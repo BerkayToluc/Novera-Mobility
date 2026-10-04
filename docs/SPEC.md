@@ -131,8 +131,9 @@ Bunlar sitede **sadece tanıtım içeriği** olarak yer alır, işlevsel olarak 
 | `green-50` | `#F1F7F3` | Hafif bölüm zemini |
 | `stone-950` | `#141A17` | Ana metin |
 | `stone-700` | `#3E4742` | İkincil metin |
-| `stone-500` | `#6B746F` | Yardımcı metin, placeholder (en küçük metin boyutunda kullanılmaz) |
-| `stone-300` | `#C9CEC9` | Form kenarlığı |
+| `stone-500` | `#67706B` | Yardımcı metin, placeholder (en küçük metin boyutunda kullanılmaz) |
+| `stone-400` | `#858D88` | Form kenarlığı (beyaz üzerinde 3.41:1, WCAG 1.4.11 için en az 3:1) |
+| `stone-300` | `#C9CEC9` | Dekoratif kenarlık |
 | `stone-200` | `#E2E5E1` | Ayırıcı çizgi |
 | `stone-100` | `#EFF1EE` | Pasif zemin |
 | `paper` | `#F8F9F6` | Sayfa zemini |
@@ -144,9 +145,9 @@ Bunlar sitede **sadece tanıtım içeriği** olarak yer alır, işlevsel olarak 
 | `warning` | `#9A6700` | Uyarı |
 | `success` | `green-700` | Başarı (marka rengiyle aynı, ayrı yeşil eklenmez) |
 
-**Ölçülen kontrastlar (WCAG):** `green-700`/beyaz 8.11 · `stone-950`/paper 16.70 · `stone-700`/paper 9.10 · `stone-500`/paper 4.57 · beyaz/`green-600` 5.98 · `clay-700`/`clay-100` 5.59 · `error`/beyaz 6.57 · `warning`/beyaz 4.87. Hepsi AA (4.5:1) üstünde.
+**Ölçülen kontrastlar (WCAG):** `green-700`/beyaz 8.11 · `stone-950`/paper 16.70 · `stone-700`/paper 9.10 · `stone-500`/paper 4.84 · `stone-500`/`green-50` 4.71 · beyaz/`green-600` 5.98 · `clay-700`/`clay-100` 5.59 · `error`/beyaz 6.57 · `warning`/beyaz 4.87. Hepsi AA (4.5:1) üstünde.
 
-**Koyu tema:** zemin `#101814`, kart `#18231D`, metin `stone-100`, birincil buton `green-600`, link ve vurgu `green-300`. Koyu temanın kontrastları token dosyası yazılırken ayrıca ölçülecek.
+**Koyu tema:** zemin `#101814`, kart `#18231D`, metin `stone-100`, birincil buton `green-600`, link ve vurgu `green-300`. Ölçülen: metin/zemin 15.90 · ikincil metin `#B4BDB7` 9.38 · yardımcı metin `#8E9892` 6.07 · link 8.97 · beyaz/`green-600` 5.98 · form kenarlığı `#68756D` kart üzerinde 3.36. Değerlerin tamamı `apps/web/app/globals.css` içinde.
 
 ### 5.2 Tipografi
 

@@ -1,3 +1,244 @@
 @import "tailwindcss";
 
-/* Design tokens (colors, type scale, spacing) are added in BACKLOG #7 from docs/SPEC.md §5. */
+/*
+ * Novera design tokens. Source of truth: docs/SPEC.md §5.
+ *
+ * Layers:
+ *   1. Primitives (:root, raw palette). Never used directly in components;
+ *      they exist so light and dark values stay traceable to the SPEC table.
+ *   2. Semantic tokens (@theme). The only colors Tailwind generates
+ *      utilities for, e.g. bg-surface, text-fg-muted, border-border-strong.
+ *
+ * Tailwind's default palette, type scale, radii and shadows are reset to
+ * `initial`, so an off-brand class such as `bg-blue-500` or `text-xl`
+ * simply does not exist.
+ */
+
+:root {
+  /* Brand: forest green */
+  --green-900: #0f2e21;
+  --green-800: #164331;
+  --green-700: #1d5a40;
+  --green-600: #25704f;
+  --green-300: #8fc2a5;
+  --green-100: #e3f0e8;
+  --green-50: #f1f7f3;
+
+  /* Neutrals: stone with a slight green cast, so greys sit in the same family as the brand */
+  --stone-950: #141a17;
+  --stone-700: #3e4742;
+  --stone-500: #67706b; /* darkened from SPEC v0.2 #6b746f to keep 4.5:1 on surface-muted */
+  --stone-400: #858d88; /* 3.4:1 on white: minimum for form control borders (WCAG 1.4.11) */
+  --stone-300: #c9cec9;
+  --stone-200: #e2e5e1;
+  --stone-100: #eff1ee;
+  --paper: #f8f9f6;
+  --white: #ffffff;
+
+  /* Accent: clay, used sparingly (badges, small markers) */
+  --clay-700: #8a4a22;
+  --clay-500: #c0703a;
+  --clay-100: #f6e6d9;
+
+  /* Status */
+  --error-700: #b42318;
+  --warning-700: #9a6700;
+
+  /* Semantic colors, light values. Dark values follow below. */
+  --novera-canvas: var(--paper);
+  --novera-surface: var(--white);
+  --novera-surface-muted: var(--green-50);
+  --novera-band: var(--green-900);
+  --novera-on-band: var(--stone-100);
+  --novera-fg: var(--stone-950);
+  --novera-fg-muted: var(--stone-700);
+  --novera-fg-subtle: var(--stone-500);
+  --novera-primary: var(--green-700);
+  --novera-primary-hover: var(--green-800);
+  --novera-on-primary: var(--white);
+  --novera-link: var(--green-700);
+  --novera-selected: var(--green-100);
+  --novera-on-selected: var(--green-800);
+  --novera-accent: var(--clay-500);
+  --novera-accent-soft: var(--clay-100);
+  --novera-on-accent-soft: var(--clay-700);
+  --novera-border: var(--stone-200);
+  --novera-border-strong: var(--stone-400);
+  --novera-focus: var(--green-700);
+  --novera-error: var(--error-700);
+  --novera-warning: var(--warning-700);
+  --novera-success: var(--green-700);
+
+  /* Native UI (scrollbars, form controls, canvas) follows the user's system theme. */
+  color-scheme: light dark;
+}
+
+/* Fallback for browsers without light-dark(): follow the system preference. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --novera-canvas: #101814;
+    --novera-surface: #18231d;
+    --novera-surface-muted: #141e18;
+    --novera-band: #0b140f;
+    --novera-on-band: var(--stone-100);
+    --novera-fg: var(--stone-100);
+    --novera-fg-muted: #b4bdb7;
+    --novera-fg-subtle: #8e9892;
+    --novera-primary: var(--green-600);
+    --novera-primary-hover: var(--green-700);
+    --novera-on-primary: var(--white);
+    --novera-link: var(--green-300);
+    --novera-selected: var(--green-800);
+    --novera-on-selected: var(--green-100);
+    --novera-accent: #e09a6a;
+    --novera-accent-soft: #3a2a1f;
+    --novera-on-accent-soft: #e09a6a;
+    --novera-border: #2c3a32;
+    --novera-border-strong: #68756d;
+    --novera-focus: var(--green-300);
+    --novera-error: #f97066;
+    --novera-warning: #e3b341;
+    --novera-success: var(--green-300);
+  }
+}
+
+/*
+ * light-dark() resolves against the computed color-scheme, so the theme
+ * toggle (BACKLOG #11) only has to set `color-scheme` on <html>.
+ */
+@supports (color: light-dark(white, black)) {
+  :root {
+    --novera-canvas: light-dark(var(--paper), #101814);
+    --novera-surface: light-dark(var(--white), #18231d);
+    --novera-surface-muted: light-dark(var(--green-50), #141e18);
+    --novera-band: light-dark(var(--green-900), #0b140f);
+    --novera-on-band: light-dark(var(--stone-100), var(--stone-100));
+    --novera-fg: light-dark(var(--stone-950), var(--stone-100));
+    --novera-fg-muted: light-dark(var(--stone-700), #b4bdb7);
+    --novera-fg-subtle: light-dark(var(--stone-500), #8e9892);
+    --novera-primary: light-dark(var(--green-700), var(--green-600));
+    --novera-primary-hover: light-dark(var(--green-800), var(--green-700));
+    --novera-on-primary: light-dark(var(--white), var(--white));
+    --novera-link: light-dark(var(--green-700), var(--green-300));
+    --novera-selected: light-dark(var(--green-100), var(--green-800));
+    --novera-on-selected: light-dark(var(--green-800), var(--green-100));
+    --novera-accent: light-dark(var(--clay-500), #e09a6a);
+    --novera-accent-soft: light-dark(var(--clay-100), #3a2a1f);
+    --novera-on-accent-soft: light-dark(var(--clay-700), #e09a6a);
+    --novera-border: light-dark(var(--stone-200), #2c3a32);
+    --novera-border-strong: light-dark(var(--stone-400), #68756d);
+    --novera-focus: light-dark(var(--green-700), var(--green-300));
+    --novera-error: light-dark(var(--error-700), #f97066);
+    --novera-warning: light-dark(var(--warning-700), #e3b341);
+    --novera-success: light-dark(var(--green-700), var(--green-300));
+  }
+}
+
+@theme {
+  --color-*: initial;
+  --color-transparent: transparent;
+  --color-current: currentColor;
+  --color-canvas: var(--novera-canvas);
+  --color-surface: var(--novera-surface);
+  --color-surface-muted: var(--novera-surface-muted);
+  --color-band: var(--novera-band);
+  --color-on-band: var(--novera-on-band);
+  --color-fg: var(--novera-fg);
+  --color-fg-muted: var(--novera-fg-muted);
+  --color-fg-subtle: var(--novera-fg-subtle);
+  --color-primary: var(--novera-primary);
+  --color-primary-hover: var(--novera-primary-hover);
+  --color-on-primary: var(--novera-on-primary);
+  --color-link: var(--novera-link);
+  --color-selected: var(--novera-selected);
+  --color-on-selected: var(--novera-on-selected);
+  --color-accent: var(--novera-accent);
+  --color-accent-soft: var(--novera-accent-soft);
+  --color-on-accent-soft: var(--novera-on-accent-soft);
+  --color-border: var(--novera-border);
+  --color-border-strong: var(--novera-border-strong);
+  --color-focus: var(--novera-focus);
+  --color-error: var(--novera-error);
+  --color-warning: var(--novera-warning);
+  --color-success: var(--novera-success);
+
+  --font-*: initial;
+  --font-sans: "Manrope Variable", ui-sans-serif, system-ui, sans-serif;
+
+  /* Fluid type scale: interpolates from the 375px to the 1280px layout. */
+  --text-*: initial;
+  --text-display: clamp(2.25rem, 1.7320rem + 2.2099vw, 3.5rem);
+  --text-display--line-height: 1.1;
+  --text-display--font-weight: 700;
+  --text-h1: clamp(1.875rem, 1.5124rem + 1.5470vw, 2.75rem);
+  --text-h1--line-height: 1.15;
+  --text-h1--font-weight: 700;
+  --text-h2: clamp(1.5rem, 1.2928rem + 0.8840vw, 2rem);
+  --text-h2--line-height: 1.2;
+  --text-h2--font-weight: 700;
+  --text-h3: clamp(1.25rem, 1.1464rem + 0.4420vw, 1.5rem);
+  --text-h3--line-height: 1.3;
+  --text-h3--font-weight: 600;
+  --text-body: clamp(1rem, 0.9741rem + 0.1105vw, 1.0625rem);
+  --text-body--line-height: 1.6;
+  --text-body--font-weight: 400;
+  --text-small: 0.875rem;
+  --text-small--line-height: 1.5;
+  --text-small--font-weight: 500;
+  --text-label: 0.9375rem;
+  --text-label--line-height: 1;
+  --text-label--font-weight: 600;
+
+  /* Spacing keeps Tailwind's 4px base: p-1 = 4px, p-4 = 16px, p-24 = 96px. */
+  --spacing: 0.25rem;
+
+  --radius-*: initial;
+  --radius-control: 10px;
+  --radius-card: 16px;
+  --radius-media: 24px;
+  --radius-full: 9999px;
+
+  /* Depth comes from surface tone (canvas vs. surface), not shadows. One shadow for floating layers only. */
+  --shadow-*: initial;
+  --shadow-overlay: 0 8px 24px rgb(15 46 33 / 0.12);
+
+  /* Layout breakpoints from SPEC: 375 (base, no prefix), 768, 1280. */
+  --breakpoint-*: initial;
+  --breakpoint-md: 48rem;
+  --breakpoint-xl: 80rem;
+
+  --container-content: 75rem;
+}
+
+@layer base {
+  html {
+    accent-color: var(--color-primary);
+  }
+
+  body {
+    background-color: var(--color-canvas);
+    color: var(--color-fg);
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+    /* Keeps the system fallback at Manrope's x-height while the font loads, avoiding layout shift. */
+    font-size-adjust: from-font;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
