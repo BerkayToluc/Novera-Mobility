@@ -130,7 +130,8 @@ novera/
 │  │  ├─ app/[locale]/      # Sayfalar (tr, en)
 │  │  ├─ components/        # ui/ (temel), sections/ (sayfa bölümleri)
 │  │  ├─ messages/          # tr.json, en.json
-│  │  ├─ styles/tokens.css  # Tüm tasarım token'ları
+│  │  ├─ i18n/              # next-intl yönlendirme ve istek ayarları
+│  │  ├─ app/globals.css    # Tüm tasarım token'ları (Tailwind temasına bağlı)
 │  │  └─ mocks/             # MSW sahte cevaplar
 │  └─ api/                  # NestJS
 │     ├─ src/<modül>/       # auth, branches, vehicles, reservations, quotes, faq
