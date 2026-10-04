@@ -8,5 +8,11 @@
   },
   "LocaleSwitcher": {
     "label": "Language"
+  },
+  "ThemeSwitcher": {
+    "label": "Theme",
+    "system": "System",
+    "light": "Light",
+    "dark": "Dark"
   }
 }

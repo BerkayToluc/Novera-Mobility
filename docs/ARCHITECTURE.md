@@ -42,6 +42,7 @@ Tek dil: **TypeScript**, frontend'de de backend'de de.
   - *Vite + React (SPA):* Basit, ama sayfalar tarayıcıda oluştuğu için SEO zayıf.
   - *Astro:* İçerik sayfalarında çok hızlı, ama kiralama akışı gibi uygulama tarafı ağırlaşınca React kadar doğal değil; hazır component ekosistemi daha dar.
 - **Sonuç:** Next.js App Router. İçerik sayfaları statik üretilir, kiralama akışı sunucu ve istemci component'lerinin karışımı.
+- **Değiştirildi (ADR-13):** Tema tercihi çerezden okunduğu için sayfalar artık istek anında sunucuda üretilir, derleme zamanında değil. Sayfalar yine sunucuda üretilmiş HTML olarak döndüğü için SEO etkilenmez.
 - **Ödünleşim:** Öğrenme eğrisi SPA'dan dik (sunucu/istemci component ayrımı). Karşılığında SEO, görsel optimizasyonu ve yönlendirme hazır gelir. Belge: [nextjs.org/docs](https://nextjs.org/docs)
 
 ## ADR-03 · Stil: Tailwind CSS + tasarım token'ları
@@ -118,6 +119,13 @@ Tek dil: **TypeScript**, frontend'de de backend'de de.
 
 - **Sonuç (öneri, en son karar verilecek):** Web → Vercel. API + PostgreSQL → Render, Railway veya Fly.io gibi bir servis.
 - **Dikkat:** Bu servislerin ücretsiz plan koşulları sık değişiyor; **doğrulanmadı**. Yayın fazına gelince güncel koşullara bakılacak.
+
+## ADR-13 · Tema tercihi: çerez + `data-theme`
+
+- **Bağlam:** SPEC §2.4: açık/koyu tema, tercih hatırlanır, giriş yapan kullanıcıda hesaba kaydedilir. Yanlış temada bir an görünmek (flash) kabul edilemez.
+- **Alternatifler:** `localStorage` + `<head>`'de küçük bir satır içi script (sayfalar statik kalır, ama sunucu temayı bilmez; ileride CSP sıkılaşırsa nonce gerekir). `next-themes` gibi bir paket (bu iş için gereksiz bağımlılık).
+- **Sonuç:** Tercih `novera-theme` çerezinde (`light` | `dark`; çerez yoksa "sistem"). Sunucu çerezi okuyup `<html data-theme>` ve `color-scheme` meta'sını ilk HTML'e yazar. CSS tarafında `data-theme`, `color-scheme`'i zorlar; tüm semantik token'lar `light-dark()` ile bu değere bağlıdır. Tailwind'in `dark:` varyantı da etkin temayı (zorlanan ya da sistem) izler. Çerezi anahtar istemciden yazar; çerez dışında bir kimlik bilgisi içermez.
+- **Ödünleşim:** Kök layout `cookies()` okuduğu için **tüm rotalar istek anında üretilir**, derleme zamanında statik üretilmez (ADR-02'ye not düşüldü). Karşılığında flash yok ve giriş yapan kullanıcının tercihini hesaba taşımak (BACKLOG #28) sunucuda çerezi okumaktan ibaret. Çerez işlevsel bir tercih çerezidir; `/cerez-politikasi` metninde (BACKLOG #36) belirtilmeli.
 
 ---
 

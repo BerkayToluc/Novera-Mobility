@@ -3,6 +3,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { locale } from "next/root-params";
 import { routing } from "@/i18n/routing";
+import { getTheme } from "@/lib/get-theme";
 // Self-hosted variable font: no request to Google at runtime, and unicode-range
 // subsets mean only Latin + Latin Extended (Turkish) files are downloaded in practice.
 import "@fontsource-variable/manrope/wght.css";
@@ -20,14 +21,16 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export const viewport: Viewport = {
+export async function generateViewport(): Promise<Viewport> {
   // Lets the browser paint the canvas in the user's theme before CSS loads.
-  colorScheme: "light dark",
-};
+  return { colorScheme: (await getTheme()) ?? "light dark" };
+}
 
+// Reading the theme cookie makes every route render per request instead of at
+// build time (ARCHITECTURE ADR-13): the price of a first paint without a flash.
 export default async function RootLayout({ children }: LayoutProps<"/[locale]">) {
   return (
-    <html lang={await locale()}>
+    <html lang={await locale()} data-theme={await getTheme()}>
       <body>
         <NextIntlClientProvider>{children}</NextIntlClientProvider>
       </body>

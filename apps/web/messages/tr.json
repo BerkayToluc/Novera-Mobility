@@ -8,5 +8,11 @@
   },
   "LocaleSwitcher": {
     "label": "Dil seçimi"
+  },
+  "ThemeSwitcher": {
+    "label": "Tema",
+    "system": "Sistem",
+    "light": "Açık",
+    "dark": "Koyu"
   }
 }
