@@ -9,6 +9,31 @@
   "LocaleSwitcher": {
     "label": "Language"
   },
+  "Header": {
+    "skip": "Skip to content",
+    "homeLabel": "Novera Mobility home",
+    "navLabel": "Main menu",
+    "menuTitle": "Menu",
+    "menuOpen": "Open menu",
+    "menuClose": "Close menu",
+    "home": "Rent a Car",
+    "products": "Products",
+    "services": "Services",
+    "about": "About Us",
+    "contact": "Contact",
+    "login": "Log In"
+  },
+  "Footer": {
+    "tagline": "We do not just rent cars, we stand by you for the whole journey.",
+    "explore": "Explore",
+    "legal": "Legal",
+    "privacy": "Privacy Notice",
+    "cookies": "Cookie Policy",
+    "terms": "Rental Terms",
+    "preferences": "Preferences",
+    "copyright": "© {year} Novera Mobility. All rights reserved.",
+    "fiction": "This site is a fictional learning project."
+  },
   "DateRangePicker": {
     "placeholder": "Select a date range",
     "month": "Month",

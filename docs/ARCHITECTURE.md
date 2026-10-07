@@ -57,6 +57,7 @@ Tek dil: **TypeScript**, frontend'de de backend'de de.
 - **Bağlam:** Türkçe ana dil, İngilizce v1'de var. URL yapısı `/` (TR), `/en/...` (EN).
 - **Alternatifler:** Next.js'in yerleşik yönlendirmesiyle elle çözüm; i18next.
 - **Sonuç:** next-intl. Metinler `messages/tr.json` ve `messages/en.json` dosyalarında. Sayfaya gömülü metin yazılmaz.
+- **Yollar:** `i18n/routing.ts` içindeki `pathnames` tablosu Türkçe yolları (SPEC §2.1) anahtar olarak tutar; `/en` altında İngilizce karşılıkları gösterilir (`/araclar` ↔ `/en/cars`). Klasör adları (`app/[locale]/araclar`) Türkçe kalır. Yeni bir sayfa eklenince yolu bu tabloya da eklenmelidir; `Link` ve `usePathname` bu tabloya göre tiplenir.
 - **Ödünleşim:** Her metin bir anahtar üzerinden yazılır, ilk başta yavaş hissettirir; ikinci dil eklemek sonradan dosya doldurmaktan ibaret olur. Belge: [next-intl.dev](https://next-intl.dev/)
 
 ## ADR-05 · Backend: NestJS + TypeScript

@@ -9,6 +9,31 @@
   "LocaleSwitcher": {
     "label": "Dil seçimi"
   },
+  "Header": {
+    "skip": "İçeriğe geç",
+    "homeLabel": "Novera Mobility ana sayfa",
+    "navLabel": "Ana menü",
+    "menuTitle": "Menü",
+    "menuOpen": "Menüyü aç",
+    "menuClose": "Menüyü kapat",
+    "home": "Araç Kirala",
+    "products": "Ürünler",
+    "services": "Hizmetler",
+    "about": "Hakkımızda",
+    "contact": "İletişim",
+    "login": "Giriş Yap"
+  },
+  "Footer": {
+    "tagline": "Sadece araç kiralamıyoruz, yol boyu güvence sunuyoruz.",
+    "explore": "Keşfet",
+    "legal": "Yasal",
+    "privacy": "KVKK Aydınlatma Metni",
+    "cookies": "Çerez Politikası",
+    "terms": "Kiralama Koşulları",
+    "preferences": "Tercihler",
+    "copyright": "© {year} Novera Mobility. Tüm hakları saklıdır.",
+    "fiction": "Bu site kurgusal bir öğrenme projesidir."
+  },
   "DateRangePicker": {
     "placeholder": "Tarih aralığı seçin",
     "month": "Ay",
