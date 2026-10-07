@@ -57,5 +57,11 @@
     "faq2Body": "Geçerli ehliyet ve kimlik belgesi yeterlidir.",
     "faq3Title": "Farklı bir şehre iade mümkün mü?",
     "faq3Body": "Evet, farklı lokasyona iade seçeneğini rezervasyon sırasında işaretleyin."
+  },
+  "ThemeSwitcher": {
+    "label": "Tema",
+    "system": "Sistem",
+    "light": "Açık",
+    "dark": "Koyu"
   }
 }

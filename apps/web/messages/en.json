@@ -57,5 +57,11 @@
     "faq2Body": "A valid driving licence and an ID document are enough.",
     "faq3Title": "Can I return the car in another city?",
     "faq3Body": "Yes, tick the different drop-off location option while booking."
+  },
+  "ThemeSwitcher": {
+    "label": "Theme",
+    "system": "System",
+    "light": "Light",
+    "dark": "Dark"
   }
 }
