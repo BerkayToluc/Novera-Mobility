@@ -20,24 +20,26 @@
 
 ### 2.1 Sayfalar
 
-| Sayfa | Yol | Not |
-|---|---|---|
-| Ana sayfa (Araç Kirala) | `/` | Bireysel / Kurumsal sekmeli arama alanı |
-| Araç listesi | `/araclar` | Arama sonuçları + filtre |
-| Araç detay | `/araclar/:slug` | Özellikler, fiyat, ek hizmet seçimi |
-| Rezervasyon özeti | `/rezervasyon` | Tarih, lokasyon, ek hizmetler, toplam |
-| Ödeme (sahte) | `/odeme` | Gerçek ödeme alınmaz |
-| Rezervasyon onay | `/rezervasyon/onay` | Rezervasyon numarası |
-| Ürünler | `/urunler` | 4 ürün; "En çok tercih edilen" öne çıkar |
-| Ürün detay | `/urunler/:slug` | Ürün içeriği + "Teklif Al" |
-| Hizmetler | `/hizmetler` | 5 hizmet, açılır-kapanır yapı |
-| Hakkımızda | `/hakkimizda` | Metin + zaman çizelgesi + sürdürülebilirlik + sayaçlar |
-| İletişim | `/iletisim` | Harita + bayi arama + liste görünümü |
-| Kurumsal teklif | `/kurumsal-teklif` | Ana sayfadaki Kurumsal sekmesi ve ürün detay sayfaları buraya bağlanır; navbar'da link yok |
-| Giriş / Kayıt / Şifremi unuttum | `/giris`, `/kayit`, `/sifre-sifirla` | |
-| Profil | `/profil` | Alt sekmeler: Hesabım, Rezervasyonlarım, Ayarlar |
-| Yasal | `/kvkk`, `/cerez-politikasi`, `/kiralama-kosullari` | Kurgusal metin |
-| 404 | — | |
+| Sayfa | Yol (TR) | Yol (EN) | Not |
+|---|---|---|---|
+| Ana sayfa (Araç Kirala) | `/` | `/en` | Bireysel / Kurumsal sekmeli arama alanı |
+| Araç listesi | `/araclar` | `/en/cars` | Arama sonuçları + filtre |
+| Araç detay | `/araclar/:slug` | `/en/cars/:slug` | Özellikler, fiyat, ek hizmet seçimi |
+| Rezervasyon özeti | `/rezervasyon` | `/en/booking` | Tarih, lokasyon, ek hizmetler, toplam |
+| Ödeme (sahte) | `/odeme` | `/en/payment` | Gerçek ödeme alınmaz |
+| Rezervasyon onay | `/rezervasyon/onay` | `/en/booking/confirmation` | Rezervasyon numarası |
+| Ürünler | `/urunler` | `/en/products` | 4 ürün; "En çok tercih edilen" öne çıkar |
+| Ürün detay | `/urunler/:slug` | `/en/products/:slug` | Ürün içeriği + "Teklif Al" |
+| Hizmetler | `/hizmetler` | `/en/services` | 5 hizmet, açılır-kapanır yapı |
+| Hakkımızda | `/hakkimizda` | `/en/about` | Metin + zaman çizelgesi + sürdürülebilirlik + sayaçlar |
+| İletişim | `/iletisim` | `/en/contact` | Harita + bayi arama + liste görünümü |
+| Kurumsal teklif | `/kurumsal-teklif` | `/en/corporate-quote` | Ana sayfadaki Kurumsal sekmesi ve ürün detay sayfaları buraya bağlanır; navbar'da link yok |
+| Giriş / Kayıt / Şifremi unuttum | `/giris`, `/kayit`, `/sifre-sifirla` | `/en/login`, `/en/register`, `/en/reset-password` |  |
+| Profil | `/profil` | `/en/profile` | Alt sekmeler: Hesabım, Rezervasyonlarım, Ayarlar |
+| Yasal | `/kvkk`, `/cerez-politikasi`, `/kiralama-kosullari` | `/en/privacy-notice`, `/en/cookie-policy`, `/en/rental-terms` | Kurgusal metin |
+| 404 | — | — |  |
+
+İngilizce yolları ADR-04 gereği `/en` altında çevrilmiştir (ör. `/araclar` ↔ `/en/cars`); eşleme `apps/web/i18n/routing.ts` içindedir.
 
 ### 2.2 Ana sayfadaki Bireysel / Kurumsal anahtarı
 

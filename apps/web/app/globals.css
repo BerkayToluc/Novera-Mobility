@@ -304,3 +304,8 @@
     }
   }
 }
+
+/* An open modal dialog (the mobile menu) must not let the page behind it scroll. */
+body:has(dialog[open]) {
+  overflow: hidden;
+}

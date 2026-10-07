@@ -28,7 +28,7 @@ export function Gallery() {
   const [range, setRange] = useState<DateRange | undefined>();
 
   return (
-    <main className="mx-auto flex max-w-content flex-col gap-12 px-4 py-12 md:px-8 xl:py-16">
+    <div className="mx-auto flex max-w-content flex-col gap-12 px-4 py-12 md:px-8 xl:py-16">
       <header className="flex flex-col gap-2">
         <h1 className="text-h1 text-fg">{t("title")}</h1>
         <p className="text-body text-fg-muted">{t("intro")}</p>
@@ -135,6 +135,6 @@ export function Gallery() {
           </AccordionItem>
         </Accordion>
       </Section>
-    </main>
+    </div>
   );
 }

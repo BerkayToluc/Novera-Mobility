@@ -1,6 +1,8 @@
 "use client";
 
+import { useParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
+import { switcherItemClasses, type SwitcherTone } from "@/components/ui/switcher-item";
 import { Link, usePathname } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 
@@ -11,10 +13,12 @@ const LANGUAGE_NAMES = {
   en: "English",
 } as const satisfies Record<(typeof routing.locales)[number], string>;
 
-export function LocaleSwitcher() {
+export function LocaleSwitcher({ tone = "default" }: { tone?: SwitcherTone }) {
   const t = useTranslations("LocaleSwitcher");
   const currentLocale = useLocale();
   const pathname = usePathname();
+  // Dynamic routes (e.g. /araclar/[slug]) need their params to build the other language's URL.
+  const params = useParams();
 
   return (
     <nav aria-label={t("label")}>
@@ -24,14 +28,13 @@ export function LocaleSwitcher() {
           return (
             <li key={locale}>
               <Link
-                href={pathname}
+                // @ts-expect-error -- TypeScript cannot relate a runtime pathname to its params; next-intl validates them.
+                href={{ pathname, params }}
                 locale={locale}
                 lang={locale}
                 hrefLang={locale}
                 aria-current={isCurrent ? "true" : undefined}
-                className={`inline-flex min-h-11 items-center rounded-control px-3 text-label ${
-                  isCurrent ? "bg-selected text-on-selected" : "text-link hover:underline"
-                }`}
+                className={switcherItemClasses(isCurrent, tone)}
               >
                 {LANGUAGE_NAMES[locale]}
               </Link>

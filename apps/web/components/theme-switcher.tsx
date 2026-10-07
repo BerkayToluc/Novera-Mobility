@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { switcherItemClasses, type SwitcherTone } from "@/components/ui/switcher-item";
 import { THEME_COOKIE, THEME_COOKIE_MAX_AGE, type Theme } from "@/lib/theme";
 
 type Choice = Theme | "system";
@@ -21,7 +22,13 @@ function applyChoice(choice: Choice) {
   }
 }
 
-export function ThemeSwitcher({ initialTheme }: { initialTheme: Theme | undefined }) {
+export function ThemeSwitcher({
+  initialTheme,
+  tone = "default",
+}: {
+  initialTheme: Theme | undefined;
+  tone?: SwitcherTone;
+}) {
   const t = useTranslations("ThemeSwitcher");
   const [choice, setChoice] = useState<Choice>(initialTheme ?? "system");
 
@@ -38,9 +45,7 @@ export function ThemeSwitcher({ initialTheme }: { initialTheme: Theme | undefine
               applyChoice(option);
               setChoice(option);
             }}
-            className={`inline-flex min-h-11 items-center rounded-control px-3 text-label ${
-              isCurrent ? "bg-selected text-on-selected" : "text-link hover:underline"
-            }`}
+            className={switcherItemClasses(isCurrent, tone)}
           >
             {t(option)}
           </button>
