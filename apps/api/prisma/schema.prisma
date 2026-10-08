@@ -1,0 +1,190 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------- Enum'lar ----------
+
+enum Locale {
+  TR
+  EN
+}
+
+enum Theme {
+  LIGHT
+  DARK
+  SYSTEM
+}
+
+enum Transmission {
+  MANUAL
+  AUTOMATIC
+}
+
+enum FuelType {
+  PETROL
+  DIESEL
+  HYBRID
+  ELECTRIC
+}
+
+enum ExtraPricing {
+  PER_DAY
+  FIXED
+}
+
+enum ReservationStatus {
+  CONFIRMED
+  CANCELLED
+}
+
+enum FaqAudience {
+  INDIVIDUAL
+  CORPORATE
+}
+
+// ---------- Modeller ----------
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  firstName    String
+  lastName     String
+  locale       Locale   @default(TR)
+  theme        Theme    @default(SYSTEM)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  reservations Reservation[]
+}
+
+model Branch {
+  id           String @id @default(uuid())
+  name         String
+  city         String
+  address      String
+  latitude     Float
+  longitude    Float
+  phone        String
+  email        String
+  openingHours Json
+
+  vehicles       Vehicle[]
+  pickupBookings Reservation[] @relation("PickupBranch")
+  returnBookings Reservation[] @relation("ReturnBranch")
+
+  @@index([city])
+}
+
+model VehicleClass {
+  id     String @id @default(uuid())
+  slug   String @unique
+  nameTr String
+  nameEn String
+
+  vehicles Vehicle[]
+}
+
+model Vehicle {
+  id           String       @id @default(uuid())
+  slug         String       @unique
+  brand        String
+  model        String
+  year         Int
+  seats        Int
+  bags         Int
+  transmission Transmission
+  fuelType     FuelType
+  dailyPrice   Int // kuruş cinsinden (₺1.250 = 125000)
+  imageUrl     String?
+  active       Boolean      @default(true)
+
+  classId  String
+  class    VehicleClass @relation(fields: [classId], references: [id])
+  branchId String
+  branch   Branch       @relation(fields: [branchId], references: [id])
+
+  reservations Reservation[]
+
+  @@index([classId])
+  @@index([branchId])
+}
+
+model Extra {
+  id      String       @id @default(uuid())
+  slug    String       @unique
+  nameTr  String
+  nameEn  String
+  price   Int // kuruş cinsinden
+  pricing ExtraPricing
+
+  reservationExtras ReservationExtra[]
+}
+
+model Reservation {
+  id        String            @id @default(uuid())
+  number    String            @unique // ör. NVR-2026-00123
+  status    ReservationStatus @default(CONFIRMED)
+  startAt   DateTime
+  endAt     DateTime
+  days      Int
+  // Rezervasyon anındaki fiyatlar (sonradan fiyat değişse de bu kayıt değişmez)
+  vehicleDailyPrice Int
+  totalPrice        Int
+  createdAt DateTime          @default(now())
+
+  // Hesap silinince rezervasyon kalır, kullanıcı bağlantısı boşalır
+  userId   String?
+  user     User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+  vehicleId String
+  vehicle   Vehicle @relation(fields: [vehicleId], references: [id])
+  pickupBranchId String
+  pickupBranch   Branch @relation("PickupBranch", fields: [pickupBranchId], references: [id])
+  returnBranchId String
+  returnBranch   Branch @relation("ReturnBranch", fields: [returnBranchId], references: [id])
+
+  extras ReservationExtra[]
+
+  @@index([vehicleId, startAt, endAt])
+  @@index([userId])
+}
+
+model ReservationExtra {
+  id            String @id @default(uuid())
+  quantity      Int    @default(1)
+  unitPrice     Int // rezervasyon anındaki fiyat, kuruş
+  totalPrice    Int
+
+  reservationId String
+  reservation   Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  extraId       String
+  extra         Extra       @relation(fields: [extraId], references: [id])
+
+  @@unique([reservationId, extraId])
+}
+
+model QuoteRequest {
+  id             String   @id @default(uuid())
+  companyName    String
+  vehicleCount   Int
+  durationMonths Int
+  vehicleType    String
+  email          String
+  createdAt      DateTime @default(now())
+}
+
+model FaqItem {
+  id        String      @id @default(uuid())
+  audience  FaqAudience
+  locale    Locale
+  question  String
+  answer    String
+  sortOrder Int         @default(0)
+
+  @@index([audience, locale])
+}
