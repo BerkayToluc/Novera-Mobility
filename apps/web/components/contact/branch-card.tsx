@@ -30,7 +30,7 @@ export function BranchCard({ branch, selected, onShowOnMap }: BranchCardProps) {
       aria-current={selected || undefined}
       className={cn(
         "flex flex-col gap-4 rounded-card border bg-surface p-5",
-        selected ? "border-primary" : "border-border",
+        selected ? "border-focus" : "border-border",
       )}
     >
       <header>
