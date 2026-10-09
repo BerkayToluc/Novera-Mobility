@@ -8,11 +8,15 @@
 // Adding a feature: create its Turkish and English file, then add an import and a spread
 // for each. If two branches both add a line here, keep both: the order does not matter.
 import trAbout from "../messages/tr/about.json";
+import trAuth from "../messages/tr/auth.json";
+import trProducts from "../messages/tr/products.json";
 import trServices from "../messages/tr/services.json";
 import trSite from "../messages/tr/site.json";
 import trUi from "../messages/tr/ui.json";
 
 import enAbout from "../messages/en/about.json";
+import enAuth from "../messages/en/auth.json";
+import enProducts from "../messages/en/products.json";
 import enServices from "../messages/en/services.json";
 import enSite from "../messages/en/site.json";
 import enUi from "../messages/en/ui.json";
@@ -21,6 +25,8 @@ import enUi from "../messages/en/ui.json";
 // instead of rendering the raw key on the page.
 export const tr = {
   ...trAbout,
+  ...trAuth,
+  ...trProducts,
   ...trServices,
   ...trSite,
   ...trUi,
@@ -29,6 +35,8 @@ export const tr = {
 // Typed as Turkish's shape, so a key missing in English is a compile error too.
 export const en: typeof tr = {
   ...enAbout,
+  ...enAuth,
+  ...enProducts,
   ...enServices,
   ...enSite,
   ...enUi,
