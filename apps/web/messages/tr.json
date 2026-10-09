@@ -136,5 +136,80 @@
       "sent": "Bu adres kayıtlıysa {email} adresine bir yenileme bağlantısı gönderdik. Gelen kutunuzu kontrol edin.",
       "back": "Giriş sayfasına dön"
     }
+  },
+  "Profile": {
+    "title": "Profilim",
+    "loading": "Yükleniyor",
+    "nav": {
+      "label": "Profil bölümleri",
+      "account": "Hesabım",
+      "bookings": "Rezervasyonlarım",
+      "settings": "Ayarlar"
+    },
+    "signedOut": {
+      "title": "Giriş yapmanız gerekiyor",
+      "text": "Hesabınızı ve rezervasyonlarınızı görmek için giriş yapın.",
+      "login": "Giriş Yap"
+    },
+    "error": {
+      "title": "Bir sorun oluştu",
+      "text": "Bu sayfa yüklenemedi. Lütfen tekrar deneyin.",
+      "retry": "Tekrar Dene"
+    },
+    "account": {
+      "title": "Hesabım",
+      "intro": "Adınızı buradan güncelleyebilirsiniz.",
+      "firstName": "Ad",
+      "lastName": "Soyad",
+      "email": "E-posta",
+      "emailNote": "E-posta adresi hesabınızı tanımlar, değiştirilemez.",
+      "save": "Kaydet",
+      "saving": "Kaydediliyor…",
+      "saved": "Bilgileriniz kaydedildi."
+    },
+    "bookings": {
+      "title": "Rezervasyonlarım",
+      "intro": "Geçmiş ve yaklaşan kiralamalarınız.",
+      "number": "Rezervasyon no",
+      "dates": "Tarihler",
+      "location": "Lokasyon",
+      "total": "Toplam",
+      "days": "{count, plural, one {# gün} other {# gün}}",
+      "status": {
+        "CONFIRMED": "Onaylandı",
+        "CANCELLED": "İptal edildi"
+      },
+      "empty": {
+        "title": "Henüz rezervasyonunuz yok",
+        "text": "İlk kiralamanızı yapın, rezervasyonlarınız burada görünsün.",
+        "cta": "Araç Ara"
+      },
+      "error": {
+        "title": "Rezervasyonlar yüklenemedi",
+        "text": "Rezervasyonlarınıza şu an ulaşamıyoruz. Lütfen tekrar deneyin.",
+        "retry": "Tekrar Dene"
+      }
+    },
+    "settings": {
+      "title": "Ayarlar",
+      "language": {
+        "title": "Dil",
+        "text": "Sitenin hangi dilde gösterileceğini seçin."
+      },
+      "theme": {
+        "title": "Görünüm",
+        "text": "Açık, koyu ya da cihazınızın ayarını izleyen tema."
+      },
+      "danger": {
+        "title": "Hesabı sil",
+        "text": "Hesabınız kalıcı olarak silinir. Geçmiş rezervasyon kayıtları anonim olarak saklanır.",
+        "delete": "Hesabımı Sil",
+        "confirmTitle": "Hesabınız silinsin mi?",
+        "confirmText": "Bu işlem geri alınamaz. Hesabınıza bir daha giriş yapamazsınız.",
+        "cancel": "Vazgeç",
+        "confirm": "Evet, Hesabımı Sil",
+        "deleting": "Siliniyor…"
+      }
+    }
   }
 }

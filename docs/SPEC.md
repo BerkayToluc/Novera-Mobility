@@ -35,7 +35,7 @@
 | İletişim | `/iletisim` | `/en/contact` | Harita + bayi arama + liste görünümü |
 | Kurumsal teklif | `/kurumsal-teklif` | `/en/corporate-quote` | Ana sayfadaki Kurumsal sekmesi ve ürün detay sayfaları buraya bağlanır; navbar'da link yok |
 | Giriş / Kayıt / Şifremi unuttum | `/giris`, `/kayit`, `/sifre-sifirla` | `/en/login`, `/en/register`, `/en/reset-password` |  |
-| Profil | `/profil` | `/en/profile` | Alt sekmeler: Hesabım, Rezervasyonlarım, Ayarlar |
+| Profil | `/profil` | `/en/profile` | Alt sekmeler, her biri kendi sayfası: Hesabım (`/profil`), Rezervasyonlarım (`/profil/rezervasyonlar`, `/en/profile/bookings`), Ayarlar (`/profil/ayarlar`, `/en/profile/settings`). Giriş yapılmamışsa "giriş yapın" bildirimi gösterilir |
 | Yasal | `/kvkk`, `/cerez-politikasi`, `/kiralama-kosullari` | `/en/privacy-notice`, `/en/cookie-policy`, `/en/rental-terms` | Kurgusal metin |
 | 404 | — | — |  |
 

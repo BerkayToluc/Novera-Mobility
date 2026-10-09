@@ -14,6 +14,9 @@ const buttonVariants = cva(
         outline:
           "border border-border-strong bg-surface text-fg hover:bg-selected disabled:text-fg-subtle",
         ghost: "text-fg hover:bg-selected disabled:text-fg-subtle",
+        // Outlined in the error colour rather than filled: white on the dark-theme error colour is too low in contrast.
+        destructive:
+          "border border-error bg-surface text-error hover:bg-surface-muted disabled:border-border disabled:text-fg-subtle",
         link: "text-link underline-offset-4 hover:underline disabled:text-fg-subtle",
       },
       size: {
