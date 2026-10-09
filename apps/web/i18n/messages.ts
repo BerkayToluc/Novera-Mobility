@@ -9,6 +9,7 @@
 // for each. If two branches both add a line here, keep both: the order does not matter.
 import trAbout from "../messages/tr/about.json";
 import trAuth from "../messages/tr/auth.json";
+import trBooking from "../messages/tr/booking.json";
 import trFleet from "../messages/tr/fleet.json";
 import trLegal from "../messages/tr/legal.json";
 import trProducts from "../messages/tr/products.json";
@@ -20,6 +21,7 @@ import trUi from "../messages/tr/ui.json";
 
 import enAbout from "../messages/en/about.json";
 import enAuth from "../messages/en/auth.json";
+import enBooking from "../messages/en/booking.json";
 import enFleet from "../messages/en/fleet.json";
 import enLegal from "../messages/en/legal.json";
 import enProducts from "../messages/en/products.json";
@@ -34,6 +36,7 @@ import enUi from "../messages/en/ui.json";
 export const tr = {
   ...trAbout,
   ...trAuth,
+  ...trBooking,
   ...trFleet,
   ...trLegal,
   ...trProducts,
@@ -48,6 +51,7 @@ export const tr = {
 export const en: typeof tr = {
   ...enAbout,
   ...enAuth,
+  ...enBooking,
   ...enFleet,
   ...enLegal,
   ...enProducts,
