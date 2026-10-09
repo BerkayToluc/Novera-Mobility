@@ -31,7 +31,6 @@ export async function LegalPage({ namespace }: { namespace: LegalNamespace }) {
               day: "numeric",
               month: "short",
               year: "numeric",
-              timeZone: "UTC",
             }),
           })}
         </p>
