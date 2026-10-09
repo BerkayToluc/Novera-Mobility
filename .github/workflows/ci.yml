@@ -23,6 +23,9 @@ jobs:
       - name: Lint
         run: pnpm -r --if-present run lint
 
+      - name: Typecheck
+        run: pnpm typecheck
+
       - name: Test
         run: pnpm -r --if-present run test
 
