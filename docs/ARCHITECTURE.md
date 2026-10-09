@@ -14,6 +14,7 @@
   Tarayıcı ───▶ │  apps/web  (Next.js)     │  Sayfalar, arayüz, çok dillilik
                 └────────────┬─────────────┘
                              │ HTTPS + JSON (OpenAPI sözleşmesi)
+                             │ tarayıcı /api/* çağırır, Next iletir (ADR-14)
                 ┌────────────▼─────────────┐
                 │  apps/api  (NestJS)      │  İş kuralları, kimlik doğrulama
                 └────────────┬─────────────┘
@@ -129,6 +130,43 @@ Tek dil: **TypeScript**, frontend'de de backend'de de.
 - **Ödünleşim:** Kök layout `cookies()` okuduğu için **tüm rotalar istek anında üretilir**, derleme zamanında statik üretilmez (ADR-02'ye not düşüldü). Karşılığında flash yok ve giriş yapan kullanıcının tercihini hesaba taşımak (BACKLOG #28) sunucuda çerezi okumaktan ibaret. Çerez işlevsel bir tercih çerezidir; `/cerez-politikasi` metninde (BACKLOG #36) belirtilmeli.
 
 ---
+
+## ADR-14 · API'ye erişim: Next üzerinden proxy
+
+- **Bağlam:** Giriş çerez tabanlı (ADR-08), web ve API ayrı servisler (ADR-12). Tarayıcı API'ye doğrudan giderse çerezin çalışması farklı alan adlarına bağlı kalır.
+- **Alternatifler:** Tarayıcı API adresini doğrudan çağırır: backend CORS'ta tam origin ve `credentials` izni vermeli, canlıda alan adları farklıysa çerez `SameSite=None; Secure` olmalı ve üçüncü taraf çerez engelleyen tarayıcılarda bozulabilir.
+- **Sonuç:** Tarayıcı `/api/...` çağırır, Next `rewrites` ile `API_URL`'deki NestJS'e `/api` öneki kaldırılarak iletir. Tarayıcıya göre API aynı siteden gelir: çerez birinci taraf olur, **CORS ve `SameSite=None` gerekmez**. Kurallar:
+  - Frontend istekleri `credentials: "include"` ile atar.
+  - Backend çerezi `httpOnly`, `Secure` (canlıda), `SameSite=Lax` koyar; route'lar `/api` öneki olmadan çalışır.
+  - Durum değiştiren uçlar yalnızca `POST/PUT/PATCH/DELETE` olur (CSRF: `SameSite=Lax` yalnızca güvenli yöntemlerin çapraz site isteğine çerez eklemesine izin verir).
+  - Sunucu bileşenleri API'yi çağırırken gelen isteğin çerezini kendisi iletir (tarayıcı olmadığı için çerez otomatik gitmez).
+  - Swagger belgesi (`/docs`) doğrudan API'de açılır, proxy'den geçmez.
+- **Ödünleşim:** Tüm API trafiği bir atlama daha yapar ve Next sunucusundan geçer; canlıdaki süre ve boyut sınırları **doğrulanmadı** (yayın fazında bakılacak). Dosya yükleme gibi büyük gövdeler v1 kapsamında yok.
+
+## ADR-15 · Para birimi: TRY, EUR, USD (backend kuru tutar)
+
+- **Bağlam:** Ziyaretçi fiyatları TL, euro veya dolar olarak görmek istiyor. SPEC'te daha önce para birimi seçimi yoktu; kapsam genişledi.
+- **Alternatifler:** Kur frontend'de sabit bir tabloda (backend'e dokunmaz ama rezervasyon tutarı ile ekrandaki tutar tutarsız olabilir). Frontend'in doğrudan dış kur servisi çağırması (anahtar ve hata durumları tarayıcıda, rezervasyonla bağı yok).
+- **Sonuç:** **Kur backend'de** `ExchangeRate` tablosunda durur; günde bir kez zamanlanmış görev bir dış kur servisinden günceller (kuru günde bir değişse yeter). Fiyatlar TRY'de tutulur, çevrilen tutarlar API'den gelir:
+  - Her tutar para birimiyle birlikte gelir: `{ "amount": 125000, "currency": "TRY" }`; `amount` alt birimin (kuruş/cent, üçünde de 100'e bölünür) tam sayısıdır.
+  - Fiyat uçları `?currency=EUR` alır (varsayılan TRY), dönüştürüp en yakın alt birime yuvarlayarak verir.
+  - Rezervasyon seçilen para birimini **ve o anki kuru** kaydeder; sonradan kur değişse de rezervasyon sabit kalır (şemadaki "rezervasyon anındaki fiyatlar" ilkesi). Ödeme sahte olduğu için para alınmaz, ekranda yazar.
+  - `GET /rates` (`updatedAt` ile) kuru gösterir. Dış servis çökerse son bilinen kur kullanılır; hiç kur yoksa seed kur.
+  - Frontend **kur çevirmez**: seçimi `novera-currency` çerezinde tutar (tema gibi), isteklerde `?currency=` olarak iletir, `formatMoney` ile gösterir. Seçim girişli kullanıcıda hesaba kaydedilir (BACKLOG #28).
+- **Ödünleşim:** Hangi dış servisin kullanılacağı ve ücretsiz kullanım koşulları **doğrulanmadı**; seçerken bakılacak. Çevrilen tutarlarda yuvarlama toplamı bozabilir: toplam sunucuda hesaplanır, ekranda hiçbir tutar yuvarlanmaz (tam tutar ondalıksız, kuruşlu/centli tutar iki ondalıkla gösterilir).
+
+## ADR-16 · Tarih ve saat dilimi
+
+- **Bağlam:** Kiralamalar Türkiye'de; Türkiye tek saat diliminde (UTC+3) ve yaz saati uygulamıyor. next-intl varsayılanı sunucunun kendi saat dilimini kullanıyor, bu da aynı rezervasyonun geliştirmede ve canlıda farklı yazılmasına yol açıyordu.
+- **Sonuç:** API her anı **ISO 8601, UTC** gönderir (`2026-10-12T10:00:00Z`). Frontend göstermek ve girmek için **`Europe/Istanbul`** kullanır (`i18n/request.ts` içinde sabit). Müsaitlik UTC anları üzerinden hesaplanır. Saat seçimi 30 dakikalık dilimlerdir.
+- **Ödünleşim:** Yurt dışı bayi eklenirse `Branch.timeZone` alanı gerekir; v1'de tüm bayiler Türkiye'de.
+
+## ADR-17 · API sözleşme kuralları
+
+- **Hata biçimi:** `{ "code": "VALIDATION_FAILED", "message": "geliştirici için İngilizce metin", "fieldErrors": { "email": "EMAIL_TAKEN" } }`. `code` ve `fieldErrors` değerleri **sabit makine kodlarıdır** (`INVALID_CREDENTIALS`, `EMAIL_TAKEN`, `VEHICLE_UNAVAILABLE`...); frontend metni kendi çeviri dosyasından gösterir, `message` ekranda gösterilmez. HTTP kodları: 400/422 doğrulama, 401 oturum yok, 404, 409 çakışma.
+- **Dil:** Çevrilen alanlar **iki dille birlikte** döner (`"name": { "tr": "Ekonomik", "en": "Economy" }`). Cevap dile göre değişmez; dil değişince yeniden istek gerekmez, önbellekleme ve mock basit kalır.
+- **Sayfalama:** Yok, düz liste (~12 araç, ~15 bayi). Sunucu yalnızca müsaitliği (tarih + lokasyon) filtreler; sınıf, yakıt, vites gibi filtreleri frontend yapar.
+- **Ürün ve hizmet içeriği API'den gelir** (SPEC §7): `Product`, `Service` modelleri ve `GET /products`, `GET /products/:slug`, `GET /services` uçları, iki dilli alanlarla. Teklif isteği ürün slug'ını (`uzun-donem`) isteğe bağlı taşır. Sayfalar API gelene kadar çeviri dosyalarındaki yer tutucu metinle çalışır, sonra API'ye bağlanır (BACKLOG Y5).
 
 ## Klasör yapısı
 
