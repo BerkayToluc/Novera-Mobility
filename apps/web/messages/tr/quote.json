@@ -1,0 +1,47 @@
+{
+  "QuoteForm": {
+    "company": "Firma adı",
+    "count": "Araç sayısı",
+    "term": "Kiralama süresi",
+    "termOption": "{months} ay",
+    "vehicleType": "Araç tipi",
+    "types": {
+      "economy": "Ekonomik",
+      "compact": "Orta sınıf",
+      "executive": "Üst sınıf",
+      "suv": "SUV",
+      "electric": "Elektrikli"
+    },
+    "email": "İletişim e-postası",
+    "submit": "Teklif İste",
+    "errors": {
+      "company": "Firma adını yazın.",
+      "count": "1 ile 9999 arasında bir sayı yazın.",
+      "email": "Geçerli bir e-posta adresi yazın."
+    },
+    "product": "İlgilendiğiniz ürün (isteğe bağlı)",
+    "noProduct": "Henüz karar vermedim"
+  },
+  "QuotePage": {
+    "metaTitle": "Kurumsal Teklif",
+    "metaDescription": "Firmanız için filo kiralama teklifi isteyin: araç sayısı, süre ve araç tipini yazın, bir iş günü içinde dönelim.",
+    "title": "Kurumsal Teklif",
+    "intro": "Firmanızın ihtiyacını yazın, bir filo uzmanı size özel teklifle e-posta ile dönsün.",
+    "stepsTitle": "Sonraki adımlar",
+    "steps": {
+      "received": "Talebiniz bize ulaşır.",
+      "review": "Bir iş günü içinde bir filo uzmanı talebinizi inceler.",
+      "offer": "Size e-posta ile özel teklif gönderilir."
+    },
+    "submitting": "Gönderiliyor",
+    "errors": {
+      "unavailable": "Teklif servisi şu an kullanılamıyor. Lütfen daha sonra tekrar deneyin.",
+      "generic": "Talebiniz gönderilemedi. Lütfen tekrar deneyin."
+    },
+    "sent": {
+      "title": "Talebiniz alındı",
+      "text": "{email} adresine bir iş günü içinde dönüş yapacağız.",
+      "home": "Ana Sayfaya Dön"
+    }
+  }
+}

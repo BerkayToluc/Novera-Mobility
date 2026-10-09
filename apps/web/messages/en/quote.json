@@ -1,0 +1,47 @@
+{
+  "QuoteForm": {
+    "company": "Company name",
+    "count": "Number of cars",
+    "term": "Rental term",
+    "termOption": "{months} months",
+    "vehicleType": "Car type",
+    "types": {
+      "economy": "Economy",
+      "compact": "Compact",
+      "executive": "Executive",
+      "suv": "SUV",
+      "electric": "Electric"
+    },
+    "email": "Contact email",
+    "submit": "Request a Quote",
+    "errors": {
+      "company": "Enter the company name.",
+      "count": "Enter a number from 1 to 9999.",
+      "email": "Enter a valid email address."
+    },
+    "product": "Product you are interested in (optional)",
+    "noProduct": "I have not decided yet"
+  },
+  "QuotePage": {
+    "metaTitle": "Corporate Quote",
+    "metaDescription": "Ask for a fleet rental quote for your company: tell us the number of cars, term and car type and we will reply within one business day.",
+    "title": "Corporate Quote",
+    "intro": "Tell us what your company needs and a fleet specialist will reply by email with a tailored quote.",
+    "stepsTitle": "What happens next",
+    "steps": {
+      "received": "Your request reaches us.",
+      "review": "Within one business day a fleet specialist reviews it.",
+      "offer": "A tailored quote is sent to you by email."
+    },
+    "submitting": "Sending",
+    "errors": {
+      "unavailable": "The quote service is not available right now. Please try again later.",
+      "generic": "Your request could not be sent. Please try again."
+    },
+    "sent": {
+      "title": "We have your request",
+      "text": "We will reply to {email} within one business day.",
+      "home": "Back to Home"
+    }
+  }
+}
