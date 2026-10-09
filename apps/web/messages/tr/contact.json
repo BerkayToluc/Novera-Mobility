@@ -1,0 +1,41 @@
+{
+  "ContactPage": {
+    "metaTitle": "İletişim",
+    "metaDescription": "Novera Mobility bayilerini haritada bulun: adres, çalışma saatleri, telefon ve yol tarifi.",
+    "title": "İletişim",
+    "intro": "Size en yakın bayiyi şehir ya da bayi adıyla arayın; adres, çalışma saatleri ve telefonu görün.",
+    "searchLabel": "Şehir veya bayi ara",
+    "searchPlaceholder": "Örn. İzmir",
+    "viewLabel": "Görünüm",
+    "views": {
+      "list": "Liste",
+      "map": "Harita"
+    },
+    "count": "{count, plural, one {# bayi} other {# bayi}}",
+    "mapUnavailable": "Harita şu an yüklenemiyor; bayileri listeden görebilirsiniz.",
+    "noResults": {
+      "title": "Aramanızla eşleşen bayi yok",
+      "text": "Başka bir şehir ya da bayi adı deneyin.",
+      "clear": "Aramayı Temizle"
+    },
+    "error": {
+      "title": "Bayiler yüklenemedi",
+      "text": "Bayi listesini şu an gösteremiyoruz. Lütfen tekrar deneyin.",
+      "retry": "Tekrar Dene"
+    },
+    "card": {
+      "hours": "Çalışma saatleri",
+      "weekdays": "Hafta içi",
+      "saturday": "Cumartesi",
+      "sunday": "Pazar",
+      "closed": "Kapalı",
+      "allDay": "7/24 açık",
+      "range": "{open} – {close}",
+      "call": "Ara: {phone}",
+      "email": "E-posta gönder",
+      "directions": "Yol tarifi al",
+      "newTab": "(yeni sekmede açılır)",
+      "showOnMap": "Haritada göster"
+    }
+  }
+}
