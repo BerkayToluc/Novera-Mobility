@@ -8,8 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Link, usePathname } from "@/i18n/navigation";
 import { MainNav } from "./main-nav";
 
-// Matches Tailwind's `md` breakpoint, where the inline desktop menu takes over.
-const DESKTOP_QUERY = "(min-width: 48rem)";
+// Matches Tailwind's `xl` breakpoint, where the inline menu takes over: six links do not fit
+// beside the logo and the login button any narrower.
+const DESKTOP_QUERY = "(min-width: 80rem)";
 
 // A native modal <dialog>: the browser traps focus, closes it on Escape and makes
 // the page behind it inert. It covers the header, so it repeats the logo and a
@@ -60,7 +61,7 @@ export function MobileMenu() {
         aria-controls={dialogId}
         aria-haspopup="dialog"
         onClick={() => dialogRef.current?.showModal()}
-        className="md:hidden"
+        className="xl:hidden"
       />
       <dialog
         ref={dialogRef}
