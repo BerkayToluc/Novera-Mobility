@@ -2,7 +2,7 @@ import { getFormatter, getTranslations } from "next-intl/server";
 import { Button } from "@/components/ui/button";
 import { StateMessage } from "@/components/ui/state-message";
 import { Link } from "@/i18n/navigation";
-import { kurusToLira, PRICE_FORMAT } from "@/lib/price";
+import { formatMoney } from "@/lib/price";
 import type { Reservation } from "@/lib/reservation";
 
 export async function ReservationList({ reservations }: { reservations: Reservation[] }) {
@@ -63,7 +63,7 @@ export async function ReservationList({ reservations }: { reservations: Reservat
               <div>
                 <dt className="text-small text-fg-muted">{t("total")}</dt>
                 <dd className="tabular-nums text-fg">
-                  {format.number(kurusToLira(reservation.totalPrice), PRICE_FORMAT)}
+                  {formatMoney(format, reservation.totalPrice)}
                 </dd>
               </div>
             </dl>

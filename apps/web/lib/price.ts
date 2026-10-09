@@ -1,20 +1,25 @@
-// How every price is shown (SPEC §4): the lira sign, no decimals, in both languages:
-// "₺1.250" in Turkish, "₺1,250" in English. `narrowSymbol` is what keeps English from
+import type { useFormatter } from "next-intl";
+import type { Money } from "./currency";
+
+type Formatter = ReturnType<typeof useFormatter>;
+
+// How every price is shown (SPEC §4): the currency's own sign, and decimals only when
+// there is something to show. "₺1.250" and "₺1.250,50" in Turkish, "₺1,250" and
+// "₺1,250.50" in English, "€36.40" and so on. `narrowSymbol` keeps English from
 // printing "TRY 1,250".
 //
-// The API sends whole kuruş (125000 = ₺1.250), so divide by 100 first:
-//   format.number(kurusToLira(totalPrice), PRICE_FORMAT)
+// A whole amount shows no decimals, an amount with kuruş or cents always shows two:
+// rounding to whole units would make the lines of a booking summary stop adding up to
+// its total, so amounts are never rounded for display.
 //
-// Rounding to whole lira is only safe while prices are whole lira. Before an amount with
-// kuruş is shown (e.g. a booking summary that adds line items), revisit this so the
-// displayed lines still add up to the displayed total.
-export const PRICE_FORMAT = {
-  style: "currency",
-  currency: "TRY",
-  currencyDisplay: "narrowSymbol",
-  maximumFractionDigits: 0,
-} as const;
-
-export function kurusToLira(kurus: number): number {
-  return kurus / 100;
+// `format` is next-intl's formatter (`useFormatter()` or `await getFormatter()`).
+export function formatMoney(format: Formatter, { amount, currency }: Money): string {
+  const whole = amount % 100 === 0;
+  return format.number(amount / 100, {
+    style: "currency",
+    currency,
+    currencyDisplay: "narrowSymbol",
+    minimumFractionDigits: whole ? 0 : 2,
+    maximumFractionDigits: whole ? 0 : 2,
+  });
 }

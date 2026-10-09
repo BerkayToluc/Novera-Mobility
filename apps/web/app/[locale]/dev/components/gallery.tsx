@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 import type { DateRange } from "react-day-picker";
 import { Accordion, AccordionItem } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,8 @@ import { Input } from "@/components/ui/input";
 import { SegmentedControl } from "@/components/ui/segmented-control";
 import { Select } from "@/components/ui/select";
 import { TimeSelect } from "@/components/ui/time-select";
+import { CURRENCIES } from "@/lib/currency";
+import { formatMoney } from "@/lib/price";
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -24,6 +26,7 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 
 export function Gallery() {
   const t = useTranslations("DevGallery");
+  const format = useFormatter();
   const [audience, setAudience] = useState<"individual" | "corporate">("individual");
   const [range, setRange] = useState<DateRange | undefined>();
 
@@ -120,6 +123,17 @@ export function Gallery() {
             {(props) => <TimeSelect defaultValue="10:00" {...props} />}
           </Field>
         </div>
+      </Section>
+
+      {/* Whole amounts show no decimals; an amount with kuruş or cents always shows two. */}
+      <Section title={t("money")}>
+        <ul className="flex flex-col gap-2 text-body tabular-nums text-fg">
+          {[125000, 125050, 3640].flatMap((amount) =>
+            CURRENCIES.map((currency) => (
+              <li key={`${amount}-${currency}`}>{formatMoney(format, { amount, currency })}</li>
+            )),
+          )}
+        </ul>
       </Section>
 
       <Section title={t("accordion")}>

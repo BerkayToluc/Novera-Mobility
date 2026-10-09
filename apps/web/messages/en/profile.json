@@ -71,6 +71,10 @@
         "cancel": "Cancel",
         "confirm": "Yes, Delete My Account",
         "deleting": "Deleting…"
+      },
+      "currency": {
+        "title": "Currency",
+        "text": "Choose the currency prices are shown in. Amounts are converted at the daily exchange rate."
       }
     }
   }

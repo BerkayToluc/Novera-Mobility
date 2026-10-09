@@ -107,6 +107,11 @@
             "duration": "1 year."
           },
           {
+            "name": "novera-currency",
+            "purpose": "Remembers your chosen currency (lira, euro or dollar). It is never created if you do not choose one.",
+            "duration": "1 year."
+          },
+          {
             "name": "Session cookie",
             "purpose": "Keeps you signed in. It is only created when you use your account.",
             "duration": "For the length of the session."
