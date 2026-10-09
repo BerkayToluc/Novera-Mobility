@@ -34,6 +34,201 @@
     "copyright": "© {year} Novera Mobility. All rights reserved.",
     "fiction": "This site is a fictional learning project."
   },
+  "NotFound": {
+    "code": "404",
+    "title": "Page not found",
+    "description": "The page you are looking for may have moved, been deleted or never existed. You can carry on from the home page.",
+    "home": "Back to Home"
+  },
+  "LegalPage": {
+    "updated": "Last updated: {date}",
+    "placeholder": "This text is sample content for a fictional learning project. It has no legal validity.",
+    "purpose": "Purpose",
+    "duration": "Duration"
+  },
+  "LegalPrivacy": {
+    "title": "Privacy Notice",
+    "sections": [
+      {
+        "heading": "Data controller",
+        "paragraphs": [
+          "Your personal data is processed by Novera Mobility as the data controller, under the Turkish Personal Data Protection Law no. 6698 (KVKK).",
+          "This site belongs to a fictional company; the contact details are examples: kvkk@novera.example."
+        ]
+      },
+      {
+        "heading": "Personal data we process",
+        "paragraphs": [
+          "Depending on how you use the site, we may process:"
+        ],
+        "list": [
+          "Identity and contact: first name, last name, email address, phone number.",
+          "Booking: pick-up and return location and dates, the chosen car and extras.",
+          "Corporate quote: company name, number of cars needed, rental period, car type.",
+          "Usage: your language and theme preference (through cookies)."
+        ]
+      },
+      {
+        "heading": "Purposes of processing",
+        "list": [
+          "Creating and managing your booking.",
+          "Answering your corporate quote requests.",
+          "Managing your account and keeping you signed in.",
+          "Remembering your site preferences."
+        ]
+      },
+      {
+        "heading": "Legal grounds",
+        "paragraphs": [
+          "Your data is processed because it is directly related to the conclusion or performance of a contract, to meet legal obligations, and where necessary for our legitimate interests."
+        ]
+      },
+      {
+        "heading": "Sharing of data",
+        "paragraphs": [
+          "Your data is not shared with third parties except where the law requires it. We may share it with our hosting and infrastructure providers only as far as necessary."
+        ]
+      },
+      {
+        "heading": "Retention",
+        "paragraphs": [
+          "Your data is kept for as long as the purpose requires and within the maximum periods set by law, then deleted, destroyed or anonymised."
+        ]
+      },
+      {
+        "heading": "Your rights",
+        "paragraphs": [
+          "Under Article 11 of the Law you have the right to:"
+        ],
+        "list": [
+          "Find out whether your data is processed and request information.",
+          "Learn the purpose of processing and whether it is used accordingly.",
+          "Request correction if it is incomplete or inaccurate.",
+          "Request deletion or destruction.",
+          "Claim compensation if you suffer damage."
+        ]
+      },
+      {
+        "heading": "How to apply",
+        "paragraphs": [
+          "Send your requests to kvkk@novera.example. Applications are answered within thirty days at the latest."
+        ]
+      }
+    ]
+  },
+  "LegalCookies": {
+    "title": "Cookie Policy",
+    "sections": [
+      {
+        "heading": "What is a cookie?",
+        "paragraphs": [
+          "Cookies are small text files saved in your browser when you visit a site. They make the site work properly for you and remember your preferences."
+        ]
+      },
+      {
+        "heading": "Which cookies do we use?",
+        "paragraphs": [
+          "Novera Mobility only uses functional cookies the site needs to work. We do not use advertising or tracking cookies."
+        ],
+        "cookies": [
+          {
+            "name": "NEXT_LOCALE",
+            "purpose": "Remembers your chosen language (Turkish or English).",
+            "duration": "Session: until you close the browser."
+          },
+          {
+            "name": "novera-theme",
+            "purpose": "Remembers your chosen appearance (light or dark theme). It is never created if you choose the system setting.",
+            "duration": "1 year."
+          },
+          {
+            "name": "Session cookie",
+            "purpose": "Keeps you signed in. It is only created when you use your account.",
+            "duration": "For the length of the session."
+          }
+        ]
+      },
+      {
+        "heading": "How can you manage cookies?",
+        "paragraphs": [
+          "You can delete or block cookies in your browser settings. If you block the language and theme cookies, your preferences reset on every visit; the site still works."
+        ]
+      },
+      {
+        "heading": "Changes",
+        "paragraphs": [
+          "This page is updated whenever a new cookie is added."
+        ]
+      }
+    ]
+  },
+  "LegalTerms": {
+    "title": "Rental Terms",
+    "sections": [
+      {
+        "heading": "Scope",
+        "paragraphs": [
+          "These terms apply to car rentals made through Novera Mobility. Corporate fleet rentals are governed by the separately signed contract."
+        ]
+      },
+      {
+        "heading": "What we expect from the renter",
+        "list": [
+          "Be at least 21 years old.",
+          "Have held a valid driving licence for at least two years.",
+          "Present an ID and the driving licence at pick-up."
+        ]
+      },
+      {
+        "heading": "Booking and payment",
+        "paragraphs": [
+          "Every item in the booking summary is shown openly; there are no hidden fees.",
+          "The payment screen on this site is a sample: no real payment is taken and nothing is charged to your card."
+        ]
+      },
+      {
+        "heading": "Cancellation and changes",
+        "paragraphs": [
+          "You can cancel your booking free of charge up to 24 hours before pick-up. For later cancellations, one day's rental fee may be charged."
+        ]
+      },
+      {
+        "heading": "Pick-up and return",
+        "list": [
+          "The car is handed over at the location and time stated in the booking.",
+          "It is returned at the agreed location and time; returning to a different location must be chosen while booking.",
+          "The car is returned with the fuel level it was collected with.",
+          "Late returns are charged for the extra time."
+        ]
+      },
+      {
+        "heading": "Road Assurance",
+        "paragraphs": [
+          "Every rental is covered by Road Assurance: a 24/7 support line, tow truck dispatch and a replacement car if a breakdown lasts more than 24 hours."
+        ]
+      },
+      {
+        "heading": "Liability and damage",
+        "paragraphs": [
+          "The renter must drive the car in line with traffic rules and its intended use. In case of damage a report is drawn up; coverage depends on the chosen assurance package."
+        ]
+      },
+      {
+        "heading": "Prohibited use",
+        "list": [
+          "Racing, drifting or driver training.",
+          "Subletting the car or letting third parties drive it.",
+          "Carrying commercial goods or passengers for hire."
+        ]
+      },
+      {
+        "heading": "Disputes",
+        "paragraphs": [
+          "Disputes are first settled by good-faith discussion; if none is found, the competent courts and enforcement offices have jurisdiction."
+        ]
+      }
+    ]
+  },
   "DateRangePicker": {
     "placeholder": "Select a date range",
     "month": "Month",

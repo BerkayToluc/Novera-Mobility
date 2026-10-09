@@ -34,6 +34,201 @@
     "copyright": "© {year} Novera Mobility. Tüm hakları saklıdır.",
     "fiction": "Bu site kurgusal bir öğrenme projesidir."
   },
+  "NotFound": {
+    "code": "404",
+    "title": "Sayfa bulunamadı",
+    "description": "Aradığınız sayfa taşınmış, silinmiş ya da hiç var olmamış olabilir. Ana sayfadan devam edebilirsiniz.",
+    "home": "Ana Sayfaya Dön"
+  },
+  "LegalPage": {
+    "updated": "Son güncelleme: {date}",
+    "placeholder": "Bu metin kurgusal bir öğrenme projesi için hazırlanmış örnek içeriktir. Hukuki bir geçerliliği yoktur.",
+    "purpose": "Amaç",
+    "duration": "Süre"
+  },
+  "LegalPrivacy": {
+    "title": "KVKK Aydınlatma Metni",
+    "sections": [
+      {
+        "heading": "Veri sorumlusu",
+        "paragraphs": [
+          "Kişisel verileriniz, 6698 sayılı Kişisel Verilerin Korunması Kanunu kapsamında veri sorumlusu sıfatıyla Novera Mobility tarafından işlenir.",
+          "Bu site kurgusal bir şirkete aittir; iletişim bilgileri örnektir: kvkk@novera.example."
+        ]
+      },
+      {
+        "heading": "İşlenen kişisel veriler",
+        "paragraphs": [
+          "Siteyi kullanımınıza bağlı olarak şu veriler işlenebilir:"
+        ],
+        "list": [
+          "Kimlik ve iletişim: ad, soyad, e-posta adresi, telefon numarası.",
+          "Rezervasyon: alış ve iade lokasyonu, tarihleri, seçilen araç ve ek hizmetler.",
+          "Kurumsal teklif: firma adı, ihtiyaç duyulan araç sayısı, kiralama süresi, araç tipi.",
+          "Kullanım: dil ve tema tercihiniz (çerezler aracılığıyla)."
+        ]
+      },
+      {
+        "heading": "İşleme amaçları",
+        "list": [
+          "Rezervasyonunuzu oluşturmak ve yönetmek.",
+          "Kurumsal teklif taleplerinize dönüş yapmak.",
+          "Hesabınızı yönetmek ve oturumunuzu sürdürmek.",
+          "Site tercihlerinizi hatırlamak."
+        ]
+      },
+      {
+        "heading": "Hukuki sebepler",
+        "paragraphs": [
+          "Verileriniz; bir sözleşmenin kurulması veya ifasıyla doğrudan ilgili olması, hukuki yükümlülüklerin yerine getirilmesi ve meşru menfaatlerimiz için gerekli olması hukuki sebeplerine dayanılarak işlenir."
+        ]
+      },
+      {
+        "heading": "Verilerin aktarımı",
+        "paragraphs": [
+          "Verileriniz, yasal zorunluluklar dışında üçüncü kişilerle paylaşılmaz. Barındırma ve altyapı hizmetleri için hizmet sağlayıcılarımızla yalnızca gerekli olduğu ölçüde paylaşılabilir."
+        ]
+      },
+      {
+        "heading": "Saklama süresi",
+        "paragraphs": [
+          "Verileriniz, işleme amacının gerektirdiği süre boyunca ve ilgili mevzuatta öngörülen azami süreler içinde saklanır; süre sonunda silinir, yok edilir veya anonim hale getirilir."
+        ]
+      },
+      {
+        "heading": "Haklarınız",
+        "paragraphs": [
+          "Kanunun 11. maddesi uyarınca şu haklara sahipsiniz:"
+        ],
+        "list": [
+          "Verilerinizin işlenip işlenmediğini öğrenme ve bilgi talep etme.",
+          "İşleme amacını ve amacına uygun kullanılıp kullanılmadığını öğrenme.",
+          "Eksik veya yanlış işlenmişse düzeltilmesini isteme.",
+          "Silinmesini veya yok edilmesini isteme.",
+          "Zarara uğramanız halinde zararın giderilmesini talep etme."
+        ]
+      },
+      {
+        "heading": "Başvuru",
+        "paragraphs": [
+          "Haklarınıza ilişkin taleplerinizi kvkk@novera.example adresine iletebilirsiniz. Başvurular en geç otuz gün içinde sonuçlandırılır."
+        ]
+      }
+    ]
+  },
+  "LegalCookies": {
+    "title": "Çerez Politikası",
+    "sections": [
+      {
+        "heading": "Çerez nedir?",
+        "paragraphs": [
+          "Çerezler, bir siteyi ziyaret ettiğinizde tarayıcınıza kaydedilen küçük metin dosyalarıdır. Siteyi sizin için doğru çalıştırmak ve tercihlerinizi hatırlamak için kullanılır."
+        ]
+      },
+      {
+        "heading": "Hangi çerezleri kullanıyoruz?",
+        "paragraphs": [
+          "Novera Mobility yalnızca siteyi çalıştırmak için gerekli işlevsel çerezleri kullanır. Reklam veya izleme amaçlı çerez kullanmıyoruz."
+        ],
+        "cookies": [
+          {
+            "name": "NEXT_LOCALE",
+            "purpose": "Seçtiğiniz dili (Türkçe veya İngilizce) hatırlar.",
+            "duration": "Oturum: tarayıcıyı kapatana kadar."
+          },
+          {
+            "name": "novera-theme",
+            "purpose": "Seçtiğiniz görünümü (açık veya koyu tema) hatırlar. Sistem ayarını seçerseniz hiç oluşturulmaz.",
+            "duration": "1 yıl."
+          },
+          {
+            "name": "Oturum çerezi",
+            "purpose": "Giriş yaptığınızda oturumunuzu sürdürür. Yalnızca hesabınızı kullandığınızda oluşturulur.",
+            "duration": "Oturum süresince."
+          }
+        ]
+      },
+      {
+        "heading": "Çerezleri nasıl yönetirsiniz?",
+        "paragraphs": [
+          "Çerezleri tarayıcı ayarlarınızdan silebilir veya engelleyebilirsiniz. Dil ve tema çerezlerini engellerseniz tercihleriniz her ziyarette sıfırlanır; site yine de çalışır."
+        ]
+      },
+      {
+        "heading": "Değişiklikler",
+        "paragraphs": [
+          "Yeni bir çerez eklendiğinde bu sayfa güncellenir."
+        ]
+      }
+    ]
+  },
+  "LegalTerms": {
+    "title": "Kiralama Koşulları",
+    "sections": [
+      {
+        "heading": "Kapsam",
+        "paragraphs": [
+          "Bu koşullar, Novera Mobility üzerinden yapılan araç kiralamaları için geçerlidir. Kurumsal filo kiralamaları ayrıca imzalanan sözleşmeyle düzenlenir."
+        ]
+      },
+      {
+        "heading": "Kiracıdan beklenenler",
+        "list": [
+          "En az 21 yaşında olmak.",
+          "En az iki yıldır geçerli bir sürücü belgesine sahip olmak.",
+          "Alış sırasında kimlik ve sürücü belgesini ibraz etmek."
+        ]
+      },
+      {
+        "heading": "Rezervasyon ve ödeme",
+        "paragraphs": [
+          "Rezervasyon özetindeki tüm kalemler açıkça gösterilir; gizli ücret yoktur.",
+          "Bu sitedeki ödeme ekranı örnektir: gerçek ödeme alınmaz ve kartınızdan para çekilmez."
+        ]
+      },
+      {
+        "heading": "İptal ve değişiklik",
+        "paragraphs": [
+          "Alış saatinden 24 saat öncesine kadar rezervasyonunuzu ücretsiz iptal edebilirsiniz. Daha geç iptallerde bir günlük kiralama bedeli tahsil edilebilir."
+        ]
+      },
+      {
+        "heading": "Teslim ve iade",
+        "list": [
+          "Araç, rezervasyonda belirtilen lokasyonda ve saatte teslim edilir.",
+          "İade, anlaşılan lokasyonda ve saatte yapılır; farklı lokasyona iade rezervasyon sırasında seçilmelidir.",
+          "Araç, teslim alındığı yakıt seviyesiyle iade edilir.",
+          "Geç iadelerde ek süre için ücret alınır."
+        ]
+      },
+      {
+        "heading": "Yol Boyu Güvence",
+        "paragraphs": [
+          "Her kiralama Yol Boyu Güvence kapsamındadır: 7/24 destek hattı, çekici yönlendirme ve arıza 24 saati aşarsa yedek araç."
+        ]
+      },
+      {
+        "heading": "Sorumluluk ve hasar",
+        "paragraphs": [
+          "Kiracı, aracı trafik kurallarına uygun ve amacına uygun kullanmakla yükümlüdür. Hasar durumunda tutanak tutulur; kapsam, seçilen güvence paketine göre belirlenir."
+        ]
+      },
+      {
+        "heading": "Yasaklı kullanımlar",
+        "list": [
+          "Yarış, drift veya sürüş eğitimi amacıyla kullanım.",
+          "Aracın alt kiraya verilmesi veya üçüncü kişilere kullandırılması.",
+          "Ticari yük veya ücretli yolcu taşımacılığı."
+        ]
+      },
+      {
+        "heading": "Uyuşmazlıklar",
+        "paragraphs": [
+          "Uyuşmazlıklarda öncelikle iyi niyetli görüşme yolu izlenir; çözüm bulunamazsa yetkili mahkemeler ve icra daireleri görevlidir."
+        ]
+      }
+    ]
+  },
   "DateRangePicker": {
     "placeholder": "Tarih aralığı seçin",
     "month": "Ay",
