@@ -1,0 +1,38 @@
+{
+  "RentalSearch": {
+    "pickupBranch": "Alış bayisi",
+    "returnBranch": "Bırakacağınız bayi",
+    "dates": "Alış ve iade tarihleri",
+    "pickupTime": "Alış saati",
+    "returnTime": "İade saati",
+    "submit": "Kirala",
+    "branchPlaceholder": "Bayi seçin",
+    "noVehicles": "Şu an araç yok",
+    "andMore": "+{count}",
+    "errors": {
+      "pickupBranch": "Alış bayisini seçin.",
+      "returnBranch": "Bırakacağınız bayiyi seçin.",
+      "dates": "Tarihleri seçin.",
+      "order": "İade zamanı, alış zamanından sonra olmalı."
+    }
+  },
+  "ResultsPage": {
+    "title": "Uygun Araçlar",
+    "searchTitle": "Araç ara",
+    "change": "Aramayı değiştir",
+    "count": "{count, plural, one {# araç} other {# araç}} bulundu",
+    "noSearch": {
+      "title": "Henüz arama yapmadınız",
+      "text": "Bayi ve tarihleri seçip Kirala'ya basın, uygun araçlar burada listelenir."
+    },
+    "empty": {
+      "title": "Bu tarihlerde uygun araç bulunamadı",
+      "text": "Tarihleri ya da bayiyi değiştirip tekrar arayın."
+    },
+    "error": {
+      "title": "Araçlar yüklenemedi",
+      "text": "Uygun araçları şu an getiremiyoruz. Lütfen tekrar deneyin.",
+      "back": "Ana Sayfaya Dön"
+    }
+  }
+}

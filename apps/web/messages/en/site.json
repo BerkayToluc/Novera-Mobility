@@ -4,7 +4,13 @@
     "description": "Corporate and personal car rental"
   },
   "HomePage": {
-    "title": "Novera Mobility"
+    "title": "Rent a Car",
+    "intro": "Choose where to pick up and drop off the car and your dates, and see the cars available at that branch with prices.",
+    "error": {
+      "title": "Branches could not be loaded",
+      "text": "Car search is not available right now. Please try again.",
+      "retry": "Try Again"
+    }
   },
   "LocaleSwitcher": {
     "label": "Language"

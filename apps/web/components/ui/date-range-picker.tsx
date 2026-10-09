@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useId, useState, type Ref } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { addYears, format, startOfDay, startOfMonth } from "date-fns";
 import { CalendarIcon } from "lucide-react";
@@ -36,6 +36,8 @@ type DateRangePickerProps = {
   "aria-invalid"?: boolean;
   disabled?: boolean;
   className?: string;
+  // Lets a form library focus the trigger when the field is invalid.
+  ref?: Ref<HTMLButtonElement>;
 };
 
 function DateRangePicker({
@@ -45,6 +47,7 @@ function DateRangePicker({
   labelledBy,
   disabled,
   className,
+  ref,
   ...aria
 }: DateRangePickerProps) {
   const t = useTranslations("DateRangePicker");
@@ -92,6 +95,7 @@ function DateRangePicker({
     <Popover open={open} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
         <button
+          ref={ref}
           type="button"
           id={id}
           disabled={disabled}

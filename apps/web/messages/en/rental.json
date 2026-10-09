@@ -1,0 +1,38 @@
+{
+  "RentalSearch": {
+    "pickupBranch": "Pick-up branch",
+    "returnBranch": "Drop-off branch",
+    "dates": "Pick-up and return dates",
+    "pickupTime": "Pick-up time",
+    "returnTime": "Return time",
+    "submit": "Rent",
+    "branchPlaceholder": "Choose a branch",
+    "noVehicles": "No cars right now",
+    "andMore": "+{count}",
+    "errors": {
+      "pickupBranch": "Choose the pick-up branch.",
+      "returnBranch": "Choose the drop-off branch.",
+      "dates": "Choose your dates.",
+      "order": "The return time must be after the pick-up time."
+    }
+  },
+  "ResultsPage": {
+    "title": "Available Cars",
+    "searchTitle": "Search for a car",
+    "change": "Change search",
+    "count": "{count, plural, one {# car} other {# cars}} found",
+    "noSearch": {
+      "title": "You have not searched yet",
+      "text": "Choose the branches and dates and press Rent; the available cars are listed here."
+    },
+    "empty": {
+      "title": "No cars available for these dates",
+      "text": "Change the dates or the branch and search again."
+    },
+    "error": {
+      "title": "Cars could not be loaded",
+      "text": "We cannot fetch the available cars right now. Please try again.",
+      "back": "Back to Home"
+    }
+  }
+}

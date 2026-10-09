@@ -48,13 +48,17 @@ G'nin kararı: arama alanının üstünde iki seçenekli bir anahtar (segmented 
 
 | Bölüm | Bireysel | Kurumsal |
 |---|---|---|
-| Arama alanı | Lokasyon + tarih → Araç Ara | Teklif ön formu → Teklif İste |
+| Arama alanı | Alış ve bırakılacak bayi + tarih-saat → Kirala | Teklif ön formu → Teklif İste |
 | Öne çıkan içerik | Araç sınıfları | 4 ürün (filo çözümleri) |
 | Sık sorulan sorular | Bireysel SSS seti | Kurumsal SSS seti |
 | Yol Boyu Güvence | Ortak | Ortak |
 | İş ortakları, footer | Ortak | Ortak |
 
-- **Bireysel (varsayılan):** alış lokasyonu, iade lokasyonu ("farklı yere iade" seçeneği), alış tarih-saat, iade tarih-saat → **Araç Ara** → `/araclar`.
+- **Bireysel (varsayılan):** alış bayisi, bırakılacak bayi, alış tarih-saat, iade tarih-saat → **Kirala** → `/araclar`.
+  - Bayi listesinde her bayinin altında o bayideki birkaç aracın adı kısaca görünür ("Toyota Corolla Hybrid, Nissan Qashqai +2"), böylece bayi seçmek aynı zamanda ilk bakış olur.
+  - Bırakılacak bayi her zaman seçilir; kullanıcı dokunmadıkça alış bayisini izler (çoğu kiralama başladığı yerde biter).
+  - Arama formunda **araç seçilmez**; araç, sonuç sayfasında seçilir.
+  - Sonuç sayfası (`/araclar`) arama bilgilerini adreste taşır (`?alis=&iade=&baslangic=&bitis=`), böylece paylaşılabilir ve yenilenebilir. Üstte bir arama özeti kalır (bayiler, tarihler); "Aramayı değiştir" ile açılıp düzenlenebilir ve yeniden aranabilir. Her araç fotoğraf, bilgi (koltuk, bavul, vites, yakıt) ve fiyatla (günlük ve toplam) gösterilir. Uygun araç yoksa, arama yapılmamışsa ve veri alınamıyorsa her biri için ayrı bir durum gösterilir.
 - **Kurumsal:** kısa bir teklif ön formu (firma adı, ihtiyaç duyulan araç sayısı, kiralama süresi, araç tipi, iletişim e-postası) → **Teklif İste** → `/kurumsal-teklif` sayfasına bu bilgiler dolu olarak gider. Gerekçe: kurumsal kiralama tarih seçip ödemeyle değil, teklif ve sözleşmeyle ilerler.
 - Seçim URL'de tutulur (`/?tip=kurumsal`) ki link paylaşılınca aynı sekme açılsın.
 

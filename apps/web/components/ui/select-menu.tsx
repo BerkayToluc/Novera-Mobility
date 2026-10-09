@@ -42,7 +42,7 @@ function SelectMenuContent({
         sideOffset={4}
         collisionPadding={16}
         className={cn(
-          "relative z-50 max-h-(--radix-select-content-available-height) min-w-(--radix-select-trigger-width) overflow-hidden rounded-control border border-border bg-surface text-fg shadow-overlay",
+          "relative z-50 max-h-(--radix-select-content-available-height) min-w-(--radix-select-trigger-width) max-w-(--radix-select-content-available-width) overflow-hidden rounded-control border border-border bg-surface text-fg shadow-overlay",
           className,
         )}
         {...props}
@@ -56,8 +56,13 @@ function SelectMenuContent({
 function SelectMenuItem({
   className,
   children,
+  description,
   ...props
-}: ComponentProps<typeof SelectPrimitive.Item>) {
+}: ComponentProps<typeof SelectPrimitive.Item> & {
+  // A second line under the option, shown in the open list only: the trigger repeats just
+  // `children` (Radix shows the ItemText), so a long description never crowds it.
+  description?: string;
+}) {
   return (
     <SelectPrimitive.Item
       className={cn(
@@ -72,7 +77,10 @@ function SelectMenuItem({
           <Check aria-hidden="true" className="size-4" />
         </SelectPrimitive.ItemIndicator>
       </span>
-      <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
+      <span className="flex flex-col">
+        <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
+        {description && <span className="text-small text-fg-muted">{description}</span>}
+      </span>
     </SelectPrimitive.Item>
   );
 }

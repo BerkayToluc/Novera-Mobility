@@ -38,7 +38,7 @@
 | # | İş | Sahip | Bağımlı | Bitti sayılması için |
 |---|---|---|---|---|
 | 16 | Ana sayfa: Bireysel/Kurumsal anahtarı, arama alanı, kitleye göre değişen bölümler, Yol Boyu Güvence bandı | FE | 10, 12 | Anahtar URL'de (`?tip=kurumsal`) tutuluyor |
-| 17 | Araç listesi sayfası + filtreler + boş/yükleniyor/hata durumları | FE | 16 | Filtre sonuç vermezse anlamlı boş durum |
+| 17 | Araç listesi sayfası (düzenlenebilir arama özeti, fotoğraf, bilgi, günlük ve toplam fiyat) + filtreler + boş/yükleniyor/hata durumları | FE | 16 | Filtre sonuç vermezse anlamlı boş durum |
 | 18 | Araç detay + ek hizmet seçimi + güvence şeridi | FE | 17 | |
 | 19 | Rezervasyon özeti (kalem kalem fiyat, "gizli ücret yok") | FE | 18 | Toplam doğru hesaplanıyor |
 | 20 | Sahte ödeme + onay sayfası | FE | 19, 26 | Para alınmadığı ekranda açıkça yazıyor |
@@ -92,6 +92,7 @@ Sonradan alınan kararlardan doğan işler (ARCHITECTURE ADR-14 ile ADR-17). Iss
 | Y6 | Backend çerez ayarları: `httpOnly`, `Secure`, `SameSite=Lax`; route'lar `/api` öneksiz | BE | 25 | Proxy üzerinden giriş yapılıp oturum sürüyor |
 | Y7 | Tarih ve saat dilimini `Europe/Istanbul`'a sabitle | FE | 8 | Aynı rezervasyon her ortamda aynı yazılıyor |
 | Y8 | Araçlarımız sayfası (`/araclarimiz`) ve menü öğesi; araç kartı, yer tutucu görsel, örnek veri katmanı (`USE_MOCKS=1`) | FE | 10 | Tüm marka ve modeller sınıfa göre listeleniyor, fiyat seçilen para biriminde |
+| Y9 | Ana sayfa arama formu (bayi seçici + bayideki araçların önizlemesi, bırakılacak bayi, tarih-saat, Kirala) ve sonuç sayfası `/araclar` (#16 ve #17'nin bayi/araç kısmı; kitle anahtarı, SSS ve Yol Boyu Güvence bandı #16'da kalır) | FE | 10, Y8 | Aynı arama adresten paylaşılıp düzenlenebiliyor; boş, hata ve arama-yok durumları var |
 
 ---
 

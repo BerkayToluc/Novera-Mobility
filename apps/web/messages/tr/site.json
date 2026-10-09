@@ -4,7 +4,13 @@
     "description": "Kurumsal ve bireysel araç kiralama"
   },
   "HomePage": {
-    "title": "Novera Mobility"
+    "title": "Araç Kirala",
+    "intro": "Alış ve bırakma bayisini ve tarihleri seçin, o bayideki uygun araçları fiyatlarıyla görün.",
+    "error": {
+      "title": "Bayiler yüklenemedi",
+      "text": "Araç arama şu an kullanılamıyor. Lütfen tekrar deneyin.",
+      "retry": "Tekrar Dene"
+    }
   },
   "LocaleSwitcher": {
     "label": "Dil seçimi"
