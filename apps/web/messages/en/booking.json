@@ -58,5 +58,49 @@
       "text": "We cannot fetch the details right now. Please try again.",
       "retry": "Try Again"
     }
+  },
+  "Payment": {
+    "metaTitle": "Payment",
+    "title": "Payment",
+    "intro": "The last step to complete your booking.",
+    "demoTitle": "This is a demo payment",
+    "demoText": "Nothing is charged. Your card details are not stored or sent to a server; do not enter a real card.",
+    "demoHint": "Demo card: 4242 4242 4242 4242, any valid date and any CVC.",
+    "fields": {
+      "holder": "Name on card",
+      "number": "Card number",
+      "expiry": "Expiry (MM/YY)",
+      "cvc": "CVC"
+    },
+    "errors": {
+      "holder": "Enter the name on the card.",
+      "number": "Enter a valid card number.",
+      "expiry": "Enter a valid expiry date (MM/YY).",
+      "cvc": "Enter a 3 or 4 digit CVC.",
+      "unavailable": "The booking service is not available right now. Please try again later.",
+      "invalid": "The booking details are not valid. Please start the search again.",
+      "signin": "You need to sign in to continue.",
+      "generic": "The booking could not be completed. Please try again."
+    },
+    "pay": "Complete Payment",
+    "paying": "Processing",
+    "summaryTitle": "Your booking",
+    "total": "Total",
+    "edit": "Back to summary"
+  },
+  "Confirmation": {
+    "metaTitle": "Booking Confirmation",
+    "title": "Your booking is confirmed",
+    "text": "The demo payment is complete; no real amount was charged.",
+    "number": "Your booking number",
+    "rentalTitle": "Rental",
+    "total": "Total",
+    "bookings": "My Bookings",
+    "home": "Back to Home",
+    "missing": {
+      "title": "No booking to confirm",
+      "text": "You get to this page after making a booking.",
+      "action": "Search Cars"
+    }
   }
 }

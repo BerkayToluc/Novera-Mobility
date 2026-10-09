@@ -6,14 +6,12 @@ import { StateMessage } from "@/components/ui/state-message";
 import { GuaranteeStrip } from "@/components/vehicle/guarantee-strip";
 import { VehicleImage } from "@/components/vehicle/vehicle-image";
 import { Link } from "@/i18n/navigation";
-import { parseBooking, toBookingQuery } from "@/lib/booking";
-import type { Extra } from "@/lib/extra";
-import { getBranches, getExtras, getVehicle } from "@/lib/fleet-client";
+import { toBookingQuery } from "@/lib/booking";
+import { loadBooking } from "@/lib/booking-data";
 import { getCurrency } from "@/lib/get-currency";
 import { formatMoney } from "@/lib/price";
-import { summarize } from "@/lib/price-summary";
-import { localToInstant, rentalDays, toQuery } from "@/lib/rental-search";
-import type { Branch, Vehicle } from "@/lib/vehicle";
+import { localToInstant, toQuery } from "@/lib/rental-search";
+import type { Branch } from "@/lib/vehicle";
 
 type Props = { searchParams: Promise<Record<string, string | string[] | undefined>> };
 
@@ -28,55 +26,32 @@ export default async function BookingSummaryPage({ searchParams }: Props) {
   const format = await getFormatter();
   const locale = (await getLocale()) as "tr" | "en";
   const currency = await getCurrency();
-  const booking = parseBooking(await searchParams);
+  const loaded = await loadBooking(await searchParams, currency);
 
-  const missing = (
-    <StateMessage title={t("missing.title")} text={t("missing.text")}>
-      <Button asChild>
-        <Link href="/">{t("missing.action")}</Link>
-      </Button>
-    </StateMessage>
-  );
   const shell = (children: ReactNode) => (
     <div className="mx-auto flex max-w-content flex-col gap-8 px-4 py-12 md:px-8 xl:py-16">{children}</div>
   );
 
-  if (!booking) return shell(missing);
-
-  // Only the fetches sit in the try: a failure to load is an expected state with its own UI,
-  // while a rendering bug should still reach the error boundary.
-  let vehicle: Vehicle | null;
-  let allExtras: Extra[];
-  let branches: Branch[];
-  try {
-    [vehicle, allExtras, branches] = await Promise.all([
-      getVehicle(booking.vehicleSlug, currency),
-      getExtras(currency),
-      getBranches(),
-    ]);
-  } catch {
+  if (loaded.status === "missing") {
+    return shell(
+      <StateMessage title={t("missing.title")} text={t("missing.text")}>
+        <Button asChild>
+          <Link href="/">{t("missing.action")}</Link>
+        </Button>
+      </StateMessage>,
+    );
+  }
+  if (loaded.status === "error") {
     return shell(
       <StateMessage tone="error" title={t("error.title")} text={t("error.text")}>
         <Button asChild>
-          <Link href={{ pathname: "/rezervasyon", query: toBookingQuery(booking) }}>{t("error.retry")}</Link>
+          <Link href={{ pathname: "/rezervasyon", query: toBookingQuery(loaded.booking) }}>{t("error.retry")}</Link>
         </Button>
       </StateMessage>,
     );
   }
 
-  // A car belongs to one branch: a link that pairs it with another pick-up point is broken.
-  const pickup = branches.find((branch) => branch.id === booking.search.pickupBranchId);
-  const dropoff = branches.find((branch) => branch.id === booking.search.returnBranchId);
-  if (!vehicle || vehicle.branchId !== booking.search.pickupBranchId || !pickup || !dropoff) {
-    return shell(missing);
-  }
-
-  const days = rentalDays(booking.search);
-  const chosen = allExtras.filter((extra) => booking.extraSlugs.includes(extra.slug));
-  const summary = summarize(vehicle.dailyPrice, days, chosen);
-  // Unknown extras in the URL are dropped, so what is shown is exactly what is charged.
-  const confirmed = { ...booking, extraSlugs: chosen.map((extra) => extra.slug) };
-  const query = toBookingQuery(confirmed);
+  const { booking, vehicle, pickup, dropoff, extras: chosen, days, summary, query } = loaded;
   // The car page names the car in its path, so it takes the search and the extras only.
   const detailQuery = {
     ...toQuery(booking.search),
