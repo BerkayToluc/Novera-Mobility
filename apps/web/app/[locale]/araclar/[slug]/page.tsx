@@ -39,7 +39,9 @@ export default async function VehicleDetailPage({ params, searchParams }: Props)
   const format = await getFormatter();
   const locale = (await getLocale()) as "tr" | "en";
   const currency = await getCurrency();
-  const search = parseRentalSearch(await searchParams);
+  const rawParams = await searchParams;
+  const search = parseRentalSearch(rawParams);
+  const initialSelected = (typeof rawParams.ek === "string" ? rawParams.ek : "").split(",").filter(Boolean);
 
   // Only the fetches sit in the try: a failure to load is an expected state with its own UI,
   // while a rendering bug should still reach the error boundary.
@@ -110,6 +112,7 @@ export default async function VehicleDetailPage({ params, searchParams }: Props)
         extras={extras}
         days={search ? rentalDays(search) : null}
         searchQuery={query}
+        initialSelected={initialSelected.filter((slug) => extras.some((extra) => extra.slug === slug))}
       />
     </div>
   );

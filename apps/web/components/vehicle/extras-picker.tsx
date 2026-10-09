@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Link } from "@/i18n/navigation";
 import type { Money } from "@/lib/currency";
-import { extraCost, type Extra } from "@/lib/extra";
+import type { Extra } from "@/lib/extra";
 import { formatMoney } from "@/lib/price";
+import { summarize } from "@/lib/price-summary";
 
 type ExtrasPickerProps = {
   vehicle: { slug: string; brand: string; model: string; dailyPrice: Money };
@@ -16,25 +17,22 @@ type ExtrasPickerProps = {
   days: number | null;
   // The search that led here, handed on to the booking page.
   searchQuery: Record<string, string> | null;
+  // Extras already chosen, when the visitor comes back from the booking summary to change them.
+  initialSelected?: string[];
 };
 
 // The extras and the running price summary live together because the summary has to follow
 // every tick of a checkbox. Prices are only added up here; the amount that is finally
 // charged is the one the backend works out when the reservation is made.
-export function ExtrasPicker({ vehicle, extras, days, searchQuery }: ExtrasPickerProps) {
+export function ExtrasPicker({ vehicle, extras, days, searchQuery, initialSelected = [] }: ExtrasPickerProps) {
   const t = useTranslations("VehicleDetail");
   const format = useFormatter();
   const locale = useLocale() as "tr" | "en";
-  const [selected, setSelected] = useState<string[]>([]);
+  const [selected, setSelected] = useState<string[]>(initialSelected);
 
   const money = (value: Money) => formatMoney(format, value);
   const chosen = extras.filter((extra) => selected.includes(extra.slug));
-  const { currency } = vehicle.dailyPrice;
-  const vehicleTotal = days ? vehicle.dailyPrice.amount * days : 0;
-  const total: Money = {
-    amount: vehicleTotal + chosen.reduce((sum, extra) => sum + extraCost(extra, days ?? 1).amount, 0),
-    currency,
-  };
+  const summary = summarize(vehicle.dailyPrice, days, chosen);
 
   function toggle(slug: string, on: boolean) {
     setSelected((current) => (on ? [...current, slug] : current.filter((item) => item !== slug)));
@@ -87,17 +85,17 @@ export function ExtrasPicker({ vehicle, extras, days, searchQuery }: ExtrasPicke
             <dl className="flex flex-col gap-2 text-body text-fg">
               <div className="flex justify-between gap-4">
                 <dt>{t("vehicleLine", { brand: vehicle.brand, model: vehicle.model, days })}</dt>
-                <dd className="tabular-nums">{money({ amount: vehicleTotal, currency })}</dd>
+                <dd className="tabular-nums">{money(summary.vehicleTotal)}</dd>
               </div>
-              {chosen.map((extra) => (
+              {summary.extraLines.map(({ extra, cost }) => (
                 <div key={extra.slug} className="flex justify-between gap-4">
                   <dt>{extra.name[locale]}</dt>
-                  <dd className="tabular-nums">{money(extraCost(extra, days))}</dd>
+                  <dd className="tabular-nums">{money(cost)}</dd>
                 </div>
               ))}
               <div className="flex justify-between gap-4 border-t border-border-strong pt-3 text-h3">
                 <dt>{t("total")}</dt>
-                <dd className="tabular-nums">{money(total)}</dd>
+                <dd className="tabular-nums">{money(summary.total)}</dd>
               </div>
             </dl>
             <p className="text-small text-fg-muted">{t("noHidden")}</p>

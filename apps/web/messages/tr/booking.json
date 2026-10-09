@@ -26,5 +26,37 @@
   },
   "GuaranteeStrip": {
     "text": "Bu kiralama Yol Boyu Güvence kapsamında: 7/24 destek, çekici, yedek araç."
+  },
+  "BookingSummary": {
+    "metaTitle": "Rezervasyon Özeti",
+    "title": "Rezervasyon Özeti",
+    "intro": "Her şeyi bir kez daha kontrol edin. Ödemeye geçmeden hiçbir şey sizden tahsil edilmez.",
+    "tripTitle": "Kiralama",
+    "pickup": "Alış",
+    "dropoff": "İade",
+    "duration": "Süre",
+    "days": "{days, plural, one {# gün} other {# gün}}",
+    "vehicleTitle": "Araç",
+    "extrasTitle": "Ek hizmetler",
+    "noExtras": "Ek hizmet seçilmedi.",
+    "changeTrip": "Tarihleri veya bayiyi değiştir",
+    "changeVehicle": "Aracı değiştir",
+    "changeExtras": "Ek hizmetleri değiştir",
+    "priceTitle": "Fiyat özeti",
+    "vehicleLine": "{brand} {model} · {price} × {days, plural, one {# gün} other {# gün}}",
+    "total": "Toplam",
+    "noHidden": "Gizli ücret yok: toplam, yukarıdaki kalemlerin toplamıdır.",
+    "payNote": "Ödemeden önce giriş yapmanız istenir; seçimleriniz korunur.",
+    "continue": "Ödemeye Geç",
+    "missing": {
+      "title": "Rezervasyon bilgisi eksik",
+      "text": "Araç, bayi ve tarihleri seçerek yeniden başlayın.",
+      "action": "Araç Ara"
+    },
+    "error": {
+      "title": "Rezervasyon özeti yüklenemedi",
+      "text": "Bilgileri şu an getiremiyoruz. Lütfen tekrar deneyin.",
+      "retry": "Tekrar Dene"
+    }
   }
 }

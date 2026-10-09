@@ -26,5 +26,37 @@
   },
   "GuaranteeStrip": {
     "text": "This rental is covered by Road Assurance: 24/7 support, towing, replacement car."
+  },
+  "BookingSummary": {
+    "metaTitle": "Booking Summary",
+    "title": "Booking Summary",
+    "intro": "Check everything once more. Nothing is charged until you go to payment.",
+    "tripTitle": "Rental",
+    "pickup": "Pick-up",
+    "dropoff": "Drop-off",
+    "duration": "Length",
+    "days": "{days, plural, one {# day} other {# days}}",
+    "vehicleTitle": "Car",
+    "extrasTitle": "Extras",
+    "noExtras": "No extras selected.",
+    "changeTrip": "Change dates or branch",
+    "changeVehicle": "Change car",
+    "changeExtras": "Change extras",
+    "priceTitle": "Price summary",
+    "vehicleLine": "{brand} {model} · {price} × {days, plural, one {# day} other {# days}}",
+    "total": "Total",
+    "noHidden": "No hidden fees: the total is the sum of the lines above.",
+    "payNote": "You will be asked to sign in before paying; your choices are kept.",
+    "continue": "Continue to Payment",
+    "missing": {
+      "title": "Booking details are missing",
+      "text": "Start again by choosing a car, a branch and dates.",
+      "action": "Search Cars"
+    },
+    "error": {
+      "title": "Booking summary could not be loaded",
+      "text": "We cannot fetch the details right now. Please try again.",
+      "retry": "Try Again"
+    }
   }
 }
