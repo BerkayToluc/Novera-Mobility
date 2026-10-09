@@ -60,6 +60,7 @@ G'nin kararı: arama alanının üstünde iki seçenekli bir anahtar (segmented 
   - Arama formunda **araç seçilmez**; araç, sonuç sayfasında seçilir.
   - Sonuç sayfası (`/araclar`) arama bilgilerini adreste taşır (`?alis=&iade=&baslangic=&bitis=`), böylece paylaşılabilir ve yenilenebilir. Üstte bir arama özeti kalır (bayiler, tarihler); "Aramayı değiştir" ile açılıp düzenlenebilir ve yeniden aranabilir. Her araç fotoğraf, bilgi (koltuk, bavul, vites, yakıt) ve fiyatla (günlük ve toplam) gösterilir. Uygun araç yoksa, arama yapılmamışsa ve veri alınamıyorsa her biri için ayrı bir durum gösterilir.
 - **Kurumsal:** kısa bir teklif ön formu (firma adı, ihtiyaç duyulan araç sayısı, kiralama süresi, araç tipi, iletişim e-postası) → **Teklif İste** → `/kurumsal-teklif` sayfasına bu bilgiler dolu olarak gider. Gerekçe: kurumsal kiralama tarih seçip ödemeyle değil, teklif ve sözleşmeyle ilerler.
+  - Bilgiler adreste taşınır (`?firma=&adet=&sure=&arac=&eposta=`). Not: e-posta adresinin URL'de görünmesi tarayıcı geçmişine ve günlüklere düşer; #32 yapılırken sessionStorage ile taşımak değerlendirilmeli.
 - Seçim URL'de tutulur (`/?tip=kurumsal`) ki link paylaşılınca aynı sekme açılsın.
 
 ### 2.3 Akışlar

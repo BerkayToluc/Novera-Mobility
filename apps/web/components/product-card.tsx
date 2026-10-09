@@ -9,9 +9,11 @@ type ProductCardProps = {
   slug: ProductSlug;
   // The featured product is drawn larger and wider so it reads as the recommended one.
   featured?: boolean;
+  // The heading level depends on where the card sits (a page of its own, or a home section).
+  headingAs?: "h2" | "h3";
 };
 
-export async function ProductCard({ slug, featured = false }: ProductCardProps) {
+export async function ProductCard({ slug, featured = false, headingAs = "h2" }: ProductCardProps) {
   const t = await getTranslations("ProductsPage");
   const title = t(`items.${slug}.title`);
 
@@ -20,7 +22,7 @@ export async function ProductCard({ slug, featured = false }: ProductCardProps) 
       <div className={featured ? "md:max-w-prose" : "flex flex-1 flex-col"}>
         <CardHeader>
           {featured && <ProductBadge>{t("featuredBadge")}</ProductBadge>}
-          <CardTitle as="h2" className={featured ? "text-h2" : undefined}>
+          <CardTitle as={headingAs} className={featured ? "text-h2" : undefined}>
             {title}
           </CardTitle>
           <CardDescription className="text-body">{t(`items.${slug}.summary`)}</CardDescription>

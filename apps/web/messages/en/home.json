@@ -1,0 +1,91 @@
+{
+  "HomePage": {
+    "title": "Rent a Car",
+    "intro": "Choose where to pick up and drop off the car and your dates, and see the cars available at that branch with prices.",
+    "corporateTitle": "Corporate Fleet",
+    "corporateIntro": "Tell us how many cars and for how long, and we will prepare a quote for your company.",
+    "audienceLabel": "Rental type",
+    "audiences": {
+      "bireysel": "Individual",
+      "kurumsal": "Corporate"
+    },
+    "error": {
+      "title": "Branches could not be loaded",
+      "text": "Car search is not available right now. Please try again.",
+      "retry": "Try Again"
+    },
+    "classes": {
+      "title": "Pick the class that suits you",
+      "intro": "From city driving to long trips, a class for every need.",
+      "from": "From {price} / day",
+      "viewAll": "Our Cars",
+      "error": {
+        "title": "Car classes could not be loaded",
+        "text": "We cannot show the classes right now."
+      }
+    },
+    "products": {
+      "title": "Fleet solutions",
+      "intro": "Four products to match your need: you decide the term, the flexibility and the management.",
+      "viewAll": "All Products"
+    },
+    "faq": {
+      "title": "Frequently asked questions",
+      "empty": {
+        "title": "No questions yet",
+        "text": "There are no published questions in this section."
+      },
+      "error": {
+        "title": "Questions could not be loaded",
+        "text": "We cannot show the frequently asked questions right now."
+      }
+    }
+  },
+  "HomeQuote": {
+    "company": "Company name",
+    "count": "Number of cars",
+    "term": "Rental term",
+    "termOption": "{months} months",
+    "vehicleType": "Car type",
+    "types": {
+      "economy": "Economy",
+      "compact": "Compact",
+      "executive": "Executive",
+      "suv": "SUV",
+      "electric": "Electric"
+    },
+    "email": "Contact email",
+    "submit": "Request a Quote",
+    "errors": {
+      "company": "Enter the company name.",
+      "count": "Enter a number from 1 to 9999.",
+      "email": "Enter a valid email address."
+    }
+  },
+  "Guarantee": {
+    "title": "We don't just rent cars, we stand by you on the road",
+    "intro": "If something goes wrong on the road, you don't have to think about what to do.",
+    "steps": {
+      "stranded": {
+        "title": "You are stranded",
+        "text": "Your car stopped halfway."
+      },
+      "sos": {
+        "title": "One tap SOS",
+        "text": "Press SOS in the app and your location reaches us."
+      },
+      "tow": {
+        "title": "The nearest tow is sent",
+        "text": "By GPS, the closest tow truck sets off to you."
+      },
+      "desk": {
+        "title": "Our 24/7 desk calls you",
+        "text": "We follow the situation through with you."
+      },
+      "replacement": {
+        "title": "A replacement car at your door",
+        "text": "If the fault lasts over 24 hours, a replacement car is brought to you."
+      }
+    }
+  }
+}
