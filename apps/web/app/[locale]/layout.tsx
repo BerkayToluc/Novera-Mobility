@@ -18,7 +18,8 @@ export function generateStaticParams() {
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("Metadata");
   return {
-    title: t("title"),
+    // Pages set only their own title; the site name is appended here.
+    title: { default: t("title"), template: `%s | ${t("title")}` },
     description: t("description"),
   };
 }

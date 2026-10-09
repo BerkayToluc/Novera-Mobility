@@ -27,7 +27,7 @@ pnpm --filter @novera/web <script>   # run a script in one workspace
 
 - No raw color, spacing or font values in components. Use design tokens only (defined in `apps/web/app/globals.css`, see SPEC §5).
   Tailwind's default palette, type scale, radii and shadows are disabled; available classes are the semantic ones, e.g. `bg-canvas`, `bg-surface`, `text-fg`, `text-fg-muted`, `bg-primary`, `text-on-primary`, `border-border-strong`, `text-display`/`text-h1`…`text-label`, `rounded-control`/`rounded-card`/`rounded-media`. Breakpoints: base (375), `md:` (768), `xl:` (1280).
-- No hardcoded UI text. Every user-facing string lives in `messages/tr.json` and `messages/en.json`.
+- No hardcoded UI text. Every user-facing string lives in `messages/tr/<feature>.json` and `messages/en/<feature>.json` (one file per feature, registered in `i18n/messages.ts`).
 - Mobile-first. Check every UI change at 375, 768 and 1280 px.
 - Accessibility: WCAG 2.2 AA (contrast, 44px touch targets, visible focus, full keyboard support).
 - Every data-driven view handles loading, empty and error states.
