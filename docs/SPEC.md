@@ -104,7 +104,7 @@ Bunlar sitede **sadece tanıtım içeriği** olarak yer alır, işlevsel olarak 
 
 - **Dil:** Türkçe ana dil; İngilizce v1'de seçenek olarak var (G'nin kararı). Tüm arayüz metinleri baştan çeviri dosyalarından okunur, sayfaya gömülü metin yazılmaz. URL yapısı: `/` Türkçe, `/en/...` İngilizce.
 - **Ton:** Kurumsal ama mesafeli değil. Güven veren, net, abartısız. "Sarsılmaz", "öncü" gibi büyük kelimeler hakkımızda metninde kalabilir; arayüz metinlerinde (buton, hata, form) sade ve kısa dil.
-- **Yazım kuralları:** Buton metinleri fiille başlar ("Araç Ara", "Teklif İste"). Fiyatlar `₺1.250` biçiminde. Tarihler `12 Eki 2026`.
+- **Yazım kuralları:** Buton metinleri fiille başlar ("Araç Ara", "Teklif İste"). Fiyatlar `₺1.250` biçiminde, ondalıksız (İngilizcede `₺1,250`; her iki dilde de ₺ simgesi). API fiyatı kuruş cinsinden tam sayı gönderir (`125000` = ₺1.250), biçimlendirme `lib/price.ts` içindedir. Tarihler `12 Eki 2026`.
 - **Metin bütçesi:** Kart açıklaması en fazla 2 satır (~120 karakter). Ürün/hizmet özeti en fazla 40 kelime; uzunu detay sayfasına.
 - **Sürdürülebilirlik:** Hakkımızda'da ayrı bölüm. Her iddia ölçülebilir olmalı (filodaki elektrikli/hibrit oranı, yıllık CO₂ tasarrufu, geri dönüştürülen lastik sayısı, kağıtsız tutanak). Rakamlar kurgusal ama tutarlı tutulur.
 
