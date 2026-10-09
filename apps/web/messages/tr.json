@@ -88,5 +88,53 @@
     "system": "Sistem",
     "light": "Açık",
     "dark": "Koyu"
+  },
+  "Auth": {
+    "showPassword": "Şifreyi göster",
+    "hidePassword": "Şifreyi gizle",
+    "fields": {
+      "email": "E-posta",
+      "password": "Şifre",
+      "firstName": "Ad",
+      "lastName": "Soyad",
+      "passwordHint": "En az {count} karakter."
+    },
+    "errors": {
+      "required": "Bu alan zorunlu.",
+      "email": "Geçerli bir e-posta adresi girin.",
+      "passwordMin": "Şifre en az {count} karakter olmalı.",
+      "consent": "Devam etmek için aydınlatma metnini onaylamalısınız.",
+      "unavailable": "Giriş hizmeti henüz bağlı değil. Lütfen daha sonra tekrar deneyin.",
+      "generic": "Bir sorun oluştu. Lütfen tekrar deneyin."
+    },
+    "login": {
+      "metaTitle": "Giriş Yap",
+      "title": "Giriş Yap",
+      "subtitle": "Rezervasyonlarınıza ve hesabınıza ulaşın.",
+      "submit": "Giriş Yap",
+      "submitting": "Giriş yapılıyor…",
+      "forgot": "Şifremi unuttum",
+      "noAccount": "Hesabınız yok mu?",
+      "register": "Kayıt Ol"
+    },
+    "register": {
+      "metaTitle": "Kayıt Ol",
+      "title": "Hesap Oluştur",
+      "subtitle": "Rezervasyon yapmak için birkaç bilgi yeterli.",
+      "submit": "Kayıt Ol",
+      "submitting": "Hesap oluşturuluyor…",
+      "consent": "<link>KVKK Aydınlatma Metni</link>'ni okudum ve kabul ediyorum.",
+      "hasAccount": "Zaten hesabınız var mı?",
+      "login": "Giriş Yap"
+    },
+    "forgot": {
+      "metaTitle": "Şifremi Unuttum",
+      "title": "Şifrenizi mi unuttunuz?",
+      "subtitle": "E-posta adresinizi girin, size yenileme bağlantısı gönderelim.",
+      "submit": "Bağlantı Gönder",
+      "submitting": "Gönderiliyor…",
+      "sent": "Bu adres kayıtlıysa {email} adresine bir yenileme bağlantısı gönderdik. Gelen kutunuzu kontrol edin.",
+      "back": "Giriş sayfasına dön"
+    }
   }
 }
