@@ -88,5 +88,69 @@
     "system": "Sistem",
     "light": "Açık",
     "dark": "Koyu"
+  },
+  "ProductsPage": {
+    "metaTitle": "Ürünler",
+    "metaDescription": "Kurumsal filo çözümleri: uzun dönem kiralama, esnek filo, elektrikli filo ve yönetilen filo.",
+    "title": "Filo çözümlerimiz",
+    "intro": "İşinizin temposuna göre dört çözüm. Hangisinin size uyduğundan emin değilseniz kurumsal ekibimiz yönlendirsin.",
+    "featuredBadge": "En çok tercih edilen",
+    "viewDetails": "Detayları Gör",
+    "backToList": "Tüm ürünler",
+    "quoteButton": "Teklif Al",
+    "featuresHeading": "Neler dahil",
+    "idealForHeading": "Kimler için",
+    "ctaTitle": "Bu çözüm için teklif alın",
+    "ctaText": "Araç sayınızı ve süreyi paylaşın, kurumsal ekibimiz size özel teklifle dönsün.",
+    "items": {
+      "uzun-donem": {
+        "title": "Uzun Dönem Filo Kiralama",
+        "summary": "12 ay ve üzeri sözleşmelerle sabit aylık bedel. Bakım, sigorta ve yedek araç dahil; sermaye bağlamadan filonuzu yenileyin.",
+        "description": "Araçları satın almak yerine sözleşme süresince kiralarsınız. Aylık bedel sabittir, bakım ve onarım Novera tarafından yürütülür; sözleşme bitince araçlar yenilenir.",
+        "features": [
+          "Sabit aylık bedel, sürpriz masraf yok",
+          "Periyodik bakım ve lastik değişimi",
+          "Kasko ve trafik sigortası",
+          "Arızada yedek araç"
+        ],
+        "idealFor": "Araç ihtiyacı öngörülebilir olan, bütçesini yıllık planlayan firmalar."
+      },
+      "esnek-filo": {
+        "title": "Esnek Filo",
+        "summary": "Mevsimsel ya da proje bazlı ihtiyaçlar için haftalık ve aylık kiralama. Araç sayısını ihtiyaca göre artırıp azaltın.",
+        "description": "Sezon, kampanya ya da proje döneminde filonuzu büyütür, iş bitince küçültürsünüz. Taahhüt süresi kısadır, teslim ve iade lokasyonunu siz seçersiniz.",
+        "features": [
+          "Haftalık ve aylık kiralama",
+          "Araç sayısını dönem içinde değiştirme",
+          "Farklı şehirde teslim ve iade",
+          "Yol Boyu Güvence kapsamı"
+        ],
+        "idealFor": "Dönemsel yoğunluğu olan, saha ekibini geçici büyüten firmalar."
+      },
+      "elektrikli": {
+        "title": "Elektrikli ve Hibrit Filo",
+        "summary": "Karbon ayak izinizi düşüren elektrikli ve hibrit araçlar. Şarj çözümü ve emisyon raporu hizmete dahil.",
+        "description": "Filonuzun bir kısmını ya da tamamını elektrikli ve hibrit araçlara taşırsınız. Şarj planlaması yapılır, yıllık emisyon tasarrufunuz raporlanır.",
+        "features": [
+          "Elektrikli ve hibrit araç seçenekleri",
+          "Şarj noktası planlama desteği",
+          "Yıllık CO₂ tasarruf raporu",
+          "Bakım ve sigorta dahil"
+        ],
+        "idealFor": "Sürdürülebilirlik hedefi olan ve kurumsal raporlama yapan firmalar."
+      },
+      "yonetilen-filo": {
+        "title": "Yönetilen Filo",
+        "summary": "Araçlar sizde, yönetim bizde. Bakım takibi, ceza ve yakıt yönetimi, sürücü işlemleri tek fatura ve tek muhatapla.",
+        "description": "Mevcut filonuzun operasyonel yükünü devralırız: bakım randevuları, ceza ve geçiş ücretleri, yakıt raporları ve sürücü işlemleri tek panelden izlenir.",
+        "features": [
+          "Tek muhatap, tek aylık fatura",
+          "Bakım ve muayene takibi",
+          "Ceza ve geçiş ücreti yönetimi",
+          "Admin Paneli ile raporlama"
+        ],
+        "idealFor": "Kendi araçları olan ama filo yönetimine zaman ayıramayan firmalar."
+      }
+    }
   }
 }
