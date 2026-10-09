@@ -58,5 +58,49 @@
       "text": "Bilgileri şu an getiremiyoruz. Lütfen tekrar deneyin.",
       "retry": "Tekrar Dene"
     }
+  },
+  "Payment": {
+    "metaTitle": "Ödeme",
+    "title": "Ödeme",
+    "intro": "Rezervasyonunuzu tamamlamak için son adım.",
+    "demoTitle": "Bu bir deneme ödemesidir",
+    "demoText": "Hiçbir tutar çekilmez. Kart bilgileriniz saklanmaz ve sunucuya gönderilmez; gerçek kartınızı girmeyin.",
+    "demoHint": "Deneme kartı: 4242 4242 4242 4242, geçerli bir tarih ve herhangi bir CVC.",
+    "fields": {
+      "holder": "Karttaki isim",
+      "number": "Kart numarası",
+      "expiry": "Son kullanma (AA/YY)",
+      "cvc": "CVC"
+    },
+    "errors": {
+      "holder": "Karttaki ismi yazın.",
+      "number": "Geçerli bir kart numarası yazın.",
+      "expiry": "Geçerli bir son kullanma tarihi yazın (AA/YY).",
+      "cvc": "3 veya 4 haneli CVC yazın.",
+      "unavailable": "Rezervasyon servisi şu an kullanılamıyor. Lütfen daha sonra tekrar deneyin.",
+      "invalid": "Rezervasyon bilgileri geçerli değil. Lütfen aramayı baştan yapın.",
+      "signin": "Devam etmek için giriş yapmanız gerekiyor.",
+      "generic": "Rezervasyon tamamlanamadı. Lütfen tekrar deneyin."
+    },
+    "pay": "Ödemeyi Tamamla",
+    "paying": "İşleniyor",
+    "summaryTitle": "Rezervasyonunuz",
+    "total": "Toplam",
+    "edit": "Özete dön"
+  },
+  "Confirmation": {
+    "metaTitle": "Rezervasyon Onayı",
+    "title": "Rezervasyonunuz alındı",
+    "text": "Deneme ödemesi tamamlandı; gerçek bir tutar çekilmedi.",
+    "number": "Rezervasyon numaranız",
+    "rentalTitle": "Kiralama",
+    "total": "Toplam",
+    "bookings": "Rezervasyonlarım",
+    "home": "Ana Sayfaya Dön",
+    "missing": {
+      "title": "Onaylanacak rezervasyon bulunamadı",
+      "text": "Bu sayfaya rezervasyon yaptıktan sonra gelinir.",
+      "action": "Araç Ara"
+    }
   }
 }

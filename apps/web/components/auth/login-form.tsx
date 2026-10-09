@@ -8,14 +8,16 @@ import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
-import { Link } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import { AuthUnavailableError, login } from "@/lib/auth-client";
 import { loginSchema, type LoginInput } from "@/lib/auth-schemas";
 import { FormError } from "./form-error";
 import { useAuthErrorMessages } from "./use-auth-messages";
 
-export function LoginForm() {
+// `next`: the booking to go back to after signing in (the payment page asked for it).
+export function LoginForm({ next }: { next?: Record<string, string> }) {
   const t = useTranslations("Auth");
+  const router = useRouter();
   const messages = useAuthErrorMessages();
   const schema = useMemo(() => loginSchema(messages), [messages]);
   const [formError, setFormError] = useState<string | null>(null);
@@ -36,6 +38,7 @@ export function LoginForm() {
     setFormError(null);
     try {
       await login(values);
+      if (next) router.push({ pathname: "/odeme", query: next });
     } catch (error) {
       setFormError(error instanceof AuthUnavailableError ? t("errors.unavailable") : t("errors.generic"));
     }
