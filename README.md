@@ -1,18 +1,18 @@
 # Novera Mobility
 
-Website for Novera Mobility, a fictional corporate and individual car rental company founded in 2003. Built as a learning project by a two-person team working asynchronously.
+Website for Novera Mobility, a fictional corporate and individual car rental company founded in 2012. Built as a learning project by a two-person team working asynchronously.
 
 ## Repository layout
 
 | Path | What |
 |---|---|
 | `apps/web` | Frontend: Next.js (App Router), TypeScript, Tailwind CSS |
-| `apps/api` | Backend: NestJS, PostgreSQL, Prisma (not set up yet) |
+| `apps/api` | Backend: NestJS, PostgreSQL, Prisma |
 | `docs/` | SPEC (product), ARCHITECTURE (decisions), BACKLOG (work items) |
 
 ## Getting started
 
-Requirements: Node.js 22 or newer (see `.nvmrc`) and pnpm (`corepack enable` installs the pinned version).
+Requirements: Node.js 24 (see `.nvmrc`) and pnpm (`corepack enable` installs the pinned version).
 
 ```bash
 pnpm install
