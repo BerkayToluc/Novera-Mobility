@@ -1,0 +1,30 @@
+{
+  "VehicleDetail": {
+    "back": "Back to results",
+    "backToSearch": "Search cars",
+    "year": "{year} model",
+    "branch": "Branch: {branch}",
+    "extrasTitle": "Extras",
+    "extrasIntro": "Add what you need; your choices show in the total right away.",
+    "perDay": "{price} / day",
+    "fixed": "{price} one-time",
+    "summaryTitle": "Price summary",
+    "vehicleLine": "{brand} {model} · {days, plural, one {# day} other {# days}}",
+    "total": "Total",
+    "noHidden": "No hidden fees: the total is the sum of the lines above.",
+    "continue": "Continue to Booking",
+    "needDates": {
+      "title": "Pick dates to see the total",
+      "text": "The daily price is below. The total is worked out once you choose dates.",
+      "action": "Search Cars"
+    },
+    "error": {
+      "title": "Car details could not be loaded",
+      "text": "We cannot show this car right now. Please try again.",
+      "retry": "Try Again"
+    }
+  },
+  "GuaranteeStrip": {
+    "text": "This rental is covered by Road Assurance: 24/7 support, towing, replacement car."
+  }
+}

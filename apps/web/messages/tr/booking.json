@@ -1,0 +1,30 @@
+{
+  "VehicleDetail": {
+    "back": "Sonuçlara dön",
+    "backToSearch": "Araç ara",
+    "year": "{year} model",
+    "branch": "Bayi: {branch}",
+    "extrasTitle": "Ek hizmetler",
+    "extrasIntro": "İsterseniz ekleyin; seçtikleriniz toplama hemen yansır.",
+    "perDay": "{price} / gün",
+    "fixed": "{price} tek seferlik",
+    "summaryTitle": "Fiyat özeti",
+    "vehicleLine": "{brand} {model} · {days, plural, one {# gün} other {# gün}}",
+    "total": "Toplam",
+    "noHidden": "Gizli ücret yok: toplam, yukarıdaki kalemlerin toplamıdır.",
+    "continue": "Rezervasyona Devam Et",
+    "needDates": {
+      "title": "Toplam için tarih seçin",
+      "text": "Günlük fiyat aşağıda. Tarihleri seçtiğinizde toplam hesaplanır.",
+      "action": "Araç Ara"
+    },
+    "error": {
+      "title": "Araç bilgileri yüklenemedi",
+      "text": "Bu aracı şu an gösteremiyoruz. Lütfen tekrar deneyin.",
+      "retry": "Tekrar Dene"
+    }
+  },
+  "GuaranteeStrip": {
+    "text": "Bu kiralama Yol Boyu Güvence kapsamında: 7/24 destek, çekici, yedek araç."
+  }
+}
