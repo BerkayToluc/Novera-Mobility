@@ -71,6 +71,10 @@
         "cancel": "Vazgeç",
         "confirm": "Evet, Hesabımı Sil",
         "deleting": "Siliniyor…"
+      },
+      "currency": {
+        "title": "Para birimi",
+        "text": "Fiyatların hangi para biriminde gösterileceğini seçin. Tutarlar günlük kurla çevrilir."
       }
     }
   }

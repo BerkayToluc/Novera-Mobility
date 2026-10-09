@@ -1,5 +1,7 @@
+import type { Money } from "./currency";
+
 // Interim shape, mirroring the Prisma model; BACKLOG #12 replaces it with the type
-// generated from openapi.yaml. Prices are whole kuruş (125000 = ₺1.250), as agreed.
+// generated from openapi.yaml. Prices are a Money: whole kuruş or cents plus the currency.
 export type ReservationStatus = "CONFIRMED" | "CANCELLED";
 
 export type Reservation = {
@@ -9,7 +11,7 @@ export type Reservation = {
   startAt: string;
   endAt: string;
   days: number;
-  totalPrice: number;
+  totalPrice: Money;
   vehicle: { brand: string; model: string };
   pickupCity: string;
   returnCity: string;

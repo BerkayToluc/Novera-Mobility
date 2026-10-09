@@ -107,6 +107,11 @@
             "duration": "1 yıl."
           },
           {
+            "name": "novera-currency",
+            "purpose": "Seçtiğiniz para birimini (TL, euro veya dolar) hatırlar. Seçim yapmazsanız hiç oluşturulmaz.",
+            "duration": "1 yıl."
+          },
+          {
             "name": "Oturum çerezi",
             "purpose": "Giriş yaptığınızda oturumunuzu sürdürür. Yalnızca hesabınızı kullandığınızda oluşturulur.",
             "duration": "Oturum süresince."

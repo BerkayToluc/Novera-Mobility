@@ -1,8 +1,10 @@
 import { getTranslations } from "next-intl/server";
+import { CurrencySwitcher } from "@/components/currency-switcher";
 import { LocaleSwitcher } from "@/components/locale-switcher";
 import { Logo } from "@/components/logo";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { Link } from "@/i18n/navigation";
+import { getCurrency } from "@/lib/get-currency";
 import { getTheme } from "@/lib/get-theme";
 import { NAV_ITEMS } from "./nav-items";
 
@@ -18,6 +20,7 @@ export async function SiteFooter() {
   const t = await getTranslations("Footer");
   const nav = await getTranslations("Header");
   const theme = await getTheme();
+  const currency = await getCurrency();
 
   return (
     <footer className="bg-band text-on-band">
@@ -64,6 +67,7 @@ export async function SiteFooter() {
           <h2 className="text-label text-on-band">{t("preferences")}</h2>
           <LocaleSwitcher tone="band" />
           <ThemeSwitcher initialTheme={theme} tone="band" />
+          <CurrencySwitcher initialCurrency={currency} tone="band" />
         </div>
       </div>
 
