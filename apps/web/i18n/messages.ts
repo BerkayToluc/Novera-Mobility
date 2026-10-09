@@ -13,6 +13,7 @@ import trFleet from "../messages/tr/fleet.json";
 import trLegal from "../messages/tr/legal.json";
 import trProducts from "../messages/tr/products.json";
 import trProfile from "../messages/tr/profile.json";
+import trRental from "../messages/tr/rental.json";
 import trServices from "../messages/tr/services.json";
 import trSite from "../messages/tr/site.json";
 import trUi from "../messages/tr/ui.json";
@@ -23,6 +24,7 @@ import enFleet from "../messages/en/fleet.json";
 import enLegal from "../messages/en/legal.json";
 import enProducts from "../messages/en/products.json";
 import enProfile from "../messages/en/profile.json";
+import enRental from "../messages/en/rental.json";
 import enServices from "../messages/en/services.json";
 import enSite from "../messages/en/site.json";
 import enUi from "../messages/en/ui.json";
@@ -36,6 +38,7 @@ export const tr = {
   ...trLegal,
   ...trProducts,
   ...trProfile,
+  ...trRental,
   ...trServices,
   ...trSite,
   ...trUi,
@@ -49,6 +52,7 @@ export const en: typeof tr = {
   ...enLegal,
   ...enProducts,
   ...enProfile,
+  ...enRental,
   ...enServices,
   ...enSite,
   ...enUi,
