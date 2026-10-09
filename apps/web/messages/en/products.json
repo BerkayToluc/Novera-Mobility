@@ -1,0 +1,66 @@
+{
+  "ProductsPage": {
+    "metaTitle": "Products",
+    "metaDescription": "Corporate fleet solutions: long-term rental, flexible fleet, electric fleet and managed fleet.",
+    "title": "Our fleet solutions",
+    "intro": "Four solutions for the pace of your business. If you are not sure which fits, our corporate team will point you in the right direction.",
+    "featuredBadge": "Most popular",
+    "viewDetails": "View Details",
+    "backToList": "All products",
+    "quoteButton": "Get a Quote",
+    "featuresHeading": "What is included",
+    "idealForHeading": "Who it is for",
+    "ctaTitle": "Get a quote for this solution",
+    "ctaText": "Share your fleet size and the period, and our corporate team will return with a tailored quote.",
+    "items": {
+      "uzun-donem": {
+        "title": "Long-Term Fleet Rental",
+        "summary": "A fixed monthly fee on contracts of 12 months or more. Maintenance, insurance and a replacement car included; renew your fleet without tying up capital.",
+        "description": "Instead of buying cars you rent them for the length of the contract. The monthly fee is fixed, Novera takes care of maintenance and repairs, and the cars are renewed when the contract ends.",
+        "features": [
+          "Fixed monthly fee, no surprise costs",
+          "Scheduled maintenance and tyre changes",
+          "Comprehensive and traffic insurance",
+          "Replacement car after a breakdown"
+        ],
+        "idealFor": "Companies whose car needs are predictable and who plan their budget yearly."
+      },
+      "esnek-filo": {
+        "title": "Flexible Fleet",
+        "summary": "Weekly and monthly rental for seasonal or project-based needs. Scale the number of cars up or down as you need.",
+        "description": "Grow your fleet for a season, a campaign or a project and shrink it when the work ends. Commitments are short and you choose the hand-over and return location.",
+        "features": [
+          "Weekly and monthly rental",
+          "Change the number of cars during the period",
+          "Hand-over and return in a different city",
+          "Road Assurance cover"
+        ],
+        "idealFor": "Companies with seasonal peaks or a field team that grows temporarily."
+      },
+      "elektrikli": {
+        "title": "Electric and Hybrid Fleet",
+        "summary": "Electric and hybrid cars that lower your carbon footprint. A charging solution and an emissions report are part of the service.",
+        "description": "Move part or all of your fleet to electric and hybrid cars. We plan the charging and report your yearly emissions savings.",
+        "features": [
+          "Electric and hybrid car options",
+          "Help planning charging points",
+          "Yearly CO₂ savings report",
+          "Maintenance and insurance included"
+        ],
+        "idealFor": "Companies with a sustainability target and corporate reporting."
+      },
+      "yonetilen-filo": {
+        "title": "Managed Fleet",
+        "summary": "The cars stay with you, the management is ours. Maintenance tracking, fines and fuel management and driver administration with one invoice and one contact.",
+        "description": "We take over the operational load of your existing fleet: service appointments, fines and tolls, fuel reports and driver administration are tracked from one panel.",
+        "features": [
+          "One contact, one monthly invoice",
+          "Maintenance and inspection tracking",
+          "Fine and toll management",
+          "Reporting through the Admin Panel"
+        ],
+        "idealFor": "Companies that own their cars but have no time for fleet management."
+      }
+    }
+  }
+}

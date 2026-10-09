@@ -28,10 +28,13 @@ export const routing = defineRouting({
     "/kayit": { tr: "/kayit", en: "/register" },
     "/sifre-sifirla": { tr: "/sifre-sifirla", en: "/reset-password" },
     "/profil": { tr: "/profil", en: "/profile" },
+    "/profil/rezervasyonlar": { tr: "/profil/rezervasyonlar", en: "/profile/bookings" },
+    "/profil/ayarlar": { tr: "/profil/ayarlar", en: "/profile/settings" },
     "/kvkk": { tr: "/kvkk", en: "/privacy-notice" },
     "/cerez-politikasi": { tr: "/cerez-politikasi", en: "/cookie-policy" },
     "/kiralama-kosullari": { tr: "/kiralama-kosullari", en: "/rental-terms" },
-    // Development-only gallery (404 in production); not translated.
+    // Development-only galleries (404 in production); not translated.
     "/dev/components": "/dev/components",
+    "/dev/profile": "/dev/profile",
   },
 });
