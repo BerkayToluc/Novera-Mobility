@@ -1,0 +1,77 @@
+{
+  "Profile": {
+    "title": "My Profile",
+    "loading": "Loading",
+    "nav": {
+      "label": "Profile sections",
+      "account": "My Account",
+      "bookings": "My Bookings",
+      "settings": "Settings"
+    },
+    "signedOut": {
+      "title": "You need to sign in",
+      "text": "Sign in to see your account and your bookings.",
+      "login": "Log In"
+    },
+    "error": {
+      "title": "Something went wrong",
+      "text": "This page could not be loaded. Please try again.",
+      "retry": "Try Again"
+    },
+    "account": {
+      "title": "My Account",
+      "intro": "You can update your name here.",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "email": "Email",
+      "emailNote": "The email address identifies your account and cannot be changed.",
+      "save": "Save",
+      "saving": "Saving…",
+      "saved": "Your details have been saved."
+    },
+    "bookings": {
+      "title": "My Bookings",
+      "intro": "Your past and upcoming rentals.",
+      "number": "Booking no.",
+      "dates": "Dates",
+      "location": "Location",
+      "total": "Total",
+      "days": "{count, plural, one {# day} other {# days}}",
+      "status": {
+        "CONFIRMED": "Confirmed",
+        "CANCELLED": "Cancelled"
+      },
+      "empty": {
+        "title": "You have no bookings yet",
+        "text": "Make your first rental and your bookings will appear here.",
+        "cta": "Search Cars"
+      },
+      "error": {
+        "title": "Bookings could not be loaded",
+        "text": "We cannot reach your bookings right now. Please try again.",
+        "retry": "Try Again"
+      }
+    },
+    "settings": {
+      "title": "Settings",
+      "language": {
+        "title": "Language",
+        "text": "Choose the language the site is shown in."
+      },
+      "theme": {
+        "title": "Appearance",
+        "text": "Light, dark, or the theme that follows your device."
+      },
+      "danger": {
+        "title": "Delete account",
+        "text": "Your account is deleted permanently. Past booking records are kept anonymously.",
+        "delete": "Delete My Account",
+        "confirmTitle": "Delete your account?",
+        "confirmText": "This cannot be undone. You will not be able to sign in to this account again.",
+        "cancel": "Cancel",
+        "confirm": "Yes, Delete My Account",
+        "deleting": "Deleting…"
+      }
+    }
+  }
+}

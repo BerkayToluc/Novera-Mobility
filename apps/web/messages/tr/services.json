@@ -1,0 +1,59 @@
+{
+  "ServicesPage": {
+    "metaTitle": "Hizmetler",
+    "metaDescription": "Yol Boyu Güvence, canlı takip, dijital hasar tutanağı ve esnek teslim: Novera Mobility hizmetleri.",
+    "title": "Hizmetlerimiz",
+    "intro": "Araç kiralamanın ötesinde: yolda, filoda ve masa başında yanınızdayız.",
+    "listLabel": "Hizmet listesi",
+    "items": [
+      {
+        "title": "Yol Boyu Güvence",
+        "summary": "Yolda kaldığınızda tek dokunuşla destek isteyin. 7/24 operasyon masası sizi arar, en yakın çekici yönlendirilir; arıza 24 saati aşarsa yedek araç kapınıza gelir.",
+        "points": [
+          "7/24 operasyon masası",
+          "Çekici yönlendirme",
+          "24 saati aşan arızada yedek araç"
+        ]
+      },
+      {
+        "title": "Canlı Takip",
+        "summary": "Filodaki her aracın konumu ve durumu GPS ve telematik verisiyle anlık izlenir. Rota, kullanım ve bakım ihtiyacı tek ekranda görünür.",
+        "points": [
+          "Anlık konum",
+          "Kullanım ve rota raporları",
+          "Bakım hatırlatmaları"
+        ]
+      },
+      {
+        "title": "Novera Driver App",
+        "summary": "Sürücüler araç teslimini, yakıt durumunu ve hasar tutanağını telefondan tamamlar. Fotoğraflı dijital tutanak, kağıt işini ve bekleme süresini ortadan kaldırır.",
+        "points": [
+          "Dijital hasar tutanağı",
+          "Fotoğraflı teslim kaydı",
+          "Kağıtsız süreç"
+        ]
+      },
+      {
+        "title": "Novera Admin Paneli",
+        "summary": "Filo yöneticileri araçları, sürücüleri, rezervasyonları ve faturaları tek panelden yönetir; raporlarla maliyeti ve kullanımı izler.",
+        "points": [
+          "Filo ve sürücü yönetimi",
+          "Maliyet raporları",
+          "Sözleşme ve fatura takibi"
+        ]
+      },
+      {
+        "title": "Esnek Teslim ve İade",
+        "summary": "Aracı bulunduğunuz yerde teslim alın, farklı bir şehirde bırakın. Alış ve iade lokasyonunu, tarihini ve saatini rezervasyon sırasında siz seçersiniz.",
+        "points": [
+          "Farklı lokasyona iade",
+          "Yarım saatlik teslim saatleri",
+          "Şeffaf fiyat"
+        ]
+      }
+    ],
+    "ctaTitle": "Filonuz için size özel çözüm",
+    "ctaText": "İhtiyacınızı anlatın, kurumsal ekibimiz teklifle dönsün.",
+    "ctaButton": "Teklif İste"
+  }
+}
