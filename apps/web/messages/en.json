@@ -157,5 +157,62 @@
     "ctaTitle": "Would you like to work with us?",
     "ctaText": "Get in touch with our team for any question or fleet need.",
     "ctaButton": "Contact Us"
+  },
+  "ServicesPage": {
+    "metaTitle": "Services",
+    "metaDescription": "Road Assurance, live tracking, digital damage reports and flexible hand-over: Novera Mobility services.",
+    "title": "Our Services",
+    "intro": "Beyond renting a car: we stand by you on the road, across the fleet and at your desk.",
+    "listLabel": "Service list",
+    "items": [
+      {
+        "title": "Road Assurance",
+        "summary": "Ask for help with one tap if you are stranded. A 24/7 operations desk calls you back, the nearest tow truck is dispatched, and if a breakdown lasts over 24 hours a replacement car comes to your door.",
+        "points": [
+          "24/7 operations desk",
+          "Tow truck dispatch",
+          "Replacement car after 24 hours"
+        ]
+      },
+      {
+        "title": "Live Tracking",
+        "summary": "The position and status of every car in the fleet is followed in real time through GPS and telematics. Routes, usage and maintenance needs appear on one screen.",
+        "points": [
+          "Real-time position",
+          "Usage and route reports",
+          "Maintenance reminders"
+        ]
+      },
+      {
+        "title": "Novera Driver App",
+        "summary": "Drivers complete hand-over, fuel level and the damage report from their phone. A digital report with photos removes the paperwork and the waiting.",
+        "points": [
+          "Digital damage report",
+          "Photo hand-over record",
+          "Paperless process"
+        ]
+      },
+      {
+        "title": "Novera Admin Panel",
+        "summary": "Fleet managers handle cars, drivers, bookings and invoices from one panel, and follow cost and usage through reports.",
+        "points": [
+          "Fleet and driver management",
+          "Cost reports",
+          "Contract and invoice tracking"
+        ]
+      },
+      {
+        "title": "Flexible Pick-up and Return",
+        "summary": "Collect the car where you are and leave it in another city. You choose the pick-up and return location, date and time while booking.",
+        "points": [
+          "Return to a different location",
+          "Half-hour hand-over times",
+          "Transparent pricing"
+        ]
+      }
+    ],
+    "ctaTitle": "A solution made for your fleet",
+    "ctaText": "Tell us what you need and our corporate team will come back with a quote.",
+    "ctaButton": "Request Quote"
   }
 }
