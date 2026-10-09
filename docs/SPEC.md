@@ -23,7 +23,8 @@
 | Sayfa | Yol (TR) | Yol (EN) | Not |
 |---|---|---|---|
 | Ana sayfa (Araç Kirala) | `/` | `/en` | Bireysel / Kurumsal sekmeli arama alanı |
-| Araç listesi | `/araclar` | `/en/cars` | Arama sonuçları + filtre |
+| Araç listesi | `/araclar` | `/en/cars` | Arama sonuçları: seçilen bayide ve tarihlerde uygun araçlar; fotoğraf, bilgi ve fiyatla. Üstte arama özeti kalır, değiştirilip yeniden aranabilir |
+| Araçlarımız | `/araclarimiz` | `/en/our-cars` | Filodaki tüm marka ve modeller, sınıfa göre, fotoğraf ve bilgiyle; tarihten bağımsız katalog |
 | Araç detay | `/araclar/:slug` | `/en/cars/:slug` | Özellikler, fiyat, ek hizmet seçimi |
 | Rezervasyon özeti | `/rezervasyon` | `/en/booking` | Tarih, lokasyon, ek hizmetler, toplam |
 | Ödeme (sahte) | `/odeme` | `/en/payment` | Gerçek ödeme alınmaz |
@@ -74,12 +75,12 @@ Ana sayfa (Kurumsal) veya Ürün detay → Teklif formu → "Talebiniz alındı"
 ### 2.4 Navigasyon
 
 ```
-Masaüstü: [Logo] Araç Kirala · Ürünler · Hizmetler · Hakkımızda · İletişim               [Profil]
+Masaüstü: [Logo] Araç Kirala · Araçlarımız · Ürünler · Hizmetler · Hakkımızda · İletişim   [Profil]
 Mobil:    [Logo]                                                   [Profil] [☰]
 ```
 
 - Navbar'da ayrı "Kurumsal Teklif" linki yok (G'nin kararı); kurumsal giriş noktası ana sayfadaki anahtar ve ürün sayfaları.
-- Hamburger = site gezintisi (sadece mobil). Profil menüsü = hesap (her ekranda).
+- Hamburger = site gezintisi. Altı bağlantı 1280px altında yan yana sığmadığı için hamburger mobilde ve tablette görünür, satır içi menü 1280px ve üstünde. Profil menüsü = hesap (her ekranda).
 - Giriş yapılmamışsa Profil yerine "Giriş Yap".
 - Dil (TR/EN), tema (açık/koyu) ve para birimi (TRY/EUR/USD) seçimi footer'da da bulunur; giriş yapan kullanıcıda tercih hesaba kaydedilir. Tutarlar günlük kurla çevrilir (ARCHITECTURE ADR-15); ödeme sahte olduğu için hangi para birimi seçilirse seçilsin para alınmaz.
 

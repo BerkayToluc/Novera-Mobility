@@ -1,0 +1,35 @@
+{
+  "Vehicle": {
+    "loading": "Loading cars",
+    "seats": "{count} seats",
+    "bags": "{count} bags",
+    "transmission": {
+      "MANUAL": "Manual",
+      "AUTOMATIC": "Automatic"
+    },
+    "fuel": {
+      "PETROL": "Petrol",
+      "DIESEL": "Diesel",
+      "HYBRID": "Hybrid",
+      "ELECTRIC": "Electric"
+    },
+    "perDay": "{price} / day",
+    "fromPerDay": "from {price} / day",
+    "total": "{days, plural, one {# day} other {# days}} total {price}"
+  },
+  "FleetPage": {
+    "metaTitle": "Our Cars",
+    "metaDescription": "Every make and model in the Novera Mobility fleet: economy, compact, SUV, executive and electric cars.",
+    "title": "Our Cars",
+    "intro": "Every make and model in our fleet, by class, starting from the lowest price.",
+    "branches": "{count, plural, one {at # branch} other {at # branches}}",
+    "error": {
+      "title": "Cars could not be loaded",
+      "text": "We cannot show our fleet right now. Please try again.",
+      "retry": "Try Again"
+    },
+    "ctaTitle": "Found a car you like?",
+    "ctaText": "Choose your location and dates to see the cars available at that branch, with prices.",
+    "ctaButton": "Rent a Car"
+  }
+}

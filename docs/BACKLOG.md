@@ -91,6 +91,7 @@ Sonradan alınan kararlardan doğan işler (ARCHITECTURE ADR-14 ile ADR-17). Iss
 | Y5 | Ürün ve hizmet sayfalarını API'ye bağla (`/products`, `/services`) | FE | 12, 33 | Metinler API'den geliyor, yükleniyor/boş/hata durumları var |
 | Y6 | Backend çerez ayarları: `httpOnly`, `Secure`, `SameSite=Lax`; route'lar `/api` öneksiz | BE | 25 | Proxy üzerinden giriş yapılıp oturum sürüyor |
 | Y7 | Tarih ve saat dilimini `Europe/Istanbul`'a sabitle | FE | 8 | Aynı rezervasyon her ortamda aynı yazılıyor |
+| Y8 | Araçlarımız sayfası (`/araclarimiz`) ve menü öğesi; araç kartı, yer tutucu görsel, örnek veri katmanı (`USE_MOCKS=1`) | FE | 10 | Tüm marka ve modeller sınıfa göre listeleniyor, fiyat seçilen para biriminde |
 
 ---
 

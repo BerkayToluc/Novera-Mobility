@@ -13,10 +13,10 @@ export async function SiteHeader() {
   return (
     <header className="border-b border-border bg-canvas">
       <div className="mx-auto flex h-16 max-w-content items-center gap-4 px-4 md:h-20 md:px-8">
-        <Link href="/" aria-label={t("homeLabel")} className="inline-flex min-h-11 items-center">
+        <Link href="/" aria-label={t("homeLabel")} className="inline-flex min-h-11 shrink-0 items-center">
           <Logo className="h-9 w-auto" />
         </Link>
-        <MainNav label={t("navLabel")} className="ml-2 hidden md:block xl:ml-8" />
+        <MainNav label={t("navLabel")} className="ml-2 hidden xl:block xl:ml-8" />
         <div className="ml-auto flex items-center gap-2">
           {/* No session exists yet (BACKLOG #23/#25), so this is always "Log in"; it becomes the profile menu with auth. */}
           <Button asChild variant="outline">
