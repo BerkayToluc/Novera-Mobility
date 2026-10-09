@@ -81,7 +81,7 @@ Mobil:    [Logo]                                                   [Profil] [☰
 - Navbar'da ayrı "Kurumsal Teklif" linki yok (G'nin kararı); kurumsal giriş noktası ana sayfadaki anahtar ve ürün sayfaları.
 - Hamburger = site gezintisi (sadece mobil). Profil menüsü = hesap (her ekranda).
 - Giriş yapılmamışsa Profil yerine "Giriş Yap".
-- Dil (TR/EN) ve tema (açık/koyu) seçimi footer'da da bulunur; giriş yapan kullanıcıda tercih hesaba kaydedilir.
+- Dil (TR/EN), tema (açık/koyu) ve para birimi (TRY/EUR/USD) seçimi footer'da da bulunur; giriş yapan kullanıcıda tercih hesaba kaydedilir. Tutarlar günlük kurla çevrilir (ARCHITECTURE ADR-15); ödeme sahte olduğu için hangi para birimi seçilirse seçilsin para alınmaz.
 
 ---
 
@@ -226,7 +226,9 @@ WCAG 2.2 AA. Metin kontrastı en az 4.5:1, dokunma hedefi en az 44×44px, görü
 
 Ayrıntılı API kontratı ayrı belgede yazılacak. Temel varlıklar:
 
-`User`, `Branch` (bayi: ad, şehir, adres, koordinat, telefon, e-posta, çalışma saatleri), `VehicleClass`, `Vehicle`, `Extra` (ek hizmet: çocuk koltuğu, ek sürücü vb.), `Reservation`, `QuoteRequest`, `FaqItem`, `Product`, `Service`.
+`User`, `Branch` (bayi: ad, şehir, adres, koordinat, telefon, e-posta, çalışma saatleri), `VehicleClass`, `Vehicle`, `Extra` (ek hizmet: çocuk koltuğu, ek sürücü vb.), `Reservation`, `QuoteRequest`, `FaqItem`, `Product`, `Service`, `ExchangeRate` (kur: para birimi, TRY'ye oran, güncellenme zamanı).
+
+Ürün ve hizmet içeriği API'den gelir, iki dilli alanlarla (ADR-17). Tutarlar `{ amount, currency }` olarak, para biriminin alt birimi cinsinden tam sayıyla taşınır (ADR-15). Zamanlar ISO 8601 UTC'dir, ekranda `Europe/Istanbul` ile gösterilir (ADR-16).
 
 ---
 
