@@ -1,0 +1,41 @@
+{
+  "ContactPage": {
+    "metaTitle": "Contact",
+    "metaDescription": "Find Novera Mobility branches on the map: address, opening hours, phone and directions.",
+    "title": "Contact",
+    "intro": "Search for the nearest branch by city or branch name and see its address, opening hours and phone.",
+    "searchLabel": "Search city or branch",
+    "searchPlaceholder": "e.g. Izmir",
+    "viewLabel": "View",
+    "views": {
+      "list": "List",
+      "map": "Map"
+    },
+    "count": "{count, plural, one {# branch} other {# branches}}",
+    "mapUnavailable": "The map cannot load right now; you can still see the branches in the list.",
+    "noResults": {
+      "title": "No branch matches your search",
+      "text": "Try another city or branch name.",
+      "clear": "Clear Search"
+    },
+    "error": {
+      "title": "Branches could not be loaded",
+      "text": "We cannot show the branch list right now. Please try again.",
+      "retry": "Try Again"
+    },
+    "card": {
+      "hours": "Opening hours",
+      "weekdays": "Weekdays",
+      "saturday": "Saturday",
+      "sunday": "Sunday",
+      "closed": "Closed",
+      "allDay": "Open 24 hours",
+      "range": "{open} – {close}",
+      "call": "Call: {phone}",
+      "email": "Send an email",
+      "directions": "Get directions",
+      "newTab": "(opens in a new tab)",
+      "showOnMap": "Show on map"
+    }
+  }
+}
