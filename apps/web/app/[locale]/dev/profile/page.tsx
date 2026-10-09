@@ -17,8 +17,9 @@ const RESERVATIONS: Reservation[] = [
     id: "1",
     number: "NVR-2026-00123",
     status: "CONFIRMED",
-    startAt: "2026-10-12T10:00:00Z",
-    endAt: "2026-10-15T10:00:00Z",
+    // 21:30 UTC is already the next day in Istanbul (UTC+3) but not in Warsaw (UTC+2) or UTC: it must read "12 Eki", which proves the configured zone is used and not the server one.
+    startAt: "2026-10-11T21:30:00Z",
+    endAt: "2026-10-14T21:30:00Z",
     days: 3,
     totalPrice: 375000,
     vehicle: { brand: "Renault", model: "Clio" },

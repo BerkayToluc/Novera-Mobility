@@ -20,7 +20,7 @@ export async function ReservationList({ reservations }: { reservations: Reservat
   }
 
   const date = (value: string) =>
-    format.dateTime(new Date(value), { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
+    format.dateTime(new Date(value), { day: "numeric", month: "short", year: "numeric" });
 
   return (
     <ul className="flex flex-col gap-4">
