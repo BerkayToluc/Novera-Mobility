@@ -1,0 +1,71 @@
+{
+  "AboutPage": {
+    "metaTitle": "About Us",
+    "metaDescription": "Novera Mobility: we do not just rent cars, we stand by you for the whole journey. Our story, our numbers and our sustainability targets.",
+    "title": "About Us",
+    "statement": "We do not just rent cars, we stand by you for the whole journey.",
+    "intro": "Novera Mobility was founded so that everyone, from individual drivers to large fleets, can travel with peace of mind. With an unshakable approach to service we do not stop at handing over the keys; we stay with you to the end of the road.",
+    "missionTitle": "Our mission",
+    "mission": "To make mobility safe, transparent and sustainable: a clear price on every rental, 24/7 support and cars that respect the environment.",
+    "visionTitle": "Our vision",
+    "vision": "To become the most trusted name in corporate and personal mobility in Turkey, and to lead the way in turning fleets green.",
+    "statsLabel": "Novera in numbers",
+    "stats": {
+      "years": "years of experience",
+      "cities": "cities with a branch",
+      "fleet": "cars in the fleet",
+      "clients": "corporate clients"
+    },
+    "timelineTitle": "Our story",
+    "timeline": {
+      "founded": {
+        "title": "Founded",
+        "text": "Novera Mobility set out in Istanbul with a small fleet of cars."
+      },
+      "corporate": {
+        "title": "First corporate fleet",
+        "text": "We began serving our first corporate clients with long-term fleet rental."
+      },
+      "assurance": {
+        "title": "Road Assurance",
+        "text": "We extended the 24/7 operations desk, tow truck dispatch and replacement car promise to every rental."
+      },
+      "digital": {
+        "title": "Digital damage report",
+        "text": "With the Novera Driver App we moved to digital reports with photos; most paperwork is gone."
+      },
+      "electric": {
+        "title": "Electric fleet",
+        "text": "We added our first electric and hybrid cars to the fleet and started charging planning support."
+      },
+      "expansion": {
+        "title": "In 15 cities",
+        "text": "We grew our branch network to 15 cities and doubled the number of corporate clients."
+      }
+    },
+    "sustainabilityTitle": "Sustainability",
+    "sustainabilityIntro": "Making a promise is easy, measuring it is hard. So we tie every claim to a number and re-measure it the same way every year.",
+    "sustainabilityNote": "Figures are 2025 data. This site is a fictional learning project; the values are examples.",
+    "claims": {
+      "ev": {
+        "label": "of the fleet is electric or hybrid",
+        "detail": "About 760 of the 4,200 cars in the fleet are electric or hybrid."
+      },
+      "co2": {
+        "label": "tonnes of CO₂ saved a year",
+        "detail": "The emissions difference of our electric and hybrid cars compared with similar diesel ones."
+      },
+      "tyres": {
+        "label": "tyres recycled",
+        "detail": "Tyres at the end of their life were put back into use through our recycling partners."
+      },
+      "paperless": {
+        "label": "of reports are paperless",
+        "detail": "Almost all hand-over and damage reports are issued digitally through the Driver App."
+      }
+    },
+    "ctaTitle": "Would you like to work with us?",
+    "ctaText": "Get in touch with our team for any question or fleet need.",
+    "ctaButton": "Contact Us"
+  }
+}
