@@ -1,64 +1,97 @@
 # Proje durumu
 
-Son güncelleme: 2026-10-09. Bu belge bir anlık görüntüdür; kalıcı kararlar ARCHITECTURE'a, kapsam SPEC'e, iş listesi BACKLOG'a aittir. Çelişki olursa onlar kazanır.
+Son güncelleme: 2026-10-09. Bu belge bir anlık görüntüdür; kalıcı kararlar ARCHITECTURE'a, kapsam SPEC'e, iş listesi BACKLOG'a aittir. Çelişki olursa onlar kazanır. Dalların `main`'de olup olmadığını bu belgeye değil `git fetch` sonrası git'e sorun.
 
 Issue numarası = BACKLOG numarası + 9. PR gövdesinde ve commit'te **issue** numarası kullanılır.
 
-## 1. Yapıldı (main'de)
+## 0. En önemli sorun: doğrulama borcu
+
+`main`'e girmemiş 8 dalın hiçbiri tarayıcıda açılıp denenmedi. Yazıldıkları makinede `pnpm build` ve dev sunucusu çalışmıyordu (SWC derleyicisi `%LOCALAPPDATA%` üzerindeki bir izin kaydını görüp reddediyor: `ERR_SWC_NATIVE_CACHE`). Bu 8 dalda yalnızca `pnpm lint` ve `tsc --noEmit` geçti. Bu, CLAUDE.md'deki "bitti" tanımını (lint + typecheck + build + 375/1280 ekran görüntüsü) karşılamaz.
+
+Bu yüzden commit'ler `Closes` değil `Refs #N` taşıyor. Doğrulama yapılınca ilgili issue'lar için `Closes #N` PR gövdesine yazılır.
+
+Yapılacak: SWC sorununu çöz (Claude uygulamasını yeniden başlat; olmazsa Claude dışındaki bir terminalden `pnpm build` dene), sonra 8 dalı sırayla build edip 375/768/1280'de kontrol et.
+
+## 1. `main`'de olanlar
 
 - İskelet, tasarım token'ları, i18n, tema, header/footer/mobil menü.
-- Ürünler ve Hizmetler sayfaları, Hakkımızda, giriş/kayıt sayfaları (PR #57, #59).
-- Next proxy (`/api/*` → `API_URL`), API kararları dokümanı (ADR-14…17) (#61, #64).
+- Ürünler, Hizmetler, Hakkımızda, giriş/kayıt sayfaları.
+- Next proxy (`/api/*` → `API_URL`), API kararları (ADR-14…17).
+- Mesajların özellik başına bölünmesi (`messages/<dil>/<özellik>.json`), yasal sayfalar + 404, profil sayfaları, saat dilimi (`Europe/Istanbul`), para birimi seçici (TRY/EUR/USD), Araçlarımız, arama formu + `/araclar` sonuçları (kısmi: `Refs #25, #26`), README düzeltmeleri, CI'da typecheck.
 
-## 2. Açık PR'lar (FE, sırayla birleşmeli)
+## 2. Push'lu ama `main`'de olmayan dallar
 
-Mesaj dosyaları artık özellik başına ayrı (`messages/<dil>/<özellik>.json`), bu yüzden eski `en.json`/`tr.json` çakışması kalmadı. Yığın birbirinin doğrudan atası olacak şekilde hizalandı.
+İki zincir ve iki bağımsız dal. Zincirde alttakini birleştirmeden üsttekini birleştirmeyin; her PR `main`'e açılır.
 
-| Sıra | PR / dal | İçerik |
+| Zincir | Dal | İçerik | Issue |
+|---|---|---|---|
+| A | `feat/home-audience` | Bireysel/Kurumsal anahtarı, kurumsal ön form, SSS, Yol Boyu Güvence bandı | Refs #25 |
+| A | `feat/corporate-quote` | `/kurumsal-teklif` | Refs #41 |
+| B | `feat/vehicle-detail` | Araç detay, ek hizmetler, canlı fiyat özeti | Refs #27 |
+| B | `feat/booking-summary` | `/rezervasyon` kalem kalem fiyat | Refs #28 |
+| B | `feat/payment` | Sahte ödeme, onay, ödeme öncesi giriş koruması | Refs #29 (#35 kısmen) |
+| B | `feat/contact-page` | İletişim, bayi arama, Google Map | Refs #43 |
+| – | `feat/seo-assets` | favicon, paylaşım görseli, robots, sitemap | (BACKLOG'da yok) |
+| – | `chore/a11y-audit` | Kısmi denetim notu ([AUDIT.md](AUDIT.md)) | Refs #47 |
+
+Not: `feat/contact-page` zincir B'nin sonunda ama ödemeye gerçek bir bağımlılığı yok; gerekirse `main`'e yeniden dayandırılabilir.
+
+`feat/products-pages` ve `feat/auth-pages` yerel dalları eskidir; itmeyin.
+
+## 3. Ön yüzün taklit ettikleri (API gelince değişecek)
+
+`USE_MOCKS=1` yoksa bunların hepsi "servis kullanılamıyor" gösterir; örnek veri üretime sızmaz.
+
+| Ne | Dosya | Karşılığı (BE) |
 |---|---|---|
-| 1 | #62 `refactor/messages-split` | Mesajları özellik dosyalarına böler |
-| 2 | #65 `feat/legal-pages` | KVKK/şartlar sayfaları |
-| 3 | #60 `feat/profile-pages` | Profil sayfaları |
-| 4 | #63 `fix/time-zone` | `Europe/Istanbul` |
-| 5 | #66 `feat/currency` | TRY/EUR/USD seçici |
-| 6 | `feat/fleet-page` | Araçlarımız |
-| 7 | `feat/rental-search` | Arama formu + `/araclar` (kısmi: `Refs`) |
-| – | `chore/ci-and-pr-template` | CI'a typecheck |
-| – | `docs/project-status` | Bu belge, README/SPEC/BACKLOG düzeltmeleri |
+| Bayiler, araçlar, ek hizmetler, bayi iletişim bilgisi | `lib/fleet-client.ts`, `mocks/` | `GET /branches`, `/vehicles`, extras (#30) |
+| SSS | `lib/faq-client.ts`, `mocks/faq.ts` | `GET /faq` (#42) |
+| Rezervasyon oluşturma (uydurma numara) | `lib/reservation-client.ts` | `POST /reservations` (#31) |
+| Kurumsal teklif gönderme (her zaman hata) | `lib/quote-client.ts` | `POST /quotes` (#42) |
+| Giriş, kayıt, şifre sıfırlama (her zaman hata) | `lib/auth-client.ts` | Auth (#34, #36) |
+| Oturum (hep `null`) | `lib/session.ts` | Çerezden oturum (#34) |
+| Kurlar | `mocks/fleet.ts` | `ExchangeRate` (Y1, Y2) |
 
-`feat/products-pages` ve `feat/auth-pages` yerel dalları eskidir (PR'ları zaten main'de); itmeyin.
+Dikkat: `USE_MOCKS=1` iken `/odeme` sayfasında giriş koruması **kapalı** (auth API olmadığı için akış yoksa görülemezdi). `USE_MOCKS` kapalıyken her zaman açık. Onay sayfası şimdilik rezervasyonu adresten kuruyor; API gelince numaradan okumalı (adresten sahte onay üretilebilir).
 
-## 3. Eksikler ve kim yapacak
+## 4. Kalan işler
 
-| İş | Sahip | Not |
-|---|---|---|
-| Kalan FE issue'ları: #25–#29, #35, #41, #43, #46, #47, #49 | FE | Rezervasyon akışı, kurumsal teklif, iletişim, SSS, hata sayfaları |
-| Kalan BE issue'ları: #15, #24, #30, #31, #34, #36, #37, #42, #44, #48 | BE | Auth, araç/müsaitlik, rezervasyon, teklif |
-| Y1–Y9 (BACKLOG M6) | Y1/Y2/Y6 BE, kalanı FE | Issue'ları açmak kullanıcıya ait |
-| Prisma: `Product`, `Service`, `ExchangeRate`; `Reservation` üzerinde para birimi + kur anlık görüntüsü | BE | ADR-15, ADR-17 gereği |
-| Seed verisi (bayiler, sınıflar, araçlar, SSS) | BE | FE'deki `mocks/fleet.ts` ile aynı şekil |
-| `openapi.yaml` | BE yazar, FE gözden geçirir | İki tarafın sözleşmesi; yoksa FE tipleri tahmindir |
-| FE'yi API'ye bağlama (`USE_MOCKS` kaldırma) | FE | API hazır olunca |
-| Web testleri | FE | Şu an yok |
-| favicon, robots, sitemap, OG görseli | FE | Yayın öncesi |
-| Gerçek fotoğraflar (şimdilik yer tutucu) | İKİ | Karar bekliyor |
+**FE**
+- 8 dalı doğrula, PR'ları aç, sırayla birleştir (§0, §2).
+- Denetimin kalanı (#47): Lighthouse, axe, ekran okuyucu, klavye turu ([AUDIT.md](AUDIT.md)).
+- Giriş sonrası dönüş yalnızca giriş formunda var; kayıt formu eksik (#35'in kalanı).
+- Yasal metin düzeltmesi, en sona: KVKK "işlenen veriler" maddesine para birimi, çerez sayfasındaki "engellerseniz" cümlesine para birimi (#45 sonrası).
+- API gelince: MSW/openapi tipleri (#21), ürün/hizmetleri API'ye bağlama (Y5), tüm taklitleri gerçek çağrılarla değiştirme.
+- Web testleri (hiç yok).
 
-## 4. Karar bekleyenler
+**BE**
+- Prisma: `Product`, `Service`, `ExchangeRate`; `Reservation` üzerinde para birimi + kur anlık görüntüsü.
+- Seed verisi (#24): bayiler (adres, koordinat, saat), sınıflar, araçlar, ek hizmetler, SSS, ürün/hizmet, başlangıç kurları.
+- `openapi.yaml`.
+- Uçlar: araç/müsaitlik (#30), rezervasyon (#31), auth (#34), şifre sıfırlama (#36), hesap silme (#37), teklif/SSS/ürün/hizmet (#42), güvenlik (#48).
+- Google Maps anahtarı: referrer kısıtlaması + kota (#44). Anahtar `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`'e girer; yoksa İletişim sayfası yalnızca liste gösterir.
+- Y1, Y2, Y6 (kur tablosu, `?currency=`, çerez ayarları).
+
+**İKİ**
+- Playwright e2e (#46), yayın (#49), ödeme öncesi giriş akışı uçtan uca (#35).
+
+**Kullanıcı (G)**: Y1–Y9 issue'larını açmak, PR'ları açıp birleştirmek, issue'ları kapatmak.
+
+## 5. Karar bekleyenler
 
 1. **Fotoğraflar:** telifsiz stok mu, üretilmiş görsel mi, yer tutucu mu kalsın?
-2. **Ödeme:** v1'de yalnızca "bayide öde" mi, sahte ödeme adımı mı? (SPEC ile uyumlu olan seçilmeli.)
-3. **Kur kaynağı:** ADR-15 günlük harici servis diyor; hangi servis ve anahtar kimde?
-4. **Rezervasyonda kur:** rezervasyon anındaki kur mu saklanacak, yoksa TRY mi esas? (Öneri: ikisi de.)
-5. **Dağıtım:** nerede yayınlanacak (web + API + DB)? Şu an yalnızca yerelde çalışıyor.
-
-## 5. Düzeltilenler
-
-- README: kuruluş yılı 2003 → 2012 (kod ve içerikle uyumlu), Node 24 (`.nvmrc`), API "kurulmadı" ifadesi kaldırıldı.
-- CI: typecheck adımı eklendi (`chore/ci-and-pr-template`).
-- PR şablonu: `Closes #N` için issue numarası uyarısı.
+2. **Kur kaynağı:** ADR-15 günlük harici servis diyor; hangisi, anahtar kimde?
+3. **Rezervasyonda kur:** rezervasyon anındaki kur mu saklanacak, yoksa TRY mi esas? (Öneri: ikisi de.)
+4. **Dağıtım:** web + API + DB nerede yayınlanacak? Şu an yalnızca yerelde.
+5. **Kurumsal form ve e-posta:** SPEC e-postanın adreste taşınmasını istiyor (`?eposta=`); bu tarayıcı geçmişine ve günlüklere düşer. Öneri: sessionStorage ile taşımak (SPEC §2.2'de not var).
+6. **`USE_MOCKS` iken ödeme girişi:** kapalı kalsın mı (şimdiki), açık mı?
+7. **İptal koşulu:** SSS "24 saat öncesine kadar ücretsiz" diyor; SPEC'te kural yok. Kural belirlenip rezervasyon özetine yazılmalı mı?
+8. **Toplamı kim hesaplar:** araç sayfasındaki ve özetteki toplam yalnızca gösterim; tahsil edilen tutarı backend hesaplamalı (#31).
 
 ## 6. Süreç kuralları (çakışmayı önlemek için)
 
-- Yeni metin yalnızca ilgili özellik dosyasına (`messages/tr/<özellik>.json` ve `en`). `i18n/messages.ts` yeni dosya eklenince güncellenir.
+- Yeni metin yalnızca ilgili özellik dosyasına (`messages/tr/<özellik>.json` ve `en`). Yeni dosya eklenince `i18n/messages.ts` güncellenir.
 - Bir dal bir öncekinin üzerine kuruluysa, öncekini main'e birleştirmeden sonrakini birleştirmeyin; PR'ı main'e açın, sırayla birleştirin.
-- `Closes #N` yalnızca iş tamamen bitince; kısmi iş için `Refs #N`.
+- `Closes #N` yalnızca iş tamamen bitince ve tarayıcıda doğrulanınca; kısmi iş için `Refs #N`.
+- Renk kuralı: ana yeşil (`primary`) yalnızca dolgu için; durum göstergesi için `focus` ya da `link` kullanın (koyu temada `primary` yüzeyde 3:1'in altında).
+- Bu makinede `USE_MOCKS=1` ile çalışılır; üretim derlemesinde boş bırakılır.
