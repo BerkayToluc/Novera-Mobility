@@ -89,6 +89,54 @@
     "light": "Light",
     "dark": "Dark"
   },
+  "Auth": {
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "fields": {
+      "email": "Email",
+      "password": "Password",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "passwordHint": "At least {count} characters."
+    },
+    "errors": {
+      "required": "This field is required.",
+      "email": "Enter a valid email address.",
+      "passwordMin": "The password must be at least {count} characters.",
+      "consent": "You must accept the privacy notice to continue.",
+      "unavailable": "The sign-in service is not connected yet. Please try again later.",
+      "generic": "Something went wrong. Please try again."
+    },
+    "login": {
+      "metaTitle": "Log In",
+      "title": "Log In",
+      "subtitle": "Get to your bookings and your account.",
+      "submit": "Log In",
+      "submitting": "Logging in…",
+      "forgot": "Forgot my password",
+      "noAccount": "No account yet?",
+      "register": "Sign Up"
+    },
+    "register": {
+      "metaTitle": "Sign Up",
+      "title": "Create an Account",
+      "subtitle": "A few details are enough to make a booking.",
+      "submit": "Sign Up",
+      "submitting": "Creating account…",
+      "consent": "I have read and accept the <link>Privacy Notice</link>.",
+      "hasAccount": "Already have an account?",
+      "login": "Log In"
+    },
+    "forgot": {
+      "metaTitle": "Forgot Password",
+      "title": "Forgot your password?",
+      "subtitle": "Enter your email address and we will send you a reset link.",
+      "submit": "Send Link",
+      "submitting": "Sending…",
+      "sent": "If this address is registered, we sent a reset link to {email}. Check your inbox.",
+      "back": "Back to log in"
+    }
+  },
   "ProductsPage": {
     "metaTitle": "Products",
     "metaDescription": "Corporate fleet solutions: long-term rental, flexible fleet, electric fleet and managed fleet.",
