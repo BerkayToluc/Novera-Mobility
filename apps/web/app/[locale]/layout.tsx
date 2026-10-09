@@ -6,6 +6,7 @@ import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { routing } from "@/i18n/routing";
 import { getTheme } from "@/lib/get-theme";
+import { SITE_URL } from "@/lib/site-url";
 // Self-hosted variable font: no request to Google at runtime, and unicode-range
 // subsets mean only Latin + Latin Extended (Turkish) files are downloaded in practice.
 import "@fontsource-variable/manrope/wght.css";
@@ -18,6 +19,9 @@ export function generateStaticParams() {
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("Metadata");
   return {
+    // Makes the share-preview image and other relative links in metadata absolute.
+    metadataBase: new URL(SITE_URL),
+    openGraph: { siteName: t("title"), type: "website" },
     // Pages set only their own title; the site name is appended here.
     title: { default: t("title"), template: `%s | ${t("title")}` },
     description: t("description"),
