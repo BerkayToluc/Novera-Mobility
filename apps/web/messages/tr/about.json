@@ -13,7 +13,7 @@
     "stats": {
       "years": "yıllık deneyim",
       "cities": "şehirde bayi",
-      "fleet": "araçlık filo",
+      "fleet": "araç modeli",
       "clients": "kurumsal müşteri"
     },
     "timelineTitle": "Hikayemiz",
@@ -39,8 +39,8 @@
         "text": "İlk elektrikli ve hibrit araçlarımızı filoya kattık, şarj planlama desteğini başlattık."
       },
       "expansion": {
-        "title": "15 şehirde",
-        "text": "Bayi ağımızı 15 şehre ulaştırdık ve kurumsal müşteri sayımızı katladık."
+        "title": "14 şehirde",
+        "text": "Bayi ağımızı 14 şehre ulaştırdık ve kurumsal müşteri sayımızı katladık."
       }
     },
     "sustainabilityTitle": "Sürdürülebilirlik",
@@ -49,7 +49,7 @@
     "claims": {
       "ev": {
         "label": "filoda elektrikli ve hibrit araç",
-        "detail": "4.200 araçlık filonun yaklaşık 760'ı elektrikli veya hibrit."
+        "detail": "Filomuzdaki araç modellerinin yaklaşık beşte biri elektrikli veya hibrit."
       },
       "co2": {
         "label": "ton CO₂ yıllık tasarruf",

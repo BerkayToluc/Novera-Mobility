@@ -13,7 +13,7 @@
     "stats": {
       "years": "years of experience",
       "cities": "cities with a branch",
-      "fleet": "cars in the fleet",
+      "fleet": "car models",
       "clients": "corporate clients"
     },
     "timelineTitle": "Our story",
@@ -39,8 +39,8 @@
         "text": "We added our first electric and hybrid cars to the fleet and started charging planning support."
       },
       "expansion": {
-        "title": "In 15 cities",
-        "text": "We grew our branch network to 15 cities and doubled the number of corporate clients."
+        "title": "In 14 cities",
+        "text": "We grew our branch network to 14 cities and doubled the number of corporate clients."
       }
     },
     "sustainabilityTitle": "Sustainability",
@@ -49,7 +49,7 @@
     "claims": {
       "ev": {
         "label": "of the fleet is electric or hybrid",
-        "detail": "About 760 of the 4,200 cars in the fleet are electric or hybrid."
+        "detail": "About one in five of the car models in our fleet is electric or hybrid."
       },
       "co2": {
         "label": "tonnes of CO₂ saved a year",

@@ -10,12 +10,18 @@ export type FuelType = "PETROL" | "DIESEL" | "HYBRID" | "ELECTRIC";
 
 export type VehicleClass = { slug: string; name: LocalizedText };
 
+// How much the model uses per 100 km: litres for fuel cars, kWh for electric ones. The unit
+// travels with the value (SPEC §2.4) so a card never shows litres for an electric car.
+export type Consumption = { value: number; unit: "L_PER_100KM" | "KWH_PER_100KM" };
+
 export type Branch = { id: string; name: string; city: string };
 
 // One car at one branch, as the schema stores it.
 export type Vehicle = {
   id: string;
   slug: string;
+  // The model this car is one of; the fleet page and its dialog are keyed by it (SPEC §2.4).
+  modelSlug: string;
   brand: string;
   model: string;
   year: number;
@@ -23,6 +29,7 @@ export type Vehicle = {
   bags: number;
   transmission: Transmission;
   fuelType: FuelType;
+  consumption: Consumption;
   dailyPrice: Money;
   // null until real photos are provided; the card draws a placeholder then.
   imageUrl: string | null;
