@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
 import { getCurrency } from "@/lib/get-currency";
 import { getTheme } from "@/lib/get-theme";
+import { getSession } from "@/lib/session";
 import { CurrencyMenu } from "./currency-menu";
 import { MainNav } from "./main-nav";
 import { MobileMenu } from "./mobile-menu";
@@ -15,6 +16,7 @@ export async function SiteHeader() {
   const t = await getTranslations("Header");
   const theme = await getTheme();
   const currency = await getCurrency();
+  const signedIn = (await getSession()) !== null;
 
   return (
     <header className="border-b border-border bg-canvas">
@@ -31,11 +33,11 @@ export async function SiteHeader() {
             <PreferencesMenu initialTheme={theme} />
           </div>
           {/* Filled so it reads as a button against the page, not as more page (SPEC §2.8).
-              No session exists yet (BACKLOG #23/#25), so this is always "Log in". */}
+              Once signed in it leads to the account instead. */}
           <Button asChild className="md:ml-2">
-            <Link href="/giris">{t("login")}</Link>
+            <Link href={signedIn ? "/profil" : "/giris"}>{signedIn ? t("account") : t("login")}</Link>
           </Button>
-          <MobileMenu initialTheme={theme} initialCurrency={currency} />
+          <MobileMenu initialTheme={theme} initialCurrency={currency} signedIn={signedIn} />
         </div>
       </div>
     </header>

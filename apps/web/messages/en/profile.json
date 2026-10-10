@@ -6,7 +6,9 @@
       "label": "Profile sections",
       "account": "My Account",
       "bookings": "My Bookings",
-      "settings": "Settings"
+      "settings": "Settings",
+      "company": "Company details",
+      "quotes": "My quote requests"
     },
     "signedOut": {
       "title": "You need to sign in",
@@ -75,6 +77,44 @@
       "currency": {
         "title": "Currency",
         "text": "Choose the currency prices are shown in. Amounts are converted at the daily exchange rate."
+      }
+    },
+    "signOut": "Sign out",
+    "company": {
+      "title": "Company details",
+      "intro": "Your account was opened by the Novera sales team. To change anything, write to our team.",
+      "name": "Company",
+      "taxOffice": "Tax office",
+      "city": "City",
+      "phone": "Phone",
+      "contactPerson": "Contact person",
+      "email": "Email",
+      "salesTitle": "Who looks after you at Novera?",
+      "salesText": "You can reach our sales team about anything to do with your account.",
+      "changeButton": "Ask for a change"
+    },
+    "quotes": {
+      "title": "My quote requests",
+      "intro": "The corporate quote requests you have sent, and where they stand.",
+      "reference": "Request no",
+      "sent": "Sent",
+      "fleet": "Fleet size",
+      "term": "Term",
+      "termMonths": "{months} months",
+      "status": {
+        "RECEIVED": "Received",
+        "IN_REVIEW": "In review",
+        "OFFERED": "Offer ready"
+      },
+      "empty": {
+        "title": "No quote requests yet",
+        "text": "Ask for a quote for your fleet and your request will show up here.",
+        "cta": "Request a quote"
+      },
+      "error": {
+        "title": "Requests could not be loaded",
+        "text": "We cannot reach your quote requests right now. Please try again.",
+        "retry": "Try again"
       }
     }
   }

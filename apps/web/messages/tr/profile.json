@@ -6,7 +6,9 @@
       "label": "Profil bölümleri",
       "account": "Hesabım",
       "bookings": "Rezervasyonlarım",
-      "settings": "Ayarlar"
+      "settings": "Ayarlar",
+      "company": "Firma bilgileri",
+      "quotes": "Teklif taleplerim"
     },
     "signedOut": {
       "title": "Giriş yapmanız gerekiyor",
@@ -75,6 +77,44 @@
       "currency": {
         "title": "Para birimi",
         "text": "Fiyatların hangi para biriminde gösterileceğini seçin. Tutarlar günlük kurla çevrilir."
+      }
+    },
+    "signOut": "Çıkış yap",
+    "company": {
+      "title": "Firma bilgileri",
+      "intro": "Hesabınız Novera satış ekibi tarafından açıldı. Bilgileri değiştirmek için ekibimize yazın.",
+      "name": "Firma",
+      "taxOffice": "Vergi dairesi",
+      "city": "Şehir",
+      "phone": "Telefon",
+      "contactPerson": "İletişim kişisi",
+      "email": "E-posta",
+      "salesTitle": "Novera tarafında kim ilgileniyor?",
+      "salesText": "Hesabınızla ilgili her konuda satış ekibimize ulaşabilirsiniz.",
+      "changeButton": "Bilgi değişikliği iste"
+    },
+    "quotes": {
+      "title": "Teklif taleplerim",
+      "intro": "Gönderdiğiniz kurumsal teklif talepleri ve durumları.",
+      "reference": "Talep no",
+      "sent": "Gönderildi",
+      "fleet": "Filo büyüklüğü",
+      "term": "Süre",
+      "termMonths": "{months} ay",
+      "status": {
+        "RECEIVED": "Alındı",
+        "IN_REVIEW": "İnceleniyor",
+        "OFFERED": "Teklif hazır"
+      },
+      "empty": {
+        "title": "Henüz teklif talebiniz yok",
+        "text": "Filonuz için bir teklif isteyin, talebiniz burada görünsün.",
+        "cta": "Teklif iste"
+      },
+      "error": {
+        "title": "Talepler yüklenemedi",
+        "text": "Teklif taleplerinize şu an ulaşamıyoruz. Lütfen tekrar deneyin.",
+        "retry": "Tekrar Dene"
       }
     }
   }
