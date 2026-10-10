@@ -1,17 +1,17 @@
 # Novera Mobility: Ürün Tanımı (SPEC)
 
-> Durum: **Taslak v0.2** · 4 Ekim 2026
+> Durum: **Taslak v0.3** · 9 Ekim 2026 (v0.2: 4 Ekim 2026)
 > Sahipler: G (frontend), arkadaş (backend)
-> İçerik kaynağı: G'nin proje sohbetindeki ilk mesajı (misyon, vizyon, ürünler, hizmetler, hakkımızda)
-> Açık karar yok. Değişiklikler PR ile yapılır.
+> İçerik kaynağı: G'nin proje sohbetindeki ilk mesajı (misyon, vizyon, hakkımızda). v0.3: G'nin 9 Ekim site güncellemesi mesajı ve aynı gün verdiği cevaplar (sayfa yapısı, ürün ve hizmet içeriği, kalite gereksinimleri).
+> Açık kararlar §10'da. Değişiklikler PR ile yapılır.
 
 ---
 
 ## 1. Amaç, kitle, başarı
 
-- **Amaç:** Kurgusal kurumsal araç kiralama şirketi Novera Mobility için, bireysel kullanıcının çevrimiçi araç rezervasyonu yapabildiği ve kurumsal firmanın filo teklifi isteyebildiği modern bir web sitesi.
+- **Amaç:** Kurgusal kurumsal araç kiralama şirketi Novera Mobility için, bireysel kullanıcının çevrimiçi araç rezervasyonu yapabildiği ve kurumsal firmanın görüşme talebi bırakabildiği modern bir web sitesi.
 - **Hedef kitle:** (1) Kısa dönem araç arayan bireysel kullanıcı ve KOBİ, (2) uzun dönem filo arayan kurumsal satın alma / filo yöneticisi.
-- **Başarı ölçütü:** Bir bireysel kullanıcı mobilde ana sayfadan başlayıp sahte ödeme ekranına kadar rezervasyonu takılmadan tamamlayabiliyor; bir kurumsal kullanıcı teklif formunu gönderebiliyor.
+- **Başarı ölçütü:** Bir bireysel kullanıcı mobilde ana sayfadan başlayıp sahte ödeme ekranına kadar rezervasyonu takılmadan tamamlayabiliyor; bir kurumsal kullanıcı talep formunu gönderebiliyor.
 - **Öğrenme hedefi (ekip için):** İki kişilik ekip, asenkron çalışarak (issue, PR, review) projeyi baştan sona şirket düzeninde yürütür.
 
 ---
@@ -22,71 +22,142 @@
 
 | Sayfa | Yol (TR) | Yol (EN) | Not |
 |---|---|---|---|
-| Ana sayfa (Araç Kirala) | `/` | `/en` | Bireysel / Kurumsal sekmeli arama alanı |
-| Araç listesi | `/araclar` | `/en/cars` | Arama sonuçları: seçilen bayide ve tarihlerde uygun araçlar; fotoğraf, bilgi ve fiyatla. Üstte arama özeti kalır, değiştirilip yeniden aranabilir |
-| Araçlarımız | `/araclarimiz` | `/en/our-cars` | Filodaki tüm marka ve modeller, sınıfa göre, fotoğraf ve bilgiyle; tarihten bağımsız katalog |
-| Araç detay | `/araclar/:slug` | `/en/cars/:slug` | Özellikler, fiyat, ek hizmet seçimi |
-| Rezervasyon özeti | `/rezervasyon` | `/en/booking` | Tarih, lokasyon, ek hizmetler, toplam |
+| Ana sayfa (Araç Kirala) | `/` | `/en` | Kampanya galerisi, Bireysel / Kurumsal kiralama kutusu, iş birlikleri, Yol Boyu Güvence, SSS (§2.2) |
+| Arama sonuçları | `/araclar` | `/en/cars` | Seçilen bayide ve tarihlerde uygun araçlar; fotoğraf, bilgi, fiyat ve **Kirala** butonu. Üstte düzenlenebilir arama (§2.3) |
+| Araçlarımız | `/araclarimiz` | `/en/our-cars` | Filodaki tüm modeller; karta tıklanınca pencere açılır, yeni sayfa açılmaz (§2.4) |
+| ~~Araç detay~~ | ~~`/araclar/:slug`~~ | ~~`/en/cars/:slug`~~ | **Kaldırıldı (v0.3):** araç bilgisi kartta ve Araçlarımız penceresinde; Kirala doğrudan rezervasyon özetine gider, ek hizmet seçimi özete taşındı |
+| Rezervasyon özeti | `/rezervasyon` | `/en/booking` | Tarih, lokasyon, **ek hizmet seçimi**, kalem kalem fiyat, toplam |
 | Ödeme (sahte) | `/odeme` | `/en/payment` | Gerçek ödeme alınmaz |
 | Rezervasyon onay | `/rezervasyon/onay` | `/en/booking/confirmation` | Rezervasyon numarası |
-| Ürünler | `/urunler` | `/en/products` | 4 ürün; "En çok tercih edilen" öne çıkar |
-| Ürün detay | `/urunler/:slug` | `/en/products/:slug` | Ürün içeriği + "Teklif Al" |
-| Hizmetler | `/hizmetler` | `/en/services` | 5 hizmet, açılır-kapanır yapı |
-| Hakkımızda | `/hakkimizda` | `/en/about` | Metin + zaman çizelgesi + sürdürülebilirlik + sayaçlar |
-| İletişim | `/iletisim` | `/en/contact` | Harita + bayi arama + liste görünümü |
-| Kurumsal teklif | `/kurumsal-teklif` | `/en/corporate-quote` | Ana sayfadaki Kurumsal sekmesi ve ürün detay sayfaları buraya bağlanır; navbar'da link yok |
+| Ürünler | `/urunler` | `/en/products` | 4 ürün; "En çok tercih edilen" öne çıkar (içerik Ek A) |
+| Ürün detay | `/urunler/:slug` | `/en/products/:slug` | Konsept, Ne Alıyorsunuz, Teknolojik Artısı + "Teklif Al" |
+| Hizmetler | `/hizmetler` | `/en/services` | 5 hizmet, açılır-kapanır yapı (içerik Ek A) |
+| Hakkımızda | `/hakkimizda` | `/en/about` | Hikayemiz (eğri zaman çizelgesi), rakamlar (sayaç), misyon/vizyon, sürdürülebilirlik (§2.7) |
+| İletişim | `/iletisim` | `/en/contact` | Genel merkez, departman e-postaları, iletişim formu, bayi listesi + harita (§2.6) |
+| Kurumsal teklif | `/kurumsal-teklif` | `/en/corporate-quote` | Ürün sayfalarındaki "Teklif Al" buraya gelir; navbar'da link yok. Ana sayfadaki kurumsal kutuyla ilişkisi açık karar (§10) |
 | Giriş / Kayıt / Şifremi unuttum | `/giris`, `/kayit`, `/sifre-sifirla` | `/en/login`, `/en/register`, `/en/reset-password` |  |
 | Profil | `/profil` | `/en/profile` | Alt sekmeler, her biri kendi sayfası: Hesabım (`/profil`), Rezervasyonlarım (`/profil/rezervasyonlar`, `/en/profile/bookings`), Ayarlar (`/profil/ayarlar`, `/en/profile/settings`). Giriş yapılmamışsa "giriş yapın" bildirimi gösterilir |
-| Yasal | `/kvkk`, `/cerez-politikasi`, `/kiralama-kosullari` | `/en/privacy-notice`, `/en/cookie-policy`, `/en/rental-terms` | Kurgusal metin |
-| 404 | — | — |  |
+| Yasal | `/kvkk`, `/cerez-politikasi`, `/kiralama-kosullari`, `/gizlilik-politikasi`, `/kullanim-sartlari` | `/en/privacy-notice`, `/en/cookie-policy`, `/en/rental-terms`, `/en/privacy-policy`, `/en/terms-of-use` | Kurgusal metin. KVKK aydınlatma metni ile gizlilik politikası ayrı belgelerdir (v0.3) |
+| 404 | — | — | Markalı, ana sayfaya dönüş |
+| 500 | — | — | Markalı hata sayfası: tekrar dene + ana sayfa (v0.3) |
 
 İngilizce yolları ADR-04 gereği `/en` altında çevrilmiştir (ör. `/araclar` ↔ `/en/cars`); eşleme `apps/web/i18n/routing.ts` içindedir.
 
-### 2.2 Ana sayfadaki Bireysel / Kurumsal anahtarı
+### 2.2 Ana sayfa
 
-G'nin kararı: arama alanının üstünde iki seçenekli bir anahtar (segmented control). Seçim sadece arama alanını değil, **ana sayfanın kitleye özel bölümlerini** de değiştirir:
+Yukarıdan aşağıya bölüm sırası:
 
-| Bölüm | Bireysel | Kurumsal |
+| # | Bölüm | Not |
 |---|---|---|
-| Arama alanı | Alış ve bırakılacak bayi + tarih-saat → Kirala | Teklif ön formu → Teklif İste |
-| Öne çıkan içerik | Araç sınıfları | 4 ürün (filo çözümleri) |
-| Sık sorulan sorular | Bireysel SSS seti | Kurumsal SSS seti |
-| Yol Boyu Güvence | Ortak | Ortak |
-| İş ortakları, footer | Ortak | Ortak |
+| 1 | Kampanya galerisi | §2.2.1 |
+| 2 | Kiralama kutusu | Sayfanın `h1`'i bu kutunun başlığıdır. Kutunun üstünde **Bireysel** / **Kurumsal** seçimi (§2.2.2, §2.2.3) |
+| 3 | İş birlikleri | Kayan logo şeridi (§2.2.4) |
+| 4 | Yol Boyu Güvence | Koyu yeşil bant (§5.5) |
+| 5 | Sık sorulan sorular | §2.2.5 |
+| 6 | Footer | §2.8 |
 
-- **Bireysel (varsayılan):** alış bayisi, bırakılacak bayi, alış tarih-saat, iade tarih-saat → **Kirala** → `/araclar`.
-  - Bayi listesinde her bayinin altında o bayideki birkaç aracın adı kısaca görünür ("Toyota Corolla Hybrid, Nissan Qashqai +2"), böylece bayi seçmek aynı zamanda ilk bakış olur.
-  - Bırakılacak bayi her zaman seçilir; kullanıcı dokunmadıkça alış bayisini izler (çoğu kiralama başladığı yerde biter).
-  - Arama formunda **araç seçilmez**; araç, sonuç sayfasında seçilir.
-  - Sonuç sayfası (`/araclar`) arama bilgilerini adreste taşır (`?alis=&iade=&baslangic=&bitis=`), böylece paylaşılabilir ve yenilenebilir. Üstte bir arama özeti kalır (bayiler, tarihler); "Aramayı değiştir" ile açılıp düzenlenebilir ve yeniden aranabilir. Her araç fotoğraf, bilgi (koltuk, bavul, vites, yakıt) ve fiyatla (günlük ve toplam) gösterilir. Uygun araç yoksa, arama yapılmamışsa ve veri alınamıyorsa her biri için ayrı bir durum gösterilir.
-- **Kurumsal:** kısa bir teklif ön formu (firma adı, ihtiyaç duyulan araç sayısı, kiralama süresi, araç tipi, iletişim e-postası) → **Teklif İste** → `/kurumsal-teklif` sayfasına bu bilgiler dolu olarak gider. Gerekçe: kurumsal kiralama tarih seçip ödemeyle değil, teklif ve sözleşmeyle ilerler.
-- Seçim URL'de tutulur (`/?tip=kurumsal`) ki link paylaşılınca aynı sekme açılsın.
+v0.2'deki kitleye göre değişen "araç sınıfları" ve "4 ürün" bölümleri kaldırıldı (G'nin kararı). `h1` galeride değil kutuda durur, çünkü galeri kampanya içeriğidir, sayfanın konusu araç kiralamaktır.
+
+#### 2.2.1 Kampanya galerisi
+
+- 3–4 slayt. Her slaytta görsel, başlık, kısa metin ve tek bir CTA. Metinler çeviri dosyasında.
+- **Otomatik geçiş yok.** Geçiş oklar, noktalar ve kaydırmayla (dokunmatikte sürükleme) yapılır; klavyeyle kullanılabilir.
+- İlk slaytın görseli sayfanın en büyük görselidir (LCP); öncelikli yüklenir, diğerleri tembel yüklenir.
+- Görseller fotoğraf kararına kadar yer tutucu (§10). İçeriğin sabit mi API'den mi geleceği açık karar; şimdilik sabit.
+
+#### 2.2.2 Bireysel (varsayılan)
+
+- Alış bayisi, bırakılacak bayi, tarih aralığı (tek takvim) ve alış/iade saati (30 dakikalık dilimler, ADR-16) → **Ara** → `/araclar`.
+- Bayi listesinde her bayinin altında o bayideki birkaç aracın adı kısaca görünür ("Toyota Corolla Hybrid, Nissan Qashqai +2"), böylece bayi seçmek aynı zamanda ilk bakış olur.
+- Bırakılacak bayi her zaman seçilir; kullanıcı dokunmadıkça alış bayisini izler (çoğu kiralama başladığı yerde biter).
+- Arama formunda **araç seçilmez**; araç, sonuç sayfasında seçilir.
+
+#### 2.2.3 Kurumsal
+
+- Gerekçe (G): kurumsal müşteri bireysel gibi kendi başına rezervasyon yapmaz. Araçlar istenen yere götürülür ve istenen yerden geri alınır, fiyat buna göre değişir; ayrıca birden fazla araç seçilebilir. Bu yüzden akış **form + görüşme**: müşteri bilgilerini bırakır, satış ekibi arar.
+- Bu kısım profesyonel görünmelidir. **Tasarım önerisi uygulanmadan önce G'ye gösterilir ve onaylanır** (§10).
+- Form KVKK onay kutusu ve spam koruması taşır (§9); gönderince "Talebiniz alındı" durumu gösterilir.
+- Seçim URL'de tutulur (`/?tip=kurumsal`), link paylaşılınca aynı seçim açılır. Seçim yalnızca kutuyu ve SSS'nin açık sekmesini değiştirir; sayfanın geri kalanı iki kitle için aynıdır.
+
+#### 2.2.4 İş birlikleri
+
+- 8 kurgusal şirket logosu (SVG). Gerçek marka logosu kullanılmaz.
+- Görsel ve davranış referansı: Framer "InfiniteLogoMarquee". Şerit sola doğru sürekli akar; logolar gri ve soluktur, üzerine gelince renklenir ve hafifçe büyür; üzerine gelince şerit durur.
+- Görünür bir **Durdur / Oynat** düğmesi vardır: WCAG 2.2.2 beş saniyeden uzun süren otomatik hareketin durdurulabilmesini ister, hover ise dokunmatikte ve klavyede yoktur. `prefers-reduced-motion` açıksa şerit hiç hareket etmez.
+- Ekran okuyucu logoları bir kez okur; döngü için tekrarlanan kopyalar gizlidir.
+
+#### 2.2.5 Sık sorulan sorular
+
+- Referans: Framer "Spring FAQ Accordion" satır düzeni ve yaylı açılma; "AK FAQ"'tan kategori sekmeleri ve altta iletişim çağrısı.
+- Sekmeler: **Bireysel** / **Kurumsal**. Başlangıçta kiralama kutusunda seçili olan sekme açıktır.
+- Aynı anda bir soru açık. Arama kutusu ve soru numarası yok (§5.6: sırası olmayan içeriğe numara verilmez).
+- Altta "Sorunuz mu kaldı?" ve İletişim sayfasına bağlantı.
+- Açılma animasyonu `prefers-reduced-motion`'da kapalıdır.
+- İçerik API'den gelir (`GET /faq?audience=`); yükleniyor, boş ve hata durumları vardır.
 
 ### 2.3 Akışlar
 
 **Bireysel rezervasyon:**
-Ana sayfa (Bireysel) → Araç listesi → Araç detay → ek hizmet seçimi → Rezervasyon özeti → giriş/kayıt → Sahte ödeme → Onay
+Ana sayfa (Bireysel) → Arama sonuçları → **Kirala** → Rezervasyon özeti (ek hizmet seçimi + kalem kalem fiyat) → giriş/kayıt → Sahte ödeme → Onay
 
 - Tek rezervasyon akışı; sepet yok.
-- Listeleme ve detay herkese açık; giriş **ödeme adımından hemen önce** istenir (G onayladı). Gerekçe: erken giriş zorunluluğu kullanıcıyı kaybettirir.
+- Arama ve sonuçlar herkese açık; giriş **ödeme adımından hemen önce** istenir (G onayladı). Gerekçe: erken giriş zorunluluğu kullanıcıyı kaybettirir.
+- Sonuç sayfası arama bilgilerini adreste taşır (`?alis=&iade=&baslangic=&bitis=`), böylece paylaşılabilir ve yenilenebilir. Üstte bir arama özeti kalır (bayiler, tarihler); "Aramayı değiştir" ile açılıp düzenlenebilir ve yeniden aranabilir.
+- Her araç kartında fotoğraf, bilgi (koltuk, bavul, vites, yakıt), fiyat (günlük ve toplam) ve **Kirala** butonu. Kirala, seçilen araç ve arama bilgileriyle `/rezervasyon`'a gider.
+- Uygun araç yoksa, arama yapılmamışsa ve veri alınamıyorsa her biri için ayrı bir durum gösterilir.
+- Ekrandaki toplam gösterim içindir; tahsil edilen tutarı backend hesaplar (ADR-15).
 
-**Kurumsal teklif:**
-Ana sayfa (Kurumsal) veya Ürün detay → Teklif formu → "Talebiniz alındı" ekranı
+**Kurumsal talep:**
+Ana sayfa (Kurumsal) → form → "Talebiniz alındı" → satış ekibi arar. Ürün detayındaki "Teklif Al" → `/kurumsal-teklif`.
 
 **Bayi bulma:**
-İletişim → harita tüm bayileri gösterir → şehir veya bayi adıyla arama → bayi kartı (adres, çalışma saatleri, `tel:` telefon, e-posta, yol tarifi linki). Mobilde harita ↔ liste geçişi.
+İletişim → şehir filtresi ve/veya arama → liste ve haritadaki pinler daralır → bayi kartı (adres, çalışma saatleri, `tel:` telefon, e-posta, yol tarifi linki).
 
-### 2.4 Navigasyon
+### 2.4 Araçlarımız
+
+- Filodaki tüm modeller, sınıfa göre gruplu; sınıflar ve modeller ucuzdan pahalıya.
+- **Kart:** stok fotoğraf, marka-model, sınıf, hap bilgiler (yakıt tüketimi: L/100 km, elektrikli araçta kWh/100 km; yakıt tipi; vites; koltuk; bagaj) ve "…'den başlayan" günlük fiyat. Kartın içinde sağda bir ok işareti; hover'da kart ve ok tepki verir. Kartın tamamı tek bir tıklama hedefidir.
+- **Pencere:** karta tıklanınca yeni sayfa açılmaz, pencere (modal) açılır. İçerik: daha detaylı bilgi (tüm özellikler, kısa açıklama) ve modelin bulunduğu bayiler (bayi adı, şehir; İletişim sayfasına bağlantı).
+- Pencere adreste iz bırakır: `/araclarimiz?arac=<model>`. Link paylaşılınca aynı pencere açık gelir; geri tuşu ve Esc kapatır; kapanınca odak tıklanan karta döner. Arama motoru için kanonik adres `/araclarimiz`'dir (ARCHITECTURE ADR-22).
+
+### 2.5 Ürünler ve hizmetler
+
+- Arayüz şimdiki haliyle kalır; G ileride modernleştirecek. Bu sürümde yalnızca içerik değişir (Ek A).
+- Ürün detayı üç bölümdür: **Konsept**, **Ne Alıyorsunuz?**, **Teknolojik Artısı** (v0.2'deki "Neler dahil" ve "Kimler için" yerine). Ürün kartında başlık, Konsept metni ve "En çok tercih edilen" rozeti (yalnızca Akıllı Kurumsal Filo Kiralama).
+- Hizmetlerde her hizmetin başlığı, Ek A'daki tek cümlelik açıklaması ve 3 kısa maddesi bulunur. Maddeleri Claude yazar (G onayladı), Ek A'daki iddiaların dışına çıkmaz.
+- Ürün adresleri yeni slug'larla değişir (Ek A). Site yayında olmadığı için eski adreslere yönlendirme gerekmez.
+
+### 2.6 İletişim
+
+Yukarıdan aşağıya:
+
+1. Başlık ve kısa giriş.
+2. **Genel merkez:** fotoğraf (yer tutucu), adres, `tel:` telefon, `mailto:` e-posta, yol tarifi linki.
+3. **Departman e-postaları:** Pazarlama, Satış, İş Birlikleri; her biri ayrı `mailto:` bağlantısı.
+4. **İletişim formu:** ad soyad, e-posta, telefon (isteğe bağlı), konu, mesaj, KVKK onay kutusu; gönderince "Mesajınız alındı" durumu (§9).
+5. **Bayiler ve harita:** masaüstünde (1280 px ve üstü) bayiler haritanın solunda alt alta listelenir. Listenin üstünde şehir filtresi (açılır liste) ve metin arama (bayi adı, ilçe, adres). Filtre ve arama hem listeyi hem haritadaki pinleri daraltır. 1280 px altında Liste / Harita geçişi. Harita yüklenemezse liste görünür.
+
+Genel merkez ve departman bilgileri kurgusaldır ve sabit içeriktir (çeviri dosyası); e-postalar gerçek bir kişiye gitmeyen ayrılmış bir alan adıyla yazılır (`.example`). Bayi verisi API'den gelir.
+
+### 2.7 Hakkımızda
+
+- **Hikayemiz:** referans Framer "Oxbow". Dalgalı bir çizgi üzerinde yıllar; seçilen kilometre taşının kartı (görsel, yıl, başlık, metin) açılır. Oklar, klavye (sol/sağ ok) ve dokunmatikte kaydırmayla gezilir; otomatik oynatma yok. 768 px altında dikey liste. Mevcut 6 kilometre taşı kullanılır, her biri bir görselle (yer tutucu).
+- **Rakamlar:** referans Framer "StatsSection". Ortalanmış büyük sayılar ve etiketleri; bölüm görününce sayılar bir kez, yaklaşık 2 saniyede yavaşlayarak artar. `prefers-reduced-motion`'da doğrudan son değer görünür; ekran okuyucu yalnızca son değeri okur. Değerler §4.1'deki tablodan.
+- Sayfanın geri kalanı (açılış, misyon/vizyon, sürdürülebilirlik, CTA) tasarım olarak değişmez; G sonra modernleştirecek. Yalnızca metinlerdeki rakamlar §4.1'e göre düzeltilir.
+
+### 2.8 Navigasyon ve footer
 
 ```
-Masaüstü: [Logo] Araç Kirala · Araçlarımız · Ürünler · Hizmetler · Hakkımızda · İletişim   [Profil]
-Mobil:    [Logo]                                                   [Profil] [☰]
+Masaüstü: [Logo] Araç Kirala · Araçlarımız · Ürünler · Hizmetler · Hakkımızda · [İletişim]   [Profil]
+Mobil:    [Logo]                                                     [Profil] [☰]
 ```
 
-- Navbar'da ayrı "Kurumsal Teklif" linki yok (G'nin kararı); kurumsal giriş noktası ana sayfadaki anahtar ve ürün sayfaları.
+- Navbar'daki linkler v0.2'deki gibi kalır. **İletişim, diğer linklerden farklı görünür** (çerçeveli buton görünümü); Giriş Yap / Profil butonundan da ayırt edilebilir. Mobil menüde de aynı vurgu.
+- Navbar'da ayrı "Kurumsal Teklif" linki yok (G'nin kararı); kurumsal giriş noktası ana sayfadaki seçim ve ürün sayfaları.
 - Hamburger = site gezintisi. Altı bağlantı 1280px altında yan yana sığmadığı için hamburger mobilde ve tablette görünür, satır içi menü 1280px ve üstünde. Profil menüsü = hesap (her ekranda).
 - Giriş yapılmamışsa Profil yerine "Giriş Yap".
-- Dil (TR/EN), tema (açık/koyu) ve para birimi (TRY/EUR/USD) seçimi footer'da da bulunur; giriş yapan kullanıcıda tercih hesaba kaydedilir. Tutarlar günlük kurla çevrilir (ARCHITECTURE ADR-15); ödeme sahte olduğu için hangi para birimi seçilirse seçilsin para alınmaz.
+- **Footer:** referans Framer "Simple Footer" (G'nin ekran görüntüsü bekleniyor, §10). İçerik: logo ve kısa tanım, Keşfet linkleri, Yasal linkler (5 sayfa ve "Çerez tercihleri"), tercihler, telif ve "kurgusal proje" notu.
+- Dil (TR/EN), tema (açık/koyu) ve para birimi (TRY/EUR/USD) seçimi footer'da bulunur; giriş yapan kullanıcıda tercih hesaba kaydedilir. Tutarlar günlük kurla çevrilir (ARCHITECTURE ADR-15); ödeme sahte olduğu için hangi para birimi seçilirse seçilsin para alınmaz.
 
 ---
 
@@ -100,6 +171,7 @@ Bunlar sitede **sadece tanıtım içeriği** olarak yer alır, işlevsel olarak 
 - SOS butonu ve canlı çekici yönlendirme
 - Gerçek ödeme entegrasyonu (ödeme ekranı sahte, para alınmaz)
 - Çoklu araç sepeti
+- Kurumsal müşterinin siteden kendi başına rezervasyon yapması (kurumsal akış form + görüşme, §2.2.3)
 - Kariyer, basın/medya sayfaları
 - Kurumsal hesap türü ("Filom" paneli)
 
@@ -109,9 +181,27 @@ Bunlar sitede **sadece tanıtım içeriği** olarak yer alır, işlevsel olarak 
 
 - **Dil:** Türkçe ana dil; İngilizce v1'de seçenek olarak var (G'nin kararı). Tüm arayüz metinleri baştan çeviri dosyalarından okunur, sayfaya gömülü metin yazılmaz. URL yapısı: `/` Türkçe, `/en/...` İngilizce.
 - **Ton:** Kurumsal ama mesafeli değil. Güven veren, net, abartısız. "Sarsılmaz", "öncü" gibi büyük kelimeler hakkımızda metninde kalabilir; arayüz metinlerinde (buton, hata, form) sade ve kısa dil.
-- **Yazım kuralları:** Buton metinleri fiille başlar ("Araç Ara", "Teklif İste"). Fiyatlar para biriminin kendi simgesiyle yazılır: `₺1.250` (İngilizcede `₺1,250`), `€36,40`, `$36.40`. Tam tutar ondalıksız, kuruşlu ya da centli tutar her zaman iki ondalıkla gösterilir; tutar ekranda yuvarlanmaz, böylece rezervasyon özetindeki kalemler toplamla tutmaya devam eder. API her tutarı para birimiyle birlikte alt birim tam sayısı olarak gönderir (`{ "amount": 125000, "currency": "TRY" }` = ₺1.250), biçimlendirme `lib/price.ts` içindedir. Tarihler `12 Eki 2026`.
+- **Yazım kuralları:** Buton metinleri fiille başlar ("Ara", "Kirala", "Teklif İste"). Fiyatlar para biriminin kendi simgesiyle yazılır: `₺1.250` (İngilizcede `₺1,250`), `€36,40`, `$36.40`. Tam tutar ondalıksız, kuruşlu ya da centli tutar her zaman iki ondalıkla gösterilir; tutar ekranda yuvarlanmaz, böylece rezervasyon özetindeki kalemler toplamla tutmaya devam eder. API her tutarı para birimiyle birlikte alt birim tam sayısı olarak gönderir (`{ "amount": 125000, "currency": "TRY" }` = ₺1.250), biçimlendirme `lib/price.ts` içindedir. Tarihler `12 Eki 2026`.
 - **Metin bütçesi:** Kart açıklaması en fazla 2 satır (~120 karakter). Ürün/hizmet özeti en fazla 40 kelime; uzunu detay sayfasına.
-- **Sürdürülebilirlik:** Hakkımızda'da ayrı bölüm. Her iddia ölçülebilir olmalı (filodaki elektrikli/hibrit oranı, yıllık CO₂ tasarrufu, geri dönüştürülen lastik sayısı, kağıtsız tutanak). Rakamlar kurgusal ama tutarlı tutulur.
+- **Sürdürülebilirlik:** Hakkımızda'da ayrı bölüm. Her iddia ölçülebilir olmalı (filodaki elektrikli/hibrit oranı, yıllık CO₂ tasarrufu, geri dönüştürülen lastik sayısı, kağıtsız tutanak). Rakamlar kurgusal ama tutarlı tutulur (§4.1).
+- **Ürün ve hizmet içeriği:** Ek A. Metinler şimdilik çeviri dosyalarında durur; aynı metin backend seed'ine de girer, API'ye bağlama BACKLOG Y5'te (ADR-17).
+- **Yasal metinler:** Kurgusal. KVKK aydınlatma metni, gizlilik politikası, çerez politikası, kullanım şartları ve kiralama koşulları ayrı sayfalardır. Kişisel veri toplayan her form aydınlatma metnine bağlanan bir onay kutusu taşır.
+
+### 4.1 Rakamlar (tek kaynak)
+
+Kurgusal şirket; rakamlar G'nin izniyle tutarlı olacak şekilde seçildi. Sitede, örnek veride ve seed'de aynı rakamlar kullanılır.
+
+| Rakam | Değer | Nerede |
+|---|---|---|
+| Kuruluş | 2012 (2026'da 14 yıl) | Hakkımızda sayacı, zaman çizelgesi |
+| Bayi ağı | 14 şehirde 15 bayi (İstanbul'da 2) | Hakkımızda sayacı ("şehirde bayi"), zaman çizelgesi, örnek veri, seed |
+| Filo | 15 araç modeli; her model 1–4 bayide | Hakkımızda sayacı ("araç modeli"), Araçlarımız, örnek veri, seed |
+| Kurumsal müşteri | 4.200 | Hakkımızda sayacı |
+| Elektrikli / hibrit | Filonun %18'i (oran korunur) | Sürdürülebilirlik |
+
+- G'nin mesajındaki "15 araçlık filo" ile "4.200 kurumsal müşteri" yan yana inandırıcı durmadığı için filo **15 araç modeli** olarak yazılır. Sitede araç sayısı verilmez.
+- Sürdürülebilirlik metinlerinde "4.200 araçlık filo" ifadesi kalkar (4.200 artık kurumsal müşteri sayısı); oranlar ve yıllık rakamlar korunur. Zaman çizelgesindeki "15 şehirde" → "14 şehirde".
+- Hakkımızda'daki dört sayaç kalır (yıl, şehir, model, kurumsal müşteri); hiçbiri kaldırılmaz.
 
 ---
 
@@ -183,7 +273,7 @@ Gövde metni en fazla ~68 karakter genişliğinde tutulur.
 - **Bölümler arası:** mobil 64px, masaüstü 96–128px.
 - **Izgara:** 4 sütun (mobil, 16px kenar boşluğu) · 8 sütun (tablet) · 12 sütun (masaüstü, en fazla 1200px içerik genişliği).
 - **Köşe yarıçapı:** form ve buton 10px, kart 16px, büyük görsel 24px, anahtar (toggle) tam yuvarlak.
-- **Gölge:** neredeyse yok. Derinlik gölgeyle değil zemin tonu farkıyla (paper → beyaz kart) verilir; sadece açılan menülerde ve arama alanında hafif gölge.
+- **Gölge:** neredeyse yok. Derinlik gölgeyle değil zemin tonu farkıyla (paper → beyaz kart) verilir; sadece açılan menülerde, pencerelerde ve arama alanında hafif gölge.
 - **Kırılma noktaları:** 375 (tasarım buradan başlar) · 768 · 1280.
 
 ### 5.4 Yerleşim konsepti: "sade, ama düz değil"
@@ -193,14 +283,17 @@ Gövde metni en fazla ~68 karakter genişliğinde tutulur.
   - Bölümler her zaman ortalanmış değil; metin solda / görsel sağda, sonraki bölümde tam genişlik, sonra koyu bant. Göz her bölümde aynı kalıba alışmaz.
   - Sayfa akışında bir kez **koyu orman yeşili bant** (`green-900`) kullanılır: Yol Boyu Güvence bölümü. Açık sayfada tek koyu bölüm, dikkati oraya toplar.
   - Büyük, kenarları yuvarlatılmış fotoğraflar; araç fotoğraflarında doğal ışık ve açık hava.
-- Hareket: sadece durum değişikliğini anlatan geçişler (anahtar değişince alanın yumuşak geçişi, açılır-kapanır SSS). Kaydırınca beliren dekoratif animasyon yok. `prefers-reduced-motion` desteklenir.
+- **Hareket:** varsayılan olarak yalnızca durum değişikliğini anlatan geçişler (anahtar değişince alanın yumuşak geçişi, pencere açılıp kapanması). Kaydırınca beliren dekoratif animasyon yok.
+  - **İstisnalar (v0.3, G'nin onayı):** iş birlikleri şeridi (sürekli akış, durdurma düğmeli), Hakkımızda sayaçları (görününce bir kez sayar), Hikayemiz zaman çizelgesi (seçim değişince geçiş), SSS'nin yaylı açılması, galeri slayt geçişi.
+  - Kendiliğinden başlayan bir geçiş yok: galeri ve zaman çizelgesini kullanıcı ilerletir.
+  - `prefers-reduced-motion` açıksa hareketli her şey durur ya da anında geçer.
 
 ### 5.5 Akılda kalacak tek öğe: Yol Boyu Güvence
 
 Hakkımızda metnindeki "Sadece Araç Kiralamıyoruz, Yol Boyu Güvence Sunuyoruz" cümlesi markanın güven vaadi. Bu vaat sitede **somut bir bileşene** dönüşür:
 
-- **Ana sayfada:** koyu yeşil bantta, bir aksilik anının senaryosu olarak anlatılır: *Yolda kaldın → tek dokunuşla SOS → GPS ile en yakın çekici yönlendirilir → 7/24 operasyon masası seni arar → arıza 24 saati aşarsa yedek araç kapında.* İkon kartları değil, soldan sağa (mobilde yukarıdan aşağı) ilerleyen tek bir zaman çizgisi.
-- **Karar anlarında tekrar:** araç detayında, rezervasyon özetinde ve ödeme ekranında aynı güvencenin kısa bir şerit hâli ("Bu kiralama Yol Boyu Güvence kapsamında: 7/24 destek, çekici, yedek araç"). Kullanıcı tam para öderken güven mesajını görür.
+- **Ana sayfada:** iş birliklerinden sonra, koyu yeşil bantta, bir aksilik anının senaryosu olarak anlatılır: *Yolda kaldın → tek dokunuşla SOS → GPS ile en yakın çekici yönlendirilir → 7/24 operasyon masası seni arar → arıza 24 saati aşarsa yedek araç kapında.* İkon kartları değil, soldan sağa (mobilde yukarıdan aşağı) ilerleyen tek bir zaman çizgisi.
+- **Karar anlarında tekrar:** rezervasyon özetinde ve ödeme ekranında aynı güvencenin kısa bir şerit hâli ("Bu kiralama Yol Boyu Güvence kapsamında: 7/24 destek, çekici, yedek araç"). Kullanıcı tam para öderken güven mesajını görür.
 - **Şeffaf fiyat:** rezervasyon özetinde tüm kalemler açık yazılır, "gizli ücret yok" ibaresi. Güven sadece söylenmez, fiyat ekranında gösterilir.
 
 ### 5.6 Kaçınılacaklar
@@ -209,29 +302,40 @@ Eşit üç sütunlu ikon+başlık+gri metin kartları, gerekçesiz gradient, sı
 
 ### 5.7 Erişilebilirlik
 
-WCAG 2.2 AA. Metin kontrastı en az 4.5:1, dokunma hedefi en az 44×44px, görünür odak halkası (`green-700`, 2px, 2px boşluk), tüm akışlar klavyeyle tamamlanabilir, anahtar (Bireysel/Kurumsal) ekran okuyucuda seçili durumu bildirir.
+WCAG 2.2 AA. Metin kontrastı en az 4.5:1, dokunma hedefi en az 44×44px, görünür odak halkası (`green-700`, 2px, 2px boşluk), tüm akışlar klavyeyle tamamlanabilir, anahtar (Bireysel/Kurumsal) ekran okuyucuda seçili durumu bildirir. Hareketli bileşenler durdurulabilir ve `prefers-reduced-motion`'a uyar (§5.4). Pencereler odağı içeride tutar, Esc ile kapanır ve kapanınca odağı açan öğeye geri verir.
 
 ---
 
 ## 6. Medya envanteri
 
+Fotoğraf kaynağı kararı açık (§10); o zamana kadar tüm fotoğraflar yer tutucu.
+
 | Tür | Kullanım yeri | Kaynak | Lisans | Adet | En-boy | Bütçe |
 |---|---|---|---|---|---|---|
-| Araç fotoğrafı | Liste, detay | Telifsiz stok veya üretici basın fotoğrafı | Kontrol edilecek | ~12 | 16:10 | ≤120 KB/adet (WebP/AVIF) |
-| Ana sayfa görseli | Hero | Stok | Kontrol edilecek | 1 | 16:9 masaüstü, 4:5 mobil | ≤200 KB |
+| Kampanya görseli | Ana sayfa galerisi | Stok veya üretilmiş | Kontrol edilecek | 3–4 | 16:9 masaüstü, 4:5 mobil | ≤200 KB (ilki LCP, öncelikli) |
+| Araç fotoğrafı | Arama sonuçları, Araçlarımız kartı ve penceresi | Telifsiz stok veya üretici basın fotoğrafı | Kontrol edilecek | 15 (model başına 1) | 16:10 | ≤120 KB/adet (WebP/AVIF) |
 | Ürün görselleri | Ürün kartları ve detay | Stok | Kontrol edilecek | 4 | 3:2 | ≤150 KB |
+| Hikayemiz görselleri | Hakkımızda zaman çizelgesi | Stok | Kontrol edilecek | 6 | 3:2 | ≤120 KB |
+| Genel merkez fotoğrafı | İletişim | Stok | Kontrol edilecek | 1 | 3:2 | ≤150 KB |
 | İkonlar | Hizmetler, özellikler | Açık kaynak ikon seti | MIT/ISC | ~30 | 1:1 SVG | Satır içi SVG |
-| İş ortağı logoları | Ana sayfa | Kurgusal üretilecek | — | 6–8 | Serbest, SVG | ≤10 KB/adet |
+| İş ortağı logoları | Ana sayfa şeridi | Kurgusal, Claude üretir | — | 8 | Serbest, SVG | ≤10 KB/adet |
 | Logo | Header, footer, favicon | Ekip üretecek | — | 1 set | SVG | — |
+| Paylaşım görseli | Open Graph | Kodla üretilir | — | 1 | 1200×630 | — |
 | Harita | İletişim | Google Maps JavaScript API (backend tarafı kuracak) | Google Maps Platform şartları | — | — | Harita kütüphanesi sadece İletişim sayfasında yüklenir |
 
 ---
 
 ## 7. Veri (backend ile ortak sözleşmenin girdisi)
 
-Ayrıntılı API kontratı ayrı belgede yazılacak. Temel varlıklar:
+Ayrıntılı API kontratı `docs/api/openapi.yaml`'da yazılacak (BACKLOG #6). Temel varlıklar:
 
-`User`, `Branch` (bayi: ad, şehir, adres, koordinat, telefon, e-posta, çalışma saatleri), `VehicleClass`, `Vehicle`, `Extra` (ek hizmet: çocuk koltuğu, ek sürücü vb.), `Reservation`, `QuoteRequest`, `FaqItem`, `Product`, `Service`, `ExchangeRate` (kur: para birimi, TRY'ye oran, güncellenme zamanı).
+`User`, `Branch` (bayi: ad, şehir, adres, koordinat, telefon, e-posta, çalışma saatleri), `VehicleClass`, `Vehicle`, `Extra` (ek hizmet: çocuk koltuğu, ek sürücü vb.), `Reservation`, `QuoteRequest`, `ContactMessage` (iletişim formu, v0.3), `FaqItem`, `Product`, `Service`, `ExchangeRate` (kur: para birimi, TRY'ye oran, güncellenme zamanı).
+
+v0.3 ekleri:
+
+- **Model ve fiziksel araç:** Araçlarımız modeli gösterir (pencere adresi model slug'ı taşır), arama sonuçları belirli bir bayideki fiziksel aracı. Model düzeyinde slug, iki dilli kısa açıklama ve **yakıt tüketimi** (değer + birim: L/100 km veya kWh/100 km) gerekir. Şema önerisi ARCHITECTURE'daki "Backend ile netleşecekler" listesinde.
+- **Kampanyalar, iş ortağı logoları, genel merkez ve departman e-postaları:** şimdilik frontend'de sabit içerik. Kampanyaların API'ye taşınması açık karar (§10).
+- **QuoteRequest alanları** kurumsal kutunun tasarımı onaylanınca netleşir.
 
 Ürün ve hizmet içeriği API'den gelir, iki dilli alanlarla (ADR-17). Tutarlar `{ amount, currency }` olarak, para biriminin alt birimi cinsinden tam sayıyla taşınır (ADR-15). Zamanlar ISO 8601 UTC'dir, ekranda `Europe/Istanbul` ile gösterilir (ADR-16).
 
@@ -241,10 +345,100 @@ Ayrıntılı API kontratı ayrı belgede yazılacak. Temel varlıklar:
 
 v1 "bitti" sayılmadan önce, 375px genişlikte mobil tarayıcıda:
 
-1. Ana sayfada Bireysel seçili; lokasyon ve tarih seçilip araç aranır.
-2. Listede filtre uygulanır, bir araç açılır, bir ek hizmet seçilir.
-3. Özet ekranında toplam doğru hesaplanır; giriş yapılır; sahte ödeme ekranı geçilir; onay sayfasında rezervasyon numarası görünür.
+1. Ana sayfada Bireysel seçili; bayi ve tarih seçilip **Ara**'ya basılır.
+2. Sonuçlarda bir araçta **Kirala**'ya basılır.
+3. Özette bir ek hizmet seçilir, toplam doğru görünür; giriş yapılır; sahte ödeme ekranı geçilir; onay sayfasında rezervasyon numarası görünür.
 4. Profil > Rezervasyonlarım'da bu rezervasyon listelenir.
-5. Ana sayfada Kurumsal'a geçilir; ön form doldurulur; teklif sayfası dolu açılır ve gönderilir.
-6. İletişim'de "İzmir" aranır; harita ve liste ilgili bayiye daralır.
-7. Aynı akışlar 1280px masaüstünde ve yalnızca klavyeyle tekrarlanır.
+5. Ana sayfada Kurumsal'a geçilir; form doldurulup gönderilir; "Talebiniz alındı" görünür.
+6. Araçlarımız'da bir karta tıklanır; pencere açılır, modelin bayileri görünür; Esc ile kapanır, odak karta döner.
+7. İletişim'de şehir filtresinden "İzmir" seçilir; liste ve pinler daralır. İletişim formu gönderilir.
+8. Çerez bandında "Reddet" seçilir; analytics yüklenmez.
+9. Aynı akışlar 1280px masaüstünde ve yalnızca klavyeyle tekrarlanır.
+
+---
+
+## 9. Kalite gereksinimleri (v0.3)
+
+G'nin 9 Ekim tarihli öneri dosyasından gelen ek maddeler (dil eşlemesi, Open Graph, yapılandırılmış veri, 500 sayfası, Core Web Vitals hedefi, manifest, güvenlik başlıkları) G tarafından 10 Ekim'de onaylandı.
+
+| Gereksinim | Kabul ölçütü |
+|---|---|
+| SEO | Herkese açık her sayfada benzersiz başlık ve meta açıklama, canonical URL, TR/EN dil eşlemesi (hreflang, `x-default` = TR), Open Graph başlık/açıklama/görsel. Yapılandırılmış veri: tüm sitede `Organization`, İletişim'de her bayi için `AutoRental` |
+| `robots.txt` | Yalnızca `/api/` engellenir; site haritası belirtilir. Dizine girmemesi gereken sayfalar `noindex` ile çıkarılır, robots.txt ile engellenmez (engellenen sayfanın `noindex`'i okunamaz) |
+| `noindex` | Giriş, kayıt, şifre sıfırlama, profil, arama sonuçları, rezervasyon özeti, ödeme, onay, 404, 500 |
+| `sitemap.xml` | Herkese açık tüm sayfalar, iki dilde, dil eşlemesiyle |
+| Görsel alt metinleri | Anlamlı görselde açıklayıcı alt metin (çeviri dosyasında); dekoratif görselde `alt=""` |
+| Gizlilik politikası, kullanım şartları | Ayrı sayfalar; footer'dan erişilir |
+| Çerez onayı | Kabul et / Reddet / Ayarlar eşit ağırlıkta; zorunlu olmayan hiçbir şey onaysız yüklenmez; tercih footer'daki "Çerez tercihleri"nden değiştirilebilir (ADR-19) |
+| Analytics | Çerez kullanmayan bir araç, yalnızca onayla yüklenir (ADR-19) |
+| Net CTA | Her bölümde tek birincil buton (§5.4); ana sayfada birincil eylem "Ara" |
+| Responsive | 375 / 768 / 1280 px'te doğru; yatay kaydırma yok |
+| Formlar | Backend uçlarıyla gerçekten gönderilir; alan bazlı hata; başarı durumu; KVKK onay kutusu; gizli tuzak alanla spam koruması (ADR-20) |
+| Kırık link kontrolü | CI'da her PR'da iç linkler kontrol edilir |
+| Site hızı | Core Web Vitals hedefi (mobil): LCP < 2,5 sn, INP < 200 ms, CLS < 0,1. Galerinin ilk görseli öncelikli |
+| Erişilebilirlik | WCAG 2.2 AA (§5.7) |
+| SSS | Ana sayfada (§2.2.5) |
+| 404 ve 500 | Markalı, ana sayfaya dönüş; 500'de tekrar dene |
+| Favicon | Favicon, Apple ikonu, web manifest ve `theme-color` |
+| `llms.txt` | Sitenin kısa tanımı ve herkese açık sayfa listesi. Not: resmi bir standart değil, SEO etkisi beklenmez |
+| Güvenlik başlıkları | CSP, HSTS (canlıda), `X-Content-Type-Options`, `Referrer-Policy` |
+
+Sonraya bırakılanlar (G onayladı): breadcrumb, Lighthouse CI.
+
+---
+
+## 10. Açık kararlar
+
+| Karar | Kimde | Not |
+|---|---|---|
+| Kurumsal kutunun tasarımı; `/kurumsal-teklif` sayfasının ana sayfa formuyla ilişkisi | G | Claude, uygulamadan önce öneri getirir |
+| Footer referansı (Simple Footer) | G | Marketplace sayfası düzeni anlatmıyor; ekran görüntüsü bekleniyor |
+| Fotoğraf kaynağı (stok / üretilmiş / yer tutucu) | G | Galeri, araçlar, Hikayemiz, genel merkez |
+| Analytics aracı: Vercel Web Analytics veya Umami | G | Yayın ortamına bağlı (ADR-12, ADR-19); ücretsiz plan koşulları doğrulanmadı |
+| Kampanya içeriği sabit mi, API'den mi | İKİ | Şimdilik sabit |
+| Yayın ortamı ve alan adı | İKİ | Canonical, sitemap ve görsel alan adı buna bağlı |
+
+---
+
+## Ek A. Ürün ve hizmet içeriği (G, 9 Ekim 2026)
+
+İçerik G'nin mesajından aynen alınmıştır. İngilizce karşılıklarını Claude çevirir. Slug'lar iki dilde aynıdır.
+
+### Ürünlerimiz
+
+**1. Akıllı Kurumsal Filo Kiralama** · `akilli-kurumsal-filo` · *En çok tercih edilen*
+- **Konsept:** Şirketinize son model araç filosu tahsis ederken, arkasında tüm filoyu yöneteceğiniz Merkezi Admin Panelini hediye ediyoruz.
+- **Ne Alıyorsunuz?** Şirketinizin ihtiyacına uygun (binek, SUV, ticari veya hibrit) uzun dönem kiralık araç filosu.
+- **Teknolojik Artısı (Dahili Panel):**
+  - Novera Admin Paneli Dahil: Araçların hangi personele zimmetli olduğunu, sözleşme sürelerini, faturaları ve HGS masraflarını tek tıkla takip edin.
+  - Canlı GPS ve Telematik: Kiralanan araçların hız, kontak durumu, rota geçmişi ve yakıt tüketimini canlı haritadan izleyin.
+  - Masraf ve ceza takibini otomatikleştiren şirket yönetim arayüzü.
+
+**2. Yönetici ve Premium Araç Kiralama (VIP Mobilite)** · `vip-mobilite`
+- **Konsept:** Üst düzey şirket yöneticileri ve kurumsal konuklar için lüks segment, tam donanımlı ve öncelikli mobilite çözümü.
+- **Ne Alıyorsunuz?** E ve F segmenti prestij araçlar (Audi, BMW, Mercedes vb.), opsiyonel VIP şoför desteği.
+- **Teknolojik Artısı:**
+  - Öncelikli Mobil Konsiyerj: Sürücüye ve yöneticiye özel VIP destek hattı.
+  - Hızlı Transfer ve Şoför Koordinasyonu: Mobil arayüz üzerinden karşılama, rota optimizasyonu ve uçuş takibi.
+
+**3. Esnek & Kısa Dönem Araç Kiralama (KOBİ ve Bireysel)** · `esnek-kisa-donem`
+- **Konsept:** Proje bazlı işler, acil saha ihtiyaçları veya dönemsel seyahatler için taahhütsüz, hızlı teslimatlı kiralama.
+- **Ne Alıyorsunuz?** Günlük, haftalık veya aylık periyotlarla son model araçlar.
+- **Teknolojik Artısı (Sürücü Uygulaması):**
+  - Novera Driver App: Anahtarı teslim alırken çizik/hasar kaydını telefondan fotoğraflayıp dijital tutanak tutabilme.
+  - Uygulama İçi SOS Butonu: Olası bir aksilikte tek tuşla konumu merkeze iletip yardım çağırabilme.
+
+**4. Yeşil Filo (Elektrikli & Hibrit Araç Kiralama)** · `yesil-filo`
+- **Konsept:** Karbon ayak izini azaltmak isteyen kurumsal şirketler için sürdürülebilir yeni nesil filo çözümü.
+- **Ne Alıyorsunuz?** En güncel elektrikli ve hibrit araç parkı.
+- **Teknolojik Artısı:** Panel üzerinden anlık batarya sağlığı, şarj istasyonu durumu ve şirketinize sağladığı karbon emisyon tasarrufu raporlaması.
+
+### Servislerimiz
+
+Her hizmete Claude 3 kısa madde ekler (§2.5).
+
+- **Akıllı Yol Yardım & Çekici:** Kaza/arıza anında GPS koordinatınıza en yakın anlaşmalı çekiciyi canlı yönlendirme.
+- **7/24 Canlı Operasyon Masası:** Sürücülerin uygulama veya telefon üzerinden anında bağlanabildiği kriz yönetimi.
+- **Kesintisiz İkame (Yedek) Araç:** Arıza 24 saati aştığında işin durmaması için kapınıza gelen eşdeğer yedek araç.
+- **Periyodik Bakım & Lastik Oteli:** Yaz/kış lastiği değişimi, muayene takibi ve adresten vale ile servis hizmeti.
+- **Novera SOS & Acil Durum Müdahale:** Tek dokunuşla tüm acil müdahale birimleri canlı konumunuzda.
