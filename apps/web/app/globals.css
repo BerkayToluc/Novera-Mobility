@@ -359,6 +359,11 @@
   }
 }
 
+/* The cookie banner is fixed to the bottom edge; this keeps a focused element scrolled clear of it (WCAG 2.2 Focus Not Obscured). */
+html:has([data-consent-banner]) {
+  scroll-padding-bottom: 14rem;
+}
+
 /* An open modal dialog (the mobile menu) must not let the page behind it scroll. */
 body:has(dialog[open]) {
   overflow: hidden;

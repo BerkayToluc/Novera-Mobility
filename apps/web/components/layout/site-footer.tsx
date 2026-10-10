@@ -1,11 +1,11 @@
 import { getTranslations } from "next-intl/server";
+import { CookiePreferencesButton } from "@/components/consent/cookie-preferences-button";
 import { Logo } from "@/components/logo";
 import { Link } from "@/i18n/navigation";
 import { COMPANY, SOCIAL_NETWORKS, telHref } from "@/lib/company";
 import { NAV_ITEMS } from "./nav-items";
 import { SocialIcon } from "./social-icon";
 
-// The cookie settings join with their own work (BACKLOG Y26).
 const LEGAL_ITEMS = [
   { href: "/kvkk", labelKey: "privacy" },
   { href: "/gizlilik-politikasi", labelKey: "privacyPolicy" },
@@ -72,6 +72,9 @@ export async function SiteFooter() {
                 </Link>
               </li>
             ))}
+            <li>
+              <CookiePreferencesButton className={`${linkClasses} text-left`} />
+            </li>
           </ul>
         </nav>
 

@@ -2,9 +2,11 @@ import type { Metadata, Viewport } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getTranslations } from "next-intl/server";
 import { locale } from "next/root-params";
+import { ConsentProvider } from "@/components/consent/consent-provider";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { routing } from "@/i18n/routing";
+import { getConsent } from "@/lib/get-consent";
 import { getTheme } from "@/lib/get-theme";
 import { socialMetadata } from "@/lib/seo";
 import { colorSchemeOf } from "@/lib/theme";
@@ -45,6 +47,7 @@ export default async function RootLayout({ children }: LayoutProps<"/[locale]">)
     <html lang={await locale()} data-theme={await getTheme()}>
       <body className="flex min-h-dvh flex-col">
         <NextIntlClientProvider>
+          <ConsentProvider initial={await getConsent()}>
           {/* First tab stop: lets keyboard users skip the header (WCAG 2.4.1). */}
           <a
             href="#main"
@@ -59,6 +62,7 @@ export default async function RootLayout({ children }: LayoutProps<"/[locale]">)
             {children}
           </main>
           <SiteFooter />
+          </ConsentProvider>
         </NextIntlClientProvider>
       </body>
     </html>

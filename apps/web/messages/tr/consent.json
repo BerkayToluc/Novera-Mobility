@@ -1,0 +1,30 @@
+{
+  "Consent": {
+    "preferences": "Çerez tercihleri",
+    "banner": {
+      "label": "Çerez bildirimi",
+      "title": "Çerezler",
+      "text": "Siteyi çalıştırmak için gerekli çerezleri kullanırız. İsterseniz siteyi nasıl kullandığınızı anlamamıza yardım eden analitik ölçümlemeye de izin verebilirsiniz.",
+      "policy": "Çerez Politikası",
+      "accept": "Kabul et",
+      "reject": "Reddet",
+      "settings": "Ayarlar"
+    },
+    "dialog": {
+      "title": "Çerez tercihleri",
+      "text": "Hangi çerezlere izin vereceğinizi seçin. Tercihinizi istediğiniz zaman değiştirebilirsiniz.",
+      "policy": "Çerez Politikası",
+      "legend": "Çerez türleri",
+      "necessary": {
+        "title": "Gerekli",
+        "text": "Dil, görünüm, para birimi ve oturum tercihlerinizi hatırlar. Site bunlarsız çalışmaz; her zaman açıktır."
+      },
+      "analytics": {
+        "title": "Analitik",
+        "text": "Hangi sayfaların kullanıldığını kişisel veri tutmadan ölçmemize yardım eder. Kapalıysa hiçbir analitik yüklenmez."
+      },
+      "save": "Kaydet",
+      "cancel": "Vazgeç"
+    }
+  }
+}
