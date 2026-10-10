@@ -35,9 +35,11 @@
 | Hakkımızda | `/hakkimizda` | `/en/about` | Hikayemiz (eğri zaman çizelgesi), rakamlar (sayaç), misyon/vizyon, sürdürülebilirlik (§2.7) |
 | İletişim | `/iletisim` | `/en/contact` | Genel merkez, departman e-postaları, iletişim formu, bayi listesi + harita (§2.6) |
 | Kurumsal teklif | `/kurumsal-teklif` | `/en/corporate-quote` | Ürün sayfalarındaki "Teklif Al" buraya gelir; navbar'da link yok. Ana sayfadaki kurumsal kutuyla ilişkisi açık karar (§10) |
-| Giriş / Kayıt / Şifremi unuttum | `/giris`, `/kayit`, `/sifre-sifirla` | `/en/login`, `/en/register`, `/en/reset-password` |  |
-| Profil | `/profil` | `/en/profile` | Alt sekmeler, her biri kendi sayfası: Hesabım (`/profil`), Rezervasyonlarım (`/profil/rezervasyonlar`, `/en/profile/bookings`), Ayarlar (`/profil/ayarlar`, `/en/profile/settings`). Giriş yapılmamışsa "giriş yapın" bildirimi gösterilir |
+| Giriş / Kayıt / Şifremi unuttum | `/giris`, `/kayit`, `/sifre-sifirla` | `/en/login`, `/en/register`, `/en/reset-password` | Girişte **Bireysel** ve **Kurumsal** sekmeleri (v0.4, §2.9) |
+| Profil | `/profil` | `/en/profile` | Alt sekmeler, her biri kendi sayfası: Hesabım (`/profil`), Rezervasyonlarım (`/profil/rezervasyonlar`, `/en/profile/bookings`; yaklaşan ve geçmiş seyahatler ayrı), Puanlarım (`/profil/puanlar`, `/en/profile/points`, v0.4), Ayarlar (`/profil/ayarlar`, `/en/profile/settings`; varsayılan para birimi, dil, tema). Kurumsal hesapta sekmeler farklıdır (§2.9). Giriş yapılmamışsa "giriş yapın" bildirimi gösterilir |
 | Yasal | `/kvkk`, `/cerez-politikasi`, `/kiralama-kosullari`, `/gizlilik-politikasi`, `/kullanim-sartlari` | `/en/privacy-notice`, `/en/cookie-policy`, `/en/rental-terms`, `/en/privacy-policy`, `/en/terms-of-use` | Kurgusal metin. KVKK aydınlatma metni ile gizlilik politikası ayrı belgelerdir (v0.3) |
+| Araç kiralama rehberleri | `/rehberler`, `/rehberler/:slug` | `/en/guides`, `/en/guides/:slug` | Kısa rehber yazıları; ana sayfada kartlarla (v0.4, §2.9) |
+| Yardım | `/yardim` | `/en/help` | İletişim'den ayrı yardım merkezi (v0.4, §2.9) |
 | 404 | — | — | Markalı, ana sayfaya dönüş |
 | 500 | — | — | Markalı hata sayfası: tekrar dene + ana sayfa (v0.3) |
 
@@ -53,8 +55,10 @@ Yukarıdan aşağıya bölüm sırası:
 | 2 | Kiralama kutusu | Sayfanın `h1`'i ("Araç Kirala") bu bölümün başlığıdır ve **ortalanır**. Altında, yine ortalı, yalnızca iki buton: **Bireysel** / **Kurumsal**; butonların çevresinde kutu ya da çerçeve yok (v0.4, G). Altında form (§2.2.2, §2.2.3) |
 | 3 | İş birlikleri | Kayan logo şeridi (§2.2.4) |
 | 4 | Yol Boyu Güvence | Koyu zeytin bant, modernleştirilmiş (§5.5) |
-| 5 | Sık sorulan sorular | §2.2.5 |
-| 6 | Footer | §2.8 |
+| 5 | Mobil uygulama | Uygulama reklamı: fotoğraf solda, metin ve mağaza rozetleri sağda (v0.4, G; §2.9) |
+| 6 | Araç kiralama rehberleri | 3–4 rehber kartı ve "Tüm rehberler" bağlantısı (v0.4, G; §2.9) |
+| 7 | Sık sorulan sorular | §2.2.5 |
+| 8 | Footer | §2.8 |
 
 v0.2'deki kitleye göre değişen "araç sınıfları" ("Size uygun sınıfı seçin") ve "4 ürün" bölümleri kaldırıldı (G'nin kararı, 10 Ekim'de yinelendi). `h1` galeride değil kutuda durur, çünkü galeri kampanya içeriğidir, sayfanın konusu araç kiralamaktır.
 
@@ -155,12 +159,27 @@ Mobil:    [Logo]                                                     [Profil] [�
 
 - Navbar'daki linkler v0.2'deki gibi kalır. **İletişim, diğer linklerden farklı görünür** (çerçeveli buton görünümü) ve **diğer linklerden belirgin bir boşlukla ayrı durur**; Giriş Yap / Profil butonundan da ayırt edilebilir. Mobil menüde de aynı vurgu.
 - **Giriş Yap** butonu zeminden ayrışan bir dolguya sahiptir; zeminle aynı renkte kalmaz (v0.4, G).
-- **Tercihler (v0.4, G):** dil, tema ve para birimi navbarda tek bir ikon düğmesiyle açılan küçük bir panelde; mobilde hamburger menünün içinde. Footer'da tercih yok.
+- **Ürünler ve Hizmetler (v0.4, G):** navbarda açılır menü; açılınca öğeler listelenir (4 ürün, 5 hizmet), her biri kendi sayfasına ya da hizmetler sayfasındaki yerine gider; başlığın kendisi liste sayfasına gider. Klavyeyle açılıp gezilebilir; mobil menüde alt liste olarak.
+- **Para birimi (v0.4, G):** navbarda kendi açılır menüsü; düğmede seçili birimin simgesi ve kodu (`₺ TRY`), listede `₺ TRY`, `€ EUR`, `$ USD`.
+- **Dil ve tema (v0.4, G):** navbarda tek bir ikon düğmesiyle açılan küçük bir panelde. Mobilde para birimi, dil ve tema hamburger menünün içinde. Footer'da tercih yok.
+- **Giriş Yap** girişe gider; giriş sayfasında Bireysel ve Kurumsal sekmeleri vardır (§2.9).
 - Navbar'da ayrı "Kurumsal Teklif" linki yok (G'nin kararı); kurumsal giriş noktası ana sayfadaki seçim ve ürün sayfaları.
 - Hamburger = site gezintisi. Altı bağlantı 1280px altında yan yana sığmadığı için hamburger mobilde ve tablette görünür, satır içi menü 1280px ve üstünde. Profil menüsü = hesap (her ekranda).
 - Giriş yapılmamışsa Profil yerine "Giriş Yap".
-- **Footer:** referans Framer "Simple Footer": solda logo, kısa tanım ve altında telif + "kurgusal proje" notu; sağda sade sütunlar: Keşfet linkleri, Yasal linkler (5 sayfa ve "Çerez tercihleri"), iletişim. Sosyal medya sütunu yok (kurgusal şirketin hesabı yok; uydurulmaz).
+- **Footer:** referans Framer "Simple Footer": solda logo, kısa tanım ve altında telif + "kurgusal proje" notu; sağda sade sütunlar: Keşfet linkleri, Yasal linkler (5 sayfa ve "Çerez tercihleri"), iletişim. **Bizi takip edin** (v0.4, G): sosyal medya ikonları görünür ama şimdilik tıklanamaz (bağlantı değil; kurgusal şirketin hesabı yok, adres uydurulmaz). Ekran okuyucu için "yakında" bilgisi taşır.
 - Dil (TR/EN), tema (açık/koyu/sistem; **varsayılan açık**) ve para birimi (TRY/EUR/USD) seçimi navbardaki tercih panelindedir; giriş yapan kullanıcıda tercih hesaba kaydedilir. Tutarlar günlük kurla çevrilir (ARCHITECTURE ADR-15); ödeme sahte olduğu için hangi para birimi seçilirse seçilsin para alınmaz.
+
+### 2.9 Hesap, puan, yardım ve rehberler (v0.4)
+
+G'nin 10 Ekim istekleri. Her biri BACKLOG M7'de sırası gelince yapılır.
+
+- **Bireysel ve kurumsal giriş:** giriş sayfasında iki sekme (`/giris`, `?tip=kurumsal`). Kurumsal sekme firma e-postasıyla giriş yapar. Kurumsal hesap basittir: firma bilgisi, teklif talepleri ve iletişim kişisi; filo yönetim paneli kapsam dışı (§3). Kayıt bireyseldir; kurumsal hesap satış görüşmesinden sonra Novera tarafından açılır (öneri; backend ile netleşecek). Backend'de hesap türü gerekir.
+- **Ayarlar:** giriş yapan kullanıcı varsayılan para birimini, dili ve temayı seçer; seçim hesaba kaydedilir ve her girişte uygulanır.
+- **Puan sistemi:** gösterim ve kurallar. Her tamamlanan rezervasyon puan kazandırır; profilde bakiye, kazanım geçmişi ve kurallar görünür. Puanla ödeme v1'de yok. Kazanım oranı açık karar (§10); hesabı backend yapar.
+- **Rezervasyonlarım:** yaklaşan ve geçmiş seyahatler ayrı listelenir; her seyahatte tarih, bayi, araç, tutar ve kazanılan puan.
+- **Yardım (`/yardim`):** İletişim'den ayrı. Konulara göre gruplanmış sorular (rezervasyon, ödeme, araç teslimi, hasar ve arıza, hesap), arama, rehberlere bağlantılar; cevap bulunamazsa İletişim'e yönlendirme. SSS içeriğiyle aynı kaynaktan beslenir, ana sayfadaki SSS'nin geniş hâlidir.
+- **Araç kiralama rehberleri (`/rehberler`):** 4–6 kısa rehber (ör. gerekli belgeler, yakıt ve teslim kuralları, farklı bayiye iade, hasar durumunda ne yapılır, elektrikli araç kullanımı). Metinleri Claude yazar, iddia uydurmaz. Ana sayfada 3–4 kart.
+- **Mobil uygulama reklamı:** ana sayfada kendi bölümü (Yol Boyu Güvence'den sonra). Uygulama kurgusal: mağaza rozetleri görünür ama gerçek mağaza bağlantısı yoktur; görsel yer tutucu (fotoğraf kararı §10).
 
 ---
 
@@ -176,7 +195,8 @@ Bunlar sitede **sadece tanıtım içeriği** olarak yer alır, işlevsel olarak 
 - Çoklu araç sepeti
 - Kurumsal müşterinin siteden kendi başına rezervasyon yapması (kurumsal akış form + görüşme, §2.2.3)
 - Kariyer, basın/medya sayfaları
-- Kurumsal hesap türü ("Filom" paneli)
+- Kurumsal filo yönetim paneli ("Filom": araç, sürücü, fatura takibi). Basit kurumsal hesap (giriş, firma bilgisi, taleplerim) v0.4'te kapsama girdi (§2.9)
+- Puanla ödeme ya da indirim (puanlar v1'de yalnızca kazanılır ve gösterilir)
 
 ---
 
@@ -403,6 +423,8 @@ Sonraya bırakılanlar (G onayladı): breadcrumb, Lighthouse CI.
 | Fotoğraf kaynağı (stok / üretilmiş / yer tutucu) | G | Galeri, araçlar, Hikayemiz, genel merkez |
 | Analytics aracı: Vercel Web Analytics veya Umami | G | Yayın ortamına bağlı (ADR-12, ADR-19); ücretsiz plan koşulları doğrulanmadı |
 | Kampanya içeriği sabit mi, API'den mi | İKİ | Şimdilik sabit |
+| Puan kazanım oranı ve kuralları | İKİ | Öneri: her ₺100 için 1 puan; backend hesaplar |
+| Kurumsal hesap nasıl açılır | İKİ | Öneri: satış görüşmesinden sonra Novera açar, sitede kurumsal kayıt yok |
 | Yayın ortamı ve alan adı | İKİ | Canonical, sitemap ve görsel alan adı buna bağlı |
 
 ---
