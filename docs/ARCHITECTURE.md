@@ -240,10 +240,10 @@ Frontend örnek veriyi bu cevaplara göre yazar; backend gelince yalnızca adres
 | Yakıt tüketimi | **Açık.** Yeni alan: değer + birim (L/100 km, elektrikli için kWh/100 km) |
 | Seed rakamları | SPEC §4.1: 14 şehirde 15 bayi, 15 model, her model 1–4 bayide |
 | Müsaitlik parametreleri | Alış ve iade bayisi, alış ve iade anı (30 dakikalık dilim, ISO 8601 UTC; ADR-16) |
-| Farklı bayiye bırakma | **Açık.** Serbest mi, ek ücreti var mı? Varsa özette ayrı kalem |
-| Fiyat hesabı | Backend hesaplar, frontend yalnızca gösterir (ADR-15). **Açık:** KDV dahil mi? |
-| Kirala'da geçici tutma | **Açık.** Araç özet/ödeme süresince tutuluyor mu (ör. 15 dk)? Tutulmuyorsa çakışma ödemede `409 VEHICLE_UNAVAILABLE` |
-| Sahte ödeme | **Açık.** Rezervasyonu "ödendi" yapan bir uç mu, yalnızca ekran mı? |
+| Farklı bayiye bırakma | **Karar (G, 10 Ekim): ücretsiz.** Özette ek kalem yok; SSS metni buna göre düzeltilir |
+| Fiyat hesabı | Backend hesaplar, frontend yalnızca gösterir (ADR-15). **Karar (G, 10 Ekim): fiyatlar KDV dahil**; özet ve ödemede "KDV dahil" yazar. Özet için `POST /reservations/price` (giriş gerektirmez; satır toplamları toplama birebir eşit) |
+| Kirala'da geçici tutma | **Karar (G, 10 Ekim): araç 15 dakika tutulur** (backend'in "tutma yok" önerisinden farklı; BACKLOG Y48). Özet ve ödemede geri sayım gösterilir; süre dolunca araç serbest kalır ve ziyaretçi aramaya yönlendirilir. Başkası tutulan aracı rezerve edemez; yine de çakışma olursa `409 VEHICLE_UNAVAILABLE` |
+| Sahte ödeme | **Karar:** ayrı uç yok; ödeme ekranında `POST /reservations` çağrılır (frontend zaten böyle kurulu). Kart bilgileri tarayıcıdan çıkmaz |
 | İletişim formu | `POST /contact`: ad soyad, e-posta, telefon (isteğe bağlı), konu, mesaj, KVKK onay zamanı. **Açık:** gönderilen form yalnızca veritabanına mı, e-postaya da mı düşüyor? |
 | Kurumsal form | `POST /quotes`; alanlar kurumsal tasarım onayından sonra (SPEC §10) |
 | Spam | Tuzak alan doluysa reddet; IP başına hız sınırı (ADR-20, #39) |

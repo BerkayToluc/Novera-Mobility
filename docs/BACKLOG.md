@@ -124,7 +124,7 @@ Sıra ve öneri dosyasındaki ek kalite maddeleri G tarafından 10 Ekim 2026'da 
 | 7 | Y15 | Ana sayfa yerleşimi ve kampanya galerisi: yeni bölüm sırası; "Araç Kirala" başlığı ve Bireysel/Kurumsal butonları ortalanır, butonların çevresindeki kutu kalkar; arama butonu "Ara"; "Size uygun sınıfı seçin" ve ürün kartları kalkar; Yol Boyu Güvence bandı modernleştirilir | FE | Y14 | SPEC §2.2 sırası; galeri klavye ve dokunmatikle gezilebiliyor; ilk görsel öncelikli |
 | 8 | Y16 | Kurumsal kutu: **önce tasarım önerisi ve G onayı**, sonra form + görüşme akışı. Ortak form parçaları (tuzak alan, KVKK onayı, başarı durumu; ADR-20) | FE | Y15 | G onayladı; örnek veriyle gönderim başarılı, kapalıyken hata durumu |
 | 9 | Y17 | İş birlikleri şeridi: 8 kurgusal SVG logo, durdurma düğmesi | FE | Y15 | Reduced-motion'da duruyor; ekran okuyucu logoları bir kez okuyor |
-| 10 | Y18 | SSS: Bireysel/Kurumsal sekmeleri, yaylı açılma, iletişim çağrısı | FE | Y15 | Açık sekme kutudaki seçimi izliyor; klavyeyle tam kullanılabilir |
+| 10 | Y18 | SSS: Bireysel/Kurumsal sekmeleri, yaylı açılma, iletişim çağrısı; farklı bayiye bırakma cevabı "ek ücret yoktur" olarak düzeltilir (G, 10 Ekim) | FE | Y15 | Açık sekme kutudaki seçimi izliyor; klavyeyle tam kullanılabilir |
 | 11 | Y39 | Ana sayfada mobil uygulama reklamı bölümü (fotoğraf + metin + mağaza rozetleri; rozetler bağlantı değil) | FE | Y15 | 375/768/1280'de doğru; görselde alt metin; rozetler gerçek mağazaya gitmiyor |
 | 12 | Y40 | Araç kiralama rehberleri: `/rehberler` liste ve rehber sayfaları (4–6 rehber, iki dilde), ana sayfada 3–4 kart | FE | Y15 | Rehberler iki dilde açılıyor; ana sayfadaki kartlar doğru rehbere gidiyor; sitemap'e eklenmesi Y29'da |
 | **3 · Araçlarımız** | | | | | |
@@ -132,7 +132,7 @@ Sıra ve öneri dosyasındaki ek kalite maddeleri G tarafından 10 Ekim 2026'da 
 | 14 | Y21 | Araçlarımız: yatay araç kartları (tüketim, ok, hover), üstte kategori çipleri ve belirgin kategori bölümleri, karta tıklayınca pencere (`?arac=`, ADR-22) | FE | Y12 | Çip seçilince liste süzülüyor; paylaşılan link pencereyi açık getiriyor; Esc ve geri tuşu kapatıyor; odak karta dönüyor |
 | **4 · SEO temeli ve kiralama akışı** | | | | | |
 | 15 | Y13 | SEO temeli (ADR-18): `lib/seo.ts` ile tüm sayfalarda canonical ve dil eşlemesi, ana sayfa meta açıklaması, robots.txt'ten özel sayfaların çıkarılması, özet/ödeme/onayda `noindex`; `/apple-icon` ve paylaşım görseli 404'ü (`proxy.ts` eşleşmesi) ve eksik `og:image` | FE | Y11 | Her sayfanın HTML'inde canonical ve iki dil bağlantısı var |
-| 16 | Y20 | Arama sonuçlarında **Kirala** → rezervasyon özeti; araç detay sayfası kalkar, ek hizmet seçimi ve güvence şeridi özete taşınır | FE | Y11 | SPEC §2.3 akışı uçtan uca çalışıyor; `/araclar/:slug` yok |
+| 16 | Y20 | Arama sonuçlarında **Kirala** → rezervasyon özeti; araç detay sayfası kalkar, ek hizmet seçimi ve güvence şeridi özete taşınır. Özet toplamı `POST /reservations/price`'tan gelir (frontend hesaplamaz), "KDV dahil" yazar; Kirala'da 15 dakikalık tutma ve geri sayım, süre dolunca ve çakışmada ayrı durum ekranı (SPEC §2.3) | FE | Y11, Y48 | SPEC §2.3 akışı uçtan uca çalışıyor; `/araclar/:slug` yok; geri sayım ve iki durum ekranı var |
 | **5 · İletişim ve yardım** | | | | | |
 | 17 | Y22 | İletişim: genel merkez, departman e-postaları, iletişim formu, şehir filtresi (liste ve pinler) | FE | Y12, Y16 | SPEC §2.6; "İzmir" seçilince liste ve pinler daralıyor; form örnek veriyle gönderiliyor |
 | 18 | Y41 | Yardım merkezi `/yardim`: konulara göre sorular, arama, rehber bağlantıları, İletişim'e yönlendirme (İletişim'den ayrı sayfa) | FE | Y40 | Arama sonuç vermezse İletişim'e yönlendiriyor; navbar ya da footer'dan erişiliyor |
@@ -165,6 +165,7 @@ Sıra ve öneri dosyasındaki ek kalite maddeleri G tarafından 10 Ekim 2026'da 
 | Y45 | Hesap türü (bireysel / kurumsal), kurumsal giriş ve firma bilgisi; kurumsal hesabı Novera açar (SPEC §2.9, §10) | BE | #25 (Auth) | Kurumsal kullanıcı girişte kurumsal hesap bilgisini alıyor |
 | Y46 | Puan sistemi: rezervasyonda puan kazanımı, `GET /me/points` (bakiye + geçmiş), kural metni (SPEC §2.9) | BE | #22, #25 | Tamamlanan rezervasyon puan ekliyor; iptal edilen eklemiyor |
 | Y47 | Kullanıcı tercihleri: varsayılan para birimi, dil, tema hesapta (#28'in genişlemesi) | BE | #28 | Tercih kaydedilip girişte dönüyor |
+| Y48 | Araç tutma: Kirala'da seçilen araç 15 dakika tutulur, süre dolunca serbest kalır; tutulan araç başka aramada müsait görünmez; tutma bitiş zamanı ISO 8601 UTC döner; çakışma `409 VEHICLE_UNAVAILABLE` (SPEC §2.3, ARCHITECTURE "Backend ile netleşecekler") | BE | #21, #22 | İki oturum aynı aracı alamıyor; 15 dakika sonra araç yeniden müsait |
 
 ---
 
