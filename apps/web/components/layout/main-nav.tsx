@@ -46,7 +46,7 @@ export function MainNav({ label, orientation = "horizontal", onNavigate, classNa
                 // cn is clsx only (lib/cn.ts), so each branch sets its own shape and spacing
                 // rather than overriding a shared one.
                 className={cn(
-                  "inline-flex min-h-11 items-center transition-colors",
+                  "inline-flex min-h-11 items-center whitespace-nowrap transition-colors",
                   vertical ? "w-full text-h3" : "text-label",
                   isContact
                     ? vertical
@@ -54,7 +54,7 @@ export function MainNav({ label, orientation = "horizontal", onNavigate, classNa
                       : "rounded-full border border-primary px-4 xl:px-5"
                     : vertical
                       ? "rounded-control px-3"
-                      : "rounded-control px-2 xl:px-3",
+                      : "rounded-control px-2",
                   isCurrent
                     ? "bg-selected text-on-selected"
                     : cn(isContact ? "text-link" : "text-fg", "hover:bg-selected"),

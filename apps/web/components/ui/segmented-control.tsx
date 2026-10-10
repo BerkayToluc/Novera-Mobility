@@ -11,6 +11,9 @@ type SegmentedControlProps<T extends string> = {
   options: readonly Option<T>[];
   value: T;
   onChange: (value: T) => void;
+  // "contained": options inside one pill-shaped track. "bare": two free-standing buttons,
+  // no track around them (the home page's audience choice, SPEC §2.2).
+  variant?: "contained" | "bare";
   className?: string;
 };
 
@@ -21,14 +24,17 @@ function SegmentedControl<T extends string>({
   options,
   value,
   onChange,
+  variant = "contained",
   className,
 }: SegmentedControlProps<T>) {
   const name = useId();
+  const bare = variant === "bare";
 
   return (
     <fieldset
       className={cn(
-        "inline-flex gap-1 rounded-full border border-border bg-surface-muted p-1",
+        "inline-flex",
+        bare ? "gap-3" : "gap-1 rounded-full border border-border bg-surface-muted p-1",
         className,
       )}
     >
@@ -45,10 +51,13 @@ function SegmentedControl<T extends string>({
           />
           <span
             className={cn(
-              "inline-flex min-h-11 cursor-pointer items-center justify-center rounded-full px-5 text-label text-fg-muted transition-colors",
-              "hover:text-fg peer-checked:bg-primary peer-checked:text-on-primary",
+              "inline-flex min-h-11 cursor-pointer items-center justify-center rounded-full text-label transition-colors",
+              "peer-checked:bg-primary peer-checked:text-on-primary",
               // The radio itself is visually hidden, so the focus ring is drawn on its label.
               "peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-focus",
+              bare
+                ? "min-w-36 border border-border-strong px-6 text-fg peer-checked:border-primary peer-not-checked:hover:bg-selected"
+                : "px-5 text-fg-muted hover:text-fg",
             )}
           >
             {option.label}

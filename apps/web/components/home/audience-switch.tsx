@@ -16,6 +16,7 @@ export function AudienceSwitch({ value }: { value: Audience }) {
 
   return (
     <SegmentedControl
+      variant="bare"
       label={t("audienceLabel")}
       options={AUDIENCES.map((audience) => ({ value: audience, label: t(`audiences.${audience}`) }))}
       value={shown}

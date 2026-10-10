@@ -1,8 +1,8 @@
 {
   "HomePage": {
     "title": "Araç Kirala",
+    "metaDescription": "Novera Mobility ile 14 şehirde araç kiralayın: bayiyi ve tarihleri seçin, uygun araçları fiyatlarıyla görün. Kurumsal filo için teklif isteyin.",
     "intro": "Alış ve bırakma bayisini ve tarihleri seçin, o bayideki uygun araçları fiyatlarıyla görün.",
-    "corporateTitle": "Kurumsal Filo",
     "corporateIntro": "Firmanız için araç sayısını ve süreyi yazın, size özel teklifi hazırlayalım.",
     "audienceLabel": "Kiralama türü",
     "audiences": {
@@ -14,21 +14,6 @@
       "text": "Araç arama şu an kullanılamıyor. Lütfen tekrar deneyin.",
       "retry": "Tekrar Dene"
     },
-    "classes": {
-      "title": "Size uygun sınıfı seçin",
-      "intro": "Şehir içi kullanımdan uzun yola, her ihtiyaca bir sınıf.",
-      "from": "{price} / gün'den başlayan",
-      "viewAll": "Tüm Araçlarımız",
-      "error": {
-        "title": "Araç sınıfları yüklenemedi",
-        "text": "Sınıfları şu an gösteremiyoruz."
-      }
-    },
-    "products": {
-      "title": "Filo çözümleri",
-      "intro": "İhtiyacınıza göre dört ürün: süreyi, esnekliği ve yönetimi siz belirlersiniz.",
-      "viewAll": "Tüm Ürünler"
-    },
     "faq": {
       "title": "Sık sorulan sorular",
       "empty": {
@@ -38,6 +23,32 @@
       "error": {
         "title": "Sorular yüklenemedi",
         "text": "Sık sorulan soruları şu an gösteremiyoruz."
+      }
+    },
+    "gallery": {
+      "label": "Kampanyalar",
+      "roledescription": "galeri",
+      "slideRoledescription": "kampanya",
+      "slideLabel": "{index} / {total}",
+      "goTo": "{index}. kampanyaya git",
+      "previous": "Önceki kampanya",
+      "next": "Sonraki kampanya",
+      "slides": {
+        "weekend": {
+          "title": "Hafta sonu yola çıkın",
+          "text": "Cuma akşamı alın, pazartesi sabahı bırakın. 14 şehirdeki bayilerimizden birinde aracınız hazır.",
+          "cta": "Araç Ara"
+        },
+        "electric": {
+          "title": "Elektrikliye geçmenin tam zamanı",
+          "text": "Elektrikli ve hibrit modellerimizle sessiz ve temiz bir yolculuk. Hangi bayide hangi modelin olduğunu görün.",
+          "cta": "Araçlarımızı Gör"
+        },
+        "fleet": {
+          "title": "Şirketinizin filosu kapınızda",
+          "text": "Araçları istediğiniz yere getiriyor, istediğiniz yerden alıyoruz. Kurumsal ekibimiz ihtiyacınızı dinlesin.",
+          "cta": "Teklif İste"
+        }
       }
     }
   },
@@ -65,6 +76,7 @@
         "title": "Yedek araç kapınızda",
         "text": "Arıza 24 saati aşarsa yedek araç size getirilir."
       }
-    }
+    },
+    "cta": "Yol Boyu Güvence'yi inceleyin"
   }
 }

@@ -5,7 +5,7 @@
     "dates": "Alış ve iade tarihleri",
     "pickupTime": "Alış saati",
     "returnTime": "İade saati",
-    "submit": "Kirala",
+    "submit": "Ara",
     "branchPlaceholder": "Bayi seçin",
     "noVehicles": "Şu an araç yok",
     "andMore": "+{count}",

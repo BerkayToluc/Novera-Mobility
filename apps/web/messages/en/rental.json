@@ -5,7 +5,7 @@
     "dates": "Pick-up and return dates",
     "pickupTime": "Pick-up time",
     "returnTime": "Return time",
-    "submit": "Rent",
+    "submit": "Search",
     "branchPlaceholder": "Choose a branch",
     "noVehicles": "No cars right now",
     "andMore": "+{count}",

@@ -1,8 +1,8 @@
 {
   "HomePage": {
     "title": "Rent a Car",
+    "metaDescription": "Rent a car in 14 cities with Novera Mobility: pick the branch and dates, see the available cars with their prices. Ask for a quote for your company fleet.",
     "intro": "Choose where to pick up and drop off the car and your dates, and see the cars available at that branch with prices.",
-    "corporateTitle": "Corporate Fleet",
     "corporateIntro": "Tell us how many cars and for how long, and we will prepare a quote for your company.",
     "audienceLabel": "Rental type",
     "audiences": {
@@ -14,21 +14,6 @@
       "text": "Car search is not available right now. Please try again.",
       "retry": "Try Again"
     },
-    "classes": {
-      "title": "Pick the class that suits you",
-      "intro": "From city driving to long trips, a class for every need.",
-      "from": "From {price} / day",
-      "viewAll": "Our Cars",
-      "error": {
-        "title": "Car classes could not be loaded",
-        "text": "We cannot show the classes right now."
-      }
-    },
-    "products": {
-      "title": "Fleet solutions",
-      "intro": "Four products to match your need: you decide the term, the flexibility and the management.",
-      "viewAll": "All Products"
-    },
     "faq": {
       "title": "Frequently asked questions",
       "empty": {
@@ -38,6 +23,32 @@
       "error": {
         "title": "Questions could not be loaded",
         "text": "We cannot show the frequently asked questions right now."
+      }
+    },
+    "gallery": {
+      "label": "Campaigns",
+      "roledescription": "carousel",
+      "slideRoledescription": "campaign",
+      "slideLabel": "{index} of {total}",
+      "goTo": "Go to campaign {index}",
+      "previous": "Previous campaign",
+      "next": "Next campaign",
+      "slides": {
+        "weekend": {
+          "title": "Hit the road this weekend",
+          "text": "Pick up on Friday evening, drop off on Monday morning. A car is ready at one of our branches in 14 cities.",
+          "cta": "Search Cars"
+        },
+        "electric": {
+          "title": "A good time to go electric",
+          "text": "Quiet, clean driving with our electric and hybrid models. See which branch has which model.",
+          "cta": "See Our Cars"
+        },
+        "fleet": {
+          "title": "Your company fleet, at your door",
+          "text": "We bring the cars where you need them and collect them where you finish. Let our corporate team hear what you need.",
+          "cta": "Request a Quote"
+        }
       }
     }
   },
@@ -65,6 +76,7 @@
         "title": "A replacement car at your door",
         "text": "If the fault lasts over 24 hours, a replacement car is brought to you."
       }
-    }
+    },
+    "cta": "Explore Road Assurance"
   }
 }
