@@ -52,7 +52,7 @@ export async function FaqSection({ audience }: { audience: Audience }) {
         <h3 className="text-h3 text-fg">{t("cta.title")}</h3>
         <p className="text-body text-fg-muted">{t("cta.text")}</p>
         <Button asChild variant="outline">
-          <Link href="/iletisim">{t("cta.button")}</Link>
+          <Link href={{ pathname: "/iletisim", hash: "mesaj" }}>{t("cta.button")}</Link>
         </Button>
       </aside>
     </section>

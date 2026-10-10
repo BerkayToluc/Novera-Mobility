@@ -1,11 +1,11 @@
 {
   "ContactPage": {
     "metaTitle": "Contact",
-    "metaDescription": "Find Novera Mobility branches on the map: address, opening hours, phone and directions.",
+    "metaDescription": "Get in touch with Novera Mobility: head office, team email addresses, a contact form, and the address, hours and directions of our branches in 14 cities.",
     "title": "Contact",
-    "intro": "Search for the nearest branch by city or branch name and see its address, opening hours and phone.",
-    "searchLabel": "Search city or branch",
-    "searchPlaceholder": "e.g. Izmir",
+    "intro": "Write to us, reach our teams directly or find the branch nearest to you.",
+    "searchLabel": "Search branches",
+    "searchPlaceholder": "Branch name, district or address",
     "viewLabel": "View",
     "views": {
       "list": "List",
@@ -36,6 +36,71 @@
       "directions": "Get directions",
       "newTab": "(opens in a new tab)",
       "showOnMap": "Show on map"
+    },
+    "cityLabel": "City",
+    "allCities": "All cities",
+    "countFiltered": "Showing {count} of {total} branches",
+    "branches": {
+      "title": "Our branches",
+      "intro": "Filter by city or search by branch name, district or address; the list and the map narrow together."
+    },
+    "form": {
+      "title": "Write to us",
+      "intro": "Leave your message and we will reply within one business day."
+    },
+    "hq": {
+      "title": "Head office",
+      "hours": "Weekdays 09:00 – 18:00",
+      "directions": "Get directions",
+      "newTab": "(opens in a new tab)",
+      "departmentsTitle": "Straight to our teams",
+      "departments": {
+        "marketing": {
+          "name": "Marketing",
+          "text": "Press, campaign and brand questions"
+        },
+        "sales": {
+          "name": "Sales",
+          "text": "Corporate quotes and fleet conversations"
+        },
+        "partnerships": {
+          "name": "Partnerships",
+          "text": "Partner and supplier enquiries"
+        }
+      }
+    }
+  },
+  "ContactForm": {
+    "name": "Full name",
+    "email": "Email",
+    "phone": "Phone (optional)",
+    "phoneHint": "Add it if you would like us to call you.",
+    "topic": "Subject",
+    "topics": {
+      "general": "General question",
+      "booking": "Booking",
+      "corporate": "Corporate rental",
+      "partnership": "Partnership",
+      "feedback": "Suggestion or complaint"
+    },
+    "message": "Your message",
+    "submit": "Send Message",
+    "submitting": "Sending",
+    "errors": {
+      "name": "Enter your first and last name.",
+      "email": "Enter a valid email address.",
+      "phone": "Enter a valid phone number with its area code, or leave it empty.",
+      "message": "Write your message in at least 10 characters.",
+      "consent": "Accept the privacy notice to continue.",
+      "invalid": "Your message looks incomplete. Check the fields and send it again.",
+      "unavailable": "The message service is not available right now. Please try again later.",
+      "generic": "Your message could not be sent. Please try again."
+    },
+    "sent": {
+      "title": "We have your message",
+      "text": "We will reply to {email} within one business day.",
+      "reference": "Your message number:",
+      "again": "Write another message"
     }
   }
 }

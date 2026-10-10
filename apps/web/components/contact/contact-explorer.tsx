@@ -3,10 +3,12 @@
 import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
+import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 import { SegmentedControl } from "@/components/ui/segmented-control";
 import { StateMessage } from "@/components/ui/state-message";
-import { matchesBranch, type BranchDetail } from "@/lib/branch-detail";
+import { inCity, matchesBranch, type BranchDetail } from "@/lib/branch-detail";
 import { BranchCard } from "./branch-card";
 import { BranchMap } from "./branch-map";
 
@@ -33,12 +35,19 @@ export function ContactExplorer({ branches, mapsApiKey }: ContactExplorerProps) 
   const t = useTranslations("ContactPage");
   const isDesktop = useIsDesktop();
   const [query, setQuery] = useState("");
+  const [city, setCity] = useState("");
   const [view, setView] = useState<View>("list");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [mapFailed, setMapFailed] = useState(false);
   const onMapFail = useCallback(() => setMapFailed(true), []);
 
-  const matches = useMemo(() => branches.filter((branch) => matchesBranch(branch, query)), [branches, query]);
+  // Cities in the order the branches come, each once.
+  const cities = useMemo(() => [...new Set(branches.map((branch) => branch.city))], [branches]);
+  const matches = useMemo(
+    () => branches.filter((branch) => inCity(branch, city) && matchesBranch(branch, query)),
+    [branches, city, query],
+  );
+  const filtered = city !== "" || query !== "";
   const mapAvailable = mapsApiKey !== "" && !mapFailed;
   // Below the desktop width the map and the list take turns; the list is where a visitor
   // starts, and the only view when there is no map.
@@ -53,22 +62,42 @@ export function ContactExplorer({ branches, mapsApiKey }: ContactExplorerProps) 
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-        <div className="flex w-full max-w-md flex-col gap-2">
-          <label htmlFor="branch-search" className="text-label text-fg">
-            {t("searchLabel")}
-          </label>
-          <Input
-            id="branch-search"
-            type="search"
-            value={query}
-            placeholder={t("searchPlaceholder")}
-            autoComplete="off"
-            onChange={(event) => {
-              setQuery(event.target.value);
-              // A new search starts from the overview, not from the last branch picked.
-              setSelectedId(null);
-            }}
-          />
+        <div className="grid w-full gap-4 md:max-w-2xl md:grid-cols-2">
+          <Field label={t("cityLabel")}>
+            {(control) => (
+              <Select
+                {...control}
+                value={city}
+                onChange={(event) => {
+                  setCity(event.target.value);
+                  // A new filter starts from the overview, not from the last branch picked.
+                  setSelectedId(null);
+                }}
+              >
+                <option value="">{t("allCities")}</option>
+                {cities.map((name) => (
+                  <option key={name} value={name}>
+                    {name}
+                  </option>
+                ))}
+              </Select>
+            )}
+          </Field>
+          <Field label={t("searchLabel")}>
+            {(control) => (
+              <Input
+                {...control}
+                type="search"
+                value={query}
+                placeholder={t("searchPlaceholder")}
+                autoComplete="off"
+                onChange={(event) => {
+                  setQuery(event.target.value);
+                  setSelectedId(null);
+                }}
+              />
+            )}
+          </Field>
         </div>
         {mapAvailable && !isDesktop && (
           <SegmentedControl
@@ -90,12 +119,19 @@ export function ContactExplorer({ branches, mapsApiKey }: ContactExplorerProps) 
       )}
 
       <p role="status" className="text-small text-fg-muted">
-        {t("count", { count: matches.length })}
+        {filtered ? t("countFiltered", { count: matches.length, total: branches.length }) : t("count", { count: matches.length })}
       </p>
 
       {matches.length === 0 ? (
         <StateMessage title={t("noResults.title")} text={t("noResults.text")}>
-          <Button type="button" variant="outline" onClick={() => setQuery("")}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              setQuery("");
+              setCity("");
+            }}
+          >
             {t("noResults.clear")}
           </Button>
         </StateMessage>
