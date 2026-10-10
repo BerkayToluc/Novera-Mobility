@@ -36,7 +36,17 @@
     "cookies": "Çerez Politikası",
     "terms": "Kiralama Koşulları",
     "copyright": "© {year} Novera Mobility. Tüm hakları saklıdır.",
-    "fiction": "Bu site kurgusal bir öğrenme projesidir."
+    "fiction": "Bu site kurgusal bir öğrenme projesidir.",
+    "contact": "İletişim",
+    "contactPage": "Bize yazın",
+    "follow": "Bizi takip edin",
+    "followSoon": "Sosyal medya hesaplarımız yakında açılacak.",
+    "social": {
+      "instagram": "Instagram",
+      "linkedin": "LinkedIn",
+      "x": "X",
+      "youtube": "YouTube"
+    }
   },
   "ThemeSwitcher": {
     "label": "Tema",
