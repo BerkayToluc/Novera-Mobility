@@ -103,45 +103,57 @@ Sıranın gerekçesi:
 2. **Ortak parçalar önce.** Örnek veri (rakamlar, tüketim), SEO yardımcısı ve navbar sonraki sayfaların hepsinde kullanılır.
 3. **Sonra G'nin mesajındaki sırayla:** ana sayfa (galeri → kurumsal kutu → iş birlikleri → SSS → footer), arama ve kiralama, Araçlarımız, İletişim, içerik sayfaları.
 4. **Yasal sayfalar, çerez ve SEO tamamlama en sonda.** Yeni sayfalar oluştuktan sonra sitemap, footer linkleri ve güvenlik başlıkları bir kez güncellenir.
+5. **10 Ekim değişikliği (G onayladı):** yeni renk paleti her sayfayı etkilediği için en öne alındı; ardından navbar (tercihler footer'dan buraya taşınıyor) ve footer; sonra ana sayfa; Araçlarımız'dan hemen önce örnek veri.
+6. **10 Ekim ek kapsam (G):** navbar açılır menüleri ve para birimi menüsü navbar aşamasına; mobil uygulama bölümü ve rehberler ana sayfa aşamasına; yardım İletişim'in yanına; giriş sekmeleri, ayarlar, puan ve seyahatler yeni "Hesap" aşamasına (auth backend'e bağlı oldukları için içerik sayfalarından sonra).
 
 Sıra ve öneri dosyasındaki ek kalite maddeleri G tarafından 10 Ekim 2026'da onaylandı.
 
-**GitHub issue numaraları (10 Ekim 2026):** Y10 #78 · Y11 #79 · Y12 #80 · Y13 #81 · Y14 #82 · Y15 #83 · Y16 #84 · Y17 #85 · Y18 #86 · Y19 #87 · Y20 #88 · Y21 #89 · Y22 #90 · Y23 #91 · Y24 #92 · Y25 #93 · Y26 #94 · Y27 #95 · Y28 #96 · Y29 #97 · Y30 #98 · Y31 #99 · Y32 #100 · Y33 #101 · Y34 #102 · Y35 #103. Commit ve PR'da bu issue numaraları kullanılır. Y1–Y9 için issue açılmadı (Y3, Y4, Y7, Y8, Y9 zaten `main`'de; Y1, Y2, Y5, Y6 backend/API gelince).
+**GitHub issue numaraları (10 Ekim 2026):** Y10 #78 · Y11 #79 · Y12 #80 · Y13 #81 · Y14 #82 · Y15 #83 · Y16 #84 · Y17 #85 · Y18 #86 · Y19 #87 · Y20 #88 · Y21 #89 · Y22 #90 · Y23 #91 · Y24 #92 · Y25 #93 · Y26 #94 · Y27 #95 · Y28 #96 · Y29 #97 · Y30 #98 · Y31 #99 · Y32 #100 · Y33 #101 · Y34 #102 · Y35 #103 · Y36–Y47 (issue henüz yok). Commit ve PR'da bu issue numaraları kullanılır. Y1–Y9 için issue açılmadı (Y3, Y4, Y7, Y8, Y9 zaten `main`'de; Y1, Y2, Y5, Y6 backend/API gelince).
 
 | Sıra | # | İş | Sahip | Bağımlı | Bitti sayılması için |
 |---|---|---|---|---|---|
 | **0 · Zemin** | | | | | |
 | 1 | Y10 | Build sorununu çöz (`ERR_SWC_NATIVE_CACHE`). Çözüm: kullanıcı ortam değişkeni `SWC_NATIVE_BINDING_CACHE` kısa bir klasöre (`C:\Users\karad\.swc-cache`) ayarlanır; varsayılan önbellek `AppData\Local` altında ve o klasörün izinleri SWC'nin güvenlik kontrolüne takılıyor, proje içindeki yol ise Windows'un 260 karakter sınırını aşıyor | FE (G) | — | `pnpm build` ve `pnpm typecheck` bu makinede geçiyor |
 | 2 | Y11 | 9 Ekim'de bekleyen 8 dalı 375/768/1280'de doğrula ve birleştir. 10 Ekim itibarıyla B zinciri (`vehicle-detail` → `booking-summary` → `payment`), `contact-page`, `seo-assets` ve `chore/a11y-audit` `main`'de (#71–#75) ve `main` build alıyor, ama tarayıcıda doğrulanmadı. Kalan: bu altısının tarayıcı kontrolü, sonra A zinciri (`home-audience` → `corporate-quote`). Araç detayının kaldırılması Y20'de | FE | Y10 | 8 dal `main`'de; altısı tarayıcıda kontrol edildi; A zincirinin PR'larında ekran görüntüleri |
-| **1 · Ortak temel** | | | | | |
-| 3 | Y12 | Örnek veri ve rakamlar (SPEC §4.1): 14 şehirde 15 bayi, 15 model, tüketim alanı, model slug'ı | FE | Y11 | Araçlarımız 15 model, bayiler 14 şehir |
-| 4 | Y13 | SEO temeli (ADR-18): `lib/seo.ts` ile tüm sayfalarda canonical ve dil eşlemesi, ana sayfa meta açıklaması, robots.txt'ten özel sayfaların çıkarılması, özet/ödeme/onayda `noindex` | FE | Y11 | Her sayfanın HTML'inde canonical ve iki dil bağlantısı var |
-| 5 | Y14 | Navbar: İletişim vurgusu (masaüstü ve mobil menü) | FE | Y11 | 375/768/1280'de farklı görünüyor; kontrast ve odak AA |
+| **1 · Renk ve çerçeve (10 Ekim'de öne alındı)** | | | | | |
+| 3 | Y36 | Renk paleti "Zeytin ve Ege" (SPEC §5.1): token'lar, açık tema varsayılan ve sayfa zemini beyaz, metin seçimi ve imleç rengi paletten; logo, favicon ve paylaşım görseli yeni renkte | FE | Y11 | Tüm renkler yeni palette; açık ve koyu temada AA; çerez yokken site açık temada |
+| 4 | Y14 | Navbar: İletişim farklı görünür ve diğer linklerden boşlukla ayrılır; Giriş Yap butonu zeminden ayrışır; para birimi kendi simgeli açılır menüsünde (`₺ TRY`); dil ve tema tek düğmeyle açılan panelde (mobilde hamburger menüde); footer'dan tercihler kalkar | FE | Y36 | 375/768/1280'de doğru; menü ve panel klavyeyle kullanılabilir; kontrast ve odak AA |
+| 5 | Y37 | Navbar'da Ürünler ve Hizmetler açılır menüleri: öğeler listelenir (4 ürün, 5 hizmet); mobilde alt liste | FE | Y14 | Menü klavyeyle açılıp gezilebiliyor, Esc kapatıyor; her öğe doğru sayfaya gidiyor |
+| 6 | Y19 | Footer (Simple Footer referansı): solda logo, tanım ve telif; sağda Keşfet, Yasal ve iletişim sütunları; "Bizi takip edin" ikonları (tıklanamaz); tercihler yok | FE | Y14 | 375/768/1280'de doğru |
 | **2 · Ana sayfa** | | | | | |
-| 6 | Y15 | Ana sayfa yerleşimi ve kampanya galerisi: yeni bölüm sırası, `h1` kutuda, arama butonu "Ara", araç sınıfları ve ürün kartları kalkar, Yol Boyu Güvence bandı yer değiştirir | FE | Y13 | SPEC §2.2 sırası; galeri klavye ve dokunmatikle gezilebiliyor; ilk görsel öncelikli |
-| 7 | Y16 | Kurumsal kutu: **önce tasarım önerisi ve G onayı**, sonra form + görüşme akışı. Ortak form parçaları (tuzak alan, KVKK onayı, başarı durumu; ADR-20) | FE | Y15 | G onayladı; örnek veriyle gönderim başarılı, kapalıyken hata durumu |
-| 8 | Y17 | İş birlikleri şeridi: 8 kurgusal SVG logo, durdurma düğmesi | FE | Y15 | Reduced-motion'da duruyor; ekran okuyucu logoları bir kez okuyor |
-| 9 | Y18 | SSS: Bireysel/Kurumsal sekmeleri, yaylı açılma, iletişim çağrısı | FE | Y15 | Açık sekme kutudaki seçimi izliyor; klavyeyle tam kullanılabilir |
-| 10 | Y19 | Footer (Simple Footer referansı) | FE | Y11, G'nin ekran görüntüsü | 375/768/1280'de doğru |
-| **3 · Kiralama akışı** | | | | | |
-| 11 | Y20 | Arama sonuçlarında **Kirala** → rezervasyon özeti; araç detay sayfası kalkar, ek hizmet seçimi ve güvence şeridi özete taşınır | FE | Y11 | SPEC §2.3 akışı uçtan uca çalışıyor; `/araclar/:slug` yok |
-| **4 · Araçlarımız** | | | | | |
-| 12 | Y21 | Araçlarımız kartı (tüketim, ok, hover) ve pencere (`?arac=`, ADR-22) | FE | Y12 | Paylaşılan link pencereyi açık getiriyor; Esc ve geri tuşu kapatıyor; odak karta dönüyor |
-| **5 · İletişim** | | | | | |
-| 13 | Y22 | İletişim: genel merkez, departman e-postaları, iletişim formu, şehir filtresi (liste ve pinler) | FE | Y12, Y16 | SPEC §2.6; "İzmir" seçilince liste ve pinler daralıyor; form örnek veriyle gönderiliyor |
+| 7 | Y15 | Ana sayfa yerleşimi ve kampanya galerisi: yeni bölüm sırası; "Araç Kirala" başlığı ve Bireysel/Kurumsal butonları ortalanır, butonların çevresindeki kutu kalkar; arama butonu "Ara"; "Size uygun sınıfı seçin" ve ürün kartları kalkar; Yol Boyu Güvence bandı modernleştirilir | FE | Y14 | SPEC §2.2 sırası; galeri klavye ve dokunmatikle gezilebiliyor; ilk görsel öncelikli |
+| 8 | Y16 | Kurumsal kutu: **önce tasarım önerisi ve G onayı**, sonra form + görüşme akışı. Ortak form parçaları (tuzak alan, KVKK onayı, başarı durumu; ADR-20) | FE | Y15 | G onayladı; örnek veriyle gönderim başarılı, kapalıyken hata durumu |
+| 9 | Y17 | İş birlikleri şeridi: 8 kurgusal SVG logo, durdurma düğmesi | FE | Y15 | Reduced-motion'da duruyor; ekran okuyucu logoları bir kez okuyor |
+| 10 | Y18 | SSS: Bireysel/Kurumsal sekmeleri, yaylı açılma, iletişim çağrısı | FE | Y15 | Açık sekme kutudaki seçimi izliyor; klavyeyle tam kullanılabilir |
+| 11 | Y39 | Ana sayfada mobil uygulama reklamı bölümü (fotoğraf + metin + mağaza rozetleri; rozetler bağlantı değil) | FE | Y15 | 375/768/1280'de doğru; görselde alt metin; rozetler gerçek mağazaya gitmiyor |
+| 12 | Y40 | Araç kiralama rehberleri: `/rehberler` liste ve rehber sayfaları (4–6 rehber, iki dilde), ana sayfada 3–4 kart | FE | Y15 | Rehberler iki dilde açılıyor; ana sayfadaki kartlar doğru rehbere gidiyor; sitemap'e eklenmesi Y29'da |
+| **3 · Araçlarımız** | | | | | |
+| 13 | Y12 | Örnek veri ve rakamlar (SPEC §4.1): 14 şehirde 15 bayi, 15 model, tüketim alanı, model slug'ı | FE | Y11 | Araçlarımız 15 model, bayiler 14 şehir |
+| 14 | Y21 | Araçlarımız: yatay araç kartları (tüketim, ok, hover), üstte kategori çipleri ve belirgin kategori bölümleri, karta tıklayınca pencere (`?arac=`, ADR-22) | FE | Y12 | Çip seçilince liste süzülüyor; paylaşılan link pencereyi açık getiriyor; Esc ve geri tuşu kapatıyor; odak karta dönüyor |
+| **4 · SEO temeli ve kiralama akışı** | | | | | |
+| 15 | Y13 | SEO temeli (ADR-18): `lib/seo.ts` ile tüm sayfalarda canonical ve dil eşlemesi, ana sayfa meta açıklaması, robots.txt'ten özel sayfaların çıkarılması, özet/ödeme/onayda `noindex`; `/apple-icon` ve paylaşım görseli 404'ü (`proxy.ts` eşleşmesi) ve eksik `og:image` | FE | Y11 | Her sayfanın HTML'inde canonical ve iki dil bağlantısı var |
+| 16 | Y20 | Arama sonuçlarında **Kirala** → rezervasyon özeti; araç detay sayfası kalkar, ek hizmet seçimi ve güvence şeridi özete taşınır | FE | Y11 | SPEC §2.3 akışı uçtan uca çalışıyor; `/araclar/:slug` yok |
+| **5 · İletişim ve yardım** | | | | | |
+| 17 | Y22 | İletişim: genel merkez, departman e-postaları, iletişim formu, şehir filtresi (liste ve pinler) | FE | Y12, Y16 | SPEC §2.6; "İzmir" seçilince liste ve pinler daralıyor; form örnek veriyle gönderiliyor |
+| 18 | Y41 | Yardım merkezi `/yardim`: konulara göre sorular, arama, rehber bağlantıları, İletişim'e yönlendirme (İletişim'den ayrı sayfa) | FE | Y40 | Arama sonuç vermezse İletişim'e yönlendiriyor; navbar ya da footer'dan erişiliyor |
 | **6 · İçerik sayfaları** | | | | | |
-| 14 | Y23 | Ürünler ve Hizmetler içeriği (SPEC Ek A): yeni slug'lar, ürün bölüm başlıkları, hizmet maddeleri, İngilizce çeviri | FE | Y11 | Metin Ek A ile aynı; tasarım değişmedi |
-| 15 | Y24 | Hakkımızda: eğri zaman çizelgesi (Hikayemiz), sayaçlar, rakam düzeltmesi (SPEC §2.7, §4.1) | FE | Y12 | Reduced-motion'da statik; rakamlar §4.1 ile aynı |
-| **7 · Yasal, çerez, analytics** | | | | | |
-| 16 | Y25 | Gizlilik politikası ve kullanım şartları sayfaları; footer linkleri; KVKK metnine iletişim formu verisi | FE | Y19 | İki dilde; footer'dan erişiliyor |
-| 17 | Y26 | Çerez onayı: bant, ayar penceresi, footer'da "Çerez tercihleri" (ADR-19) | FE | Y25 | "Reddet" seçilince analytics HTML'de yok |
-| 18 | Y27 | Analytics (çerezsiz araç, yalnızca onayla) | FE | Y26, analytics aracı kararı | Onaylı bir ziyaret araçta görünüyor |
-| 19 | Y28 | 500 hata sayfası (ADR-23) | FE | Y11 | Bilerek atılan hatada markalı sayfa çıkıyor |
-| **8 · SEO tamamlama ve kalite** | | | | | |
-| 20 | Y29 | JSON-LD, Open Graph metinleri, sitemap'e yeni sayfalar, `llms.txt`, web manifest ve `theme-color` | FE | Y25 | JSON-LD şema doğrulayıcıdan hatasız geçiyor; sitemap tüm herkese açık sayfaları içeriyor |
-| 21 | Y30 | Güvenlik başlıkları: CSP, HSTS, `X-Content-Type-Options`, `Referrer-Policy` | FE | Y27 | Başlıklar yanıtta var; harita, analytics ve formlar çalışıyor |
-| 22 | Y31 | CI'da kırık link kontrolü | FE | Y29 | Bilerek kırılan bir link CI'ı kırmızı yapıyor |
-| 23 | Y32 | Hız: Core Web Vitals hedefleri (SPEC §9), mobil Lighthouse raporu ve düzeltmeler | FE | Y15–Y29 | LCP, INP, CLS hedefte; rapor PR'da |
+| 19 | Y23 | Ürünler ve Hizmetler içeriği (SPEC Ek A): yeni slug'lar, ürün bölüm başlıkları, hizmet maddeleri, İngilizce çeviri | FE | Y11 | Metin Ek A ile aynı; tasarım değişmedi |
+| 20 | Y24 | Hakkımızda: eğri zaman çizelgesi (Hikayemiz), sayaçlar, rakam düzeltmesi (SPEC §2.7, §4.1) | FE | Y12 | Reduced-motion'da statik; rakamlar §4.1 ile aynı |
+| **7 · Hesap** | | | | | |
+| 21 | Y38 | Girişte Bireysel ve Kurumsal sekmeleri; kurumsal hesap sayfası (firma bilgisi, teklif talepleri) | FE | Y11 | Sekme adreste (`?tip=kurumsal`); kurumsal girişte kurumsal hesap sayfası açılıyor (örnek veriyle) |
+| 22 | Y42 | Profil Ayarlar: varsayılan para birimi, dil ve tema hesaba kaydedilir ve girişte uygulanır | FE | Y38 | Ayar kaydedilip yeniden girişte geri geliyor (örnek veriyle) |
+| 23 | Y43 | Puanlarım (`/profil/puanlar`): bakiye, kazanım geçmişi, kurallar; rezervasyon onayında kazanılan puan | FE | Y42 | Örnek veriyle bakiye ve geçmiş görünüyor; boş ve hata durumları var |
+| 24 | Y44 | Rezervasyonlarım: yaklaşan ve geçmiş seyahatler ayrı; her seyahatte kazanılan puan | FE | Y43 | İki liste doğru ayrılıyor; boş durumlar anlamlı |
+| **8 · Yasal, çerez, analytics** | | | | | |
+| 25 | Y25 | Gizlilik politikası ve kullanım şartları sayfaları; footer linkleri; KVKK metnine iletişim formu verisi | FE | Y19 | İki dilde; footer'dan erişiliyor |
+| 26 | Y26 | Çerez onayı: bant, ayar penceresi, footer'da "Çerez tercihleri" (ADR-19) | FE | Y25 | "Reddet" seçilince analytics HTML'de yok |
+| 27 | Y27 | Analytics (çerezsiz araç, yalnızca onayla) | FE | Y26, analytics aracı kararı | Onaylı bir ziyaret araçta görünüyor |
+| 28 | Y28 | 500 hata sayfası (ADR-23) | FE | Y11 | Bilerek atılan hatada markalı sayfa çıkıyor |
+| **9 · SEO tamamlama ve kalite** | | | | | |
+| 29 | Y29 | JSON-LD, Open Graph metinleri, sitemap'e yeni sayfalar, `llms.txt`, web manifest ve `theme-color` | FE | Y25 | JSON-LD şema doğrulayıcıdan hatasız geçiyor; sitemap tüm herkese açık sayfaları içeriyor |
+| 30 | Y30 | Güvenlik başlıkları: CSP, HSTS, `X-Content-Type-Options`, `Referrer-Policy` | FE | Y27 | Başlıklar yanıtta var; harita, analytics ve formlar çalışıyor |
+| 31 | Y31 | CI'da kırık link kontrolü | FE | Y29 | Bilerek kırılan bir link CI'ı kırmızı yapıyor |
+| 32 | Y32 | Hız: Core Web Vitals hedefleri (SPEC §9), mobil Lighthouse raporu ve düzeltmeler | FE | Y15–Y29 | LCP, INP, CLS hedefte; rapor PR'da |
 
 **Backend (paralel).** Frontend örnek veriyle ilerlediği için bunları beklemez; uçlar gelince örnek veri kapatılır.
 
@@ -150,6 +162,9 @@ Sıra ve öneri dosyasındaki ek kalite maddeleri G tarafından 10 Ekim 2026'da 
 | Y33 | Model ve fiziksel araç ayrımı, tüketim alanı; seed'i SPEC §4.1'e göre güncelle | BE | #6, #14, #15 | Araçlarımız modelleri ve bayilerini tek istekle alıyor |
 | Y34 | `POST /contact`: `ContactMessage`, tuzak alan reddi, hız sınırı, KVKK onay zamanı (ADR-20) | BE | #6, #14 | Tuzak alanı dolu istek reddediliyor |
 | Y35 | `POST /quotes` alanlarını onaylanan kurumsal tasarıma göre güncelle | BE | Y16 | Kurumsal form gerçek uca gönderiliyor |
+| Y45 | Hesap türü (bireysel / kurumsal), kurumsal giriş ve firma bilgisi; kurumsal hesabı Novera açar (SPEC §2.9, §10) | BE | #25 (Auth) | Kurumsal kullanıcı girişte kurumsal hesap bilgisini alıyor |
+| Y46 | Puan sistemi: rezervasyonda puan kazanımı, `GET /me/points` (bakiye + geçmiş), kural metni (SPEC §2.9) | BE | #22, #25 | Tamamlanan rezervasyon puan ekliyor; iptal edilen eklemiyor |
+| Y47 | Kullanıcı tercihleri: varsayılan para birimi, dil, tema hesapta (#28'in genişlemesi) | BE | #28 | Tercih kaydedilip girişte dönüyor |
 
 ---
 

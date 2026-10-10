@@ -3,38 +3,28 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { switcherItemClasses, type SwitcherTone } from "@/components/ui/switcher-item";
-import { THEME_COOKIE, THEME_COOKIE_MAX_AGE, type Theme } from "@/lib/theme";
-
-type Choice = Theme | "system";
-
-const CHOICES: readonly Choice[] = ["system", "light", "dark"];
+import { THEME_COOKIE, THEME_COOKIE_MAX_AGE, THEMES, type Theme } from "@/lib/theme";
 
 // Writes the choice where the server will read it on the next request and applies
 // it to the open page immediately, so there is no round trip before the change shows.
-function applyChoice(choice: Choice) {
-  const root = document.documentElement;
-  if (choice === "system") {
-    root.removeAttribute("data-theme");
-    document.cookie = `${THEME_COOKIE}=; path=/; max-age=0; samesite=lax`;
-  } else {
-    root.setAttribute("data-theme", choice);
-    document.cookie = `${THEME_COOKIE}=${choice}; path=/; max-age=${THEME_COOKIE_MAX_AGE}; samesite=lax`;
-  }
+function applyChoice(choice: Theme) {
+  document.documentElement.setAttribute("data-theme", choice);
+  document.cookie = `${THEME_COOKIE}=${choice}; path=/; max-age=${THEME_COOKIE_MAX_AGE}; samesite=lax`;
 }
 
 export function ThemeSwitcher({
   initialTheme,
   tone = "default",
 }: {
-  initialTheme: Theme | undefined;
+  initialTheme: Theme;
   tone?: SwitcherTone;
 }) {
   const t = useTranslations("ThemeSwitcher");
-  const [choice, setChoice] = useState<Choice>(initialTheme ?? "system");
+  const [choice, setChoice] = useState<Theme>(initialTheme);
 
   return (
     <div role="group" aria-label={t("label")} className="flex gap-1">
-      {CHOICES.map((option) => {
+      {THEMES.map((option) => {
         const isCurrent = option === choice;
         return (
           <button

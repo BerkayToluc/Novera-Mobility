@@ -14,7 +14,7 @@ export default async function OpenGraphImage() {
 
   return new ImageResponse(
     (
-      <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", background: "#1d5a40" }}>
+      <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", background: "#45561d" }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={src} alt="" width={720} height={198} />
       </div>
