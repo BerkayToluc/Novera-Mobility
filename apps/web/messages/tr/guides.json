@@ -1,0 +1,164 @@
+{
+  "GuidesPage": {
+    "metaTitle": "Araç Kiralama Rehberleri",
+    "metaDescription": "Araç kiralamadan önce bilmeniz gerekenler: gerekli belgeler, farklı bayiye bırakma, hasar ve arıza, elektrikli araçlar ve kurumsal kiralama.",
+    "title": "Araç kiralama rehberleri",
+    "intro": "Araç kiralamadan önce ve kiralarken işinize yarayacak kısa rehberler.",
+    "read": "Rehberi oku",
+    "back": "Tüm rehberler",
+    "homeTitle": "Araç kiralama rehberleri",
+    "homeIntro": "Kiralamadan önce merak edilenler, kısa ve net.",
+    "viewAll": "Tüm rehberler",
+    "moreTitle": "Diğer rehberler",
+    "helpTitle": "Cevabı bulamadınız mı?",
+    "helpText": "Ekibimiz yardımcı olsun.",
+    "helpButton": "Bize yazın",
+    "items": {
+      "gerekli-belgeler": {
+        "title": "Araç kiralamak için hangi belgeler gerekli?",
+        "summary": "Teslim günü yanınızda olması gerekenler ve rezervasyondan önce hazırlamanız iyi olur.",
+        "sections": [
+          {
+            "heading": "Teslimde yanınızda olması gerekenler",
+            "paragraphs": [
+              "Geçerli bir ehliyet ve kimlik belgesi yeterlidir. Aracı teslim alırken bu belgeleri bayide göstermeniz istenir."
+            ]
+          },
+          {
+            "heading": "Önceden hazırlayın",
+            "paragraphs": [
+              "Rezervasyon sırasında adınızı ve iletişim bilgilerinizi belgelerinizdeki gibi yazın. Küçük bir yazım farkı teslimde zaman kaybettirebilir.",
+              "Aracı kullanacak herkesin ehliyetinin geçerli olduğundan emin olun."
+            ]
+          },
+          {
+            "heading": "Teslimde birlikte kontrol",
+            "paragraphs": [
+              "Teslim sırasında aracın durumunu sizinle birlikte kontrol ederiz. Novera Driver App ile çizik ve hasarı telefondan fotoğraflayıp dijital tutanak tutabilirsiniz."
+            ]
+          }
+        ]
+      },
+      "farkli-bayiye-iade": {
+        "title": "Aracı farklı bir bayide nasıl bırakırsınız?",
+        "summary": "Aldığınız yerde bırakmak zorunda değilsiniz: bırakma bayisini ayrıca seçin, ek ücret ödemeyin.",
+        "sections": [
+          {
+            "heading": "Bırakma bayisini ayrıca seçin",
+            "paragraphs": [
+              "Ana sayfadaki arama kutusunda alış bayisini ve bırakacağınız bayiyi ayrı ayrı seçersiniz. Bırakma bayisini değiştirmezseniz alış bayisiyle aynı kalır."
+            ]
+          },
+          {
+            "heading": "Ek ücret yok",
+            "paragraphs": [
+              "Farklı bayiye bırakmak için ek ücret alınmaz. Rezervasyon özetinde tüm kalemleri açıkça görürsünüz; fiyatlara KDV dahildir."
+            ]
+          },
+          {
+            "heading": "14 şehirde 15 bayi",
+            "paragraphs": [
+              "Bayilerimiz 14 şehirde, çoğu havalimanlarında. Adres ve çalışma saatlerini İletişim sayfasında şehre göre süzerek görebilirsiniz."
+            ]
+          }
+        ]
+      },
+      "hasar-ve-ariza": {
+        "title": "Hasar ya da arıza olursa ne yapmalısınız?",
+        "summary": "Yolda bir aksilik olduğunda sırayla neler olur ve size ne düşer.",
+        "sections": [
+          {
+            "heading": "Önce güvende olun",
+            "paragraphs": [
+              "Aracı güvenli bir yere çekin ve gerekiyorsa acil durum hizmetlerini arayın."
+            ]
+          },
+          {
+            "heading": "Tek dokunuşla yardım",
+            "paragraphs": [
+              "Novera Driver App'teki SOS butonuyla konumunuzu tek tuşla merkeze iletirsiniz. 7/24 operasyon masası uygulamadan ya da telefonla ulaşılabilir durumdadır; bağlandığınızda durumu sizinle birlikte takip eder."
+            ]
+          },
+          {
+            "heading": "Çekici ve yedek araç",
+            "paragraphs": [
+              "Kaza ya da arıza anında GPS konumunuza en yakın anlaşmalı çekici yönlendirilir. Arıza 24 saati aşarsa işiniz durmasın diye eşdeğer bir yedek araç kapınıza getirilir."
+            ]
+          }
+        ]
+      },
+      "elektrikli-arac-rehberi": {
+        "title": "Elektrikli ve hibrit araç kiralarken bilmeniz gerekenler",
+        "summary": "Tüketim değerlerini nasıl okuyacağınızı ve uzun yola çıkmadan neye bakacağınızı özetliyoruz.",
+        "sections": [
+          {
+            "heading": "Tüketim nasıl okunur?",
+            "paragraphs": [
+              "Akaryakıtla çalışan ve hibrit araçlarda tüketim 100 km'de litre (L/100 km), elektrikli araçlarda 100 km'de kilovatsaat (kWh/100 km) olarak yazılır. İki değer birbirinin yerine konmaz; Araçlarımız sayfasında her modelin değeri kendi biriminde görünür."
+            ]
+          },
+          {
+            "heading": "Hibrit ile elektrikli arasındaki fark",
+            "paragraphs": [
+              "Hibrit araçlar benzinli motorla elektrik motorunu birlikte kullanır ve şarj gerektirmeden çalışır. Elektrikli araçlar yalnızca bataryayla gider; yola çıkmadan önce güzergâhınızdaki şarj noktalarına bakmak iyi olur."
+            ]
+          },
+          {
+            "heading": "Şirketler için",
+            "paragraphs": [
+              "Karbon ayak izini azaltmak isteyen şirketler için Yeşil Filo ürünümüz elektrikli ve hibrit araçlarla sürdürülebilir bir filo sunar."
+            ]
+          }
+        ]
+      },
+      "kurumsal-kiralama-rehberi": {
+        "title": "Şirketiniz için uzun mu, kısa dönem mi?",
+        "summary": "Akıllı Kurumsal Filo ile Esnek ve Kısa Dönem kiralama arasındaki farkı özetliyoruz.",
+        "sections": [
+          {
+            "heading": "İhtiyacınız süreklilik mi?",
+            "paragraphs": [
+              "Şirketinizin araç ihtiyacı sürekliyse Akıllı Kurumsal Filo Kiralama uzun dönem bir filo sunar ve Novera Admin Paneli ile araçları, sözleşmeleri, faturaları ve HGS masraflarını tek yerden takip edersiniz."
+            ]
+          },
+          {
+            "heading": "Proje ya da mevsim mi?",
+            "paragraphs": [
+              "Proje bazlı işler, acil saha ihtiyaçları veya dönemsel seyahatler için Esnek & Kısa Dönem kiralama taahhütsüzdür ve günlük, haftalık veya aylık periyotlarla çalışır."
+            ]
+          },
+          {
+            "heading": "Teklif nasıl alınır?",
+            "paragraphs": [
+              "Kurumsal müşterilerde araçlar istediğiniz yere getirilir ve istediğiniz yerden alınır; fiyat buna göre değişir. Bu yüzden formu doldurursunuz, satış ekibimiz bir iş günü içinde sizi arar."
+            ]
+          }
+        ]
+      },
+      "dogru-arac-secimi": {
+        "title": "Doğru aracı seçmek: sınıflar ve ihtiyaçlar",
+        "summary": "Ekonomik, orta sınıf, SUV, üst sınıf ve elektrikli araçlar arasından size uygun olanı bulun.",
+        "sections": [
+          {
+            "heading": "Önce yolculuğunuzu düşünün",
+            "paragraphs": [
+              "Kaç kişi olacaksınız, ne kadar bagaj taşıyacaksınız, şehir içinde mi yoksa uzun yolda mı gideceksiniz? Her model kartında koltuk ve bavul sayısı, vites, yakıt tipi ve tüketim yazar."
+            ]
+          },
+          {
+            "heading": "Sınıflar",
+            "paragraphs": [
+              "Ekonomik araçlar şehir içi kısa gezilere, orta sınıf ve üst sınıf araçlar konfor ve uzun yola, SUV'lar geniş iç hacme ve yüksek sürüş konumuna, elektrikli araçlar ise sessiz ve temiz sürüşe uygundur."
+            ]
+          },
+          {
+            "heading": "Fiyatı karşılaştırın",
+            "paragraphs": [
+              "Araçlarımız sayfasında modeller sınıflarına göre, en uygun fiyattan başlayarak sıralanır. Fiyatlara KDV dahildir ve rezervasyon özetinde kalem kalem görünür."
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

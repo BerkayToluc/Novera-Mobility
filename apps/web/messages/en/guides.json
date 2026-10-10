@@ -1,0 +1,164 @@
+{
+  "GuidesPage": {
+    "metaTitle": "Car Rental Guides",
+    "metaDescription": "What to know before renting a car: required documents, returning at another branch, damage and breakdowns, electric cars and corporate rental.",
+    "title": "Car rental guides",
+    "intro": "Short guides that help before and while you rent a car.",
+    "read": "Read the guide",
+    "back": "All guides",
+    "homeTitle": "Car rental guides",
+    "homeIntro": "What people wonder before renting, short and clear.",
+    "viewAll": "All guides",
+    "moreTitle": "More guides",
+    "helpTitle": "Did not find the answer?",
+    "helpText": "Our team is happy to help.",
+    "helpButton": "Write to Us",
+    "items": {
+      "gerekli-belgeler": {
+        "title": "Which documents do you need to rent a car?",
+        "summary": "What to have with you on pick-up day, and what is worth preparing before you book.",
+        "sections": [
+          {
+            "heading": "What to bring on pick-up day",
+            "paragraphs": [
+              "A valid driving licence and an ID document are enough. You will be asked to show them at the branch when you take the car."
+            ]
+          },
+          {
+            "heading": "Prepare ahead",
+            "paragraphs": [
+              "Write your name and contact details exactly as they appear on your documents when you book. A small spelling difference can cost time at pick-up.",
+              "Make sure everyone who will drive the car has a valid licence."
+            ]
+          },
+          {
+            "heading": "Checking the car together",
+            "paragraphs": [
+              "At pick-up we check the car's condition with you. With the Novera Driver App you can photograph any scratch or damage on your phone and keep a digital record."
+            ]
+          }
+        ]
+      },
+      "farkli-bayiye-iade": {
+        "title": "How to return the car at a different branch",
+        "summary": "You do not have to return it where you picked it up: choose the drop-off branch separately, at no extra charge.",
+        "sections": [
+          {
+            "heading": "Choose the drop-off branch separately",
+            "paragraphs": [
+              "In the search box on the home page you pick the pick-up branch and the drop-off branch one by one. If you do not change the drop-off branch it stays the same as the pick-up branch."
+            ]
+          },
+          {
+            "heading": "No extra charge",
+            "paragraphs": [
+              "There is no extra charge for returning at a different branch. The booking summary shows every item openly, and prices include VAT."
+            ]
+          },
+          {
+            "heading": "15 branches in 14 cities",
+            "paragraphs": [
+              "Our branches are in 14 cities, most of them at airports. You can see addresses and opening hours on the Contact page by filtering by city."
+            ]
+          }
+        ]
+      },
+      "hasar-ve-ariza": {
+        "title": "What to do after damage or a breakdown",
+        "summary": "What happens, in order, when something goes wrong on the road, and what is left to you.",
+        "sections": [
+          {
+            "heading": "Get to safety first",
+            "paragraphs": [
+              "Move the car to a safe place and call the emergency services if you need to."
+            ]
+          },
+          {
+            "heading": "Help with one tap",
+            "paragraphs": [
+              "With the SOS button in the Novera Driver App you send your location to the centre in one tap. The 24/7 operations desk can be reached through the app or by phone and follows the situation with you once you are connected."
+            ]
+          },
+          {
+            "heading": "Tow truck and replacement car",
+            "paragraphs": [
+              "In a crash or breakdown the partner tow truck nearest to your GPS position is directed to you. If the breakdown lasts more than 24 hours, an equivalent replacement car is brought to your door so your work does not stop."
+            ]
+          }
+        ]
+      },
+      "elektrikli-arac-rehberi": {
+        "title": "What to know when renting an electric or hybrid car",
+        "summary": "How to read the consumption figures and what to check before a long trip.",
+        "sections": [
+          {
+            "heading": "How to read consumption",
+            "paragraphs": [
+              "For fuel and hybrid cars consumption is given in litres per 100 km (L/100 km); for electric cars in kilowatt-hours per 100 km (kWh/100 km). The two cannot be swapped; on the Our Cars page every model shows its value in its own unit."
+            ]
+          },
+          {
+            "heading": "Hybrid or electric",
+            "paragraphs": [
+              "A hybrid uses a petrol engine together with an electric motor and runs without charging. An electric car runs on its battery alone, so check the charging points along your route before you set off."
+            ]
+          },
+          {
+            "heading": "For companies",
+            "paragraphs": [
+              "For companies that want to reduce their carbon footprint, our Green Fleet product offers a sustainable fleet of electric and hybrid cars."
+            ]
+          }
+        ]
+      },
+      "kurumsal-kiralama-rehberi": {
+        "title": "Long or short term for your company?",
+        "summary": "The difference between Smart Corporate Fleet and Flexible & Short-Term rental, in brief.",
+        "sections": [
+          {
+            "heading": "Do you need continuity?",
+            "paragraphs": [
+              "If your company needs cars all the time, Smart Corporate Fleet Rental gives you a long-term fleet, and with the Novera Admin Panel you follow cars, contracts, invoices and HGS (toll) costs in one place."
+            ]
+          },
+          {
+            "heading": "A project or a season?",
+            "paragraphs": [
+              "For project-based work, urgent field needs or seasonal travel, Flexible & Short-Term rental has no commitment and works by the day, week or month."
+            ]
+          },
+          {
+            "heading": "How to get a quote",
+            "paragraphs": [
+              "For corporate customers we bring the cars where you need them and collect them where you finish, and the price changes with that. So you fill in the form and our sales team calls you within one business day."
+            ]
+          }
+        ]
+      },
+      "dogru-arac-secimi": {
+        "title": "Choosing the right car: classes and needs",
+        "summary": "Find the right car among economy, compact, SUV, executive and electric.",
+        "sections": [
+          {
+            "heading": "Start with your trip",
+            "paragraphs": [
+              "How many of you are travelling, how much luggage will you carry, and is it a city trip or a long drive? Every model card shows seats, bags, gearbox, fuel type and consumption."
+            ]
+          },
+          {
+            "heading": "The classes",
+            "paragraphs": [
+              "Economy cars suit short city trips, compact and executive cars suit comfort and long distances, SUVs suit a roomy cabin and a high driving position, and electric cars suit a quiet, clean drive."
+            ]
+          },
+          {
+            "heading": "Compare prices",
+            "paragraphs": [
+              "On the Our Cars page models are listed by class, starting from the best price. Prices include VAT and appear item by item in the booking summary."
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

@@ -46,6 +46,11 @@ export async function SiteFooter() {
                 </Link>
               </li>
             ))}
+            <li>
+              <Link href="/rehberler" className={linkClasses}>
+                {nav("guides")}
+              </Link>
+            </li>
           </ul>
         </nav>
 
