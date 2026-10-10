@@ -7,8 +7,8 @@ const FAQ: FaqItem[] = [
     audience: "bireysel",
     question: { tr: "Aracı farklı bir bayide teslim edebilir miyim?", en: "Can I return the car at a different branch?" },
     answer: {
-      tr: "Evet. Rezervasyonda bırakacağınız bayiyi ayrıca seçersiniz; bayiler arası teslim için ek bir ücret rezervasyon özetinde açıkça yazılır.",
-      en: "Yes. You choose the drop-off branch separately when booking; any one-way fee is shown plainly in the booking summary.",
+      tr: "Evet. Rezervasyonda bırakacağınız bayiyi ayrıca seçersiniz; farklı bayiye bırakmak için ek ücret alınmaz.",
+      en: "Yes. You choose the drop-off branch separately when booking, and there is no extra charge for returning at a different branch.",
     },
   },
   {

@@ -23,6 +23,19 @@
       "error": {
         "title": "Sorular yüklenemedi",
         "text": "Sık sorulan soruları şu an gösteremiyoruz."
+      },
+      "intro": "Kiralama, teslim ve ödeme hakkında en çok merak edilenler.",
+      "tabsLabel": "Soru türü",
+      "tabs": {
+        "bireysel": "Bireysel",
+        "kurumsal": "Kurumsal"
+      },
+      "open": "Aç",
+      "close": "Kapat",
+      "cta": {
+        "title": "Sorunuz mu kaldı?",
+        "text": "Aradığınız cevabı bulamadıysanız ekibimiz yardımcı olsun.",
+        "button": "Bize Yazın"
       }
     },
     "gallery": {
