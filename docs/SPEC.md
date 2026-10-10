@@ -79,7 +79,7 @@ v0.2'deki kitleye göre değişen "araç sınıfları" ("Size uygun sınıfı se
 #### 2.2.3 Kurumsal
 
 - Gerekçe (G): kurumsal müşteri bireysel gibi kendi başına rezervasyon yapmaz. Araçlar istenen yere götürülür ve istenen yerden geri alınır, fiyat buna göre değişir; ayrıca birden fazla araç seçilebilir. Bu yüzden akış **form + görüşme**: müşteri bilgilerini bırakır, satış ekibi arar.
-- Bu kısım profesyonel görünmelidir. **Tasarım önerisi uygulanmadan önce G'ye gösterilir ve onaylanır** (§10).
+- Bu kısım profesyonel görünmelidir. **Tasarım (G onayladı, 10 Ekim):** tek adım. Kurumsal seçilince kutuda önce "Nasıl ilerliyor?" şeridi (formu gönderin → satış ekibi bir iş günü içinde arar → size özel teklif), sonra talep formu: firma adı, yetkili ad soyad, iş e-postası, telefon, araç sayısı (1–5 / 6–20 / 21–50 / 50+), süre (6 / 12 / 24 / 36+ ay), ihtiyaç türü (birden fazla seçilebilen çipler: binek, SUV, ticari, elektrikli/hibrit, premium), teslim şehirleri, not, KVKK onayı. Gönderince aynı yerde "Talebiniz alındı" ve talep numarası. `/kurumsal-teklif` aynı formu kullanır; ürün sayfalarındaki "Teklif Al" oraya ürünü önceden seçili getirir (`?urun=`). Kişisel bilgiler adreste taşınmaz.
 - Form KVKK onay kutusu ve spam koruması taşır (§9); gönderince "Talebiniz alındı" durumu gösterilir.
 - Seçim URL'de tutulur (`/?tip=kurumsal`), link paylaşılınca aynı seçim açılır. Seçim yalnızca kutuyu ve SSS'nin açık sekmesini değiştirir; sayfanın geri kalanı iki kitle için aynıdır.
 
@@ -419,7 +419,6 @@ Sonraya bırakılanlar (G onayladı): breadcrumb, Lighthouse CI.
 
 | Karar | Kimde | Not |
 |---|---|---|
-| Kurumsal kutunun tasarımı; `/kurumsal-teklif` sayfasının ana sayfa formuyla ilişkisi | G | Claude, uygulamadan önce öneri getirir |
 | Fotoğraf kaynağı (stok / üretilmiş / yer tutucu) | G | Galeri, araçlar, Hikayemiz, genel merkez |
 | Analytics aracı: Vercel Web Analytics veya Umami | G | Yayın ortamına bağlı (ADR-12, ADR-19); ücretsiz plan koşulları doğrulanmadı |
 | Kampanya içeriği sabit mi, API'den mi | İKİ | Şimdilik sabit |

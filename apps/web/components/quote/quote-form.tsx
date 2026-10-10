@@ -5,24 +5,31 @@ import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FormError } from "@/components/auth/form-error";
+import { FormSuccess } from "@/components/form/form-success";
 import { Button } from "@/components/ui/button";
-import { Link } from "@/i18n/navigation";
-import { QuoteUnavailableError, submitQuote } from "@/lib/quote-client";
-import { quoteSchema, type QuoteInput } from "@/lib/quote-prefill";
+import { emptyQuote, quoteSchema, type QuoteInput } from "@/lib/quote";
+import { submitQuote } from "@/lib/quote-actions";
 import { QuoteFields } from "./quote-fields";
 
-export function QuoteForm({ initial }: { initial: QuoteInput }) {
+type Sent = { email: string; reference: string };
+
+// The corporate request (SPEC §2.2.3, BACKLOG Y16): one form for the home page's corporate box
+// and the /kurumsal-teklif page. Once sent it turns into the confirmation in place.
+export function QuoteForm({ initialProduct = "", withProduct = false }: { initialProduct?: string; withProduct?: boolean }) {
   const t = useTranslations("QuoteForm");
-  const page = useTranslations("QuotePage");
   const [formError, setFormError] = useState<string | null>(null);
-  const [sentTo, setSentTo] = useState<string | null>(null);
+  const [sent, setSent] = useState<Sent | null>(null);
 
   const schema = useMemo(
     () =>
       quoteSchema({
         company: t("errors.company"),
-        count: t("errors.count"),
+        contactName: t("errors.contactName"),
         email: t("errors.email"),
+        phone: t("errors.phone"),
+        needs: t("errors.needs"),
+        cities: t("errors.cities"),
+        consent: t("errors.consent"),
       }),
     [t],
   );
@@ -30,47 +37,72 @@ export function QuoteForm({ initial }: { initial: QuoteInput }) {
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors, isSubmitting },
-  } = useForm<QuoteInput>({ resolver: zodResolver(schema), mode: "onTouched", defaultValues: initial });
+  } = useForm<QuoteInput>({
+    resolver: zodResolver(schema),
+    mode: "onTouched",
+    defaultValues: emptyQuote(initialProduct),
+    // The library focuses in registration order, which puts the need chips first; the first
+    // invalid control in reading order is what a keyboard user expects (see focusFirstError).
+    shouldFocusError: false,
+  });
+
+  function focusFirstError(form: HTMLFormElement) {
+    // After the errors have rendered, so aria-invalid is already on the controls.
+    setTimeout(() => form.querySelector<HTMLElement>("[aria-invalid=\"true\"]")?.focus(), 0);
+  }
 
   async function onSubmit(values: QuoteInput) {
     setFormError(null);
     try {
-      await submitQuote(values);
-      setSentTo(values.email);
-    } catch (error) {
-      setFormError(
-        error instanceof QuoteUnavailableError ? page("errors.unavailable") : page("errors.generic"),
-      );
+      const result = await submitQuote(values);
+      if (result.ok) setSent({ email: values.email, reference: result.reference });
+      else setFormError(t(result.reason === "invalid" ? "errors.invalid" : "errors.unavailable"));
+    } catch {
+      setFormError(t("errors.generic"));
     }
   }
 
-  if (sentTo) {
+  if (sent) {
     return (
-      <div role="status" className="flex flex-col items-start gap-3">
-        <h2 className="text-h3 text-fg">{page("sent.title")}</h2>
-        <p className="max-w-prose text-body text-fg-muted">{page("sent.text", { email: sentTo })}</p>
-        <Button asChild variant="outline">
-          <Link href="/">{page("sent.home")}</Link>
+      <FormSuccess
+        title={t("sent.title")}
+        text={t("sent.text", { email: sent.email })}
+        detail={
+          <p className="text-body text-fg">
+            {t("sent.reference")} <strong className="tabular-nums">{sent.reference}</strong>
+          </p>
+        }
+      >
+        <Button
+          variant="outline"
+          onClick={() => {
+            reset(emptyQuote(initialProduct));
+            setSent(null);
+          }}
+        >
+          {t("sent.again")}
         </Button>
-      </div>
+      </FormSuccess>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-5">
+    <form
+      onSubmit={(event) => {
+        const form = event.currentTarget;
+        return handleSubmit(onSubmit, () => focusFirstError(form))(event);
+      }}
+      noValidate
+      className="flex flex-col gap-6"
+    >
       <FormError message={formError} />
-      <div className="grid gap-4 md:grid-cols-2">
-        <QuoteFields register={register} errors={errors} withProduct />
+      <div className="grid gap-5 md:grid-cols-2">
+        <QuoteFields register={register} errors={errors} withProduct={withProduct} />
       </div>
-      <Button
-        type="submit"
-        size="lg"
-        disabled={isSubmitting}
-        aria-busy={isSubmitting}
-        className="self-start"
-      >
-        {isSubmitting ? page("submitting") : t("submit")}
+      <Button type="submit" size="lg" disabled={isSubmitting} aria-busy={isSubmitting} className="md:self-start">
+        {isSubmitting ? t("submitting") : t("submit")}
       </Button>
     </form>
   );

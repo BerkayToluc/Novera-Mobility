@@ -1,47 +1,70 @@
 {
   "QuoteForm": {
     "company": "Firma adı",
-    "count": "Araç sayısı",
+    "contactName": "Yetkili ad soyad",
+    "email": "İş e-postası",
+    "phone": "Telefon",
+    "fleetSize": "Araç sayısı",
+    "fleetSizes": {
+      "1-5": "1–5 araç",
+      "6-20": "6–20 araç",
+      "21-50": "21–50 araç",
+      "50+": "50'den fazla araç"
+    },
     "term": "Kiralama süresi",
-    "termOption": "{months} ay",
-    "vehicleType": "Araç tipi",
-    "types": {
-      "economy": "Ekonomik",
-      "compact": "Orta sınıf",
-      "executive": "Üst sınıf",
+    "terms": {
+      "6": "6 ay",
+      "12": "12 ay",
+      "24": "24 ay",
+      "36+": "36 ay ve üzeri"
+    },
+    "needs": "İhtiyaç duyduğunuz araçlar",
+    "needsHint": "Birden fazla seçebilirsiniz.",
+    "needOptions": {
+      "sedan": "Binek",
       "suv": "SUV",
-      "electric": "Elektrikli"
+      "commercial": "Ticari",
+      "electric": "Elektrikli / hibrit",
+      "premium": "Premium"
     },
-    "email": "İletişim e-postası",
-    "submit": "Teklif İste",
-    "errors": {
-      "company": "Firma adını yazın.",
-      "count": "1 ile 9999 arasında bir sayı yazın.",
-      "email": "Geçerli bir e-posta adresi yazın."
-    },
+    "cities": "Teslim şehirleri",
+    "citiesHint": "Araçları teslim etmemizi istediğiniz şehirler, örneğin İstanbul, Ankara.",
     "product": "İlgilendiğiniz ürün (isteğe bağlı)",
-    "noProduct": "Henüz karar vermedim"
-  },
-  "QuotePage": {
-    "metaTitle": "Kurumsal Teklif",
-    "metaDescription": "Firmanız için filo kiralama teklifi isteyin: araç sayısı, süre ve araç tipini yazın, bir iş günü içinde dönelim.",
-    "title": "Kurumsal Teklif",
-    "intro": "Firmanızın ihtiyacını yazın, bir filo uzmanı size özel teklifle e-posta ile dönsün.",
-    "stepsTitle": "Sonraki adımlar",
-    "steps": {
-      "received": "Talebiniz bize ulaşır.",
-      "review": "Bir iş günü içinde bir filo uzmanı talebinizi inceler.",
-      "offer": "Size e-posta ile özel teklif gönderilir."
-    },
+    "noProduct": "Henüz karar vermedim",
+    "note": "Eklemek istedikleriniz (isteğe bağlı)",
+    "submit": "Teklif İste",
     "submitting": "Gönderiliyor",
     "errors": {
+      "company": "Firma adını yazın.",
+      "contactName": "Yetkilinin adını ve soyadını yazın.",
+      "email": "Geçerli bir e-posta adresi yazın.",
+      "phone": "Alan koduyla birlikte geçerli bir telefon numarası yazın.",
+      "needs": "En az bir araç türü seçin.",
+      "cities": "En az bir teslim şehri yazın.",
+      "consent": "Devam etmek için aydınlatma metnini onaylayın.",
+      "invalid": "Talebiniz eksik görünüyor. Alanları kontrol edip tekrar gönderin.",
       "unavailable": "Teklif servisi şu an kullanılamıyor. Lütfen daha sonra tekrar deneyin.",
       "generic": "Talebiniz gönderilemedi. Lütfen tekrar deneyin."
     },
     "sent": {
       "title": "Talebiniz alındı",
-      "text": "{email} adresine bir iş günü içinde dönüş yapacağız.",
-      "home": "Ana Sayfaya Dön"
+      "text": "Satış ekibimiz {email} adresine ve verdiğiniz telefona bir iş günü içinde dönüş yapacak.",
+      "reference": "Talep numaranız:",
+      "again": "Yeni talep oluştur"
+    }
+  },
+  "QuotePage": {
+    "metaTitle": "Kurumsal Teklif",
+    "metaDescription": "Firmanız için filo kiralama teklifi isteyin: ihtiyacınızı yazın, satış ekibimiz bir iş günü içinde arasın.",
+    "title": "Kurumsal Teklif",
+    "intro": "Araçları istediğiniz yere getiriyor, istediğiniz yerden alıyoruz. İhtiyacınızı yazın, satış ekibimiz sizi arasın."
+  },
+  "QuoteSteps": {
+    "title": "Nasıl ilerliyor?",
+    "steps": {
+      "send": "Formu gönderin",
+      "call": "Satış ekibimiz bir iş günü içinde arar",
+      "offer": "Size özel teklif hazırlanır"
     }
   }
 }
