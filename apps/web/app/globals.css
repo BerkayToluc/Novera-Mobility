@@ -294,6 +294,18 @@
   --breakpoint-xl: 80rem;
 
   --container-content: 75rem;
+
+  /* Partner strip (SPEC §2.2.4): the track holds two identical sets, so moving it by half
+     its width loops without a seam. Paused by hover, its own button and reduced motion. */
+  --animate-marquee: marquee 48s linear infinite;
+  @keyframes marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
 }
 
 @layer base {

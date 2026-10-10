@@ -78,5 +78,11 @@
       }
     },
     "cta": "Yol Boyu Güvence'yi inceleyin"
+  },
+  "Partners": {
+    "title": "İş birliklerimiz",
+    "intro": "Filolarını ve yolculuklarını bize emanet eden kurumlardan bazıları.",
+    "pause": "Kaydırmayı durdur",
+    "play": "Kaydırmayı başlat"
   }
 }
