@@ -11,10 +11,13 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t("metaTitle"), description: t("metaDescription") };
 }
 
-export default async function ServicesPage() {
+export default async function ServicesPage({ searchParams }: PageProps<"/[locale]/hizmetler">) {
   const t = await getTranslations("ServicesPage");
   // The five services are content, so they live in the message files with every other string.
   const items = t.raw("items") as Service[];
+  // The header menu links to one service (?hizmet=2#hizmet-2): that item opens, the first otherwise.
+  const requested = Number((await searchParams).hizmet);
+  const openIndex = Number.isInteger(requested) && requested >= 1 && requested <= items.length ? requested - 1 : 0;
 
   return (
     <div className="mx-auto max-w-content px-4 py-12 md:px-8 xl:py-20">
@@ -29,7 +32,14 @@ export default async function ServicesPage() {
           <Accordion>
             {items.map((item, index) => (
               // Same `name` makes the group exclusive: opening one closes the others.
-              <AccordionItem key={item.title} name="services" title={item.title} open={index === 0}>
+              <AccordionItem
+                key={item.title}
+                id={`hizmet-${index + 1}`}
+                name="services"
+                title={item.title}
+                open={index === openIndex}
+                className="scroll-mt-8"
+              >
                 <p className="max-w-prose text-body text-fg-muted">{item.summary}</p>
                 <ul className="mt-4 flex flex-col gap-2 text-body text-fg">
                   {item.points.map((point) => (

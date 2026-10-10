@@ -24,7 +24,9 @@
     "preferencesLabel": "Dil ve tema: {language}",
     "language": "Dil",
     "theme": "Tema",
-    "currency": "Para birimi"
+    "currency": "Para birimi",
+    "allProducts": "Tüm ürünler",
+    "allServices": "Tüm hizmetler"
   },
   "Footer": {
     "tagline": "Sadece araç kiralamıyoruz, yol boyu güvence sunuyoruz.",

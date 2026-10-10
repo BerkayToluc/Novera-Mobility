@@ -24,7 +24,9 @@
     "preferencesLabel": "Language and theme: {language}",
     "language": "Language",
     "theme": "Theme",
-    "currency": "Currency"
+    "currency": "Currency",
+    "allProducts": "All products",
+    "allServices": "All services"
   },
   "Footer": {
     "tagline": "We do not just rent cars, we stand by you for the whole journey.",

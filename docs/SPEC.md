@@ -159,7 +159,7 @@ Mobil:    [Logo]                                                     [Profil] [�
 
 - Navbar'daki linkler v0.2'deki gibi kalır. **İletişim, diğer linklerden farklı görünür** (çerçeveli buton görünümü) ve **diğer linklerden belirgin bir boşlukla ayrı durur**; Giriş Yap / Profil butonundan da ayırt edilebilir. Mobil menüde de aynı vurgu.
 - **Giriş Yap** butonu zeminden ayrışan bir dolguya sahiptir; zeminle aynı renkte kalmaz (v0.4, G).
-- **Ürünler ve Hizmetler (v0.4, G):** navbarda açılır menü; açılınca öğeler listelenir (4 ürün, 5 hizmet), her biri kendi sayfasına ya da hizmetler sayfasındaki yerine gider; başlığın kendisi liste sayfasına gider. Klavyeyle açılıp gezilebilir; mobil menüde alt liste olarak.
+- **Ürünler ve Hizmetler (v0.4, G):** navbarda açılır menü; açılınca öğeler listelenir (4 ürün, 5 hizmet), her biri kendi sayfasına ya da hizmetler sayfasındaki yerine gider (o madde açık gelir). Masaüstünde başlık menüyü açan bir düğmedir; liste sayfası menünün son maddesidir ("Tüm ürünler →"), çünkü hem link hem açılır menü olan bir öğe tıklanınca ne olacağını belirsizleştirir. Klavyeyle açılıp gezilebilir, Esc kapatır; mobil menüde başlık liste sayfasına gider ve öğeler altında girintili listelenir.
 - **Para birimi (v0.4, G):** navbarda kendi açılır menüsü; düğmede seçili birimin simgesi ve kodu (`₺ TRY`), listede `₺ TRY`, `€ EUR`, `$ USD`.
 - **Dil ve tema (v0.4, G):** navbarda tek bir ikon düğmesiyle açılan küçük bir panelde. Mobilde para birimi, dil ve tema hamburger menünün içinde. Footer'da tercih yok.
 - **Giriş Yap** girişe gider; giriş sayfasında Bireysel ve Kurumsal sekmeleri vardır (§2.9).
