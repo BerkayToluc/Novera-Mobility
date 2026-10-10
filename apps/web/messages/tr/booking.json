@@ -101,6 +101,7 @@
       "title": "Onaylanacak rezervasyon bulunamadı",
       "text": "Bu sayfaya rezervasyon yaptıktan sonra gelinir.",
       "action": "Araç Ara"
-    }
+    },
+    "points": "Bu kiralamayla {count, plural, one {# puan} other {# puan}} kazanacaksınız."
   }
 }

@@ -101,6 +101,7 @@
       "title": "No booking to confirm",
       "text": "You get to this page after making a booking.",
       "action": "Search Cars"
-    }
+    },
+    "points": "This rental earns you {count, plural, one {# point} other {# points}}."
   }
 }

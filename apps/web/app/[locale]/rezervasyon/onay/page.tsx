@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, Coins } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { BookingBrief } from "@/components/booking/booking-brief";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,8 @@ import { GuaranteeStrip } from "@/components/vehicle/guarantee-strip";
 import { Link } from "@/i18n/navigation";
 import { loadBooking } from "@/lib/booking-data";
 import { getCurrency } from "@/lib/get-currency";
+import { pointsForTotal } from "@/lib/points";
+import { getSession } from "@/lib/session";
 
 type Props = { searchParams: Promise<Record<string, string | string[] | undefined>> };
 
@@ -39,6 +41,13 @@ export default async function ConfirmationPage({ searchParams }: Props) {
     );
   }
 
+  // Points follow the lira total, so it is worked out in lira whatever currency the page shows.
+  let points = 0;
+  if ((await getSession())?.type === "individual") {
+    const inLira = await loadBooking(params, "TRY");
+    if (inLira.status === "ok") points = pointsForTotal(inLira.summary.total);
+  }
+
   return (
     <div className="mx-auto flex max-w-content flex-col gap-8 px-4 py-12 md:px-8 xl:py-16">
       <header className="flex flex-col gap-4">
@@ -49,6 +58,12 @@ export default async function ConfirmationPage({ searchParams }: Props) {
           <span className="text-small text-fg-muted">{t("number")}</span>
           <span className="text-h2 tabular-nums text-fg">{number}</span>
         </p>
+        {points > 0 && (
+          <p className="flex items-center gap-2 text-body text-fg">
+            <Coins aria-hidden="true" className="size-5 text-link" />
+            {t("points", { count: points })}
+          </p>
+        )}
       </header>
 
       <div className="flex max-w-xl flex-col gap-4">

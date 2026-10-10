@@ -15,4 +15,6 @@ export type Reservation = {
   vehicle: { brand: string; model: string };
   pickupCity: string;
   returnCity: string;
+  // Points the booking earns or has earned (SPEC §2.9); a cancelled booking earns none.
+  pointsEarned: number;
 };

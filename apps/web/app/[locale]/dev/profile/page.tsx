@@ -25,6 +25,7 @@ const RESERVATIONS: Reservation[] = [
     vehicle: { brand: "Renault", model: "Clio" },
     pickupCity: "İzmir",
     returnCity: "Ankara",
+    pointsEarned: 37,
   },
   {
     id: "2",
@@ -37,6 +38,7 @@ const RESERVATIONS: Reservation[] = [
     vehicle: { brand: "Toyota", model: "Corolla Hybrid" },
     pickupCity: "İstanbul",
     returnCity: "İstanbul",
+    pointsEarned: 0,
   },
 ];
 

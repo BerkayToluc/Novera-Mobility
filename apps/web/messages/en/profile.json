@@ -8,7 +8,8 @@
       "bookings": "My Bookings",
       "settings": "Settings",
       "company": "Company details",
-      "quotes": "My quote requests"
+      "quotes": "My quote requests",
+      "points": "My Points"
     },
     "signedOut": {
       "title": "You need to sign in",
@@ -113,6 +114,32 @@
         "title": "Requests could not be loaded",
         "text": "We cannot reach your quote requests right now. Please try again.",
         "retry": "Try again"
+      }
+    },
+    "points": {
+      "title": "My points",
+      "intro": "The points you earn with your rentals.",
+      "balance": "Points balance",
+      "pending": "Pending points",
+      "pendingNote": "They are added to your account when your upcoming rentals are completed.",
+      "history": "Earning history",
+      "earnedFor": "Rental {number}",
+      "earned": "Points earned:",
+      "empty": {
+        "title": "No points yet",
+        "text": "Your points appear here once your first rental is completed.",
+        "cta": "Search Cars"
+      },
+      "error": {
+        "title": "Points could not be loaded",
+        "text": "We cannot reach your points right now. Please try again.",
+        "retry": "Try again"
+      },
+      "rules": {
+        "title": "How do points work?",
+        "earn": "You earn 1 point for every {amount} you spend.",
+        "credit": "Points are added to your account when your rental is completed.",
+        "cancelled": "Cancelled bookings do not earn points."
       }
     }
   }
