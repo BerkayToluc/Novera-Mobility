@@ -6,6 +6,7 @@ import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { routing } from "@/i18n/routing";
 import { getTheme } from "@/lib/get-theme";
+import { colorSchemeOf } from "@/lib/theme";
 import { SITE_URL } from "@/lib/site-url";
 // Self-hosted variable font: no request to Google at runtime, and unicode-range
 // subsets mean only Latin + Latin Extended (Turkish) files are downloaded in practice.
@@ -30,7 +31,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export async function generateViewport(): Promise<Viewport> {
   // Lets the browser paint the canvas in the user's theme before CSS loads.
-  return { colorScheme: (await getTheme()) ?? "light dark" };
+  return { colorScheme: colorSchemeOf(await getTheme()) };
 }
 
 // Reading the theme cookie makes every route render per request instead of at

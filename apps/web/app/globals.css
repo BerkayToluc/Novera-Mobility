@@ -15,81 +15,102 @@
  */
 
 :root {
-  /* Brand: forest green */
-  --green-900: #0f2e21;
-  --green-800: #164331;
-  --green-700: #1d5a40;
-  --green-600: #25704f;
-  --green-300: #8fc2a5;
-  --green-100: #e3f0e8;
-  --green-50: #f1f7f3;
+  /* Brand: olive. A yellow-leaning green read from the Anatolian landscape, dark
+     enough to carry white text (8.1:1) as a button fill. */
+  --olive-950: #1a1c16;
+  --olive-900: #262b1b;
+  --olive-800: #323f13;
+  --olive-750: #384717;
+  --olive-700: #45561d;
+  --olive-600: #566b25;
+  --olive-500: #627a2b;
+  --olive-300: #b5c97e;
+  --olive-100: #e5ebd3;
 
-  /* Neutrals: stone with a slight green cast, so greys sit in the same family as the brand */
-  --stone-950: #141a17;
-  --stone-700: #3e4742;
-  --stone-500: #67706b; /* darkened from SPEC v0.2 #6b746f to keep 4.5:1 on surface-muted */
-  --stone-400: #858d88; /* 3.4:1 on white: minimum for form control borders (WCAG 1.4.11) */
-  --stone-300: #c9cec9;
-  --stone-200: #e2e5e1;
-  --stone-100: #eff1ee;
-  --paper: #f8f9f6;
+  /* Neutrals: limestone, greys pulled slightly toward olive so text and lines
+     belong to the brand's family without reading as tinted. */
+  --stone-700: #4a4d40;
+  --stone-600: #62655a;
+  --stone-500: #868979; /* 3.6:1 on white: minimum for form control borders (WCAG 1.4.11) */
+  --stone-300: #dcdcd3;
+  --stone-200: #c9ccbd;
+  --stone-100: #f3f3ef;
+  --stone-50: #eeefe8;
   --white: #ffffff;
 
-  /* Accent: clay, used sparingly (badges, small markers) */
-  --clay-700: #8a4a22;
-  --clay-500: #c0703a;
-  --clay-100: #f6e6d9;
+  /* Accent: Aegean blue. Sits opposite olive on the wheel (split complement), so
+     it marks the few things that must stand out (badges, highlights) and nothing else. */
+  --aegean-900: #154f67;
+  --aegean-700: #1c6a8a;
+  --aegean-300: #8fc3da;
+  --aegean-100: #dceef5;
 
   /* Status */
   --error-700: #b42318;
   --warning-700: #9a6700;
 
-  /* Semantic colors, light values. Dark values follow below. */
-  --novera-canvas: var(--paper);
+  /* Dark theme grounds: olive-black, never pure black. */
+  --night-canvas: #13140f;
+  --night-surface: #1c1e17;
+  --night-surface-muted: #171913;
+  --night-band: #0b0c08;
+  --night-border: #2f3227;
+  --night-border-strong: #757968;
+  --night-fg-muted: #bbbeaf;
+  --night-fg-subtle: #979a8b;
+  --night-selected: #2c3516;
+  --night-on-selected: #d7e3b4;
+  --night-accent-soft: #18303a;
+  --night-error: #f97066;
+  --night-warning: #e3b341;
+
+  /* Semantic colors, light values. Dark values follow below. The light page is
+     white (G's decision); depth comes from limestone panels and hairlines. */
+  --novera-canvas: var(--white);
   --novera-surface: var(--white);
-  --novera-surface-muted: var(--green-50);
-  --novera-band: var(--green-900);
-  --novera-on-band: var(--stone-100);
-  --novera-fg: var(--stone-950);
+  --novera-surface-muted: var(--stone-100);
+  --novera-band: var(--olive-900);
+  --novera-on-band: var(--stone-50);
+  --novera-fg: var(--olive-950);
   --novera-fg-muted: var(--stone-700);
-  --novera-fg-subtle: var(--stone-500);
-  --novera-primary: var(--green-700);
-  --novera-primary-hover: var(--green-800);
+  --novera-fg-subtle: var(--stone-600);
+  --novera-primary: var(--olive-700);
+  --novera-primary-hover: var(--olive-750);
   --novera-on-primary: var(--white);
-  --novera-link: var(--green-700);
-  --novera-selected: var(--green-100);
-  --novera-on-selected: var(--green-800);
-  --novera-accent: var(--clay-500);
-  --novera-accent-soft: var(--clay-100);
-  --novera-on-accent-soft: var(--clay-700);
-  --novera-border: var(--stone-200);
-  --novera-border-strong: var(--stone-400);
-  --novera-focus: var(--green-700);
+  --novera-link: var(--olive-700);
+  --novera-selected: var(--olive-100);
+  --novera-on-selected: var(--olive-800);
+  --novera-accent: var(--aegean-700);
+  --novera-accent-soft: var(--aegean-100);
+  --novera-on-accent-soft: var(--aegean-900);
+  --novera-border: var(--stone-300);
+  --novera-border-strong: var(--stone-500);
+  --novera-focus: var(--olive-700);
   --novera-error: var(--error-700);
   --novera-warning: var(--warning-700);
-  --novera-success: var(--green-700);
+  --novera-success: var(--olive-700);
 
-  /* Native UI (scrollbars, form controls, canvas) follows the user's system theme. */
-  color-scheme: light dark;
-}
-
-/*
- * Theme preference (BACKLOG #11). No attribute means "follow the system"; the
- * server sets data-theme on <html> from the `novera-theme` cookie so the first
- * paint already has the right theme. Forcing color-scheme is all light-dark()
- * needs to switch every semantic token below.
- */
-:root[data-theme="light"] {
+  /* Native UI (scrollbars, form controls, canvas) follows the active theme. */
   color-scheme: light;
 }
 
+/*
+ * Theme preference (BACKLOG #11). Light is the default (G's decision, 10 Oct 2026);
+ * `data-theme="system"` follows the operating system, and the server writes the
+ * attribute from the `novera-theme` cookie so the first paint is already right.
+ * Forcing color-scheme is all light-dark() needs to switch every semantic token.
+ */
 :root[data-theme="dark"] {
   color-scheme: dark;
 }
 
+:root[data-theme="system"] {
+  color-scheme: light dark;
+}
+
 /*
- * Tailwind's `dark:` follows the effective theme (forced choice, otherwise the
- * system), not just the system setting, so it never disagrees with the tokens.
+ * Tailwind's `dark:` follows the effective theme (a forced choice, or the system
+ * when "system" is chosen), so it never disagrees with the tokens.
  */
 @custom-variant dark {
   &:where([data-theme="dark"], [data-theme="dark"] *) {
@@ -97,102 +118,102 @@
   }
 
   @media (prefers-color-scheme: dark) {
-    &:where(:root:not([data-theme="light"]), :root:not([data-theme="light"]) *) {
+    &:where([data-theme="system"], [data-theme="system"] *) {
       @slot;
     }
   }
 }
 
 /*
- * Fallback for browsers without light-dark(): the same dark values, applied for
- * a forced dark theme and for the system preference unless light is forced.
- * Keep both blocks identical to each other and to the light-dark() block below.
+ * Fallback for browsers without light-dark(): the same dark values, applied for a
+ * forced dark theme and for "system" on a dark system. Keep both blocks identical
+ * to each other and to the light-dark() block below.
  */
 @supports not (color: light-dark(white, black)) {
   @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-      --novera-canvas: #101814;
-      --novera-surface: #18231d;
-      --novera-surface-muted: #141e18;
-      --novera-band: #0b140f;
-      --novera-on-band: var(--stone-100);
-      --novera-fg: var(--stone-100);
-      --novera-fg-muted: #b4bdb7;
-      --novera-fg-subtle: #8e9892;
-      --novera-primary: var(--green-600);
-      --novera-primary-hover: var(--green-700);
+    :root[data-theme="system"] {
+      --novera-canvas: var(--night-canvas);
+      --novera-surface: var(--night-surface);
+      --novera-surface-muted: var(--night-surface-muted);
+      --novera-band: var(--night-band);
+      --novera-on-band: var(--stone-50);
+      --novera-fg: var(--stone-50);
+      --novera-fg-muted: var(--night-fg-muted);
+      --novera-fg-subtle: var(--night-fg-subtle);
+      --novera-primary: var(--olive-600);
+      --novera-primary-hover: var(--olive-500);
       --novera-on-primary: var(--white);
-      --novera-link: var(--green-300);
-      --novera-selected: var(--green-800);
-      --novera-on-selected: var(--green-100);
-      --novera-accent: #e09a6a;
-      --novera-accent-soft: #3a2a1f;
-      --novera-on-accent-soft: #e09a6a;
-      --novera-border: #2c3a32;
-      --novera-border-strong: #68756d;
-      --novera-focus: var(--green-300);
-      --novera-error: #f97066;
-      --novera-warning: #e3b341;
-      --novera-success: var(--green-300);
+      --novera-link: var(--olive-300);
+      --novera-selected: var(--night-selected);
+      --novera-on-selected: var(--night-on-selected);
+      --novera-accent: var(--aegean-300);
+      --novera-accent-soft: var(--night-accent-soft);
+      --novera-on-accent-soft: var(--aegean-300);
+      --novera-border: var(--night-border);
+      --novera-border-strong: var(--night-border-strong);
+      --novera-focus: var(--olive-300);
+      --novera-error: var(--night-error);
+      --novera-warning: var(--night-warning);
+      --novera-success: var(--olive-300);
     }
   }
 
   :root[data-theme="dark"] {
-    --novera-canvas: #101814;
-    --novera-surface: #18231d;
-    --novera-surface-muted: #141e18;
-    --novera-band: #0b140f;
-    --novera-on-band: var(--stone-100);
-    --novera-fg: var(--stone-100);
-    --novera-fg-muted: #b4bdb7;
-    --novera-fg-subtle: #8e9892;
-    --novera-primary: var(--green-600);
-    --novera-primary-hover: var(--green-700);
+    --novera-canvas: var(--night-canvas);
+    --novera-surface: var(--night-surface);
+    --novera-surface-muted: var(--night-surface-muted);
+    --novera-band: var(--night-band);
+    --novera-on-band: var(--stone-50);
+    --novera-fg: var(--stone-50);
+    --novera-fg-muted: var(--night-fg-muted);
+    --novera-fg-subtle: var(--night-fg-subtle);
+    --novera-primary: var(--olive-600);
+    --novera-primary-hover: var(--olive-500);
     --novera-on-primary: var(--white);
-    --novera-link: var(--green-300);
-    --novera-selected: var(--green-800);
-    --novera-on-selected: var(--green-100);
-    --novera-accent: #e09a6a;
-    --novera-accent-soft: #3a2a1f;
-    --novera-on-accent-soft: #e09a6a;
-    --novera-border: #2c3a32;
-    --novera-border-strong: #68756d;
-    --novera-focus: var(--green-300);
-    --novera-error: #f97066;
-    --novera-warning: #e3b341;
-    --novera-success: var(--green-300);
+    --novera-link: var(--olive-300);
+    --novera-selected: var(--night-selected);
+    --novera-on-selected: var(--night-on-selected);
+    --novera-accent: var(--aegean-300);
+    --novera-accent-soft: var(--night-accent-soft);
+    --novera-on-accent-soft: var(--aegean-300);
+    --novera-border: var(--night-border);
+    --novera-border-strong: var(--night-border-strong);
+    --novera-focus: var(--olive-300);
+    --novera-error: var(--night-error);
+    --novera-warning: var(--night-warning);
+    --novera-success: var(--olive-300);
   }
 }
 
 /*
- * light-dark() resolves against the computed color-scheme, which the
- * data-theme rules above force. These are the single source of the dark values.
+ * light-dark() resolves against the computed color-scheme, which the data-theme
+ * rules above force. These are the single source of the dark values.
  */
 @supports (color: light-dark(white, black)) {
   :root {
-    --novera-canvas: light-dark(var(--paper), #101814);
-    --novera-surface: light-dark(var(--white), #18231d);
-    --novera-surface-muted: light-dark(var(--green-50), #141e18);
-    --novera-band: light-dark(var(--green-900), #0b140f);
-    --novera-on-band: light-dark(var(--stone-100), var(--stone-100));
-    --novera-fg: light-dark(var(--stone-950), var(--stone-100));
-    --novera-fg-muted: light-dark(var(--stone-700), #b4bdb7);
-    --novera-fg-subtle: light-dark(var(--stone-500), #8e9892);
-    --novera-primary: light-dark(var(--green-700), var(--green-600));
-    --novera-primary-hover: light-dark(var(--green-800), var(--green-700));
+    --novera-canvas: light-dark(var(--white), var(--night-canvas));
+    --novera-surface: light-dark(var(--white), var(--night-surface));
+    --novera-surface-muted: light-dark(var(--stone-100), var(--night-surface-muted));
+    --novera-band: light-dark(var(--olive-900), var(--night-band));
+    --novera-on-band: light-dark(var(--stone-50), var(--stone-50));
+    --novera-fg: light-dark(var(--olive-950), var(--stone-50));
+    --novera-fg-muted: light-dark(var(--stone-700), var(--night-fg-muted));
+    --novera-fg-subtle: light-dark(var(--stone-600), var(--night-fg-subtle));
+    --novera-primary: light-dark(var(--olive-700), var(--olive-600));
+    --novera-primary-hover: light-dark(var(--olive-750), var(--olive-500));
     --novera-on-primary: light-dark(var(--white), var(--white));
-    --novera-link: light-dark(var(--green-700), var(--green-300));
-    --novera-selected: light-dark(var(--green-100), var(--green-800));
-    --novera-on-selected: light-dark(var(--green-800), var(--green-100));
-    --novera-accent: light-dark(var(--clay-500), #e09a6a);
-    --novera-accent-soft: light-dark(var(--clay-100), #3a2a1f);
-    --novera-on-accent-soft: light-dark(var(--clay-700), #e09a6a);
-    --novera-border: light-dark(var(--stone-200), #2c3a32);
-    --novera-border-strong: light-dark(var(--stone-400), #68756d);
-    --novera-focus: light-dark(var(--green-700), var(--green-300));
-    --novera-error: light-dark(var(--error-700), #f97066);
-    --novera-warning: light-dark(var(--warning-700), #e3b341);
-    --novera-success: light-dark(var(--green-700), var(--green-300));
+    --novera-link: light-dark(var(--olive-700), var(--olive-300));
+    --novera-selected: light-dark(var(--olive-100), var(--night-selected));
+    --novera-on-selected: light-dark(var(--olive-800), var(--night-on-selected));
+    --novera-accent: light-dark(var(--aegean-700), var(--aegean-300));
+    --novera-accent-soft: light-dark(var(--aegean-100), var(--night-accent-soft));
+    --novera-on-accent-soft: light-dark(var(--aegean-900), var(--aegean-300));
+    --novera-border: light-dark(var(--stone-300), var(--night-border));
+    --novera-border-strong: light-dark(var(--stone-500), var(--night-border-strong));
+    --novera-focus: light-dark(var(--olive-700), var(--olive-300));
+    --novera-error: light-dark(var(--error-700), var(--night-error));
+    --novera-warning: light-dark(var(--warning-700), var(--night-warning));
+    --novera-success: light-dark(var(--olive-700), var(--olive-300));
   }
 }
 
@@ -262,7 +283,7 @@
 
   /* Depth comes from surface tone (canvas vs. surface), not shadows. One shadow for floating layers only. */
   --shadow-*: initial;
-  --shadow-overlay: 0 8px 24px rgb(15 46 33 / 0.12);
+  --shadow-overlay: 0 8px 24px rgb(26 28 22 / 0.12);
 
   /* Layout breakpoints from SPEC: 375 (base, no prefix), 768, 1280. */
   --breakpoint-*: initial;
@@ -275,6 +296,13 @@
 @layer base {
   html {
     accent-color: var(--color-primary);
+    caret-color: var(--color-primary);
+  }
+
+  /* Browser surfaces carry the palette too. */
+  ::selection {
+    background-color: var(--color-selected);
+    color: var(--color-on-selected);
   }
 
   body {

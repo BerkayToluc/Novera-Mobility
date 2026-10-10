@@ -1,8 +1,8 @@
 # Novera Mobility: Ürün Tanımı (SPEC)
 
-> Durum: **Taslak v0.3** · 9 Ekim 2026 (v0.2: 4 Ekim 2026)
+> Durum: **Taslak v0.4** · 10 Ekim 2026 (v0.3: 9 Ekim, v0.2: 4 Ekim 2026)
 > Sahipler: G (frontend), arkadaş (backend)
-> İçerik kaynağı: G'nin proje sohbetindeki ilk mesajı (misyon, vizyon, hakkımızda). v0.3: G'nin 9 Ekim site güncellemesi mesajı ve aynı gün verdiği cevaplar (sayfa yapısı, ürün ve hizmet içeriği, kalite gereksinimleri).
+> İçerik kaynağı: G'nin proje sohbetindeki ilk mesajı (misyon, vizyon, hakkımızda). v0.3: G'nin 9 Ekim site güncellemesi mesajı ve aynı gün verdiği cevaplar (sayfa yapısı, ürün ve hizmet içeriği, kalite gereksinimleri). v0.4: G'nin 10 Ekim tasarım geri bildirimi (yeni renk paleti, beyaz zemin, tercihlerin navbara taşınması, ana sayfa ve Araçlarımız düzeni).
 > Açık kararlar §10'da. Değişiklikler PR ile yapılır.
 
 ---
@@ -50,13 +50,13 @@ Yukarıdan aşağıya bölüm sırası:
 | # | Bölüm | Not |
 |---|---|---|
 | 1 | Kampanya galerisi | §2.2.1 |
-| 2 | Kiralama kutusu | Sayfanın `h1`'i bu kutunun başlığıdır. Kutunun üstünde **Bireysel** / **Kurumsal** seçimi (§2.2.2, §2.2.3) |
+| 2 | Kiralama kutusu | Sayfanın `h1`'i ("Araç Kirala") bu bölümün başlığıdır ve **ortalanır**. Altında, yine ortalı, yalnızca iki buton: **Bireysel** / **Kurumsal**; butonların çevresinde kutu ya da çerçeve yok (v0.4, G). Altında form (§2.2.2, §2.2.3) |
 | 3 | İş birlikleri | Kayan logo şeridi (§2.2.4) |
-| 4 | Yol Boyu Güvence | Koyu yeşil bant (§5.5) |
+| 4 | Yol Boyu Güvence | Koyu zeytin bant, modernleştirilmiş (§5.5) |
 | 5 | Sık sorulan sorular | §2.2.5 |
 | 6 | Footer | §2.8 |
 
-v0.2'deki kitleye göre değişen "araç sınıfları" ve "4 ürün" bölümleri kaldırıldı (G'nin kararı). `h1` galeride değil kutuda durur, çünkü galeri kampanya içeriğidir, sayfanın konusu araç kiralamaktır.
+v0.2'deki kitleye göre değişen "araç sınıfları" ("Size uygun sınıfı seçin") ve "4 ürün" bölümleri kaldırıldı (G'nin kararı, 10 Ekim'de yinelendi). `h1` galeride değil kutuda durur, çünkü galeri kampanya içeriğidir, sayfanın konusu araç kiralamaktır.
 
 #### 2.2.1 Kampanya galerisi
 
@@ -116,7 +116,8 @@ Ana sayfa (Kurumsal) → form → "Talebiniz alındı" → satış ekibi arar. �
 ### 2.4 Araçlarımız
 
 - Filodaki tüm modeller, sınıfa göre gruplu; sınıflar ve modeller ucuzdan pahalıya.
-- **Kart:** stok fotoğraf, marka-model, sınıf, hap bilgiler (yakıt tüketimi: L/100 km, elektrikli araçta kWh/100 km; yakıt tipi; vites; koltuk; bagaj) ve "…'den başlayan" günlük fiyat. Kartın içinde sağda bir ok işareti; hover'da kart ve ok tepki verir. Kartın tamamı tek bir tıklama hedefidir.
+- **Kategoriler (v0.4):** sayfanın üstünde kategori çipleri ("Tümü", "Ekonomik", "Orta sınıf"…); biri seçilince liste o kategoriye süzülür. Kategori bölümleri belirgin başlık, model sayısı ve aralarında net boşlukla ayrılır.
+- **Kart yatay (v0.4):** fotoğraf solda, bilgiler sağda; mobilde de yatay, sıkıştırılmış. Stok fotoğraf, marka-model, sınıf, hap bilgiler (yakıt tüketimi: L/100 km, elektrikli araçta kWh/100 km; yakıt tipi; vites; koltuk; bagaj) ve "…'den başlayan" günlük fiyat. Kartın içinde sağda bir ok işareti; hover'da kart ve ok tepki verir. Kartın tamamı tek bir tıklama hedefidir.
 - **Pencere:** karta tıklanınca yeni sayfa açılmaz, pencere (modal) açılır. İçerik: daha detaylı bilgi (tüm özellikler, kısa açıklama) ve modelin bulunduğu bayiler (bayi adı, şehir; İletişim sayfasına bağlantı).
 - Pencere adreste iz bırakır: `/araclarimiz?arac=<model>`. Link paylaşılınca aynı pencere açık gelir; geri tuşu ve Esc kapatır; kapanınca odak tıklanan karta döner. Arama motoru için kanonik adres `/araclarimiz`'dir (ARCHITECTURE ADR-22).
 
@@ -152,12 +153,14 @@ Masaüstü: [Logo] Araç Kirala · Araçlarımız · Ürünler · Hizmetler · H
 Mobil:    [Logo]                                                     [Profil] [☰]
 ```
 
-- Navbar'daki linkler v0.2'deki gibi kalır. **İletişim, diğer linklerden farklı görünür** (çerçeveli buton görünümü); Giriş Yap / Profil butonundan da ayırt edilebilir. Mobil menüde de aynı vurgu.
+- Navbar'daki linkler v0.2'deki gibi kalır. **İletişim, diğer linklerden farklı görünür** (çerçeveli buton görünümü) ve **diğer linklerden belirgin bir boşlukla ayrı durur**; Giriş Yap / Profil butonundan da ayırt edilebilir. Mobil menüde de aynı vurgu.
+- **Giriş Yap** butonu zeminden ayrışan bir dolguya sahiptir; zeminle aynı renkte kalmaz (v0.4, G).
+- **Tercihler (v0.4, G):** dil, tema ve para birimi navbarda tek bir ikon düğmesiyle açılan küçük bir panelde; mobilde hamburger menünün içinde. Footer'da tercih yok.
 - Navbar'da ayrı "Kurumsal Teklif" linki yok (G'nin kararı); kurumsal giriş noktası ana sayfadaki seçim ve ürün sayfaları.
 - Hamburger = site gezintisi. Altı bağlantı 1280px altında yan yana sığmadığı için hamburger mobilde ve tablette görünür, satır içi menü 1280px ve üstünde. Profil menüsü = hesap (her ekranda).
 - Giriş yapılmamışsa Profil yerine "Giriş Yap".
-- **Footer:** referans Framer "Simple Footer" (G'nin ekran görüntüsü bekleniyor, §10). İçerik: logo ve kısa tanım, Keşfet linkleri, Yasal linkler (5 sayfa ve "Çerez tercihleri"), tercihler, telif ve "kurgusal proje" notu.
-- Dil (TR/EN), tema (açık/koyu) ve para birimi (TRY/EUR/USD) seçimi footer'da bulunur; giriş yapan kullanıcıda tercih hesaba kaydedilir. Tutarlar günlük kurla çevrilir (ARCHITECTURE ADR-15); ödeme sahte olduğu için hangi para birimi seçilirse seçilsin para alınmaz.
+- **Footer:** referans Framer "Simple Footer": solda logo, kısa tanım ve altında telif + "kurgusal proje" notu; sağda sade sütunlar: Keşfet linkleri, Yasal linkler (5 sayfa ve "Çerez tercihleri"), iletişim. Sosyal medya sütunu yok (kurgusal şirketin hesabı yok; uydurulmaz).
+- Dil (TR/EN), tema (açık/koyu/sistem; **varsayılan açık**) ve para birimi (TRY/EUR/USD) seçimi navbardaki tercih panelindedir; giriş yapan kullanıcıda tercih hesaba kaydedilir. Tutarlar günlük kurla çevrilir (ARCHITECTURE ADR-15); ödeme sahte olduğu için hangi para birimi seçilirse seçilsin para alınmaz.
 
 ---
 
@@ -207,44 +210,49 @@ Kurgusal şirket; rakamlar G'nin izniyle tutarlı olacak şekilde seçildi. Site
 
 ## 5. Tasarım yönü
 
-> G'nin yönlendirmesi: marka rengi doğa yeşili; tipografi modern ve kurumsal; sade ve net ama düz değil; orantılı boşluklar; akılda kalacak öğe güven odaklı.
+> G'nin yönlendirmesi: marka rengi doğa yeşili; tipografi modern ve kurumsal; sade ve net ama düz değil; orantılı boşluklar; akılda kalacak öğe güven odaklı. 10 Ekim: v0.3 paleti "yapay zekâ tarzı" bulundu; yeşil kalarak renk teorisine uyan, daha doğal bir palet seçildi (§5.1) ve sayfa zemini varsayılan olarak beyaz oldu.
 
 ### 5.1 Renk
 
-**Ana renk: orman yeşili `#1D5A40`.** Parlak, açık yeşil (yaprak yeşili) "çevreci girişim" gibi okunur; koyu, doygunluğu düşük orman yeşili ise bankalarda ve sigortacılarda görülen ağırlığı taşır. Doğa vurgusu ve güven aynı renkte buluşuyor. Beyaz üzerinde kontrastı 8.1:1, yani hem metin hem buton zemini olarak kullanılabilir.
+**Palet: Zeytin ve Ege (v0.4, G'nin seçimi, 10 Ekim 2026).** v0.3'teki krem kâğıt zemin, terrakota vurgu ve koyu temadaki parlak nane yeşili, yapay zekâ üretimi arayüzlerin en tanıdık kalıbıydı; site "hazır şablon" gibi okunuyordu. Yeni palet Anadolu manzarasından geliyor: zeytin yeşili, kireçtaşı nötrler ve Ege mavisi.
 
-**Nötrler: yeşile çekik taş grisi.** Saf gri yeşilin yanında soğuk ve "hazır şablon" gibi durur. Grilere çok az yeşil karıştırmak tüm sayfayı tek bir aile gibi gösterir. Sayfa zemini saf beyaz değil, kâğıt tonu `#F8F9F6`: göz yormaz, kartlar (beyaz) zeminden hafifçe ayrılır.
+**Ana renk: zeytin `#45561D`.** Sarıya çekik, doygunluğu düşük bir yeşil. Hem doğa vurgusunu (SPEC'in ilk kararı) hem güveni taşır; beyaz üzerinde 8.1:1, yani buton zemini ve metin olarak kullanılabilir.
 
-**Vurgu: kil / toprak `#C0703A`.** Renk çemberinde yeşilin karşısında kırmızı-turuncu bölge var. Saf kırmızı hata rengiyle karışacağı için toprağa çekilmiş, doğayla uyumlu bir kil tonu seçildi. **Çok az kullanılır:** "En çok tercih edilen" rozeti, öne çıkan küçük işaretler. Butonlar yeşil kalır.
+**Nötrler: kireçtaşı.** Grilere çok az zeytin karışır; metin ve çizgiler markanın ailesinden olur ama renkli görünmez. **Sayfa zemini beyazdır** (G'nin kararı); derinlik kireçtaşı paneller (`stone-100`) ve ince çizgilerle verilir.
+
+**Vurgu: Ege mavisi `#1C6A8A`.** Renk çemberinde zeytinin karşı tarafına yakın (ayrık tamamlayıcı uyum). Yalnızca öne çıkması gereken birkaç şeyde kullanılır: "En çok tercih edilen" rozeti, küçük işaretler, koyu banttaki vurgu. Butonlar zeytin kalır.
 
 | Token | Hex | Kullanım |
 |---|---|---|
-| `green-900` | `#0F2E21` | Koyu bant bölümler, footer zemini |
-| `green-800` | `#164331` | Hover (buton), açık zeminde başlık alternatifi |
-| `green-700` | `#1D5A40` | **Ana marka rengi**, birincil buton, linkler |
-| `green-600` | `#25704F` | Koyu temada birincil buton |
-| `green-300` | `#8FC2A5` | Koyu zeminde vurgu metni, ikon |
-| `green-100` | `#E3F0E8` | Seçili durum zemini, rozet zemini |
-| `green-50` | `#F1F7F3` | Hafif bölüm zemini |
-| `stone-950` | `#141A17` | Ana metin |
-| `stone-700` | `#3E4742` | İkincil metin |
-| `stone-500` | `#67706B` | Yardımcı metin, placeholder (en küçük metin boyutunda kullanılmaz) |
-| `stone-400` | `#858D88` | Form kenarlığı (beyaz üzerinde 3.41:1, WCAG 1.4.11 için en az 3:1) |
-| `stone-300` | `#C9CEC9` | Dekoratif kenarlık |
-| `stone-200` | `#E2E5E1` | Ayırıcı çizgi |
-| `stone-100` | `#EFF1EE` | Pasif zemin |
-| `paper` | `#F8F9F6` | Sayfa zemini |
-| `white` | `#FFFFFF` | Kart ve form zemini |
-| `clay-500` | `#C0703A` | Vurgu (ikon, nokta, çizgi) |
-| `clay-700` | `#8A4A22` | Vurgu zemininde metin |
-| `clay-100` | `#F6E6D9` | Vurgu rozet zemini |
+| `olive-950` | `#1A1C16` | Ana metin |
+| `olive-900` | `#262B1B` | Koyu bant (Yol Boyu Güvence) |
+| `olive-800` | `#323F13` | Seçili durumda metin |
+| `olive-750` | `#384717` | Birincil buton hover |
+| `olive-700` | `#45561D` | **Ana marka rengi**, birincil buton, link, odak halkası |
+| `olive-600` | `#566B25` | Koyu temada birincil buton |
+| `olive-500` | `#627A2B` | Koyu temada buton hover |
+| `olive-300` | `#B5C97E` | Koyu temada link, odak, vurgu metni |
+| `olive-100` | `#E5EBD3` | Seçili durum zemini, metin seçimi |
+| `stone-700` | `#4A4D40` | İkincil metin |
+| `stone-600` | `#62655A` | Yardımcı metin, placeholder |
+| `stone-500` | `#868979` | Form kenarlığı (beyaz üzerinde 3.58:1, WCAG 1.4.11 için en az 3:1) |
+| `stone-300` | `#DCDCD3` | Ayırıcı çizgi, kart kenarlığı |
+| `stone-100` | `#F3F3EF` | Hafif bölüm ve panel zemini |
+| `stone-50` | `#EEEFE8` | Koyu zeminde metin |
+| `white` | `#FFFFFF` | Sayfa, kart ve form zemini |
+| `aegean-700` | `#1C6A8A` | Vurgu (ikon, nokta, çizgi) |
+| `aegean-900` | `#154F67` | Vurgu zemininde metin |
+| `aegean-300` | `#8FC3DA` | Koyu zeminde vurgu |
+| `aegean-100` | `#DCEEF5` | Vurgu rozet zemini |
 | `error` | `#B42318` | Hata |
 | `warning` | `#9A6700` | Uyarı |
-| `success` | `green-700` | Başarı (marka rengiyle aynı, ayrı yeşil eklenmez) |
+| `success` | `olive-700` | Başarı (marka rengiyle aynı, ayrı yeşil eklenmez) |
 
-**Ölçülen kontrastlar (WCAG):** `green-700`/beyaz 8.11 · `stone-950`/paper 16.70 · `stone-700`/paper 9.10 · `stone-500`/paper 4.84 · `stone-500`/`green-50` 4.71 · beyaz/`green-600` 5.98 · `clay-700`/`clay-100` 5.59 · `error`/beyaz 6.57 · `warning`/beyaz 4.87. Hepsi AA (4.5:1) üstünde.
+**Ölçülen kontrastlar (WCAG):** beyaz/`olive-700` 8.07 · beyaz/`olive-750` 10.09 · `olive-950`/beyaz 17.19 · `stone-700`/`stone-100` 7.78 · `stone-600`/beyaz 5.95 · `stone-600`/`stone-100` 5.35 · `aegean-900`/`aegean-100` 7.50 · beyaz/`aegean-700` 6.04 · `stone-50`/`olive-900` 12.57 · `aegean-300`/`olive-900` 7.61 · `error`/beyaz 6.57 · `warning`/beyaz 4.87. Hepsi AA (4.5:1) üstünde; kenarlık 3:1 üstünde.
 
-**Koyu tema:** zemin `#101814`, kart `#18231D`, metin `stone-100`, birincil buton `green-600`, link ve vurgu `green-300`. Ölçülen: metin/zemin 15.90 · ikincil metin `#B4BDB7` 9.38 · yardımcı metin `#8E9892` 6.07 · link 8.97 · beyaz/`green-600` 5.98 · form kenarlığı `#68756D` kart üzerinde 3.36. Değerlerin tamamı `apps/web/app/globals.css` içinde.
+**Koyu tema** (kullanıcı seçerse ya da "sistem" seçilip sistem koyuysa): zemin `#13140F`, kart `#1C1E17`, metin `stone-50`, birincil buton `olive-600`, link ve odak `olive-300`, vurgu `aegean-300`. Ölçülen: metin/zemin 15.99 · ikincil metin `#BBBEAF` 9.78 · yardımcı metin `#979A8B` 6.44 · link 10.24 · beyaz/`olive-600` 5.96 · beyaz/`olive-500` (hover) 4.84 · form kenarlığı `#757968` kart üzerinde 3.76. Saf siyah kullanılmaz. Değerlerin tamamı `apps/web/app/globals.css` içinde.
+
+**Tarayıcı yüzeyleri:** metin seçimi (`olive-100` üzerinde `olive-800`), imleç ve form kontrollerinin vurgu rengi paletten gelir; tarayıcı varsayılanında kalmaz.
 
 ### 5.2 Tipografi
 
@@ -281,7 +289,7 @@ Gövde metni en fazla ~68 karakter genişliğinde tutulur.
 - Sadelik az öğeden gelir: her bölümün tek bir görevi ve tek bir birincil butonu var.
 - "Düz değil" hissi ritimden gelir, süsten değil:
   - Bölümler her zaman ortalanmış değil; metin solda / görsel sağda, sonraki bölümde tam genişlik, sonra koyu bant. Göz her bölümde aynı kalıba alışmaz.
-  - Sayfa akışında bir kez **koyu orman yeşili bant** (`green-900`) kullanılır: Yol Boyu Güvence bölümü. Açık sayfada tek koyu bölüm, dikkati oraya toplar.
+  - Sayfa akışında bir kez **koyu zeytin bant** (`olive-900`) kullanılır: Yol Boyu Güvence bölümü. Açık sayfada tek koyu bölüm, dikkati oraya toplar.
   - Büyük, kenarları yuvarlatılmış fotoğraflar; araç fotoğraflarında doğal ışık ve açık hava.
 - **Hareket:** varsayılan olarak yalnızca durum değişikliğini anlatan geçişler (anahtar değişince alanın yumuşak geçişi, pencere açılıp kapanması). Kaydırınca beliren dekoratif animasyon yok.
   - **İstisnalar (v0.3, G'nin onayı):** iş birlikleri şeridi (sürekli akış, durdurma düğmeli), Hakkımızda sayaçları (görününce bir kez sayar), Hikayemiz zaman çizelgesi (seçim değişince geçiş), SSS'nin yaylı açılması, galeri slayt geçişi.
@@ -302,7 +310,7 @@ Eşit üç sütunlu ikon+başlık+gri metin kartları, gerekçesiz gradient, sı
 
 ### 5.7 Erişilebilirlik
 
-WCAG 2.2 AA. Metin kontrastı en az 4.5:1, dokunma hedefi en az 44×44px, görünür odak halkası (`green-700`, 2px, 2px boşluk), tüm akışlar klavyeyle tamamlanabilir, anahtar (Bireysel/Kurumsal) ekran okuyucuda seçili durumu bildirir. Hareketli bileşenler durdurulabilir ve `prefers-reduced-motion`'a uyar (§5.4). Pencereler odağı içeride tutar, Esc ile kapanır ve kapanınca odağı açan öğeye geri verir.
+WCAG 2.2 AA. Metin kontrastı en az 4.5:1, dokunma hedefi en az 44×44px, görünür odak halkası (`olive-700`, koyu temada `olive-300`; 2px, 2px boşluk), tüm akışlar klavyeyle tamamlanabilir, anahtar (Bireysel/Kurumsal) ekran okuyucuda seçili durumu bildirir. Hareketli bileşenler durdurulabilir ve `prefers-reduced-motion`'a uyar (§5.4). Pencereler odağı içeride tutar, Esc ile kapanır ve kapanınca odağı açan öğeye geri verir.
 
 ---
 
@@ -392,7 +400,6 @@ Sonraya bırakılanlar (G onayladı): breadcrumb, Lighthouse CI.
 | Karar | Kimde | Not |
 |---|---|---|
 | Kurumsal kutunun tasarımı; `/kurumsal-teklif` sayfasının ana sayfa formuyla ilişkisi | G | Claude, uygulamadan önce öneri getirir |
-| Footer referansı (Simple Footer) | G | Marketplace sayfası düzeni anlatmıyor; ekran görüntüsü bekleniyor |
 | Fotoğraf kaynağı (stok / üretilmiş / yer tutucu) | G | Galeri, araçlar, Hikayemiz, genel merkez |
 | Analytics aracı: Vercel Web Analytics veya Umami | G | Yayın ortamına bağlı (ADR-12, ADR-19); ücretsiz plan koşulları doğrulanmadı |
 | Kampanya içeriği sabit mi, API'den mi | İKİ | Şimdilik sabit |
