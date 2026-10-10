@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { ContactExplorer } from "@/components/contact/contact-explorer";
 import { ContactForm } from "@/components/contact/contact-form";
+import { JsonLd } from "@/components/json-ld";
 import { Headquarters } from "@/components/contact/headquarters";
 import { Button } from "@/components/ui/button";
 import { StateMessage } from "@/components/ui/state-message";
@@ -9,6 +10,7 @@ import { Link } from "@/i18n/navigation";
 import type { BranchDetail } from "@/lib/branch-detail";
 import { getBranchDetails } from "@/lib/fleet-client";
 import { pageMetadata } from "@/lib/seo";
+import { branchJsonLd } from "@/lib/structured-data";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("ContactPage");
@@ -31,6 +33,8 @@ export default async function ContactPage() {
 
   return (
     <div className="mx-auto flex max-w-content flex-col gap-16 px-4 py-12 md:px-8 xl:py-16">
+      {/* Each branch is described to search engines as a car rental place (ADR-18). */}
+      {branches?.map((branch) => <JsonLd key={branch.id} data={branchJsonLd(branch)} />)}
       <header className="flex flex-col gap-3">
         <h1 className="text-h1 text-fg">{t("title")}</h1>
         <p className="max-w-prose text-body text-fg-muted">{t("intro")}</p>

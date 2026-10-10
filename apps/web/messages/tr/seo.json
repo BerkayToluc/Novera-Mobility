@@ -1,0 +1,24 @@
+{
+  "Llms": {
+    "name": "Novera Mobility",
+    "summary": "Kurgusal bir kurumsal araç kiralama şirketinin sitesi: bireysel ve kurumsal araç kiralama, 14 şehirde 15 bayi, Yol Boyu Güvence ve Novera Driver App.",
+    "note": "Bu site kurgusal bir öğrenme projesidir; şirket, adresler ve telefon numaraları örnektir.",
+    "language": "Türkçe",
+    "pages": {
+      "home": "Ana sayfa: araç kirala",
+      "araclarimiz": "Araçlarımız",
+      "urunler": "Ürünler",
+      "hizmetler": "Hizmetler",
+      "hakkimizda": "Hakkımızda",
+      "iletisim": "İletişim ve bayiler",
+      "yardim": "Yardım merkezi",
+      "rehberler": "Araç kiralama rehberleri",
+      "kurumsal-teklif": "Kurumsal teklif iste",
+      "kvkk": "KVKK Aydınlatma Metni",
+      "gizlilik-politikasi": "Gizlilik Politikası",
+      "cerez-politikasi": "Çerez Politikası",
+      "kullanim-sartlari": "Kullanım Şartları",
+      "kiralama-kosullari": "Kiralama Koşulları"
+    }
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "Llms": {
+    "name": "Novera Mobility",
+    "summary": "The site of a fictional corporate car rental company: individual and corporate rental, 15 branches in 14 cities, Road Assurance and the Novera Driver App.",
+    "note": "This site is a fictional learning project; the company, addresses and phone numbers are examples.",
+    "language": "English",
+    "pages": {
+      "home": "Home: rent a car",
+      "araclarimiz": "Our Cars",
+      "urunler": "Products",
+      "hizmetler": "Services",
+      "hakkimizda": "About Us",
+      "iletisim": "Contact and branches",
+      "yardim": "Help centre",
+      "rehberler": "Car rental guides",
+      "kurumsal-teklif": "Request a corporate quote",
+      "kvkk": "Privacy Notice (KVKK)",
+      "gizlilik-politikasi": "Privacy Policy",
+      "cerez-politikasi": "Cookie Policy",
+      "kullanim-sartlari": "Terms of Use",
+      "kiralama-kosullari": "Rental Terms"
+    }
+  }
+}
