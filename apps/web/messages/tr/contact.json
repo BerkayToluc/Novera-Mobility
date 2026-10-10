@@ -1,11 +1,11 @@
 {
   "ContactPage": {
     "metaTitle": "İletişim",
-    "metaDescription": "Novera Mobility bayilerini haritada bulun: adres, çalışma saatleri, telefon ve yol tarifi.",
+    "metaDescription": "Novera Mobility'ye ulaşın: genel merkez, ekip e-postaları, iletişim formu ve 14 şehirdeki bayilerimizin adresleri, saatleri ve yol tarifi.",
     "title": "İletişim",
-    "intro": "Size en yakın bayiyi şehir ya da bayi adıyla arayın; adres, çalışma saatleri ve telefonu görün.",
-    "searchLabel": "Şehir veya bayi ara",
-    "searchPlaceholder": "Örn. İzmir",
+    "intro": "Bize yazın, ekiplerimize doğrudan ulaşın ya da size en yakın bayiyi bulun.",
+    "searchLabel": "Bayi ara",
+    "searchPlaceholder": "Bayi adı, ilçe veya adres",
     "viewLabel": "Görünüm",
     "views": {
       "list": "Liste",
@@ -36,6 +36,71 @@
       "directions": "Yol tarifi al",
       "newTab": "(yeni sekmede açılır)",
       "showOnMap": "Haritada göster"
+    },
+    "cityLabel": "Şehir",
+    "allCities": "Tüm şehirler",
+    "countFiltered": "{total} bayiden {count} tanesi gösteriliyor",
+    "branches": {
+      "title": "Bayilerimiz",
+      "intro": "Şehre göre süzün ya da bayi adı, ilçe veya adresle arayın; liste ve harita birlikte daralır."
+    },
+    "form": {
+      "title": "Bize yazın",
+      "intro": "Mesajınızı bırakın, bir iş günü içinde dönelim."
+    },
+    "hq": {
+      "title": "Genel merkez",
+      "hours": "Hafta içi 09:00 – 18:00",
+      "directions": "Yol tarifi al",
+      "newTab": "(yeni sekmede açılır)",
+      "departmentsTitle": "Ekiplerimizle doğrudan",
+      "departments": {
+        "marketing": {
+          "name": "Pazarlama",
+          "text": "Basın, kampanya ve marka soruları"
+        },
+        "sales": {
+          "name": "Satış",
+          "text": "Kurumsal teklif ve filo görüşmeleri"
+        },
+        "partnerships": {
+          "name": "İş birlikleri",
+          "text": "Ortaklık ve tedarikçi başvuruları"
+        }
+      }
+    }
+  },
+  "ContactForm": {
+    "name": "Ad soyad",
+    "email": "E-posta",
+    "phone": "Telefon (isteğe bağlı)",
+    "phoneHint": "Sizi aramamızı istiyorsanız yazın.",
+    "topic": "Konu",
+    "topics": {
+      "general": "Genel soru",
+      "booking": "Rezervasyon",
+      "corporate": "Kurumsal kiralama",
+      "partnership": "İş birliği",
+      "feedback": "Öneri veya şikâyet"
+    },
+    "message": "Mesajınız",
+    "submit": "Mesajı Gönder",
+    "submitting": "Gönderiliyor",
+    "errors": {
+      "name": "Adınızı ve soyadınızı yazın.",
+      "email": "Geçerli bir e-posta adresi yazın.",
+      "phone": "Alan koduyla birlikte geçerli bir telefon numarası yazın ya da boş bırakın.",
+      "message": "Mesajınızı en az 10 karakterle yazın.",
+      "consent": "Devam etmek için aydınlatma metnini onaylayın.",
+      "invalid": "Mesajınız eksik görünüyor. Alanları kontrol edip tekrar gönderin.",
+      "unavailable": "Mesaj servisi şu an kullanılamıyor. Lütfen daha sonra tekrar deneyin.",
+      "generic": "Mesajınız gönderilemedi. Lütfen tekrar deneyin."
+    },
+    "sent": {
+      "title": "Mesajınız alındı",
+      "text": "{email} adresine bir iş günü içinde dönüş yapacağız.",
+      "reference": "Mesaj numaranız:",
+      "again": "Yeni mesaj yaz"
     }
   }
 }

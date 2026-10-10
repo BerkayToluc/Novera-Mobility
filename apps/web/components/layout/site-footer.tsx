@@ -80,7 +80,7 @@ export async function SiteFooter() {
               </a>
             </li>
             <li>
-              <Link href="/iletisim" className={linkClasses}>
+              <Link href={{ pathname: "/iletisim", hash: "mesaj" }} className={linkClasses}>
                 {t("contactPage")}
               </Link>
             </li>

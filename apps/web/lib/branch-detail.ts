@@ -27,10 +27,16 @@ export function normalizeSearch(value: string): string {
     .trim();
 }
 
+// The branches in one city, or all of them for an empty `city`.
+export function inCity(branch: BranchDetail, city: string): boolean {
+  return city === "" || branch.city === city;
+}
+
+// Name, city and address, so "Sarıyer" or "Havalimanı" find a branch as "İzmir" does.
 export function matchesBranch(branch: BranchDetail, query: string): boolean {
   const needle = normalizeSearch(query);
   if (!needle) return true;
-  return normalizeSearch(`${branch.city} ${branch.name}`).includes(needle);
+  return normalizeSearch(`${branch.city} ${branch.name} ${branch.address}`).includes(needle);
 }
 
 export const directionsUrl = ({ latitude, longitude }: BranchDetail) =>
