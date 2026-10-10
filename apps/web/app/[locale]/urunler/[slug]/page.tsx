@@ -5,6 +5,7 @@ import { ProductBadge } from "@/components/product-badge";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
 import { isProductSlug, PRODUCTS } from "@/lib/products";
+import { pageMetadata } from "@/lib/seo";
 
 export async function generateMetadata({
   params,
@@ -12,7 +13,11 @@ export async function generateMetadata({
   const { slug } = await params;
   if (!isProductSlug(slug)) return {};
   const t = await getTranslations("ProductsPage");
-  return { title: t(`items.${slug}.title`), description: t(`items.${slug}.summary`) };
+  return pageMetadata({
+    href: { pathname: "/urunler/[slug]", params: { slug } },
+    title: t(`items.${slug}.title`),
+    description: t(`items.${slug}.summary`),
+  });
 }
 
 export default async function ProductDetailPage({

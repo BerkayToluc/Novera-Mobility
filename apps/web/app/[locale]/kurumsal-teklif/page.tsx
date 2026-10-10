@@ -3,10 +3,11 @@ import { getTranslations } from "next-intl/server";
 import { QuoteForm } from "@/components/quote/quote-form";
 import { QuoteSteps } from "@/components/quote/quote-steps";
 import { productFromParams } from "@/lib/quote";
+import { pageMetadata } from "@/lib/seo";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("QuotePage");
-  return { title: t("metaTitle"), description: t("metaDescription") };
+  return pageMetadata({ href: "/kurumsal-teklif", title: t("metaTitle"), description: t("metaDescription") });
 }
 
 // The same corporate request as the home page's box (BACKLOG Y16), reached from a product's

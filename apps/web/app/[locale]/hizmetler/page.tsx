@@ -3,12 +3,13 @@ import { getTranslations } from "next-intl/server";
 import { Accordion, AccordionItem } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
+import { pageMetadata } from "@/lib/seo";
 
 type Service = { title: string; summary: string; points: string[] };
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("ServicesPage");
-  return { title: t("metaTitle"), description: t("metaDescription") };
+  return pageMetadata({ href: "/hizmetler", title: t("metaTitle"), description: t("metaDescription") });
 }
 
 export default async function ServicesPage({ searchParams }: PageProps<"/[locale]/hizmetler">) {

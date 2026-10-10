@@ -2,10 +2,11 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { ProductCard } from "@/components/product-card";
 import { PRODUCTS } from "@/lib/products";
+import { pageMetadata } from "@/lib/seo";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("ProductsPage");
-  return { title: t("metaTitle"), description: t("metaDescription") };
+  return pageMetadata({ href: "/urunler", title: t("metaTitle"), description: t("metaDescription") });
 }
 
 export default async function ProductsPage() {
