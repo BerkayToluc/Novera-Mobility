@@ -25,7 +25,7 @@ export async function ProductCard({ slug, featured = false, headingAs = "h2" }: 
           <CardTitle as={headingAs} className={featured ? "text-h2" : undefined}>
             {title}
           </CardTitle>
-          <CardDescription className="text-body">{t(`items.${slug}.summary`)}</CardDescription>
+          <CardDescription className="text-body">{t(`items.${slug}.concept`)}</CardDescription>
         </CardHeader>
         {!featured && <CardContent className="flex-1" />}
       </div>
