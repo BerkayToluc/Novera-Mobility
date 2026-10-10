@@ -16,6 +16,7 @@ import { parseAudience } from "@/lib/audience";
 import type { BranchOption } from "@/lib/branch-options";
 import { getCurrency } from "@/lib/get-currency";
 import { getBranchOptions } from "@/lib/rental-data";
+import { pageMetadata } from "@/lib/seo";
 
 // Anchor of the rental section, so campaign buttons can bring the visitor to the form.
 const RENTAL_ANCHOR = "kiralama";
@@ -28,7 +29,7 @@ const CAMPAIGNS: { id: CampaignArtKind; href: CampaignSlide["href"] }[] = [
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("HomePage");
-  return { description: t("metaDescription") };
+  return pageMetadata({ href: "/", description: t("metaDescription") });
 }
 
 // Section order of SPEC §2.2: campaigns, the rental box, partners, Road Assurance, FAQ. The

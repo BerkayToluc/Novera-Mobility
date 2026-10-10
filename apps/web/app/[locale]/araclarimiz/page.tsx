@@ -7,10 +7,11 @@ import { Link } from "@/i18n/navigation";
 import { getBranches, getVehicles } from "@/lib/fleet-client";
 import { groupFleet, type FleetCategory } from "@/lib/fleet-models";
 import { getCurrency } from "@/lib/get-currency";
+import { pageMetadata } from "@/lib/seo";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("FleetPage");
-  return { title: t("metaTitle"), description: t("metaDescription") };
+  return pageMetadata({ href: "/araclarimiz", title: t("metaTitle"), description: t("metaDescription") });
 }
 
 export default async function FleetPage({ searchParams }: PageProps<"/[locale]/araclarimiz">) {

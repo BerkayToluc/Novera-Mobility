@@ -3,10 +3,11 @@ import { getFormatter, getTranslations } from "next-intl/server";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
 import { CLAIMS, FOUNDED_YEAR, STATS, TIMELINE } from "@/lib/about-data";
+import { pageMetadata } from "@/lib/seo";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("AboutPage");
-  return { title: t("metaTitle"), description: t("metaDescription") };
+  return pageMetadata({ href: "/hakkimizda", title: t("metaTitle"), description: t("metaDescription") });
 }
 
 export default async function AboutPage() {

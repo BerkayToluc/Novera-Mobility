@@ -13,6 +13,7 @@
   },
   "LegalPrivacy": {
     "title": "KVKK Aydınlatma Metni",
+    "metaDescription": "Novera Mobility'nin kişisel verilerinizi nasıl topladığı, kullandığı ve koruduğuna dair KVKK aydınlatma metni.",
     "sections": [
       {
         "heading": "Veri sorumlusu",
@@ -83,6 +84,7 @@
   },
   "LegalCookies": {
     "title": "Çerez Politikası",
+    "metaDescription": "Novera Mobility'nin kullandığı çerezler, ne işe yaradıkları ve tercihlerinizi nasıl yönetebileceğiniz.",
     "sections": [
       {
         "heading": "Çerez nedir?",
@@ -134,6 +136,7 @@
   },
   "LegalTerms": {
     "title": "Kiralama Koşulları",
+    "metaDescription": "Novera Mobility ile araç kiralarken geçerli olan koşullar: teslim, iade, sigorta ve iptal.",
     "sections": [
       {
         "heading": "Kapsam",

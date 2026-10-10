@@ -180,7 +180,7 @@ Tek dil: **TypeScript**, frontend'de de backend'de de.
   - `app/sitemap.ts` herkese açık sayfaların tek listesidir, iki dilde ve dil eşlemesiyle. Araç detay sayfası kalktığı için (SPEC v0.3) sitemap API'ye bağlı değildir. `llms.txt` aynı listeden bir route handler ile üretilir, iki liste ayrışmaz.
   - Paylaşım görseli `opengraph-image.tsx` ile kodda üretilir. `app/manifest.ts` ve `theme-color` (viewport) favicon işinin parçasıdır.
   - JSON-LD sunucuda `<script type="application/ld+json">` olarak yazılır: kök layout'ta `Organization`, İletişim'de her bayi için `AutoRental`. `FAQPage` eklenmez: G'nin öneri dosyasına göre Google bu zengin sonucu 2023'ten beri yalnızca resmi kurum ve sağlık sitelerinde gösteriyor.
-- **Ödünleşim:** Canonical, sitemap ve JSON-LD'deki adresler yayın alan adına bağlı; alan adı belli olana kadar yerel adres yazılır. `feat/seo-assets` dalındaki robots.txt özel sayfaları engelliyor; bu karar gereği BACKLOG Y13'te düzeltilir.
+- **Ödünleşim:** Canonical, sitemap ve JSON-LD'deki adresler yayın alan adına bağlı; alan adı belli olana kadar yerel adres yazılır. Yerel adres yalnızca geliştirme varsayılanıdır; canlıda `NEXT_PUBLIC_SITE_URL` zorunludur. robots.txt yalnızca `/api/`'yi kapatır, özel sayfalar kendi `noindex`'ini taşır (Y13, 10 Ekim 2026). Üretilen ikon ve paylaşım görseli `proxy.ts` eşleşmesinin dışındadır (aksi halde dil önekiyle yönlendirilip 404 verirler); paylaşım görseli `openGraph.images` ile her sayfada açıkça verilir, çünkü sayfanın `openGraph` nesnesi layout'unkini birleştirmeden değiştirir (`lib/seo.ts`).
 
 ## ADR-19 · Çerez onayı ve analytics
 

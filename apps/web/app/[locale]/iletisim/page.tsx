@@ -6,10 +6,11 @@ import { StateMessage } from "@/components/ui/state-message";
 import { Link } from "@/i18n/navigation";
 import type { BranchDetail } from "@/lib/branch-detail";
 import { getBranchDetails } from "@/lib/fleet-client";
+import { pageMetadata } from "@/lib/seo";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("ContactPage");
-  return { title: t("metaTitle"), description: t("metaDescription") };
+  return pageMetadata({ href: "/iletisim", title: t("metaTitle"), description: t("metaDescription") });
 }
 
 export default async function ContactPage() {

@@ -1,11 +1,12 @@
 import type { Metadata, Viewport } from "next";
 import { NextIntlClientProvider } from "next-intl";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { locale } from "next/root-params";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { routing } from "@/i18n/routing";
 import { getTheme } from "@/lib/get-theme";
+import { socialMetadata } from "@/lib/seo";
 import { colorSchemeOf } from "@/lib/theme";
 import { SITE_URL } from "@/lib/site-url";
 // Self-hosted variable font: no request to Google at runtime, and unicode-range
@@ -19,10 +20,11 @@ export function generateStaticParams() {
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("Metadata");
+  const current = (await getLocale()) as (typeof routing.locales)[number];
   return {
     // Makes the share-preview image and other relative links in metadata absolute.
     metadataBase: new URL(SITE_URL),
-    openGraph: { siteName: t("title"), type: "website" },
+    ...socialMetadata({ locale: current, siteName: t("title") }),
     // Pages set only their own title; the site name is appended here.
     title: { default: t("title"), template: `%s | ${t("title")}` },
     description: t("description"),

@@ -13,6 +13,7 @@
   },
   "LegalPrivacy": {
     "title": "Privacy Notice",
+    "metaDescription": "Novera Mobility's privacy notice: how your personal data is collected, used and protected.",
     "sections": [
       {
         "heading": "Data controller",
@@ -83,6 +84,7 @@
   },
   "LegalCookies": {
     "title": "Cookie Policy",
+    "metaDescription": "The cookies Novera Mobility uses, what they are for and how to manage your choices.",
     "sections": [
       {
         "heading": "What is a cookie?",
@@ -134,6 +136,7 @@
   },
   "LegalTerms": {
     "title": "Rental Terms",
+    "metaDescription": "The terms that apply when you rent a car from Novera Mobility: pick-up, return, insurance and cancellation.",
     "sections": [
       {
         "heading": "Scope",
