@@ -27,7 +27,8 @@
     "currency": "Currency",
     "allProducts": "All products",
     "allServices": "All services",
-    "guides": "Guides"
+    "guides": "Guides",
+    "help": "Help"
   },
   "Footer": {
     "tagline": "We do not just rent cars, we stand by you for the whole journey.",

@@ -1,0 +1,43 @@
+{
+  "HelpPage": {
+    "metaTitle": "Help Centre",
+    "metaDescription": "Frequently asked questions about booking, payment, pick-up, damage and breakdowns, and your account; write to our team if you do not find yours.",
+    "title": "Help centre",
+    "intro": "Find the answer by topic, or search for it.",
+    "searchLabel": "Search the help centre",
+    "searchPlaceholder": "For example: cancel, VAT, documents",
+    "topicsLabel": "Topics",
+    "allTopics": "All",
+    "topics": {
+      "rezervasyon": "Booking",
+      "odeme": "Payment",
+      "teslim": "Pick-up and return",
+      "hasar": "Damage and breakdowns",
+      "hesap": "Account",
+      "kurumsal": "Corporate"
+    },
+    "results": "{count, plural, =0 {No results} one {Showing 1 question} other {Showing # questions}}",
+    "open": "Open",
+    "close": "Close",
+    "noResults": {
+      "title": "We could not find that",
+      "text": "Try another word, or write to our team.",
+      "button": "Write to us"
+    },
+    "empty": {
+      "title": "No questions yet",
+      "text": "There are no published questions in the help centre."
+    },
+    "error": {
+      "title": "Questions could not be loaded",
+      "text": "We cannot show the help questions right now. Please try again shortly."
+    },
+    "guidesTitle": "Browse our guides",
+    "guidesAll": "All guides",
+    "cta": {
+      "title": "Did not find the answer?",
+      "text": "Our team is happy to help.",
+      "button": "Write to us"
+    }
+  }
+}
