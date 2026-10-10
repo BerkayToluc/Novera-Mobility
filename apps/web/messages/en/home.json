@@ -63,6 +63,21 @@
           "cta": "Request a Quote"
         }
       }
+    },
+    "app": {
+      "title": "Novera in your pocket",
+      "text": "With the Novera Driver App, everything from the moment you take the car to the moment you return it happens on your phone.",
+      "points": {
+        "report": "Photograph any scratch or damage when you take the key and keep a digital record.",
+        "sos": "If something goes wrong, send your location to the centre and call for help with one tap.",
+        "desk": "Reach the 24/7 operations desk through the app or by phone."
+      },
+      "badgeTop": "Download on",
+      "stores": {
+        "appStore": "App Store",
+        "googlePlay": "Google Play"
+      },
+      "soon": "The app is coming to the stores soon. The badges are not links yet."
     }
   },
   "Guarantee": {
