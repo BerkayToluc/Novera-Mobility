@@ -48,5 +48,9 @@
     "faq3Title": "Farklı bir şehre iade mümkün mü?",
     "faq3Body": "Evet, farklı lokasyona iade seçeneğini rezervasyon sırasında işaretleyin.",
     "money": "Fiyat biçimi"
+  },
+  "FormParts": {
+    "consent": "<link>KVKK Aydınlatma Metni</link>'ni okudum; bilgilerimin bu talep için işlenmesini kabul ediyorum.",
+    "newTab": "(yeni sekmede açılır)"
   }
 }

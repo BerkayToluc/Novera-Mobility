@@ -198,8 +198,8 @@ Tek dil: **TypeScript**, frontend'de de backend'de de.
 - **Bağlam:** İletişim formu ve kurumsal form kişisel veri topluyor ve "gerçekten çalışmalı" (SPEC §9). Backend uçları henüz yok.
 - **Alternatifler:** Formspree / Web3Forms gibi bir servis (bugün çalışır, ama kişisel veri üçüncü tarafa gider ve anahtar gerekir). Next server action ile doğrudan e-posta (SMTP sırrı web uygulamasına girer, backend'in işini web yapar). Cloudflare Turnstile (güçlü bot koruması, ama harici script ve anahtar).
 - **Sonuç:**
-  - Formlar ADR-10'daki gibi React Hook Form + Zod. Gönderim `lib/<form>-client.ts` üzerinden `/api/contact` ve `/api/quotes`'a gider (ADR-14). Hata cevabı ADR-17 biçimindedir; `fieldErrors` ilgili alanın yanında gösterilir.
-  - Backend gelene kadar: `USE_MOCKS=1` iken istemci başarı döner, kapalıyken "servis kullanılamıyor" gösterilir. Üretimde örnek başarı gösterilmez.
+  - Formlar ADR-10'daki gibi React Hook Form + Zod. Gönderim bir sunucu aksiyonu üzerinden yapılır (`lib/<form>-actions.ts`, ör. `lib/quote-actions.ts`); API gelince aksiyon `/quotes` ve `/contact` uçlarını çağırır. Tarayıcı `USE_MOCKS`'u hiç görmez, örnek veri kararı sunucuda kalır. Hata cevabı ADR-17 biçimindedir; `fieldErrors` ilgili alanın yanında gösterilir.
+  - Backend gelene kadar: `USE_MOCKS=1` iken aksiyon başarı ve uydurma bir talep numarası döner, kapalıyken "servis kullanılamıyor" gösterilir. Üretimde örnek başarı gösterilmez.
   - Spam: görünmeyen bir tuzak alan (ekran okuyucudan ve klavyeden gizli, `autocomplete="off"`). Doluysa istemci göndermeden başarı gösterir; backend de reddeder ve IP başına hız sınırı uygular (BACKLOG #39). Gerekirse Turnstile sonra eklenir.
   - KVKK onay kutusu zorunludur ve aydınlatma metnine bağlanır; backend onay zamanını kaydeder.
   - Ortak parçalar (tuzak alan, onay kutusu, başarı durumu) ilk formda `components/form/` altına yazılır, sonraki formlar yeniden kullanır.

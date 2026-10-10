@@ -1,47 +1,70 @@
 {
   "QuoteForm": {
     "company": "Company name",
-    "count": "Number of cars",
+    "contactName": "Contact person",
+    "email": "Work email",
+    "phone": "Phone",
+    "fleetSize": "Number of cars",
+    "fleetSizes": {
+      "1-5": "1–5 cars",
+      "6-20": "6–20 cars",
+      "21-50": "21–50 cars",
+      "50+": "More than 50 cars"
+    },
     "term": "Rental term",
-    "termOption": "{months} months",
-    "vehicleType": "Car type",
-    "types": {
-      "economy": "Economy",
-      "compact": "Compact",
-      "executive": "Executive",
+    "terms": {
+      "6": "6 months",
+      "12": "12 months",
+      "24": "24 months",
+      "36+": "36 months or more"
+    },
+    "needs": "Cars you need",
+    "needsHint": "You can choose more than one.",
+    "needOptions": {
+      "sedan": "Saloon",
       "suv": "SUV",
-      "electric": "Electric"
+      "commercial": "Commercial",
+      "electric": "Electric / hybrid",
+      "premium": "Premium"
     },
-    "email": "Contact email",
-    "submit": "Request a Quote",
-    "errors": {
-      "company": "Enter the company name.",
-      "count": "Enter a number from 1 to 9999.",
-      "email": "Enter a valid email address."
-    },
+    "cities": "Delivery cities",
+    "citiesHint": "The cities where you want the cars delivered, for example Istanbul, Ankara.",
     "product": "Product you are interested in (optional)",
-    "noProduct": "I have not decided yet"
-  },
-  "QuotePage": {
-    "metaTitle": "Corporate Quote",
-    "metaDescription": "Ask for a fleet rental quote for your company: tell us the number of cars, term and car type and we will reply within one business day.",
-    "title": "Corporate Quote",
-    "intro": "Tell us what your company needs and a fleet specialist will reply by email with a tailored quote.",
-    "stepsTitle": "What happens next",
-    "steps": {
-      "received": "Your request reaches us.",
-      "review": "Within one business day a fleet specialist reviews it.",
-      "offer": "A tailored quote is sent to you by email."
-    },
+    "noProduct": "I have not decided yet",
+    "note": "Anything else (optional)",
+    "submit": "Request a Quote",
     "submitting": "Sending",
     "errors": {
+      "company": "Enter the company name.",
+      "contactName": "Enter the contact person's full name.",
+      "email": "Enter a valid email address.",
+      "phone": "Enter a valid phone number with its area code.",
+      "needs": "Choose at least one kind of car.",
+      "cities": "Enter at least one delivery city.",
+      "consent": "Accept the privacy notice to continue.",
+      "invalid": "Your request looks incomplete. Check the fields and send it again.",
       "unavailable": "The quote service is not available right now. Please try again later.",
       "generic": "Your request could not be sent. Please try again."
     },
     "sent": {
       "title": "We have your request",
-      "text": "We will reply to {email} within one business day.",
-      "home": "Back to Home"
+      "text": "Our sales team will get back to you at {email} and on your phone within one business day.",
+      "reference": "Your request number:",
+      "again": "Make another request"
+    }
+  },
+  "QuotePage": {
+    "metaTitle": "Corporate Quote",
+    "metaDescription": "Ask for a fleet rental quote for your company: tell us what you need and our sales team will call within one business day.",
+    "title": "Corporate Quote",
+    "intro": "We bring the cars where you need them and collect them where you finish. Tell us what you need and our sales team will call you."
+  },
+  "QuoteSteps": {
+    "title": "How it works",
+    "steps": {
+      "send": "Send the form",
+      "call": "Our sales team calls you within one business day",
+      "offer": "We prepare a quote for you"
     }
   }
 }

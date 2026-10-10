@@ -3,7 +3,8 @@ import { getTranslations } from "next-intl/server";
 import { AudienceSwitch } from "@/components/home/audience-switch";
 import { CampaignArt, type CampaignArtKind } from "@/components/home/campaign-art";
 import { CampaignGallery, type CampaignSlide } from "@/components/home/campaign-gallery";
-import { CorporateQuoteForm } from "@/components/home/corporate-quote-form";
+import { QuoteForm } from "@/components/quote/quote-form";
+import { QuoteSteps } from "@/components/quote/quote-steps";
 import { FaqSection } from "@/components/home/faq-section";
 import { GuaranteeBand } from "@/components/home/guarantee-band";
 import { RentalSearchForm } from "@/components/rental/rental-search-form";
@@ -82,7 +83,11 @@ export default async function Home({ searchParams }: PageProps<"/[locale]">) {
 
         <div className="w-full max-w-3xl rounded-card border border-border bg-surface p-6 md:p-8">
           {corporate ? (
-            <CorporateQuoteForm />
+            // A request, not a booking (SPEC §2.2.3): what happens next comes first, then the form.
+            <div className="flex flex-col gap-8">
+              <QuoteSteps />
+              <QuoteForm />
+            </div>
           ) : branches ? (
             <RentalSearchForm branches={branches} />
           ) : (
