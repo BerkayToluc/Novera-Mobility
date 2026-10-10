@@ -359,11 +359,11 @@ v1 "bitti" sayılmadan önce, 375px genişlikte mobil tarayıcıda:
 
 ## 9. Kalite gereksinimleri (v0.3)
 
-† ile işaretliler G'nin 9 Ekim tarihli öneri dosyasından gelir; G'nin onayı bekleniyor (§10).
+G'nin 9 Ekim tarihli öneri dosyasından gelen ek maddeler (dil eşlemesi, Open Graph, yapılandırılmış veri, 500 sayfası, Core Web Vitals hedefi, manifest, güvenlik başlıkları) G tarafından 10 Ekim'de onaylandı.
 
 | Gereksinim | Kabul ölçütü |
 |---|---|
-| SEO | Herkese açık her sayfada benzersiz başlık ve meta açıklama, canonical URL, TR/EN dil eşlemesi (hreflang, `x-default` = TR)†, Open Graph başlık/açıklama/görsel†. Yapılandırılmış veri†: tüm sitede `Organization`, İletişim'de her bayi için `AutoRental` |
+| SEO | Herkese açık her sayfada benzersiz başlık ve meta açıklama, canonical URL, TR/EN dil eşlemesi (hreflang, `x-default` = TR), Open Graph başlık/açıklama/görsel. Yapılandırılmış veri: tüm sitede `Organization`, İletişim'de her bayi için `AutoRental` |
 | `robots.txt` | Yalnızca `/api/` engellenir; site haritası belirtilir. Dizine girmemesi gereken sayfalar `noindex` ile çıkarılır, robots.txt ile engellenmez (engellenen sayfanın `noindex`'i okunamaz) |
 | `noindex` | Giriş, kayıt, şifre sıfırlama, profil, arama sonuçları, rezervasyon özeti, ödeme, onay, 404, 500 |
 | `sitemap.xml` | Herkese açık tüm sayfalar, iki dilde, dil eşlemesiyle |
@@ -375,15 +375,15 @@ v1 "bitti" sayılmadan önce, 375px genişlikte mobil tarayıcıda:
 | Responsive | 375 / 768 / 1280 px'te doğru; yatay kaydırma yok |
 | Formlar | Backend uçlarıyla gerçekten gönderilir; alan bazlı hata; başarı durumu; KVKK onay kutusu; gizli tuzak alanla spam koruması (ADR-20) |
 | Kırık link kontrolü | CI'da her PR'da iç linkler kontrol edilir |
-| Site hızı | Core Web Vitals hedefi† (mobil): LCP < 2,5 sn, INP < 200 ms, CLS < 0,1. Galerinin ilk görseli öncelikli |
+| Site hızı | Core Web Vitals hedefi (mobil): LCP < 2,5 sn, INP < 200 ms, CLS < 0,1. Galerinin ilk görseli öncelikli |
 | Erişilebilirlik | WCAG 2.2 AA (§5.7) |
 | SSS | Ana sayfada (§2.2.5) |
 | 404 ve 500 | Markalı, ana sayfaya dönüş; 500'de tekrar dene |
-| Favicon | Favicon, Apple ikonu, web manifest ve `theme-color`† |
+| Favicon | Favicon, Apple ikonu, web manifest ve `theme-color` |
 | `llms.txt` | Sitenin kısa tanımı ve herkese açık sayfa listesi. Not: resmi bir standart değil, SEO etkisi beklenmez |
-| Güvenlik başlıkları† | CSP, HSTS (canlıda), `X-Content-Type-Options`, `Referrer-Policy` |
+| Güvenlik başlıkları | CSP, HSTS (canlıda), `X-Content-Type-Options`, `Referrer-Policy` |
 
-Sonraya bırakılanlar (öneri): breadcrumb, Lighthouse CI.
+Sonraya bırakılanlar (G onayladı): breadcrumb, Lighthouse CI.
 
 ---
 
@@ -393,7 +393,6 @@ Sonraya bırakılanlar (öneri): breadcrumb, Lighthouse CI.
 |---|---|---|
 | Kurumsal kutunun tasarımı; `/kurumsal-teklif` sayfasının ana sayfa formuyla ilişkisi | G | Claude, uygulamadan önce öneri getirir |
 | Footer referansı (Simple Footer) | G | Marketplace sayfası düzeni anlatmıyor; ekran görüntüsü bekleniyor |
-| †'li kalite maddeleri, breadcrumb, Lighthouse CI | G | Claude'un önerisi: †'lilerin hepsi şimdi, breadcrumb ve Lighthouse CI sonra |
 | Fotoğraf kaynağı (stok / üretilmiş / yer tutucu) | G | Galeri, araçlar, Hikayemiz, genel merkez |
 | Analytics aracı: Vercel Web Analytics veya Umami | G | Yayın ortamına bağlı (ADR-12, ADR-19); ücretsiz plan koşulları doğrulanmadı |
 | Kampanya içeriği sabit mi, API'den mi | İKİ | Şimdilik sabit |

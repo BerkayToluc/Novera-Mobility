@@ -104,16 +104,16 @@ Sıranın gerekçesi:
 3. **Sonra G'nin mesajındaki sırayla:** ana sayfa (galeri → kurumsal kutu → iş birlikleri → SSS → footer), arama ve kiralama, Araçlarımız, İletişim, içerik sayfaları.
 4. **Yasal sayfalar, çerez ve SEO tamamlama en sonda.** Yeni sayfalar oluştuktan sonra sitemap, footer linkleri ve güvenlik başlıkları bir kez güncellenir.
 
-† G'nin onayı bekleniyor (SPEC §10).
+Sıra ve öneri dosyasındaki ek kalite maddeleri G tarafından 10 Ekim 2026'da onaylandı.
 
 | Sıra | # | İş | Sahip | Bağımlı | Bitti sayılması için |
 |---|---|---|---|---|---|
 | **0 · Zemin** | | | | | |
-| 1 | Y10 | Build sorununu çöz (`ERR_SWC_NATIVE_CACHE`) | FE (G) | — | `pnpm build` bu makinede geçiyor |
+| 1 | Y10 | Build sorununu çöz (`ERR_SWC_NATIVE_CACHE`). Çözüm: kullanıcı ortam değişkeni `SWC_NATIVE_BINDING_CACHE` kısa bir klasöre (`C:\Users\karad\.swc-cache`) ayarlanır; varsayılan önbellek `AppData\Local` altında ve o klasörün izinleri SWC'nin güvenlik kontrolüne takılıyor, proje içindeki yol ise Windows'un 260 karakter sınırını aşıyor | FE (G) | — | `pnpm build` ve `pnpm typecheck` bu makinede geçiyor |
 | 2 | Y11 | Birleşmemiş 8 dalı build edip 375/768/1280'de doğrula ve şu sırayla birleştir: `seo-assets`, `chore/a11y-audit`, `home-audience` → `corporate-quote`, `vehicle-detail` → `booking-summary` → `payment` → `contact-page`. B zinciri olduğu gibi girer; araç detayının kaldırılması Y20'de | FE | Y10 | 8 dal `main`'de; her PR'da ekran görüntüleri |
 | **1 · Ortak temel** | | | | | |
 | 3 | Y12 | Örnek veri ve rakamlar (SPEC §4.1): 14 şehirde 15 bayi, 15 model, tüketim alanı, model slug'ı | FE | Y11 | Araçlarımız 15 model, bayiler 14 şehir |
-| 4 | Y13 | SEO temeli (ADR-18): `lib/seo.ts` ile tüm sayfalarda canonical ve dil eşlemesi†, ana sayfa meta açıklaması, robots.txt'ten özel sayfaların çıkarılması, özet/ödeme/onayda `noindex` | FE | Y11 | Her sayfanın HTML'inde canonical ve iki dil bağlantısı var |
+| 4 | Y13 | SEO temeli (ADR-18): `lib/seo.ts` ile tüm sayfalarda canonical ve dil eşlemesi, ana sayfa meta açıklaması, robots.txt'ten özel sayfaların çıkarılması, özet/ödeme/onayda `noindex` | FE | Y11 | Her sayfanın HTML'inde canonical ve iki dil bağlantısı var |
 | 5 | Y14 | Navbar: İletişim vurgusu (masaüstü ve mobil menü) | FE | Y11 | 375/768/1280'de farklı görünüyor; kontrast ve odak AA |
 | **2 · Ana sayfa** | | | | | |
 | 6 | Y15 | Ana sayfa yerleşimi ve kampanya galerisi: yeni bölüm sırası, `h1` kutuda, arama butonu "Ara", araç sınıfları ve ürün kartları kalkar, Yol Boyu Güvence bandı yer değiştirir | FE | Y13 | SPEC §2.2 sırası; galeri klavye ve dokunmatikle gezilebiliyor; ilk görsel öncelikli |
@@ -134,12 +134,12 @@ Sıranın gerekçesi:
 | 16 | Y25 | Gizlilik politikası ve kullanım şartları sayfaları; footer linkleri; KVKK metnine iletişim formu verisi | FE | Y19 | İki dilde; footer'dan erişiliyor |
 | 17 | Y26 | Çerez onayı: bant, ayar penceresi, footer'da "Çerez tercihleri" (ADR-19) | FE | Y25 | "Reddet" seçilince analytics HTML'de yok |
 | 18 | Y27 | Analytics (çerezsiz araç, yalnızca onayla) | FE | Y26, analytics aracı kararı | Onaylı bir ziyaret araçta görünüyor |
-| 19 | Y28 | 500 hata sayfası (ADR-23)† | FE | Y11 | Bilerek atılan hatada markalı sayfa çıkıyor |
+| 19 | Y28 | 500 hata sayfası (ADR-23) | FE | Y11 | Bilerek atılan hatada markalı sayfa çıkıyor |
 | **8 · SEO tamamlama ve kalite** | | | | | |
-| 20 | Y29 | JSON-LD†, Open Graph metinleri†, sitemap'e yeni sayfalar, `llms.txt`, web manifest ve `theme-color`† | FE | Y25 | JSON-LD şema doğrulayıcıdan hatasız geçiyor; sitemap tüm herkese açık sayfaları içeriyor |
-| 21 | Y30 | Güvenlik başlıkları: CSP, HSTS, `X-Content-Type-Options`, `Referrer-Policy`† | FE | Y27 | Başlıklar yanıtta var; harita, analytics ve formlar çalışıyor |
+| 20 | Y29 | JSON-LD, Open Graph metinleri, sitemap'e yeni sayfalar, `llms.txt`, web manifest ve `theme-color` | FE | Y25 | JSON-LD şema doğrulayıcıdan hatasız geçiyor; sitemap tüm herkese açık sayfaları içeriyor |
+| 21 | Y30 | Güvenlik başlıkları: CSP, HSTS, `X-Content-Type-Options`, `Referrer-Policy` | FE | Y27 | Başlıklar yanıtta var; harita, analytics ve formlar çalışıyor |
 | 22 | Y31 | CI'da kırık link kontrolü | FE | Y29 | Bilerek kırılan bir link CI'ı kırmızı yapıyor |
-| 23 | Y32 | Hız: Core Web Vitals hedefleri (SPEC §9)†, mobil Lighthouse raporu ve düzeltmeler | FE | Y15–Y29 | LCP, INP, CLS hedefte; rapor PR'da |
+| 23 | Y32 | Hız: Core Web Vitals hedefleri (SPEC §9), mobil Lighthouse raporu ve düzeltmeler | FE | Y15–Y29 | LCP, INP, CLS hedefte; rapor PR'da |
 
 **Backend (paralel).** Frontend örnek veriyle ilerlediği için bunları beklemez; uçlar gelince örnek veri kapatılır.
 
