@@ -78,5 +78,11 @@
       }
     },
     "cta": "Explore Road Assurance"
+  },
+  "Partners": {
+    "title": "Our partners",
+    "intro": "Some of the companies that trust us with their fleets and their journeys.",
+    "pause": "Pause scrolling",
+    "play": "Resume scrolling"
   }
 }

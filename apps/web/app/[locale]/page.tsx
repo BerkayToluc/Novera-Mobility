@@ -7,6 +7,7 @@ import { QuoteForm } from "@/components/quote/quote-form";
 import { QuoteSteps } from "@/components/quote/quote-steps";
 import { FaqSection } from "@/components/home/faq-section";
 import { GuaranteeBand } from "@/components/home/guarantee-band";
+import { PartnerStrip } from "@/components/home/partner-strip";
 import { RentalSearchForm } from "@/components/rental/rental-search-form";
 import { Button } from "@/components/ui/button";
 import { StateMessage } from "@/components/ui/state-message";
@@ -30,8 +31,8 @@ export async function generateMetadata(): Promise<Metadata> {
   return { description: t("metaDescription") };
 }
 
-// Section order of SPEC §2.2: campaigns, the rental box, Road Assurance, FAQ. Partners, the
-// app section and the guides join between them with their own work (BACKLOG Y17, Y39, Y40).
+// Section order of SPEC §2.2: campaigns, the rental box, partners, Road Assurance, FAQ. The
+// app section and the guides join between them with their own work (BACKLOG Y39, Y40).
 export default async function Home({ searchParams }: PageProps<"/[locale]">) {
   const t = await getTranslations("HomePage");
   const audience = parseAudience((await searchParams).tip);
@@ -99,6 +100,10 @@ export default async function Home({ searchParams }: PageProps<"/[locale]">) {
           )}
         </div>
       </section>
+
+      <div className="mx-auto max-w-content px-4 pb-16 md:px-8 xl:pb-24">
+        <PartnerStrip />
+      </div>
 
       <GuaranteeBand />
 
