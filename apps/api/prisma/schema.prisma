@@ -20,6 +20,17 @@ enum Theme {
   SYSTEM
 }
 
+enum Currency {
+  TRY
+  EUR
+  USD
+}
+
+enum AccountType {
+  INDIVIDUAL
+  CORPORATE
+}
+
 enum Transmission {
   MANUAL
   AUTOMATIC
@@ -30,6 +41,11 @@ enum FuelType {
   DIESEL
   HYBRID
   ELECTRIC
+}
+
+enum ConsumptionUnit {
+  L_PER_100KM
+  KWH_PER_100KM
 }
 
 enum ExtraPricing {
@@ -47,21 +63,42 @@ enum FaqAudience {
   CORPORATE
 }
 
-// ---------- Modeller ----------
+// ---------- Hesap ----------
 
 model User {
-  id           String   @id @default(uuid())
-  email        String   @unique
+  id           String      @id @default(uuid())
+  email        String      @unique
   passwordHash String
   firstName    String
   lastName     String
-  locale       Locale   @default(TR)
-  theme        Theme    @default(SYSTEM)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  accountType  AccountType @default(INDIVIDUAL)
+  companyName  String? // yalnızca kurumsal hesapta (hesabı Novera açar)
+  locale       Locale      @default(TR)
+  theme        Theme       @default(LIGHT)
+  currency     Currency    @default(TRY)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
 
-  reservations Reservation[]
+  reservations      Reservation[]
+  quoteRequests     QuoteRequest[]
+  pointTransactions PointTransaction[]
 }
+
+// Puan kazanımı. Bakiye = bu kayıtların toplamı. Puanla ödeme v1'de yok.
+model PointTransaction {
+  id        String   @id @default(uuid())
+  points    Int
+  createdAt DateTime @default(now())
+
+  userId        String
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reservationId String?      @unique
+  reservation   Reservation? @relation(fields: [reservationId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+}
+
+// ---------- Bayi ve araç ----------
 
 model Branch {
   id           String @id @default(uuid())
@@ -87,31 +124,49 @@ model VehicleClass {
   nameTr String
   nameEn String
 
-  vehicles Vehicle[]
+  models VehicleModel[]
 }
 
-model Vehicle {
-  id           String       @id @default(uuid())
-  slug         String       @unique
-  brand        String
-  model        String
-  year         Int
-  seats        Int
-  bags         Int
-  transmission Transmission
-  fuelType     FuelType
-  dailyPrice   Int // kuruş cinsinden (₺1.250 = 125000)
-  imageUrl     String?
-  active       Boolean      @default(true)
+// Katalogdaki model (Araçlarımız sayfası). Fiyat ve özellikler burada.
+model VehicleModel {
+  id              String          @id @default(uuid())
+  slug            String          @unique
+  brand           String
+  model           String
+  seats           Int
+  bags            Int
+  transmission    Transmission
+  fuelType        FuelType
+  consumption     Float
+  consumptionUnit ConsumptionUnit
+  dailyPrice      Int // TRY, kuruş cinsinden (₺1.250 = 125000)
+  description     Json // { "tr": "...", "en": "..." }
+  imageUrl        String?
 
-  classId  String
-  class    VehicleClass @relation(fields: [classId], references: [id])
-  branchId String
-  branch   Branch       @relation(fields: [branchId], references: [id])
+  classId String
+  class   VehicleClass @relation(fields: [classId], references: [id])
 
-  reservations Reservation[]
+  vehicles Vehicle[]
 
   @@index([classId])
+}
+
+// Bir bayide duran fiziksel araç. Müsaitlik bu tabloya göre hesaplanır.
+model Vehicle {
+  id     String  @id @default(uuid())
+  plate  String  @unique
+  year   Int
+  active Boolean @default(true)
+
+  vehicleModelId String
+  vehicleModel   VehicleModel @relation(fields: [vehicleModelId], references: [id])
+  branchId       String
+  branch         Branch       @relation(fields: [branchId], references: [id])
+
+  reservations Reservation[]
+  holds        Hold[]
+
+  @@index([vehicleModelId])
   @@index([branchId])
 }
 
@@ -120,45 +175,71 @@ model Extra {
   slug    String       @unique
   nameTr  String
   nameEn  String
-  price   Int // kuruş cinsinden
+  price   Int // TRY, kuruş cinsinden
   pricing ExtraPricing
 
   reservationExtras ReservationExtra[]
 }
 
+// ---------- Rezervasyon ----------
+
+// "Kirala"da aracı 15 dakika tutar. Süre dolunca araç serbest kalır;
+// tutulan araç başka aramada müsait görünmez (BACKLOG Y48).
+model Hold {
+  id             String   @id @default(uuid())
+  startAt        DateTime
+  endAt          DateTime
+  pickupBranchId String
+  returnBranchId String
+  expiresAt      DateTime
+  createdAt      DateTime @default(now())
+
+  vehicleId String
+  vehicle   Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+  @@index([vehicleId, startAt, endAt])
+  @@index([expiresAt])
+}
+
 model Reservation {
-  id        String            @id @default(uuid())
-  number    String            @unique // ör. NVR-2026-00123
-  status    ReservationStatus @default(CONFIRMED)
-  startAt   DateTime
-  endAt     DateTime
-  days      Int
-  // Rezervasyon anındaki fiyatlar (sonradan fiyat değişse de bu kayıt değişmez)
+  id      String            @id @default(uuid())
+  number  String            @unique // ör. NVR-2026-00123
+  status  ReservationStatus @default(CONFIRMED)
+  startAt DateTime
+  endAt   DateTime
+  days    Int
+
+  // Aşağıdaki tüm tutarlar `currency` biriminin alt biriminde (kuruş/cent) saklanır.
+  // Birim fiyatlar önce çevrilir, sonra günle çarpılır: kalemlerin toplamı = totalPrice.
+  currency          Currency @default(TRY)
+  exchangeRate      Decimal  @default(1) @db.Decimal(18, 8) // rezervasyon anındaki kur (1 TRY = ? currency)
   vehicleDailyPrice Int
   totalPrice        Int
-  createdAt DateTime          @default(now())
+
+  createdAt DateTime @default(now())
 
   // Hesap silinince rezervasyon kalır, kullanıcı bağlantısı boşalır
-  userId   String?
-  user     User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
-  vehicleId String
-  vehicle   Vehicle @relation(fields: [vehicleId], references: [id])
+  userId         String?
+  user           User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+  vehicleId      String
+  vehicle        Vehicle @relation(fields: [vehicleId], references: [id])
   pickupBranchId String
-  pickupBranch   Branch @relation("PickupBranch", fields: [pickupBranchId], references: [id])
+  pickupBranch   Branch  @relation("PickupBranch", fields: [pickupBranchId], references: [id])
   returnBranchId String
-  returnBranch   Branch @relation("ReturnBranch", fields: [returnBranchId], references: [id])
+  returnBranch   Branch  @relation("ReturnBranch", fields: [returnBranchId], references: [id])
 
-  extras ReservationExtra[]
+  extras           ReservationExtra[]
+  pointTransaction PointTransaction?
 
   @@index([vehicleId, startAt, endAt])
   @@index([userId])
 }
 
 model ReservationExtra {
-  id            String @id @default(uuid())
-  quantity      Int    @default(1)
-  unitPrice     Int // rezervasyon anındaki fiyat, kuruş
-  totalPrice    Int
+  id         String @id @default(uuid())
+  quantity   Int    @default(1)
+  unitPrice  Int // rezervasyon anındaki fiyat, rezervasyonun para biriminde
+  totalPrice Int
 
   reservationId String
   reservation   Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
@@ -168,6 +249,42 @@ model ReservationExtra {
   @@unique([reservationId, extraId])
 }
 
+// ---------- İçerik ve formlar ----------
+
+// SPEC Ek A: Konsept, Ne Alıyorsunuz?, Teknolojik Artısı
+model Product {
+  id           String  @id @default(uuid())
+  slug         String  @unique // ör. akilli-kurumsal-filo
+  title        Json // { "tr": "...", "en": "..." }
+  concept      Json
+  whatYouGet   Json
+  techBenefits Json // { "tr": ["..."], "en": ["..."] }
+  featured     Boolean @default(false) // "En çok tercih edilen"
+  sortOrder    Int     @default(0)
+
+  quotes QuoteRequest[]
+}
+
+model Service {
+  id        String @id @default(uuid())
+  slug      String @unique // navbar menüsünde hizmetler sayfasındaki madde için
+  title     Json
+  summary   Json // tek cümlelik açıklama
+  points    Json // { "tr": ["...", "...", "..."], "en": [...] }
+  sortOrder Int    @default(0)
+}
+
+model FaqItem {
+  id        String      @id @default(uuid())
+  audience  FaqAudience
+  question  Json // { "tr": "...", "en": "..." }
+  answer    Json
+  sortOrder Int         @default(0)
+
+  @@index([audience])
+}
+
+// Alanlar kurumsal kutunun tasarım onayından sonra (BACKLOG Y35) güncellenecek
 model QuoteRequest {
   id             String   @id @default(uuid())
   companyName    String
@@ -176,15 +293,26 @@ model QuoteRequest {
   vehicleType    String
   email          String
   createdAt      DateTime @default(now())
+
+  productId String?
+  product   Product? @relation(fields: [productId], references: [id])
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
 }
 
-model FaqItem {
-  id        String      @id @default(uuid())
-  audience  FaqAudience
-  locale    Locale
-  question  String
-  answer    String
-  sortOrder Int         @default(0)
+model ContactMessage {
+  id            String   @id @default(uuid())
+  name          String
+  email         String
+  phone         String?
+  subject       String
+  message       String
+  kvkkConsentAt DateTime
+  createdAt     DateTime @default(now())
+}
 
-  @@index([audience, locale])
+model ExchangeRate {
+  currency   Currency @id
+  ratePerTry Decimal  @db.Decimal(18, 8) // 1 TRY kaç `currency` ediyor
+  updatedAt  DateTime @updatedAt
 }
