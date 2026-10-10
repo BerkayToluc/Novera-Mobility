@@ -13,9 +13,11 @@ export class AuthUnavailableError extends Error {
   }
 }
 
-export async function login(input: LoginInput, kind: AccountType = "individual"): Promise<void> {
+// Resolves to the language the account saved, or undefined to stay in the current one.
+export async function login(input: LoginInput, kind: AccountType = "individual"): Promise<"tr" | "en" | undefined> {
   const result = await signIn(kind, input.email, input.password);
   if (!result.ok) throw new AuthUnavailableError();
+  return result.locale ?? undefined;
 }
 
 export async function register(input: RegisterInput): Promise<void> {

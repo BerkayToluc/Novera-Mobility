@@ -56,14 +56,6 @@
     },
     "settings": {
       "title": "Settings",
-      "language": {
-        "title": "Language",
-        "text": "Choose the language the site is shown in."
-      },
-      "theme": {
-        "title": "Appearance",
-        "text": "Light, dark, or the theme that follows your device."
-      },
       "danger": {
         "title": "Delete account",
         "text": "Your account is deleted permanently. Past booking records are kept anonymously.",
@@ -74,9 +66,15 @@
         "confirm": "Yes, Delete My Account",
         "deleting": "Deleting…"
       },
-      "currency": {
-        "title": "Currency",
-        "text": "Choose the currency prices are shown in. Amounts are converted at the daily exchange rate."
+      "defaults": {
+        "title": "My default preferences",
+        "text": "Language, appearance and currency are saved to your account and applied each time you sign in.",
+        "language": "Language",
+        "theme": "Appearance",
+        "currency": "Currency",
+        "save": "Save",
+        "saving": "Saving…",
+        "saved": "Your preferences were saved."
       }
     },
     "signOut": "Sign out",

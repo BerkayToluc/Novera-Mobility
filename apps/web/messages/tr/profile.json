@@ -56,14 +56,6 @@
     },
     "settings": {
       "title": "Ayarlar",
-      "language": {
-        "title": "Dil",
-        "text": "Sitenin hangi dilde gösterileceğini seçin."
-      },
-      "theme": {
-        "title": "Görünüm",
-        "text": "Açık, koyu ya da cihazınızın ayarını izleyen tema."
-      },
       "danger": {
         "title": "Hesabı sil",
         "text": "Hesabınız kalıcı olarak silinir. Geçmiş rezervasyon kayıtları anonim olarak saklanır.",
@@ -74,9 +66,15 @@
         "confirm": "Evet, Hesabımı Sil",
         "deleting": "Siliniyor…"
       },
-      "currency": {
-        "title": "Para birimi",
-        "text": "Fiyatların hangi para biriminde gösterileceğini seçin. Tutarlar günlük kurla çevrilir."
+      "defaults": {
+        "title": "Varsayılan tercihlerim",
+        "text": "Dil, görünüm ve para birimi hesabınıza kaydedilir; her girişte otomatik uygulanır.",
+        "language": "Dil",
+        "theme": "Görünüm",
+        "currency": "Para birimi",
+        "save": "Kaydet",
+        "saving": "Kaydediliyor…",
+        "saved": "Tercihleriniz kaydedildi."
       }
     },
     "signOut": "Çıkış yap",
