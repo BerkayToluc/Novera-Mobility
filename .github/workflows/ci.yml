@@ -31,3 +31,14 @@ jobs:
 
       - name: Build
         run: pnpm -r --if-present run build
+
+      # Starts the built site with sample data and follows every internal link on every page in
+      # the sitemap; one that leads nowhere fails the build (BACKLOG Y31).
+      - name: Check links
+        env:
+          USE_MOCKS: "1"
+          NEXT_PUBLIC_SITE_URL: http://localhost:3000
+        run: |
+          pnpm --filter @novera/web start &
+          for i in $(seq 1 30); do curl -sf http://localhost:3000/sitemap.xml > /dev/null && break; sleep 2; done
+          pnpm --filter @novera/web check-links
