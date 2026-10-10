@@ -66,6 +66,11 @@
     },
     "ctaTitle": "Bizimle çalışmak ister misiniz?",
     "ctaText": "Sorularınız ya da filo ihtiyacınız için ekibimizle iletişime geçin.",
-    "ctaButton": "İletişime Geç"
+    "ctaButton": "İletişime Geç",
+    "timelineNav": {
+      "label": "Hikayemiz, yıllara göre",
+      "previous": "Önceki yıl",
+      "next": "Sonraki yıl"
+    }
   }
 }
