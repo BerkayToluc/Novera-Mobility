@@ -109,7 +109,8 @@ Ana sayfa (Bireysel) → Arama sonuçları → **Kirala** → Rezervasyon özeti
 - Sonuç sayfası arama bilgilerini adreste taşır (`?alis=&iade=&baslangic=&bitis=`), böylece paylaşılabilir ve yenilenebilir. Üstte bir arama özeti kalır (bayiler, tarihler); "Aramayı değiştir" ile açılıp düzenlenebilir ve yeniden aranabilir.
 - Her araç kartında fotoğraf, bilgi (koltuk, bavul, vites, yakıt), fiyat (günlük ve toplam) ve **Kirala** butonu. Kirala, seçilen araç ve arama bilgileriyle `/rezervasyon`'a gider.
 - Uygun araç yoksa, arama yapılmamışsa ve veri alınamıyorsa her biri için ayrı bir durum gösterilir.
-- Ekrandaki toplam gösterim içindir; tahsil edilen tutarı backend hesaplar (ADR-15).
+- Ekrandaki toplam gösterim içindir; tahsil edilen tutarı backend hesaplar (ADR-15). Fiyatlar **KDV dahil** gösterilir ve özetin altında "KDV dahil" yazar. Farklı bayiye bırakmanın **ek ücreti yoktur** (G, 10 Ekim).
+- **Araç tutma (G, 10 Ekim):** **Kirala**'ya basınca seçilen araç 15 dakika tutulur. Özet ve ödeme sayfasında kalan süre görünür (ekran okuyucuya sürekli okunmaz; son bir dakikada ve süre dolunca bildirilir). Süre dolarsa araç serbest kalır, ziyaretçiye "Süre doldu" durumu ve aynı aramaya dönüş düğmesi gösterilir. Ödeme sırasında araç başkasınca alınmışsa (çakışma) "Bu araç az önce kiralandı" durumu gösterilir.
 
 **Kurumsal talep:**
 Ana sayfa (Kurumsal) → form → "Talebiniz alındı" → satış ekibi arar. Ürün detayındaki "Teklif Al" → `/kurumsal-teklif`.
@@ -175,7 +176,7 @@ G'nin 10 Ekim istekleri. Her biri BACKLOG M7'de sırası gelince yapılır.
 
 - **Bireysel ve kurumsal giriş:** giriş sayfasında iki sekme (`/giris`, `?tip=kurumsal`). Kurumsal sekme firma e-postasıyla giriş yapar. Kurumsal hesap basittir: firma bilgisi, teklif talepleri ve iletişim kişisi; filo yönetim paneli kapsam dışı (§3). Kayıt bireyseldir; kurumsal hesap satış görüşmesinden sonra Novera tarafından açılır (öneri; backend ile netleşecek). Backend'de hesap türü gerekir.
 - **Ayarlar:** giriş yapan kullanıcı varsayılan para birimini, dili ve temayı seçer; seçim hesaba kaydedilir ve her girişte uygulanır.
-- **Puan sistemi:** gösterim ve kurallar. Her tamamlanan rezervasyon puan kazandırır; profilde bakiye, kazanım geçmişi ve kurallar görünür. Puanla ödeme v1'de yok. Kazanım oranı açık karar (§10); hesabı backend yapar.
+- **Puan sistemi:** gösterim ve kurallar. Tamamlanan her rezervasyon, toplam tutarın her tam ₺100'ü için 1 puan kazandırır (ek hizmetler dahil, aşağı yuvarlanır; ₺2.850 = 28 puan; G onayladı, 10 Ekim). İptal edilen rezervasyon puan kazandırmaz. Profilde bakiye, kazanım geçmişi ve kurallar görünür. Puanla ödeme v1'de yok; hesabı backend yapar.
 - **Rezervasyonlarım:** yaklaşan ve geçmiş seyahatler ayrı listelenir; her seyahatte tarih, bayi, araç, tutar ve kazanılan puan.
 - **Yardım (`/yardim`):** İletişim'den ayrı. Konulara göre gruplanmış sorular (rezervasyon, ödeme, araç teslimi, hasar ve arıza, hesap), arama, rehberlere bağlantılar; cevap bulunamazsa İletişim'e yönlendirme. SSS içeriğiyle aynı kaynaktan beslenir, ana sayfadaki SSS'nin geniş hâlidir.
 - **Araç kiralama rehberleri (`/rehberler`):** 4–6 kısa rehber (ör. gerekli belgeler, yakıt ve teslim kuralları, farklı bayiye iade, hasar durumunda ne yapılır, elektrikli araç kullanımı). Metinleri Claude yazar, iddia uydurmaz. Ana sayfada 3–4 kart.
@@ -422,7 +423,6 @@ Sonraya bırakılanlar (G onayladı): breadcrumb, Lighthouse CI.
 | Fotoğraf kaynağı (stok / üretilmiş / yer tutucu) | G | Galeri, araçlar, Hikayemiz, genel merkez |
 | Analytics aracı: Vercel Web Analytics veya Umami | G | Yayın ortamına bağlı (ADR-12, ADR-19); ücretsiz plan koşulları doğrulanmadı |
 | Kampanya içeriği sabit mi, API'den mi | İKİ | Şimdilik sabit |
-| Puan kazanım oranı ve kuralları | İKİ | Öneri: her ₺100 için 1 puan; backend hesaplar |
 | Kurumsal hesap nasıl açılır | İKİ | Öneri: satış görüşmesinden sonra Novera açar, sitede kurumsal kayıt yok |
 | Yayın ortamı ve alan adı | İKİ | Canonical, sitemap ve görsel alan adı buna bağlı |
 
