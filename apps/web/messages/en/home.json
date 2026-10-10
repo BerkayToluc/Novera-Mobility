@@ -23,6 +23,19 @@
       "error": {
         "title": "Questions could not be loaded",
         "text": "We cannot show the frequently asked questions right now."
+      },
+      "intro": "What people most often ask about renting, pick-up and payment.",
+      "tabsLabel": "Type of question",
+      "tabs": {
+        "bireysel": "Individual",
+        "kurumsal": "Corporate"
+      },
+      "open": "Open",
+      "close": "Close",
+      "cta": {
+        "title": "Still have a question?",
+        "text": "If you did not find your answer, our team is happy to help.",
+        "button": "Write to Us"
       }
     },
     "gallery": {

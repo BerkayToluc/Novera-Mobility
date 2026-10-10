@@ -352,3 +352,33 @@
 body:has(dialog[open]) {
   overflow: hidden;
 }
+
+/*
+ * FAQ rows open with a short spring (SPEC §2.2.5). `::details-content` and `interpolate-size`
+ * let the browser animate height to `auto`; without them the row simply opens at once, which is
+ * the fallback. The curve overshoots by a few percent and settles, like Spring FAQ Accordion.
+ */
+@supports (interpolate-size: allow-keywords) and selector(::details-content) {
+  .faq-row {
+    interpolate-size: allow-keywords;
+    --faq-spring: linear(0, 0.2 4%, 0.62 10%, 0.93 18%, 1.04 26%, 1.03 34%, 0.995 44%, 1.002 60%, 1);
+  }
+
+  .faq-row::details-content {
+    height: 0;
+    overflow: clip;
+    transition:
+      height 0.55s var(--faq-spring),
+      content-visibility 0.55s allow-discrete;
+  }
+
+  .faq-row[open]::details-content {
+    height: auto;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .faq-row::details-content {
+      transition: none;
+    }
+  }
+}
