@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
-import { NAV_ITEMS } from "./nav-items";
+import { CONTACT_HREF, NAV_ITEMS } from "./nav-items";
 
 type MainNavProps = {
   // Accessible name of this <nav>; the header and the mobile panel each have one.
@@ -25,16 +25,30 @@ export function MainNav({ label, orientation = "horizontal", onNavigate, classNa
         {NAV_ITEMS.map(({ href, labelKey }) => {
           // Sub-pages (a vehicle, a product) keep their section highlighted; "/" only matches itself.
           const isCurrent = href === "/" ? pathname === "/" : pathname.startsWith(href);
+          // Contact is the way to a person, so it stands apart from the browsing links
+          // (SPEC §2.8): outlined, and set off by space rather than sitting in the row.
+          const isContact = href === CONTACT_HREF;
           return (
-            <li key={href}>
+            <li key={href} className={cn(isContact && (vertical ? "mt-4" : "ml-4 xl:ml-6"))}>
               <Link
                 href={href}
                 onClick={onNavigate}
                 aria-current={isCurrent ? "page" : undefined}
+                // cn is clsx only (lib/cn.ts), so each branch sets its own shape and spacing
+                // rather than overriding a shared one.
                 className={cn(
-                  "inline-flex min-h-11 items-center rounded-control",
-                  vertical ? "w-full px-3 text-h3" : "px-2 text-label xl:px-3",
-                  isCurrent ? "bg-selected text-on-selected" : "text-fg hover:bg-selected",
+                  "inline-flex min-h-11 items-center transition-colors",
+                  vertical ? "w-full text-h3" : "text-label",
+                  isContact
+                    ? vertical
+                      ? "justify-center rounded-control border border-primary px-3"
+                      : "rounded-full border border-primary px-4 xl:px-5"
+                    : vertical
+                      ? "rounded-control px-3"
+                      : "rounded-control px-2 xl:px-3",
+                  isCurrent
+                    ? "bg-selected text-on-selected"
+                    : cn(isContact ? "text-link" : "text-fg", "hover:bg-selected"),
                 )}
               >
                 {t(labelKey)}

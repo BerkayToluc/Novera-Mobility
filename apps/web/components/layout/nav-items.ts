@@ -12,3 +12,6 @@ export const NAV_ITEMS = [
   { href: "/hakkimizda", labelKey: "about" },
   { href: "/iletisim", labelKey: "contact" },
 ] as const satisfies readonly { href: AppPathname; labelKey: string }[];
+
+// The header sets this one apart from the rest (SPEC §2.8).
+export const CONTACT_HREF = "/iletisim" satisfies AppPathname;

@@ -13,7 +13,8 @@ import {
 } from "@/lib/currency";
 
 // Outside the component: it writes to the document, which is not React state.
-function saveCurrency(currency: Currency) {
+// Shared with the header's currency menu so both write the same cookie.
+export function saveCurrency(currency: Currency) {
   document.cookie = `${CURRENCY_COOKIE}=${currency}; path=/; max-age=${CURRENCY_COOKIE_MAX_AGE}; samesite=lax`;
 }
 

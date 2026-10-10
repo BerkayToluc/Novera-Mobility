@@ -21,6 +21,8 @@ const buttonVariants = cva(
       },
       size: {
         default: "min-h-11 px-5",
+        // Header controls that sit in a row (currency, language): same height, less padding.
+        compact: "min-h-11 px-3",
         lg: "min-h-12 px-6",
         icon: "size-11",
       },
