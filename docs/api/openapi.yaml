@@ -1,0 +1,963 @@
+openapi: 3.0.3
+info:
+  title: Novera Mobility API
+  version: 0.1.0
+  description: |
+    Novera Mobility backend sözleşmesi (BACKLOG #6). Frontend tipleri ve MSW mock'ları buradan üretilir.
+
+    ## Genel kurallar (ARCHITECTURE ADR-14…17)
+
+    - **Yollar `/api` öneki olmadan** tanımlıdır. Tarayıcı `/api/...` çağırır, Next öneki kaldırıp iletir.
+    - **Oturum:** `novera_session` çerezi (`httpOnly`, `Secure` canlıda, `SameSite=Lax`). İstekler `credentials: "include"` ile atılır.
+    - **Zaman:** her an ISO 8601 UTC (`2026-10-12T10:00:00Z`). Alış/iade anları 30 dakikalık dilimlere oturur (`:00` veya `:30`).
+    - **Para:** her tutar `{ "amount": 125000, "currency": "TRY" }`. `amount` alt birimin (kuruş/cent) tam sayısıdır. Fiyat uçları `?currency=` alır (varsayılan `TRY`).
+    - **Dil:** çevrilen alanlar iki dille birlikte döner (`{ "tr": "...", "en": "..." }`). `?lang` yoktur.
+    - **Sayfalama yok.** Düz liste. Sınıf, yakıt, vites filtrelerini ve bayi arama/şehir filtresini frontend yapar; sunucu yalnızca müsaitliği süzer.
+    - **Enum yazımı:** `locale` ve `theme` küçük harf (`tr`, `light`), diğer tüm enum'lar büyük harf (`CONFIRMED`, `TRY`).
+    - **Hata biçimi:** `{ code, message, fieldErrors }`. `code` ve `fieldErrors` değerleri sabit makine kodlarıdır; frontend metni kendi çevirisinden gösterir, `message` ekranda gösterilmez. HTTP: 400 bozuk istek, 422 doğrulama, 401 oturum yok, 404, 409 çakışma, 429 hız sınırı.
+
+    ## Onaylanacak öneriler (G ile)
+
+    Aşağıdakiler benim önerim; PR'da onaylanınca bu liste silinir.
+
+    1. Farklı bayiye bırakma: **ek ücret yok** (v1).
+    2. Fiyatlar **KDV dahil**, ayrı KDV kalemi yok.
+    3. **Karar (G):** "Kirala"da araç **15 dakika tutulur** (`POST /holds`). Süre dolunca serbest kalır; tutulan araç başka aramada müsait görünmez; bitiş zamanı API'den döner (`expiresAt`). Tutma yüzünden çakışma nadirdir ama yine olursa `POST /reservations` `409 VEHICLE_UNAVAILABLE` döner.
+    4. Sahte ödeme için ayrı uç yok: `POST /reservations` ödeme ekranında çağrılır ve rezervasyonu doğrudan `CONFIRMED` oluşturur.
+    5. İletişim formu yalnızca veritabanına yazılır, e-posta gönderilmez.
+    6. Puan: her tam ₺100 için 1 puan (TRY karşılığı üzerinden), rezervasyon oluşunca verilir, iptalde geri alınır. Puanla ödeme yok.
+    7. Gün sayısı: `ceil((endAt - startAt) / 24 saat)`, en az 1.
+    8. Kurumsal hesabı Novera açar; sitede kurumsal kayıt yoktur (`/auth/register` yalnızca bireysel).
+    9. `POST /quotes` alanları geçicidir (BACKLOG Y35, kurumsal kutu tasarımı onaylanınca netleşir).
+    10. Varsayılan tema `light` (SPEC v0.4); `system` seçenek olarak vardır.
+
+    Kesinleşenler (G, 10 Ekim): 1, 2, 4 ve 6 onaylandı; 3 yukarıdaki gibi değişti.
+servers:
+  - url: http://localhost:3000
+    description: Yerel geliştirme (API doğrudan; tarayıcıdan Next proxy üzerinden `/api` ile)
+tags:
+  - name: health
+  - name: catalog
+    description: Bayiler, modeller, araçlar, ek hizmetler, kurlar
+  - name: reservations
+  - name: auth
+  - name: me
+  - name: content
+    description: SSS, ürünler, hizmetler
+  - name: forms
+paths:
+  /health:
+    get:
+      tags: [health]
+      summary: Sağlık kontrolü
+      responses:
+        "200":
+          description: API çalışıyor
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status]
+                properties:
+                  status: { type: string, example: ok }
+
+  /branches:
+    get:
+      tags: [catalog]
+      summary: Tüm bayiler
+      description: ~15 bayi, düz liste. Şehir filtresi ve metin arama frontend'dedir.
+      responses:
+        "200":
+          description: Bayi listesi
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Branch" }
+
+  /vehicle-models:
+    get:
+      tags: [catalog]
+      summary: Araç modelleri (Araçlarımız sayfası)
+      description: Tüm modeller; her modelin bulunduğu bayilerle birlikte. Müsaitlik filtresi yoktur.
+      parameters:
+        - $ref: "#/components/parameters/Currency"
+      responses:
+        "200":
+          description: Model listesi
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/VehicleModel" }
+
+  /vehicles:
+    get:
+      tags: [catalog]
+      summary: Müsait araçlar (arama sonuçları)
+      description: |
+        Alış bayisinde, verilen aralıkta müsait olan araçlar. Aynı modelden birden fazla müsait araç varsa
+        model başına bir sonuç döner (`vehicleId` müsait olanlardan biridir). Rezervasyonla çakışanlar
+        ve süresi dolmamış bir tutmayla (`/holds`) tutulan araçlar listede çıkmaz.
+        Fiyatlar seçilen para biriminde, ek hizmetler hariçtir.
+
+        **Tarih ve bayi parametreleri zorunludur.** Tarihsiz çağrı yoktur; model başına bayi listesi
+        (Araçlarımız sayfası) için `GET /vehicle-models` kullanılır.
+      parameters:
+        - { name: pickupBranchId, in: query, required: true, schema: { type: string, format: uuid } }
+        - { name: returnBranchId, in: query, required: true, schema: { type: string, format: uuid } }
+        - { name: startAt, in: query, required: true, schema: { type: string, format: date-time } }
+        - { name: endAt, in: query, required: true, schema: { type: string, format: date-time } }
+        - $ref: "#/components/parameters/Currency"
+      responses:
+        "200":
+          description: Müsait araçlar (boş liste olabilir)
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/VehicleOffer" }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+
+  /extras:
+    get:
+      tags: [catalog]
+      summary: Ek hizmetler
+      parameters:
+        - $ref: "#/components/parameters/Currency"
+      responses:
+        "200":
+          description: Ek hizmet listesi
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Extra" }
+
+  /rates:
+    get:
+      tags: [catalog]
+      summary: Güncel kurlar
+      description: Günde bir kez güncellenir. Dış servis çökerse son bilinen kur, hiç kur yoksa seed kuru döner.
+      responses:
+        "200":
+          description: Kurlar
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/ExchangeRate" }
+
+  /holds:
+    post:
+      tags: [reservations]
+      summary: Aracı 15 dakika tut ("Kirala")
+      description: |
+        Giriş gerekmez (giriş ödemeden hemen önce istenir). Seçilen aracı verilen aralık için 15 dakika tutar;
+        bu sürede araç başka aramalarda müsait görünmez. Dönen `expiresAt` geri sayım içindir.
+        Aynı IP için eşzamanlı tutma sayısı sınırlıdır (`429 RATE_LIMITED`); araç tutulamıyorsa
+        `409 VEHICLE_UNAVAILABLE`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/HoldRequest" }
+      responses:
+        "201":
+          description: Araç tutuldu
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Hold" }
+        "409": { $ref: "#/components/responses/Conflict" }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
+  /holds/{id}:
+    delete:
+      tags: [reservations]
+      summary: Tutmayı bırak
+      description: Kullanıcı aramayı değiştirir ya da vazgeçerse aracı hemen serbest bırakır. Olmayan veya süresi dolmuş tutmada da `204` döner.
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+      responses:
+        "204": { description: Bırakıldı }
+
+  /reservations/price:
+    post:
+      tags: [reservations]
+      summary: Fiyat dökümü (rezervasyon özeti)
+      description: Rezervasyon oluşturmadan kalem kalem fiyatı hesaplar. Giriş gerekmez. Toplamı sunucu hesaplar.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ReservationRequest" }
+      responses:
+        "200":
+          description: Fiyat dökümü
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PriceBreakdown" }
+        "409": { $ref: "#/components/responses/Conflict" }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+
+  /reservations:
+    post:
+      tags: [reservations]
+      summary: Rezervasyon oluştur (sahte ödeme ekranında)
+      description: |
+        Giriş gerekir. Rezervasyon `CONFIRMED` oluşur, para alınmaz. `holdId` verilirse ve tutma geçerliyse
+        araç o tutmaya göre alınır, tutma silinir. Süresi dolmuşsa müsaitlik işlem içinde tekrar kontrol edilir;
+        araç hâlâ boşsa devam edilir, değilse `409 VEHICLE_UNAVAILABLE`. Puan aynı işlemde yazılır.
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ReservationRequest" }
+      responses:
+        "201":
+          description: Oluşturuldu
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Reservation" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "409": { $ref: "#/components/responses/Conflict" }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+
+  /me/reservations:
+    get:
+      tags: [me]
+      summary: Rezervasyonlarım
+      description: Yeniden eskiye. Yaklaşan/geçmiş ayrımını frontend tarihe göre yapar.
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Kullanıcının rezervasyonları
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Reservation" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /me/points:
+    get:
+      tags: [me]
+      summary: Puanlarım
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Bakiye, geçmiş ve kural metni
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Points" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /me:
+    get:
+      tags: [me]
+      summary: Oturumdaki kullanıcı
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Kullanıcı
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+    patch:
+      tags: [me]
+      summary: Profil ve tercihleri güncelle
+      description: Ad, soyad, dil, tema ve varsayılan para birimi. E-posta değiştirilemez.
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UserUpdate" }
+      responses:
+        "200":
+          description: Güncel kullanıcı
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+    delete:
+      tags: [me]
+      summary: Hesabı sil
+      description: Hesap kalıcı silinir, oturum sonlanır. Geçmiş rezervasyon kayıtları anonim olarak kalır.
+      security:
+        - cookieAuth: []
+      responses:
+        "204": { description: Silindi }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /auth/register:
+    post:
+      tags: [auth]
+      summary: Bireysel kayıt
+      description: Başarılı kayıt oturumu da açar (çerez set edilir).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RegisterRequest" }
+      responses:
+        "201":
+          description: Hesap oluşturuldu, oturum açıldı
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+        "409":
+          description: E-posta kayıtlı (`EMAIL_TAKEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
+  /auth/login:
+    post:
+      tags: [auth]
+      summary: Giriş (bireysel ve kurumsal)
+      description: Tek uç. Kurumsal kullanıcıda yanıttaki `accountType` `CORPORATE` olur.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/LoginRequest" }
+      responses:
+        "200":
+          description: Oturum açıldı
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+        "401":
+          description: E-posta veya şifre yanlış (`INVALID_CREDENTIALS`). Hangisi olduğunu belli etmez.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
+  /auth/logout:
+    post:
+      tags: [auth]
+      summary: Çıkış
+      responses:
+        "204": { description: Oturum sonlandı }
+
+  /auth/forgot-password:
+    post:
+      tags: [auth]
+      summary: Şifre sıfırlama bağlantısı iste
+      description: |
+        E-posta kayıtlı olsun olmasın her zaman `202` döner (kullanıcı varlığı sızdırılmaz).
+        Gerçek e-posta gönderilmez; bağlantı sunucu konsoluna yazılır.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email: { type: string, format: email }
+      responses:
+        "202": { description: Talep alındı }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
+  /auth/reset-password:
+    post:
+      tags: [auth]
+      summary: Yeni şifre belirle
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token, password]
+              properties:
+                token: { type: string }
+                password: { type: string, minLength: 8 }
+      responses:
+        "204":
+          description: Şifre değişti; eski token geçersiz olur
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+
+  /faq:
+    get:
+      tags: [content]
+      summary: Sık sorulan sorular
+      parameters:
+        - name: audience
+          in: query
+          required: true
+          schema: { $ref: "#/components/schemas/FaqAudience" }
+      responses:
+        "200":
+          description: Sıralı soru listesi
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/FaqItem" }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+
+  /products:
+    get:
+      tags: [content]
+      summary: Ürünler
+      responses:
+        "200":
+          description: Sıralı ürün listesi
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Product" }
+
+  /products/{slug}:
+    get:
+      tags: [content]
+      summary: Ürün detayı
+      parameters:
+        - { name: slug, in: path, required: true, schema: { type: string, example: akilli-kurumsal-filo } }
+      responses:
+        "200":
+          description: Ürün
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Product" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /services:
+    get:
+      tags: [content]
+      summary: Hizmetler
+      responses:
+        "200":
+          description: Sıralı hizmet listesi
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Service" }
+
+  /quotes:
+    post:
+      tags: [forms]
+      summary: Kurumsal teklif / görüşme talebi
+      description: |
+        Alanlar geçicidir (BACKLOG Y35). `website` görünmeyen tuzak alandır: doluysa `422 SPAM_DETECTED`.
+        Giriş yapmış kurumsal kullanıcıda talep hesaba bağlanır.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/QuoteRequest" }
+      responses:
+        "201":
+          description: Talep alındı
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Received" }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
+  /contact:
+    post:
+      tags: [forms]
+      summary: İletişim formu
+      description: |
+        `website` tuzak alanı doluysa `422 SPAM_DETECTED`. IP başına hız sınırı uygulanır.
+        KVKK onay zamanı sunucuda kaydedilir.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ContactRequest" }
+      responses:
+        "201":
+          description: Mesaj alındı
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Received" }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: novera_session
+
+  parameters:
+    Currency:
+      name: currency
+      in: query
+      required: false
+      description: Tutarların döneceği para birimi. Varsayılan `TRY`.
+      schema: { $ref: "#/components/schemas/Currency" }
+
+  responses:
+    BadRequest:
+      description: Bozuk istek (`BAD_REQUEST`)
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    Unauthorized:
+      description: Oturum yok (`UNAUTHENTICATED`)
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    NotFound:
+      description: Bulunamadı (`NOT_FOUND`)
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    Conflict:
+      description: Çakışma (`VEHICLE_UNAVAILABLE`)
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    ValidationFailed:
+      description: Doğrulama hatası (`VALIDATION_FAILED`, alan hataları `fieldErrors` içinde)
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    TooManyRequests:
+      description: Hız sınırı aşıldı (`RATE_LIMITED`)
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+
+  schemas:
+    # ---------- Ortak ----------
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          description: Sabit makine kodu.
+          enum:
+            - BAD_REQUEST
+            - VALIDATION_FAILED
+            - UNAUTHENTICATED
+            - INVALID_CREDENTIALS
+            - EMAIL_TAKEN
+            - NOT_FOUND
+            - VEHICLE_UNAVAILABLE
+            - INVALID_DATE_RANGE
+            - RESET_TOKEN_INVALID
+            - SPAM_DETECTED
+            - RATE_LIMITED
+        message:
+          type: string
+          description: Geliştirici için İngilizce metin. Ekranda gösterilmez.
+        fieldErrors:
+          type: object
+          description: Alan adı → sabit hata kodu.
+          additionalProperties:
+            type: string
+            enum:
+              - REQUIRED
+              - INVALID_EMAIL
+              - INVALID_FORMAT
+              - TOO_SHORT
+              - TOO_LONG
+              - OUT_OF_RANGE
+              - EMAIL_TAKEN
+              - CONSENT_REQUIRED
+              - INVALID_DATE_RANGE
+              - NOT_IN_SLOT
+              - UNKNOWN_REFERENCE
+          example: { email: EMAIL_TAKEN }
+
+    LocalizedText:
+      type: object
+      required: [tr, en]
+      properties:
+        tr: { type: string }
+        en: { type: string }
+
+    LocalizedList:
+      type: object
+      required: [tr, en]
+      properties:
+        tr: { type: array, items: { type: string } }
+        en: { type: array, items: { type: string } }
+
+    Currency:
+      type: string
+      enum: [TRY, EUR, USD]
+
+    Money:
+      type: object
+      required: [amount, currency]
+      properties:
+        amount:
+          type: integer
+          format: int64
+          description: Alt birimin (kuruş/cent) tam sayısı. 125000 TRY = ₺1.250.
+          example: 125000
+        currency: { $ref: "#/components/schemas/Currency" }
+
+    Received:
+      type: object
+      required: [received]
+      properties:
+        received: { type: boolean, example: true }
+
+    # ---------- Katalog ----------
+    OpeningHours:
+      type: object
+      description: Her alan `"08:30-19:00"` biçiminde ya da `"closed"`.
+      required: [weekdays, saturday, sunday]
+      properties:
+        weekdays: { type: string, example: "08:30-19:00" }
+        saturday: { type: string, example: "09:00-17:00" }
+        sunday: { type: string, example: closed }
+
+    BranchRef:
+      type: object
+      required: [id, name, city]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        city: { type: string }
+
+    Branch:
+      type: object
+      required: [id, name, city, address, latitude, longitude, phone, email, openingHours, vehicleModels]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string, example: İzmir Adnan Menderes Havalimanı }
+        city: { type: string, example: İzmir }
+        address: { type: string }
+        latitude: { type: number, format: double }
+        longitude: { type: number, format: double }
+        phone: { type: string }
+        email: { type: string, format: email }
+        openingHours: { $ref: "#/components/schemas/OpeningHours" }
+        vehicleModels:
+          type: array
+          description: Bayideki modeller (arama formundaki bayi önizlemesi için).
+          items:
+            type: object
+            required: [slug, brand, model]
+            properties:
+              slug: { type: string }
+              brand: { type: string }
+              model: { type: string }
+
+    VehicleClass:
+      type: object
+      required: [slug, name]
+      properties:
+        slug: { type: string, example: ekonomik }
+        name: { $ref: "#/components/schemas/LocalizedText" }
+
+    Consumption:
+      type: object
+      required: [value, unit]
+      properties:
+        value: { type: number, example: 4.5 }
+        unit:
+          type: string
+          enum: [L_PER_100KM, KWH_PER_100KM]
+
+    VehicleModelBase:
+      type: object
+      required: [slug, brand, model, class, seats, bags, transmission, fuelType, consumption, description, imageUrl]
+      properties:
+        slug: { type: string, example: toyota-corolla-hybrid }
+        brand: { type: string, example: Toyota }
+        model: { type: string, example: Corolla Hybrid }
+        class: { $ref: "#/components/schemas/VehicleClass" }
+        seats: { type: integer }
+        bags: { type: integer }
+        transmission: { type: string, enum: [MANUAL, AUTOMATIC] }
+        fuelType: { type: string, enum: [PETROL, DIESEL, HYBRID, ELECTRIC] }
+        consumption: { $ref: "#/components/schemas/Consumption" }
+        description: { $ref: "#/components/schemas/LocalizedText" }
+        imageUrl: { type: string, nullable: true }
+
+    VehicleModel:
+      allOf:
+        - $ref: "#/components/schemas/VehicleModelBase"
+        - type: object
+          required: [fromDailyPrice, branches]
+          properties:
+            fromDailyPrice: { $ref: "#/components/schemas/Money" }
+            branches:
+              type: array
+              items: { $ref: "#/components/schemas/BranchRef" }
+
+    VehicleOffer:
+      type: object
+      required: [vehicleId, model, branch, days, dailyPrice, totalPrice]
+      properties:
+        vehicleId: { type: string, format: uuid }
+        model: { $ref: "#/components/schemas/VehicleModelBase" }
+        branch: { $ref: "#/components/schemas/BranchRef" }
+        days: { type: integer, example: 3 }
+        dailyPrice: { $ref: "#/components/schemas/Money" }
+        totalPrice:
+          allOf:
+            - $ref: "#/components/schemas/Money"
+          description: Araç için toplam (ek hizmet hariç). `dailyPrice × days`, aynı para biriminde.
+
+    Extra:
+      type: object
+      required: [slug, name, price, pricing]
+      properties:
+        slug: { type: string, example: cocuk-koltugu }
+        name: { $ref: "#/components/schemas/LocalizedText" }
+        price: { $ref: "#/components/schemas/Money" }
+        pricing:
+          type: string
+          enum: [PER_DAY, FIXED]
+
+    ExchangeRate:
+      type: object
+      required: [currency, ratePerTry, updatedAt]
+      properties:
+        currency: { $ref: "#/components/schemas/Currency" }
+        ratePerTry:
+          type: number
+          description: 1 TRY kaç `currency` ediyor (TRY için 1).
+          example: 0.0291
+        updatedAt: { type: string, format: date-time }
+
+    # ---------- Rezervasyon ----------
+    ReservationRequest:
+      type: object
+      required: [vehicleId, pickupBranchId, returnBranchId, startAt, endAt, currency]
+      properties:
+        vehicleId: { type: string, format: uuid }
+        pickupBranchId: { type: string, format: uuid }
+        returnBranchId: { type: string, format: uuid }
+        startAt: { type: string, format: date-time }
+        endAt: { type: string, format: date-time }
+        currency: { $ref: "#/components/schemas/Currency" }
+        holdId:
+          type: string
+          format: uuid
+          description: "`POST /holds` cevabındaki tutma. Yalnızca `POST /reservations` kullanır; isteğe bağlı."
+        extras:
+          type: array
+          items:
+            type: object
+            required: [slug, quantity]
+            properties:
+              slug: { type: string }
+              quantity: { type: integer, minimum: 1, maximum: 10 }
+
+    HoldRequest:
+      type: object
+      required: [vehicleId, pickupBranchId, returnBranchId, startAt, endAt]
+      properties:
+        vehicleId: { type: string, format: uuid }
+        pickupBranchId: { type: string, format: uuid }
+        returnBranchId: { type: string, format: uuid }
+        startAt: { type: string, format: date-time }
+        endAt: { type: string, format: date-time }
+
+    Hold:
+      type: object
+      required: [id, vehicleId, expiresAt]
+      properties:
+        id: { type: string, format: uuid }
+        vehicleId: { type: string, format: uuid }
+        expiresAt:
+          type: string
+          format: date-time
+          description: Tutmanın bittiği an (UTC). Geri sayım bununla yapılır; istemci saatine güvenilmez.
+
+    PriceLine:
+      type: object
+      required: [type, label, quantity, unitPrice, total]
+      properties:
+        type: { type: string, enum: [VEHICLE, EXTRA] }
+        label: { $ref: "#/components/schemas/LocalizedText" }
+        quantity:
+          type: integer
+          description: Araç için gün sayısı; ek hizmet için adet (günlük ek hizmette adet × gün).
+        unitPrice: { $ref: "#/components/schemas/Money" }
+        total: { $ref: "#/components/schemas/Money" }
+
+    PriceBreakdown:
+      type: object
+      description: |
+        Birim fiyatlar önce hedef para biriminin alt birimine çevrilir, sonra adet/günle çarpılır;
+        bu yüzden satır toplamlarının toplamı `total`'a tam eşittir (ekranda yuvarlama yok).
+      required: [currency, exchangeRate, days, lines, total]
+      properties:
+        currency: { $ref: "#/components/schemas/Currency" }
+        exchangeRate:
+          type: number
+          description: Hesapta kullanılan kur (1 TRY = ? currency).
+        days: { type: integer }
+        lines:
+          type: array
+          items: { $ref: "#/components/schemas/PriceLine" }
+        total: { $ref: "#/components/schemas/Money" }
+
+    Reservation:
+      type: object
+      required: [id, number, status, vehicle, pickupBranch, returnBranch, startAt, endAt, price, pointsEarned, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        number: { type: string, example: NVR-2026-00123 }
+        status: { type: string, enum: [CONFIRMED, CANCELLED] }
+        vehicle:
+          type: object
+          required: [id, model]
+          properties:
+            id: { type: string, format: uuid }
+            model: { $ref: "#/components/schemas/VehicleModelBase" }
+        pickupBranch: { $ref: "#/components/schemas/BranchRef" }
+        returnBranch: { $ref: "#/components/schemas/BranchRef" }
+        startAt: { type: string, format: date-time }
+        endAt: { type: string, format: date-time }
+        price: { $ref: "#/components/schemas/PriceBreakdown" }
+        pointsEarned: { type: integer, example: 12 }
+        createdAt: { type: string, format: date-time }
+
+    Points:
+      type: object
+      required: [balance, history, rules]
+      properties:
+        balance: { type: integer }
+        history:
+          type: array
+          items:
+            type: object
+            required: [points, createdAt]
+            properties:
+              points: { type: integer }
+              reservationNumber: { type: string, nullable: true }
+              createdAt: { type: string, format: date-time }
+        rules: { $ref: "#/components/schemas/LocalizedText" }
+
+    # ---------- Hesap ----------
+    User:
+      type: object
+      required: [id, email, firstName, lastName, accountType, companyName, locale, theme, currency]
+      properties:
+        id: { type: string, format: uuid }
+        email: { type: string, format: email }
+        firstName: { type: string }
+        lastName: { type: string }
+        accountType: { type: string, enum: [INDIVIDUAL, CORPORATE] }
+        companyName: { type: string, nullable: true }
+        locale: { type: string, enum: [tr, en] }
+        theme: { type: string, enum: [light, dark, system], description: Varsayılan `light`. }
+        currency: { $ref: "#/components/schemas/Currency" }
+
+    UserUpdate:
+      type: object
+      description: Gönderilen alanlar güncellenir.
+      properties:
+        firstName: { type: string, minLength: 1, maxLength: 80 }
+        lastName: { type: string, minLength: 1, maxLength: 80 }
+        locale: { type: string, enum: [tr, en] }
+        theme: { type: string, enum: [light, dark, system] }
+        currency: { $ref: "#/components/schemas/Currency" }
+
+    RegisterRequest:
+      type: object
+      required: [email, password, firstName, lastName, consent]
+      properties:
+        email: { type: string, format: email }
+        password: { type: string, minLength: 8, maxLength: 128 }
+        firstName: { type: string, minLength: 1, maxLength: 80 }
+        lastName: { type: string, minLength: 1, maxLength: 80 }
+        consent:
+          type: boolean
+          description: Gizlilik/KVKK onayı. `false` ise `fieldErrors.consent = CONSENT_REQUIRED`.
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string, format: email }
+        password: { type: string }
+
+    # ---------- İçerik ----------
+    FaqAudience:
+      type: string
+      enum: [INDIVIDUAL, CORPORATE]
+
+    FaqItem:
+      type: object
+      required: [id, question, answer]
+      properties:
+        id: { type: string, format: uuid }
+        question: { $ref: "#/components/schemas/LocalizedText" }
+        answer: { $ref: "#/components/schemas/LocalizedText" }
+
+    Product:
+      type: object
+      required: [slug, title, concept, whatYouGet, techBenefits, featured]
+      properties:
+        slug: { type: string, example: akilli-kurumsal-filo }
+        title: { $ref: "#/components/schemas/LocalizedText" }
+        concept: { $ref: "#/components/schemas/LocalizedText" }
+        whatYouGet: { $ref: "#/components/schemas/LocalizedText" }
+        techBenefits: { $ref: "#/components/schemas/LocalizedList" }
+        featured:
+          type: boolean
+          description: '"En çok tercih edilen" rozeti.'
+
+    Service:
+      type: object
+      required: [slug, title, summary, points]
+      properties:
+        slug: { type: string, example: akilli-yol-yardim }
+        title: { $ref: "#/components/schemas/LocalizedText" }
+        summary: { $ref: "#/components/schemas/LocalizedText" }
+        points: { $ref: "#/components/schemas/LocalizedList" }
+
+    # ---------- Formlar ----------
+    QuoteRequest:
+      type: object
+      description: Geçici alanlar (BACKLOG Y35).
+      required: [companyName, vehicleCount, durationMonths, vehicleType, email, consent]
+      properties:
+        companyName: { type: string, minLength: 1, maxLength: 160 }
+        vehicleCount: { type: integer, minimum: 1, maximum: 10000 }
+        durationMonths: { type: integer, minimum: 1, maximum: 120 }
+        vehicleType: { type: string, description: Araç sınıfı slug'ı veya serbest metin. }
+        email: { type: string, format: email }
+        productSlug: { type: string, nullable: true }
+        consent: { type: boolean }
+        website:
+          type: string
+          description: Tuzak alan. Boş olmalı.
+
+    ContactRequest:
+      type: object
+      required: [name, email, subject, message, consent]
+      properties:
+        name: { type: string, minLength: 1, maxLength: 120 }
+        email: { type: string, format: email }
+        phone: { type: string, nullable: true, maxLength: 30 }
+        subject: { type: string, minLength: 1, maxLength: 160 }
+        message: { type: string, minLength: 1, maxLength: 4000 }
+        consent: { type: boolean }
+        website:
+          type: string
+          description: Tuzak alan. Boş olmalı.
