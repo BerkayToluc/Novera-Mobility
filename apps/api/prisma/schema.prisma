@@ -74,7 +74,7 @@ model User {
   accountType  AccountType @default(INDIVIDUAL)
   companyName  String? // yalnızca kurumsal hesapta (hesabı Novera açar)
   locale       Locale      @default(TR)
-  theme        Theme       @default(SYSTEM)
+  theme        Theme       @default(LIGHT)
   currency     Currency    @default(TRY)
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
@@ -164,6 +164,7 @@ model Vehicle {
   branch         Branch       @relation(fields: [branchId], references: [id])
 
   reservations Reservation[]
+  holds        Hold[]
 
   @@index([vehicleModelId])
   @@index([branchId])
@@ -181,6 +182,24 @@ model Extra {
 }
 
 // ---------- Rezervasyon ----------
+
+// "Kirala"da aracı 15 dakika tutar. Süre dolunca araç serbest kalır;
+// tutulan araç başka aramada müsait görünmez (BACKLOG Y48).
+model Hold {
+  id             String   @id @default(uuid())
+  startAt        DateTime
+  endAt          DateTime
+  pickupBranchId String
+  returnBranchId String
+  expiresAt      DateTime
+  createdAt      DateTime @default(now())
+
+  vehicleId String
+  vehicle   Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+  @@index([vehicleId, startAt, endAt])
+  @@index([expiresAt])
+}
 
 model Reservation {
   id      String            @id @default(uuid())
