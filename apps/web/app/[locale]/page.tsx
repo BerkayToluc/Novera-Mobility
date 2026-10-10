@@ -1,10 +1,11 @@
+import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { AudienceSwitch } from "@/components/home/audience-switch";
-import { ClassHighlights } from "@/components/home/class-highlights";
+import { CampaignArt, type CampaignArtKind } from "@/components/home/campaign-art";
+import { CampaignGallery, type CampaignSlide } from "@/components/home/campaign-gallery";
 import { CorporateQuoteForm } from "@/components/home/corporate-quote-form";
 import { FaqSection } from "@/components/home/faq-section";
 import { GuaranteeBand } from "@/components/home/guarantee-band";
-import { ProductCard } from "@/components/product-card";
 import { RentalSearchForm } from "@/components/rental/rental-search-form";
 import { Button } from "@/components/ui/button";
 import { StateMessage } from "@/components/ui/state-message";
@@ -12,9 +13,24 @@ import { Link } from "@/i18n/navigation";
 import { parseAudience } from "@/lib/audience";
 import type { BranchOption } from "@/lib/branch-options";
 import { getCurrency } from "@/lib/get-currency";
-import { PRODUCTS } from "@/lib/products";
 import { getBranchOptions } from "@/lib/rental-data";
 
+// Anchor of the rental section, so campaign buttons can bring the visitor to the form.
+const RENTAL_ANCHOR = "kiralama";
+
+const CAMPAIGNS: { id: CampaignArtKind; href: CampaignSlide["href"] }[] = [
+  { id: "weekend", href: { pathname: "/", hash: RENTAL_ANCHOR } },
+  { id: "electric", href: "/araclarimiz" },
+  { id: "fleet", href: { pathname: "/", query: { tip: "kurumsal" }, hash: RENTAL_ANCHOR } },
+];
+
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("HomePage");
+  return { description: t("metaDescription") };
+}
+
+// Section order of SPEC §2.2: campaigns, the rental box, Road Assurance, FAQ. Partners, the
+// app section and the guides join between them with their own work (BACKLOG Y17, Y39, Y40).
 export default async function Home({ searchParams }: PageProps<"/[locale]">) {
   const t = await getTranslations("HomePage");
   const audience = parseAudience((await searchParams).tip);
@@ -33,59 +49,55 @@ export default async function Home({ searchParams }: PageProps<"/[locale]">) {
     }
   }
 
+  const slides: CampaignSlide[] = CAMPAIGNS.map(({ id, href }) => ({
+    id,
+    href,
+    title: t(`gallery.slides.${id}.title`),
+    text: t(`gallery.slides.${id}.text`),
+    cta: t(`gallery.slides.${id}.cta`),
+    art: <CampaignArt kind={id} className="size-full" />,
+  }));
+
   return (
     <>
-      <div className="mx-auto flex max-w-content flex-col gap-12 px-4 py-12 md:px-8 xl:gap-16 xl:py-20">
-        <div className="flex flex-col gap-8">
-          <header className="flex flex-col gap-3">
-            <h1 className="text-display text-fg">{corporate ? t("corporateTitle") : t("title")}</h1>
-            <p className="max-w-prose text-body text-fg-muted">
-              {corporate ? t("corporateIntro") : t("intro")}
-            </p>
-          </header>
-
-          <AudienceSwitch value={audience} />
-
-          <div className="max-w-3xl rounded-card border border-border bg-surface p-6 md:p-8">
-            {corporate ? (
-              <CorporateQuoteForm />
-            ) : branches ? (
-              <RentalSearchForm branches={branches} />
-            ) : (
-              <StateMessage tone="error" title={t("error.title")} text={t("error.text")}>
-                <Button asChild>
-                  <Link href="/">{t("error.retry")}</Link>
-                </Button>
-              </StateMessage>
-            )}
-          </div>
-        </div>
-
-        {corporate ? (
-          <section aria-labelledby="products-title" className="flex flex-col gap-6">
-            <header className="flex flex-col gap-2">
-              <h2 id="products-title" className="text-h2 text-fg">
-                {t("products.title")}
-              </h2>
-              <p className="max-w-prose text-body text-fg-muted">{t("products.intro")}</p>
-            </header>
-            <div className="grid gap-4 md:grid-cols-2">
-              {PRODUCTS.map((product) => (
-                <ProductCard key={product.slug} slug={product.slug} headingAs="h3" />
-              ))}
-            </div>
-            <Button asChild variant="outline" className="self-start">
-              <Link href="/urunler">{t("products.viewAll")}</Link>
-            </Button>
-          </section>
-        ) : (
-          <ClassHighlights currency={currency} />
-        )}
+      <div className="mx-auto max-w-content px-4 pt-6 md:px-8 md:pt-8">
+        <CampaignGallery slides={slides} />
       </div>
+
+      {/* The page's h1 heads this section, not the gallery: campaigns change, the page is
+          about renting a car (SPEC §2.2). Centred, with the audience buttons free-standing. */}
+      <section
+        id={RENTAL_ANCHOR}
+        aria-labelledby="rental-title"
+        className="mx-auto flex max-w-content scroll-mt-4 flex-col items-center gap-8 px-4 py-16 md:px-8 xl:py-24"
+      >
+        <header className="flex flex-col items-center gap-3 text-center">
+          <h1 id="rental-title" className="text-display text-fg">
+            {t("title")}
+          </h1>
+          <p className="max-w-prose text-body text-fg-muted">{corporate ? t("corporateIntro") : t("intro")}</p>
+        </header>
+
+        <AudienceSwitch value={audience} />
+
+        <div className="w-full max-w-3xl rounded-card border border-border bg-surface p-6 md:p-8">
+          {corporate ? (
+            <CorporateQuoteForm />
+          ) : branches ? (
+            <RentalSearchForm branches={branches} />
+          ) : (
+            <StateMessage tone="error" title={t("error.title")} text={t("error.text")}>
+              <Button asChild>
+                <Link href="/">{t("error.retry")}</Link>
+              </Button>
+            </StateMessage>
+          )}
+        </div>
+      </section>
 
       <GuaranteeBand />
 
-      <div className="mx-auto max-w-content px-4 py-12 md:px-8 xl:py-20">
+      <div className="mx-auto max-w-content px-4 py-16 md:px-8 xl:py-24">
         <FaqSection audience={audience} />
       </div>
     </>

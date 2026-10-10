@@ -64,7 +64,7 @@ export function NavMenu({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger
         className={cn(
-          "group inline-flex min-h-11 items-center gap-1 rounded-control px-2 text-label transition-colors xl:px-3",
+          "group inline-flex min-h-11 items-center gap-1 whitespace-nowrap rounded-control px-2 text-label transition-colors",
           isCurrent ? "bg-selected text-on-selected" : "text-fg hover:bg-selected",
         )}
       >

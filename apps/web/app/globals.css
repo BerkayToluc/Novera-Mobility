@@ -71,6 +71,8 @@
   --novera-surface-muted: var(--stone-100);
   --novera-band: var(--olive-900);
   --novera-on-band: var(--stone-50);
+  /* Highlights on the dark band, which stays dark in both themes, so one value serves both. */
+  --novera-band-accent: var(--aegean-300);
   --novera-fg: var(--olive-950);
   --novera-fg-muted: var(--stone-700);
   --novera-fg-subtle: var(--stone-600);
@@ -226,6 +228,7 @@
   --color-surface-muted: var(--novera-surface-muted);
   --color-band: var(--novera-band);
   --color-on-band: var(--novera-on-band);
+  --color-band-accent: var(--novera-band-accent);
   --color-fg: var(--novera-fg);
   --color-fg-muted: var(--novera-fg-muted);
   --color-fg-subtle: var(--novera-fg-subtle);
