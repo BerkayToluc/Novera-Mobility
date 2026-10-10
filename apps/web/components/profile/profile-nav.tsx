@@ -30,7 +30,7 @@ export function ProfileNav() {
                 className={cn(
                   "inline-flex min-h-11 items-center border-b-2 px-4 text-label",
                   isCurrent
-                    ? "border-primary text-fg"
+                    ? "border-focus text-fg"
                     : "border-transparent text-fg-muted hover:text-fg",
                 )}
               >

@@ -1,0 +1,106 @@
+{
+  "VehicleDetail": {
+    "back": "Back to results",
+    "backToSearch": "Search cars",
+    "year": "{year} model",
+    "branch": "Branch: {branch}",
+    "extrasTitle": "Extras",
+    "extrasIntro": "Add what you need; your choices show in the total right away.",
+    "perDay": "{price} / day",
+    "fixed": "{price} one-time",
+    "summaryTitle": "Price summary",
+    "vehicleLine": "{brand} {model} · {days, plural, one {# day} other {# days}}",
+    "total": "Total",
+    "noHidden": "No hidden fees: the total is the sum of the lines above.",
+    "continue": "Continue to Booking",
+    "needDates": {
+      "title": "Pick dates to see the total",
+      "text": "The daily price is below. The total is worked out once you choose dates.",
+      "action": "Search Cars"
+    },
+    "error": {
+      "title": "Car details could not be loaded",
+      "text": "We cannot show this car right now. Please try again.",
+      "retry": "Try Again"
+    }
+  },
+  "GuaranteeStrip": {
+    "text": "This rental is covered by Road Assurance: 24/7 support, towing, replacement car."
+  },
+  "BookingSummary": {
+    "metaTitle": "Booking Summary",
+    "title": "Booking Summary",
+    "intro": "Check everything once more. Nothing is charged until you go to payment.",
+    "tripTitle": "Rental",
+    "pickup": "Pick-up",
+    "dropoff": "Drop-off",
+    "duration": "Length",
+    "days": "{days, plural, one {# day} other {# days}}",
+    "vehicleTitle": "Car",
+    "extrasTitle": "Extras",
+    "noExtras": "No extras selected.",
+    "changeTrip": "Change dates or branch",
+    "changeVehicle": "Change car",
+    "changeExtras": "Change extras",
+    "priceTitle": "Price summary",
+    "vehicleLine": "{brand} {model} · {price} × {days, plural, one {# day} other {# days}}",
+    "total": "Total",
+    "noHidden": "No hidden fees: the total is the sum of the lines above.",
+    "payNote": "You will be asked to sign in before paying; your choices are kept.",
+    "continue": "Continue to Payment",
+    "missing": {
+      "title": "Booking details are missing",
+      "text": "Start again by choosing a car, a branch and dates.",
+      "action": "Search Cars"
+    },
+    "error": {
+      "title": "Booking summary could not be loaded",
+      "text": "We cannot fetch the details right now. Please try again.",
+      "retry": "Try Again"
+    }
+  },
+  "Payment": {
+    "metaTitle": "Payment",
+    "title": "Payment",
+    "intro": "The last step to complete your booking.",
+    "demoTitle": "This is a demo payment",
+    "demoText": "Nothing is charged. Your card details are not stored or sent to a server; do not enter a real card.",
+    "demoHint": "Demo card: 4242 4242 4242 4242, any valid date and any CVC.",
+    "fields": {
+      "holder": "Name on card",
+      "number": "Card number",
+      "expiry": "Expiry (MM/YY)",
+      "cvc": "CVC"
+    },
+    "errors": {
+      "holder": "Enter the name on the card.",
+      "number": "Enter a valid card number.",
+      "expiry": "Enter a valid expiry date (MM/YY).",
+      "cvc": "Enter a 3 or 4 digit CVC.",
+      "unavailable": "The booking service is not available right now. Please try again later.",
+      "invalid": "The booking details are not valid. Please start the search again.",
+      "signin": "You need to sign in to continue.",
+      "generic": "The booking could not be completed. Please try again."
+    },
+    "pay": "Complete Payment",
+    "paying": "Processing",
+    "summaryTitle": "Your booking",
+    "total": "Total",
+    "edit": "Back to summary"
+  },
+  "Confirmation": {
+    "metaTitle": "Booking Confirmation",
+    "title": "Your booking is confirmed",
+    "text": "The demo payment is complete; no real amount was charged.",
+    "number": "Your booking number",
+    "rentalTitle": "Rental",
+    "total": "Total",
+    "bookings": "My Bookings",
+    "home": "Back to Home",
+    "missing": {
+      "title": "No booking to confirm",
+      "text": "You get to this page after making a booking.",
+      "action": "Search Cars"
+    }
+  }
+}

@@ -1,6 +1,10 @@
 import "server-only";
+import { mockBranchDetails } from "@/mocks/branch-details";
+import { mockExtras } from "@/mocks/extras";
 import { mockAvailable, mockBranches, mockVehicles } from "@/mocks/fleet";
+import type { BranchDetail } from "./branch-detail";
 import type { Currency } from "./currency";
+import type { Extra } from "./extra";
 import type { RentalSearch } from "./rental-search";
 import type { Branch, Vehicle, VehicleOffer } from "./vehicle";
 
@@ -32,5 +36,21 @@ export async function getAvailableVehicles(
   currency: Currency,
 ): Promise<VehicleOffer[]> {
   if (mocksEnabled()) return mockAvailable(search, currency);
+  throw new ApiUnavailableError();
+}
+
+// One car by its slug (unique per car, i.e. per branch), or null when there is no such car.
+export async function getVehicle(slug: string, currency: Currency): Promise<Vehicle | null> {
+  if (!mocksEnabled()) throw new ApiUnavailableError();
+  return mockVehicles(currency).find((vehicle) => vehicle.slug === slug) ?? null;
+}
+
+export async function getExtras(currency: Currency): Promise<Extra[]> {
+  if (mocksEnabled()) return mockExtras(currency);
+  throw new ApiUnavailableError();
+}
+
+export async function getBranchDetails(): Promise<BranchDetail[]> {
+  if (mocksEnabled()) return mockBranchDetails();
   throw new ApiUnavailableError();
 }

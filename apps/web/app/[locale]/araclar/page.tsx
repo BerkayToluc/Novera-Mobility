@@ -10,7 +10,7 @@ import type { BranchOption } from "@/lib/branch-options";
 import { getAvailableVehicles } from "@/lib/fleet-client";
 import { getCurrency } from "@/lib/get-currency";
 import { getBranchOptions } from "@/lib/rental-data";
-import { localToInstant, parseRentalSearch } from "@/lib/rental-search";
+import { localToInstant, parseRentalSearch, toQuery } from "@/lib/rental-search";
 import type { VehicleOffer } from "@/lib/vehicle";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -104,7 +104,10 @@ export default async function ResultsPage({ searchParams }: PageProps<"/[locale]
           <ul className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
             {sorted.map((offer) => (
               <li key={offer.id}>
-                <VehicleCard vehicle={offer} />
+                <VehicleCard
+                  vehicle={offer}
+                  href={{ pathname: "/araclar/[slug]", params: { slug: offer.slug }, query: toQuery(search) }}
+                />
               </li>
             ))}
           </ul>

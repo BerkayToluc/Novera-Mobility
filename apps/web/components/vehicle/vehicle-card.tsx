@@ -1,6 +1,7 @@
-import type { ReactNode } from "react";
+import type { ComponentProps, ReactNode } from "react";
 import { Cog, Fuel, Luggage, Users } from "lucide-react";
 import { getFormatter, getLocale, getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 import type { Money } from "@/lib/currency";
 import { formatMoney } from "@/lib/price";
 import type { Vehicle, VehicleOffer } from "@/lib/vehicle";
@@ -12,9 +13,11 @@ type VehicleCardProps = {
   fromPrice?: Money;
   // Shown under the price, e.g. how many branches have the model.
   note?: ReactNode;
+  // Where the card leads: the car's own page. The fleet catalogue has no page per model.
+  href?: ComponentProps<typeof Link>["href"];
 };
 
-export async function VehicleCard({ vehicle, fromPrice, note }: VehicleCardProps) {
+export async function VehicleCard({ vehicle, fromPrice, note, href }: VehicleCardProps) {
   const t = await getTranslations("Vehicle");
   const format = await getFormatter();
   const locale = (await getLocale()) as "tr" | "en";
@@ -28,12 +31,21 @@ export async function VehicleCard({ vehicle, fromPrice, note }: VehicleCardProps
   ];
 
   return (
-    <article className="flex h-full flex-col gap-4 rounded-card border border-border bg-surface p-4">
+    <article className="relative flex h-full flex-col gap-4 rounded-card border border-border bg-surface p-4 focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-focus">
       <VehicleImage imageUrl={vehicle.imageUrl} brand={vehicle.brand} model={vehicle.model} />
       <div className="flex flex-1 flex-col gap-3">
         <div>
           <h3 className="text-h3 text-fg">
-            {vehicle.brand} {vehicle.model}
+            {href ? (
+              // The link's ::after covers the whole card, so the card is one big target.
+              <Link href={href} className="after:absolute after:inset-0 focus-visible:outline-none">
+                {vehicle.brand} {vehicle.model}
+              </Link>
+            ) : (
+              <>
+                {vehicle.brand} {vehicle.model}
+              </>
+            )}
           </h3>
           <p className="text-small text-fg-muted">
             {vehicle.vehicleClass.name[locale]} · {vehicle.year}
