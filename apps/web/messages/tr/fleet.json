@@ -15,14 +15,17 @@
     },
     "perDay": "{price} / gün",
     "fromPerDay": "{price} / gün'den başlayan",
-    "total": "{days, plural, one {# gün} other {# gün}} toplam {price}"
+    "total": "{days, plural, one {# gün} other {# gün}} toplam {price}",
+    "consumption": {
+      "L_PER_100KM": "{value} L/100 km",
+      "KWH_PER_100KM": "{value} kWh/100 km"
+    }
   },
   "FleetPage": {
     "metaTitle": "Araçlarımız",
     "metaDescription": "Novera Mobility filosundaki tüm markalar ve modeller: ekonomik, orta sınıf, SUV, üst sınıf ve elektrikli araçlar.",
     "title": "Araçlarımız",
-    "intro": "Filomuzdaki tüm marka ve modeller, sınıflarına göre, en uygun fiyattan başlayarak.",
-    "branches": "{count, plural, one {# bayide} other {# bayide}}",
+    "intro": "Filomuzdaki tüm modeller, kategorilerine göre, en uygun fiyattan başlayarak. Ayrıntı için bir modele dokunun.",
     "error": {
       "title": "Araçlar yüklenemedi",
       "text": "Filomuzu şu an gösteremiyoruz. Lütfen tekrar deneyin.",
@@ -30,6 +33,23 @@
     },
     "ctaTitle": "Beğendiğiniz bir araç mı var?",
     "ctaText": "Lokasyonunuzu ve tarihlerinizi seçin, o bayideki uygun araçları fiyatlarıyla görün.",
-    "ctaButton": "Araç Kirala"
+    "ctaButton": "Araç Kirala",
+    "filterLabel": "Kategori",
+    "all": "Tümü",
+    "modelCount": "{count} model",
+    "card": {
+      "details": "ayrıntıları göster"
+    },
+    "empty": {
+      "title": "Henüz araç yok",
+      "text": "Filomuz şu an boş görünüyor. Lütfen daha sonra tekrar bakın."
+    },
+    "dialog": {
+      "close": "Pencereyi kapat",
+      "features": "Özellikler",
+      "branches": "Bu model {count, plural, one {# bayide} other {# bayide}} var",
+      "branchesLink": "Bayi bilgilerini İletişim'de gör",
+      "rent": "Bu aracı kirala"
+    }
   }
 }

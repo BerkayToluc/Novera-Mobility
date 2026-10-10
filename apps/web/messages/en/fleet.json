@@ -15,14 +15,17 @@
     },
     "perDay": "{price} / day",
     "fromPerDay": "from {price} / day",
-    "total": "{days, plural, one {# day} other {# days}} total {price}"
+    "total": "{days, plural, one {# day} other {# days}} total {price}",
+    "consumption": {
+      "L_PER_100KM": "{value} L/100 km",
+      "KWH_PER_100KM": "{value} kWh/100 km"
+    }
   },
   "FleetPage": {
     "metaTitle": "Our Cars",
     "metaDescription": "Every make and model in the Novera Mobility fleet: economy, compact, SUV, executive and electric cars.",
     "title": "Our Cars",
-    "intro": "Every make and model in our fleet, by class, starting from the lowest price.",
-    "branches": "{count, plural, one {at # branch} other {at # branches}}",
+    "intro": "Every model in our fleet, by category, starting from the best price. Tap a model for the details.",
     "error": {
       "title": "Cars could not be loaded",
       "text": "We cannot show our fleet right now. Please try again.",
@@ -30,6 +33,23 @@
     },
     "ctaTitle": "Found a car you like?",
     "ctaText": "Choose your location and dates to see the cars available at that branch, with prices.",
-    "ctaButton": "Rent a Car"
+    "ctaButton": "Rent a Car",
+    "filterLabel": "Category",
+    "all": "All",
+    "modelCount": "{count, plural, one {# model} other {# models}}",
+    "card": {
+      "details": "show details"
+    },
+    "empty": {
+      "title": "No cars yet",
+      "text": "Our fleet looks empty right now. Please check back later."
+    },
+    "dialog": {
+      "close": "Close dialog",
+      "features": "Features",
+      "branches": "Available at {count, plural, one {# branch} other {# branches}}",
+      "branchesLink": "See branch details on the Contact page",
+      "rent": "Rent this car"
+    }
   }
 }
