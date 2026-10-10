@@ -39,6 +39,8 @@ export const routing = defineRouting({
     "/kvkk": { tr: "/kvkk", en: "/privacy-notice" },
     "/cerez-politikasi": { tr: "/cerez-politikasi", en: "/cookie-policy" },
     "/kiralama-kosullari": { tr: "/kiralama-kosullari", en: "/rental-terms" },
+    "/gizlilik-politikasi": { tr: "/gizlilik-politikasi", en: "/privacy-policy" },
+    "/kullanim-sartlari": { tr: "/kullanim-sartlari", en: "/terms-of-use" },
     // Development-only galleries (404 in production); not translated.
     "/dev/components": "/dev/components",
     "/dev/profile": "/dev/profile",

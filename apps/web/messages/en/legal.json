@@ -31,6 +31,8 @@
           "Identity and contact: first name, last name, email address, phone number.",
           "Booking: pick-up and return location and dates, the chosen car and extras.",
           "Corporate quote: company name, number of cars needed, rental period, car type.",
+          "Contact form: your name, email address, phone number (optional), topic and message.",
+          "Account: your preferences (language, theme, currency) and the points you earn from your rentals.",
           "Usage: your language and theme preference (through cookies)."
         ]
       },
@@ -38,8 +40,10 @@
         "heading": "Purposes of processing",
         "list": [
           "Creating and managing your booking.",
+          "Answering the messages you send through the contact form.",
           "Answering your corporate quote requests.",
           "Managing your account and keeping you signed in.",
+          "Working out your points and remembering your preferences with your account.",
           "Remembering your site preferences."
         ]
       },
@@ -198,6 +202,111 @@
         "heading": "Disputes",
         "paragraphs": [
           "Disputes are first settled by good-faith discussion; if none is found, the competent courts and enforcement offices have jurisdiction."
+        ]
+      }
+    ]
+  },
+  "LegalPolicy": {
+    "title": "Privacy Policy",
+    "metaDescription": "What information Novera Mobility collects when you use the site, why, and how it protects it.",
+    "sections": [
+      {
+        "heading": "In short",
+        "paragraphs": [
+          "We only take the information needed to provide the service, we do not sell it, and we do not share it with third parties for advertising. The legal detail is in the Privacy Notice (KVKK); this page says the same in plain words."
+        ]
+      },
+      {
+        "heading": "What information do we collect?",
+        "list": [
+          "Your account: your first name, last name and email address; company details for a corporate account.",
+          "Your bookings: dates, locations, the car and extras you chose.",
+          "Forms: what you write in the contact and corporate quote forms.",
+          "Your preferences: language, theme and currency.",
+          "Your points: the points you earn from your rentals."
+        ]
+      },
+      {
+        "heading": "What do we use it for?",
+        "list": [
+          "Making your booking and getting in touch with you.",
+          "Answering your questions and quote requests.",
+          "Remembering your account and preferences.",
+          "Working out your points."
+        ]
+      },
+      {
+        "heading": "Payment details",
+        "paragraphs": [
+          "The payment screen on this site is a sample: your card details are not stored and no money is taken from your card."
+        ]
+      },
+      {
+        "heading": "Cookies",
+        "paragraphs": [
+          "We use cookies to remember your language, theme and currency choice and your session. The details are in the Cookie Policy."
+        ]
+      },
+      {
+        "heading": "How do we protect it, and for how long do we keep it?",
+        "paragraphs": [
+          "Access to your data is limited to authorised staff. We keep it for as long as its purpose needs, then delete or anonymise it. You can delete your account on the Settings page."
+        ]
+      },
+      {
+        "heading": "Get in touch",
+        "paragraphs": [
+          "For questions about privacy you can write to kvkk@novera.example."
+        ]
+      }
+    ]
+  },
+  "LegalSiteTerms": {
+    "title": "Terms of Use",
+    "metaDescription": "The terms that apply when you use the Novera Mobility site: accounts, content, liability and changes.",
+    "sections": [
+      {
+        "heading": "Scope",
+        "paragraphs": [
+          "These terms govern the use of the Novera Mobility website. The terms of renting a car are on the Rental Terms page."
+        ]
+      },
+      {
+        "heading": "Using the site",
+        "list": [
+          "You use the site only for lawful purposes.",
+          "You are responsible for the information you give in the forms being correct.",
+          "Use that harms the site, disrupts access or collects data in bulk with automated tools is not allowed."
+        ]
+      },
+      {
+        "heading": "Your account",
+        "paragraphs": [
+          "You are responsible for the security of your account; do not share your sign-in details. You open an individual account yourself, while Novera opens a corporate account after a sales conversation."
+        ]
+      },
+      {
+        "heading": "Points",
+        "paragraphs": [
+          "Points are earned with completed rentals; cancelled bookings earn none. If the points rule changes, it will be announced on this page."
+        ]
+      },
+      {
+        "heading": "Content and prices",
+        "paragraphs": [
+          "The text, images and logos on the site belong to Novera Mobility. Prices include VAT; the amount in the booking summary applies. Currency conversions use the daily rate."
+        ]
+      },
+      {
+        "heading": "Limits of liability",
+        "paragraphs": [
+          "We work to keep the site running without interruption or error but cannot guarantee it. We are not liable for indirect loss from temporary access problems caused by maintenance or faults."
+        ]
+      },
+      {
+        "heading": "Changes",
+        "paragraphs": [
+          "We may update these terms; the current version is always on this page. Continuing to use the site after an update means you accept the new terms."
         ]
       }
     ]

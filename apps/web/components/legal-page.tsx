@@ -12,7 +12,7 @@ type LegalSection = {
 };
 
 // Keys of the messages that hold a legal page's content (see the `Legal*` namespaces).
-type LegalNamespace = "LegalPrivacy" | "LegalCookies" | "LegalTerms";
+type LegalNamespace = "LegalPrivacy" | "LegalCookies" | "LegalTerms" | "LegalPolicy" | "LegalSiteTerms";
 
 export async function LegalPage({ namespace }: { namespace: LegalNamespace }) {
   const t = await getTranslations(namespace);

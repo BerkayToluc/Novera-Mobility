@@ -5,11 +5,12 @@ import { COMPANY, SOCIAL_NETWORKS, telHref } from "@/lib/company";
 import { NAV_ITEMS } from "./nav-items";
 import { SocialIcon } from "./social-icon";
 
-// Only pages that exist today; the privacy policy, terms of use and cookie settings join
-// with their own work (BACKLOG Y25, Y26).
+// The cookie settings join with their own work (BACKLOG Y26).
 const LEGAL_ITEMS = [
   { href: "/kvkk", labelKey: "privacy" },
+  { href: "/gizlilik-politikasi", labelKey: "privacyPolicy" },
   { href: "/cerez-politikasi", labelKey: "cookies" },
+  { href: "/kullanim-sartlari", labelKey: "siteTerms" },
   { href: "/kiralama-kosullari", labelKey: "terms" },
 ] as const;
 
