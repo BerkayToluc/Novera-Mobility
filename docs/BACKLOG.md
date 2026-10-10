@@ -108,7 +108,7 @@ Sıranın gerekçesi:
 
 Sıra ve öneri dosyasındaki ek kalite maddeleri G tarafından 10 Ekim 2026'da onaylandı.
 
-**GitHub issue numaraları (10 Ekim 2026):** Y10 #78 · Y11 #79 · Y12 #80 · Y13 #81 · Y14 #82 · Y15 #83 · Y16 #84 · Y17 #85 · Y18 #86 · Y19 #87 · Y20 #88 · Y21 #89 · Y22 #90 · Y23 #91 · Y24 #92 · Y25 #93 · Y26 #94 · Y27 #95 · Y28 #96 · Y29 #97 · Y30 #98 · Y31 #99 · Y32 #100 · Y33 #101 · Y34 #102 · Y35 #103 · Y36–Y47 (issue henüz yok). Commit ve PR'da bu issue numaraları kullanılır. Y1–Y9 için issue açılmadı (Y3, Y4, Y7, Y8, Y9 zaten `main`'de; Y1, Y2, Y5, Y6 backend/API gelince).
+**GitHub issue numaraları (10 Ekim 2026):** Y10 #78 · Y11 #79 · Y12 #80 · Y13 #81 · Y14 #82 · Y15 #83 · Y16 #84 · Y17 #85 · Y18 #86 · Y19 #87 · Y20 #88 · Y21 #89 · Y22 #90 · Y23 #91 · Y24 #92 · Y25 #93 · Y26 #94 · Y27 #95 · Y28 #96 · Y29 #97 · Y30 #98 · Y31 #99 · Y32 #100 · Y33 #101 · Y34 #102 · Y35 #103 · Y36 #107 · Y37 #108 · Y38 #112 · Y39 #109 · Y40 #110 · Y41 #111 · Y42 #113 · Y43 #114 · Y44 #115 · Y45 #116 · Y46 #117 · Y47 #118. Commit ve PR'da bu issue numaraları kullanılır. Y1–Y9 için issue açılmadı (Y3, Y4, Y7, Y8, Y9 zaten `main`'de; Y1, Y2, Y5, Y6 backend/API gelince).
 
 | Sıra | # | İş | Sahip | Bağımlı | Bitti sayılması için |
 |---|---|---|---|---|---|

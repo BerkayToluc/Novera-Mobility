@@ -19,7 +19,14 @@
     "services": "Hizmetler",
     "about": "Hakkımızda",
     "contact": "İletişim",
-    "login": "Giriş Yap"
+    "login": "Giriş Yap",
+    "preferences": "Tercihler",
+    "preferencesLabel": "Dil ve tema: {language}",
+    "language": "Dil",
+    "theme": "Tema",
+    "currency": "Para birimi",
+    "allProducts": "Tüm ürünler",
+    "allServices": "Tüm hizmetler"
   },
   "Footer": {
     "tagline": "Sadece araç kiralamıyoruz, yol boyu güvence sunuyoruz.",
@@ -28,7 +35,6 @@
     "privacy": "KVKK Aydınlatma Metni",
     "cookies": "Çerez Politikası",
     "terms": "Kiralama Koşulları",
-    "preferences": "Tercihler",
     "copyright": "© {year} Novera Mobility. Tüm hakları saklıdır.",
     "fiction": "Bu site kurgusal bir öğrenme projesidir."
   },
@@ -39,6 +45,12 @@
     "dark": "Koyu"
   },
   "CurrencySwitcher": {
-    "label": "Para birimi"
+    "label": "Para birimi",
+    "current": "Para birimi: {code}",
+    "names": {
+      "TRY": "Türk lirası",
+      "EUR": "Euro",
+      "USD": "ABD doları"
+    }
   }
 }

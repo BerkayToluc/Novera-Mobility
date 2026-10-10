@@ -1,11 +1,6 @@
 import { getTranslations } from "next-intl/server";
-import { CurrencySwitcher } from "@/components/currency-switcher";
-import { LocaleSwitcher } from "@/components/locale-switcher";
 import { Logo } from "@/components/logo";
-import { ThemeSwitcher } from "@/components/theme-switcher";
 import { Link } from "@/i18n/navigation";
-import { getCurrency } from "@/lib/get-currency";
-import { getTheme } from "@/lib/get-theme";
 import { NAV_ITEMS } from "./nav-items";
 
 const LEGAL_ITEMS = [
@@ -19,12 +14,10 @@ const linkClasses = "inline-flex min-h-11 items-center text-small text-on-band h
 export async function SiteFooter() {
   const t = await getTranslations("Footer");
   const nav = await getTranslations("Header");
-  const theme = await getTheme();
-  const currency = await getCurrency();
 
   return (
     <footer className="bg-band text-on-band">
-      <div className="mx-auto grid max-w-content gap-12 px-4 py-16 md:grid-cols-2 md:px-8 xl:grid-cols-4">
+      <div className="mx-auto grid max-w-content gap-12 px-4 py-16 md:grid-cols-2 md:px-8 xl:grid-cols-3">
         <div className="flex flex-col gap-4 md:col-span-2 xl:col-span-1">
           <Link href="/" aria-label={nav("homeLabel")} className="inline-flex min-h-11 items-center self-start">
             <Logo tone="on-band" className="h-9 w-auto" />
@@ -62,13 +55,6 @@ export async function SiteFooter() {
             ))}
           </ul>
         </nav>
-
-        <div className="flex flex-col gap-4">
-          <h2 className="text-label text-on-band">{t("preferences")}</h2>
-          <LocaleSwitcher tone="band" />
-          <ThemeSwitcher initialTheme={theme} tone="band" />
-          <CurrencySwitcher initialCurrency={currency} tone="band" />
-        </div>
       </div>
 
       <div className="border-t border-on-band/20">
