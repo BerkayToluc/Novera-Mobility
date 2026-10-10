@@ -36,7 +36,17 @@
     "cookies": "Cookie Policy",
     "terms": "Rental Terms",
     "copyright": "© {year} Novera Mobility. All rights reserved.",
-    "fiction": "This site is a fictional learning project."
+    "fiction": "This site is a fictional learning project.",
+    "contact": "Contact",
+    "contactPage": "Write to us",
+    "follow": "Follow us",
+    "followSoon": "Our social media accounts are coming soon.",
+    "social": {
+      "instagram": "Instagram",
+      "linkedin": "LinkedIn",
+      "x": "X",
+      "youtube": "YouTube"
+    }
   },
   "ThemeSwitcher": {
     "label": "Theme",

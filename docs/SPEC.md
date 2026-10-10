@@ -166,7 +166,7 @@ Mobil:    [Logo]                                                     [Profil] [�
 - Navbar'da ayrı "Kurumsal Teklif" linki yok (G'nin kararı); kurumsal giriş noktası ana sayfadaki seçim ve ürün sayfaları.
 - Hamburger = site gezintisi. Altı bağlantı 1280px altında yan yana sığmadığı için hamburger mobilde ve tablette görünür, satır içi menü 1280px ve üstünde. Profil menüsü = hesap (her ekranda).
 - Giriş yapılmamışsa Profil yerine "Giriş Yap".
-- **Footer:** referans Framer "Simple Footer": solda logo, kısa tanım ve altında telif + "kurgusal proje" notu; sağda sade sütunlar: Keşfet linkleri, Yasal linkler (5 sayfa ve "Çerez tercihleri"), iletişim. **Bizi takip edin** (v0.4, G): sosyal medya ikonları görünür ama şimdilik tıklanamaz (bağlantı değil; kurgusal şirketin hesabı yok, adres uydurulmaz). Ekran okuyucu için "yakında" bilgisi taşır.
+- **Footer:** referans Framer "Simple Footer", açık zeminde (`stone-100`; sayfadaki tek koyu bant Yol Boyu Güvence kalır, §5.4): solda logo, kısa tanım ve altında telif + "kurgusal proje" notu; sağda sade sütunlar: Keşfet linkleri, Yasal linkler (5 sayfa ve "Çerez tercihleri"), iletişim. **Bizi takip edin** (v0.4, G): sosyal medya ikonları görünür ama şimdilik tıklanamaz (bağlantı değil; kurgusal şirketin hesabı yok, adres uydurulmaz). Ekran okuyucu için "yakında" bilgisi taşır.
 - Dil (TR/EN), tema (açık/koyu/sistem; **varsayılan açık**) ve para birimi (TRY/EUR/USD) seçimi navbardaki tercih panelindedir; giriş yapan kullanıcıda tercih hesaba kaydedilir. Tutarlar günlük kurla çevrilir (ARCHITECTURE ADR-15); ödeme sahte olduğu için hangi para birimi seçilirse seçilsin para alınmaz.
 
 ### 2.9 Hesap, puan, yardım ve rehberler (v0.4)
