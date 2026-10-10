@@ -1,0 +1,91 @@
+{
+  "HomePage": {
+    "title": "Araç Kirala",
+    "intro": "Alış ve bırakma bayisini ve tarihleri seçin, o bayideki uygun araçları fiyatlarıyla görün.",
+    "corporateTitle": "Kurumsal Filo",
+    "corporateIntro": "Firmanız için araç sayısını ve süreyi yazın, size özel teklifi hazırlayalım.",
+    "audienceLabel": "Kiralama türü",
+    "audiences": {
+      "bireysel": "Bireysel",
+      "kurumsal": "Kurumsal"
+    },
+    "error": {
+      "title": "Bayiler yüklenemedi",
+      "text": "Araç arama şu an kullanılamıyor. Lütfen tekrar deneyin.",
+      "retry": "Tekrar Dene"
+    },
+    "classes": {
+      "title": "Size uygun sınıfı seçin",
+      "intro": "Şehir içi kullanımdan uzun yola, her ihtiyaca bir sınıf.",
+      "from": "{price} / gün'den başlayan",
+      "viewAll": "Tüm Araçlarımız",
+      "error": {
+        "title": "Araç sınıfları yüklenemedi",
+        "text": "Sınıfları şu an gösteremiyoruz."
+      }
+    },
+    "products": {
+      "title": "Filo çözümleri",
+      "intro": "İhtiyacınıza göre dört ürün: süreyi, esnekliği ve yönetimi siz belirlersiniz.",
+      "viewAll": "Tüm Ürünler"
+    },
+    "faq": {
+      "title": "Sık sorulan sorular",
+      "empty": {
+        "title": "Henüz soru yok",
+        "text": "Bu başlıkta yayımlanmış bir soru bulunmuyor."
+      },
+      "error": {
+        "title": "Sorular yüklenemedi",
+        "text": "Sık sorulan soruları şu an gösteremiyoruz."
+      }
+    }
+  },
+  "HomeQuote": {
+    "company": "Firma adı",
+    "count": "Araç sayısı",
+    "term": "Kiralama süresi",
+    "termOption": "{months} ay",
+    "vehicleType": "Araç tipi",
+    "types": {
+      "economy": "Ekonomik",
+      "compact": "Orta sınıf",
+      "executive": "Üst sınıf",
+      "suv": "SUV",
+      "electric": "Elektrikli"
+    },
+    "email": "İletişim e-postası",
+    "submit": "Teklif İste",
+    "errors": {
+      "company": "Firma adını yazın.",
+      "count": "1 ile 9999 arasında bir sayı yazın.",
+      "email": "Geçerli bir e-posta adresi yazın."
+    }
+  },
+  "Guarantee": {
+    "title": "Sadece araç kiralamıyoruz, yol boyu güvence sunuyoruz",
+    "intro": "Yolda bir aksilik olursa ne yapacağınızı düşünmeniz gerekmez.",
+    "steps": {
+      "stranded": {
+        "title": "Yolda kaldınız",
+        "text": "Aracınız yarı yolda durdu."
+      },
+      "sos": {
+        "title": "Tek dokunuşla SOS",
+        "text": "Uygulamadan SOS'a basın, konumunuz bize ulaşır."
+      },
+      "tow": {
+        "title": "En yakın çekici yönlendirilir",
+        "text": "GPS ile size en yakın çekici yola çıkar."
+      },
+      "desk": {
+        "title": "7/24 operasyon masası sizi arar",
+        "text": "Durumu sizinle birlikte takip ederiz."
+      },
+      "replacement": {
+        "title": "Yedek araç kapınızda",
+        "text": "Arıza 24 saati aşarsa yedek araç size getirilir."
+      }
+    }
+  }
+}
