@@ -30,6 +30,8 @@ export type Vehicle = {
   transmission: Transmission;
   fuelType: FuelType;
   consumption: Consumption;
+  // A sentence or two about the model, in both languages (SPEC §2.4).
+  description: LocalizedText;
   dailyPrice: Money;
   // null until real photos are provided; the card draws a placeholder then.
   imageUrl: string | null;

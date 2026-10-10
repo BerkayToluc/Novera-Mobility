@@ -78,6 +78,25 @@ const MODELS: Model[] = [
   { slug: "hyundai-ioniq-5", brand: "Hyundai", model: "Ioniq 5", class: "electric", seats: 5, bags: 3, transmission: "AUTOMATIC", fuelType: "ELECTRIC", consumption: kwh(17.5), dailyKurus: 245000, branches: ["istanbul-havalimani", "ankara-esenboga"] },
 ];
 
+// Short descriptions shown in the fleet dialog (SPEC §2.4); the real ones come from the API.
+const DESCRIPTIONS: Record<string, { tr: string; en: string }> = {
+  "fiat-egea": { tr: "Şehir içinde ve uzun yolda rahat, geniş bagajlı ve ekonomik bir sedan. İlk kiralama için sakin bir seçim.", en: "A comfortable, economical saloon with a roomy boot, equally at home in town and on long drives." },
+  "renault-clio": { tr: "Dar sokaklarda park etmesi kolay, az yakan küçük bir hatchback. Kısa gezilerin pratik arkadaşı.", en: "A small hatchback that is easy to park in tight streets and light on fuel. A practical companion for short trips." },
+  "hyundai-i20": { tr: "Otomatik vitesli ve sürmesi kolay bir şehir aracı; yoğun trafikte yorulmadan ilerlemek isteyenler için.", en: "An easy-to-drive automatic city car for anyone who wants to get through heavy traffic without the fatigue." },
+  "toyota-corolla-hybrid": { tr: "Hibrit motoruyla düşük tüketim ve sessiz sürüş sunan orta sınıf bir sedan; hem iş hem tatil yolculuklarına uygun.", en: "A compact saloon whose hybrid engine means low consumption and a quiet ride, suited to business trips and holidays alike." },
+  "renault-megane": { tr: "Geniş iç hacmi ve dizel motoruyla uzun yolda ekonomik giden dengeli bir orta sınıf araç.", en: "A balanced compact car with a spacious cabin and a diesel engine that stays economical on long journeys." },
+  "volkswagen-passat": { tr: "Geniş bagajı ve konforlu koltuklarıyla uzun mesafe ve iş seyahatleri için üst sınıf bir sedan.", en: "An executive saloon with a large boot and comfortable seats, made for long distances and business travel." },
+  "mercedes-e-serisi": { tr: "Yönetici ve konuk taşımacılığı için tam donanımlı, sessiz ve prestijli bir üst sınıf sedan.", en: "A fully equipped, quiet and prestigious executive saloon for carrying managers and guests." },
+  "bmw-5-serisi": { tr: "Sürüş keyfi ve iç mekân kalitesini bir araya getiren, tam donanımlı üst sınıf bir sedan.", en: "A fully equipped executive saloon that pairs driving pleasure with a high-quality interior." },
+  "dacia-duster": { tr: "Yüksek sürüş konumu ve sağlam yapısıyla bozuk yollarda da rahat eden, uygun fiyatlı bir SUV.", en: "An affordable SUV whose high driving position and sturdy build cope well even on rough roads." },
+  "nissan-qashqai": { tr: "Aile yolculukları için geniş iç hacim ve otomatik vitesi bir arada sunan şehir SUV'u.", en: "A city SUV combining a spacious cabin with an automatic gearbox for family journeys." },
+  "toyota-rav4-hybrid": { tr: "Hibrit motoru ve geniş bagajıyla uzun yolda da şehirde de ekonomik, rahat bir SUV.", en: "A comfortable SUV that stays economical in the city and on the road thanks to its hybrid engine and large boot." },
+  "peugeot-3008": { tr: "Şık iç tasarımı ve dizel motoruyla uzun yolculuklar için konforlu bir SUV.", en: "A comfortable SUV for long journeys, with a stylish interior and a diesel engine." },
+  "tesla-model-y": { tr: "Tamamen elektrikli, hızlı ve sessiz; geniş bagajıyla aile yolculuklarına da uygun bir SUV.", en: "A fully electric, quick and quiet SUV whose large boot also suits family trips." },
+  "togg-t10x": { tr: "Yerli üretim, tamamen elektrikli bir SUV; sessiz sürüş ve geniş iç hacim.", en: "A domestically built, fully electric SUV with a quiet ride and a spacious cabin." },
+  "hyundai-ioniq-5": { tr: "Hızlı şarj desteği ve ferah kabiniyle uzun yola da çıkabilen, tamamen elektrikli bir crossover.", en: "A fully electric crossover with fast-charging support and an airy cabin, able to take on long trips." },
+};
+
 function buildVehicles(): Vehicle[] {
   const vehicles: Vehicle[] = [];
   for (const model of MODELS) {
@@ -94,6 +113,7 @@ function buildVehicles(): Vehicle[] {
         transmission: model.transmission,
         fuelType: model.fuelType,
         consumption: model.consumption,
+        description: DESCRIPTIONS[model.slug],
         dailyPrice: { amount: model.dailyKurus, currency: "TRY" },
         imageUrl: null,
         vehicleClass: CLASSES[model.class],
