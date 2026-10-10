@@ -41,27 +41,6 @@
       }
     }
   },
-  "HomeQuote": {
-    "company": "Company name",
-    "count": "Number of cars",
-    "term": "Rental term",
-    "termOption": "{months} months",
-    "vehicleType": "Car type",
-    "types": {
-      "economy": "Economy",
-      "compact": "Compact",
-      "executive": "Executive",
-      "suv": "SUV",
-      "electric": "Electric"
-    },
-    "email": "Contact email",
-    "submit": "Request a Quote",
-    "errors": {
-      "company": "Enter the company name.",
-      "count": "Enter a number from 1 to 9999.",
-      "email": "Enter a valid email address."
-    }
-  },
   "Guarantee": {
     "title": "We don't just rent cars, we stand by you on the road",
     "intro": "If something goes wrong on the road, you don't have to think about what to do.",

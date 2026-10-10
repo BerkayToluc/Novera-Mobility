@@ -41,27 +41,6 @@
       }
     }
   },
-  "HomeQuote": {
-    "company": "Firma adı",
-    "count": "Araç sayısı",
-    "term": "Kiralama süresi",
-    "termOption": "{months} ay",
-    "vehicleType": "Araç tipi",
-    "types": {
-      "economy": "Ekonomik",
-      "compact": "Orta sınıf",
-      "executive": "Üst sınıf",
-      "suv": "SUV",
-      "electric": "Elektrikli"
-    },
-    "email": "İletişim e-postası",
-    "submit": "Teklif İste",
-    "errors": {
-      "company": "Firma adını yazın.",
-      "count": "1 ile 9999 arasında bir sayı yazın.",
-      "email": "Geçerli bir e-posta adresi yazın."
-    }
-  },
   "Guarantee": {
     "title": "Sadece araç kiralamıyoruz, yol boyu güvence sunuyoruz",
     "intro": "Yolda bir aksilik olursa ne yapacağınızı düşünmeniz gerekmez.",
