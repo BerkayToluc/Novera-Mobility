@@ -53,6 +53,22 @@
         "title": "Rezervasyonlar yüklenemedi",
         "text": "Rezervasyonlarınıza şu an ulaşamıyoruz. Lütfen tekrar deneyin.",
         "retry": "Tekrar Dene"
+      },
+      "pointsPending": "Tamamlanınca {count, plural, one {# puan} other {# puan}} kazanacaksınız",
+      "pointsEarned": "{count, plural, one {# puan} other {# puan}} kazandınız",
+      "upcoming": {
+        "title": "Yaklaşan seyahatler",
+        "empty": {
+          "title": "Yaklaşan seyahatiniz yok",
+          "text": "Yeni bir kiralama yaptığınızda burada görünür."
+        }
+      },
+      "past": {
+        "title": "Geçmiş seyahatler",
+        "empty": {
+          "title": "Geçmiş seyahatiniz yok",
+          "text": "Tamamlanan ve iptal edilen kiralamalarınız burada listelenir."
+        }
       }
     },
     "settings": {
