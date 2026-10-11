@@ -7,6 +7,7 @@ import { CampaignGallery, type CampaignSlide } from "@/components/home/campaign-
 import { QuoteForm } from "@/components/quote/quote-form";
 import { QuoteSteps } from "@/components/quote/quote-steps";
 import { FaqSection } from "@/components/home/faq-section";
+import { GuidesPreview } from "@/components/home/guides-preview";
 import { GuaranteeBand } from "@/components/home/guarantee-band";
 import { PartnerStrip } from "@/components/home/partner-strip";
 import { RentalSearchForm } from "@/components/rental/rental-search-form";
@@ -34,7 +35,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 // Section order of SPEC §2.2: campaigns, the rental box, partners, Road Assurance, the app, FAQ.
-// The guides join before the FAQ with their own work (BACKLOG Y40).
+// The guides sit between the app and the FAQ (BACKLOG Y40).
 export default async function Home({ searchParams }: PageProps<"/[locale]">) {
   const t = await getTranslations("HomePage");
   const audience = parseAudience((await searchParams).tip);
@@ -111,6 +112,7 @@ export default async function Home({ searchParams }: PageProps<"/[locale]">) {
 
       <div className="mx-auto flex max-w-content flex-col gap-16 px-4 py-16 md:px-8 xl:gap-24 xl:py-24">
         <AppPromo />
+        <GuidesPreview />
         <FaqSection audience={audience} />
       </div>
     </>

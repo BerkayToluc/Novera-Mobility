@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { routing } from "@/i18n/routing";
+import { GUIDES } from "@/lib/guides";
 import { PRODUCTS } from "@/lib/products";
 import { localizedUrl, type PageHref } from "@/lib/seo";
 
@@ -13,6 +14,8 @@ const PUBLIC: PageHref[] = [
   "/hizmetler",
   "/hakkimizda",
   "/iletisim",
+  "/rehberler",
+  ...GUIDES.map((slug) => ({ pathname: "/rehberler/[slug]", params: { slug } }) as const),
   "/kurumsal-teklif",
   "/kvkk",
   "/cerez-politikasi",
