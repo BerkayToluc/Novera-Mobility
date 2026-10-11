@@ -48,7 +48,10 @@ export function CountUp({ value, duration = 2000 }: { value: number; duration?: 
   }, [value, duration, format]);
 
   return (
-    <span aria-label={format.number(value)} className="tabular-nums">
+    <span className="tabular-nums">
+      {/* The final figure is what a screen reader gets; the counting one is hidden from it
+          (an aria-label is not allowed on a plain span). */}
+      <span className="sr-only">{format.number(value)}</span>
       <span ref={ref} aria-hidden="true">
         {format.number(value)}
       </span>
