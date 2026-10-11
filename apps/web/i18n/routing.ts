@@ -33,6 +33,7 @@ export const routing = defineRouting({
     "/sifre-sifirla": { tr: "/sifre-sifirla", en: "/reset-password" },
     "/profil": { tr: "/profil", en: "/profile" },
     "/profil/rezervasyonlar": { tr: "/profil/rezervasyonlar", en: "/profile/bookings" },
+    "/profil/puanlar": { tr: "/profil/puanlar", en: "/profile/points" },
     "/profil/teklifler": { tr: "/profil/teklifler", en: "/profile/quotes" },
     "/profil/ayarlar": { tr: "/profil/ayarlar", en: "/profile/settings" },
     "/kvkk": { tr: "/kvkk", en: "/privacy-notice" },

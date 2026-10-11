@@ -10,6 +10,7 @@ const TABS = {
   individual: [
     { href: "/profil", labelKey: "account" },
     { href: "/profil/rezervasyonlar", labelKey: "bookings" },
+    { href: "/profil/puanlar", labelKey: "points" },
     { href: "/profil/ayarlar", labelKey: "settings" },
   ],
   corporate: [

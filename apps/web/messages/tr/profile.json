@@ -8,7 +8,8 @@
       "bookings": "Rezervasyonlarım",
       "settings": "Ayarlar",
       "company": "Firma bilgileri",
-      "quotes": "Teklif taleplerim"
+      "quotes": "Teklif taleplerim",
+      "points": "Puanlarım"
     },
     "signedOut": {
       "title": "Giriş yapmanız gerekiyor",
@@ -113,6 +114,32 @@
         "title": "Talepler yüklenemedi",
         "text": "Teklif taleplerinize şu an ulaşamıyoruz. Lütfen tekrar deneyin.",
         "retry": "Tekrar Dene"
+      }
+    },
+    "points": {
+      "title": "Puanlarım",
+      "intro": "Kiralamalarınızla kazandığınız puanlar.",
+      "balance": "Puan bakiyesi",
+      "pending": "Bekleyen puan",
+      "pendingNote": "Yaklaşan kiralamalarınız tamamlanınca hesabınıza işlenir.",
+      "history": "Kazanım geçmişi",
+      "earnedFor": "{number} numaralı kiralama",
+      "earned": "Kazanılan puan:",
+      "empty": {
+        "title": "Henüz puan kazanmadınız",
+        "text": "İlk kiralamanız tamamlandığında puanlarınız burada görünür.",
+        "cta": "Araç Ara"
+      },
+      "error": {
+        "title": "Puanlar yüklenemedi",
+        "text": "Puan bilgilerinize şu an ulaşamıyoruz. Lütfen tekrar deneyin.",
+        "retry": "Tekrar Dene"
+      },
+      "rules": {
+        "title": "Puanlar nasıl kazanılır?",
+        "earn": "Her {amount} harcamanız için 1 puan kazanırsınız.",
+        "credit": "Puanlar kiralamanız tamamlandığında hesabınıza işlenir.",
+        "cancelled": "İptal edilen rezervasyonlar puan kazandırmaz."
       }
     }
   }
