@@ -30,7 +30,7 @@ export function RentButton({ params, carName }: { params: Record<string, string>
     <div className="flex flex-col gap-2">
       <Button type="button" size="lg" onClick={rent} disabled={pending} aria-busy={pending} className="relative z-10 w-full">
         {pending ? t("holding") : t("button")}
-        <span className="sr-only">: {carName}</span>
+        <span className="sr-only"> {carName}</span>
       </Button>
       {failure && (
         <p role="alert" className="text-small text-error">
