@@ -29,8 +29,6 @@
     }
   },
   "FleetPage": {
-    "metaTitle": "Araçlarımız",
-    "metaDescription": "Novera Mobility filosundaki tüm markalar ve modeller: ekonomik, orta sınıf, SUV, üst sınıf ve elektrikli araçlar.",
     "title": "Araçlarımız",
     "intro": "Filomuzdaki tüm modeller, kategorilerine göre, en uygun fiyattan başlayarak. Ayrıntı için bir modele dokunun.",
     "error": {
@@ -38,11 +36,7 @@
       "text": "Filomuzu şu an gösteremiyoruz. Lütfen tekrar deneyin.",
       "retry": "Tekrar Dene"
     },
-    "ctaTitle": "Beğendiğiniz bir araç mı var?",
-    "ctaText": "Lokasyonunuzu ve tarihlerinizi seçin, o bayideki uygun araçları fiyatlarıyla görün.",
-    "ctaButton": "Araç Kirala",
     "filterLabel": "Kategori",
-    "all": "Tümü",
     "modelCount": "{count} model",
     "card": {
       "details": "ayrıntıları göster"

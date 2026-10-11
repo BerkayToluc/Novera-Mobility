@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { getTranslations } from "next-intl/server";
 import { AudienceSwitch } from "@/components/home/audience-switch";
 import { AppPromo } from "@/components/home/app-promo";
 import { CampaignArt, type CampaignArtKind } from "@/components/home/campaign-art";
 import { CampaignGallery, type CampaignSlide } from "@/components/home/campaign-gallery";
+import { FleetSection } from "@/components/fleet/fleet-section";
+import { FleetSkeleton } from "@/components/fleet/fleet-skeleton";
 import { QuoteForm } from "@/components/quote/quote-form";
 import { QuoteSteps } from "@/components/quote/quote-steps";
 import { FaqSection } from "@/components/home/faq-section";
@@ -22,10 +25,12 @@ import { pageMetadata } from "@/lib/seo";
 
 // Anchor of the rental section, so campaign buttons can bring the visitor to the form.
 const RENTAL_ANCHOR = "kiralama";
+// Anchor of the fleet section (SPEC §2.4), for the campaign that points at the cars.
+const FLEET_ANCHOR = "araclarimiz";
 
 const CAMPAIGNS: { id: CampaignArtKind; href: CampaignSlide["href"] }[] = [
   { id: "weekend", href: { pathname: "/", hash: RENTAL_ANCHOR } },
-  { id: "electric", href: "/araclarimiz" },
+  { id: "electric", href: { pathname: "/", hash: FLEET_ANCHOR } },
   { id: "fleet", href: { pathname: "/", query: { tip: "kurumsal" }, hash: RENTAL_ANCHOR } },
 ];
 
@@ -34,11 +39,14 @@ export async function generateMetadata(): Promise<Metadata> {
   return pageMetadata({ href: "/", description: t("metaDescription") });
 }
 
-// Section order of SPEC §2.2: campaigns, the rental box, partners, Road Assurance, the app, FAQ.
+// Section order of SPEC §2.2: campaigns, the rental box, the fleet (Individual tab only), partners,
+// Road Assurance, the app, FAQ.
 // The guides sit between the app and the FAQ (BACKLOG Y40).
 export default async function Home({ searchParams }: PageProps<"/[locale]">) {
   const t = await getTranslations("HomePage");
-  const audience = parseAudience((await searchParams).tip);
+  const params = await searchParams;
+  const audience = parseAudience(params.tip);
+  const requestedModel = Array.isArray(params.arac) ? params.arac[0] : params.arac;
   const corporate = audience === "kurumsal";
   const currency = await getCurrency();
 
@@ -103,6 +111,15 @@ export default async function Home({ searchParams }: PageProps<"/[locale]">) {
           )}
         </div>
       </section>
+
+      {/* Cars are picked in the results, not here, so the corporate tab (a request form) has no fleet. */}
+      {!corporate && (
+        <div id={FLEET_ANCHOR} className="mx-auto max-w-content scroll-mt-4 px-4 pb-16 md:px-8 xl:pb-24">
+          <Suspense fallback={<FleetSkeleton />}>
+            <FleetSection requestedModel={requestedModel} />
+          </Suspense>
+        </div>
+      )}
 
       <div className="mx-auto max-w-content px-4 pb-16 md:px-8 xl:pb-24">
         <PartnerStrip />
