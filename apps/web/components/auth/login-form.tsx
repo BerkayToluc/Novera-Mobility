@@ -38,9 +38,9 @@ export function LoginForm({ next, kind = "individual" }: { next?: Record<string,
   async function onSubmit(values: LoginInput) {
     setFormError(null);
     try {
-      await login(values, kind);
-      if (next) router.push({ pathname: "/odeme", query: next });
-      else router.push("/profil");
+      const locale = await login(values, kind);
+      if (next) router.push({ pathname: "/odeme", query: next }, { locale });
+      else router.push("/profil", { locale });
       // The header reads the session on the server, so it has to be asked again.
       router.refresh();
     } catch (error) {
