@@ -29,6 +29,26 @@ export async function signIn(kind: AccountType, email: string, password: string)
   return { ok: true, locale: preferences?.locale ?? null };
 }
 
+// `POST /auth/register` does not exist yet (BACKLOG #25). With USE_MOCKS=1 a valid sign-up
+// signs the sample individual account in (the sample data has only that one); without it the
+// visitor is told the service is unavailable, and no account is pretended.
+export async function signUp(input: {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  consent: boolean;
+}): Promise<SignInResult> {
+  const valid =
+    input.firstName.trim() !== "" &&
+    input.lastName.trim() !== "" &&
+    input.email.includes("@") &&
+    input.password.length >= 8 &&
+    input.consent === true;
+  if (!valid) return { ok: false, reason: "invalid" };
+  return signIn("individual", input.email, input.password);
+}
+
 export async function signOut(): Promise<void> {
   (await cookies()).delete(MOCK_SESSION_COOKIE);
 }
