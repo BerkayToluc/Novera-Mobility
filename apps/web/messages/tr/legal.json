@@ -118,6 +118,11 @@
             "duration": "1 yıl."
           },
           {
+            "name": "novera-consent",
+            "purpose": "Çerez tercihinizi (analitiğe izin verip vermediğinizi) hatırlar.",
+            "duration": "6 ay."
+          },
+          {
             "name": "Oturum çerezi",
             "purpose": "Giriş yaptığınızda oturumunuzu sürdürür. Yalnızca hesabınızı kullandığınızda oluşturulur.",
             "duration": "Oturum süresince."

@@ -1,0 +1,30 @@
+{
+  "Consent": {
+    "preferences": "Cookie preferences",
+    "banner": {
+      "label": "Cookie notice",
+      "title": "Cookies",
+      "text": "We use the cookies needed to run the site. If you wish, you can also allow analytics that helps us understand how the site is used.",
+      "policy": "Cookie Policy",
+      "accept": "Accept",
+      "reject": "Reject",
+      "settings": "Settings"
+    },
+    "dialog": {
+      "title": "Cookie preferences",
+      "text": "Choose which cookies to allow. You can change your choice at any time.",
+      "policy": "Cookie Policy",
+      "legend": "Cookie types",
+      "necessary": {
+        "title": "Necessary",
+        "text": "Remember your language, appearance, currency and session. The site does not work without them; they are always on."
+      },
+      "analytics": {
+        "title": "Analytics",
+        "text": "Helps us measure which pages are used without keeping personal data. When off, no analytics is loaded."
+      },
+      "save": "Save",
+      "cancel": "Cancel"
+    }
+  }
+}
