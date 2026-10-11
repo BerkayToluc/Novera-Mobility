@@ -1,0 +1,10 @@
+{
+  "ServerError": {
+    "code": "500",
+    "title": "Something went wrong",
+    "description": "An unexpected error occurred while showing the page. You can try again or carry on from the home page.",
+    "retry": "Try again",
+    "home": "Back to Home",
+    "reference": "Error code"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "ServerError": {
+    "code": "500",
+    "title": "Bir şeyler ters gitti",
+    "description": "Sayfayı gösterirken beklenmedik bir hata oluştu. Tekrar deneyebilir ya da ana sayfadan devam edebilirsiniz.",
+    "retry": "Tekrar dene",
+    "home": "Ana Sayfaya Dön",
+    "reference": "Hata kodu"
+  }
+}
