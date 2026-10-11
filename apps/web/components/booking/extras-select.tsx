@@ -1,6 +1,6 @@
 "use client";
 
-import { useTransition } from "react";
+import { useOptimistic, useTransition } from "react";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useRouter } from "@/i18n/navigation";
@@ -26,12 +26,15 @@ export function ExtrasSelect({
   const locale = useLocale() as "tr" | "en";
   const router = useRouter();
   const [pending, startTransition] = useTransition();
+  // A tick shows at once; the price follows when the server has worked it out.
+  const [shown, setShown] = useOptimistic(selected);
 
   function toggle(slug: string, on: boolean) {
-    const next = on ? [...selected, slug] : selected.filter((item) => item !== slug);
+    const next = on ? [...shown, slug] : shown.filter((item) => item !== slug);
     const { ek: previous, ...rest } = query;
     void previous;
     startTransition(() => {
+      setShown(next);
       router.replace(
         { pathname: "/rezervasyon", query: { ...rest, ...(next.length ? { ek: next.join(",") } : {}) } },
         { scroll: false },
@@ -48,7 +51,7 @@ export function ExtrasSelect({
     >
       {extras.map((extra) => (
         <li key={extra.slug} className="flex flex-col justify-between gap-1 py-1 md:flex-row md:items-center md:gap-4">
-          <Checkbox checked={selected.includes(extra.slug)} onChange={(event) => toggle(extra.slug, event.target.checked)}>
+          <Checkbox checked={shown.includes(extra.slug)} onChange={(event) => toggle(extra.slug, event.target.checked)}>
             {extra.name[locale]}
           </Checkbox>
           <span className="pl-8 text-small tabular-nums text-fg-muted md:pl-0">

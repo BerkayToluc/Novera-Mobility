@@ -20,6 +20,7 @@ pnpm dev            # run every app in dev mode
 pnpm lint           # eslint in every workspace
 pnpm typecheck      # tsc in every workspace
 pnpm test           # unit tests (Vitest in apps/web, Jest in apps/api)
+pnpm --filter @novera/web test:e2e   # Playwright; needs `pnpm build` first
 pnpm build          # production build
 pnpm --filter @novera/web <script>   # run a script in one workspace
 ```
