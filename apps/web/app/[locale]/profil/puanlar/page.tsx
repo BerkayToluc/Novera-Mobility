@@ -72,7 +72,7 @@ export default async function PointsPage() {
           {account.entries.length === 0 ? (
             <StateMessage title={t("empty.title")} text={t("empty.text")}>
               <Button asChild>
-                <Link href="/araclarimiz">{t("empty.cta")}</Link>
+                <Link href={{ pathname: "/", hash: "araclarimiz" }}>{t("empty.cta")}</Link>
               </Button>
             </StateMessage>
           ) : (

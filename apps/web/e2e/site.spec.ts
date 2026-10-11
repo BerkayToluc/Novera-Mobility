@@ -46,7 +46,7 @@ test.describe("with the banner out of the way", () => {
   });
 
   test("a fleet card opens its window, Esc closes it and focus goes back to the card", async ({ page }) => {
-    await page.goto("/araclarimiz");
+    await page.goto("/");
     const card = page.getByRole("button", { name: /Renault Clio/ }).first();
     await card.focus();
     await page.keyboard.press("Enter");
@@ -57,6 +57,40 @@ test.describe("with the banner out of the way", () => {
     await page.keyboard.press("Escape");
     await expect(dialog).toBeHidden();
     await expect(card).toBeFocused();
+  });
+
+  test("the home page fleet shows one category at a time and keeps the rest of the address", async ({ page }) => {
+    await page.goto("/?tip=bireysel");
+    const fleet = page.locator("#araclarimiz");
+    // The first category is open to begin with and there is no "all" chip.
+    await expect(fleet.getByRole("button", { name: /^Tümü/ })).toHaveCount(0);
+    await expect(fleet.getByRole("button", { name: /Renault Clio/ }).first()).toBeVisible();
+    await expect(fleet.getByRole("button", { name: /Dacia Duster/ })).toHaveCount(0);
+
+    await fleet.getByRole("button", { name: /^SUV/ }).click();
+    await expect(fleet.getByRole("button", { name: /Dacia Duster/ }).first()).toBeVisible();
+    await expect(fleet.getByRole("button", { name: /Renault Clio/ })).toHaveCount(0);
+
+    // Opening a model adds ?arac= and leaves ?tip= where it was.
+    await fleet.getByRole("button", { name: /Dacia Duster/ }).first().click();
+    await expect(page).toHaveURL(/tip=bireysel/);
+    await expect(page).toHaveURL(/arac=/);
+    await page.keyboard.press("Escape");
+    await expect(page).toHaveURL(/tip=bireysel/);
+    await expect(page).not.toHaveURL(/arac=/);
+  });
+
+  test("the corporate tab has no fleet section", async ({ page }) => {
+    await page.goto("/?tip=kurumsal");
+    await expect(page.locator("#araclarimiz")).toHaveCount(0);
+  });
+
+  test("a shared model link opens its window on the home page", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("button", { name: /Renault Clio/ }).first().click();
+    const shared = page.url();
+    await page.goto(shared);
+    await expect(page.getByRole("dialog")).toBeVisible();
   });
 
   test("the city filter narrows the branches", async ({ page }) => {
