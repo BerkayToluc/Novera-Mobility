@@ -33,7 +33,7 @@
           "Kurumsal teklif: firma adı, ihtiyaç duyulan araç sayısı, kiralama süresi, araç tipi.",
           "İletişim formu: ad, e-posta adresi, telefon numarası (isteğe bağlı), konu ve mesajınız.",
           "Hesap: tercihleriniz (dil, tema, para birimi) ve kiralamalarınızdan kazandığınız puanlar.",
-          "Kullanım: dil ve tema tercihiniz (çerezler aracılığıyla)."
+          "Kullanım: dil, tema ve para birimi tercihiniz (çerezler aracılığıyla)."
         ]
       },
       {
@@ -132,7 +132,7 @@
       {
         "heading": "Çerezleri nasıl yönetirsiniz?",
         "paragraphs": [
-          "Çerezleri tarayıcı ayarlarınızdan silebilir veya engelleyebilirsiniz. Dil ve tema çerezlerini engellerseniz tercihleriniz her ziyarette sıfırlanır; site yine de çalışır."
+          "Çerezleri tarayıcı ayarlarınızdan silebilir veya engelleyebilirsiniz. Dil, tema ve para birimi çerezlerini engellerseniz tercihleriniz her ziyarette sıfırlanır; site yine de çalışır."
         ]
       },
       {

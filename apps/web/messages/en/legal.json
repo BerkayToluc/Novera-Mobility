@@ -33,7 +33,7 @@
           "Corporate quote: company name, number of cars needed, rental period, car type.",
           "Contact form: your name, email address, phone number (optional), topic and message.",
           "Account: your preferences (language, theme, currency) and the points you earn from your rentals.",
-          "Usage: your language and theme preference (through cookies)."
+          "Usage: your language, theme and currency preference (through cookies)."
         ]
       },
       {
@@ -132,7 +132,7 @@
       {
         "heading": "How can you manage cookies?",
         "paragraphs": [
-          "You can delete or block cookies in your browser settings. If you block the language and theme cookies, your preferences reset on every visit; the site still works."
+          "You can delete or block cookies in your browser settings. If you block the language, theme and currency cookies, your preferences reset on every visit; the site still works."
         ]
       },
       {
