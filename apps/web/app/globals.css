@@ -287,6 +287,8 @@
   /* Depth comes from surface tone (canvas vs. surface), not shadows. One shadow for floating layers only. */
   --shadow-*: initial;
   --shadow-overlay: 0 8px 24px rgb(26 28 22 / 0.12);
+  /* The floating header pill (SPEC §5.3): lighter than a menu, since it rests on the page. */
+  --shadow-float: 0 2px 12px rgb(26 28 22 / 0.08);
 
   /* Layout breakpoints from SPEC: 375 (base, no prefix), 768, 1280. */
   --breakpoint-*: initial;

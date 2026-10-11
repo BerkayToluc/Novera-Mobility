@@ -16,5 +16,6 @@ export const NAV_ITEMS = [
 // The header sets this one apart from the rest (SPEC §2.8).
 export const CONTACT_HREF = "/iletisim" satisfies AppPathname;
 
-// Entries whose header item opens a list of their pages (SPEC §2.8).
-export const NAV_MENUS = { "/urunler": "products", "/hizmetler": "services" } as const;
+// Entries whose header item opens a list of their pages (SPEC §2.8). Services is a plain link:
+// its items are the accordion on its own page.
+export const NAV_MENUS = { "/urunler": "products" } as const;

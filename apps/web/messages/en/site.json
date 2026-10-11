@@ -4,7 +4,8 @@
     "description": "Corporate and personal car rental"
   },
   "LocaleSwitcher": {
-    "label": "Language"
+    "label": "Language",
+    "current": "Language: {language}"
   },
   "Header": {
     "skip": "Skip to content",
@@ -21,12 +22,9 @@
     "contact": "Contact",
     "login": "Log In",
     "preferences": "Preferences",
-    "preferencesLabel": "Language and theme: {language}",
     "language": "Language",
-    "theme": "Theme",
     "currency": "Currency",
     "allProducts": "All products",
-    "allServices": "All services",
     "guides": "Guides",
     "help": "Help",
     "account": "My Account"

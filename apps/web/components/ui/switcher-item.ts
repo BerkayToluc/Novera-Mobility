@@ -3,7 +3,7 @@
 export type SwitcherTone = "default" | "band";
 
 export function switcherItemClasses(isCurrent: boolean, tone: SwitcherTone) {
-  const base = "inline-flex min-h-11 items-center rounded-control px-3 text-label";
+  const base = "inline-flex min-h-11 items-center gap-2 rounded-control px-3 text-label";
   if (tone === "band") {
     // Inverted pill: it stays clearly visible on the band in both themes.
     return `${base} ${isCurrent ? "bg-on-band text-band" : "text-on-band hover:underline"}`;

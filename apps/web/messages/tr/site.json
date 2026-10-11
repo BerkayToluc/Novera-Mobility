@@ -4,7 +4,8 @@
     "description": "Kurumsal ve bireysel araç kiralama"
   },
   "LocaleSwitcher": {
-    "label": "Dil seçimi"
+    "label": "Dil seçimi",
+    "current": "Dil: {language}"
   },
   "Header": {
     "skip": "İçeriğe geç",
@@ -21,12 +22,9 @@
     "contact": "İletişim",
     "login": "Giriş Yap",
     "preferences": "Tercihler",
-    "preferencesLabel": "Dil ve tema: {language}",
     "language": "Dil",
-    "theme": "Tema",
     "currency": "Para birimi",
     "allProducts": "Tüm ürünler",
-    "allServices": "Tüm hizmetler",
     "guides": "Rehberler",
     "help": "Yardım",
     "account": "Hesabım"
