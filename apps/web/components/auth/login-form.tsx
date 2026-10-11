@@ -68,7 +68,7 @@ export function LoginForm({ next, kind = "individual" }: { next?: Record<string,
       </Field>
       <Link
         href="/sifre-sifirla"
-        className="inline-flex min-h-11 items-center self-start text-link underline-offset-4 hover:underline"
+        className="inline-flex min-h-11 items-center self-start text-link underline underline-offset-4"
       >
         {t("login.forgot")}
       </Link>

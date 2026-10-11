@@ -23,6 +23,8 @@ const buttonVariants = cva(
         default: "min-h-11 px-5",
         // Header controls that sit in a row (currency, language): same height, less padding.
         compact: "min-h-11 px-3",
+        // A link-styled button that sits in text flow: no side padding, so it lines up with the content above it.
+        inline: "min-h-11 px-0",
         lg: "min-h-12 px-6",
         icon: "size-11",
       },
