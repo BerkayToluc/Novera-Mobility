@@ -222,7 +222,7 @@ Tek dil: **TypeScript**, frontend'de de backend'de de.
 
 - **Bağlam:** SPEC §2.4: karta tıklanınca yeni sayfa değil pencere açılır; pencere paylaşılabilir olmalı.
 - **Alternatifler:** Next "intercepting routes": her araca gerçek bir adres verir, ama adres doğrudan açılınca ayrı bir sayfa olarak görünür (G "yeni sayfa açılmasın" dedi) ve iki görünümün bakımı gerekir. Hazır modal kütüphanesi: gereksiz bağımlılık; yerel `<dialog>` odak tuzağını, Esc'yi ve arka planın etkisizleşmesini zaten sağlıyor.
-- **Sonuç:** Yerel `<dialog>` ve `showModal()`. Açık model adreste `?arac=<model-slug>` olarak durur; sayfa bu parametreyle sunucuda üretilir, istemci yüklenince pencereyi açar, böylece paylaşılan link aynı pencereyle gelir. Açma ve kapama adresi `history` ile günceller, sunucuya yeni istek gitmez; geri tuşu pencereyi kapatır. Modelin bayileri sayfada zaten yüklü olan araç listesinden türetilir. Canonical `/araclarimiz`.
+- **Sonuç:** Yerel `<dialog>` ve `showModal()`. Açık model adreste `?arac=<model-slug>` olarak durur; sayfa bu parametreyle sunucuda üretilir, istemci yüklenince pencereyi açar, böylece paylaşılan link aynı pencereyle gelir. Açma ve kapama adresi `history` ile günceller, sunucuya yeni istek gitmez; geri tuşu pencereyi kapatır. Modelin bayileri sayfada zaten yüklü olan araç listesinden türetilir. Canonical `/`. **v0.5:** Araçlarımız ayrı sayfa olmaktan çıktı, bölüm ana sayfadadır; pencere adresi `/?arac=<model-slug>` olur ve açma/kapama adresteki diğer parametreleri (ör. `?tip=kurumsal`) korur.
 - **Ödünleşim:** Model pencereleri arama motorunda ayrı sayfa olarak yer almaz. Bilinçli bir tercih: aynı bilgi zaten kartlarda.
 
 ## ADR-23 · Hata sayfaları (404, 500)
