@@ -34,7 +34,7 @@ export async function ProductCard({ slug, featured = false, headingAs = "h2" }: 
           <Link href={{ pathname: "/urunler/[slug]", params: { slug } }}>
             {t("viewDetails")}
             {/* Several links share this text, so the product name makes each one distinct. */}
-            <span className="sr-only">: {title}</span>
+            <span className="sr-only"> {title}</span>
           </Link>
         </Button>
       </CardFooter>

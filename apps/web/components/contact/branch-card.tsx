@@ -45,8 +45,8 @@ export function BranchCard({ branch, selected, onShowOnMap }: BranchCardProps) {
 
       <div className="flex items-start gap-2">
         <Clock aria-hidden="true" className="mt-1 size-4 shrink-0 text-fg-muted" />
+        <p className="sr-only">{t("hours")}</p>
         <dl className="grid grid-cols-[auto_1fr] gap-x-4 text-body">
-          <dt className="sr-only">{t("hours")}</dt>
           {rows.map((row) => (
             <div key={row.label} className="col-span-2 grid grid-cols-subgrid">
               <dt className="text-fg-muted">{row.label}</dt>
@@ -74,7 +74,7 @@ export function BranchCard({ branch, selected, onShowOnMap }: BranchCardProps) {
 
       <Button type="button" variant="outline" onClick={onShowOnMap} className="self-start">
         {t("showOnMap")}
-        <span className="sr-only">: {branch.name}</span>
+        <span className="sr-only"> {branch.name}</span>
       </Button>
     </article>
   );
