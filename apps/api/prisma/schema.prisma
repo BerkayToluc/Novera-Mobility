@@ -63,6 +63,22 @@ enum FaqAudience {
   CORPORATE
 }
 
+// Yardım merkezi konu grupları. API'de de küçük harf döner (openapi.yaml FaqTopic).
+enum FaqTopic {
+  rezervasyon
+  odeme
+  teslim
+  hasar
+  hesap
+  kurumsal
+}
+
+enum QuoteStatus {
+  RECEIVED
+  IN_REVIEW
+  OFFERED
+}
+
 // ---------- Hesap ----------
 
 model User {
@@ -72,7 +88,16 @@ model User {
   firstName    String
   lastName     String
   accountType  AccountType @default(INDIVIDUAL)
-  companyName  String? // yalnızca kurumsal hesapta (hesabı Novera açar)
+  // Kurumsal hesap bilgileri (hesabı Novera açar); bireysel hesapta hepsi boş
+  companyName  String?
+  taxOffice    String?
+  companyCity  String?
+  companyPhone String?
+  contactTitle String?
+  // Novera satış iletişimi (openapi SalesContact)
+  salesContactName  String?
+  salesContactEmail String?
+  salesContactPhone String?
   locale       Locale      @default(TR)
   theme        Theme       @default(LIGHT)
   currency     Currency    @default(TRY)
@@ -277,22 +302,30 @@ model Service {
 model FaqItem {
   id        String      @id @default(uuid())
   audience  FaqAudience
+  topic     FaqTopic
   question  Json // { "tr": "...", "en": "..." }
   answer    Json
   sortOrder Int         @default(0)
 
-  @@index([audience])
+  @@index([audience, topic])
 }
 
-// Alanlar kurumsal kutunun tasarım onayından sonra (BACKLOG Y35) güncellenecek
+// Kurumsal teklif / görüşme talebi (BACKLOG Y35). `number` ör. TKL-2026-00042.
 model QuoteRequest {
-  id             String   @id @default(uuid())
+  id             String      @id @default(uuid())
+  number         String      @unique
+  status         QuoteStatus @default(RECEIVED)
   companyName    String
+  contactName    String?
+  phone          String?
+  email          String
   vehicleCount   Int
   durationMonths Int
-  vehicleType    String
-  email          String
-  createdAt      DateTime @default(now())
+  vehicleType    String // sınıf slug'ı veya virgülle ayrılmış ihtiyaç türleri
+  deliveryCities String?
+  notes          String?
+  kvkkConsentAt  DateTime
+  createdAt      DateTime    @default(now())
 
   productId String?
   product   Product? @relation(fields: [productId], references: [id])
