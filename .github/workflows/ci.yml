@@ -42,3 +42,18 @@ jobs:
           pnpm --filter @novera/web start &
           for i in $(seq 1 30); do curl -sf http://localhost:3000/sitemap.xml > /dev/null && break; sleep 2; done
           pnpm --filter @novera/web check-links
+
+      # Walks the main flows (search, hold, summary, payment, forms, account, cookie banner) in a
+      # real browser at 375 and 1280 px against the built site with sample data (SPEC §8).
+      - name: End-to-end tests
+        env:
+          PLAYWRIGHT_CHANNEL: ""
+        run: |
+          pnpm --filter @novera/web exec playwright install --with-deps chromium
+          pnpm --filter @novera/web test:e2e
+      - name: Upload the Playwright traces of a failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-test-results
+          path: apps/web/test-results
