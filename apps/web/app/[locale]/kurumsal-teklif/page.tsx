@@ -16,14 +16,15 @@ export default async function CorporateQuotePage({ searchParams }: PageProps<"/[
   const t = await getTranslations("QuotePage");
   const product = productFromParams(await searchParams);
 
+  // One centred column: the form is the page, so it is not pushed to the left of a wide empty area.
   return (
-    <div className="mx-auto flex max-w-content flex-col gap-8 px-4 py-12 md:px-8 xl:py-20">
+    <div className="mx-auto flex max-w-3xl flex-col gap-8 px-4 py-12 md:px-8 xl:py-20">
       <header className="flex flex-col gap-3">
         <h1 className="text-h1 text-fg">{t("title")}</h1>
         <p className="max-w-prose text-body text-fg-muted">{t("intro")}</p>
       </header>
 
-      <div className="flex max-w-3xl flex-col gap-8 rounded-card border border-border bg-surface p-6 md:p-8">
+      <div className="flex flex-col gap-8 rounded-card border border-border bg-surface p-6 md:p-8">
         <QuoteSteps />
         <QuoteForm initialProduct={product} withProduct />
       </div>
