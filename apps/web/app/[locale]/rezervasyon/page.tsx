@@ -11,6 +11,7 @@ import { GuaranteeStrip } from "@/components/vehicle/guarantee-strip";
 import { VehicleImage } from "@/components/vehicle/vehicle-image";
 import { Link } from "@/i18n/navigation";
 import { toBookingQuery } from "@/lib/booking";
+import { classRequirement } from "@/lib/driver-rules";
 import { loadBooking } from "@/lib/booking-data";
 import { currentTime } from "@/lib/clock";
 import { getCurrency } from "@/lib/get-currency";
@@ -28,6 +29,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function BookingSummaryPage({ searchParams }: Props) {
   const t = await getTranslations("BookingSummary");
+  const d = await getTranslations("Driver");
   const format = await getFormatter();
   const locale = (await getLocale()) as "tr" | "en";
   const currency = await getCurrency();
@@ -117,6 +119,12 @@ export default async function BookingSummaryPage({ searchParams }: Props) {
                 </span>
                 <br />
                 <span className="text-fg-muted">{vehicle.vehicleClass.name[locale]}</span>
+                <br />
+                <span className="text-small text-fg-muted">
+                  {d("requirement", { age: classRequirement(vehicle.vehicleClass.slug).minAge, years: classRequirement(vehicle.vehicleClass.slug).minLicenceYears })}
+                  {" · "}
+                  {d("requirementNote")}
+                </span>
               </p>
             </div>
             <Button asChild variant="link" size="inline" className="self-start">

@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Cog, Fuel, Luggage, Users } from "lucide-react";
 import { getFormatter, getLocale, getTranslations } from "next-intl/server";
 import type { Money } from "@/lib/currency";
+import { classRequirement } from "@/lib/driver-rules";
 import { formatMoney } from "@/lib/price";
 import type { Vehicle, VehicleOffer } from "@/lib/vehicle";
 import { VehicleImage } from "./vehicle-image";
@@ -18,9 +19,11 @@ type VehicleCardProps = {
 
 export async function VehicleCard({ vehicle, fromPrice, note, action }: VehicleCardProps) {
   const t = await getTranslations("Vehicle");
+  const d = await getTranslations("Driver");
   const format = await getFormatter();
   const locale = (await getLocale()) as "tr" | "en";
   const offer = "totalPrice" in vehicle ? vehicle : null;
+  const requirement = classRequirement(vehicle.vehicleClass.slug);
 
   const specs = [
     { icon: Users, label: t("seats", { count: vehicle.seats }) },
@@ -49,6 +52,9 @@ export async function VehicleCard({ vehicle, fromPrice, note, action }: VehicleC
             </li>
           ))}
         </ul>
+        <p className="text-small text-fg-muted">
+          {d("requirement", { age: requirement.minAge, years: requirement.minLicenceYears })}
+        </p>
         <div className="mt-auto border-t border-border pt-3">
           <p className="text-h3 tabular-nums text-fg">
             {fromPrice

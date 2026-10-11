@@ -61,7 +61,9 @@
       "unavailable": "Rezervasyon servisi şu an kullanılamıyor. Lütfen daha sonra tekrar deneyin.",
       "invalid": "Rezervasyon bilgileri geçerli değil. Lütfen aramayı baştan yapın.",
       "signin": "Devam etmek için giriş yapmanız gerekiyor.",
-      "generic": "Rezervasyon tamamlanamadı. Lütfen tekrar deneyin."
+      "generic": "Rezervasyon tamamlanamadı. Lütfen tekrar deneyin.",
+      "ineligible": "Sürücü koşulları karşılanmıyor.",
+      "notVerified": "Ehliyet doğrulanamadı."
     },
     "pay": "Ödemeyi Tamamla",
     "paying": "İşleniyor",
