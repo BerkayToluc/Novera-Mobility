@@ -63,3 +63,15 @@ test("an expired hold shows the time-is-up screen and leads back to the search",
   await page.getByRole("link", { name: "Aramaya dön" }).click();
   await expect(page).toHaveURL(/\/araclar\?/);
 });
+
+test("the summary states the cancellation rule before paying", async ({ page }) => {
+  await page.goto(RESULTS);
+  await page.getByRole("button", { name: /Kirala.*Renault Clio/ }).click();
+  await page.waitForURL(/\/rezervasyon/);
+  await expect(page.getByText(/24 saat öncesine kadar ücretsiz iptal/)).toBeVisible();
+  // The footer has a link with the same words; this is the one in the price panel.
+  await expect(page.getByRole("main").getByRole("link", { name: "Kiralama koşulları", exact: true })).toHaveAttribute(
+    "href",
+    "/kiralama-kosullari",
+  );
+});

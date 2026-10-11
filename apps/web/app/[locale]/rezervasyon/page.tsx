@@ -167,6 +167,15 @@ export default async function BookingSummaryPage({ searchParams }: Props) {
             </div>
           </dl>
           <p className="text-small text-fg-muted">{t("vatNote")}</p>
+          <p className="text-small text-fg">
+            {t.rich("cancelNote", {
+              link: (chunks) => (
+                <Link href="/kiralama-kosullari" className="text-link underline underline-offset-4">
+                  {chunks}
+                </Link>
+              ),
+            })}
+          </p>
           <p className="text-small text-fg-muted">{t("noHidden")}</p>
           <p className="text-small text-fg-muted">{t("payNote")}</p>
           <Button asChild size="lg">
