@@ -22,7 +22,7 @@
 
 | Sayfa | Yol (TR) | Yol (EN) | Not |
 |---|---|---|---|
-| Ana sayfa (Araç Kirala) | `/` | `/en` | Kampanya galerisi, Bireysel / Kurumsal kiralama kutusu, **filomuz (v0.5)**, iş birlikleri, Yol Boyu Güvence, SSS (§2.2) |
+| Ana sayfa (Araç Kirala) | `/` | `/en` | Kampanya galerisi, Bireysel / Kurumsal kiralama kutusu, **araçlarımız bölümü (v0.5)**, iş birlikleri, Yol Boyu Güvence, SSS (§2.2) |
 | Arama sonuçları | `/araclar` | `/en/cars` | Seçilen bayide ve tarihlerde uygun araçlar; fotoğraf, bilgi, fiyat ve **Kirala** butonu. Üstte düzenlenebilir arama (§2.3) |
 | ~~Araçlarımız~~ | ~~`/araclarimiz`~~ | ~~`/en/our-cars`~~ | **Kaldırıldı (v0.5):** filo ana sayfada bir bölümdür (§2.4); eski adrese yönlendirme eklenmez, site yayında değil |
 | Bayilerimiz | `/bayilerimiz` | `/en/branches` | Bayi listesi, şehir filtresi, arama ve harita; İletişim'den taşındı (v0.5, §2.6.1) |
@@ -54,7 +54,7 @@ Yukarıdan aşağıya bölüm sırası:
 |---|---|---|
 | 1 | Kampanya galerisi | §2.2.1 |
 | 2 | Kiralama kutusu | Sayfanın `h1`'i ("Araç Kirala") bu bölümün başlığıdır ve **ortalanır**. Altında, yine ortalı, yalnızca iki buton: **Bireysel** / **Kurumsal**; butonların çevresinde kutu ya da çerçeve yok (v0.4, G). Altında form (§2.2.2, §2.2.3) |
-| 3 | Filomuz | Kategori çipleri ve seçili kategorideki modeller; yalnızca Bireysel sekmede (v0.5, G; §2.4) |
+| 3 | Araçlarımız (filo) | Kategori çipleri ve seçili kategorideki modeller; yalnızca Bireysel sekmede (v0.5, G; §2.4) |
 | 4 | İş birlikleri | Kayan logo şeridi (§2.2.4) |
 | 5 | Yol Boyu Güvence | Koyu zeytin bant, modernleştirilmiş (§5.5) |
 | 6 | Mobil uygulama | Uygulama reklamı: fotoğraf solda, metin ve mağaza rozetleri sağda (v0.4, G; §2.9) |
@@ -120,7 +120,7 @@ Ana sayfa (Kurumsal) → form → "Talebiniz alındı" → satış ekibi arar. �
 **Bayi bulma:**
 Bayilerimiz → şehir filtresi ve/veya arama → liste ve haritadaki pinler daralır → bayi kartı (adres, çalışma saatleri, `tel:` telefon, e-posta, yol tarifi linki).
 
-### 2.4 Filomuz (ana sayfa bölümü)
+### 2.4 Araçlarımız (ana sayfa bölümü)
 
 - **v0.5 (G):** ayrı Araçlarımız sayfası kalktı; filo, ana sayfada kiralama kutusunun hemen altında bir bölümdür ve yalnızca **Bireysel** sekmede görünür (Kurumsal sekmede araç seçilmez). Bölümün adresi `/#araclarimiz`.
 - Filodaki modeller kategoriye göre; sınıflar ve modeller ucuzdan pahalıya.
