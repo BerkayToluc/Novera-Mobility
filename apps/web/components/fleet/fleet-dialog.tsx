@@ -94,7 +94,7 @@ function DialogContent({ model, titleId, onClose }: { model: FleetModel; titleId
               </li>
             ))}
           </ul>
-          <Link href="/iletisim" className="inline-flex min-h-11 items-center text-label text-link underline-offset-4 hover:underline">
+          <Link href="/bayilerimiz" className="inline-flex min-h-11 items-center text-label text-link underline-offset-4 hover:underline">
             {t("branchesLink")}
           </Link>
         </Section>

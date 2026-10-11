@@ -29,10 +29,10 @@ function useIsDesktop() {
   );
 }
 
-type ContactExplorerProps = { branches: BranchDetail[]; mapsApiKey: string };
+type BranchExplorerProps = { branches: BranchDetail[]; mapsApiKey: string };
 
-export function ContactExplorer({ branches, mapsApiKey }: ContactExplorerProps) {
-  const t = useTranslations("ContactPage");
+export function BranchExplorer({ branches, mapsApiKey }: BranchExplorerProps) {
+  const t = useTranslations("BranchesPage");
   const isDesktop = useIsDesktop();
   const [query, setQuery] = useState("");
   const [city, setCity] = useState("");

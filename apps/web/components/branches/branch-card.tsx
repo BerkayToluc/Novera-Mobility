@@ -11,7 +11,7 @@ type BranchCardProps = {
 };
 
 export function BranchCard({ branch, selected, onShowOnMap }: BranchCardProps) {
-  const t = useTranslations("ContactPage.card");
+  const t = useTranslations("BranchesPage.card");
 
   const hours = (value: DayHours) => {
     if (!value) return t("closed");

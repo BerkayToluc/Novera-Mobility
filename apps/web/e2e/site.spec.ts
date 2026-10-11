@@ -60,7 +60,7 @@ test.describe("with the banner out of the way", () => {
   });
 
   test("the city filter narrows the branches", async ({ page }) => {
-    await page.goto("/iletisim");
+    await page.goto("/bayilerimiz");
     const city = page.getByLabel("Şehir");
     await expect
       .poll(async () => {
