@@ -17,7 +17,7 @@ export function LocaleSwitcher({ tone = "default" }: { tone?: SwitcherTone }) {
   const t = useTranslations("LocaleSwitcher");
   const currentLocale = useLocale();
   const pathname = usePathname();
-  // Dynamic routes (e.g. /araclar/[slug]) need their params to build the other language's URL.
+  // Dynamic routes (e.g. /urunler/[slug]) need their params to build the other language's URL.
   const params = useParams();
 
   return (

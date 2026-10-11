@@ -57,7 +57,20 @@ export function PaymentForm({ query }: { query: Record<string, string> }) {
     try {
       const result = await placeReservation(query);
       if (result.ok) {
-        router.push({ pathname: "/rezervasyon/onay", query: { ...query, no: result.number } });
+        // The hold is spent by now, so it does not travel on to the confirmation.
+        const { tutma: spent, ...rest } = query;
+        void spent;
+        router.push({ pathname: "/rezervasyon/onay", query: { ...rest, no: result.number } });
+        return;
+      }
+      // Time ran out while paying: this page asks the server again and shows the "time is up" screen.
+      if (result.reason === "expired") {
+        router.refresh();
+        return;
+      }
+      // Someone else got the car first: the summary explains it and leads back to the search.
+      if (result.reason === "taken") {
+        router.push({ pathname: "/rezervasyon", query: { ...query, durum: "dolu" } });
         return;
       }
       setFormError(t(`errors.${result.reason}`));

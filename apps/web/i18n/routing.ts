@@ -15,7 +15,6 @@ export const routing = defineRouting({
     "/": "/",
     "/araclar": { tr: "/araclar", en: "/cars" },
     "/araclarimiz": { tr: "/araclarimiz", en: "/our-cars" },
-    "/araclar/[slug]": { tr: "/araclar/[slug]", en: "/cars/[slug]" },
     "/rezervasyon": { tr: "/rezervasyon", en: "/booking" },
     "/rezervasyon/onay": { tr: "/rezervasyon/onay", en: "/booking/confirmation" },
     "/odeme": { tr: "/odeme", en: "/payment" },
