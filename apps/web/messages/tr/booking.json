@@ -37,7 +37,8 @@
       "fixed": "{price} tek seferlik",
       "intro": "İsterseniz ekleyin; seçtikleriniz toplama hemen yansır."
     },
-    "vatNote": "Fiyatlara KDV dahildir. Farklı bayiye bırakmak için ek ücret alınmaz."
+    "vatNote": "Fiyatlara KDV dahildir. Farklı bayiye bırakmak için ek ücret alınmaz.",
+    "cancelNote": "Alış zamanından 24 saat öncesine kadar ücretsiz iptal edebilirsiniz. <link>Kiralama koşulları</link>"
   },
   "Payment": {
     "metaTitle": "Ödeme",

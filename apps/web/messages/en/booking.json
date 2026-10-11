@@ -37,7 +37,8 @@
       "fixed": "{price} one-off",
       "intro": "Add them if you like; what you pick shows in the total straight away."
     },
-    "vatNote": "Prices include VAT. There is no extra charge for returning at a different branch."
+    "vatNote": "Prices include VAT. There is no extra charge for returning at a different branch.",
+    "cancelNote": "You can cancel free of charge up to 24 hours before pick-up. <link>Rental terms</link>"
   },
   "Payment": {
     "metaTitle": "Payment",

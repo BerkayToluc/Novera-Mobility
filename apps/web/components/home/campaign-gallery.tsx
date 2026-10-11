@@ -21,7 +21,7 @@ export type CampaignSlide = {
 // arrows and dots only move that strip. Nothing advances on its own: the visitor sets the pace.
 export function CampaignGallery({ slides }: { slides: CampaignSlide[] }) {
   const t = useTranslations("HomePage.gallery");
-  const stripRef = useRef<HTMLUListElement>(null);
+  const stripRef = useRef<HTMLDivElement>(null);
   const [current, setCurrent] = useState(0);
   // Where the strip is headed. Scroll events arrive a frame late and keep firing while a
   // smooth scroll runs, so the arrows count from the target, not from the scroll position.
@@ -42,7 +42,7 @@ export function CampaignGallery({ slides }: { slides: CampaignSlide[] }) {
 
   return (
     <section aria-roledescription={t("roledescription")} aria-label={t("label")} className="flex flex-col gap-4">
-      <ul
+      <div
         ref={stripRef}
         onScroll={(event) => {
           // Swipes and trackpads move the strip directly; follow them once a button's own
@@ -56,7 +56,7 @@ export function CampaignGallery({ slides }: { slides: CampaignSlide[] }) {
         className="flex snap-x snap-mandatory overflow-x-auto rounded-media [scrollbar-width:none]"
       >
         {slides.map((slide, index) => (
-          <li
+          <div
             key={slide.id}
             role="group"
             aria-roledescription={t("slideRoledescription")}
@@ -74,9 +74,9 @@ export function CampaignGallery({ slides }: { slides: CampaignSlide[] }) {
             <div className="order-1 aspect-[16/10] md:order-2 md:aspect-auto md:min-h-80">
               {slide.art}
             </div>
-          </li>
+          </div>
         ))}
-      </ul>
+      </div>
 
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-1">
