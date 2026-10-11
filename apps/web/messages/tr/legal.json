@@ -31,6 +31,8 @@
           "Kimlik ve iletişim: ad, soyad, e-posta adresi, telefon numarası.",
           "Rezervasyon: alış ve iade lokasyonu, tarihleri, seçilen araç ve ek hizmetler.",
           "Kurumsal teklif: firma adı, ihtiyaç duyulan araç sayısı, kiralama süresi, araç tipi.",
+          "İletişim formu: ad, e-posta adresi, telefon numarası (isteğe bağlı), konu ve mesajınız.",
+          "Hesap: tercihleriniz (dil, tema, para birimi) ve kiralamalarınızdan kazandığınız puanlar.",
           "Kullanım: dil ve tema tercihiniz (çerezler aracılığıyla)."
         ]
       },
@@ -38,8 +40,10 @@
         "heading": "İşleme amaçları",
         "list": [
           "Rezervasyonunuzu oluşturmak ve yönetmek.",
+          "İletişim formundan gelen mesajlarınıza yanıt vermek.",
           "Kurumsal teklif taleplerinize dönüş yapmak.",
           "Hesabınızı yönetmek ve oturumunuzu sürdürmek.",
+          "Puanlarınızı hesaplamak ve tercihlerinizi hesabınızla birlikte hatırlamak.",
           "Site tercihlerinizi hatırlamak."
         ]
       },
@@ -198,6 +202,111 @@
         "heading": "Uyuşmazlıklar",
         "paragraphs": [
           "Uyuşmazlıklarda öncelikle iyi niyetli görüşme yolu izlenir; çözüm bulunamazsa yetkili mahkemeler ve icra daireleri görevlidir."
+        ]
+      }
+    ]
+  },
+  "LegalPolicy": {
+    "title": "Gizlilik Politikası",
+    "metaDescription": "Novera Mobility'nin siteyi kullanırken hangi bilgileri neden topladığı ve bunları nasıl koruduğu.",
+    "sections": [
+      {
+        "heading": "Kısaca",
+        "paragraphs": [
+          "Yalnızca hizmeti sunmak için gerekli bilgileri alırız, satmayız ve reklam amacıyla üçüncü kişilerle paylaşmayız. Hukuki ayrıntılar KVKK Aydınlatma Metni'ndedir; bu sayfa aynı konuyu sade bir dille anlatır."
+        ]
+      },
+      {
+        "heading": "Hangi bilgileri alırız?",
+        "list": [
+          "Hesabınız: ad, soyad ve e-posta adresiniz; kurumsal hesapta firma bilgileri.",
+          "Rezervasyonlarınız: tarihler, lokasyonlar, seçtiğiniz araç ve ek hizmetler.",
+          "Formlar: iletişim ve kurumsal teklif formlarına yazdıklarınız.",
+          "Tercihleriniz: dil, tema ve para birimi.",
+          "Puanlarınız: kiralamalarınızdan kazandığınız puanlar."
+        ]
+      },
+      {
+        "heading": "Bunları ne için kullanırız?",
+        "list": [
+          "Rezervasyonunuzu oluşturmak ve size ulaşmak.",
+          "Sorularınıza ve teklif taleplerinize dönmek.",
+          "Hesabınızı ve tercihlerinizi hatırlamak.",
+          "Puanlarınızı hesaplamak."
+        ]
+      },
+      {
+        "heading": "Ödeme bilgileri",
+        "paragraphs": [
+          "Bu sitedeki ödeme ekranı örnektir; kart bilgileriniz saklanmaz ve kartınızdan para çekilmez."
+        ]
+      },
+      {
+        "heading": "Çerezler",
+        "paragraphs": [
+          "Dil, tema ve para birimi tercihinizi ve oturumunuzu hatırlamak için çerez kullanırız. Ayrıntılar Çerez Politikası'ndadır."
+        ]
+      },
+      {
+        "heading": "Verilerinizi nasıl korur ve ne kadar saklarız?",
+        "paragraphs": [
+          "Verilerinize erişim yetkili ekiple sınırlıdır. Verileri, kullanım amacının gerektirdiği süre kadar saklar, sonra sileriz ya da anonim hale getiririz. Hesabınızı Ayarlar sayfasından silebilirsiniz."
+        ]
+      },
+      {
+        "heading": "Bize ulaşın",
+        "paragraphs": [
+          "Gizlilikle ilgili sorularınız için kvkk@novera.example adresine yazabilirsiniz."
+        ]
+      }
+    ]
+  },
+  "LegalSiteTerms": {
+    "title": "Kullanım Şartları",
+    "metaDescription": "Novera Mobility sitesini kullanırken geçerli olan şartlar: hesap, içerik, sorumluluk ve değişiklikler.",
+    "sections": [
+      {
+        "heading": "Kapsam",
+        "paragraphs": [
+          "Bu şartlar, Novera Mobility web sitesinin kullanımını düzenler. Araç kiralamaya ilişkin koşullar ayrıca Kiralama Koşulları sayfasındadır."
+        ]
+      },
+      {
+        "heading": "Siteyi kullanma",
+        "list": [
+          "Siteyi yalnızca yasalara uygun amaçlarla kullanırsınız.",
+          "Formlarda verdiğiniz bilgilerin doğru olması sizin sorumluluğunuzdadır.",
+          "Siteye zarar verecek, erişimi aksatacak ya da otomatik araçlarla toplu veri çekecek kullanım yasaktır."
+        ]
+      },
+      {
+        "heading": "Hesabınız",
+        "paragraphs": [
+          "Hesabınızın güvenliğinden siz sorumlusunuz; giriş bilgilerinizi başkalarıyla paylaşmayın. Bireysel hesabı siz açarsınız, kurumsal hesabı satış görüşmesinden sonra Novera açar."
+        ]
+      },
+      {
+        "heading": "Puanlar",
+        "paragraphs": [
+          "Puanlar tamamlanan kiralamalarla kazanılır; iptal edilen rezervasyonlar puan kazandırmaz. Puan kuralı değişirse bu sayfada duyurulur."
+        ]
+      },
+      {
+        "heading": "İçerik ve fiyatlar",
+        "paragraphs": [
+          "Sitedeki metin, görsel ve logolar Novera Mobility'ye aittir. Fiyatlara KDV dahildir; rezervasyon özetindeki tutar geçerlidir. Para birimi dönüşümleri günlük kurla yapılır."
+        ]
+      },
+      {
+        "heading": "Sorumluluğun sınırı",
+        "paragraphs": [
+          "Siteyi kesintisiz ve hatasız sunmak için çalışırız ancak bunu garanti edemeyiz. Bakım ya da arıza nedeniyle oluşan geçici erişim sorunlarından doğan dolaylı zararlardan sorumlu değiliz."
+        ]
+      },
+      {
+        "heading": "Değişiklikler",
+        "paragraphs": [
+          "Bu şartları güncelleyebiliriz; geçerli sürüm her zaman bu sayfadadır. Güncellemeden sonra siteyi kullanmaya devam etmek yeni şartları kabul ettiğiniz anlamına gelir."
         ]
       }
     ]

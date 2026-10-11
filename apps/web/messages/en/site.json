@@ -49,7 +49,9 @@
       "linkedin": "LinkedIn",
       "x": "X",
       "youtube": "YouTube"
-    }
+    },
+    "privacyPolicy": "Privacy Policy",
+    "siteTerms": "Terms of Use"
   },
   "ThemeSwitcher": {
     "label": "Theme",

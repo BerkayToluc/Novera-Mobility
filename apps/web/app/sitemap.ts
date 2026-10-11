@@ -21,6 +21,8 @@ const PUBLIC: PageHref[] = [
   "/kvkk",
   "/cerez-politikasi",
   "/kiralama-kosullari",
+  "/gizlilik-politikasi",
+  "/kullanim-sartlari",
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {

@@ -49,7 +49,9 @@
       "linkedin": "LinkedIn",
       "x": "X",
       "youtube": "YouTube"
-    }
+    },
+    "privacyPolicy": "Gizlilik Politikası",
+    "siteTerms": "Kullanım Şartları"
   },
   "ThemeSwitcher": {
     "label": "Tema",
