@@ -11,11 +11,12 @@ import { PasswordInput } from "@/components/ui/password-input";
 import { Link, useRouter } from "@/i18n/navigation";
 import { AuthUnavailableError, login } from "@/lib/auth-client";
 import { loginSchema, type LoginInput } from "@/lib/auth-schemas";
+import type { AccountType } from "@/lib/session";
 import { FormError } from "./form-error";
 import { useAuthErrorMessages } from "./use-auth-messages";
 
 // `next`: the booking to go back to after signing in (the payment page asked for it).
-export function LoginForm({ next }: { next?: Record<string, string> }) {
+export function LoginForm({ next, kind = "individual" }: { next?: Record<string, string>; kind?: AccountType }) {
   const t = useTranslations("Auth");
   const router = useRouter();
   const messages = useAuthErrorMessages();
@@ -37,8 +38,11 @@ export function LoginForm({ next }: { next?: Record<string, string> }) {
   async function onSubmit(values: LoginInput) {
     setFormError(null);
     try {
-      await login(values);
+      await login(values, kind);
       if (next) router.push({ pathname: "/odeme", query: next });
+      else router.push("/profil");
+      // The header reads the session on the server, so it has to be asked again.
+      router.refresh();
     } catch (error) {
       setFormError(error instanceof AuthUnavailableError ? t("errors.unavailable") : t("errors.generic"));
     }
@@ -48,7 +52,7 @@ export function LoginForm({ next }: { next?: Record<string, string> }) {
     // noValidate: our own messages replace the browser's bubbles, in both languages.
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-5">
       <FormError message={formError} />
-      <Field label={t("fields.email")} error={errors.email?.message}>
+      <Field label={kind === "corporate" ? t("fields.companyEmail") : t("fields.email")} error={errors.email?.message}>
         {(props) => <Input type="email" autoComplete="email" inputMode="email" {...props} {...register("email")} />}
       </Field>
       <Field label={t("fields.password")} error={errors.password?.message}>

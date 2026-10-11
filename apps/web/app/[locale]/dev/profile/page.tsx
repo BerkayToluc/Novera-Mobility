@@ -58,7 +58,7 @@ export default async function ProfileGalleryPage() {
     <div className="mx-auto flex max-w-content flex-col gap-12 px-4 py-12 md:px-8">
       <h1 className="text-h1 text-fg">Profile gallery</h1>
       <Section title="Navigation">
-        <ProfileNav />
+        <ProfileNav type="individual" />
       </Section>
       <Section title="Account">
         <AccountForm user={USER} />

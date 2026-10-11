@@ -20,7 +20,15 @@ const DESKTOP_QUERY = "(min-width: 80rem)";
 // A native modal <dialog>: the browser traps focus, closes it on Escape and makes
 // the page behind it inert. It covers the header, so it repeats the logo and a
 // close button in the same positions; the visitor sees the page chrome stay put.
-export function MobileMenu({ initialTheme, initialCurrency }: { initialTheme: Theme; initialCurrency: Currency }) {
+export function MobileMenu({
+  initialTheme,
+  initialCurrency,
+  signedIn,
+}: {
+  initialTheme: Theme;
+  initialCurrency: Currency;
+  signedIn: boolean;
+}) {
   const t = useTranslations("Header");
   const preferencesId = useId();
   const pathname = usePathname();
@@ -86,8 +94,8 @@ export function MobileMenu({ initialTheme, initialCurrency }: { initialTheme: Th
         <div className="mx-auto flex min-h-0 w-full max-w-content flex-1 flex-col gap-8 overflow-y-auto px-4 pb-8 pt-4">
           <MainNav label={t("navLabel")} orientation="vertical" onNavigate={close} />
           <Button asChild size="lg" className="w-full">
-            <Link href="/giris" onClick={close}>
-              {t("login")}
+            <Link href={signedIn ? "/profil" : "/giris"} onClick={close}>
+              {signedIn ? t("account") : t("login")}
             </Link>
           </Button>
           {/* The header shows currency, language and theme from md up; on a phone they live here. */}

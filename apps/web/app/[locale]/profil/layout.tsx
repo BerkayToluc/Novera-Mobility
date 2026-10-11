@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { getTranslations } from "next-intl/server";
 import { ProfileNav } from "@/components/profile/profile-nav";
+import { SignOutButton } from "@/components/profile/sign-out-button";
 import { SignedOutNotice } from "@/components/profile/signed-out-notice";
 import { getSession } from "@/lib/session";
 
@@ -12,10 +13,13 @@ export default async function ProfileLayout({ children }: { children: ReactNode 
 
   return (
     <div className="mx-auto flex max-w-content flex-col gap-8 px-4 py-12 md:px-8 xl:py-16">
-      <h1 className="text-h1 text-fg">{t("title")}</h1>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <h1 className="text-h1 text-fg">{t("title")}</h1>
+        {session && <SignOutButton />}
+      </div>
       {session ? (
         <>
-          <ProfileNav />
+          <ProfileNav type={session.type} />
           {children}
         </>
       ) : (

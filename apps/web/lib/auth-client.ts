@@ -1,4 +1,6 @@
+import { signIn } from "./auth-actions";
 import type { ForgotPasswordInput, LoginInput, RegisterInput } from "./auth-schemas";
+import type { AccountType } from "./session";
 
 // The auth API does not exist yet (BACKLOG #25, #27). Until it does, every call says so
 // plainly instead of pretending to succeed: a fake "signed in" would mislead and could
@@ -11,9 +13,9 @@ export class AuthUnavailableError extends Error {
   }
 }
 
-export async function login(input: LoginInput): Promise<void> {
-  void input;
-  throw new AuthUnavailableError();
+export async function login(input: LoginInput, kind: AccountType = "individual"): Promise<void> {
+  const result = await signIn(kind, input.email, input.password);
+  if (!result.ok) throw new AuthUnavailableError();
 }
 
 export async function register(input: RegisterInput): Promise<void> {

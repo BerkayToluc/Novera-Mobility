@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { AuthShell } from "@/components/auth/auth-shell";
 import { LoginForm } from "@/components/auth/login-form";
+import { LoginTabs } from "@/components/auth/login-tabs";
 import { Link } from "@/i18n/navigation";
 import { parseBooking, toBookingQuery } from "@/lib/booking";
 
@@ -20,24 +21,37 @@ export default async function LoginPage({ searchParams }: Props) {
   // attacker's choosing.
   const params = await searchParams;
   const booking = params.sonra === "odeme" ? parseBooking(params) : null;
+  const next = booking ? toBookingQuery(booking) : undefined;
+  // A booking is only ever paid for by an individual, so the corporate tab does not carry it.
+  const corporate = params.tip === "kurumsal" && !booking;
+
+  const linkClasses = "inline-flex min-h-11 items-center text-link underline underline-offset-4";
 
   return (
     <AuthShell
-      title={t("title")}
-      subtitle={t("subtitle")}
+      title={corporate ? t("corporateTitle") : t("title")}
+      subtitle={corporate ? t("corporateSubtitle") : t("subtitle")}
+      tabs={<LoginTabs current={corporate ? "corporate" : "individual"} next={next} />}
       footer={
-        <>
-          <p>{t("noAccount")}</p>
-          <Link
-            href="/kayit"
-            className="inline-flex min-h-11 items-center text-link underline underline-offset-4"
-          >
-            {t("register")}
-          </Link>
-        </>
+        corporate ? (
+          <>
+            <p className="max-w-sm text-center">{t("corporateNote")}</p>
+            <p>{t("corporateAsk")}</p>
+            <Link href="/kurumsal-teklif" className={linkClasses}>
+              {t("corporateQuote")}
+            </Link>
+          </>
+        ) : (
+          <>
+            <p>{t("noAccount")}</p>
+            <Link href="/kayit" className={linkClasses}>
+              {t("register")}
+            </Link>
+          </>
+        )
       }
     >
-      <LoginForm next={booking ? toBookingQuery(booking) : undefined} />
+      <LoginForm key={corporate ? "corporate" : "individual"} kind={corporate ? "corporate" : "individual"} next={next} />
     </AuthShell>
   );
 }
