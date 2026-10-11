@@ -25,7 +25,10 @@ export default async function ProductsPage() {
         {featured && <ProductCard slug={featured.slug} featured />}
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {others.map((product) => (
-            <ProductCard key={product.slug} slug={product.slug} />
+            // A grid wrapper so the card fills its cell; the last one spans both columns at md rather than sitting alone.
+            <div key={product.slug} className="grid md:last:col-span-2 xl:last:col-span-1">
+              <ProductCard slug={product.slug} />
+            </div>
           ))}
         </div>
       </div>

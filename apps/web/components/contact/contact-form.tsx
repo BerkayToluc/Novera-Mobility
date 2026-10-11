@@ -98,7 +98,7 @@ export function ContactForm() {
       className="flex flex-col gap-5"
     >
       <FormError message={formError} />
-      <div className="grid gap-5 md:grid-cols-2">
+      <div className="grid gap-5 xl:grid-cols-2">
         <Field label={t("name")} error={errors.name?.message}>
           {(control) => <Input autoComplete="name" {...control} {...register("name")} />}
         </Field>
@@ -119,10 +119,10 @@ export function ContactForm() {
             </Select>
           )}
         </Field>
-        <Field label={t("message")} error={errors.message?.message} className="md:col-span-2">
+        <Field label={t("message")} error={errors.message?.message} className="xl:col-span-2">
           {(control) => <Textarea rows={5} {...control} {...register("message")} />}
         </Field>
-        <div className="md:col-span-2">
+        <div className="xl:col-span-2">
           <ConsentCheckbox error={errors.consent?.message} {...register("consent")} />
         </div>
         <Honeypot {...register("website")} />

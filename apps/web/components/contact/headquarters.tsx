@@ -49,7 +49,7 @@ export async function Headquarters() {
         </h2>
         <ul className="divide-y divide-border rounded-card border border-border bg-surface">
           {DEPARTMENTS.map(({ key, email }) => (
-            <li key={key} className="flex flex-col gap-0.5 px-5 py-3 md:flex-row md:items-center md:justify-between md:gap-6">
+            <li key={key} className="flex flex-col gap-0.5 px-5 py-3 xl:flex-row xl:items-center xl:justify-between xl:gap-6">
               <div>
                 <p className="text-label text-fg">{t(`departments.${key}.name`)}</p>
                 <p className="text-small text-fg-muted">{t(`departments.${key}.text`)}</p>
