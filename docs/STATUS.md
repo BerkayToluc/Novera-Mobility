@@ -16,7 +16,7 @@ SWC_NATIVE_BINDING_CACHE=C:\Users\karad\.swc-cache
 
 Bununla `pnpm build`, `pnpm typecheck` ve `pnpm lint` geçiyor. İzinlere dokunulmadı. CI'da ayrıca iç link kontrolü çalışır (`apps/web/scripts/check-links.mjs`, Y31).
 
-**Doğrulama.** 11 Ekim'de 25 sayfa 375, 768 ve 1280 px'te Playwright (sistem Chrome'u) ile ölçüldü: yatay taşma yok, axe (WCAG 2.2 AA, 75 tarama) sıfır ihlal, 11 sayfada Tab ile klavye turu (ilk durak "İçeriğe geç", odak tuzağı ve halkasız öğe yok; ölçüm hesaplanmış stile bakar, gözle inceleme değildir). Uzun sayfaların 375/1280 hâli yalnızca ölçüldü, tek tek gözle incelenmedi. **Hâlâ yapılmadı:** Lighthouse (G; production build, Kaspersky kapalı, gizli pencere), ekran okuyucu turu. Bu yüzden bazı commit'ler `Refs #N` taşır. Ölçümler ve eksikler: [PERFORMANCE.md](PERFORMANCE.md), [AUDIT.md](AUDIT.md).
+**Doğrulama.** 11 Ekim'de 25 sayfa 375, 768 ve 1280 px'te Playwright (sistem Chrome'u) ile ölçüldü: yatay taşma yok, axe (WCAG 2.2 AA, 75 tarama) sıfır ihlal, 11 sayfada Tab ile klavye turu (ilk durak "İçeriğe geç", odak tuzağı ve halkasız öğe yok; ölçüm hesaplanmış stile bakar, gözle inceleme değildir). Uzun sayfaların 375/1280 hâli yalnızca ölçüldü, tek tek gözle incelenmedi. **Hâlâ yapılmadı:** Lighthouse (G yapmayacak; PERFORMANCE.md'deki mobil sayılar geliştirme sunucusundan, geçerli değil; ölçmek isteyen production build + gizli pencere + Kaspersky'nin script eklemesi kapalı kullanmalı), ekran okuyucu turu. Bu yüzden bazı commit'ler `Refs #N` taşır. Ölçümler ve eksikler: [PERFORMANCE.md](PERFORMANCE.md), [AUDIT.md](AUDIT.md).
 
 ## 1. `main`'de olanlar
 
@@ -34,11 +34,12 @@ BACKLOG M7'nin frontend işlerinin **tamamı** (Y10–Y44, Y20, Y25–Y32 dahil)
 
 ## 2. Bekleyen dallar
 
-Tablet (768 px) düzeni ve denetim düzeltmeleri, birbirinin üzerine kurulu zincir; G'ye "Create a merge commit" ile **bu sırayla** birleştirmek kalır (`git fetch` sonrası `git log origin/main..origin/<dal>` ile kontrol edin):
+Tablet (768 px) düzeni ve denetim düzeltmeleri, birbirinin üzerine kurulu dört dallık zincir; G'ye "Create a merge commit" ile **bu sırayla** birleştirmek kalır (`git fetch` sonrası `git log origin/main..origin/<dal>` ile kontrol edin):
 
 1. `fix/tablet-layout`: Yol Boyu Güvence bandı (768'de ortada çizgi, adımlar sağlı sollu), rehber ve araç listeleri 2 sütun (araç kartı md–xl arası dikey), footer, galeri denetimleri, Yardım ve Hakkımızda ayarları.
 2. `fix/booking-tablet`: özet ve ödemede xl altında ekrana yapışan toplam şeridi, hizalanan bağlantı düğmeleri (`size="inline"`), ortalanmış onay sayfası, altı çizili "Şifremi unuttum".
 3. `fix/visual-tour`: İletişim 768'de yan yana, Ürünler'de öksüz kart yok, kaydırılabilir profil sekmeleri, Hakkımızda sayaçlarında axe düzeltmesi, footer bağlantı genişliği.
+4. `fix/quote-centred`: Kurumsal teklif sayfası 1280 px'te tek sütunda ortalı.
 
 Hepsi `Refs #47` taşır (denetim işi açık). Yeni iş için `main`'den dallanılır.
 
@@ -64,8 +65,7 @@ Dikkat: `USE_MOCKS=1` iken `/odeme` sayfasında giriş koruması **kapalı**; `U
 
 **FE**
 - Google Maps haritası CSP altında ve gerçek anahtarla denenmedi (CSP Google adreslerine izin veriyor); anahtar gelince bir kez bakılmalı.
-- Denetim (#47): Lighthouse (rapor için [PERFORMANCE.md](PERFORMANCE.md)), ekran okuyucu. 768 px turu, axe ve klavye turu yapıldı (§0).
-- Kurumsal teklif sayfasında 1280 px'te formun sağı boş: yan panel mi, ortalama mı kararı bekliyor.
+- Denetim (#47): ekran okuyucu. Lighthouse'u G yapmayacak, PERFORMANCE.md'deki sayılar geçersiz kalır. 768 px turu, axe ve klavye turu yapıldı (§0).
 - Fotoğraflar (SPEC §6, §10): G sağlayacak; yerleştirme, WebP/AVIF sıkıştırma (bu makinede `cwebp`/`magick` yok, bir yol gerekir), `next/image` önceliği, sonra production LCP yeniden ölçümü.
 - API gelince: tüm taklitleri gerçek çağrılarla değiştirmek, openapi tipleri; e2e'ye SPEC §8 adım 4 (yeni rezervasyon Rezervasyonlarım'da) eklemek.
 - Bileşen testleri yok (yalnızca birim ve e2e).
@@ -75,12 +75,10 @@ Dikkat: `USE_MOCKS=1` iken `/odeme` sayfasında giriş koruması **kapalı**; `U
 - Sözleşmeye eklenecekler: `topic` (SSS), `GET /me/quotes`, rezervasyon cevabında `pointsEarned`.
 - Y33–Y35, Y45–Y48 (BACKLOG).
 - Google Maps anahtarı: referrer kısıtlaması + kota; `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`.
+- Canlı ortam değişkenleri: `NEXT_PUBLIC_SITE_URL` (yoksa sitemap ve JSON-LD adresleri localhost olur) ve analytics aracını kurup `ANALYTICS_SCRIPT_URL`, `ANALYTICS_WEBSITE_ID` değerlerini yazmak (Umami öngörüldü, ADR-19).
 
 **Kullanıcı (G)**
-- Canlıda `NEXT_PUBLIC_SITE_URL` ayarlamak (yoksa sitemap ve JSON-LD adresleri localhost olur).
-- Chrome'da Lighthouse (mobil) çalıştırıp rapora eklemek (production build, gizli pencere, Kaspersky'nin script ekleme ayarı kapalı).
 - Fotoğrafları sağlamak (liste ve bütçeler SPEC §6).
-- Analytics aracını kurup (Umami öngörüldü, ADR-19) iki ortam değişkenini canlıya yazmak: `ANALYTICS_SCRIPT_URL`, `ANALYTICS_WEBSITE_ID`.
 - Arkadaşa iletmek: yukarıdaki sözleşme eklemeleri.
 
 ## 5. Karar bekleyenler
