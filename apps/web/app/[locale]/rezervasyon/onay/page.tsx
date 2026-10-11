@@ -27,7 +27,7 @@ export default async function ConfirmationPage({ searchParams }: Props) {
   const t = await getTranslations("Confirmation");
   const params = await searchParams;
   const number = typeof params.no === "string" && NUMBER.test(params.no) ? params.no : null;
-  const loaded = await loadBooking(params, await getCurrency());
+  const loaded = await loadBooking(params, await getCurrency(), { hold: "ignore" });
 
   if (!number || loaded.status !== "ok") {
     return (
@@ -44,7 +44,7 @@ export default async function ConfirmationPage({ searchParams }: Props) {
   // Points follow the lira total, so it is worked out in lira whatever currency the page shows.
   let points = 0;
   if ((await getSession())?.type === "individual") {
-    const inLira = await loadBooking(params, "TRY");
+    const inLira = await loadBooking(params, "TRY", { hold: "ignore" });
     if (inLira.status === "ok") points = pointsForTotal(inLira.summary.total);
   }
 

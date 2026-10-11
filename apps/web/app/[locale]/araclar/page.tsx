@@ -4,6 +4,7 @@ import { getFormatter, getTranslations } from "next-intl/server";
 import { RentalSearchForm } from "@/components/rental/rental-search-form";
 import { Button } from "@/components/ui/button";
 import { StateMessage } from "@/components/ui/state-message";
+import { RentButton } from "@/components/vehicle/rent-button";
 import { VehicleCard } from "@/components/vehicle/vehicle-card";
 import { Link } from "@/i18n/navigation";
 import type { BranchOption } from "@/lib/branch-options";
@@ -106,7 +107,12 @@ export default async function ResultsPage({ searchParams }: PageProps<"/[locale]
               <li key={offer.id}>
                 <VehicleCard
                   vehicle={offer}
-                  href={{ pathname: "/araclar/[slug]", params: { slug: offer.slug }, query: toQuery(search) }}
+                  action={
+                    <RentButton
+                      params={{ ...toQuery(search), arac: offer.slug }}
+                      carName={`${offer.brand} ${offer.model}`}
+                    />
+                  }
                 />
               </li>
             ))}

@@ -3,6 +3,8 @@ import type { ReactNode } from "react";
 import { Info } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 import { BookingBrief } from "@/components/booking/booking-brief";
+import { HoldCountdown } from "@/components/booking/hold-countdown";
+import { HoldEnded } from "@/components/booking/hold-states";
 import { PaymentForm } from "@/components/payment/payment-form";
 import { Button } from "@/components/ui/button";
 import { StateMessage } from "@/components/ui/state-message";
@@ -10,6 +12,7 @@ import { GuaranteeStrip } from "@/components/vehicle/guarantee-strip";
 import { Link, redirect } from "@/i18n/navigation";
 import { toBookingQuery } from "@/lib/booking";
 import { loadBooking } from "@/lib/booking-data";
+import { currentTime } from "@/lib/clock";
 import { getCurrency } from "@/lib/get-currency";
 import { getSession } from "@/lib/session";
 
@@ -46,6 +49,7 @@ export default async function PaymentPage({ searchParams }: Props) {
       </StateMessage>,
     );
   }
+  if (loaded.status === "expired") return shell(<HoldEnded booking={loaded.booking} reason="expired" />);
   if (loaded.status === "error") {
     return shell(
       <StateMessage tone="error" title={b("error.title")} text={b("error.text")}>
@@ -62,6 +66,8 @@ export default async function PaymentPage({ searchParams }: Props) {
         <h1 className="text-h1 text-fg">{t("title")}</h1>
         <p className="max-w-prose text-body text-fg-muted">{t("intro")}</p>
       </header>
+
+      {loaded.hold && <HoldCountdown expiresAt={loaded.hold.expiresAt} serverNow={new Date(currentTime()).toISOString()} />}
 
       <div className="flex flex-col gap-8 xl:grid xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] xl:items-start">
         <div className="flex flex-col gap-6">

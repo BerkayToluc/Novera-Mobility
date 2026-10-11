@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { getFormatter, getLocale, getTranslations } from "next-intl/server";
+import { ExtrasSelect } from "@/components/booking/extras-select";
+import { HoldCountdown } from "@/components/booking/hold-countdown";
+import { HoldEnded } from "@/components/booking/hold-states";
 import { Button } from "@/components/ui/button";
 import { StateMessage } from "@/components/ui/state-message";
 import { GuaranteeStrip } from "@/components/vehicle/guarantee-strip";
@@ -8,6 +11,7 @@ import { VehicleImage } from "@/components/vehicle/vehicle-image";
 import { Link } from "@/i18n/navigation";
 import { toBookingQuery } from "@/lib/booking";
 import { loadBooking } from "@/lib/booking-data";
+import { currentTime } from "@/lib/clock";
 import { getCurrency } from "@/lib/get-currency";
 import { formatMoney } from "@/lib/price";
 import { localToInstant, toQuery } from "@/lib/rental-search";
@@ -26,7 +30,8 @@ export default async function BookingSummaryPage({ searchParams }: Props) {
   const format = await getFormatter();
   const locale = (await getLocale()) as "tr" | "en";
   const currency = await getCurrency();
-  const loaded = await loadBooking(await searchParams, currency);
+  const params = await searchParams;
+  const loaded = await loadBooking(params, currency);
 
   const shell = (children: ReactNode) => (
     <div className="mx-auto flex max-w-content flex-col gap-8 px-4 py-12 md:px-8 xl:py-16">{children}</div>
@@ -41,6 +46,9 @@ export default async function BookingSummaryPage({ searchParams }: Props) {
       </StateMessage>,
     );
   }
+  if (loaded.status === "expired") return shell(<HoldEnded booking={loaded.booking} reason="expired" />);
+  // The payment page sends the visitor here when the car was taken while paying.
+  if (params.durum === "dolu") return shell(<HoldEnded booking={loaded.booking} reason="taken" />);
   if (loaded.status === "error") {
     return shell(
       <StateMessage tone="error" title={t("error.title")} text={t("error.text")}>
@@ -51,12 +59,7 @@ export default async function BookingSummaryPage({ searchParams }: Props) {
     );
   }
 
-  const { booking, vehicle, pickup, dropoff, extras: chosen, days, summary, query } = loaded;
-  // The car page names the car in its path, so it takes the search and the extras only.
-  const detailQuery = {
-    ...toQuery(booking.search),
-    ...(chosen.length ? { ek: chosen.map((extra) => extra.slug).join(",") } : {}),
-  };
+  const { booking, vehicle, pickup, dropoff, extras: chosen, allExtras, days, summary, hold, query } = loaded;
 
   const money = (value: Parameters<typeof formatMoney>[1]) => formatMoney(format, value);
   const moment = (local: string) =>
@@ -69,6 +72,8 @@ export default async function BookingSummaryPage({ searchParams }: Props) {
         <h1 className="text-h1 text-fg">{t("title")}</h1>
         <p className="max-w-prose text-body text-fg-muted">{t("intro")}</p>
       </header>
+
+      {hold && <HoldCountdown expiresAt={hold.expiresAt} serverNow={new Date(currentTime()).toISOString()} />}
 
       <div className="flex flex-col gap-8 xl:grid xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] xl:items-start">
         <div className="flex flex-col gap-6">
@@ -118,25 +123,17 @@ export default async function BookingSummaryPage({ searchParams }: Props) {
             </Button>
           </section>
 
-          <section aria-labelledby="extras-summary-title" className="flex flex-col gap-4 rounded-card border border-border bg-surface p-6">
-            <h2 id="extras-summary-title" className="text-h3 text-fg">
-              {t("extrasTitle")}
-            </h2>
-            {chosen.length === 0 ? (
-              <p className="text-body text-fg-muted">{t("noExtras")}</p>
-            ) : (
-              <ul className="list-disc pl-5 text-body text-fg">
-                {chosen.map((extra) => (
-                  <li key={extra.slug}>{extra.name[locale]}</li>
-                ))}
-              </ul>
-            )}
-            <Button asChild variant="link" className="self-start px-0">
-              <Link href={{ pathname: "/araclar/[slug]", params: { slug: vehicle.slug }, query: detailQuery }}>
-                {t("changeExtras")}
-              </Link>
-            </Button>
+          <section aria-labelledby="extras-summary-title" className="flex flex-col gap-4">
+            <header className="flex flex-col gap-1">
+              <h2 id="extras-summary-title" className="text-h3 text-fg">
+                {t("extrasTitle")}
+              </h2>
+              <p className="max-w-prose text-body text-fg-muted">{t("extras.intro")}</p>
+            </header>
+            <ExtrasSelect extras={allExtras} selected={chosen.map((extra) => extra.slug)} query={query} />
           </section>
+
+          <GuaranteeStrip />
         </div>
 
         <section
@@ -169,8 +166,8 @@ export default async function BookingSummaryPage({ searchParams }: Props) {
               <dd className="tabular-nums">{money(summary.total)}</dd>
             </div>
           </dl>
+          <p className="text-small text-fg-muted">{t("vatNote")}</p>
           <p className="text-small text-fg-muted">{t("noHidden")}</p>
-          <GuaranteeStrip />
           <p className="text-small text-fg-muted">{t("payNote")}</p>
           <Button asChild size="lg">
             <Link href={{ pathname: "/odeme", query }}>{t("continue")}</Link>

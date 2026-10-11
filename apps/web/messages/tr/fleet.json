@@ -19,6 +19,13 @@
     "consumption": {
       "L_PER_100KM": "{value} L/100 km",
       "KWH_PER_100KM": "{value} kWh/100 km"
+    },
+    "vatIncluded": "KDV dahil",
+    "rent": {
+      "button": "Kirala",
+      "holding": "Araç tutuluyor…",
+      "taken": "Bu araç az önce tutuldu. Başka bir araç seçebilirsiniz.",
+      "unavailable": "Araç şu an tutulamadı. Lütfen tekrar deneyin."
     }
   },
   "FleetPage": {

@@ -19,6 +19,13 @@
     "consumption": {
       "L_PER_100KM": "{value} L/100 km",
       "KWH_PER_100KM": "{value} kWh/100 km"
+    },
+    "vatIncluded": "VAT included",
+    "rent": {
+      "button": "Rent",
+      "holding": "Holding the car…",
+      "taken": "This car was just taken. You can choose another one.",
+      "unavailable": "The car could not be held right now. Please try again."
     }
   },
   "FleetPage": {
