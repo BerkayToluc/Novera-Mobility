@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getTranslations } from "next-intl/server";
 import { locale } from "next/root-params";
+import { Analytics } from "@/components/analytics";
 import { ConsentProvider } from "@/components/consent/consent-provider";
 import { JsonLd } from "@/components/json-ld";
 import { SiteFooter } from "@/components/layout/site-footer";
@@ -75,6 +76,7 @@ export default async function RootLayout({ children }: LayoutProps<"/[locale]">)
           </main>
           <SiteFooter />
           </ConsentProvider>
+          <Analytics />
         </NextIntlClientProvider>
       </body>
     </html>
