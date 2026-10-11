@@ -1,66 +1,87 @@
 {
   "ProductsPage": {
     "metaTitle": "Products",
-    "metaDescription": "Corporate fleet solutions: long-term rental, flexible fleet, electric fleet and managed fleet.",
+    "metaDescription": "Smart corporate fleet, VIP mobility, flexible and short-term rental, and a green fleet: Novera Mobility products.",
     "title": "Our fleet solutions",
     "intro": "Four solutions for the pace of your business. If you are not sure which fits, our corporate team will point you in the right direction.",
     "featuredBadge": "Most popular",
     "viewDetails": "View Details",
     "backToList": "All products",
     "quoteButton": "Get a Quote",
-    "featuresHeading": "What is included",
-    "idealForHeading": "Who it is for",
     "ctaTitle": "Get a quote for this solution",
     "ctaText": "Share your fleet size and the period, and our corporate team will return with a tailored quote.",
     "items": {
-      "uzun-donem": {
-        "title": "Long-Term Fleet Rental",
-        "summary": "A fixed monthly fee on contracts of 12 months or more. Maintenance, insurance and a replacement car included; renew your fleet without tying up capital.",
-        "description": "Instead of buying cars you rent them for the length of the contract. The monthly fee is fixed, Novera takes care of maintenance and repairs, and the cars are renewed when the contract ends.",
-        "features": [
-          "Fixed monthly fee, no surprise costs",
-          "Scheduled maintenance and tyre changes",
-          "Comprehensive and traffic insurance",
-          "Replacement car after a breakdown"
-        ],
-        "idealFor": "Companies whose car needs are predictable and who plan their budget yearly."
+      "akilli-kurumsal-filo": {
+        "title": "Smart Corporate Fleet Rental",
+        "concept": "While we allocate your company a fleet of the latest models, we give you the central Admin Panel to manage the whole fleet as a gift.",
+        "whatYouGet": "A long-term rental fleet suited to your company's needs (saloon, SUV, commercial or hybrid).",
+        "tech": {
+          "note": "Built-in panel",
+          "points": [
+            {
+              "title": "Novera Admin Panel included",
+              "text": "See which employee each car is assigned to, contract terms, invoices and HGS (toll) costs in one click."
+            },
+            {
+              "title": "Live GPS and telematics",
+              "text": "Follow the speed, ignition status, route history and fuel consumption of the rented cars on a live map."
+            },
+            {
+              "text": "A company management interface that automates expense and fine tracking."
+            }
+          ]
+        }
       },
-      "esnek-filo": {
-        "title": "Flexible Fleet",
-        "summary": "Weekly and monthly rental for seasonal or project-based needs. Scale the number of cars up or down as you need.",
-        "description": "Grow your fleet for a season, a campaign or a project and shrink it when the work ends. Commitments are short and you choose the hand-over and return location.",
-        "features": [
-          "Weekly and monthly rental",
-          "Change the number of cars during the period",
-          "Hand-over and return in a different city",
-          "Road Assurance cover"
-        ],
-        "idealFor": "Companies with seasonal peaks or a field team that grows temporarily."
+      "vip-mobilite": {
+        "title": "Executive and Premium Car Rental (VIP Mobility)",
+        "concept": "A luxury-segment, fully equipped, priority mobility solution for senior company executives and corporate guests.",
+        "whatYouGet": "E and F segment prestige cars (Audi, BMW, Mercedes and others), with optional VIP chauffeur support.",
+        "tech": {
+          "points": [
+            {
+              "title": "Priority mobile concierge",
+              "text": "A VIP support line for the driver and the executive."
+            },
+            {
+              "title": "Fast transfer and chauffeur coordination",
+              "text": "Greeting, route optimisation and flight tracking through a mobile interface."
+            }
+          ]
+        }
       },
-      "elektrikli": {
-        "title": "Electric and Hybrid Fleet",
-        "summary": "Electric and hybrid cars that lower your carbon footprint. A charging solution and an emissions report are part of the service.",
-        "description": "Move part or all of your fleet to electric and hybrid cars. We plan the charging and report your yearly emissions savings.",
-        "features": [
-          "Electric and hybrid car options",
-          "Help planning charging points",
-          "Yearly CO₂ savings report",
-          "Maintenance and insurance included"
-        ],
-        "idealFor": "Companies with a sustainability target and corporate reporting."
+      "esnek-kisa-donem": {
+        "title": "Flexible & Short-Term Car Rental (SMEs and Individuals)",
+        "concept": "No-commitment, fast-delivery rental for project-based work, urgent field needs or seasonal travel.",
+        "whatYouGet": "Latest-model cars by the day, week or month.",
+        "tech": {
+          "note": "Driver app",
+          "points": [
+            {
+              "title": "Novera Driver App",
+              "text": "When you take the key, photograph any scratch or damage on your phone and keep a digital record."
+            },
+            {
+              "title": "In-app SOS button",
+              "text": "If something goes wrong, send your location to the centre and call for help with one tap."
+            }
+          ]
+        }
       },
-      "yonetilen-filo": {
-        "title": "Managed Fleet",
-        "summary": "The cars stay with you, the management is ours. Maintenance tracking, fines and fuel management and driver administration with one invoice and one contact.",
-        "description": "We take over the operational load of your existing fleet: service appointments, fines and tolls, fuel reports and driver administration are tracked from one panel.",
-        "features": [
-          "One contact, one monthly invoice",
-          "Maintenance and inspection tracking",
-          "Fine and toll management",
-          "Reporting through the Admin Panel"
-        ],
-        "idealFor": "Companies that own their cars but have no time for fleet management."
+      "yesil-filo": {
+        "title": "Green Fleet (Electric & Hybrid Car Rental)",
+        "concept": "A sustainable, new-generation fleet solution for companies that want to reduce their carbon footprint.",
+        "whatYouGet": "The most up-to-date electric and hybrid fleet.",
+        "tech": {
+          "points": [
+            {
+              "text": "Live battery health and charging station status through the panel, plus reporting of the carbon emissions saved for your company."
+            }
+          ]
+        }
       }
-    }
+    },
+    "conceptHeading": "Concept",
+    "whatYouGetHeading": "What you get",
+    "techHeading": "The technology edge"
   }
 }

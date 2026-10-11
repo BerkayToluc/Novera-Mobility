@@ -1,54 +1,54 @@
 {
   "ServicesPage": {
     "metaTitle": "Hizmetler",
-    "metaDescription": "Yol Boyu Güvence, canlı takip, dijital hasar tutanağı ve esnek teslim: Novera Mobility hizmetleri.",
+    "metaDescription": "Akıllı yol yardım, 7/24 operasyon masası, yedek araç, periyodik bakım ve acil durum müdahale: Novera Mobility hizmetleri.",
     "title": "Hizmetlerimiz",
     "intro": "Araç kiralamanın ötesinde: yolda, filoda ve masa başında yanınızdayız.",
     "listLabel": "Hizmet listesi",
     "items": [
       {
-        "title": "Yol Boyu Güvence",
-        "summary": "Yolda kaldığınızda tek dokunuşla destek isteyin. 7/24 operasyon masası sizi arar, en yakın çekici yönlendirilir; arıza 24 saati aşarsa yedek araç kapınıza gelir.",
+        "title": "Akıllı Yol Yardım & Çekici",
+        "summary": "Kaza/arıza anında GPS koordinatınıza en yakın anlaşmalı çekiciyi canlı yönlendirme.",
         "points": [
-          "7/24 operasyon masası",
-          "Çekici yönlendirme",
-          "24 saati aşan arızada yedek araç"
+          "Anlaşmalı çekici ağı",
+          "GPS koordinatınıza göre yönlendirme",
+          "Kaza ve arıza anında devrede"
         ]
       },
       {
-        "title": "Canlı Takip",
-        "summary": "Filodaki her aracın konumu ve durumu GPS ve telematik verisiyle anlık izlenir. Rota, kullanım ve bakım ihtiyacı tek ekranda görünür.",
+        "title": "7/24 Canlı Operasyon Masası",
+        "summary": "Sürücülerin uygulama veya telefon üzerinden anında bağlanabildiği kriz yönetimi.",
         "points": [
-          "Anlık konum",
-          "Kullanım ve rota raporları",
-          "Bakım hatırlatmaları"
+          "7/24 kesintisiz erişim",
+          "Uygulama veya telefonla bağlanma",
+          "Anında kriz yönetimi"
         ]
       },
       {
-        "title": "Novera Driver App",
-        "summary": "Sürücüler araç teslimini, yakıt durumunu ve hasar tutanağını telefondan tamamlar. Fotoğraflı dijital tutanak, kağıt işini ve bekleme süresini ortadan kaldırır.",
+        "title": "Kesintisiz İkame (Yedek) Araç",
+        "summary": "Arıza 24 saati aştığında işin durmaması için kapınıza gelen eşdeğer yedek araç.",
         "points": [
-          "Dijital hasar tutanağı",
-          "Fotoğraflı teslim kaydı",
-          "Kağıtsız süreç"
+          "24 saati aşan arızada devreye girer",
+          "Eşdeğer sınıfta araç",
+          "Kapınıza teslim"
         ]
       },
       {
-        "title": "Novera Admin Paneli",
-        "summary": "Filo yöneticileri araçları, sürücüleri, rezervasyonları ve faturaları tek panelden yönetir; raporlarla maliyeti ve kullanımı izler.",
+        "title": "Periyodik Bakım & Lastik Oteli",
+        "summary": "Yaz/kış lastiği değişimi, muayene takibi ve adresten vale ile servis hizmeti.",
         "points": [
-          "Filo ve sürücü yönetimi",
-          "Maliyet raporları",
-          "Sözleşme ve fatura takibi"
+          "Yaz/kış lastiği değişimi",
+          "Muayene takibi",
+          "Adresten vale ile servis"
         ]
       },
       {
-        "title": "Esnek Teslim ve İade",
-        "summary": "Aracı bulunduğunuz yerde teslim alın, farklı bir şehirde bırakın. Alış ve iade lokasyonunu, tarihini ve saatini rezervasyon sırasında siz seçersiniz.",
+        "title": "Novera SOS & Acil Durum Müdahale",
+        "summary": "Tek dokunuşla tüm acil müdahale birimleri canlı konumunuzda.",
         "points": [
-          "Farklı lokasyona iade",
-          "Yarım saatlik teslim saatleri",
-          "Şeffaf fiyat"
+          "Tek dokunuşla çağrı",
+          "Canlı konum paylaşımı",
+          "Acil müdahale birimlerinin yönlendirilmesi"
         ]
       }
     ],

@@ -1,54 +1,54 @@
 {
   "ServicesPage": {
     "metaTitle": "Services",
-    "metaDescription": "Road Assurance, live tracking, digital damage reports and flexible hand-over: Novera Mobility services.",
+    "metaDescription": "Smart roadside assistance, a 24/7 operations desk, replacement cars, periodic maintenance and emergency response: Novera Mobility services.",
     "title": "Our Services",
     "intro": "Beyond renting a car: we stand by you on the road, across the fleet and at your desk.",
     "listLabel": "Service list",
     "items": [
       {
-        "title": "Road Assurance",
-        "summary": "Ask for help with one tap if you are stranded. A 24/7 operations desk calls you back, the nearest tow truck is dispatched, and if a breakdown lasts over 24 hours a replacement car comes to your door.",
+        "title": "Smart Roadside Assistance & Towing",
+        "summary": "In a crash or breakdown, the partner tow truck nearest to your GPS coordinates is directed to you live.",
         "points": [
-          "24/7 operations desk",
-          "Tow truck dispatch",
-          "Replacement car after 24 hours"
+          "Partner tow network",
+          "Directed to your GPS coordinates",
+          "Ready in a crash or breakdown"
         ]
       },
       {
-        "title": "Live Tracking",
-        "summary": "The position and status of every car in the fleet is followed in real time through GPS and telematics. Routes, usage and maintenance needs appear on one screen.",
+        "title": "24/7 Live Operations Desk",
+        "summary": "Crisis management that drivers can reach instantly through the app or by phone.",
         "points": [
-          "Real-time position",
-          "Usage and route reports",
-          "Maintenance reminders"
+          "Round-the-clock access",
+          "Reach us by app or phone",
+          "Instant crisis handling"
         ]
       },
       {
-        "title": "Novera Driver App",
-        "summary": "Drivers complete hand-over, fuel level and the damage report from their phone. A digital report with photos removes the paperwork and the waiting.",
+        "title": "Uninterrupted Replacement Car",
+        "summary": "When a breakdown lasts more than 24 hours, an equivalent replacement car comes to your door so work does not stop.",
         "points": [
-          "Digital damage report",
-          "Photo hand-over record",
-          "Paperless process"
+          "Starts after a 24-hour breakdown",
+          "An equivalent class of car",
+          "Delivered to your door"
         ]
       },
       {
-        "title": "Novera Admin Panel",
-        "summary": "Fleet managers handle cars, drivers, bookings and invoices from one panel, and follow cost and usage through reports.",
+        "title": "Periodic Maintenance & Tyre Hotel",
+        "summary": "Summer and winter tyre changes, inspection tracking and valet service from your address.",
         "points": [
-          "Fleet and driver management",
-          "Cost reports",
-          "Contract and invoice tracking"
+          "Summer and winter tyre changes",
+          "Inspection tracking",
+          "Valet service from your address"
         ]
       },
       {
-        "title": "Flexible Pick-up and Return",
-        "summary": "Collect the car where you are and leave it in another city. You choose the pick-up and return location, date and time while booking.",
+        "title": "Novera SOS & Emergency Response",
+        "summary": "With one tap, every emergency response unit is at your live location.",
         "points": [
-          "Return to a different location",
-          "Half-hour hand-over times",
-          "Transparent pricing"
+          "One-tap call",
+          "Live location sharing",
+          "Emergency units directed to you"
         ]
       }
     ],

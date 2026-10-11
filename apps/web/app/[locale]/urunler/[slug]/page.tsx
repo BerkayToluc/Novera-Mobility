@@ -16,7 +16,7 @@ export async function generateMetadata({
   return pageMetadata({
     href: { pathname: "/urunler/[slug]", params: { slug } },
     title: t(`items.${slug}.title`),
-    description: t(`items.${slug}.summary`),
+    description: t(`items.${slug}.concept`),
   });
 }
 
@@ -28,8 +28,10 @@ export default async function ProductDetailPage({
 
   const t = await getTranslations("ProductsPage");
   const featured = PRODUCTS.some((product) => product.slug === slug && product.featured);
-  // The list of inclusions is content, so it sits in the message files with the rest of the text.
-  const features = t.raw(`items.${slug}.features`) as string[];
+  // The technology points are content, so they sit in the message files with the rest of the text.
+  // A point may have a bold lead ("Novera Admin Paneli Dahil") before its sentence.
+  const points = t.raw(`items.${slug}.tech.points`) as { title?: string; text: string }[];
+  const techNote = t.has(`items.${slug}.tech.note`) ? t(`items.${slug}.tech.note`) : null;
 
   return (
     <div className="mx-auto max-w-content px-4 py-12 md:px-8 xl:py-20">
@@ -42,24 +44,34 @@ export default async function ProductDetailPage({
           <header className="flex flex-col gap-4">
             {featured && <ProductBadge>{t("featuredBadge")}</ProductBadge>}
             <h1 className="text-h1 text-fg">{t(`items.${slug}.title`)}</h1>
-            <p className="max-w-prose text-body text-fg-muted">{t(`items.${slug}.description`)}</p>
           </header>
 
           <section className="flex flex-col gap-4">
-            <h2 className="text-h2 text-fg">{t("featuresHeading")}</h2>
-            <ul className="flex max-w-prose flex-col gap-3 text-body text-fg">
-              {features.map((feature) => (
-                <li key={feature} className="flex gap-3">
-                  <span aria-hidden="true" className="mt-3 size-1.5 shrink-0 rounded-full bg-accent" />
-                  {feature}
-                </li>
-              ))}
-            </ul>
+            <h2 className="text-h2 text-fg">{t("conceptHeading")}</h2>
+            <p className="max-w-prose text-body text-fg">{t(`items.${slug}.concept`)}</p>
           </section>
 
           <section className="flex flex-col gap-4">
-            <h2 className="text-h2 text-fg">{t("idealForHeading")}</h2>
-            <p className="max-w-prose text-body text-fg">{t(`items.${slug}.idealFor`)}</p>
+            <h2 className="text-h2 text-fg">{t("whatYouGetHeading")}</h2>
+            <p className="max-w-prose text-body text-fg">{t(`items.${slug}.whatYouGet`)}</p>
+          </section>
+
+          <section className="flex flex-col gap-4">
+            <div className="flex flex-col gap-1">
+              <h2 className="text-h2 text-fg">{t("techHeading")}</h2>
+              {techNote && <p className="text-small text-fg-muted">{techNote}</p>}
+            </div>
+            <ul className="flex max-w-prose flex-col gap-3 text-body text-fg">
+              {points.map((point) => (
+                <li key={point.title ?? point.text} className="flex gap-3">
+                  <span aria-hidden="true" className="mt-3 size-1.5 shrink-0 rounded-full bg-accent" />
+                  <span>
+                    {point.title && <strong className="font-semibold">{point.title}: </strong>}
+                    {point.text}
+                  </span>
+                </li>
+              ))}
+            </ul>
           </section>
         </article>
 
