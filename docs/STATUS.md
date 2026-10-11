@@ -1,43 +1,37 @@
 # Proje durumu
 
-Son güncelleme: 2026-10-10. Bu belge bir anlık görüntüdür; kalıcı kararlar ARCHITECTURE'a, kapsam SPEC'e, iş listesi BACKLOG'a aittir. Çelişki olursa onlar kazanır. Dalların `main`'de olup olmadığını bu belgeye değil `git fetch` sonrası git'e sorun.
+Son güncelleme: 2026-10-11. Bu belge bir anlık görüntüdür; kalıcı kararlar ARCHITECTURE'a, kapsam SPEC'e, iş listesi BACKLOG'a aittir. Çelişki olursa onlar kazanır. Dalların `main`'de olup olmadığını bu belgeye değil `git fetch` sonrası git'e sorun.
 
-**Güncel plan:** SPEC v0.3, ARCHITECTURE v0.2 ve BACKLOG M7 (sıralı iş listesi, G onayladı). Bunlar `docs/site-update` dalında; o PR birleşene kadar plan oradadır.
+**Güncel plan:** SPEC v0.4, ARCHITECTURE v0.2 ve BACKLOG M7 (sıralı iş listesi). Hepsi `main`'de.
 
-Issue numarası = BACKLOG numarası + 9 (ilk 40 satır). GitHub'daki issue başlıkları iş adı değil milestone başlığıdır (ör. #27 "## M2 · Kiralama akışı"); işin kendisi issue gövdesindeki satırdır. PR gövdesinde ve commit'te **issue** numarası kullanılır.
+Issue numarası = BACKLOG numarası + 9 (ilk 40 satır). GitHub'daki issue başlıkları iş adı değil milestone başlığıdır; işin kendisi issue gövdesindeki satırdır. PR gövdesinde ve commit'te **issue** numarası kullanılır.
 
 ## 0. Build ve doğrulama
 
-**Build sorunu çözüldü (10 Ekim).** `pnpm build` ve `next typegen` bu makinede `ERR_SWC_NATIVE_CACHE` veriyordu. Sebep: SWC'nin yerel önbelleği varsayılan olarak `%LOCALAPPDATA%\swc` altında. `C:\Users\karad\AppData` klasöründe bir AppContainer SID'ine tam yetki tanımlı ve SWC bu izni güvensiz bulup reddediyor. Proje içindeki bir önbellek yolu da Windows'un 260 karakterlik yol sınırını aşıyor. Çözüm, kısa bir klasörü gösteren kullanıcı ortam değişkeni:
+Bu makinede build için kullanıcı ortam değişkeni gerekir (Y10):
 
 ```
 SWC_NATIVE_BINDING_CACHE=C:\Users\karad\.swc-cache
 ```
 
-Bu ayarla `pnpm build`, `pnpm typecheck` ve `pnpm lint` geçiyor. İzinlere dokunulmadı.
+Bununla `pnpm build`, `pnpm typecheck` ve `pnpm lint` geçiyor. İzinlere dokunulmadı. CI'da ayrıca iç link kontrolü çalışır (`apps/web/scripts/check-links.mjs`, Y31).
 
-**Doğrulama borcu sürüyor.** 9 Ekim'de bekleyen 8 daldan 6'sı (#71–#75) `main`'e girdi ve `main` build alıyor, ama hiçbiri tarayıcıda 375/768/1280'de denenmedi. Commit'ler bu yüzden `Refs #N` taşıyor. Sıradaki iş BACKLOG Y11.
+**Doğrulama borcu.** İşlerin çoğu 375 px'te ve DOM üzerinden denendi; 768/1280 px görsel kontrolü, klavye turu, axe ve Lighthouse yapılmadı (tarayıcı paneli gizliyken ekran görüntüsü güvenilmez). Bu yüzden birçok commit `Refs #N` taşıyor. Ölçümler ve eksikler: [PERFORMANCE.md](PERFORMANCE.md), [AUDIT.md](AUDIT.md).
 
 ## 1. `main`'de olanlar
 
-- İskelet, tasarım token'ları, i18n, tema, header/footer/mobil menü.
-- Ürünler, Hizmetler, Hakkımızda, giriş/kayıt sayfaları.
-- Next proxy (`/api/*` → `API_URL`), API kararları (ADR-14…17).
-- Mesajların özellik başına bölünmesi, yasal sayfalar + 404, profil sayfaları, saat dilimi (`Europe/Istanbul`), para birimi seçici (TRY/EUR/USD), Araçlarımız, arama formu + `/araclar` sonuçları, README düzeltmeleri, CI'da typecheck.
-- 10 Ekim'e kadar eklenenler (tarayıcıda doğrulanmadı): araç detay + ek hizmetler (SPEC v0.3'te kalkıyor, BACKLOG Y20), `/rezervasyon` özeti, sahte ödeme + onay, İletişim (bayi arama, liste, Google Map), favicon/paylaşım görseli/robots/sitemap, kısmi erişilebilirlik denetimi ([AUDIT.md](AUDIT.md)).
+BACKLOG M7'nin tamamı, **Y20, Y27 ve Y30 hariç**:
 
-## 2. Push'lu ama `main`'de olmayan dallar
+- Palet "Zeytin ve Ege", navbar (açılır menüler, para birimi, tercihler), footer, ana sayfa (kampanya galerisi, kiralama kutusu, kurumsal ön form, iş birlikleri şeridi, Yol Boyu Güvence, mobil uygulama bölümü, rehber kartları, SSS).
+- Araçlarımız (model kartları, kategori çipleri, `?arac=` penceresi), SEO temeli, JSON-LD, manifest, `theme-color`, `llms.txt`.
+- İletişim (genel merkez, form, şehir filtresi), Yardım merkezi, Rehberler, Ürünler/Hizmetler içeriği, Hakkımızda zaman çizelgesi.
+- Hesap: giriş sekmeleri (bireysel/kurumsal), kurumsal hesap sayfaları, ayarlar (dil, tema, para birimi hesaba kaydedilir), Puanlarım, Rezervasyonlarım (yaklaşan/geçmiş).
+- Gizlilik politikası, kullanım şartları, çerez onayı (ADR-19), 500 sayfası (ADR-23).
+- Backend tarafında şema v2 ve `docs/api/openapi.yaml` v0.1 sözleşmesi (araç tutma `POST /holds`, `POST /reservations/price`, `/me/points`, `/me/preferences` vb. dahil).
 
-| Zincir | Dal | İçerik | Issue |
-|---|---|---|---|
-| A | `feat/home-audience` | Bireysel/Kurumsal anahtarı, kurumsal ön form, SSS, Yol Boyu Güvence bandı | Refs #25 |
-| A | `feat/corporate-quote` | `/kurumsal-teklif` | Refs #41 |
+## 2. Bekleyen dallar
 
-Önce `home-audience`, sonra `corporate-quote`; ikisinin PR'ı da `main`'e açılır. Ana sayfa SPEC v0.3'te yeniden düzenleniyor (BACKLOG Y15–Y18); bu iki dal o işlerin zeminidir.
-
-Push edilmemiş belge dalları: `docs/status-update` (bu belge), `docs/site-update` (SPEC/ARCHITECTURE/BACKLOG).
-
-`feat/products-pages` ve `feat/auth-pages` yerel dalları eskidir; itmeyin.
+Yok. Önceki zincir dallarının hepsi birleşti. Yeni iş için `main`'den dallanılır.
 
 ## 3. Ön yüzün taklit ettikleri (API gelince değişecek)
 
@@ -45,59 +39,57 @@ Push edilmemiş belge dalları: `docs/status-update` (bu belge), `docs/site-upda
 
 | Ne | Dosya | Karşılığı (BE) |
 |---|---|---|
-| Bayiler, araçlar, ek hizmetler, bayi iletişim bilgisi | `lib/fleet-client.ts`, `mocks/` | `GET /branches`, `/vehicles`, extras (#30) |
-| SSS | `lib/faq-client.ts`, `mocks/faq.ts` (A zincirinde) | `GET /faq` (#42) |
-| Rezervasyon oluşturma (uydurma numara) | `lib/reservation-client.ts` | `POST /reservations` (#31) |
-| Kurumsal teklif gönderme (her zaman hata) | `lib/quote-client.ts` (A zincirinde) | `POST /quotes` (#42) |
-| Giriş, kayıt, şifre sıfırlama (her zaman hata) | `lib/auth-client.ts` | Auth (#34, #36) |
-| Oturum (hep `null`) | `lib/session.ts` | Çerezden oturum (#34) |
-| Kurlar | `mocks/fleet.ts` | `ExchangeRate` (Y1, Y2) |
+| Bayiler, araçlar, ek hizmetler, bayi iletişim bilgisi | `lib/fleet-client.ts`, `mocks/` | `GET /branches`, `/vehicles`, `/extras` |
+| SSS (konu alanıyla) | `lib/faq-client.ts`, `mocks/faq.ts` | `GET /faq` (**`topic` alanı gerekiyor**) |
+| Rezervasyon oluşturma (uydurma numara) | `lib/reservation-client.ts` | `POST /reservations` |
+| Kurumsal teklif ve iletişim formu | `lib/quote-actions.ts`, `lib/contact-actions.ts` | `POST /quotes`, `POST /contact` |
+| Giriş (sahte oturum çerezi, yalnızca `USE_MOCKS=1`), çıkış | `lib/auth-actions.ts`, `lib/session.ts`, `mocks/accounts.ts` | `/auth/login`, `/auth/logout`, `/me` |
+| Kayıt, şifre sıfırlama (her zaman hata) | `lib/auth-client.ts` | `/auth/register`, `/auth/forgot-password` |
+| Tercihleri kaydetme (sahte çerez) | `lib/preferences-actions.ts` | `PATCH /me` tercihleri (Y47) |
+| Puanlar, rezervasyonlarım, teklif taleplerim | `lib/account-client.ts`, `mocks/reservations.ts`, `mocks/quotes.ts` | `/me/points`, `/me/reservations`, `GET /me/quotes` (**sözleşmede yok**) |
+| Kurlar | `mocks/fleet.ts` | `GET /rates` |
 
-Dikkat: `USE_MOCKS=1` iken `/odeme` sayfasında giriş koruması **kapalı** (auth API olmadığı için akış yoksa görülemezdi). `USE_MOCKS` kapalıyken her zaman açık. Onay sayfası şimdilik rezervasyonu adresten kuruyor; API gelince numaradan okumalı (adresten sahte onay üretilebilir).
+Dikkat: `USE_MOCKS=1` iken `/odeme` sayfasında giriş koruması **kapalı**; `USE_MOCKS` kapalıyken açık. Onay sayfası rezervasyonu hâlâ adresten kuruyor; API gelince numaradan okumalı.
 
 ## 4. Kalan işler
 
 **FE**
-- BACKLOG M7, **sırasıyla** (Y10–Y32). Sıra G'nin onayıyla belirlendi; değişecekse önce G'ye sorulur.
-- Denetimin kalanı (#47): Lighthouse, axe, ekran okuyucu, klavye turu ([AUDIT.md](AUDIT.md)).
-- Giriş sonrası dönüş yalnızca giriş formunda var; kayıt formu eksik (#35'in kalanı).
-- Yasal metin düzeltmesi: KVKK "işlenen veriler" maddesine para birimi, çerez sayfasındaki "engellerseniz" cümlesine para birimi (#45 sonrası; Y25 ile birlikte yapılabilir).
-- API gelince: MSW/openapi tipleri (#21), ürün/hizmetleri API'ye bağlama (Y5), tüm taklitleri gerçek çağrılarla değiştirme.
-- Web testleri (hiç yok).
+- **Y20** (Kirala → rezervasyon özeti, 15 dakikalık tutma): sözleşme `docs/api/openapi.yaml`'da hazır; örnek veriyle yapılabilir.
+- **Y27** analytics: araç kararı bekliyor (SPEC §10, ADR-19: çerezsiz araç, yalnızca onayla). **Y30** güvenlik başlıkları Y27'ye bağlı (CSP analytics ve harita adreslerini bilmeli).
+- Denetim (#47): Lighthouse, axe, ekran okuyucu, klavye turu.
+- Kayıt formunda giriş sonrası dönüş eksik (#35'in kalanı).
+- Yasal metin: KVKK "işlenen veriler" ve çerez sayfasına para birimi tercihi (Y25'te yapılmadı).
+- API gelince: tüm taklitleri gerçek çağrılarla değiştirmek, openapi tipleri, web testleri (hiç yok).
 
 **BE**
-- `openapi.yaml` (#15): ARCHITECTURE "Backend ile netleşecekler" tablosundaki açık konular burada cevaplanır.
-- Prisma: `Product`, `Service`, `ExchangeRate`; `Reservation` üzerinde para birimi + kur anlık görüntüsü.
-- Seed verisi (#24): SPEC §4.1 rakamları (14 şehirde 15 bayi, 15 model), sınıflar, ek hizmetler, SSS, ürün/hizmet (SPEC Ek A), başlangıç kurları.
-- Uçlar: araç/müsaitlik (#30), rezervasyon (#31), auth (#34), şifre sıfırlama (#36), hesap silme (#37), teklif/SSS/ürün/hizmet (#42), güvenlik (#48), BACKLOG Y33–Y35 (model/araç ayrımı, `POST /contact`, `POST /quotes` alanları).
-- Google Maps anahtarı: referrer kısıtlaması + kota (#44). Anahtar `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`'e girer; yoksa İletişim sayfası yalnızca liste gösterir.
-- Y1, Y2, Y6 (kur tablosu, `?currency=`, çerez ayarları).
-
-**İKİ**
-- Playwright e2e (#46), yayın (#49), ödeme öncesi giriş akışı uçtan uca (#35).
+- Sözleşmedeki uçların gerçeklenmesi; seed (SPEC §4.1: 14 şehirde 15 bayi, 15 model).
+- Sözleşmeye eklenecekler: `topic` (SSS), `GET /me/quotes`, rezervasyon cevabında `pointsEarned`.
+- Y33–Y35, Y45–Y48 (BACKLOG).
+- Google Maps anahtarı: referrer kısıtlaması + kota; `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`.
 
 **Kullanıcı (G)**
-- `SWC_NATIVE_BINDING_CACHE` ortam değişkenini kalıcı yapmak (Y10).
-- İki belge dalını push edip PR açmak; A zincirinin PR'larını açmak.
-- #27'yi (araç detay) "not planned" olarak kapatmak.
-- Y1–Y35 için issue açmak ve numaralarını BACKLOG'a yazdırmak.
-- Simple Footer ekran görüntüsünü göndermek (Y19).
+- Canlıda `NEXT_PUBLIC_SITE_URL` ayarlamak (yoksa sitemap ve JSON-LD adresleri localhost olur).
+- Chrome'da Lighthouse (mobil) çalıştırıp rapora eklemek; 768/1280 px görsel kontrolü.
+- Analytics aracını seçmek (Y27).
+- Arkadaşa iletmek: yukarıdaki sözleşme eklemeleri.
 
 ## 5. Karar bekleyenler
 
-Site güncellemesiyle ilgili açık kararlar SPEC §10'da (kurumsal kutu tasarımı, footer, fotoğraflar, analytics aracı, kampanya içeriği, yayın ortamı). Backend sözleşmesindeki açık konular ARCHITECTURE "Backend ile netleşecekler" tablosunda. Bunların dışında kalanlar:
+Açık kararlar SPEC §10'da (fotoğraflar, analytics aracı, yayın ortamı). Diğerleri:
 
 1. **Kur kaynağı:** ADR-15 günlük harici servis diyor; hangisi, anahtar kimde?
-2. **Rezervasyonda kur:** rezervasyon anındaki kur mu saklanacak, yoksa TRY mi esas? (Öneri: ikisi de.)
-3. **Kurumsal form ve e-posta:** mevcut ön form e-postayı adreste taşıyor (`?eposta=`); bu tarayıcı geçmişine ve günlüklere düşer. Kurumsal akış Y16'da yeniden tasarlanırken çözülecek.
+2. **Rezervasyonda kur:** anlık kur mu saklanacak, TRY mi esas? (Öneri: ikisi de.)
+3. **Kurumsal form e-postası:** ön form e-postayı adreste taşıyor (`?eposta=`); tarayıcı geçmişine düşer.
 4. **`USE_MOCKS` iken ödeme girişi:** kapalı kalsın mı (şimdiki), açık mı?
-5. **İptal koşulu:** SSS "24 saat öncesine kadar ücretsiz" diyor; SPEC'te kural yok. Kural belirlenip rezervasyon özetine yazılmalı mı?
+5. **İptal koşulu:** SSS ve kiralama koşulları "24 saat öncesine kadar ücretsiz" diyor; rezervasyon özetine de yazılsın mı?
+6. **Kurumsal sekmesi hesap açma:** kurumsal hesabı Novera açıyor (öneri); onay bekliyor.
 
-## 6. Süreç kuralları (çakışmayı önlemek için)
+## 6. Süreç kuralları
 
 - Yeni metin yalnızca ilgili özellik dosyasına (`messages/tr/<özellik>.json` ve `en`). Yeni dosya eklenince `i18n/messages.ts` güncellenir.
-- İşler BACKLOG M7 sırasıyla yapılır; bir iş, bağımlı olduğu işler `main`'e girdikten sonra `main`'den dallanır. Zincir kurulmaz.
+- İşler BACKLOG M7 sırasıyla yapılır; değişecekse önce G'ye sorulur.
+- Dallar `main`'den açılır. G onaylarsa art arda zincir kurulabilir (10 Ekim'de beş, sonra on dal böyle yapıldı); G hepsini sırayla "Create a merge commit" ile birleştirir, squash yapmaz.
+- Push, PR ve birleştirme G'nindir.
 - `Closes #N` yalnızca iş tamamen bitince ve tarayıcıda doğrulanınca; kısmi iş için `Refs #N`.
-- Renk kuralı: ana yeşil (`primary`) yalnızca dolgu için; durum göstergesi için `focus` ya da `link` kullanın (koyu temada `primary` yüzeyde 3:1'in altında).
+- Renk kuralı: ana yeşil (`primary`) yalnızca dolgu için; durum göstergesi için `focus` ya da `link` kullanın.
 - Bu makinede `USE_MOCKS=1` ile çalışılır; üretim derlemesinde boş bırakılır.
-- Bu makinede build için `SWC_NATIVE_BINDING_CACHE` tanımlı olmalı (§0).
