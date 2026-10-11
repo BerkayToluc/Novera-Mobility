@@ -1,6 +1,6 @@
 # Proje durumu
 
-Son güncelleme: 2026-10-12. Bu belge bir anlık görüntüdür; kalıcı kararlar ARCHITECTURE'a, kapsam SPEC'e, iş listesi BACKLOG'a aittir. Çelişki olursa onlar kazanır. Dalların `main`'de olup olmadığını bu belgeye değil `git fetch` sonrası git'e sorun.
+Son güncelleme: 2026-10-11. Bu belge bir anlık görüntüdür; kalıcı kararlar ARCHITECTURE'a, kapsam SPEC'e, iş listesi BACKLOG'a aittir. Çelişki olursa onlar kazanır. Dalların `main`'de olup olmadığını bu belgeye değil `git fetch` sonrası git'e sorun.
 
 **Güncel plan:** SPEC v0.4, ARCHITECTURE v0.2 ve BACKLOG M7 (sıralı iş listesi). Hepsi `main`'de.
 
@@ -16,7 +16,7 @@ SWC_NATIVE_BINDING_CACHE=C:\Users\karad\.swc-cache
 
 Bununla `pnpm build`, `pnpm typecheck` ve `pnpm lint` geçiyor. İzinlere dokunulmadı. CI'da ayrıca iç link kontrolü çalışır (`apps/web/scripts/check-links.mjs`, Y31).
 
-**Doğrulama borcu.** İşlerin çoğu 375 px'te ve DOM üzerinden denendi; 768/1280 px görsel kontrolü, klavye turu, axe ve Lighthouse yapılmadı (tarayıcı paneli gizliyken ekran görüntüsü güvenilmez). Bu yüzden birçok commit `Refs #N` taşıyor. Ölçümler ve eksikler: [PERFORMANCE.md](PERFORMANCE.md), [AUDIT.md](AUDIT.md).
+**Doğrulama.** 11 Ekim'de 25 sayfa 375, 768 ve 1280 px'te Playwright (sistem Chrome'u) ile ölçüldü: yatay taşma yok, axe (WCAG 2.2 AA, 75 tarama) sıfır ihlal, 11 sayfada Tab ile klavye turu (ilk durak "İçeriğe geç", odak tuzağı ve halkasız öğe yok; ölçüm hesaplanmış stile bakar, gözle inceleme değildir). Uzun sayfaların 375/1280 hâli yalnızca ölçüldü, tek tek gözle incelenmedi. **Hâlâ yapılmadı:** Lighthouse (G yapmayacak; PERFORMANCE.md'deki mobil sayılar geliştirme sunucusundan, geçerli değil; ölçmek isteyen production build + gizli pencere + Kaspersky'nin script eklemesi kapalı kullanmalı), ekran okuyucu turu. Bu yüzden bazı commit'ler `Refs #N` taşır. Ölçümler ve eksikler: [PERFORMANCE.md](PERFORMANCE.md), [AUDIT.md](AUDIT.md).
 
 ## 1. `main`'de olanlar
 
@@ -34,7 +34,18 @@ BACKLOG M7'nin frontend işlerinin **tamamı** (Y10–Y44, Y20, Y25–Y32 dahil)
 
 ## 2. Bekleyen dallar
 
-Yok. Önceki zincir dallarının hepsi birleşti. Yeni iş için `main`'den dallanılır.
+Tablet (768 px) düzeni ve denetim düzeltmeleri, birbirinin üzerine kurulu sekiz dallık zincir (5–8 `feat/navbar-pill` ile başlar ve birbirine kurulu; 5 numaralı belge dalı ayrıdır); G'ye "Create a merge commit" ile **bu sırayla** birleştirmek kalır (`git fetch` sonrası `git log origin/main..origin/<dal>` ile kontrol edin):
+
+1. `fix/tablet-layout`: Yol Boyu Güvence bandı (768'de ortada çizgi, adımlar sağlı sollu), rehber ve araç listeleri 2 sütun (araç kartı md–xl arası dikey), footer, galeri denetimleri, Yardım ve Hakkımızda ayarları.
+2. `fix/booking-tablet`: özet ve ödemede xl altında ekrana yapışan toplam şeridi, hizalanan bağlantı düğmeleri (`size="inline"`), ortalanmış onay sayfası, altı çizili "Şifremi unuttum".
+3. `fix/visual-tour`: İletişim 768'de yan yana, Ürünler'de öksüz kart yok, kaydırılabilir profil sekmeleri, Hakkımızda sayaçlarında axe düzeltmesi, footer bağlantı genişliği.
+4. `fix/quote-centred`: Kurumsal teklif sayfası 1280 px'te tek sütunda ortalı.
+5. `docs/spec-v05`: SPEC v0.5 (navbar, Bayilerimiz, filo ana sayfada, sürücü uygunluğu önerisi §2.10), ADR-22 ve BACKLOG Y49–Y52. Kod değil, ama aşağıdaki üç dalın dayanağı.
+6. `feat/navbar-pill`: yüzen hap navbar, bayraklı dil menüsü, hesap simgesi, tema navbardan çıktı, Hizmetler düz link (Y49).
+7. `feat/branches-page`: `/bayilerimiz`, bayi bölümü İletişim'den taşındı (Y50).
+8. `feat/fleet-on-home`: filo ana sayfada, kategori başına bir liste, `/araclarimiz` kalktı (Y51).
+
+Hepsi `Refs #47` taşır (denetim işi açık). Yeni iş için `main`'den dallanılır.
 
 ## 3. Ön yüzün taklit ettikleri (API gelince değişecek)
 
@@ -58,21 +69,20 @@ Dikkat: `USE_MOCKS=1` iken `/odeme` sayfasında giriş koruması **kapalı**; `U
 
 **FE**
 - Google Maps haritası CSP altında ve gerçek anahtarla denenmedi (CSP Google adreslerine izin veriyor); anahtar gelince bir kez bakılmalı.
-- Denetim (#47): Lighthouse (rapor için [PERFORMANCE.md](PERFORMANCE.md)), axe, ekran okuyucu, 768 px görsel tur, tam klavye turu.
-- Kayıt formunda giriş sonrası dönüş eksik (#35'in kalanı).
+- Denetim (#47): ekran okuyucu. Lighthouse'u G yapmayacak, PERFORMANCE.md'deki sayılar geçersiz kalır. 768 px turu, axe ve klavye turu yapıldı (§0).
+- Fotoğraflar (SPEC §6, §10): G sağlayacak; yerleştirme, WebP/AVIF sıkıştırma (bu makinede `cwebp`/`magick` yok, bir yol gerekir), `next/image` önceliği, sonra production LCP yeniden ölçümü.
 - API gelince: tüm taklitleri gerçek çağrılarla değiştirmek, openapi tipleri; e2e'ye SPEC §8 adım 4 (yeni rezervasyon Rezervasyonlarım'da) eklemek.
 - Bileşen testleri yok (yalnızca birim ve e2e).
 
 **BE**
-- Sözleşmedeki uçların gerçeklenmesi; seed (SPEC §4.1: 14 şehirde 15 bayi, 15 model).
+- Sözleşmedeki uçların gerçeklenmesi. Seed verisi `main`'de (#160); SPEC §4.1'e (14 şehirde 15 bayi, 15 model) uygunluğu bu belge yazılırken denetlenmedi.
 - Sözleşmeye eklenecekler: `topic` (SSS), `GET /me/quotes`, rezervasyon cevabında `pointsEarned`.
 - Y33–Y35, Y45–Y48 (BACKLOG).
 - Google Maps anahtarı: referrer kısıtlaması + kota; `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`.
+- Canlı ortam değişkenleri: `NEXT_PUBLIC_SITE_URL` (yoksa sitemap ve JSON-LD adresleri localhost olur) ve analytics aracını kurup `ANALYTICS_SCRIPT_URL`, `ANALYTICS_WEBSITE_ID` değerlerini yazmak (Umami öngörüldü, ADR-19).
 
 **Kullanıcı (G)**
-- Canlıda `NEXT_PUBLIC_SITE_URL` ayarlamak (yoksa sitemap ve JSON-LD adresleri localhost olur).
-- Chrome'da Lighthouse (mobil) çalıştırıp rapora eklemek; 768/1280 px görsel kontrolü.
-- Analytics aracını kurup (Umami öngörüldü, ADR-19) iki ortam değişkenini canlıya yazmak: `ANALYTICS_SCRIPT_URL`, `ANALYTICS_WEBSITE_ID`.
+- Fotoğrafları sağlamak (liste ve bütçeler SPEC §6).
 - Arkadaşa iletmek: yukarıdaki sözleşme eklemeleri.
 
 ## 5. Karar bekleyenler
@@ -83,7 +93,7 @@ Açık kararlar SPEC §10'da (fotoğraflar, analytics aracı, yayın ortamı). D
 2. **Rezervasyonda kur:** anlık kur mu saklanacak, TRY mi esas? (Öneri: ikisi de.)
 3. **Kurumsal form e-postası:** ön form e-postayı adreste taşıyor (`?eposta=`); tarayıcı geçmişine düşer.
 4. **`USE_MOCKS` iken ödeme girişi:** kapalı kalsın mı (şimdiki), açık mı?
-5. **İptal koşulu:** SSS ve kiralama koşulları "24 saat öncesine kadar ücretsiz" diyor; rezervasyon özetine de yazılsın mı?
+5. ~~**İptal koşulu**~~ Karar verildi: rezervasyon özetinde yazıyor (`4a8f641`, `main`'de).
 6. **Kurumsal sekmesi hesap açma:** kurumsal hesabı Novera açıyor (öneri); onay bekliyor.
 
 ## 6. Süreç kuralları
