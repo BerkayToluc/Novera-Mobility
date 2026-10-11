@@ -88,7 +88,7 @@ export function FleetExplorer({
               </h2>
               <p className="text-small text-fg-muted">{t("modelCount", { count: category.models.length })}</p>
             </header>
-            <ul className="grid gap-4 xl:grid-cols-2">
+            <ul className="grid gap-4 md:grid-cols-2">
               {category.models.map((model) => (
                 <li key={model.slug}>
                   <FleetModelCard model={model} onOpen={() => open(model.slug)} />
