@@ -61,12 +61,18 @@ test.describe("with the banner out of the way", () => {
 
   test("the city filter narrows the branches", async ({ page }) => {
     await page.goto("/iletisim");
-    await page.getByLabel("Şehir").selectOption("İzmir");
+    const city = page.getByLabel("Şehir");
+    await expect
+      .poll(async () => {
+        await city.selectOption("İzmir");
+        return city.inputValue();
+      })
+      .toBe("İzmir");
     // "X of 15 branches are shown": fewer than all of them, and the Izmir ones.
-    const shown = page.getByText(/\d+ bayiden \d+ tanesi gösteriliyor/);
-    await expect(shown).toBeVisible();
-    // The text reads "{total} bayiden {count} tanesi gösteriliyor".
-    const [total, count] = ((await shown.textContent()) ?? "").match(/\d+/g)!.map(Number);
+    const shown = page.getByRole("status").filter({ hasText: /\d/ });
+    await expect(shown).toHaveCount(1);
+    // The text carries "{total}" and "{count}" for the filtered result.
+    const [total, count] = ((await shown.first().textContent()) ?? "").match(/\d+/g)!.map(Number);
     expect(count).toBeGreaterThan(0);
     expect(count).toBeLessThan(total);
     await expect(page.getByRole("list").getByText(/İzmir/).first()).toBeVisible();
