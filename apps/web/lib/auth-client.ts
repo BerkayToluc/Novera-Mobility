@@ -1,4 +1,4 @@
-import { signIn } from "./auth-actions";
+import { signIn, signUp } from "./auth-actions";
 import type { ForgotPasswordInput, LoginInput, RegisterInput } from "./auth-schemas";
 import type { AccountType } from "./session";
 
@@ -20,9 +20,11 @@ export async function login(input: LoginInput, kind: AccountType = "individual")
   return result.locale ?? undefined;
 }
 
-export async function register(input: RegisterInput): Promise<void> {
-  void input;
-  throw new AuthUnavailableError();
+// Resolves to the language the new account starts with, as login does.
+export async function register(input: RegisterInput): Promise<"tr" | "en" | undefined> {
+  const result = await signUp(input);
+  if (!result.ok) throw new AuthUnavailableError();
+  return result.locale ?? undefined;
 }
 
 export async function requestPasswordReset(input: ForgotPasswordInput): Promise<void> {

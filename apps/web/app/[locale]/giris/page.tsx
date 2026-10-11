@@ -44,7 +44,7 @@ export default async function LoginPage({ searchParams }: Props) {
         ) : (
           <>
             <p>{t("noAccount")}</p>
-            <Link href="/kayit" className={linkClasses}>
+            <Link href={{ pathname: "/kayit", query: next ? { sonra: "odeme", ...next } : undefined }} className={linkClasses}>
               {t("register")}
             </Link>
           </>

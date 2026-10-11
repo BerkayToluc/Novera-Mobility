@@ -114,3 +114,45 @@ test("saved preferences come back at the next sign-in", async ({ page }) => {
   const cookies = await context.cookies();
   expect(cookies.find((c) => c.name === "novera-currency")?.value).toBe("EUR");
 });
+
+const fillSignUp = async (page: import("@playwright/test").Page) => {
+  await page.getByLabel("Ad", { exact: true }).fill("Elif");
+  await page.getByLabel("Soyad").fill("Yıldız");
+  await page.getByLabel("E-posta").fill("elif@example.com");
+  await page.getByLabel("Şifre", { exact: true }).fill("uzun-bir-sifre-1");
+  await page.getByRole("checkbox", { name: /KVKK/ }).check();
+  await page.getByRole("button", { name: "Kayıt Ol" }).click();
+};
+
+test("signing up opens the account", async ({ page }) => {
+  await page.goto("/kayit");
+  await fillSignUp(page);
+  await expect(page).toHaveURL(/\/profil$/);
+  await expect(page.getByRole("heading", { level: 1, name: "Profilim" })).toBeVisible();
+});
+
+test("signing up from the payment page goes back to the booking, and only to it", async ({ page }) => {
+  const booking =
+    "alis=istanbul-kadikoy&iade=istanbul-havalimani&baslangic=2026-12-14T10:00&bitis=2026-12-17T10:00&arac=renault-clio-istanbul-kadikoy";
+  // The hold is made the way a visitor makes it, so the payment page it returns to is a live one.
+  await page.goto(`/araclar?${booking.replace("&arac=renault-clio-istanbul-kadikoy", "")}`);
+  await page.getByRole("button", { name: /Kirala.*Renault Clio/ }).click();
+  await page.waitForURL(/tutma=/);
+  const query = new URL(page.url()).search.slice(1);
+
+  await page.goto(`/giris?sonra=odeme&${query}`);
+  await page.getByRole("link", { name: "Kayıt Ol" }).click();
+  await expect(page).toHaveURL(/\/kayit\?sonra=odeme/);
+  await fillSignUp(page);
+  await expect(page).toHaveURL(/\/odeme\?.*tutma=/);
+  await expect(page.getByRole("heading", { level: 1, name: "Ödeme" })).toBeVisible();
+
+  // An address that is not a booking is ignored: it ends up on the profile, not on a page of its choosing.
+  await page.context().clearCookies();
+  await page.context().addCookies([
+    { name: "novera-consent", value: encodeURIComponent('{"v":1,"analytics":false}'), url: "http://localhost:3200" },
+  ]);
+  await page.goto("/kayit?sonra=https://example.org");
+  await fillSignUp(page);
+  await expect(page).toHaveURL(/\/profil$/);
+});

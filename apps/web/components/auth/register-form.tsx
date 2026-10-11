@@ -9,14 +9,16 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
-import { Link } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import { AuthUnavailableError, register as registerAccount } from "@/lib/auth-client";
 import { PASSWORD_MIN_LENGTH, registerSchema, type RegisterInput } from "@/lib/auth-schemas";
 import { FormError } from "./form-error";
 import { useAuthErrorMessages } from "./use-auth-messages";
 
-export function RegisterForm() {
+// `next`: the booking to go back to after signing up (the payment page asked for it), as on login.
+export function RegisterForm({ next }: { next?: Record<string, string> }) {
   const t = useTranslations("Auth");
+  const router = useRouter();
   const messages = useAuthErrorMessages();
   const schema = useMemo(() => registerSchema(messages), [messages]);
   const [formError, setFormError] = useState<string | null>(null);
@@ -47,7 +49,11 @@ export function RegisterForm() {
   async function onSubmit(values: RegisterInput) {
     setFormError(null);
     try {
-      await registerAccount(values);
+      const locale = await registerAccount(values);
+      if (next) router.push({ pathname: "/odeme", query: next }, { locale });
+      else router.push("/profil", { locale });
+      // The header reads the session on the server, so it has to be asked again.
+      router.refresh();
     } catch (error) {
       setFormError(error instanceof AuthUnavailableError ? t("errors.unavailable") : t("errors.generic"));
     }
