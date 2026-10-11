@@ -16,6 +16,7 @@ export async function deleteAccount(): Promise<void> {
 }
 
 export async function getMyReservations(): Promise<Reservation[]> {
+  if (process.env.USE_MOCKS === "1") return (await import("@/mocks/reservations")).MOCK_RESERVATIONS;
   throw new AuthUnavailableError();
 }
 

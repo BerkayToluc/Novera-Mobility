@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { ReservationList } from "@/components/profile/reservation-list";
 import { Button } from "@/components/ui/button";
 import { StateMessage } from "@/components/ui/state-message";
-import { Link } from "@/i18n/navigation";
+import { Link, redirect } from "@/i18n/navigation";
 import { getMyReservations } from "@/lib/account-client";
+import { currentTime } from "@/lib/clock";
 import type { Reservation } from "@/lib/reservation";
 import { getSession } from "@/lib/session";
 
@@ -17,6 +18,8 @@ export default async function BookingsPage() {
   const t = await getTranslations("Profile.bookings");
   const session = await getSession();
   if (!session) return null;
+  // Bookings belong to individual accounts; a corporate one asks for quotes instead.
+  if (session.type !== "individual") redirect({ href: "/profil", locale: await getLocale() });
 
   // Only the fetch sits in the try: a failure to load is an expected state with its own UI,
   // while a rendering bug should still reach the segment's error boundary.
@@ -29,7 +32,7 @@ export default async function BookingsPage() {
 
   // The list could not be fetched: say so, with a way to try again, instead of a blank page.
   const content = reservations ? (
-    <ReservationList reservations={reservations} />
+    <ReservationList reservations={reservations} now={currentTime()} />
   ) : (
     <StateMessage tone="error" title={t("error.title")} text={t("error.text")}>
       <Button asChild>

@@ -53,6 +53,22 @@
         "title": "Bookings could not be loaded",
         "text": "We cannot reach your bookings right now. Please try again.",
         "retry": "Try Again"
+      },
+      "pointsPending": "You will earn {count, plural, one {# point} other {# points}} when it is completed",
+      "pointsEarned": "You earned {count, plural, one {# point} other {# points}}",
+      "upcoming": {
+        "title": "Upcoming trips",
+        "empty": {
+          "title": "No upcoming trips",
+          "text": "A new booking will show up here."
+        }
+      },
+      "past": {
+        "title": "Past trips",
+        "empty": {
+          "title": "No past trips",
+          "text": "Completed and cancelled rentals are listed here."
+        }
       }
     },
     "settings": {

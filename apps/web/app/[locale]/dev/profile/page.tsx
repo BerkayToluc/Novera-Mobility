@@ -66,10 +66,10 @@ export default async function ProfileGalleryPage() {
         <AccountForm user={USER} />
       </Section>
       <Section title="Bookings: list">
-        <ReservationList reservations={RESERVATIONS} />
+        <ReservationList reservations={RESERVATIONS} now={Date.parse("2026-10-10T12:00:00Z")} />
       </Section>
       <Section title="Bookings: empty">
-        <ReservationList reservations={[]} />
+        <ReservationList reservations={[]} now={Date.parse("2026-10-10T12:00:00Z")} />
       </Section>
       <Section title="Bookings: error">
         <StateMessage tone="error" title={t("error.title")} text={t("error.text")} />
