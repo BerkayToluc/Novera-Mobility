@@ -34,12 +34,16 @@ BACKLOG M7'nin frontend işlerinin **tamamı** (Y10–Y44, Y20, Y25–Y32 dahil)
 
 ## 2. Bekleyen dallar
 
-Tablet (768 px) düzeni ve denetim düzeltmeleri, birbirinin üzerine kurulu dört dallık zincir; G'ye "Create a merge commit" ile **bu sırayla** birleştirmek kalır (`git fetch` sonrası `git log origin/main..origin/<dal>` ile kontrol edin):
+Tablet (768 px) düzeni ve denetim düzeltmeleri, birbirinin üzerine kurulu sekiz dallık zincir (5–8 `feat/navbar-pill` ile başlar ve birbirine kurulu; 5 numaralı belge dalı ayrıdır); G'ye "Create a merge commit" ile **bu sırayla** birleştirmek kalır (`git fetch` sonrası `git log origin/main..origin/<dal>` ile kontrol edin):
 
 1. `fix/tablet-layout`: Yol Boyu Güvence bandı (768'de ortada çizgi, adımlar sağlı sollu), rehber ve araç listeleri 2 sütun (araç kartı md–xl arası dikey), footer, galeri denetimleri, Yardım ve Hakkımızda ayarları.
 2. `fix/booking-tablet`: özet ve ödemede xl altında ekrana yapışan toplam şeridi, hizalanan bağlantı düğmeleri (`size="inline"`), ortalanmış onay sayfası, altı çizili "Şifremi unuttum".
 3. `fix/visual-tour`: İletişim 768'de yan yana, Ürünler'de öksüz kart yok, kaydırılabilir profil sekmeleri, Hakkımızda sayaçlarında axe düzeltmesi, footer bağlantı genişliği.
 4. `fix/quote-centred`: Kurumsal teklif sayfası 1280 px'te tek sütunda ortalı.
+5. `docs/spec-v05`: SPEC v0.5 (navbar, Bayilerimiz, filo ana sayfada, sürücü uygunluğu önerisi §2.10), ADR-22 ve BACKLOG Y49–Y52. Kod değil, ama aşağıdaki üç dalın dayanağı.
+6. `feat/navbar-pill`: yüzen hap navbar, bayraklı dil menüsü, hesap simgesi, tema navbardan çıktı, Hizmetler düz link (Y49).
+7. `feat/branches-page`: `/bayilerimiz`, bayi bölümü İletişim'den taşındı (Y50).
+8. `feat/fleet-on-home`: filo ana sayfada, kategori başına bir liste, `/araclarimiz` kalktı (Y51).
 
 Hepsi `Refs #47` taşır (denetim işi açık). Yeni iş için `main`'den dallanılır.
 
