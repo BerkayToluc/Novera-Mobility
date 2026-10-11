@@ -194,15 +194,33 @@ G'nin 10 Ekim istekleri. Her biri BACKLOG M7'de sırası gelince yapılır.
 - **Araç kiralama rehberleri (`/rehberler`):** 4–6 kısa rehber (ör. gerekli belgeler, yakıt ve teslim kuralları, farklı bayiye iade, hasar durumunda ne yapılır, elektrikli araç kullanımı). Metinleri Claude yazar, iddia uydurmaz. Ana sayfada 3–4 kart.
 - **Mobil uygulama reklamı:** ana sayfada kendi bölümü (Yol Boyu Güvence'den sonra). Uygulama kurgusal: mağaza rozetleri görünür ama gerçek mağaza bağlantısı yoktur; görsel yer tutucu (fotoğraf kararı §10).
 
-### 2.10 Sürücü uygunluğu (öneri, onay bekliyor, v0.5)
+### 2.10 Sürücü uygunluğu (v0.5, G onayladı, 11 Ekim)
 
-Kiralayan kişinin aracı yasal ve şirket koşullarına göre kullanabilip kullanamayacağının kontrolü. **Şu an kodda yok;** tek kural metin olarak Kiralama Koşulları'nda: en az 21 yaş, en az 2 yıllık geçerli sürücü belgesi, alışta kimlik ve ehliyet ibrazı. G karar verene kadar bu bölüm bir öneridir, kapsam değildir.
+Kiralayan kişinin aracı koşullara göre kullanıp kullanamayacağının kontrolü. Kontrol ödemeden önce yapılır. **Sitede gerçek bilgi kullanılmaz:** ehliyet numarası, tarihler ve doğrulama hizmeti kurguseldir, ekranda "deneme" olduğu yazar (ödemedeki deneme kartı gibi).
 
-- **Beyana dayalı:** kullanıcı doğum tarihini ve ehliyet veriliş tarihini beyan eder; site yaşı ve ehliyet yılını kiralamanın **başlangıç tarihine** göre hesaplar ve aracın sınıfının koşuluyla karşılaştırır. Ehliyetin gerçekliği doğrulanmaz (kurgusal proje); ekranlarda "beyan" olduğu ve belgelerin alışta kontrol edileceği yazar.
-- **Kural:** her araç sınıfı `minAge` ve `minLicenceYears` taşır, varsayılan 21 ve 2. Sınıfa göre farklı değerleri G belirler. Koşul, arama sonucu kartında karar öncesi görünür.
-- **Akıştaki yeri:** `/odeme`, kart formunun üstünde "Sürücü bilgileri" (kullanıcı bu noktada giriş yapmıştır, §2.3). Kişisel veri adrese konmaz; ödeme isteğiyle sunucuya gider. Uygun değilse ödeme kapanır, tutmayan kural yazılır ve "Başka sınıf seç" sonuçlara döner. 15 dakikalık tutma sürmeye devam eder.
-- **Sunucu yetkilidir:** kontrol `POST /reservations`'ta yeniden yapılır; uygun değilse `422 DRIVER_NOT_ELIGIBLE` ve nedenleri (`age`, `licence_years`) döner.
-- **Açık kararlar (G):** sınıfa göre kural farkı; doğum ve ehliyet tarihinin profilde saklanıp saklanmayacağı; "Ek sürücü" seçilince ikinci sürücü için aynı alanların ilk sürümde olup olmayacağı. Yeni veri KVKK Aydınlatma Metni'ne yazılır.
+- **Kural iki şeye bağlıdır:** aracın sınıfı ve ehliyetin verildiği ülke. Sınıf en az yaşı ve en az ehliyet yılını belirler; ülke ehliyet yılına ek yıl koyabilir ve uluslararası sürücü belgesi isteyebilir. Kurallar tek bir tabloda durur (`apps/web/lib/driver-rules.ts`); değerler **örnektir**, gerçek hukuk bilgisi iddia edilmez, G düzeltir.
+
+| Sınıf | En az yaş | En az ehliyet yılı |
+|---|---|---|
+| Ekonomik | 21 | 2 |
+| Orta sınıf | 21 | 2 |
+| SUV | 23 | 3 |
+| Elektrikli | 23 | 2 |
+| Üst sınıf | 25 | 5 |
+
+| Ehliyetin verildiği ülke | Ehliyet yılına ek | Uluslararası sürücü belgesi |
+|---|---|---|
+| Türkiye | 0 | gerekmez |
+| Almanya | +1 | gerekmez |
+| Birleşik Krallık | +1 | gerekmez |
+| ABD | +2 | gerekir (beyan) |
+
+- **Kullanıcıdan istenenler:** doğum tarihi, ehliyetin verildiği ülke, ehliyet numarası, ehliyet veriliş tarihi ve bir beyan onayı ("bilgilerin doğru olduğunu beyan ederim; belgelerim alışta kontrol edilecek"). ABD seçilince uluslararası sürücü belgesi beyanı da istenir.
+- **Simüle doğrulama:** "Ehliyetimi doğrula" sahte bir doğrulama servisini çağırır; sonuç geçerli, bulunamadı ya da süresi dolmuş olur (deneme numaralarıyla; ekranda ipucu yazar). Gerçek servis yoktur, gerçek ehliyet numarası girilmez. Yaş ve ehliyet yılı kuralı doğrulamadan ayrıca ve kiralamanın **başlangıç gününe** göre uygulanır.
+- **Saklanmaz (G):** doğum tarihi, ehliyet numarası ve tarihleri ne hesaba, ne rezervasyon kaydına, ne tarayıcıya (depolama, çerez) ne de adrese yazılır; yalnızca rezervasyon anında kontrol için kullanılır. Bu, KVKK Aydınlatma Metni'nde yazar.
+- **Akıştaki yeri:** `/odeme`, kart formunun üstünde "Sürücü bilgileri". Uygun değilse ödeme düğmesi kapalı kalır, tutmayan kural açıkça yazılır ve "Başka araç seç" sonuçlara döner. Kontrol sunucu eyleminde yeniden yapılır (istemci atlanabilir). 15 dakikalık tutma sürmeye devam eder.
+- **Karar öncesi şeffaflık:** arama sonucundaki kartta ve rezervasyon özetinde sınıfın koşulu ("en az 23 yaş · 3 yıl ehliyet") ve Kiralama Koşulları bağlantısı görünür.
+- **Kapsam dışı (ilk sürüm):** "Ek sürücü" seçilince ikinci sürücünün kontrolü; sürücü bilgisinin profilde saklanması.
 
 ---
 

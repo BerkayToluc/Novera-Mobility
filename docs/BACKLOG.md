@@ -158,7 +158,7 @@ Sıra ve öneri dosyasındaki ek kalite maddeleri G tarafından 10 Ekim 2026'da 
 | 33 | Y49 | Navbar: yüzen açık hap (Framer "Modern Navbar"), Bayilerimiz linki, tema navbardan kalkar, dil menüsü bayraklı, hesap simgesi, Hizmetler düz link, yalnızca Ürünler açılır (SPEC §2.8) | FE | Y14, Y37 | 375/768/1280'de doğru; menüler klavyeyle gezilebiliyor; axe temiz; tema kontrolü navbarda yok |
 | 34 | Y50 | Bayilerimiz sayfası `/bayilerimiz`: bayi listesi, filtre, harita ve JSON-LD İletişim'den taşınır; İletişim'de yalnızca bağlantı (SPEC §2.6.1) | FE | Y49 | Filtre `/bayilerimiz`'de çalışıyor; İletişim'de bayi bölümü yok; sitemap'te var |
 | 35 | Y51 | Filo ana sayfada: kiralama kutusunun altında kategori çipli bölüm ("Tümü" yok, ilk kategori seçili), `/araclarimiz` kalkar, `?arac=` diğer parametreleri korur (SPEC §2.4) | FE | Y50 | Kart penceresi `/`'de açılıp Esc ile kapanıyor, odak karta dönüyor; eski rota ve nav öğesi yok |
-| 36 | Y52 | Sürücü uygunluğu (yaş ve ehliyet yılı beyanı): önce SPEC §2.10 önerisi ve sözleşme ekleri, onaydan sonra FE (saf fonksiyon, şema, `/odeme` bölümü) ve BE (sınıf kuralı, 422) | İKİ | G'nin kararları | SPEC §2.10 onaylandı; uygun ve uygun olmayan iki yol e2e'de |
+| 36 | Y52 | Sürücü uygunluğu (SPEC §2.10): sınıf ve ehliyet ülkesine göre kural tablosu, `/odeme`'de "Sürücü bilgileri" (doğum tarihi, ülke, simüle ehliyet doğrulama, beyan), sunucu eyleminde yeniden kontrol, karar öncesi koşul satırı; veri saklanmaz; KVKK metni güncellenir. Backend sözleşmesi (sınıf kuralı, 422) ayrı | FE | Y49 | Uygun ve uygun olmayan iki yol e2e'de; doğum tarihi adreste ve depolamada yok; axe temiz |
 
 **Backend (paralel).** Frontend örnek veriyle ilerlediği için bunları beklemez; uçlar gelince örnek veri kapatılır.
 
