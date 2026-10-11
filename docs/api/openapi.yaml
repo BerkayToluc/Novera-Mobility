@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Novera Mobility API
-  version: 0.1.0
+  version: 0.2.0
   description: |
     Novera Mobility backend sözleşmesi (BACKLOG #6). Frontend tipleri ve MSW mock'ları buradan üretilir.
 
@@ -13,25 +13,8 @@ info:
     - **Para:** her tutar `{ "amount": 125000, "currency": "TRY" }`. `amount` alt birimin (kuruş/cent) tam sayısıdır. Fiyat uçları `?currency=` alır (varsayılan `TRY`).
     - **Dil:** çevrilen alanlar iki dille birlikte döner (`{ "tr": "...", "en": "..." }`). `?lang` yoktur.
     - **Sayfalama yok.** Düz liste. Sınıf, yakıt, vites filtrelerini ve bayi arama/şehir filtresini frontend yapar; sunucu yalnızca müsaitliği süzer.
-    - **Enum yazımı:** `locale` ve `theme` küçük harf (`tr`, `light`), diğer tüm enum'lar büyük harf (`CONFIRMED`, `TRY`).
+    - **Enum yazımı:** `locale`, `theme` ve `FaqTopic` küçük harf (`tr`, `light`, `rezervasyon`), diğer tüm enum'lar büyük harf (`CONFIRMED`, `TRY`).
     - **Hata biçimi:** `{ code, message, fieldErrors }`. `code` ve `fieldErrors` değerleri sabit makine kodlarıdır; frontend metni kendi çevirisinden gösterir, `message` ekranda gösterilmez. HTTP: 400 bozuk istek, 422 doğrulama, 401 oturum yok, 404, 409 çakışma, 429 hız sınırı.
-
-    ## Onaylanacak öneriler (G ile)
-
-    Aşağıdakiler benim önerim; PR'da onaylanınca bu liste silinir.
-
-    1. Farklı bayiye bırakma: **ek ücret yok** (v1).
-    2. Fiyatlar **KDV dahil**, ayrı KDV kalemi yok.
-    3. **Karar (G):** "Kirala"da araç **15 dakika tutulur** (`POST /holds`). Süre dolunca serbest kalır; tutulan araç başka aramada müsait görünmez; bitiş zamanı API'den döner (`expiresAt`). Tutma yüzünden çakışma nadirdir ama yine olursa `POST /reservations` `409 VEHICLE_UNAVAILABLE` döner.
-    4. Sahte ödeme için ayrı uç yok: `POST /reservations` ödeme ekranında çağrılır ve rezervasyonu doğrudan `CONFIRMED` oluşturur.
-    5. İletişim formu yalnızca veritabanına yazılır, e-posta gönderilmez.
-    6. Puan: her tam ₺100 için 1 puan (TRY karşılığı üzerinden), rezervasyon oluşunca verilir, iptalde geri alınır. Puanla ödeme yok.
-    7. Gün sayısı: `ceil((endAt - startAt) / 24 saat)`, en az 1.
-    8. Kurumsal hesabı Novera açar; sitede kurumsal kayıt yoktur (`/auth/register` yalnızca bireysel).
-    9. `POST /quotes` alanları geçicidir (BACKLOG Y35, kurumsal kutu tasarımı onaylanınca netleşir).
-    10. Varsayılan tema `light` (SPEC v0.4); `system` seçenek olarak vardır.
-
-    Kesinleşenler (G, 10 Ekim): 1, 2, 4 ve 6 onaylandı; 3 yukarıdaki gibi değişti.
 servers:
   - url: http://localhost:3000
     description: Yerel geliştirme (API doğrudan; tarayıcıdan Next proxy üzerinden `/api` ile)
@@ -97,12 +80,8 @@ paths:
       summary: Müsait araçlar (arama sonuçları)
       description: |
         Alış bayisinde, verilen aralıkta müsait olan araçlar. Aynı modelden birden fazla müsait araç varsa
-        model başına bir sonuç döner (`vehicleId` müsait olanlardan biridir). Rezervasyonla çakışanlar
-        ve süresi dolmamış bir tutmayla (`/holds`) tutulan araçlar listede çıkmaz.
+        model başına bir sonuç döner (`vehicleId` müsait olanlardan biridir).
         Fiyatlar seçilen para biriminde, ek hizmetler hariçtir.
-
-        **Tarih ve bayi parametreleri zorunludur.** Tarihsiz çağrı yoktur; model başına bayi listesi
-        (Araçlarımız sayfası) için `GET /vehicle-models` kullanılır.
       parameters:
         - { name: pickupBranchId, in: query, required: true, schema: { type: string, format: uuid } }
         - { name: returnBranchId, in: query, required: true, schema: { type: string, format: uuid } }
@@ -151,12 +130,8 @@ paths:
   /holds:
     post:
       tags: [reservations]
-      summary: Aracı 15 dakika tut ("Kirala")
-      description: |
-        Giriş gerekmez (giriş ödemeden hemen önce istenir). Seçilen aracı verilen aralık için 15 dakika tutar;
-        bu sürede araç başka aramalarda müsait görünmez. Dönen `expiresAt` geri sayım içindir.
-        Aynı IP için eşzamanlı tutma sayısı sınırlıdır (`429 RATE_LIMITED`); araç tutulamıyorsa
-        `409 VEHICLE_UNAVAILABLE`.
+      summary: Aracı 15 dakika geçici tut (Kirala butonunda)
+      description: Seçilen aracı 15 dakika boyunca başka aramalara kapatır (BACKLOG Y48).
       requestBody:
         required: true
         content:
@@ -170,17 +145,6 @@ paths:
               schema: { $ref: "#/components/schemas/Hold" }
         "409": { $ref: "#/components/responses/Conflict" }
         "422": { $ref: "#/components/responses/ValidationFailed" }
-        "429": { $ref: "#/components/responses/TooManyRequests" }
-
-  /holds/{id}:
-    delete:
-      tags: [reservations]
-      summary: Tutmayı bırak
-      description: Kullanıcı aramayı değiştirir ya da vazgeçerse aracı hemen serbest bırakır. Olmayan veya süresi dolmuş tutmada da `204` döner.
-      parameters:
-        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
-      responses:
-        "204": { description: Bırakıldı }
 
   /reservations/price:
     post:
@@ -206,9 +170,8 @@ paths:
       tags: [reservations]
       summary: Rezervasyon oluştur (sahte ödeme ekranında)
       description: |
-        Giriş gerekir. Rezervasyon `CONFIRMED` oluşur, para alınmaz. `holdId` verilirse ve tutma geçerliyse
-        araç o tutmaya göre alınır, tutma silinir. Süresi dolmuşsa müsaitlik işlem içinde tekrar kontrol edilir;
-        araç hâlâ boşsa devam edilir, değilse `409 VEHICLE_UNAVAILABLE`. Puan aynı işlemde yazılır.
+        Giriş gerekir. Rezervasyon `CONFIRMED` oluşur, para alınmaz. Müsaitlik işlem içinde tekrar kontrol edilir;
+        çakışmada `409 VEHICLE_UNAVAILABLE`. Puan aynı işlemde yazılır.
       security:
         - cookieAuth: []
       requestBody:
@@ -241,6 +204,23 @@ paths:
               schema:
                 type: array
                 items: { $ref: "#/components/schemas/Reservation" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /me/quotes:
+    get:
+      tags: [me]
+      summary: Kurumsal teklif taleplerim
+      description: Kurumsal kullanıcının geçmişten bugüne oluşturduğu filo teklif talepleri listesi.
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Teklif talepleri listesi
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/QuoteSummary" }
         "401": { $ref: "#/components/responses/Unauthorized" }
 
   /me/points:
@@ -401,7 +381,7 @@ paths:
       parameters:
         - name: audience
           in: query
-          required: true
+          required: false
           schema: { $ref: "#/components/schemas/FaqAudience" }
       responses:
         "200":
@@ -458,7 +438,7 @@ paths:
       tags: [forms]
       summary: Kurumsal teklif / görüşme talebi
       description: |
-        Alanlar geçicidir (BACKLOG Y35). `website` görünmeyen tuzak alandır: doluysa `422 SPAM_DETECTED`.
+        `website` görünmeyen tuzak alandır: doluysa `422 SPAM_DETECTED`.
         Giriş yapmış kurumsal kullanıcıda talep hesaba bağlanır.
       requestBody:
         required: true
@@ -559,6 +539,7 @@ components:
             - EMAIL_TAKEN
             - NOT_FOUND
             - VEHICLE_UNAVAILABLE
+            - HOLD_EXPIRED
             - INVALID_DATE_RANGE
             - RESET_TOKEN_INVALID
             - SPAM_DETECTED
@@ -619,6 +600,7 @@ components:
       required: [received]
       properties:
         received: { type: boolean, example: true }
+        referenceNumber: { type: string, nullable: true, example: TKL-2026-00042 }
 
     # ---------- Katalog ----------
     OpeningHours:
@@ -741,30 +723,7 @@ components:
           example: 0.0291
         updatedAt: { type: string, format: date-time }
 
-    # ---------- Rezervasyon ----------
-    ReservationRequest:
-      type: object
-      required: [vehicleId, pickupBranchId, returnBranchId, startAt, endAt, currency]
-      properties:
-        vehicleId: { type: string, format: uuid }
-        pickupBranchId: { type: string, format: uuid }
-        returnBranchId: { type: string, format: uuid }
-        startAt: { type: string, format: date-time }
-        endAt: { type: string, format: date-time }
-        currency: { $ref: "#/components/schemas/Currency" }
-        holdId:
-          type: string
-          format: uuid
-          description: "`POST /holds` cevabındaki tutma. Yalnızca `POST /reservations` kullanır; isteğe bağlı."
-        extras:
-          type: array
-          items:
-            type: object
-            required: [slug, quantity]
-            properties:
-              slug: { type: string }
-              quantity: { type: integer, minimum: 1, maximum: 10 }
-
+    # ---------- Rezervasyon ve Tutma ----------
     HoldRequest:
       type: object
       required: [vehicleId, pickupBranchId, returnBranchId, startAt, endAt]
@@ -781,10 +740,27 @@ components:
       properties:
         id: { type: string, format: uuid }
         vehicleId: { type: string, format: uuid }
-        expiresAt:
-          type: string
-          format: date-time
-          description: Tutmanın bittiği an (UTC). Geri sayım bununla yapılır; istemci saatine güvenilmez.
+        expiresAt: { type: string, format: date-time }
+
+    ReservationRequest:
+      type: object
+      required: [vehicleId, pickupBranchId, returnBranchId, startAt, endAt, currency]
+      properties:
+        vehicleId: { type: string, format: uuid }
+        holdId: { type: string, format: uuid, nullable: true }
+        pickupBranchId: { type: string, format: uuid }
+        returnBranchId: { type: string, format: uuid }
+        startAt: { type: string, format: date-time }
+        endAt: { type: string, format: date-time }
+        currency: { $ref: "#/components/schemas/Currency" }
+        extras:
+          type: array
+          items:
+            type: object
+            required: [slug, quantity]
+            properties:
+              slug: { type: string }
+              quantity: { type: integer, minimum: 1, maximum: 10 }
 
     PriceLine:
       type: object
@@ -853,6 +829,14 @@ components:
         rules: { $ref: "#/components/schemas/LocalizedText" }
 
     # ---------- Hesap ----------
+    SalesContact:
+      type: object
+      required: [name, email, phone]
+      properties:
+        name: { type: string, example: Selin Kaya }
+        email: { type: string, format: email, example: kurumsal@novera.example }
+        phone: { type: string, example: "+90 212 555 01 99" }
+
     User:
       type: object
       required: [id, email, firstName, lastName, accountType, companyName, locale, theme, currency]
@@ -863,8 +847,16 @@ components:
         lastName: { type: string }
         accountType: { type: string, enum: [INDIVIDUAL, CORPORATE] }
         companyName: { type: string, nullable: true }
+        taxOffice: { type: string, nullable: true }
+        companyCity: { type: string, nullable: true }
+        companyPhone: { type: string, nullable: true }
+        contactTitle: { type: string, nullable: true }
+        salesContact:
+          allOf:
+            - $ref: "#/components/schemas/SalesContact"
+          nullable: true
         locale: { type: string, enum: [tr, en] }
-        theme: { type: string, enum: [light, dark, system], description: Varsayılan `light`. }
+        theme: { type: string, enum: [light, dark, system] }
         currency: { $ref: "#/components/schemas/Currency" }
 
     UserUpdate:
@@ -901,11 +893,17 @@ components:
       type: string
       enum: [INDIVIDUAL, CORPORATE]
 
+    FaqTopic:
+      type: string
+      enum: [rezervasyon, odeme, teslim, hasar, hesap, kurumsal]
+
     FaqItem:
       type: object
-      required: [id, question, answer]
+      required: [id, audience, topic, question, answer]
       properties:
         id: { type: string, format: uuid }
+        audience: { $ref: "#/components/schemas/FaqAudience" }
+        topic: { $ref: "#/components/schemas/FaqTopic" }
         question: { $ref: "#/components/schemas/LocalizedText" }
         answer: { $ref: "#/components/schemas/LocalizedText" }
 
@@ -931,16 +929,35 @@ components:
         summary: { $ref: "#/components/schemas/LocalizedText" }
         points: { $ref: "#/components/schemas/LocalizedList" }
 
-    # ---------- Formlar ----------
+    # ---------- Formlar ve Kurumsal Teklifler ----------
+    QuoteStatus:
+      type: string
+      enum: [RECEIVED, IN_REVIEW, OFFERED]
+
+    QuoteSummary:
+      type: object
+      required: [id, number, createdAt, vehicleCount, durationMonths, status]
+      properties:
+        id: { type: string, format: uuid }
+        number: { type: string, example: TKL-2026-00042 }
+        createdAt: { type: string, format: date-time }
+        vehicleCount: { type: integer, example: 10 }
+        durationMonths: { type: integer, example: 24 }
+        productSlug: { type: string, nullable: true }
+        status: { $ref: "#/components/schemas/QuoteStatus" }
+
     QuoteRequest:
       type: object
-      description: Geçici alanlar (BACKLOG Y35).
       required: [companyName, vehicleCount, durationMonths, vehicleType, email, consent]
       properties:
         companyName: { type: string, minLength: 1, maxLength: 160 }
+        contactName: { type: string, nullable: true, maxLength: 120 }
+        phone: { type: string, nullable: true, maxLength: 30 }
         vehicleCount: { type: integer, minimum: 1, maximum: 10000 }
         durationMonths: { type: integer, minimum: 1, maximum: 120 }
-        vehicleType: { type: string, description: Araç sınıfı slug'ı veya serbest metin. }
+        vehicleType: { type: string, description: Araç sınıfı slug'ı veya virgülle ayrılmış ihtiyaç türleri. }
+        deliveryCities: { type: string, nullable: true, maxLength: 240 }
+        notes: { type: string, nullable: true, maxLength: 2000 }
         email: { type: string, format: email }
         productSlug: { type: string, nullable: true }
         consent: { type: boolean }
