@@ -298,6 +298,17 @@
   /* Partner strip (SPEC §2.2.4): the track holds two identical sets, so moving it by half
      its width loops without a seam. Paused by hover, its own button and reduced motion. */
   --animate-marquee: marquee 48s linear infinite;
+  --animate-fade-in: fade-in 0.3s ease-out;
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
   @keyframes marquee {
     from {
       transform: translateX(0);

@@ -66,6 +66,11 @@
     },
     "ctaTitle": "Would you like to work with us?",
     "ctaText": "Get in touch with our team for any question or fleet need.",
-    "ctaButton": "Contact Us"
+    "ctaButton": "Contact Us",
+    "timelineNav": {
+      "label": "Our story, by year",
+      "previous": "Previous year",
+      "next": "Next year"
+    }
   }
 }
