@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { AudienceSwitch } from "@/components/home/audience-switch";
+import { AppPromo } from "@/components/home/app-promo";
 import { CampaignArt, type CampaignArtKind } from "@/components/home/campaign-art";
 import { CampaignGallery, type CampaignSlide } from "@/components/home/campaign-gallery";
 import { QuoteForm } from "@/components/quote/quote-form";
@@ -32,8 +33,8 @@ export async function generateMetadata(): Promise<Metadata> {
   return pageMetadata({ href: "/", description: t("metaDescription") });
 }
 
-// Section order of SPEC §2.2: campaigns, the rental box, partners, Road Assurance, FAQ. The
-// app section and the guides join between them with their own work (BACKLOG Y39, Y40).
+// Section order of SPEC §2.2: campaigns, the rental box, partners, Road Assurance, the app, FAQ.
+// The guides join before the FAQ with their own work (BACKLOG Y40).
 export default async function Home({ searchParams }: PageProps<"/[locale]">) {
   const t = await getTranslations("HomePage");
   const audience = parseAudience((await searchParams).tip);
@@ -108,7 +109,8 @@ export default async function Home({ searchParams }: PageProps<"/[locale]">) {
 
       <GuaranteeBand />
 
-      <div className="mx-auto max-w-content px-4 py-16 md:px-8 xl:py-24">
+      <div className="mx-auto flex max-w-content flex-col gap-16 px-4 py-16 md:px-8 xl:gap-24 xl:py-24">
+        <AppPromo />
         <FaqSection audience={audience} />
       </div>
     </>

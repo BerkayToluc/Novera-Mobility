@@ -63,6 +63,21 @@
           "cta": "Teklif İste"
         }
       }
+    },
+    "app": {
+      "title": "Novera cebinizde",
+      "text": "Novera Driver App ile teslim aldığınız andan iade edene kadar işlemleriniz telefonunuzdan yürür.",
+      "points": {
+        "report": "Anahtarı teslim alırken çizik ve hasarı fotoğraflayıp dijital tutanak tutun.",
+        "sos": "Bir aksilikte tek tuşla konumunuzu merkeze iletip yardım çağırın.",
+        "desk": "7/24 operasyon masasına uygulamadan ya da telefonla bağlanın."
+      },
+      "badgeTop": "İndirin",
+      "stores": {
+        "appStore": "App Store",
+        "googlePlay": "Google Play"
+      },
+      "soon": "Uygulama mağazalarda yakında. Rozetler henüz bağlantı değildir."
     }
   },
   "Guarantee": {
