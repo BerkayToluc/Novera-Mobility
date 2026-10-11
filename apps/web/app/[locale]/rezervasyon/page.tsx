@@ -4,6 +4,7 @@ import { getFormatter, getLocale, getTranslations } from "next-intl/server";
 import { ExtrasSelect } from "@/components/booking/extras-select";
 import { HoldCountdown } from "@/components/booking/hold-countdown";
 import { HoldEnded } from "@/components/booking/hold-states";
+import { TotalBar } from "@/components/booking/total-bar";
 import { Button } from "@/components/ui/button";
 import { StateMessage } from "@/components/ui/state-message";
 import { GuaranteeStrip } from "@/components/vehicle/guarantee-strip";
@@ -97,7 +98,7 @@ export default async function BookingSummaryPage({ searchParams }: Props) {
                 <dd className="text-body text-fg">{t("days", { days })}</dd>
               </div>
             </dl>
-            <Button asChild variant="link" className="self-start px-0">
+            <Button asChild variant="link" size="inline" className="self-start">
               <Link href={{ pathname: "/araclar", query: toQuery(booking.search) }}>{t("changeTrip")}</Link>
             </Button>
           </section>
@@ -118,7 +119,7 @@ export default async function BookingSummaryPage({ searchParams }: Props) {
                 <span className="text-fg-muted">{vehicle.vehicleClass.name[locale]}</span>
               </p>
             </div>
-            <Button asChild variant="link" className="self-start px-0">
+            <Button asChild variant="link" size="inline" className="self-start">
               <Link href={{ pathname: "/araclar", query: toQuery(booking.search) }}>{t("changeVehicle")}</Link>
             </Button>
           </section>
@@ -178,11 +179,17 @@ export default async function BookingSummaryPage({ searchParams }: Props) {
           </p>
           <p className="text-small text-fg-muted">{t("noHidden")}</p>
           <p className="text-small text-fg-muted">{t("payNote")}</p>
-          <Button asChild size="lg">
+          <Button asChild size="lg" className="max-xl:hidden">
             <Link href={{ pathname: "/odeme", query }}>{t("continue")}</Link>
           </Button>
         </section>
       </div>
+
+      <TotalBar label={t("total")} amount={money(summary.total)}>
+        <Button asChild size="lg">
+          <Link href={{ pathname: "/odeme", query }}>{t("continue")}</Link>
+        </Button>
+      </TotalBar>
     </>,
   );
 }

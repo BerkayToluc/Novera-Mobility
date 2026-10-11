@@ -28,12 +28,12 @@ export function FleetModelCard({
   return (
     <article
       className={cn(
-        "group relative flex items-center gap-4 rounded-card border border-border bg-surface p-3 transition-colors md:gap-6 md:p-4",
+        "group relative flex items-center gap-4 rounded-card border border-border bg-surface p-3 transition-colors md:flex-col md:items-stretch md:gap-4 md:p-4 xl:flex-row xl:items-center xl:gap-6",
         "hover:border-primary hover:bg-surface-muted focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-focus",
         className,
       )}
     >
-      <div className="w-28 shrink-0 md:w-56">
+      <div className="w-28 shrink-0 md:w-full xl:w-56">
         <VehicleImage imageUrl={model.imageUrl} brand={model.brand} model={model.model} decorative />
       </div>
 
@@ -71,7 +71,7 @@ export function FleetModelCard({
 
       <span
         aria-hidden="true"
-        className="inline-flex size-10 shrink-0 items-center justify-center rounded-full border border-border text-link transition-all group-hover:border-primary group-hover:bg-primary group-hover:text-on-primary"
+        className="inline-flex size-10 shrink-0 items-center justify-center rounded-full border border-border text-link transition-all md:absolute md:bottom-4 md:right-4 xl:static group-hover:border-primary group-hover:bg-primary group-hover:text-on-primary"
       >
         <ArrowRight className="size-5 transition-transform group-hover:translate-x-0.5" />
       </span>

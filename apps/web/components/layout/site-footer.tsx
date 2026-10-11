@@ -26,7 +26,7 @@ export async function SiteFooter() {
 
   return (
     <footer className="border-t border-border bg-surface-muted text-fg">
-      <div className="mx-auto grid max-w-content grid-cols-2 gap-x-6 gap-y-12 px-4 py-16 md:grid-cols-3 md:gap-x-12 md:px-8 xl:grid-cols-[minmax(0,1.4fr)_repeat(3,minmax(0,1fr))] xl:gap-x-16 xl:py-20">
+      <div className="mx-auto grid max-w-content grid-cols-2 gap-x-6 gap-y-12 px-4 py-16 md:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1.2fr)] md:gap-x-8 md:px-8 xl:gap-x-16 xl:grid-cols-[minmax(0,1.4fr)_repeat(3,minmax(0,1fr))] xl:py-20">
         <div className="col-span-2 flex flex-col gap-4 md:col-span-3 xl:col-span-1">
           <Link href="/" aria-label={nav("homeLabel")} className="inline-flex min-h-11 items-center self-start">
             <Logo className="h-9 w-auto" />
@@ -39,7 +39,7 @@ export async function SiteFooter() {
           <h2 id="footer-explore" className={headingClasses}>
             {t("explore")}
           </h2>
-          <ul>
+          <ul className="md:grid md:grid-cols-2 md:gap-x-4 xl:block">
             {NAV_ITEMS.map(({ href, labelKey }) => (
               <li key={href}>
                 <Link href={href} className={linkClasses}>
@@ -111,7 +111,7 @@ export async function SiteFooter() {
           {/* Shown, not linked (G's decision): the fictional company has no real accounts, so
               there is nothing honest to point at. No hover state, nothing to suggest a click. */}
           <div className="flex items-center gap-4">
-            <p className="text-small text-fg-muted">{t("follow")}</p>
+            <p className="whitespace-nowrap text-small text-fg-muted">{t("follow")}</p>
             <ul className="flex items-center gap-2">
               {SOCIAL_NETWORKS.map((network) => (
                 <li

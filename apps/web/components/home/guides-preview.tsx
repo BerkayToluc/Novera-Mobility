@@ -23,9 +23,9 @@ export async function GuidesPreview() {
           <Link href="/rehberler">{t("viewAll")}</Link>
         </Button>
       </header>
-      <ul className="grid gap-6 md:grid-cols-3">
+      <ul className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
         {PREVIEW.map((slug) => (
-          <li key={slug}>
+          <li key={slug} className="md:last:col-span-2 xl:last:col-span-1">
             <GuideCard slug={slug} headingAs="h3" />
           </li>
         ))}

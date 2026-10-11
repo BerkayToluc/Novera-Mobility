@@ -36,19 +36,30 @@ export async function GuaranteeBand() {
         </div>
 
         <div className="relative">
-          {/* The road: vertical behind the markers below xl, horizontal from xl up. Outside the
-              list, since an <ol> may only hold list items. */}
+          {/* The road: vertical at the left on a phone, down the middle on a tablet (stops alternate
+              left and right of it), horizontal from xl up. Outside the list, since an <ol> may
+              only hold list items. */}
           <span
             aria-hidden="true"
-            className="absolute bottom-6 left-6 top-6 border-l-2 border-dashed border-on-band/40 xl:bottom-auto xl:right-6 xl:border-l-0 xl:border-t-2"
+            className="absolute bottom-6 left-6 top-6 border-l-2 border-dashed border-on-band/40 md:left-1/2 md:-translate-x-px xl:bottom-auto xl:left-6 xl:right-6 xl:translate-x-0 xl:border-l-0 xl:border-t-2"
           />
           <ol className="relative grid gap-10 xl:grid-cols-5 xl:gap-6">
           {STEPS.map(({ key, icon: Icon }, index) => (
-            <li key={key} className="relative flex gap-5 xl:flex-col">
-              <span className="relative z-10 inline-flex size-12 shrink-0 items-center justify-center rounded-full border border-on-band/30 bg-band text-band-accent">
+            <li
+              key={key}
+              className={`relative flex gap-5 md:w-1/2 md:gap-0 xl:w-auto xl:flex-col xl:gap-5 ${
+                index % 2 === 0 ? "md:flex-row-reverse md:text-right xl:flex-col xl:text-left" : "md:ml-auto xl:ml-0"
+              }`}
+            >
+              {/* The marker is centred on the road: half its width is pushed over the column edge. */}
+              <span
+                className={`relative z-10 inline-flex size-12 shrink-0 items-center justify-center rounded-full border border-on-band/30 bg-band text-band-accent xl:translate-x-0 ${
+                  index % 2 === 0 ? "md:translate-x-6" : "md:-translate-x-6"
+                }`}
+              >
                 <Icon aria-hidden="true" className="size-5" />
               </span>
-              <div className="flex flex-col gap-2 pt-2 xl:pt-0">
+              <div className="flex flex-col gap-2 pt-2 md:px-2 xl:px-0 xl:pt-0">
                 <span className="sr-only">{index + 1}.</span>
                 <h3 className="text-h3">{t(`steps.${key}.title`)}</h3>
                 <p className="max-w-xs text-body text-on-band/80">{t(`steps.${key}.text`)}</p>

@@ -49,8 +49,9 @@ export default async function ConfirmationPage({ searchParams }: Props) {
   }
 
   return (
-    <div className="mx-auto flex max-w-content flex-col gap-8 px-4 py-12 md:px-8 xl:py-16">
-      <header className="flex flex-col gap-4">
+    <div className="mx-auto flex max-w-2xl flex-col items-center gap-8 px-4 py-12 md:px-8 xl:py-16">
+      {/* A single short column, centred: the page ends a flow, so it reads as a receipt, not a form. */}
+      <header className="flex flex-col items-center gap-4 text-center">
         <CheckCircle2 aria-hidden="true" className="size-10 text-success" />
         <h1 className="text-h1 text-fg">{t("title")}</h1>
         <p className="max-w-prose text-body text-fg-muted">{t("text")}</p>
@@ -66,12 +67,12 @@ export default async function ConfirmationPage({ searchParams }: Props) {
         )}
       </header>
 
-      <div className="flex max-w-xl flex-col gap-4">
+      <div className="flex w-full max-w-xl flex-col gap-4">
         <BookingBrief data={loaded} title={t("rentalTitle")} />
         <GuaranteeStrip />
       </div>
 
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap justify-center gap-3">
         <Button asChild size="lg">
           <Link href="/profil/rezervasyonlar">{t("bookings")}</Link>
         </Button>

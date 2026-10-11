@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { Info } from "lucide-react";
-import { getLocale, getTranslations } from "next-intl/server";
+import { getFormatter, getLocale, getTranslations } from "next-intl/server";
 import { BookingBrief } from "@/components/booking/booking-brief";
 import { HoldCountdown } from "@/components/booking/hold-countdown";
 import { HoldEnded } from "@/components/booking/hold-states";
+import { TotalBar } from "@/components/booking/total-bar";
 import { PaymentForm } from "@/components/payment/payment-form";
 import { Button } from "@/components/ui/button";
 import { StateMessage } from "@/components/ui/state-message";
@@ -14,6 +15,7 @@ import { toBookingQuery } from "@/lib/booking";
 import { loadBooking } from "@/lib/booking-data";
 import { currentTime } from "@/lib/clock";
 import { getCurrency } from "@/lib/get-currency";
+import { formatMoney } from "@/lib/price";
 import { getSession } from "@/lib/session";
 
 type Props = { searchParams: Promise<Record<string, string | string[] | undefined>> };
@@ -87,11 +89,13 @@ export default async function PaymentPage({ searchParams }: Props) {
         <div className="flex flex-col gap-4 xl:sticky xl:top-24">
           <BookingBrief data={loaded} title={t("summaryTitle")} />
           <GuaranteeStrip />
-          <Button asChild variant="link" className="self-start px-0">
+          <Button asChild variant="link" size="inline" className="self-start">
             <Link href={{ pathname: "/rezervasyon", query: loaded.query }}>{t("edit")}</Link>
           </Button>
         </div>
       </div>
+
+      <TotalBar label={t("total")} amount={formatMoney(await getFormatter(), loaded.summary.total)} />
     </>,
   );
 }
