@@ -1,0 +1,43 @@
+{
+  "HelpPage": {
+    "metaTitle": "Yardım Merkezi",
+    "metaDescription": "Rezervasyon, ödeme, araç teslimi, hasar ve arıza ile hesabınız hakkında sık sorulan sorular; aradığınızı bulamazsanız ekibimize yazın.",
+    "title": "Yardım merkezi",
+    "intro": "Sorunuzun cevabını konuya göre bulun ya da arayın.",
+    "searchLabel": "Yardım konusunda ara",
+    "searchPlaceholder": "Örneğin: iptal, KDV, belge",
+    "topicsLabel": "Konular",
+    "allTopics": "Tümü",
+    "topics": {
+      "rezervasyon": "Rezervasyon",
+      "odeme": "Ödeme",
+      "teslim": "Araç teslimi",
+      "hasar": "Hasar ve arıza",
+      "hesap": "Hesap",
+      "kurumsal": "Kurumsal"
+    },
+    "results": "{count, plural, =0 {Sonuç bulunamadı} one {1 soru gösteriliyor} other {# soru gösteriliyor}}",
+    "open": "Aç",
+    "close": "Kapat",
+    "noResults": {
+      "title": "Aradığınızı bulamadık",
+      "text": "Başka bir sözcükle aramayı deneyin ya da ekibimize yazın.",
+      "button": "Bize yazın"
+    },
+    "empty": {
+      "title": "Henüz soru yok",
+      "text": "Yardım merkezinde yayımlanmış bir soru bulunmuyor."
+    },
+    "error": {
+      "title": "Sorular yüklenemedi",
+      "text": "Yardım sorularını şu an gösteremiyoruz. Lütfen biraz sonra tekrar deneyin."
+    },
+    "guidesTitle": "Rehberlerimize göz atın",
+    "guidesAll": "Tüm rehberler",
+    "cta": {
+      "title": "Cevabı bulamadınız mı?",
+      "text": "Ekibimiz size yardımcı olsun.",
+      "button": "Bize yazın"
+    }
+  }
+}

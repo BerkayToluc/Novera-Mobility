@@ -14,6 +14,7 @@ const PUBLIC: PageHref[] = [
   "/hizmetler",
   "/hakkimizda",
   "/iletisim",
+  "/yardim",
   "/rehberler",
   ...GUIDES.map((slug) => ({ pathname: "/rehberler/[slug]", params: { slug } }) as const),
   "/kurumsal-teklif",

@@ -27,7 +27,8 @@
     "currency": "Para birimi",
     "allProducts": "Tüm ürünler",
     "allServices": "Tüm hizmetler",
-    "guides": "Rehberler"
+    "guides": "Rehberler",
+    "help": "Yardım"
   },
   "Footer": {
     "tagline": "Sadece araç kiralamıyoruz, yol boyu güvence sunuyoruz.",
