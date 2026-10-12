@@ -84,7 +84,7 @@ export function FleetExplorer({
         ))}
       </div>
 
-      <ul aria-label={chosen.name} className="grid gap-4 md:grid-cols-2">
+      <ul aria-label={chosen.name} className="flex flex-col gap-4">
         {chosen.models.map((model) => (
           <li key={model.slug}>
             <FleetModelCard model={model} onOpen={() => open(model.slug)} />

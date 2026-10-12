@@ -15,6 +15,8 @@
     },
     "perDay": "{price} / gün",
     "fromPerDay": "{price} / gün'den başlayan",
+    "priceFrom": "Başlayan fiyat",
+    "perDayUnit": "/ gün",
     "total": "{days, plural, one {# gün} other {# gün}} toplam {price}",
     "consumption": {
       "L_PER_100KM": "{value} L/100 km",
