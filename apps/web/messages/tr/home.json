@@ -110,7 +110,6 @@
   "Partners": {
     "title": "İş birliklerimiz",
     "intro": "Filolarını ve yolculuklarını bize emanet eden kurumlardan bazıları.",
-    "pause": "Kaydırmayı durdur",
-    "play": "Kaydırmayı başlat"
+    "label": "İş birliği yaptığımız kurumların logoları. Hareket ettirmek için üzerine gelin ya da odaklanın."
   }
 }
