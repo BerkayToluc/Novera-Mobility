@@ -8,7 +8,6 @@
     "back": "All guides",
     "homeTitle": "Car rental guides",
     "homeIntro": "What people wonder before renting, short and clear.",
-    "viewAll": "All guides",
     "moreTitle": "More guides",
     "helpTitle": "Did not find the answer?",
     "helpText": "Our team is happy to help.",
@@ -159,6 +158,12 @@
           }
         ]
       }
+    },
+    "carousel": {
+      "label": "Car rental guides",
+      "roledescription": "carousel",
+      "previous": "Previous guides",
+      "next": "Next guides"
     }
   }
 }
