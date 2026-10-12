@@ -1,6 +1,6 @@
 # Novera Mobility: Ürün Tanımı (SPEC)
 
-> Durum: **Taslak v0.5** · 11 Ekim 2026 (v0.4: 10 Ekim, v0.3: 9 Ekim, v0.2: 4 Ekim 2026). v0.5: G'nin 11 Ekim navbar ve sayfa düzeni geri bildirimi (yüzen hap navbar, Bayilerimiz sayfası, filonun ana sayfaya taşınması; §2.1, §2.4, §2.6, §2.8, §5.3, §8)
+> Durum: **Taslak v0.6** · 12 Ekim 2026 (v0.6: G'nin 12 Ekim ana sayfa rötuşları: kurumsal süre 1/2/3 ay, bayi satırında çalışma durumu, tek sütun araç kartı ve fiyat bloğu, durdur düğmesi yerine kullanıcı başlatan şerit, güvence bandında akan çizgi, mağaza işaretleri, oklu rehber kaydırıcı, konu sekmeli SSS; §2.2, §2.4, §2.9, §5.4) · v0.5: 11 Ekim (v0.4: 10 Ekim, v0.3: 9 Ekim, v0.2: 4 Ekim 2026). v0.5: G'nin 11 Ekim navbar ve sayfa düzeni geri bildirimi (yüzen hap navbar, Bayilerimiz sayfası, filonun ana sayfaya taşınması; §2.1, §2.4, §2.6, §2.8, §5.3, §8)
 > Sahipler: G (frontend), arkadaş (backend)
 > İçerik kaynağı: G'nin proje sohbetindeki ilk mesajı (misyon, vizyon, hakkımızda). v0.3: G'nin 9 Ekim site güncellemesi mesajı ve aynı gün verdiği cevaplar (sayfa yapısı, ürün ve hizmet içeriği, kalite gereksinimleri). v0.4: G'nin 10 Ekim tasarım geri bildirimi (yeni renk paleti, beyaz zemin, tercihlerin navbara taşınması, ana sayfa ve Araçlarımız düzeni).
 > Açık kararlar §10'da. Değişiklikler PR ile yapılır.
@@ -58,7 +58,7 @@ Yukarıdan aşağıya bölüm sırası:
 | 4 | İş birlikleri | Kayan logo şeridi (§2.2.4) |
 | 5 | Yol Boyu Güvence | Koyu zeytin bant, modernleştirilmiş (§5.5) |
 | 6 | Mobil uygulama | Uygulama reklamı: fotoğraf solda, metin ve mağaza rozetleri sağda (v0.4, G; §2.9) |
-| 7 | Araç kiralama rehberleri | 3–4 rehber kartı ve "Tüm rehberler" bağlantısı (v0.4, G; §2.9) |
+| 7 | Araç kiralama rehberleri | Oklarla kaydırılan rehber kartları; "Tüm rehberler" düğmesi yok, liste footer'dan ve Yardım'dan açılır (v0.6, G; §2.9) |
 | 8 | Sık sorulan sorular | §2.2.5 |
 | 9 | Footer | §2.8 |
 
@@ -74,29 +74,29 @@ v0.2'deki kitleye göre değişen "araç sınıfları" ("Size uygun sınıfı se
 #### 2.2.2 Bireysel (varsayılan)
 
 - Alış bayisi, bırakılacak bayi, tarih aralığı (tek takvim) ve alış/iade saati (30 dakikalık dilimler, ADR-16) → **Ara** → `/araclar`.
-- Bayi listesinde her bayinin altında o bayideki birkaç aracın adı kısaca görünür ("Toyota Corolla Hybrid, Nissan Qashqai +2"), böylece bayi seçmek aynı zamanda ilk bakış olur.
+- **Bayi listesi (v0.6, G):** her bayinin adının altında **çalışma durumu** yazar: "7/24 açık", "Şu an açık, 20:00'ye kadar" ya da "Kapalı, yarın 09:00'da açılır" (Türkiye saatine göre, liste açılınca hesaplanır). Aracın adları artık görünmez; araç sonuç sayfasında seçilir.
 - Bırakılacak bayi her zaman seçilir; kullanıcı dokunmadıkça alış bayisini izler (çoğu kiralama başladığı yerde biter).
 - Arama formunda **araç seçilmez**; araç, sonuç sayfasında seçilir.
 
 #### 2.2.3 Kurumsal
 
 - Gerekçe (G): kurumsal müşteri bireysel gibi kendi başına rezervasyon yapmaz. Araçlar istenen yere götürülür ve istenen yerden geri alınır, fiyat buna göre değişir; ayrıca birden fazla araç seçilebilir. Bu yüzden akış **form + görüşme**: müşteri bilgilerini bırakır, satış ekibi arar.
-- Bu kısım profesyonel görünmelidir. **Tasarım (G onayladı, 10 Ekim):** tek adım. Kurumsal seçilince kutuda önce "Nasıl ilerliyor?" şeridi (formu gönderin → satış ekibi bir iş günü içinde arar → size özel teklif), sonra talep formu: firma adı, yetkili ad soyad, iş e-postası, telefon, araç sayısı (1–5 / 6–20 / 21–50 / 50+), süre (6 / 12 / 24 / 36+ ay), ihtiyaç türü (birden fazla seçilebilen çipler: binek, SUV, ticari, elektrikli/hibrit, premium), teslim şehirleri, not, KVKK onayı. Gönderince aynı yerde "Talebiniz alındı" ve talep numarası. `/kurumsal-teklif` aynı formu kullanır; ürün sayfalarındaki "Teklif Al" oraya ürünü önceden seçili getirir (`?urun=`). Kişisel bilgiler adreste taşınmaz.
+- Bu kısım profesyonel görünmelidir. **Tasarım (G onayladı, 10 Ekim):** tek adım. Kurumsal seçilince kutuda önce "Nasıl ilerliyor?" şeridi (formu gönderin → satış ekibi bir iş günü içinde arar → size özel teklif), sonra talep formu: firma adı, yetkili ad soyad, iş e-postası, telefon, araç sayısı (1–5 / 6–20 / 21–50 / 50+), süre (1 / 2 / 3 / 6 / 12 / 24 / 36+ ay; v0.6), ihtiyaç türü (birden fazla seçilebilen çipler: binek, SUV, ticari, elektrikli/hibrit, premium), teslim şehirleri, not, KVKK onayı. Gönderince aynı yerde "Talebiniz alındı" ve talep numarası. `/kurumsal-teklif` aynı formu kullanır; ürün sayfalarındaki "Teklif Al" oraya ürünü önceden seçili getirir (`?urun=`). Kişisel bilgiler adreste taşınmaz.
 - Form KVKK onay kutusu ve spam koruması taşır (§9); gönderince "Talebiniz alındı" durumu gösterilir.
 - Seçim URL'de tutulur (`/?tip=kurumsal`), link paylaşılınca aynı seçim açılır. Seçim yalnızca kutuyu ve SSS'nin açık sekmesini değiştirir; sayfanın geri kalanı iki kitle için aynıdır.
 
 #### 2.2.4 İş birlikleri
 
 - 8 kurgusal şirket logosu (SVG). Gerçek marka logosu kullanılmaz.
-- Görsel ve davranış referansı: Framer "InfiniteLogoMarquee". Şerit sola doğru sürekli akar; logolar gri ve soluktur, üzerine gelince renklenir ve hafifçe büyür; üzerine gelince şerit durur.
-- Görünür bir **Durdur / Oynat** düğmesi vardır: WCAG 2.2.2 beş saniyeden uzun süren otomatik hareketin durdurulabilmesini ister, hover ise dokunmatikte ve klavyede yoktur. `prefers-reduced-motion` açıksa şerit hiç hareket etmez.
+- Görsel ve davranış referansı: Framer "InfiniteLogoMarquee". Logolar gri ve soluktur, üzerine gelince renklenir ve hafifçe büyür. **Şerit kendiliğinden akmaz (v0.6, G):** durur; fare üzerine geldiğinde ya da klavye odağı şeride girdiğinde sola doğru akar, ayrılınca bulunduğu yerde durur.
+- **Durdur / Oynat düğmesi kalktı (v0.6):** hareket kendiliğinden başlamadığı, kullanıcının üzerine gelmesi ya da odaklamasıyla başladığı için WCAG 2.2.2 (beş saniyeden uzun otomatik hareket) sorun olmaz. Şerit klavyeyle odaklanabilir (`tabindex=0`, adlı grup); dokunmatikte şerit yatay kaydırılır. `prefers-reduced-motion` açıksa şerit hiç hareket etmez.
 - Ekran okuyucu logoları bir kez okur; döngü için tekrarlanan kopyalar gizlidir.
 
 #### 2.2.5 Sık sorulan sorular
 
-- Referans: Framer "Spring FAQ Accordion" satır düzeni ve yaylı açılma; "AK FAQ"'tan kategori sekmeleri ve altta iletişim çağrısı.
-- Sekmeler: **Bireysel** / **Kurumsal**. Başlangıçta kiralama kutusunda seçili olan sekme açıktır.
-- Aynı anda bir soru açık. Arama kutusu ve soru numarası yok (§5.6: sırası olmayan içeriğe numara verilmez).
+- **v0.6 (G):** kategori sekmeli SSS bileşeni (sekmede kayan dolgu animasyonu, satırda dönen artı simgesi, `framer-motion`); altta iletişim çağrısı.
+- Sekmeler **konulardır** (Rezervasyon, Ödeme, Teslim, Hasar ve arıza, Hesap, Kurumsal; yalnızca sorusu olanlar), Yardım merkeziyle aynı veri. Bireysel / Kurumsal ayrımı kiralama kutusunda seçili olan sekmeden gelir: Kurumsal seçiliyse kurumsal sorular, değilse bireysel sorular görünür.
+- Satırlar bağımsız açılır (her biri kendi düğmesiyle). Arama kutusu ve soru numarası yok (§5.6: sırası olmayan içeriğe numara verilmez).
 - Altta "Sorunuz mu kaldı?" ve İletişim sayfasına bağlantı.
 - Açılma animasyonu `prefers-reduced-motion`'da kapalıdır.
 - İçerik API'den gelir (`GET /faq?audience=`); yükleniyor, boş ve hata durumları vardır.
@@ -125,7 +125,7 @@ Bayilerimiz → şehir filtresi ve/veya arama → liste ve haritadaki pinler dar
 - **v0.5 (G):** ayrı Araçlarımız sayfası kalktı; filo, ana sayfada kiralama kutusunun hemen altında bir bölümdür ve yalnızca **Bireysel** sekmede görünür (Kurumsal sekmede araç seçilmez). Bölümün adresi `/#araclarimiz`.
 - Filodaki modeller kategoriye göre; sınıflar ve modeller ucuzdan pahalıya.
 - **Kategoriler (v0.5):** bölümün üstünde kategori çipleri ("Ekonomik", "Orta sınıf"…); **"Tümü" yoktur, ilk kategori seçili başlar ve yalnızca seçili kategorinin modelleri görünür.** Çipte model sayısı yazar.
-- **Kart yatay (v0.4):** fotoğraf solda, bilgiler sağda; mobilde de yatay, sıkıştırılmış. Stok fotoğraf, marka-model, sınıf, hap bilgiler (yakıt tüketimi: L/100 km, elektrikli araçta kWh/100 km; yakıt tipi; vites; koltuk; bagaj) ve "…'den başlayan" günlük fiyat. Kartın içinde sağda bir ok işareti; hover'da kart ve ok tepki verir. Kartın tamamı tek bir tıklama hedefidir.
+- **Kart yatay (v0.4):** fotoğraf solda, bilgiler sağda; mobilde de yatay, sıkıştırılmış. Stok fotoğraf, marka-model, sınıf, hap bilgiler (yakıt tüketimi: L/100 km, elektrikli araçta kWh/100 km; yakıt tipi; vites; koltuk; bagaj) ve günlük fiyat. **Kartlar tek sütundur, her satırda bir kart (v0.6, G).** Fiyat ayrı bir bloktur: üstte küçük "Başlayan fiyat", ortada büyük tutar, yanında küçük "/ gün"; blok kartın sağında, dar ekranda altında durur. Kartın içinde sağda bir ok işareti; hover'da kart ve ok tepki verir. Kartın tamamı tek bir tıklama hedefidir.
 - **Pencere:** karta tıklanınca yeni sayfa açılmaz, pencere (modal) açılır. İçerik: daha detaylı bilgi (tüm özellikler, kısa açıklama) ve modelin bulunduğu bayiler (bayi adı, şehir; Bayilerimiz sayfasına bağlantı).
 - Pencere adreste iz bırakır: `/?arac=<model>`; adresteki diğer parametreler (ör. `?tip=`) korunur. Link paylaşılınca aynı pencere açık gelir; geri tuşu ve Esc kapatır; kapanınca odak tıklanan karta döner. Kanonik adres `/`'dir (ARCHITECTURE ADR-22).
 - Bölüm kendi yükleniyor, boş ve hata durumlarını taşır; yüklenmesi ana sayfanın geri kalanını geciktirmez.
@@ -191,8 +191,8 @@ G'nin 10 Ekim istekleri. Her biri BACKLOG M7'de sırası gelince yapılır.
 - **Puan sistemi:** gösterim ve kurallar. Tamamlanan her rezervasyon, toplam tutarın her tam ₺100'ü için 1 puan kazandırır (ek hizmetler dahil, aşağı yuvarlanır; ₺2.850 = 28 puan; G onayladı, 10 Ekim). İptal edilen rezervasyon puan kazandırmaz. Profilde bakiye, kazanım geçmişi ve kurallar görünür. Puanla ödeme v1'de yok; hesabı backend yapar.
 - **Rezervasyonlarım:** yaklaşan ve geçmiş seyahatler ayrı listelenir; her seyahatte tarih, bayi, araç, tutar ve kazanılan puan.
 - **Yardım (`/yardim`):** İletişim'den ayrı. Konulara göre gruplanmış sorular (rezervasyon, ödeme, araç teslimi, hasar ve arıza, hesap), arama, rehberlere bağlantılar; cevap bulunamazsa İletişim'e yönlendirme. SSS içeriğiyle aynı kaynaktan beslenir, ana sayfadaki SSS'nin geniş hâlidir.
-- **Araç kiralama rehberleri (`/rehberler`):** 4–6 kısa rehber (ör. gerekli belgeler, yakıt ve teslim kuralları, farklı bayiye iade, hasar durumunda ne yapılır, elektrikli araç kullanımı). Metinleri Claude yazar, iddia uydurmaz. Ana sayfada 3–4 kart.
-- **Mobil uygulama reklamı:** ana sayfada kendi bölümü (Yol Boyu Güvence'den sonra). Uygulama kurgusal: mağaza rozetleri görünür ama gerçek mağaza bağlantısı yoktur; görsel yer tutucu (fotoğraf kararı §10).
+- **Araç kiralama rehberleri (`/rehberler`):** 4–6 kısa rehber (ör. gerekli belgeler, yakıt ve teslim kuralları, farklı bayiye iade, hasar durumunda ne yapılır, elektrikli araç kullanımı). Metinleri Claude yazar, iddia uydurmaz. Ana sayfada rehberlerin hepsi yan yana oklarla (sol ve sağ kenarda) kaydırılır; "Tüm rehberler" düğmesi yoktur (v0.6, G), `/rehberler` footer'dan, Yardım'dan ve rehber sayfalarından açılır.
+- **Mobil uygulama reklamı:** ana sayfada kendi bölümü (Yol Boyu Güvence'den sonra). Uygulama kurgusal: mağaza düğmeleri ortalanır ve Apple ve Google Play işaretini taşır (v0.6), ama gerçek mağaza bağlantısı yoktur; görsel yer tutucu (fotoğraf kararı §10).
 
 ### 2.10 Sürücü uygunluğu (v0.5, G onayladı, 11 Ekim)
 
@@ -353,7 +353,7 @@ Gövde metni en fazla ~68 karakter genişliğinde tutulur.
   - Sayfa akışında bir kez **koyu zeytin bant** (`olive-900`) kullanılır: Yol Boyu Güvence bölümü. Açık sayfada tek koyu bölüm, dikkati oraya toplar.
   - Büyük, kenarları yuvarlatılmış fotoğraflar; araç fotoğraflarında doğal ışık ve açık hava.
 - **Hareket:** varsayılan olarak yalnızca durum değişikliğini anlatan geçişler (anahtar değişince alanın yumuşak geçişi, pencere açılıp kapanması). Kaydırınca beliren dekoratif animasyon yok.
-  - **İstisnalar (v0.3, G'nin onayı):** iş birlikleri şeridi (sürekli akış, durdurma düğmeli), Hakkımızda sayaçları (görününce bir kez sayar), Hikayemiz zaman çizelgesi (seçim değişince geçiş), SSS'nin yaylı açılması, galeri slayt geçişi.
+  - **İstisnalar (v0.3, G'nin onayı):** iş birlikleri şeridi (üzerine gelince/odaklanınca akış; kendiliğinden başlamaz, v0.6), Yol Boyu Güvence bandındaki çizgi (görününce iki tur akan bir iz, sonra durur; v0.6, G), Hakkımızda sayaçları (görününce bir kez sayar), Hikayemiz zaman çizelgesi (seçim değişince geçiş), SSS'nin yaylı açılması, galeri slayt geçişi.
   - Kendiliğinden başlayan bir geçiş yok: galeri ve zaman çizelgesini kullanıcı ilerletir.
   - `prefers-reduced-motion` açıksa hareketli her şey durur ya da anında geçer.
 
