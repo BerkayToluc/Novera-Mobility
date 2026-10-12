@@ -95,3 +95,34 @@ test("the store buttons carry the Apple and Google Play marks, centred, and are 
   const columnMiddle = column!.x + column!.width / 2;
   expect(Math.abs(pairMiddle - columnMiddle)).toBeLessThan(4);
 });
+
+test("the FAQ has a tab for each topic, rows that open and close, and follows the rental box's audience", async ({ page }) => {
+  await page.goto("/");
+  const faq = page.locator("section[aria-labelledby=faq-title]");
+  await faq.scrollIntoViewIfNeeded();
+
+  // The first topic is chosen and its first row is open.
+  const topics = faq.getByRole("group", { name: "Konular" });
+  await expect(topics.getByRole("button", { name: "Rezervasyon" })).toHaveAttribute("aria-pressed", "true");
+  const first = faq.getByRole("button", { name: /Rezervasyonu iptal edebilir miyim/ });
+  await expect(first).toHaveAttribute("aria-expanded", "true");
+
+  // A row closes and opens on its own button, and a closed answer is out of the page.
+  await first.click();
+  await expect(first).toHaveAttribute("aria-expanded", "false");
+  await expect(faq.getByText(/24 saat öncesine kadar ücretsiz iptal/)).toHaveCount(0);
+  await first.click();
+  await expect(faq.getByText(/24 saat öncesine kadar ücretsiz iptal/)).toBeVisible();
+
+  // Another topic shows its own questions.
+  await topics.getByRole("button", { name: "Ödeme" }).click();
+  await expect(topics.getByRole("button", { name: "Ödeme" })).toHaveAttribute("aria-pressed", "true");
+  await expect(faq.getByRole("button", { name: /Gösterilen fiyatlara KDV dahil mi/ })).toBeVisible();
+  await expect(first).toHaveCount(0);
+
+  // The corporate tab of the rental box brings the corporate questions.
+  await page.goto("/?tip=kurumsal");
+  const corporate = page.locator("section[aria-labelledby=faq-title]");
+  await expect(corporate.getByRole("button", { name: /En az kaç araç için teklif alabilirim/ })).toBeVisible();
+  await expect(corporate.getByRole("button", { name: /Rezervasyonu iptal edebilir miyim/ })).toHaveCount(0);
+});
