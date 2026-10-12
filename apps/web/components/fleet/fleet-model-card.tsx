@@ -1,16 +1,17 @@
 "use client";
 
 import { ArrowRight } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { VehicleImage } from "@/components/vehicle/vehicle-image";
 import { cn } from "@/lib/cn";
 import type { FleetModel } from "@/lib/fleet-models";
-import { formatMoney } from "@/lib/price";
+import { moneyParts } from "@/lib/price";
 import { useSpecs } from "./vehicle-specs";
 
-// A horizontal card (SPEC §2.4): photo left, facts right, an arrow at the far end. The whole
-// card is one target: the name is the button, and its ::after stretches over the card. The
-// name sits in a heading (a heading cannot sit inside a button), the facts stay plain text.
+// A horizontal card, one per row (SPEC §2.4): photo, facts, a price block and an arrow. On a phone
+// the price block drops under the photo and facts. The whole card is one target: the name is the
+// button, and its ::after stretches over the card. The name sits in a heading (a heading cannot
+// sit inside a button), the facts stay plain text.
 export function FleetModelCard({
   model,
   className,
@@ -22,22 +23,20 @@ export function FleetModelCard({
 }) {
   const t = useTranslations("FleetPage");
   const v = useTranslations("Vehicle");
-  const format = useFormatter();
+  const locale = useLocale();
   const specs = useSpecs(model);
 
   return (
     <article
       className={cn(
-        "group relative flex items-center gap-4 rounded-card border border-border bg-surface p-3 transition-colors md:flex-col md:items-stretch md:gap-4 md:p-4 xl:flex-row xl:items-center xl:gap-6",
+        "group relative grid grid-cols-[7rem_minmax(0,1fr)] items-center gap-x-4 gap-y-3 rounded-card border border-border bg-surface p-3 transition-colors md:grid-cols-[14rem_minmax(0,1fr)_auto_auto] md:gap-x-6 md:p-4 xl:grid-cols-[16rem_minmax(0,1fr)_auto_auto]",
         "hover:border-primary hover:bg-surface-muted focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-focus",
         className,
       )}
     >
-      <div className="w-28 shrink-0 md:w-full xl:w-56">
-        <VehicleImage imageUrl={model.imageUrl} brand={model.brand} model={model.model} decorative />
-      </div>
+      <VehicleImage imageUrl={model.imageUrl} brand={model.brand} model={model.model} decorative />
 
-      <div className="flex min-w-0 flex-1 flex-col gap-2">
+      <div className="flex min-w-0 flex-col gap-2">
         <h3 className="text-h3 text-fg">
           <button
             type="button"
@@ -64,17 +63,32 @@ export function FleetModelCard({
             </li>
           ))}
         </ul>
-        <p className="text-label tabular-nums text-fg md:text-body md:font-semibold">
-          {v("fromPerDay", { price: formatMoney(format, model.fromPrice) })}
-        </p>
       </div>
 
-      <span
-        aria-hidden="true"
-        className="inline-flex size-10 shrink-0 items-center justify-center rounded-full border border-border text-link transition-all md:absolute md:bottom-4 md:right-4 xl:static group-hover:border-primary group-hover:bg-primary group-hover:text-on-primary"
-      >
-        <ArrowRight className="size-5 transition-transform group-hover:translate-x-0.5" />
-      </span>
+      {/* Under the photo on a phone (a row of its own); from md the two are cells of the card's grid. */}
+      <div className="col-span-2 flex items-end justify-between gap-4 border-t border-border pt-3 md:contents">
+        <div className="flex flex-col md:items-end md:border-l md:border-border md:pl-6 md:text-right">
+          <span className="text-small text-fg-muted">{v("priceFrom")}</span>
+          <p className="flex items-baseline gap-1 tabular-nums text-fg">
+            <span className="flex items-baseline">
+              {moneyParts(locale, model.fromPrice).map((part, index) => (
+                // The sign sits small and high, the figure is the thing to read.
+                <span key={index} className={part.type === "currency" ? "mr-0.5 text-label text-fg-muted" : "text-h2"}>
+                  {part.value}
+                </span>
+              ))}
+            </span>
+            <span className="text-small text-fg-muted">{v("perDayUnit")}</span>
+          </p>
+        </div>
+
+        <span
+          aria-hidden="true"
+          className="inline-flex size-10 shrink-0 items-center justify-center rounded-full border border-border text-link transition-all group-hover:border-primary group-hover:bg-primary group-hover:text-on-primary"
+        >
+          <ArrowRight className="size-5 transition-transform group-hover:translate-x-0.5" />
+        </span>
+      </div>
     </article>
   );
 }
