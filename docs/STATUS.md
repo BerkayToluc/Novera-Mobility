@@ -34,19 +34,17 @@ BACKLOG M7'nin frontend işlerinin **tamamı** (Y10–Y44, Y20, Y25–Y32 dahil)
 
 ## 2. Bekleyen dallar
 
-Tablet (768 px) düzeni ve denetim düzeltmeleri, birbirinin üzerine kurulu uzun bir zincir (6–9 ve 11, `feat/navbar-pill` ile başlar ve birbirine kurulu; 5 ve 10 numaralı belge dalları ayrıdır); G'ye "Create a merge commit" ile **bu sırayla** birleştirmek kalır (`git fetch` sonrası `git log origin/main..origin/<dal>` ile kontrol edin):
+G'nin kuralı (12 Ekim): **her sayfa ya da bileşen grubu bir dal, bir PR.** Bunlar birbirinin üzerine kurulu bir zincirdir; `git fetch` sonrası `git log origin/main..origin/<dal>` ile kontrol edin, G "Create a merge commit" ile bu sırayla birleştirir:
 
-1. `fix/tablet-layout`: Yol Boyu Güvence bandı (768'de ortada çizgi, adımlar sağlı sollu), rehber ve araç listeleri 2 sütun (araç kartı md–xl arası dikey), footer, galeri denetimleri, Yardım ve Hakkımızda ayarları.
-2. `fix/booking-tablet`: özet ve ödemede xl altında ekrana yapışan toplam şeridi, hizalanan bağlantı düğmeleri (`size="inline"`), ortalanmış onay sayfası, altı çizili "Şifremi unuttum".
-3. `fix/visual-tour`: İletişim 768'de yan yana, Ürünler'de öksüz kart yok, kaydırılabilir profil sekmeleri, Hakkımızda sayaçlarında axe düzeltmesi, footer bağlantı genişliği.
-4. `fix/quote-centred`: Kurumsal teklif sayfası 1280 px'te tek sütunda ortalı.
-5. `docs/spec-v05`: SPEC v0.5 (navbar, Bayilerimiz, filo ana sayfada, sürücü uygunluğu önerisi §2.10), ADR-22 ve BACKLOG Y49–Y52. Kod değil, ama aşağıdaki üç dalın dayanağı.
-6. `feat/navbar-pill`: yüzen hap navbar, bayraklı dil menüsü, hesap simgesi, tema navbardan çıktı, Hizmetler düz link (Y49).
-7. `feat/branches-page`: `/bayilerimiz`, bayi bölümü İletişim'den taşındı (Y50).
-8. `feat/fleet-on-home`: filo ana sayfada, kategori başına bir liste, `/araclarimiz` kalktı (Y51).
-9. `feat/driver-eligibility`: ödemede sürücü bilgileri ve simüle ehliyet doğrulama, sınıf × ehliyet ülkesi kural tablosu (örnek değerler, `lib/driver-rules.ts`), hiçbir veri saklanmaz (Y52, SPEC §2.10).
-10. `docs/spec-v06`: SPEC v0.6 (ana sayfa rötuşları), BACKLOG Y53. Belge dalı, ayrı.
-11. Ana sayfa rötuşları (Y53, SPEC v0.6), birbirine kurulu: `feat/home-form-branches` (kurumsal süre 1/2/3 ay, bayi satırında çalışma durumu), `feat/home-fleet-cards` (tek sütun kart, fiyat bloğu), `feat/home-strip-guarantee` (şerit hover/odakta akar, güvence çizgisi akan iz), `feat/home-app-guides` (mağaza işaretleri, oklu rehber kaydırıcı), `feat/home-faq` (konu sekmeli SSS, `framer-motion` yeni bağımlılık).
+1. `fix/tablet-layout` → `fix/booking-tablet` → `fix/visual-tour` → `fix/quote-centred`: 768 px turu ve denetim düzeltmeleri (Güvence bandı, rehber ve araç listeleri, footer, galeri, sabit toplam şeridi, İletişim yan yana, profil sekmeleri, axe, kurumsal teklif ortalı).
+2. `feat/navbar-pill`: **Navbar** (Y49): yüzen hap, bayraklı dil menüsü, hesap simgesi, tema navbardan çıktı, Hizmetler düz link.
+3. `feat/branches-page`: **Bayilerimiz sayfası** (Y50): `/bayilerimiz`, bayi bölümü İletişim'den taşındı.
+4. `feat/home-page`: **Araç Kirala (ana sayfa)** (Y51, Y53): filo ana sayfada ve `/araclarimiz` kalktı; kurumsal süre 1/2/3 ay; bayi satırında çalışma durumu; tek sütun araç kartı ve fiyat bloğu; şerit hover/odakta akar; güvence çizgisi akan iz; mağaza işaretleri; oklu rehber kaydırıcı; konu sekmeli SSS (`framer-motion`); Konumumu kullan; Nasıl çalışır?.
+5. `feat/payment-page`: **Ödeme sayfası** (Y52): sürücü bilgileri ve simüle ehliyet doğrulama (sınıf × ehliyet ülkesi kural tablosu, örnek değerler, hiçbir veri saklanmaz, SPEC §2.10) ve kampanya kodu.
+
+Belge dalları ayrı: `docs/spec-v05` (SPEC v0.5, ADR-22, BACKLOG Y49–Y52) ve `docs/spec-v06` (SPEC v0.6, BACKLOG Y53), bu belgenin dalı `docs/status-visual-tour`.
+
+**Eski dallar artık gereksiz:** `feat/fleet-on-home`, `feat/driver-eligibility`, `feat/home-form-branches`, `feat/home-fleet-cards`, `feat/home-strip-guarantee`, `feat/home-app-guides` ve `feat/home-faq` yukarıdaki sayfa dallarının parçalarıydı (aynı commit'ler 4 ve 5'te). Uzağa itildiyse silinebilir, birleştirilmemeli.
 
 Hepsi `Refs #47` taşır (denetim işi açık). Yeni iş için `main`'den dallanılır.
 
