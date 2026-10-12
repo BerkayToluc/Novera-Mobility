@@ -61,7 +61,9 @@
       "unavailable": "The booking service is not available right now. Please try again later.",
       "invalid": "The booking details are not valid. Please start the search again.",
       "signin": "You need to sign in to continue.",
-      "generic": "The booking could not be completed. Please try again."
+      "generic": "The booking could not be completed. Please try again.",
+      "ineligible": "The driver does not meet the conditions.",
+      "notVerified": "The licence could not be confirmed."
     },
     "pay": "Complete Payment",
     "paying": "Processing",

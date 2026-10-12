@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { EXPERIENCED, fillDriver } from "./driver-helpers";
 
 // SPEC §8 steps 2 and 3: from the results, hold a car, add an extra, pay with the test card and
 // reach the confirmation. The search itself is opened by address; the form is covered separately.
@@ -44,6 +45,10 @@ test("pay with the test card and reach the confirmation", async ({ page }) => {
   await page.getByRole("link", { name: "Ödemeye Geç" }).click();
 
   await expect(page.getByRole("heading", { level: 1, name: "Ödeme" })).toBeVisible();
+  // The driver comes first (SPEC §2.10); the card waits for a checked licence.
+  await fillDriver(page, EXPERIENCED);
+  await page.getByRole("button", { name: "Ehliyetimi doğrula" }).click();
+  await expect(page.getByText("Ehliyet doğrulandı (deneme).")).toBeVisible();
   await page.getByLabel("Karttaki isim").fill("Elif Yıldız");
   await page.getByLabel("Kart numarası").fill("4242 4242 4242 4242");
   await page.getByLabel(/Son kullanma/).fill("12/30");

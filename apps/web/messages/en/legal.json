@@ -33,7 +33,8 @@
           "Corporate quote: company name, number of cars needed, rental period, car type.",
           "Contact form: your name, email address, phone number (optional), topic and message.",
           "Account: your preferences (language, theme, currency) and the points you earn from your rentals.",
-          "Usage: your language, theme and currency preference (through cookies)."
+          "Usage: your language, theme and currency preference (through cookies).",
+          "Driver eligibility: your date of birth, the country that issued your driving licence, its number and its issue date."
         ]
       },
       {
@@ -44,7 +45,8 @@
           "Answering your corporate quote requests.",
           "Managing your account and keeping you signed in.",
           "Working out your points and remembering your preferences with your account.",
-          "Remembering your site preferences."
+          "Remembering your site preferences.",
+          "Checking, at the time of booking, that the person who will drive meets the age and driving-licence conditions."
         ]
       },
       {
@@ -62,7 +64,8 @@
       {
         "heading": "Retention",
         "paragraphs": [
-          "Your data is kept for as long as the purpose requires and within the maximum periods set by law, then deleted, destroyed or anonymised."
+          "Your data is kept for as long as the purpose requires and within the maximum periods set by law, then deleted, destroyed or anonymised.",
+          "The date of birth and driving-licence details you enter for the eligibility check are used only for the check while you book; they are not saved to your account, your booking record or your browser, and are not kept afterwards."
         ]
       },
       {
@@ -156,9 +159,11 @@
       {
         "heading": "What we expect from the renter",
         "list": [
-          "Be at least 21 years old.",
-          "Have held a valid driving licence for at least two years.",
+          "Meet the age and years-of-licence conditions (for Economy and Compact cars, at least 21 years old and a licence held for two years; other classes and licences issued abroad can ask for more).",
           "Present an ID and the driving licence at pick-up."
+        ],
+        "paragraphs": [
+          "The age and driving-licence conditions depend on the vehicle class and the country that issued the licence; the condition for the car you pick is shown on the results and summary pages. Your documents are also checked at pick-up."
         ]
       },
       {
