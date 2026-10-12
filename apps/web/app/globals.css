@@ -298,9 +298,19 @@
   --container-content: 75rem;
 
   /* Partner strip (SPEC §2.2.4): the track holds two identical sets, so moving it by half
-     its width loops without a seam. Paused by hover, its own button and reduced motion. */
+     its width loops without a seam. It runs only while hovered or focused, never with reduced motion. */
   --animate-marquee: marquee 48s linear infinite;
+  /* The trail on the Road Assurance line (SPEC §5.4): twice along the road, under five seconds. */
+  --animate-road-trail: road-trail 2.4s linear 2 both;
   --animate-fade-in: fade-in 0.3s ease-out;
+  @keyframes road-trail {
+    from {
+      stroke-dashoffset: 0.25;
+    }
+    to {
+      stroke-dashoffset: -1;
+    }
+  }
   @keyframes fade-in {
     from {
       opacity: 0;

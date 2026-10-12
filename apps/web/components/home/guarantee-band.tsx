@@ -1,6 +1,7 @@
 import { ArrowRight, Headset, KeyRound, Siren, TriangleAlert, Truck } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
+import { AnimatedPath } from "./animated-path";
 
 const STEPS = [
   { key: "stranded", icon: TriangleAlert },
@@ -39,10 +40,12 @@ export async function GuaranteeBand() {
           {/* The road: vertical at the left on a phone, down the middle on a tablet (stops alternate
               left and right of it), horizontal from xl up. Outside the list, since an <ol> may
               only hold list items. */}
-          <span
-            aria-hidden="true"
-            className="absolute bottom-6 left-6 top-6 border-l-2 border-dashed border-on-band/40 md:left-1/2 md:-translate-x-px xl:bottom-auto xl:left-6 xl:right-6 xl:translate-x-0 xl:border-l-0 xl:border-t-2"
-          />
+          <div className="absolute bottom-6 left-6 top-6 -translate-x-1/2 md:left-1/2 xl:hidden">
+            <AnimatedPath orientation="vertical" className="h-full" />
+          </div>
+          <div className="absolute left-6 right-6 top-6 hidden -translate-y-1/2 xl:block">
+            <AnimatedPath orientation="horizontal" className="w-full" />
+          </div>
           <ol className="relative grid gap-10 xl:grid-cols-5 xl:gap-6">
           {STEPS.map(({ key, icon: Icon }, index) => (
             <li

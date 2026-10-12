@@ -110,7 +110,6 @@
   "Partners": {
     "title": "Our partners",
     "intro": "Some of the companies that trust us with their fleets and their journeys.",
-    "pause": "Pause scrolling",
-    "play": "Resume scrolling"
+    "label": "Logos of our partner organisations. Point at the strip or focus it to move it."
   }
 }

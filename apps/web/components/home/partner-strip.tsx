@@ -1,20 +1,15 @@
-"use client";
-
-import { useState } from "react";
-import { Pause, Play } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/cn";
+import { getTranslations } from "next-intl/server";
 import { PARTNERS } from "@/lib/partners";
 import { PartnerLogo } from "./partner-logo";
 
-// The partner strip (SPEC §2.2.4, after the Framer InfiniteLogoMarquee): logos drift left in a
-// loop, muted until pointed at. It stops on hover, by its own button (WCAG 2.2.2: moving content
-// that lasts over five seconds needs a way to pause it that works without a mouse) and, with
-// reduced motion, never starts. The list is read once; the copy that closes the loop is hidden.
-export function PartnerStrip() {
-  const t = useTranslations("Partners");
-  const [paused, setPaused] = useState(false);
+// The partner strip (SPEC §2.2.4, after the Framer InfiniteLogoMarquee): logos muted until pointed
+// at, and a strip that does not move by itself. It drifts left while the pointer is over it or
+// keyboard focus is inside it, and stays where it stopped when that ends. Nothing starts without
+// the visitor, so no pause button is needed (WCAG 2.2.2); with reduced motion it never moves.
+// On a touch screen the strip scrolls sideways with a finger. The list is read once; the copy
+// that closes the loop is hidden.
+export async function PartnerStrip() {
+  const t = await getTranslations("Partners");
 
   const logos = (copy: "first" | "loop") => (
     <ul
@@ -35,34 +30,22 @@ export function PartnerStrip() {
 
   return (
     <section aria-labelledby="partners-title" className="flex flex-col gap-8">
-      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-        <header className="flex max-w-2xl flex-col gap-3">
-          <h2 id="partners-title" className="text-h2 text-fg">
-            {t("title")}
-          </h2>
-          <p className="text-body text-fg-muted">{t("intro")}</p>
-        </header>
-        {/* Nothing moves with reduced motion, so there is nothing to pause. */}
-        <Button
-          variant="outline"
-          size="compact"
-          onClick={() => setPaused((value) => !value)}
-          aria-pressed={paused}
-          className="self-start motion-reduce:hidden md:self-auto"
-        >
-          {paused ? <Play aria-hidden="true" className="size-4" /> : <Pause aria-hidden="true" className="size-4" />}
-          {paused ? t("play") : t("pause")}
-        </Button>
-      </div>
+      <header className="flex max-w-2xl flex-col gap-3">
+        <h2 id="partners-title" className="text-h2 text-fg">
+          {t("title")}
+        </h2>
+        <p className="text-body text-fg-muted">{t("intro")}</p>
+      </header>
 
-      {/* Edges fade so logos arrive and leave rather than being cut off by the container. */}
-      <div className="group overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_6%,black_94%,transparent)]">
-        <div
-          className={cn(
-            "flex w-max animate-marquee group-hover:[animation-play-state:paused] motion-reduce:animate-none",
-            paused && "[animation-play-state:paused]",
-          )}
-        >
+      {/* Edges fade so logos arrive and leave rather than being cut off by the container. The strip
+          takes focus so a keyboard visitor can start it too, and scrolls sideways under a finger. */}
+      <div
+        tabIndex={0}
+        role="group"
+        aria-label={t("label")}
+        className="group overflow-x-auto rounded-control [mask-image:linear-gradient(to_right,transparent,black_6%,black_94%,transparent)] [scrollbar-width:none] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+      >
+        <div className="flex w-max animate-marquee [animation-play-state:paused] group-focus-within:[animation-play-state:running] group-hover:[animation-play-state:running] motion-reduce:animate-none">
           {logos("first")}
           {logos("loop")}
         </div>
