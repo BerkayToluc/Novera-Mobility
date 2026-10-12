@@ -1,0 +1,44 @@
+{
+  "BranchesPage": {
+    "metaTitle": "Our Branches",
+    "metaDescription": "Novera Mobility's branches in 14 cities: address, opening hours, phone and directions. Filter by city and see them on the map.",
+    "title": "Our Branches",
+    "intro": "Filter by city or search by branch name, district or address; the list and the map narrow together.",
+    "searchLabel": "Search branches",
+    "searchPlaceholder": "Branch name, district or address",
+    "viewLabel": "View",
+    "views": {
+      "list": "List",
+      "map": "Map"
+    },
+    "count": "{count, plural, one {# branch} other {# branches}}",
+    "mapUnavailable": "The map cannot load right now; you can still see the branches in the list.",
+    "noResults": {
+      "title": "No branch matches your search",
+      "text": "Try another city or branch name.",
+      "clear": "Clear Search"
+    },
+    "error": {
+      "title": "Branches could not be loaded",
+      "text": "We cannot show the branch list right now. Please try again.",
+      "retry": "Try Again"
+    },
+    "card": {
+      "hours": "Opening hours",
+      "weekdays": "Weekdays",
+      "saturday": "Saturday",
+      "sunday": "Sunday",
+      "closed": "Closed",
+      "allDay": "Open 24 hours",
+      "range": "{open} – {close}",
+      "call": "Call: {phone}",
+      "email": "Send an email",
+      "directions": "Get directions",
+      "newTab": "(opens in a new tab)",
+      "showOnMap": "Show on map"
+    },
+    "cityLabel": "City",
+    "allCities": "All cities",
+    "countFiltered": "Showing {count} of {total} branches"
+  }
+}

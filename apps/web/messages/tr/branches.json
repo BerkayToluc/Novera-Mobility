@@ -1,0 +1,44 @@
+{
+  "BranchesPage": {
+    "metaTitle": "Bayilerimiz",
+    "metaDescription": "Novera Mobility'nin 14 şehirdeki bayileri: adres, çalışma saatleri, telefon ve yol tarifi. Şehre göre süzün, haritada görün.",
+    "title": "Bayilerimiz",
+    "intro": "Şehre göre süzün ya da bayi adı, ilçe veya adresle arayın; liste ve harita birlikte daralır.",
+    "searchLabel": "Bayi ara",
+    "searchPlaceholder": "Bayi adı, ilçe veya adres",
+    "viewLabel": "Görünüm",
+    "views": {
+      "list": "Liste",
+      "map": "Harita"
+    },
+    "count": "{count, plural, one {# bayi} other {# bayi}}",
+    "mapUnavailable": "Harita şu an yüklenemiyor; bayileri listeden görebilirsiniz.",
+    "noResults": {
+      "title": "Aramanızla eşleşen bayi yok",
+      "text": "Başka bir şehir ya da bayi adı deneyin.",
+      "clear": "Aramayı Temizle"
+    },
+    "error": {
+      "title": "Bayiler yüklenemedi",
+      "text": "Bayi listesini şu an gösteremiyoruz. Lütfen tekrar deneyin.",
+      "retry": "Tekrar Dene"
+    },
+    "card": {
+      "hours": "Çalışma saatleri",
+      "weekdays": "Hafta içi",
+      "saturday": "Cumartesi",
+      "sunday": "Pazar",
+      "closed": "Kapalı",
+      "allDay": "7/24 açık",
+      "range": "{open} – {close}",
+      "call": "Ara: {phone}",
+      "email": "E-posta gönder",
+      "directions": "Yol tarifi al",
+      "newTab": "(yeni sekmede açılır)",
+      "showOnMap": "Haritada göster"
+    },
+    "cityLabel": "Şehir",
+    "allCities": "Tüm şehirler",
+    "countFiltered": "{total} bayiden {count} tanesi gösteriliyor"
+  }
+}
