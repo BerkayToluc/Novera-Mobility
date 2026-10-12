@@ -34,7 +34,7 @@ BACKLOG M7'nin frontend işlerinin **tamamı** (Y10–Y44, Y20, Y25–Y32 dahil)
 
 ## 2. Bekleyen dallar
 
-Tablet (768 px) düzeni ve denetim düzeltmeleri, birbirinin üzerine kurulu sekiz dallık zincir (5–8 `feat/navbar-pill` ile başlar ve birbirine kurulu; 5 numaralı belge dalı ayrıdır); G'ye "Create a merge commit" ile **bu sırayla** birleştirmek kalır (`git fetch` sonrası `git log origin/main..origin/<dal>` ile kontrol edin):
+Tablet (768 px) düzeni ve denetim düzeltmeleri, birbirinin üzerine kurulu uzun bir zincir (6–9 ve 11, `feat/navbar-pill` ile başlar ve birbirine kurulu; 5 ve 10 numaralı belge dalları ayrıdır); G'ye "Create a merge commit" ile **bu sırayla** birleştirmek kalır (`git fetch` sonrası `git log origin/main..origin/<dal>` ile kontrol edin):
 
 1. `fix/tablet-layout`: Yol Boyu Güvence bandı (768'de ortada çizgi, adımlar sağlı sollu), rehber ve araç listeleri 2 sütun (araç kartı md–xl arası dikey), footer, galeri denetimleri, Yardım ve Hakkımızda ayarları.
 2. `fix/booking-tablet`: özet ve ödemede xl altında ekrana yapışan toplam şeridi, hizalanan bağlantı düğmeleri (`size="inline"`), ortalanmış onay sayfası, altı çizili "Şifremi unuttum".
@@ -44,6 +44,9 @@ Tablet (768 px) düzeni ve denetim düzeltmeleri, birbirinin üzerine kurulu sek
 6. `feat/navbar-pill`: yüzen hap navbar, bayraklı dil menüsü, hesap simgesi, tema navbardan çıktı, Hizmetler düz link (Y49).
 7. `feat/branches-page`: `/bayilerimiz`, bayi bölümü İletişim'den taşındı (Y50).
 8. `feat/fleet-on-home`: filo ana sayfada, kategori başına bir liste, `/araclarimiz` kalktı (Y51).
+9. `feat/driver-eligibility`: ödemede sürücü bilgileri ve simüle ehliyet doğrulama, sınıf × ehliyet ülkesi kural tablosu (örnek değerler, `lib/driver-rules.ts`), hiçbir veri saklanmaz (Y52, SPEC §2.10).
+10. `docs/spec-v06`: SPEC v0.6 (ana sayfa rötuşları), BACKLOG Y53. Belge dalı, ayrı.
+11. Ana sayfa rötuşları (Y53, SPEC v0.6), birbirine kurulu: `feat/home-form-branches` (kurumsal süre 1/2/3 ay, bayi satırında çalışma durumu), `feat/home-fleet-cards` (tek sütun kart, fiyat bloğu), `feat/home-strip-guarantee` (şerit hover/odakta akar, güvence çizgisi akan iz), `feat/home-app-guides` (mağaza işaretleri, oklu rehber kaydırıcı), `feat/home-faq` (konu sekmeli SSS, `framer-motion` yeni bağımlılık).
 
 Hepsi `Refs #47` taşır (denetim işi açık). Yeni iş için `main`'den dallanılır.
 
