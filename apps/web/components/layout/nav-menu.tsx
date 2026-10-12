@@ -8,8 +8,6 @@ import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { PRODUCTS } from "@/lib/products";
 
-export type NavMenuKind = "products" | "services";
-
 type MenuItem = {
   key: string;
   href: ComponentProps<typeof Link>["href"];
@@ -17,46 +15,31 @@ type MenuItem = {
   featured?: boolean;
 };
 
-// The entries behind "Ürünler" and "Hizmetler" (SPEC §2.8). Products have their own pages;
-// services share one page, so each link opens its item there (?hizmet=N) and scrolls to it.
-export function useNavMenuItems(kind: NavMenuKind) {
+// The entries behind "Ürünler" (SPEC §2.8): each product has its own page.
+export function useNavMenuItems() {
   const products = useTranslations("ProductsPage");
-  const services = useTranslations("ServicesPage");
   const header = useTranslations("Header");
 
-  if (kind === "products") {
-    const items: MenuItem[] = PRODUCTS.map((product) => ({
-      key: product.slug,
-      href: { pathname: "/urunler/[slug]", params: { slug: product.slug } },
-      label: products(`items.${product.slug}.title`),
-      featured: product.featured,
-    }));
-    return { allHref: "/urunler" as const, allLabel: header("allProducts"), featuredLabel: products("featuredBadge"), items };
-  }
-
-  // Index-based until the services get slugs with their new content (BACKLOG Y23).
-  const titles = (services.raw("items") as { title: string }[]).map((item) => item.title);
-  const items: MenuItem[] = titles.map((title, index) => ({
-    key: String(index + 1),
-    href: { pathname: "/hizmetler", query: { hizmet: String(index + 1) }, hash: `hizmet-${index + 1}` },
-    label: title,
+  const items: MenuItem[] = PRODUCTS.map((product) => ({
+    key: product.slug,
+    href: { pathname: "/urunler/[slug]", params: { slug: product.slug } },
+    label: products(`items.${product.slug}.title`),
+    featured: product.featured,
   }));
-  return { allHref: "/hizmetler" as const, allLabel: header("allServices"), featuredLabel: "", items };
+  return { allHref: "/urunler" as const, allLabel: header("allProducts"), featuredLabel: products("featuredBadge"), items };
 }
 
 // Desktop: the menu title opens a panel of links. A button rather than a link, so one click
 // always does one thing; the overview page is the panel's first entry. Links inside a
 // popover, not an ARIA menu: Tab moves through them and Escape closes, as for any panel.
 export function NavMenu({
-  kind,
   label,
   isCurrent,
 }: {
-  kind: NavMenuKind;
   label: string;
   isCurrent: boolean;
 }) {
-  const { allHref, allLabel, featuredLabel, items } = useNavMenuItems(kind);
+  const { allHref, allLabel, featuredLabel, items } = useNavMenuItems();
   const [open, setOpen] = useState(false);
   const close = () => setOpen(false);
 
@@ -64,7 +47,7 @@ export function NavMenu({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger
         className={cn(
-          "group inline-flex min-h-11 items-center gap-1 whitespace-nowrap rounded-control px-2 text-label transition-colors",
+          "group inline-flex min-h-11 items-center gap-1 whitespace-nowrap rounded-full px-3 text-label transition-colors",
           isCurrent ? "bg-selected text-on-selected" : "text-fg hover:bg-selected",
         )}
       >
@@ -107,8 +90,8 @@ export function NavMenu({
 
 // Mobile panel: the title stays a link to the overview and the entries sit indented beneath it,
 // all visible at once; a phone menu is already a disclosure, so it needs no second one.
-export function NavSubList({ kind, onNavigate }: { kind: NavMenuKind; onNavigate?: () => void }) {
-  const { items } = useNavMenuItems(kind);
+export function NavSubList({ onNavigate }: { onNavigate?: () => void }) {
+  const { items } = useNavMenuItems();
   return (
     <ul className="mb-2 ml-3 flex flex-col border-l border-border pl-3">
       {items.map((item) => (
