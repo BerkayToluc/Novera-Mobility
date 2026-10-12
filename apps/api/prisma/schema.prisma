@@ -1,6 +1,6 @@
 generator client {
   provider = "prisma-client"
-  output   = "../generated/prisma"
+  output   = "../src/generated/prisma"
 }
 
 datasource db {
@@ -63,7 +63,6 @@ enum FaqAudience {
   CORPORATE
 }
 
-// Yardım merkezi konu grupları. API'de de küçük harf döner (openapi.yaml FaqTopic).
 enum FaqTopic {
   rezervasyon
   odeme
@@ -88,21 +87,20 @@ model User {
   firstName    String
   lastName     String
   accountType  AccountType @default(INDIVIDUAL)
-  // Kurumsal hesap bilgileri (hesabı Novera açar); bireysel hesapta hepsi boş
+
+  // Kurumsal hesap bilgileri (yalnızca CORPORATE hesapta dolu gelir, hesabı Novera açar)
   companyName  String?
   taxOffice    String?
   companyCity  String?
   companyPhone String?
   contactTitle String?
-  // Novera satış iletişimi (openapi SalesContact)
-  salesContactName  String?
-  salesContactEmail String?
-  salesContactPhone String?
-  locale       Locale      @default(TR)
-  theme        Theme       @default(LIGHT)
-  currency     Currency    @default(TRY)
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
+  salesContact Json? // { "name": "...", "email": "...", "phone": "..." }
+
+  locale    Locale   @default(TR)
+  theme     Theme    @default(LIGHT)
+  currency  Currency @default(TRY)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   reservations      Reservation[]
   quoteRequests     QuoteRequest[]
@@ -302,35 +300,38 @@ model Service {
 model FaqItem {
   id        String      @id @default(uuid())
   audience  FaqAudience
-  topic     FaqTopic
+  topic     FaqTopic    @default(rezervasyon)
   question  Json // { "tr": "...", "en": "..." }
   answer    Json
   sortOrder Int         @default(0)
 
-  @@index([audience, topic])
+  @@index([audience])
+  @@index([topic])
 }
 
-// Kurumsal teklif / görüşme talebi (BACKLOG Y35). `number` ör. TKL-2026-00042.
+// Kurumsal teklif talepleri (GET /me/quotes ve POST /quotes)
 model QuoteRequest {
   id             String      @id @default(uuid())
-  number         String      @unique
+  number         String      @unique // ör. TKL-2026-00042
   status         QuoteStatus @default(RECEIVED)
   companyName    String
   contactName    String?
   phone          String?
-  email          String
   vehicleCount   Int
   durationMonths Int
-  vehicleType    String // sınıf slug'ı veya virgülle ayrılmış ihtiyaç türleri
+  vehicleType    String
   deliveryCities String?
   notes          String?
-  kvkkConsentAt  DateTime
+  email          String
+  kvkkConsentAt  DateTime    @default(now())
   createdAt      DateTime    @default(now())
 
   productId String?
   product   Product? @relation(fields: [productId], references: [id])
   userId    String?
   user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
 }
 
 model ContactMessage {
