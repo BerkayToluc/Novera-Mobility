@@ -1,6 +1,6 @@
 # Novera Mobility: Ürün Tanımı (SPEC)
 
-> Durum: **Taslak v0.4** · 10 Ekim 2026 (v0.3: 9 Ekim, v0.2: 4 Ekim 2026)
+> Durum: **Taslak v0.5** · 11 Ekim 2026 (v0.4: 10 Ekim, v0.3: 9 Ekim, v0.2: 4 Ekim 2026). v0.5: G'nin 11 Ekim navbar ve sayfa düzeni geri bildirimi (yüzen hap navbar, Bayilerimiz sayfası, filonun ana sayfaya taşınması; §2.1, §2.4, §2.6, §2.8, §5.3, §8)
 > Sahipler: G (frontend), arkadaş (backend)
 > İçerik kaynağı: G'nin proje sohbetindeki ilk mesajı (misyon, vizyon, hakkımızda). v0.3: G'nin 9 Ekim site güncellemesi mesajı ve aynı gün verdiği cevaplar (sayfa yapısı, ürün ve hizmet içeriği, kalite gereksinimleri). v0.4: G'nin 10 Ekim tasarım geri bildirimi (yeni renk paleti, beyaz zemin, tercihlerin navbara taşınması, ana sayfa ve Araçlarımız düzeni).
 > Açık kararlar §10'da. Değişiklikler PR ile yapılır.
@@ -22,9 +22,10 @@
 
 | Sayfa | Yol (TR) | Yol (EN) | Not |
 |---|---|---|---|
-| Ana sayfa (Araç Kirala) | `/` | `/en` | Kampanya galerisi, Bireysel / Kurumsal kiralama kutusu, iş birlikleri, Yol Boyu Güvence, SSS (§2.2) |
+| Ana sayfa (Araç Kirala) | `/` | `/en` | Kampanya galerisi, Bireysel / Kurumsal kiralama kutusu, **araçlarımız bölümü (v0.5)**, iş birlikleri, Yol Boyu Güvence, SSS (§2.2) |
 | Arama sonuçları | `/araclar` | `/en/cars` | Seçilen bayide ve tarihlerde uygun araçlar; fotoğraf, bilgi, fiyat ve **Kirala** butonu. Üstte düzenlenebilir arama (§2.3) |
-| Araçlarımız | `/araclarimiz` | `/en/our-cars` | Filodaki tüm modeller; karta tıklanınca pencere açılır, yeni sayfa açılmaz (§2.4) |
+| ~~Araçlarımız~~ | ~~`/araclarimiz`~~ | ~~`/en/our-cars`~~ | **Kaldırıldı (v0.5):** filo ana sayfada bir bölümdür (§2.4); eski adrese yönlendirme eklenmez, site yayında değil |
+| Bayilerimiz | `/bayilerimiz` | `/en/branches` | Bayi listesi, şehir filtresi, arama ve harita; İletişim'den taşındı (v0.5, §2.6.1) |
 | ~~Araç detay~~ | ~~`/araclar/:slug`~~ | ~~`/en/cars/:slug`~~ | **Kaldırıldı (v0.3):** araç bilgisi kartta ve Araçlarımız penceresinde; Kirala doğrudan rezervasyon özetine gider, ek hizmet seçimi özete taşındı |
 | Rezervasyon özeti | `/rezervasyon` | `/en/booking` | Tarih, lokasyon, **ek hizmet seçimi**, kalem kalem fiyat, toplam |
 | Ödeme (sahte) | `/odeme` | `/en/payment` | Gerçek ödeme alınmaz |
@@ -33,7 +34,7 @@
 | Ürün detay | `/urunler/:slug` | `/en/products/:slug` | Konsept, Ne Alıyorsunuz, Teknolojik Artısı + "Teklif Al" |
 | Hizmetler | `/hizmetler` | `/en/services` | 5 hizmet, açılır-kapanır yapı (içerik Ek A) |
 | Hakkımızda | `/hakkimizda` | `/en/about` | Hikayemiz (eğri zaman çizelgesi), rakamlar (sayaç), misyon/vizyon, sürdürülebilirlik (§2.7) |
-| İletişim | `/iletisim` | `/en/contact` | Genel merkez, departman e-postaları, iletişim formu, bayi listesi + harita (§2.6) |
+| İletişim | `/iletisim` | `/en/contact` | Genel merkez, departman e-postaları, iletişim formu ve Bayilerimiz'e bağlantı (§2.6) |
 | Kurumsal teklif | `/kurumsal-teklif` | `/en/corporate-quote` | Ürün sayfalarındaki "Teklif Al" buraya gelir; navbar'da link yok. Ana sayfadaki kurumsal kutuyla ilişkisi açık karar (§10) |
 | Giriş / Kayıt / Şifremi unuttum | `/giris`, `/kayit`, `/sifre-sifirla` | `/en/login`, `/en/register`, `/en/reset-password` | Girişte **Bireysel** ve **Kurumsal** sekmeleri (v0.4, §2.9) |
 | Profil | `/profil` | `/en/profile` | Alt sekmeler, her biri kendi sayfası: Hesabım (`/profil`), Rezervasyonlarım (`/profil/rezervasyonlar`, `/en/profile/bookings`; yaklaşan ve geçmiş seyahatler ayrı), Puanlarım (`/profil/puanlar`, `/en/profile/points`, v0.4), Ayarlar (`/profil/ayarlar`, `/en/profile/settings`; varsayılan para birimi, dil, tema). Kurumsal hesapta sekmeler farklıdır (§2.9). Giriş yapılmamışsa "giriş yapın" bildirimi gösterilir |
@@ -53,12 +54,13 @@ Yukarıdan aşağıya bölüm sırası:
 |---|---|---|
 | 1 | Kampanya galerisi | §2.2.1 |
 | 2 | Kiralama kutusu | Sayfanın `h1`'i ("Araç Kirala") bu bölümün başlığıdır ve **ortalanır**. Altında, yine ortalı, yalnızca iki buton: **Bireysel** / **Kurumsal**; butonların çevresinde kutu ya da çerçeve yok (v0.4, G). Altında form (§2.2.2, §2.2.3) |
-| 3 | İş birlikleri | Kayan logo şeridi (§2.2.4) |
-| 4 | Yol Boyu Güvence | Koyu zeytin bant, modernleştirilmiş (§5.5) |
-| 5 | Mobil uygulama | Uygulama reklamı: fotoğraf solda, metin ve mağaza rozetleri sağda (v0.4, G; §2.9) |
-| 6 | Araç kiralama rehberleri | 3–4 rehber kartı ve "Tüm rehberler" bağlantısı (v0.4, G; §2.9) |
-| 7 | Sık sorulan sorular | §2.2.5 |
-| 8 | Footer | §2.8 |
+| 3 | Araçlarımız (filo) | Kategori çipleri ve seçili kategorideki modeller; yalnızca Bireysel sekmede (v0.5, G; §2.4) |
+| 4 | İş birlikleri | Kayan logo şeridi (§2.2.4) |
+| 5 | Yol Boyu Güvence | Koyu zeytin bant, modernleştirilmiş (§5.5) |
+| 6 | Mobil uygulama | Uygulama reklamı: fotoğraf solda, metin ve mağaza rozetleri sağda (v0.4, G; §2.9) |
+| 7 | Araç kiralama rehberleri | 3–4 rehber kartı ve "Tüm rehberler" bağlantısı (v0.4, G; §2.9) |
+| 8 | Sık sorulan sorular | §2.2.5 |
+| 9 | Footer | §2.8 |
 
 v0.2'deki kitleye göre değişen "araç sınıfları" ("Size uygun sınıfı seçin") ve "4 ürün" bölümleri kaldırıldı (G'nin kararı, 10 Ekim'de yinelendi). `h1` galeride değil kutuda durur, çünkü galeri kampanya içeriğidir, sayfanın konusu araç kiralamaktır.
 
@@ -116,15 +118,17 @@ Ana sayfa (Bireysel) → Arama sonuçları → **Kirala** → Rezervasyon özeti
 Ana sayfa (Kurumsal) → form → "Talebiniz alındı" → satış ekibi arar. Ürün detayındaki "Teklif Al" → `/kurumsal-teklif`.
 
 **Bayi bulma:**
-İletişim → şehir filtresi ve/veya arama → liste ve haritadaki pinler daralır → bayi kartı (adres, çalışma saatleri, `tel:` telefon, e-posta, yol tarifi linki).
+Bayilerimiz → şehir filtresi ve/veya arama → liste ve haritadaki pinler daralır → bayi kartı (adres, çalışma saatleri, `tel:` telefon, e-posta, yol tarifi linki).
 
-### 2.4 Araçlarımız
+### 2.4 Araçlarımız (ana sayfa bölümü)
 
-- Filodaki tüm modeller, sınıfa göre gruplu; sınıflar ve modeller ucuzdan pahalıya.
-- **Kategoriler (v0.4):** sayfanın üstünde kategori çipleri ("Tümü", "Ekonomik", "Orta sınıf"…); biri seçilince liste o kategoriye süzülür. Kategori bölümleri belirgin başlık, model sayısı ve aralarında net boşlukla ayrılır.
+- **v0.5 (G):** ayrı Araçlarımız sayfası kalktı; filo, ana sayfada kiralama kutusunun hemen altında bir bölümdür ve yalnızca **Bireysel** sekmede görünür (Kurumsal sekmede araç seçilmez). Bölümün adresi `/#araclarimiz`.
+- Filodaki modeller kategoriye göre; sınıflar ve modeller ucuzdan pahalıya.
+- **Kategoriler (v0.5):** bölümün üstünde kategori çipleri ("Ekonomik", "Orta sınıf"…); **"Tümü" yoktur, ilk kategori seçili başlar ve yalnızca seçili kategorinin modelleri görünür.** Çipte model sayısı yazar.
 - **Kart yatay (v0.4):** fotoğraf solda, bilgiler sağda; mobilde de yatay, sıkıştırılmış. Stok fotoğraf, marka-model, sınıf, hap bilgiler (yakıt tüketimi: L/100 km, elektrikli araçta kWh/100 km; yakıt tipi; vites; koltuk; bagaj) ve "…'den başlayan" günlük fiyat. Kartın içinde sağda bir ok işareti; hover'da kart ve ok tepki verir. Kartın tamamı tek bir tıklama hedefidir.
-- **Pencere:** karta tıklanınca yeni sayfa açılmaz, pencere (modal) açılır. İçerik: daha detaylı bilgi (tüm özellikler, kısa açıklama) ve modelin bulunduğu bayiler (bayi adı, şehir; İletişim sayfasına bağlantı).
-- Pencere adreste iz bırakır: `/araclarimiz?arac=<model>`. Link paylaşılınca aynı pencere açık gelir; geri tuşu ve Esc kapatır; kapanınca odak tıklanan karta döner. Arama motoru için kanonik adres `/araclarimiz`'dir (ARCHITECTURE ADR-22).
+- **Pencere:** karta tıklanınca yeni sayfa açılmaz, pencere (modal) açılır. İçerik: daha detaylı bilgi (tüm özellikler, kısa açıklama) ve modelin bulunduğu bayiler (bayi adı, şehir; Bayilerimiz sayfasına bağlantı).
+- Pencere adreste iz bırakır: `/?arac=<model>`; adresteki diğer parametreler (ör. `?tip=`) korunur. Link paylaşılınca aynı pencere açık gelir; geri tuşu ve Esc kapatır; kapanınca odak tıklanan karta döner. Kanonik adres `/`'dir (ARCHITECTURE ADR-22).
+- Bölüm kendi yükleniyor, boş ve hata durumlarını taşır; yüklenmesi ana sayfanın geri kalanını geciktirmez.
 
 ### 2.5 Ürünler ve hizmetler
 
@@ -141,9 +145,15 @@ Yukarıdan aşağıya:
 2. **Genel merkez:** fotoğraf (yer tutucu), adres, `tel:` telefon, `mailto:` e-posta, yol tarifi linki.
 3. **Departman e-postaları:** Pazarlama, Satış, İş Birlikleri; her biri ayrı `mailto:` bağlantısı.
 4. **İletişim formu:** ad soyad, e-posta, telefon (isteğe bağlı), konu, mesaj, KVKK onay kutusu; gönderince "Mesajınız alındı" durumu (§9).
-5. **Bayiler ve harita:** masaüstünde (1280 px ve üstü) bayiler haritanın solunda alt alta listelenir. Listenin üstünde şehir filtresi (açılır liste) ve metin arama (bayi adı, ilçe, adres). Filtre ve arama hem listeyi hem haritadaki pinleri daraltır. 1280 px altında Liste / Harita geçişi. Harita yüklenemezse liste görünür.
+5. **Bayilerimiz'e bağlantı (v0.5):** bayi listesi ve harita Bayilerimiz sayfasına taşındı (§2.6.1); İletişim'de kısa bir "Bayilerimiz" bağlantısı kalır.
 
 Genel merkez ve departman bilgileri kurgusaldır ve sabit içeriktir (çeviri dosyası); e-postalar gerçek bir kişiye gitmeyen ayrılmış bir alan adıyla yazılır (`.example`). Bayi verisi API'den gelir.
+
+#### 2.6.1 Bayilerimiz (`/bayilerimiz`, v0.5)
+
+- Başlık ve kısa giriş; masaüstünde (1280 px ve üstü) bayiler haritanın solunda alt alta listelenir. Listenin üstünde şehir filtresi (açılır liste) ve metin arama (bayi adı, ilçe, adres). Filtre ve arama hem listeyi hem haritadaki pinleri daraltır. 1280 px altında Liste / Harita geçişi. Harita yüklenemezse liste görünür.
+- Her bayi arama motoruna `AutoRental` olarak bildirilir (JSON-LD, §9); bu bildirim İletişim'den bu sayfaya taşındı. Yükleniyor, boş ve hata durumları vardır.
+- Navbarda "Bayilerimiz" olarak yer alır (§2.8).
 
 ### 2.7 Hakkımızda
 
@@ -154,21 +164,23 @@ Genel merkez ve departman bilgileri kurgusaldır ve sabit içeriktir (çeviri do
 ### 2.8 Navigasyon ve footer
 
 ```
-Masaüstü: [Logo] Araç Kirala · Araçlarımız · Ürünler · Hizmetler · Hakkımızda · [İletişim]   [Profil]
-Mobil:    [Logo]                                                     [Profil] [☰]
+Masaüstü: (yüzen hap) [Logo]  Araç Kirala · Bayilerimiz · Ürünler ▾ · Hizmetler · Hakkımızda   [İletişim]  ‖  ₺ TRY ▾ · 🇹🇷 TR ▾ · [hesap simgesi]
+Mobil:    (hap) [Logo]                                                     [hesap simgesi] [☰]
 ```
 
-- Navbar'daki linkler v0.2'deki gibi kalır. **İletişim, diğer linklerden farklı görünür** (çerçeveli buton görünümü) ve **diğer linklerden belirgin bir boşlukla ayrı durur**; Giriş Yap / Profil butonundan da ayırt edilebilir. Mobil menüde de aynı vurgu.
-- **Giriş Yap** butonu zeminden ayrışan bir dolguya sahiptir; zeminle aynı renkte kalmaz (v0.4, G).
-- **Ürünler ve Hizmetler (v0.4, G):** navbarda açılır menü; açılınca öğeler listelenir (4 ürün, 5 hizmet), her biri kendi sayfasına ya da hizmetler sayfasındaki yerine gider (o madde açık gelir). Masaüstünde başlık menüyü açan bir düğmedir; liste sayfası menünün son maddesidir ("Tüm ürünler →"), çünkü hem link hem açılır menü olan bir öğe tıklanınca ne olacağını belirsizleştirir. Klavyeyle açılıp gezilebilir, Esc kapatır; mobil menüde başlık liste sayfasına gider ve öğeler altında girintili listelenir.
-- **Para birimi (v0.4, G):** navbarda kendi açılır menüsü; düğmede seçili birimin simgesi ve kodu (`₺ TRY`), listede `₺ TRY`, `€ EUR`, `$ USD`.
-- **Dil ve tema (v0.4, G):** navbarda tek bir ikon düğmesiyle açılan küçük bir panelde. Mobilde para birimi, dil ve tema hamburger menünün içinde. Footer'da tercih yok.
+- **Görünüm (v0.5, G):** navbar sayfanın üstünde yüzen, tam yuvarlak bir **hap**tır (referans Framer "Modern Navbar"): beyaz zemin (koyu temada yüzey rengi), ince çizgi, hafif gölge; solda logo, linkler bir arada, sağda tercihler ve hesap. Link üzerine gelince yuvarlak, hafif dolgulu bir hap belirir. Navbar sayfayla kayar, yapışmaz (odaktaki öğeyi örtmesin, WCAG 2.2). Mobilde aynı hap daha küçük köşeyle durur.
+- Linkler: Araç Kirala · Bayilerimiz · Ürünler · Hizmetler · Hakkımızda. **İletişim, diğer linklerden farklı görünür** (çerçeveli hap) ve **belirgin bir boşlukla ayrı durur**; hesap simgesinden de ayırt edilebilir. Mobil menüde de aynı vurgu.
+- **Hesap (v0.5, G):** giriş yapılmamışsa zeminden ayrışan dolgulu **Giriş Yap** butonu (v0.4, G); giriş yapmışsa yazı yok, yuvarlak bir **kullanıcı simgesi** (`aria-label` "Hesabım") profile gider.
+- **Ürünler (v0.5, G):** yalnızca Ürünler açılır menüdür; açılınca 4 ürün listelenir, her biri kendi sayfasına gider. Masaüstünde başlık menüyü açan bir düğmedir; liste sayfası menünün son maddesidir ("Tüm ürünler →"), çünkü hem link hem açılır menü olan bir öğe tıklanınca ne olacağını belirsizleştirir. Klavyeyle açılıp gezilebilir, Esc kapatır; mobil menüde başlık liste sayfasına gider ve öğeler altında girintili listelenir. **Hizmetler (v0.5) açılır değildir**, düz bir linktir; hizmetler kendi sayfasındaki akordeondadır.
+- **Para birimi (v0.4, G):** navbarda kendi açılır menüsü; düğmede seçili birimin simgesi ve kodu (`₺ TRY`), listede `₺ TRY`, `€ EUR`, `$ USD`. Linklerle aynı yazı ve üzerine gelme diliyle yazılır.
+- **Dil (v0.5, G):** kendi açılır menüsü; düğmede bayrak ve kod (`TR`), listede bayrak ve dilin kendi adı (Türkçe, English). Bayraklar satır içi SVG'dir (emoji bayrak bazı sistemlerde harf olarak çizilir), dekoratiftir; İngilizce için İngiliz bayrağı. Mobilde para birimi ve dil hamburger menünün içindedir. Footer'da tercih yok.
+- **Tema (v0.5, G):** navbarda artık tema seçimi yoktur. Giriş yapan kullanıcı temayı yalnızca Profil > Ayarlar'dan seçer (§2.9); ziyaretçi her zaman açık temayı görür.
 - **Giriş Yap** girişe gider; giriş sayfasında Bireysel ve Kurumsal sekmeleri vardır (§2.9).
 - Navbar'da ayrı "Kurumsal Teklif" linki yok (G'nin kararı); kurumsal giriş noktası ana sayfadaki seçim ve ürün sayfaları.
 - Hamburger = site gezintisi. Altı bağlantı 1280px altında yan yana sığmadığı için hamburger mobilde ve tablette görünür, satır içi menü 1280px ve üstünde. Profil menüsü = hesap (her ekranda).
 - Giriş yapılmamışsa Profil yerine "Giriş Yap".
 - **Footer:** referans Framer "Simple Footer", açık zeminde (`stone-100`; sayfadaki tek koyu bant Yol Boyu Güvence kalır, §5.4): solda logo, kısa tanım ve altında telif + "kurgusal proje" notu; sağda sade sütunlar: Keşfet linkleri, Yasal linkler (5 sayfa ve "Çerez tercihleri"), iletişim. **Bizi takip edin** (v0.4, G): sosyal medya ikonları görünür ama şimdilik tıklanamaz (bağlantı değil; kurgusal şirketin hesabı yok, adres uydurulmaz). Ekran okuyucu için "yakında" bilgisi taşır.
-- Dil (TR/EN), tema (açık/koyu/sistem; **varsayılan açık**) ve para birimi (TRY/EUR/USD) seçimi navbardaki tercih panelindedir; giriş yapan kullanıcıda tercih hesaba kaydedilir. Tutarlar günlük kurla çevrilir (ARCHITECTURE ADR-15); ödeme sahte olduğu için hangi para birimi seçilirse seçilsin para alınmaz.
+- Dil (TR/EN) ve para birimi (TRY/EUR/USD) seçimi navbardadır; tema (açık/koyu/sistem; **varsayılan açık**) Profil > Ayarlar'dadır. Giriş yapan kullanıcıda üçü de hesaba kaydedilir. Tutarlar günlük kurla çevrilir (ARCHITECTURE ADR-15); ödeme sahte olduğu için hangi para birimi seçilirse seçilsin para alınmaz.
 
 ### 2.9 Hesap, puan, yardım ve rehberler (v0.4)
 
@@ -181,6 +193,34 @@ G'nin 10 Ekim istekleri. Her biri BACKLOG M7'de sırası gelince yapılır.
 - **Yardım (`/yardim`):** İletişim'den ayrı. Konulara göre gruplanmış sorular (rezervasyon, ödeme, araç teslimi, hasar ve arıza, hesap), arama, rehberlere bağlantılar; cevap bulunamazsa İletişim'e yönlendirme. SSS içeriğiyle aynı kaynaktan beslenir, ana sayfadaki SSS'nin geniş hâlidir.
 - **Araç kiralama rehberleri (`/rehberler`):** 4–6 kısa rehber (ör. gerekli belgeler, yakıt ve teslim kuralları, farklı bayiye iade, hasar durumunda ne yapılır, elektrikli araç kullanımı). Metinleri Claude yazar, iddia uydurmaz. Ana sayfada 3–4 kart.
 - **Mobil uygulama reklamı:** ana sayfada kendi bölümü (Yol Boyu Güvence'den sonra). Uygulama kurgusal: mağaza rozetleri görünür ama gerçek mağaza bağlantısı yoktur; görsel yer tutucu (fotoğraf kararı §10).
+
+### 2.10 Sürücü uygunluğu (v0.5, G onayladı, 11 Ekim)
+
+Kiralayan kişinin aracı koşullara göre kullanıp kullanamayacağının kontrolü. Kontrol ödemeden önce yapılır. **Sitede gerçek bilgi kullanılmaz:** ehliyet numarası, tarihler ve doğrulama hizmeti kurguseldir, ekranda "deneme" olduğu yazar (ödemedeki deneme kartı gibi).
+
+- **Kural iki şeye bağlıdır:** aracın sınıfı ve ehliyetin verildiği ülke. Sınıf en az yaşı ve en az ehliyet yılını belirler; ülke ehliyet yılına ek yıl koyabilir ve uluslararası sürücü belgesi isteyebilir. Kurallar tek bir tabloda durur (`apps/web/lib/driver-rules.ts`); değerler **örnektir**, gerçek hukuk bilgisi iddia edilmez, G düzeltir.
+
+| Sınıf | En az yaş | En az ehliyet yılı |
+|---|---|---|
+| Ekonomik | 21 | 2 |
+| Orta sınıf | 21 | 2 |
+| SUV | 23 | 3 |
+| Elektrikli | 23 | 2 |
+| Üst sınıf | 25 | 5 |
+
+| Ehliyetin verildiği ülke | Ehliyet yılına ek | Uluslararası sürücü belgesi |
+|---|---|---|
+| Türkiye | 0 | gerekmez |
+| Almanya | +1 | gerekmez |
+| Birleşik Krallık | +1 | gerekmez |
+| ABD | +2 | gerekir (beyan) |
+
+- **Kullanıcıdan istenenler:** doğum tarihi, ehliyetin verildiği ülke, ehliyet numarası, ehliyet veriliş tarihi ve bir beyan onayı ("bilgilerin doğru olduğunu beyan ederim; belgelerim alışta kontrol edilecek"). ABD seçilince uluslararası sürücü belgesi beyanı da istenir.
+- **Simüle doğrulama:** "Ehliyetimi doğrula" sahte bir doğrulama servisini çağırır; sonuç geçerli, bulunamadı ya da süresi dolmuş olur (deneme numaralarıyla; ekranda ipucu yazar). Gerçek servis yoktur, gerçek ehliyet numarası girilmez. Yaş ve ehliyet yılı kuralı doğrulamadan ayrıca ve kiralamanın **başlangıç gününe** göre uygulanır.
+- **Saklanmaz (G):** doğum tarihi, ehliyet numarası ve tarihleri ne hesaba, ne rezervasyon kaydına, ne tarayıcıya (depolama, çerez) ne de adrese yazılır; yalnızca rezervasyon anında kontrol için kullanılır. Bu, KVKK Aydınlatma Metni'nde yazar.
+- **Akıştaki yeri:** `/odeme`, kart formunun üstünde "Sürücü bilgileri". Uygun değilse ödeme düğmesi kapalı kalır, tutmayan kural açıkça yazılır ve "Başka araç seç" sonuçlara döner. Kontrol sunucu eyleminde yeniden yapılır (istemci atlanabilir). 15 dakikalık tutma sürmeye devam eder.
+- **Karar öncesi şeffaflık:** arama sonucundaki kartta ve rezervasyon özetinde sınıfın koşulu ("en az 23 yaş · 3 yıl ehliyet") ve Kiralama Koşulları bağlantısı görünür.
+- **Kapsam dışı (ilk sürüm):** "Ek sürücü" seçilince ikinci sürücünün kontrolü; sürücü bilgisinin profilde saklanması.
 
 ---
 
@@ -302,7 +342,7 @@ Gövde metni en fazla ~68 karakter genişliğinde tutulur.
 - **Bölümler arası:** mobil 64px, masaüstü 96–128px.
 - **Izgara:** 4 sütun (mobil, 16px kenar boşluğu) · 8 sütun (tablet) · 12 sütun (masaüstü, en fazla 1200px içerik genişliği).
 - **Köşe yarıçapı:** form ve buton 10px, kart 16px, büyük görsel 24px, anahtar (toggle) tam yuvarlak.
-- **Gölge:** neredeyse yok. Derinlik gölgeyle değil zemin tonu farkıyla (paper → beyaz kart) verilir; sadece açılan menülerde, pencerelerde ve arama alanında hafif gölge.
+- **Gölge:** neredeyse yok. Derinlik gölgeyle değil zemin tonu farkıyla (paper → beyaz kart) verilir; sadece açılan menülerde, pencerelerde, arama alanında ve yüzen navbar hapında (v0.5) hafif gölge.
 - **Kırılma noktaları:** 375 (tasarım buradan başlar) · 768 · 1280.
 
 ### 5.4 Yerleşim konsepti: "sade, ama düz değil"
@@ -379,8 +419,8 @@ v1 "bitti" sayılmadan önce, 375px genişlikte mobil tarayıcıda:
 3. Özette bir ek hizmet seçilir, toplam doğru görünür; giriş yapılır; sahte ödeme ekranı geçilir; onay sayfasında rezervasyon numarası görünür.
 4. Profil > Rezervasyonlarım'da bu rezervasyon listelenir.
 5. Ana sayfada Kurumsal'a geçilir; form doldurulup gönderilir; "Talebiniz alındı" görünür.
-6. Araçlarımız'da bir karta tıklanır; pencere açılır, modelin bayileri görünür; Esc ile kapanır, odak karta döner.
-7. İletişim'de şehir filtresinden "İzmir" seçilir; liste ve pinler daralır. İletişim formu gönderilir.
+6. Ana sayfada filo bölümünde bir kategori seçilir, yalnızca o kategorinin modelleri görünür; bir karta tıklanır, pencere açılır, modelin bayileri görünür; Esc ile kapanır, odak karta döner.
+7. Bayilerimiz'de şehir filtresinden "İzmir" seçilir; liste ve pinler daralır. İletişim'de form gönderilir.
 8. Çerez bandında "Reddet" seçilir; analytics yüklenmez.
 9. Aynı akışlar 1280px masaüstünde ve yalnızca klavyeyle tekrarlanır.
 
