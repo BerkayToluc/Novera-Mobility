@@ -11,6 +11,7 @@ import { QuoteForm } from "@/components/quote/quote-form";
 import { QuoteSteps } from "@/components/quote/quote-steps";
 import { FaqSection } from "@/components/home/faq-section";
 import { GuidesPreview } from "@/components/home/guides-preview";
+import { HowItWorks } from "@/components/home/how-it-works";
 import { GuaranteeBand } from "@/components/home/guarantee-band";
 import { PartnerStrip } from "@/components/home/partner-strip";
 import { RentalSearchForm } from "@/components/rental/rental-search-form";
@@ -110,7 +111,13 @@ export default async function Home({ searchParams }: PageProps<"/[locale]">) {
         </div>
       </section>
 
-      {/* Cars are picked in the results, not here, so the corporate tab (a request form) has no fleet. */}
+      {/* Cars are picked in the results, not here, so the corporate tab (a request form) has neither these steps nor a fleet. */}
+      {!corporate && (
+        <div className="mx-auto max-w-content px-4 pb-16 md:px-8 xl:pb-24">
+          <HowItWorks />
+        </div>
+      )}
+
       {!corporate && (
         <div id={FLEET_ANCHOR} className="mx-auto max-w-content scroll-mt-4 px-4 pb-16 md:px-8 xl:pb-24">
           <Suspense fallback={<FleetSkeleton />}>

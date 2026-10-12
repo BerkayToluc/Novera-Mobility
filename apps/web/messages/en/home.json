@@ -72,6 +72,23 @@
         "googlePlay": "Google Play"
       },
       "soon": "The app is coming to the stores soon. The badges are not links yet."
+    },
+    "how": {
+      "title": "How it works",
+      "steps": {
+        "choose": {
+          "title": "Choose a branch and dates",
+          "text": "Pick where you collect and return the car, and when; the cars that fit come with their prices."
+        },
+        "rent": {
+          "title": "Rent your car",
+          "text": "We hold the car you choose for 15 minutes; add extras and complete the payment."
+        },
+        "pickup": {
+          "title": "Collect it and go",
+          "text": "Visit the branch with your documents; Road Assurance is with you the whole way."
+        }
+      }
     }
   },
   "Guarantee": {

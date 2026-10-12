@@ -20,6 +20,14 @@
       "closedForGood": "Closed",
       "today": "today",
       "tomorrow": "tomorrow"
+    },
+    "locate": {
+      "button": "Use my location",
+      "locating": "Finding your location",
+      "found": "Nearest branch chosen: {name}, about {km} km away.",
+      "denied": "Location permission was not given. You can choose a branch from the list.",
+      "failed": "Your location could not be found. You can choose a branch from the list.",
+      "unsupported": "This browser does not share its location. You can choose a branch from the list."
     }
   },
   "ResultsPage": {

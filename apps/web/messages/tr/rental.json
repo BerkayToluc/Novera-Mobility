@@ -20,6 +20,14 @@
       "closedForGood": "Kapalı",
       "today": "bugün",
       "tomorrow": "yarın"
+    },
+    "locate": {
+      "button": "Konumumu kullan",
+      "locating": "Konum alınıyor",
+      "found": "En yakın bayi seçildi: {name}, yaklaşık {km} km.",
+      "denied": "Konum izni verilmedi. Bayiyi listeden seçebilirsiniz.",
+      "failed": "Konumunuz alınamadı. Bayiyi listeden seçebilirsiniz.",
+      "unsupported": "Bu tarayıcı konum paylaşımını desteklemiyor. Bayiyi listeden seçebilirsiniz."
     }
   },
   "ResultsPage": {

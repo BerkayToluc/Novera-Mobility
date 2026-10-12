@@ -6,6 +6,9 @@ export type BranchOption = {
   id: string;
   label: string;
   openingHours: OpeningHours;
+  // Where the branch is, for "use my location" (SPEC §2.2.2).
+  latitude: number;
+  longitude: number;
 };
 
 export function buildBranchOptions(branches: BranchDetail[]): BranchOption[] {
@@ -16,5 +19,7 @@ export function buildBranchOptions(branches: BranchDetail[]): BranchOption[] {
       // The city first: "Merkez" alone would not say which of two cities it is.
       label: `${branch.city} · ${branch.name}`,
       openingHours: branch.openingHours,
+      latitude: branch.latitude,
+      longitude: branch.longitude,
     }));
 }
