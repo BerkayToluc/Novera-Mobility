@@ -54,13 +54,14 @@ Yukarıdan aşağıya bölüm sırası:
 |---|---|---|
 | 1 | Kampanya galerisi | §2.2.1 |
 | 2 | Kiralama kutusu | Sayfanın `h1`'i ("Araç Kirala") bu bölümün başlığıdır ve **ortalanır**. Altında, yine ortalı, yalnızca iki buton: **Bireysel** / **Kurumsal**; butonların çevresinde kutu ya da çerçeve yok (v0.4, G). Altında form (§2.2.2, §2.2.3) |
-| 3 | Araçlarımız (filo) | Kategori çipleri ve seçili kategorideki modeller; yalnızca Bireysel sekmede (v0.5, G; §2.4) |
-| 4 | İş birlikleri | Kayan logo şeridi (§2.2.4) |
-| 5 | Yol Boyu Güvence | Koyu zeytin bant, modernleştirilmiş (§5.5) |
-| 6 | Mobil uygulama | Uygulama reklamı: fotoğraf solda, metin ve mağaza rozetleri sağda (v0.4, G; §2.9) |
-| 7 | Araç kiralama rehberleri | Oklarla kaydırılan rehber kartları; "Tüm rehberler" düğmesi yok, liste footer'dan ve Yardım'dan açılır (v0.6, G; §2.9) |
-| 8 | Sık sorulan sorular | §2.2.5 |
-| 9 | Footer | §2.8 |
+| 3 | Nasıl çalışır? | Üç adım: bayi ve tarihi seçin, aracı kiralayın, teslim alıp yola çıkın; yalnızca Bireysel sekmede (v0.6, G) |
+| 4 | Araçlarımız (filo) | Kategori çipleri ve seçili kategorideki modeller; yalnızca Bireysel sekmede (v0.5, G; §2.4) |
+| 5 | İş birlikleri | Kayan logo şeridi (§2.2.4) |
+| 6 | Yol Boyu Güvence | Koyu zeytin bant, modernleştirilmiş (§5.5) |
+| 7 | Mobil uygulama | Uygulama reklamı: fotoğraf solda, metin ve mağaza rozetleri sağda (v0.4, G; §2.9) |
+| 8 | Araç kiralama rehberleri | Oklarla kaydırılan rehber kartları; "Tüm rehberler" düğmesi yok, liste footer'dan ve Yardım'dan açılır (v0.6, G; §2.9) |
+| 9 | Sık sorulan sorular | §2.2.5 |
+| 10 | Footer | §2.8 |
 
 v0.2'deki kitleye göre değişen "araç sınıfları" ("Size uygun sınıfı seçin") ve "4 ürün" bölümleri kaldırıldı (G'nin kararı, 10 Ekim'de yinelendi). `h1` galeride değil kutuda durur, çünkü galeri kampanya içeriğidir, sayfanın konusu araç kiralamaktır.
 
@@ -74,6 +75,7 @@ v0.2'deki kitleye göre değişen "araç sınıfları" ("Size uygun sınıfı se
 #### 2.2.2 Bireysel (varsayılan)
 
 - Alış bayisi, bırakılacak bayi, tarih aralığı (tek takvim) ve alış/iade saati (30 dakikalık dilimler, ADR-16) → **Ara** → `/araclar`.
+- **Konumumu kullan (v0.6, G):** alış bayisinin altında bir düğme; basılınca tarayıcı konum izni ister, en yakın bayi (kuş uçuşu) seçilir ve ne kadar uzakta olduğu yazılır. Konum yalnızca o an kullanılır, hiçbir yere kaydedilmez; izin verilmezse ya da alınamazsa bayi listeden seçilir.
 - **Bayi listesi (v0.6, G):** her bayinin adının altında **çalışma durumu** yazar: "7/24 açık", "Şu an açık, 20:00'ye kadar" ya da "Kapalı, yarın 09:00'da açılır" (Türkiye saatine göre, liste açılınca hesaplanır). Aracın adları artık görünmez; araç sonuç sayfasında seçilir.
 - Bırakılacak bayi her zaman seçilir; kullanıcı dokunmadıkça alış bayisini izler (çoğu kiralama başladığı yerde biter).
 - Arama formunda **araç seçilmez**; araç, sonuç sayfasında seçilir.
@@ -119,6 +121,8 @@ Ana sayfa (Kurumsal) → form → "Talebiniz alındı" → satış ekibi arar. �
 
 **Bayi bulma:**
 Bayilerimiz → şehir filtresi ve/veya arama → liste ve haritadaki pinler daralır → bayi kartı (adres, çalışma saatleri, `tel:` telefon, e-posta, yol tarifi linki).
+
+**Kampanya kodu (v0.6, G):** ödeme sayfasında fiyat bloğunun yanında bir kod kutusu. Kod adreste durur (kişisel veri değil), sunucu fiyatı kodla hesaplar; indirim özette, ödemede ve onayda ayrı bir satırdır ve araç ile ek hizmetlerin toplamından düşer. Tanımsız kod "geçerli değil" der, fiyat değişmez. Deneme kodları kurgusaldır (NOVERA10 %10, HOSGELDIN %5).
 
 ### 2.4 Araçlarımız (ana sayfa bölümü)
 
