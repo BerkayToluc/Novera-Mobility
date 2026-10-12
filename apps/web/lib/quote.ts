@@ -4,7 +4,7 @@ import { isProductSlug } from "./products";
 // The corporate request (SPEC §2.2.3, BACKLOG Y16): a company leaves its details and the sales
 // team calls back. One form serves the home page's corporate box and /kurumsal-teklif.
 export const FLEET_SIZES = ["1-5", "6-20", "21-50", "50+"] as const;
-export const QUOTE_TERMS = ["6", "12", "24", "36+"] as const;
+export const QUOTE_TERMS = ["1", "2", "3", "6", "12", "24", "36+"] as const;
 export const QUOTE_NEEDS = ["sedan", "suv", "commercial", "electric", "premium"] as const;
 
 export type QuoteErrorMessages = {

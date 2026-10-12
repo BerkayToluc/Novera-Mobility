@@ -13,6 +13,9 @@
     },
     "term": "Rental term",
     "terms": {
+      "1": "1 month",
+      "2": "2 months",
+      "3": "3 months",
       "6": "6 months",
       "12": "12 months",
       "24": "24 months",
