@@ -40,7 +40,7 @@ export default async function ContactPage() {
         <p className="max-w-prose text-body text-fg-muted">{t("intro")}</p>
       </header>
 
-      <div className="flex flex-col gap-10 xl:grid xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] xl:items-start xl:gap-12">
+      <div className="flex flex-col gap-10 md:grid md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:items-start md:gap-6 xl:gap-12">
         <Headquarters />
         <section
           id="mesaj"

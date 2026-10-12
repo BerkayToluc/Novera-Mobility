@@ -14,7 +14,7 @@ const LEGAL_ITEMS = [
   { href: "/kiralama-kosullari", labelKey: "terms" },
 ] as const;
 
-const linkClasses = "inline-flex min-h-11 items-center text-body text-fg-muted hover:text-fg hover:underline";
+const linkClasses = "inline-flex min-h-11 min-w-11 items-center text-body text-fg-muted hover:text-fg hover:underline";
 const headingClasses = "text-label text-fg";
 
 // Simple Footer reference (SPEC §2.8): brand on the left, plain link columns on the right,
