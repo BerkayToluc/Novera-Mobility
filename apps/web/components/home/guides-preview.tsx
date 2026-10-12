@@ -1,35 +1,30 @@
 import { getTranslations } from "next-intl/server";
 import { GuideCard } from "@/components/guides/guide-card";
-import { Button } from "@/components/ui/button";
-import { Link } from "@/i18n/navigation";
 import { GUIDES } from "@/lib/guides";
+import { GuidesCarousel } from "./guides-carousel";
 
-// Three of the guides on the home page (SPEC §2.2); the rest sit on the guides page.
-const PREVIEW = GUIDES.slice(0, 3);
-
+// All the guides on the home page, in a row to slide (SPEC §2.9). There is no "all guides"
+// button: the list page is one link away in the footer and the help centre.
 export async function GuidesPreview() {
   const t = await getTranslations("GuidesPage");
 
   return (
     <section aria-labelledby="guides-title" className="flex flex-col gap-8">
-      <header className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-        <div className="flex flex-col gap-2">
-          <h2 id="guides-title" className="text-h1 text-fg">
-            {t("homeTitle")}
-          </h2>
-          <p className="max-w-prose text-body text-fg-muted">{t("homeIntro")}</p>
-        </div>
-        <Button asChild variant="outline" className="self-start">
-          <Link href="/rehberler">{t("viewAll")}</Link>
-        </Button>
+      <header className="flex flex-col gap-2">
+        <h2 id="guides-title" className="text-h1 text-fg">
+          {t("homeTitle")}
+        </h2>
+        <p className="max-w-prose text-body text-fg-muted">{t("homeIntro")}</p>
       </header>
-      <ul className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-        {PREVIEW.map((slug) => (
-          <li key={slug} className="md:last:col-span-2 xl:last:col-span-1">
+      <GuidesCarousel>
+        {GUIDES.map((slug) => (
+          // The padding is the gap between cards: a margin or a gap would make three cards a
+          // little wider than the strip.
+          <li key={slug} className="flex shrink-0 basis-full snap-start px-3 md:basis-1/2 xl:basis-1/3">
             <GuideCard slug={slug} headingAs="h3" />
           </li>
         ))}
-      </ul>
+      </GuidesCarousel>
     </section>
   );
 }

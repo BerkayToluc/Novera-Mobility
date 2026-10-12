@@ -1,5 +1,6 @@
-import { Camera, Download, Headset, Siren } from "lucide-react";
+import { Camera, Headset, Siren } from "lucide-react";
 import { getTranslations } from "next-intl/server";
+import { StoreIcon } from "@/components/ui/store-icons";
 import { AppArt } from "./app-art";
 
 const POINTS = [
@@ -43,14 +44,14 @@ export async function AppPromo() {
           ))}
         </ul>
 
-        <div className="flex flex-col gap-3">
-          <ul className="flex flex-wrap gap-3">
+        <div className="flex flex-col items-center gap-3">
+          <ul className="flex flex-wrap justify-center gap-3">
             {STORES.map((store) => (
               <li
                 key={store}
                 className="inline-flex min-h-12 items-center gap-3 rounded-control bg-band px-4 text-on-band"
               >
-                <Download aria-hidden="true" className="size-5 shrink-0" />
+                <StoreIcon store={store} className="size-6 shrink-0" />
                 <span className="flex flex-col leading-tight">
                   <span className="text-small text-on-band/80">{t("badgeTop")}</span>
                   <span className="text-label">{t(`stores.${store}`)}</span>
@@ -58,7 +59,7 @@ export async function AppPromo() {
               </li>
             ))}
           </ul>
-          <p className="text-small text-fg-muted">{t("soon")}</p>
+          <p className="text-center text-small text-fg-muted">{t("soon")}</p>
         </div>
       </div>
     </section>

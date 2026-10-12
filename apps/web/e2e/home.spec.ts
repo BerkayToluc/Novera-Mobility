@@ -48,3 +48,50 @@ test("the Road Assurance line runs a trail twice once it is on screen, and not a
   await page.emulateMedia({ reducedMotion: "reduce" });
   await expect(live.first()).toHaveCSS("animation-name", "none");
 });
+
+test("the guides slide with an arrow at each side, and there is no all-guides button", async ({ page }) => {
+  await page.goto("/");
+  const section = page.locator("section[aria-labelledby=guides-title]");
+  await section.scrollIntoViewIfNeeded();
+  await expect(section.getByRole("link", { name: "Tüm rehberler" })).toHaveCount(0);
+  await expect(section.getByRole("button", { name: "Tüm rehberler" })).toHaveCount(0);
+  // All six guides are in the strip, not only the three that fit.
+  await expect(section.getByRole("heading", { level: 3 })).toHaveCount(6);
+
+  const strip = section.locator("ul").first();
+  const previous = section.getByRole("button", { name: "Önceki rehberler" });
+  const next = section.getByRole("button", { name: "Sonraki rehberler" });
+  await expect(previous).toHaveAttribute("aria-disabled", "true");
+  await expect(next).toHaveAttribute("aria-disabled", "false");
+
+  await next.click();
+  await expect.poll(() => strip.evaluate((element) => element.scrollLeft)).toBeGreaterThan(0);
+  await expect(previous).toHaveAttribute("aria-disabled", "false");
+
+  // Pressing next on and on reaches the last guide, where it is marked unavailable.
+  for (let step = 0; step < 6; step++) {
+    if ((await next.getAttribute("aria-disabled")) === "true") break;
+    await next.click();
+    await page.waitForTimeout(300);
+  }
+  await expect(next).toHaveAttribute("aria-disabled", "true");
+});
+
+test("the store buttons carry the Apple and Google Play marks, centred, and are not links", async ({ page }) => {
+  await page.goto("/");
+  const app = page.locator("section", { has: page.getByRole("heading", { name: "Novera cebinizde" }) });
+  await app.scrollIntoViewIfNeeded();
+  const badges = app.locator("li", { hasText: /App Store|Google Play/ });
+  await expect(badges).toHaveCount(2);
+  for (const badge of await badges.all()) {
+    await expect(badge.locator("svg")).toHaveCount(1);
+    await expect(badge.getByRole("link")).toHaveCount(0);
+  }
+  // Centred: the pair's middle is the middle of the column that holds it.
+  const [first, second] = [await badges.nth(0).boundingBox(), await badges.nth(1).boundingBox()];
+  const column = await app.locator("li", { hasText: /App Store/ }).locator("xpath=ancestor::div[1]").boundingBox();
+  expect(first && second && column).toBeTruthy();
+  const pairMiddle = (first!.x + second!.x + second!.width) / 2;
+  const columnMiddle = column!.x + column!.width / 2;
+  expect(Math.abs(pairMiddle - columnMiddle)).toBeLessThan(4);
+});
