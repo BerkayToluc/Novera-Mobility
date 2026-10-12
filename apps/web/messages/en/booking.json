@@ -38,7 +38,8 @@
       "intro": "Add them if you like; what you pick shows in the total straight away."
     },
     "vatNote": "Prices include VAT. There is no extra charge for returning at a different branch.",
-    "cancelNote": "You can cancel free of charge up to 24 hours before pick-up. <link>Rental terms</link>"
+    "cancelNote": "You can cancel free of charge up to 24 hours before pick-up. <link>Rental terms</link>",
+    "discount": "Campaign discount ({code}, {percent}%)"
   },
   "Payment": {
     "metaTitle": "Payment",
@@ -69,7 +70,17 @@
     "paying": "Processing",
     "summaryTitle": "Your booking",
     "total": "Total",
-    "edit": "Back to summary"
+    "edit": "Back to summary",
+    "promo": {
+      "title": "Campaign code",
+      "label": "Your campaign code",
+      "apply": "Apply",
+      "applying": "Applying",
+      "remove": "Remove",
+      "applied": "{code} applied: {percent}% off.",
+      "unknown": "\"{code}\" is not a valid campaign code.",
+      "hint": "Trial codes: NOVERA10 (10%) and HOSGELDIN (5%). The codes are made up."
+    }
   },
   "Confirmation": {
     "metaTitle": "Booking Confirmation",
