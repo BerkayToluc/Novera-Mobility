@@ -115,7 +115,7 @@
       "sent": "Sent",
       "fleet": "Fleet size",
       "term": "Term",
-      "termMonths": "{months} months",
+      "termMonths": "{months, plural, one {# month} other {# months}}",
       "status": {
         "RECEIVED": "Received",
         "IN_REVIEW": "In review",

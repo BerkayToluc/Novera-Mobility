@@ -6,14 +6,20 @@
     "pickupTime": "Alış saati",
     "returnTime": "İade saati",
     "submit": "Ara",
-    "branchPlaceholder": "Bayi seçin",
-    "noVehicles": "Şu an araç yok",
-    "andMore": "+{count}",
     "errors": {
       "pickupBranch": "Alış bayisini seçin.",
       "returnBranch": "Bırakacağınız bayiyi seçin.",
       "dates": "Tarihleri seçin.",
       "order": "İade zamanı, alış zamanından sonra olmalı."
+    },
+    "status": {
+      "placeholder": "Bayi seçin",
+      "always": "7/24 açık",
+      "open": "Şu an açık · kapanış {time}",
+      "closed": "Kapalı · açılış {when} {time}",
+      "closedForGood": "Kapalı",
+      "today": "bugün",
+      "tomorrow": "yarın"
     }
   },
   "ResultsPage": {

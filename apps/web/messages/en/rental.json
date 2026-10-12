@@ -6,14 +6,20 @@
     "pickupTime": "Pick-up time",
     "returnTime": "Return time",
     "submit": "Search",
-    "branchPlaceholder": "Choose a branch",
-    "noVehicles": "No cars right now",
-    "andMore": "+{count}",
     "errors": {
       "pickupBranch": "Choose the pick-up branch.",
       "returnBranch": "Choose the drop-off branch.",
       "dates": "Choose your dates.",
       "order": "The return time must be after the pick-up time."
+    },
+    "status": {
+      "placeholder": "Choose a branch",
+      "always": "Open 24/7",
+      "open": "Open now · closes {time}",
+      "closed": "Closed · opens {when} {time}",
+      "closedForGood": "Closed",
+      "today": "today",
+      "tomorrow": "tomorrow"
     }
   },
   "ResultsPage": {

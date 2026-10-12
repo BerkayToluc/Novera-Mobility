@@ -19,7 +19,6 @@ import { StateMessage } from "@/components/ui/state-message";
 import { Link } from "@/i18n/navigation";
 import { parseAudience } from "@/lib/audience";
 import type { BranchOption } from "@/lib/branch-options";
-import { getCurrency } from "@/lib/get-currency";
 import { getBranchOptions } from "@/lib/rental-data";
 import { pageMetadata } from "@/lib/seo";
 
@@ -48,7 +47,6 @@ export default async function Home({ searchParams }: PageProps<"/[locale]">) {
   const audience = parseAudience(params.tip);
   const requestedModel = Array.isArray(params.arac) ? params.arac[0] : params.arac;
   const corporate = audience === "kurumsal";
-  const currency = await getCurrency();
 
   // Only the fetch sits in the try: not reaching the branches is an expected state with its
   // own message, while a rendering bug should still reach the error boundary. The corporate
@@ -56,7 +54,7 @@ export default async function Home({ searchParams }: PageProps<"/[locale]">) {
   let branches: BranchOption[] | null = null;
   if (!corporate) {
     try {
-      branches = await getBranchOptions(currency);
+      branches = await getBranchOptions();
     } catch {
       branches = null;
     }
