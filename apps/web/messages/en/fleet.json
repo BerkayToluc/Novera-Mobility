@@ -29,8 +29,6 @@
     }
   },
   "FleetPage": {
-    "metaTitle": "Our Cars",
-    "metaDescription": "Every make and model in the Novera Mobility fleet: economy, compact, SUV, executive and electric cars.",
     "title": "Our Cars",
     "intro": "Every model in our fleet, by category, starting from the best price. Tap a model for the details.",
     "error": {
@@ -38,11 +36,7 @@
       "text": "We cannot show our fleet right now. Please try again.",
       "retry": "Try Again"
     },
-    "ctaTitle": "Found a car you like?",
-    "ctaText": "Choose your location and dates to see the cars available at that branch, with prices.",
-    "ctaButton": "Rent a Car",
     "filterLabel": "Category",
-    "all": "All",
     "modelCount": "{count, plural, one {# model} other {# models}}",
     "card": {
       "details": "show details"

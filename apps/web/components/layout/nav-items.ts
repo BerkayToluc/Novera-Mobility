@@ -7,7 +7,6 @@ type AppPathname = keyof typeof routing.pathnames;
 export const NAV_ITEMS = [
   { href: "/", labelKey: "home" },
   { href: "/bayilerimiz", labelKey: "branches" },
-  { href: "/araclarimiz", labelKey: "fleet" },
   { href: "/urunler", labelKey: "products" },
   { href: "/hizmetler", labelKey: "services" },
   { href: "/hakkimizda", labelKey: "about" },
