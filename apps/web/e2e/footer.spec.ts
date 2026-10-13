@@ -8,29 +8,31 @@ test.beforeEach(async ({ context }) => {
   ]);
 });
 
-const arrow = (link: import("@playwright/test").Locator) => link.locator("svg");
+// The line that grows under a footer link; "0 1" is scaled flat, anything else has grown.
+const line = (link: import("@playwright/test").Locator) => link.locator("span.h-px");
+const scaleOf = (link: import("@playwright/test").Locator) => line(link).evaluate((el) => getComputedStyle(el).scale);
 
-test("a footer link shows its arrow when focused, and loses it when focus leaves", async ({ page }) => {
+test("a footer link is named once, and draws its line when focused", async ({ page }) => {
   await page.goto("/hakkimizda");
   const link = page.getByRole("contentinfo").getByRole("link", { name: "Gizlilik Politikası" });
   await link.scrollIntoViewIfNeeded();
-  await expect(arrow(link)).toHaveCSS("opacity", "0");
+  await expect.poll(() => scaleOf(link)).toBe("0 1");
   await link.focus();
-  await expect(arrow(link)).toHaveCSS("opacity", "1");
+  await expect.poll(() => scaleOf(link)).not.toBe("0 1");
   await page.getByRole("contentinfo").getByRole("link", { name: "Kullanım Şartları" }).focus();
-  await expect(arrow(link)).toHaveCSS("opacity", "0");
+  await expect.poll(() => scaleOf(link)).toBe("0 1");
 });
 
-test("a footer link shows its arrow under the pointer, and the text does not move", async ({ page, isMobile }) => {
+test("a footer link waves its letters under the pointer, and the link does not move", async ({ page, isMobile }) => {
   test.skip(isMobile, "there is no pointer to hover with");
   await page.goto("/hakkimizda");
   const link = page.getByRole("contentinfo").getByRole("link", { name: "Gizlilik Politikası" });
   await link.scrollIntoViewIfNeeded();
   const before = await link.boundingBox();
   await link.hover();
-  await expect(arrow(link)).toHaveCSS("opacity", "1");
+  await expect(link.locator("[aria-hidden=true] > span").first()).toHaveCSS("animation-name", "wave");
+  await expect.poll(() => scaleOf(link)).not.toBe("0 1");
   const after = await link.boundingBox();
-  // The room for the arrow is reserved: the link is the same size with and without it.
   expect(after!.width).toBe(before!.width);
   expect(after!.x).toBe(before!.x);
 });
@@ -62,15 +64,19 @@ test("below xl the links come before the brand, from xl the brand is on the left
   else expect(nav!.y).toBeLessThan(logo!.y);
 });
 
-test("the footer shows social networks as plain text with a note, and has no contact column", async ({ page }) => {
+test("the social marks are not links, say they are coming soon, and show their name on focus", async ({ page }) => {
   await page.goto("/hakkimizda");
   const footer = page.getByRole("contentinfo");
   await footer.scrollIntoViewIfNeeded();
   await expect(footer.getByRole("heading", { name: "Bizi takip edin" })).toBeVisible();
-  await expect(footer.getByText("Instagram")).toBeVisible();
-  await expect(footer.getByText("yakında açılacak")).toBeVisible();
-  await expect(footer.getByRole("link", { name: "Instagram" })).toHaveCount(0);
+  const instagram = footer.getByRole("img", { name: "Instagram · yakında" });
+  await expect(instagram).toBeVisible();
+  await expect(footer.getByRole("link", { name: /Instagram/ })).toHaveCount(0);
   await expect(footer.locator('a[href^="mailto:"], a[href^="tel:"]')).toHaveCount(0);
+  const tip = instagram.locator("span[aria-hidden=true]");
+  await expect(tip).toBeHidden();
+  await instagram.focus();
+  await expect(tip).toBeVisible();
 });
 
 test("the footer's eyes are decorative and keep the pupils inside", async ({ page, isMobile }) => {

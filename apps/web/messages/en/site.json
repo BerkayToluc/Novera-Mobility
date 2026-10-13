@@ -49,7 +49,8 @@
       "youtube": "YouTube"
     },
     "privacyPolicy": "Privacy Policy",
-    "siteTerms": "Terms of Use"
+    "siteTerms": "Terms of Use",
+    "socialSoon": "{network} · coming soon"
   },
   "ThemeSwitcher": {
     "label": "Theme",
