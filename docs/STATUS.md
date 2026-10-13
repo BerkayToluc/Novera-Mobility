@@ -40,9 +40,9 @@ G'nin kuralı (12 Ekim): **her sayfa ya da bileşen grubu bir dal, bir PR.** Bun
 2. `feat/navbar-pill`: **Navbar** (Y49): yüzen hap, bayraklı dil menüsü, hesap simgesi, tema navbardan çıktı, Hizmetler düz link.
 3. `feat/branches-page`: **Bayilerimiz sayfası** (Y50): `/bayilerimiz`, bayi bölümü İletişim'den taşındı.
 4. `feat/home-page`: **Araç Kirala (ana sayfa)** (Y51, Y53): filo ana sayfada ve `/araclarimiz` kalktı; kurumsal süre 1/2/3 ay; bayi satırında çalışma durumu; tek sütun araç kartı ve fiyat bloğu; şerit hover/odakta akar; güvence çizgisi akan iz; mağaza işaretleri; oklu rehber kaydırıcı; konu sekmeli SSS (`framer-motion`); Konumumu kullan; Nasıl çalışır?.
+5. `feat/payment-page`: **Ödeme sayfası** (Y52): sürücü bilgileri ve simüle ehliyet doğrulama (sınıf × ehliyet ülkesi kural tablosu, örnek değerler, hiçbir veri saklanmaz, SPEC §2.10) ve kampanya kodu.
 6. `feat/branches-extras`: **Bayilerimiz'in devamı** (Y50): arama kutulu şehir listesi (`feat/branches-page`'in son commit'ini içerir), kartta açık/kapalı, Buradan kirala, Bana en yakın bayiler, bayi türü çipleri, ortalanmış başlık.
 7. `feat/footer-simple`: **Footer** (Y54): Framer Simple Footer'ın ↗ hover okları, bloklarda yerine oturma hareketi, xl altında linklerin markadan önce gelmesi.
-5. `feat/payment-page`: **Ödeme sayfası** (Y52): sürücü bilgileri ve simüle ehliyet doğrulama (sınıf × ehliyet ülkesi kural tablosu, örnek değerler, hiçbir veri saklanmaz, SPEC §2.10) ve kampanya kodu.
 
 Belge dalları ayrı: `docs/spec-v05` (SPEC v0.5, ADR-22, BACKLOG Y49–Y52) ve `docs/spec-v06` (SPEC v0.6, BACKLOG Y53), bu belgenin dalı `docs/status-visual-tour`.
 
