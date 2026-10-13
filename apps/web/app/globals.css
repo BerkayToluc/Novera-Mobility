@@ -302,6 +302,8 @@
   --animate-marquee: marquee 48s linear infinite;
   /* The trail on the Road Assurance line (SPEC §5.4): twice along the road, under five seconds. */
   --animate-road-trail: road-trail 2.4s linear 2 both;
+  /* The footer's easing (SPEC §2.8, after the Framer Simple Footer): a long, soft finish. */
+  --ease-link: cubic-bezier(0.12, 0.23, 0.5, 1);
   --animate-fade-in: fade-in 0.3s ease-out;
   @keyframes road-trail {
     from {
@@ -329,6 +331,23 @@
       transform: translateX(-50%);
     }
   }
+}
+
+/* The footer's blocks rise into view as the page scrolls to them (SPEC §2.8). FooterReveal marks an
+   element hidden only after the page has loaded and only if it is below the fold, so without
+   script, or with reduced motion, everything simply shows. */
+[data-reveal] {
+  transition:
+    opacity 0.6s cubic-bezier(0.12, 0.23, 0.5, 1),
+    transform 0.6s cubic-bezier(0.12, 0.23, 0.5, 1);
+}
+[data-reveal="hidden"][data-kind="block"] {
+  opacity: 0;
+  transform: scale(0.97);
+}
+[data-reveal="hidden"][data-kind="text"] {
+  opacity: 0;
+  transform: translateY(3.75rem);
 }
 
 @layer base {
