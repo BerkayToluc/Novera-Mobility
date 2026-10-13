@@ -31,7 +31,7 @@
       "allDay": "Open 24 hours",
       "range": "{open} – {close}",
       "call": "Call: {phone}",
-      "email": "Send an email",
+      "email": "Email",
       "directions": "Get directions",
       "newTab": "(opens in a new tab)",
       "showOnMap": "Show on map",

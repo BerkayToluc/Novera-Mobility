@@ -66,5 +66,14 @@
       "EUR": "Euro",
       "USD": "US dollar"
     }
+  },
+  "ContactLink": {
+    "emailHeading": "Email address",
+    "phoneHeading": "Phone number",
+    "send": "Send email",
+    "call": "Call",
+    "copyEmail": "Copy address",
+    "copyPhone": "Copy number",
+    "copied": "Copied"
   }
 }
