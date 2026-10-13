@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
+import { SearchableSelect, type SearchableOption } from "@/components/ui/searchable-select";
 import { SegmentedControl } from "@/components/ui/segmented-control";
 import { StateMessage } from "@/components/ui/state-message";
 import { inCity, matchesBranch, type BranchDetail } from "@/lib/branch-detail";
@@ -41,8 +41,15 @@ export function BranchExplorer({ branches, mapsApiKey }: BranchExplorerProps) {
   const [mapFailed, setMapFailed] = useState(false);
   const onMapFail = useCallback(() => setMapFailed(true), []);
 
-  // Cities in the order the branches come, each once.
-  const cities = useMemo(() => [...new Set(branches.map((branch) => branch.city))], [branches]);
+  // Cities in the order the branches come, each once, with how many branches each has; "all cities" first.
+  const cityOptions = useMemo<SearchableOption[]>(() => {
+    const counts = new Map<string, number>();
+    for (const branch of branches) counts.set(branch.city, (counts.get(branch.city) ?? 0) + 1);
+    return [
+      { value: "", label: t("allCities"), hint: t("count", { count: branches.length }) },
+      ...[...counts].map(([name, count]) => ({ value: name, label: name, hint: t("count", { count }) })),
+    ];
+  }, [branches, t]);
   const matches = useMemo(
     () => branches.filter((branch) => inCity(branch, city) && matchesBranch(branch, query)),
     [branches, city, query],
@@ -61,26 +68,25 @@ export function BranchExplorer({ branches, mapsApiKey }: BranchExplorerProps) {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-        <div className="grid w-full gap-4 md:max-w-2xl md:grid-cols-2">
+      {/* The two fields are centred under the heading, and the list/map switch (below xl) under them. */}
+      <div className="flex flex-col items-center gap-4">
+        <div className="mx-auto grid w-full gap-4 md:max-w-2xl md:grid-cols-2">
           <Field label={t("cityLabel")}>
             {(control) => (
-              <Select
+              <SearchableSelect
                 {...control}
+                options={cityOptions}
                 value={city}
-                onChange={(event) => {
-                  setCity(event.target.value);
+                placeholder={t("allCities")}
+                searchLabel={t("citySearch")}
+                searchPlaceholder={t("citySearchPlaceholder")}
+                emptyText={t("noCity")}
+                onChange={(next) => {
+                  setCity(next);
                   // A new filter starts from the overview, not from the last branch picked.
                   setSelectedId(null);
                 }}
-              >
-                <option value="">{t("allCities")}</option>
-                {cities.map((name) => (
-                  <option key={name} value={name}>
-                    {name}
-                  </option>
-                ))}
-              </Select>
+              />
             )}
           </Field>
           <Field label={t("searchLabel")}>
