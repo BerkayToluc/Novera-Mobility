@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, type ComponentProps, type ReactNode } from "react";
+import { useRef, useState, type ComponentProps, type MouseEvent, type ReactNode } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,9 @@ export type CampaignSlide = {
 // The campaign gallery at the top of the home page (SPEC §2.2.1). The slides sit in a native
 // scroll-snap strip, so touch swipe, trackpad and keyboard scrolling work without script; the
 // arrows and dots only move that strip. Nothing advances on its own: the visitor sets the pace.
+// The arrows sit inside the picture, a frosted band down its left and right edge (SPEC §2.2.1,
+// G): on a device that hovers they appear when the pointer is over the gallery or an arrow has
+// focus; on a touch screen, which cannot hover, they stay in view.
 export function CampaignGallery({ slides }: { slides: CampaignSlide[] }) {
   const t = useTranslations("HomePage.gallery");
   const stripRef = useRef<HTMLDivElement>(null);
@@ -42,6 +45,7 @@ export function CampaignGallery({ slides }: { slides: CampaignSlide[] }) {
 
   return (
     <section aria-roledescription={t("roledescription")} aria-label={t("label")} className="flex flex-col gap-4">
+      <div className="group/gallery relative">
       <div
         ref={stripRef}
         onScroll={(event) => {
@@ -77,8 +81,17 @@ export function CampaignGallery({ slides }: { slides: CampaignSlide[] }) {
           </div>
         ))}
       </div>
+      {/* Laid over the strip on the slides' own grid, so the bands cover exactly the picture: the
+          top of the slide on a phone, its right column from md up. */}
+      <div className="pointer-events-none absolute inset-0 grid overflow-hidden rounded-media md:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
+        <div className="relative aspect-[16/10] self-start md:col-start-2 md:aspect-auto md:self-stretch">
+          <GalleryArrow side="previous" label={t("previous")} onClick={(event) => go(targetRef.current - 1, event.timeStamp)} />
+          <GalleryArrow side="next" label={t("next")} onClick={(event) => go(targetRef.current + 1, event.timeStamp)} />
+        </div>
+      </div>
+      </div>
 
-      <div className="flex items-center justify-between gap-4 md:justify-start md:gap-6">
+      <div className="flex items-center gap-4">
         <div className="flex items-center gap-1">
           {slides.map((slide, index) => (
             <button
@@ -99,15 +112,38 @@ export function CampaignGallery({ slides }: { slides: CampaignSlide[] }) {
             </button>
           ))}
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="icon" onClick={(event) => go(targetRef.current - 1, event.timeStamp)} aria-label={t("previous")}>
-            <ChevronLeft aria-hidden="true" className="size-5" />
-          </Button>
-          <Button variant="outline" size="icon" onClick={(event) => go(targetRef.current + 1, event.timeStamp)} aria-label={t("next")}>
-            <ChevronRight aria-hidden="true" className="size-5" />
-          </Button>
-        </div>
       </div>
     </section>
+  );
+}
+
+// One edge of the picture: the whole height is the button (a large target), frosted so the art
+// behind stays readable, with the chevron on a solid disc so it keeps its contrast on any slide.
+function GalleryArrow({
+  side,
+  label,
+  onClick,
+}: {
+  side: "previous" | "next";
+  label: string;
+  onClick: (event: MouseEvent<HTMLButtonElement>) => void;
+}) {
+  const Icon = side === "previous" ? ChevronLeft : ChevronRight;
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={label}
+      className={cn(
+        "pointer-events-auto absolute inset-y-0 flex w-14 items-center justify-center bg-surface/25 backdrop-blur-md transition-opacity duration-300 md:w-20",
+        "[@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover/gallery:opacity-100 focus-visible:opacity-100 [@media(hover:hover)]:focus-visible:opacity-100",
+        "focus-visible:outline-2 focus-visible:-outline-offset-4 focus-visible:outline-focus motion-reduce:transition-none",
+        side === "previous" ? "left-0" : "right-0",
+      )}
+    >
+      <span className="inline-flex size-10 items-center justify-center rounded-full bg-surface text-fg shadow-overlay">
+        <Icon aria-hidden="true" className="size-5" />
+      </span>
+    </button>
   );
 }

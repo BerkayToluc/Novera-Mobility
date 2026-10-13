@@ -300,11 +300,8 @@
 
   --container-content: 75rem;
 
-  /* Partner strip (SPEC §2.2.4): the track holds two identical sets, so moving it by half
-     its width loops without a seam. It runs only while hovered or focused, never with reduced motion. */
-  --animate-marquee: marquee 48s linear infinite;
-  /* The trail on the Road Assurance line (SPEC §5.4): twice along the road, under five seconds. */
-  --animate-road-trail: road-trail 2.4s linear 2 both;
+  /* The Road Assurance line filling from stop to stop (SPEC §5.4, after the Framer StepProgress). */
+  --ease-step: cubic-bezier(0.4, 0, 0.2, 1);
   /* The footer's easing (SPEC §2.8, after the Framer Simple Footer): a long, soft finish. */
   --ease-link: cubic-bezier(0.12, 0.23, 0.5, 1);
   /* The letter roll of the nav links (after the Framer SplitTextHover). */
@@ -312,14 +309,6 @@
   /* Menus that open and close (after the Framer Pill Dropdown Nav). */
   --ease-menu: cubic-bezier(0.44, 0, 0.56, 1);
   --animate-fade-in: fade-in 0.3s ease-out;
-  @keyframes road-trail {
-    from {
-      stroke-dashoffset: 0.25;
-    }
-    to {
-      stroke-dashoffset: -1;
-    }
-  }
   @keyframes fade-in {
     from {
       opacity: 0;
@@ -328,14 +317,6 @@
     to {
       opacity: 1;
       transform: none;
-    }
-  }
-  @keyframes marquee {
-    from {
-      transform: translateX(0);
-    }
-    to {
-      transform: translateX(-50%);
     }
   }
 }
