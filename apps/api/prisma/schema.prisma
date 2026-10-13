@@ -215,6 +215,7 @@ model Hold {
   pickupBranchId String
   returnBranchId String
   expiresAt      DateTime
+  clientKey      String?
   createdAt      DateTime @default(now())
 
   vehicleId String
@@ -222,6 +223,7 @@ model Hold {
 
   @@index([vehicleId, startAt, endAt])
   @@index([expiresAt])
+  @@index([clientKey, expiresAt])
 }
 
 model Reservation {
