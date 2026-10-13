@@ -61,3 +61,29 @@ test("below xl the links come before the brand, from xl the brand is on the left
   if ((page.viewportSize()?.width ?? 0) >= 1280) expect(logo!.x).toBeLessThan(nav!.x);
   else expect(nav!.y).toBeLessThan(logo!.y);
 });
+
+test("the footer shows social networks as plain text with a note, and has no contact column", async ({ page }) => {
+  await page.goto("/hakkimizda");
+  const footer = page.getByRole("contentinfo");
+  await footer.scrollIntoViewIfNeeded();
+  await expect(footer.getByRole("heading", { name: "Bizi takip edin" })).toBeVisible();
+  await expect(footer.getByText("Instagram")).toBeVisible();
+  await expect(footer.getByText("yakında açılacak")).toBeVisible();
+  await expect(footer.getByRole("link", { name: "Instagram" })).toHaveCount(0);
+  await expect(footer.locator('a[href^="mailto:"], a[href^="tel:"]')).toHaveCount(0);
+});
+
+test("the footer's eyes are decorative and keep the pupils inside", async ({ page, isMobile }) => {
+  test.skip(isMobile, "there is no pointer to follow");
+  await page.goto("/hakkimizda");
+  const footer = page.getByRole("contentinfo");
+  await footer.scrollIntoViewIfNeeded();
+  const eyes = footer.locator("[data-eye]");
+  await expect(eyes).toHaveCount(2);
+  await expect(footer.locator("[data-eye]").first().locator("xpath=..")).toHaveAttribute("aria-hidden", "true");
+  const box = (await eyes.first().boundingBox())!;
+  await page.mouse.move(box.x + box.width + 200, box.y - 100);
+  await expect
+    .poll(() => footer.locator("[data-pupil]").first().evaluate((el) => (el as HTMLElement).style.transform))
+    .toMatch(/translate\(\d/);
+});

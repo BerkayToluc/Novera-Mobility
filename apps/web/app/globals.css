@@ -229,6 +229,9 @@
   --color-band: var(--novera-band);
   --color-on-band: var(--novera-on-band);
   --color-band-accent: var(--novera-band-accent);
+  /* The eyes in the footer keep their own colours in both themes (SPEC §2.8). */
+  --color-eye-white: #fffefd;
+  --color-eye-pupil: #0c0c0c;
   --color-fg: var(--novera-fg);
   --color-fg-muted: var(--novera-fg-muted);
   --color-fg-subtle: var(--novera-fg-subtle);
