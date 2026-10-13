@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
+import { LocateFixed } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
@@ -8,11 +9,17 @@ import { Input } from "@/components/ui/input";
 import { SearchableSelect, type SearchableOption } from "@/components/ui/searchable-select";
 import { SegmentedControl } from "@/components/ui/segmented-control";
 import { StateMessage } from "@/components/ui/state-message";
-import { inCity, matchesBranch, type BranchDetail } from "@/lib/branch-detail";
+import { branchKind, inCity, matchesBranch, type BranchDetail, type BranchKind } from "@/lib/branch-detail";
+import { cn } from "@/lib/cn";
+import { distanceKm, type Position } from "@/lib/nearest-branch";
 import { BranchCard } from "./branch-card";
 import { BranchMap } from "./branch-map";
 
 type View = "list" | "map";
+type Kind = "" | BranchKind;
+type Locate = { state: "idle" | "locating" | "active" | "denied" | "failed" | "unsupported" };
+
+const KINDS: Kind[] = ["", "airport", "city"];
 
 // Same width as the header's inline menu: from here the list and the map sit side by side.
 const DESKTOP_QUERY = "(min-width: 80rem)";
@@ -29,6 +36,21 @@ function useIsDesktop() {
   );
 }
 
+// The time the open/closed words are read at: null on the server and in the first render, then the
+// browser's clock, a minute at a time. So the server's page never carries a clock the browser would
+// then disagree with.
+function useMinuteClock(): Date | null {
+  const minute = useSyncExternalStore(
+    (notify) => {
+      const timer = setInterval(notify, 60_000);
+      return () => clearInterval(timer);
+    },
+    () => Math.floor(Date.now() / 60_000) * 60_000,
+    () => null,
+  );
+  return useMemo(() => (minute === null ? null : new Date(minute)), [minute]);
+}
+
 type BranchExplorerProps = { branches: BranchDetail[]; mapsApiKey: string };
 
 export function BranchExplorer({ branches, mapsApiKey }: BranchExplorerProps) {
@@ -40,6 +62,11 @@ export function BranchExplorer({ branches, mapsApiKey }: BranchExplorerProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [mapFailed, setMapFailed] = useState(false);
   const onMapFail = useCallback(() => setMapFailed(true), []);
+  const [kind, setKind] = useState<Kind>("");
+  // Where the visitor is, once they have asked for the nearest branches; kept here and nowhere else.
+  const [position, setPosition] = useState<Position | null>(null);
+  const [locate, setLocate] = useState<Locate>({ state: "idle" });
+  const now = useMinuteClock();
 
   // Cities in the order the branches come, each once, with how many branches each has; "all cities" first.
   const cityOptions = useMemo<SearchableOption[]>(() => {
@@ -50,11 +77,44 @@ export function BranchExplorer({ branches, mapsApiKey }: BranchExplorerProps) {
       ...[...counts].map(([name, count]) => ({ value: name, label: name, hint: t("count", { count }) })),
     ];
   }, [branches, t]);
-  const matches = useMemo(
-    () => branches.filter((branch) => inCity(branch, city) && matchesBranch(branch, query)),
-    [branches, city, query],
+  const kindCounts = useMemo(
+    () => ({
+      "": branches.length,
+      airport: branches.filter((branch) => branchKind(branch) === "airport").length,
+      city: branches.filter((branch) => branchKind(branch) === "city").length,
+    }),
+    [branches],
   );
-  const filtered = city !== "" || query !== "";
+  const matches = useMemo(() => {
+    const found = branches.filter(
+      (branch) => inCity(branch, city) && matchesBranch(branch, query) && (kind === "" || branchKind(branch) === kind),
+    );
+    // Nearest first once the visitor has shared where they are.
+    return position ? [...found].sort((a, b) => distanceKm(position, a) - distanceKm(position, b)) : found;
+  }, [branches, city, query, kind, position]);
+  const filtered = city !== "" || query !== "" || kind !== "";
+
+  function findNearest() {
+    if (!("geolocation" in navigator)) {
+      setLocate({ state: "unsupported" });
+      return;
+    }
+    setLocate({ state: "locating" });
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => {
+        setPosition({ latitude: coords.latitude, longitude: coords.longitude });
+        setLocate({ state: "active" });
+        setSelectedId(null);
+      },
+      (error) => setLocate({ state: error.code === error.PERMISSION_DENIED ? "denied" : "failed" }),
+      { timeout: 10_000, maximumAge: 60_000 },
+    );
+  }
+
+  function stopNearest() {
+    setPosition(null);
+    setLocate({ state: "idle" });
+  }
   const mapAvailable = mapsApiKey !== "" && !mapFailed;
   // Below the desktop width the map and the list take turns; the list is where a visitor
   // starts, and the only view when there is no map.
@@ -105,6 +165,56 @@ export function BranchExplorer({ branches, mapsApiKey }: BranchExplorerProps) {
             )}
           </Field>
         </div>
+        {/* The kind of branch: all of them, the airport desks, or the city offices. */}
+        <div role="group" aria-label={t("kindLabel")} className="flex flex-wrap justify-center gap-2">
+          {KINDS.map((value) => (
+            <button
+              key={value || "all"}
+              type="button"
+              aria-pressed={kind === value}
+              onClick={() => {
+                setKind(value);
+                setSelectedId(null);
+              }}
+              className={cn(
+                "inline-flex min-h-11 items-center gap-2 rounded-full border px-4 text-label transition-colors",
+                kind === value ? "border-primary bg-primary text-on-primary" : "border-border-strong text-fg hover:bg-selected",
+              )}
+            >
+              {t(`kinds.${value || "all"}`)}
+              <span aria-hidden="true" className={cn("text-small tabular-nums", kind === value ? "text-on-primary" : "text-fg-muted")}>
+                {kindCounts[value]}
+              </span>
+            </button>
+          ))}
+        </div>
+
+        {/* Nearest first: asks for the position when pressed, uses it here, and keeps it nowhere else. */}
+        <div className="flex flex-col items-center gap-2">
+          {locate.state === "active" ? (
+            <Button type="button" variant="outline" onClick={stopNearest}>
+              <LocateFixed aria-hidden="true" className="size-4" />
+              {t("near.clear")}
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={findNearest}
+              disabled={locate.state === "locating"}
+              aria-busy={locate.state === "locating"}
+            >
+              <LocateFixed aria-hidden="true" className="size-4" />
+              {locate.state === "locating" ? t("near.locating") : t("near.button")}
+            </Button>
+          )}
+          {locate.state !== "idle" && locate.state !== "locating" && (
+            <p role="status" className="text-small text-fg-muted">
+              {t(`near.${locate.state}`)}
+            </p>
+          )}
+        </div>
+
         {mapAvailable && !isDesktop && (
           <SegmentedControl
             label={t("viewLabel")}
@@ -136,6 +246,7 @@ export function BranchExplorer({ branches, mapsApiKey }: BranchExplorerProps) {
             onClick={() => {
               setQuery("");
               setCity("");
+              setKind("");
             }}
           >
             {t("noResults.clear")}
@@ -151,6 +262,8 @@ export function BranchExplorer({ branches, mapsApiKey }: BranchExplorerProps) {
                     branch={branch}
                     selected={branch.id === selectedId}
                     onShowOnMap={() => showOnMap(branch.id)}
+                    now={now}
+                    distanceKm={position ? Math.round(distanceKm(position, branch)) : undefined}
                   />
                 </li>
               ))}

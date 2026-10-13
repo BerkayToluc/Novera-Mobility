@@ -34,13 +34,30 @@
       "email": "Send an email",
       "directions": "Get directions",
       "newTab": "(opens in a new tab)",
-      "showOnMap": "Show on map"
+      "showOnMap": "Show on map",
+      "rentHere": "Rent from here",
+      "distance": "about {km} km"
     },
     "cityLabel": "City",
     "allCities": "All cities",
     "countFiltered": "Showing {count} of {total} branches",
     "citySearch": "Search cities",
     "citySearchPlaceholder": "Type a city",
-    "noCity": "No city matches."
+    "noCity": "No city matches.",
+    "kindLabel": "Kind of branch",
+    "kinds": {
+      "all": "All",
+      "airport": "Airport",
+      "city": "City centre"
+    },
+    "near": {
+      "button": "Branches nearest to me",
+      "locating": "Finding your location",
+      "clear": "Remove the ordering",
+      "active": "Branches are listed from the nearest to you.",
+      "denied": "Location permission was not given. You can filter the branches by city.",
+      "failed": "Your location could not be found. You can filter the branches by city.",
+      "unsupported": "This browser does not share its location. You can filter the branches by city."
+    }
   }
 }

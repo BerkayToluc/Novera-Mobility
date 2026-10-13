@@ -47,6 +47,7 @@ export default async function Home({ searchParams }: PageProps<"/[locale]">) {
   const params = await searchParams;
   const audience = parseAudience(params.tip);
   const requestedModel = Array.isArray(params.arac) ? params.arac[0] : params.arac;
+  const requestedPickup = Array.isArray(params.alis) ? params.alis[0] : params.alis;
   const corporate = audience === "kurumsal";
 
   // Only the fetch sits in the try: not reaching the branches is an expected state with its
@@ -100,7 +101,11 @@ export default async function Home({ searchParams }: PageProps<"/[locale]">) {
               <QuoteForm />
             </div>
           ) : branches ? (
-            <RentalSearchForm branches={branches} />
+            <RentalSearchForm
+              branches={branches}
+              // A branch from a link ("rent from here"), only if it exists.
+              initialPickup={branches.some((branch) => branch.id === requestedPickup) ? requestedPickup : undefined}
+            />
           ) : (
             <StateMessage tone="error" title={t("error.title")} text={t("error.text")}>
               <Button asChild>

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { inCity, matchesBranch, normalizeSearch, type BranchDetail } from "@/lib/branch-detail";
+import { inCity, matchesBranch, normalizeSearch, type BranchDetail, branchKind } from "@/lib/branch-detail";
 import { telHref } from "@/lib/company";
 import { groupFleet } from "@/lib/fleet-models";
 import { createHold, getHold, HOLD_MINUTES } from "@/lib/hold-client";
@@ -146,5 +146,15 @@ describe("sample account data", () => {
 describe("telHref", () => {
   it("drops the spaces", () => {
     expect(telHref("+90 212 555 00 00")).toBe("tel:+902125550000");
+  });
+});
+
+describe("branchKind", () => {
+  it("calls a branch whose name has Havalimanı an airport, and any other a city office", () => {
+    expect(branchKind({ name: "İstanbul Havalimanı" })).toBe("airport");
+    expect(branchKind({ name: "Esenboğa Havalimanı" })).toBe("airport");
+    expect(branchKind({ name: "ADNAN MENDERES HAVALİMANI" })).toBe("airport");
+    expect(branchKind({ name: "Kadıköy" })).toBe("city");
+    expect(branchKind({ name: "Merkez" })).toBe("city");
   });
 });
