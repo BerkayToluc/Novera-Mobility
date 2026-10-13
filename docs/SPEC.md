@@ -155,7 +155,7 @@ Genel merkez ve departman bilgileri kurgusaldır ve sabit içeriktir (çeviri do
 
 #### 2.6.1 Bayilerimiz (`/bayilerimiz`, v0.5)
 
-- Başlık ve kısa giriş; masaüstünde (1280 px ve üstü) bayiler haritanın solunda alt alta listelenir. Listenin üstünde şehir filtresi (açılır liste) ve metin arama (bayi adı, ilçe, adres). Filtre ve arama hem listeyi hem haritadaki pinleri daraltır. 1280 px altında Liste / Harita geçişi. Harita yüklenemezse liste görünür.
+- Yalnızca başlık (giriş cümlesi yok, v0.6, G); şehir ve bayi arama alanları başlığın altında ortalanır. Masaüstünde (1280 px ve üstü) bayiler haritanın solunda alt alta listelenir. Listenin üstünde şehir filtresi ve metin arama (bayi adı, ilçe, adres). **Şehir filtresi arama kutulu bir açılır listedir (v0.6, G; referans Framer "SearchableDropdown"):** her şehir bayi sayısıyla görünür, yazdıkça daralır (büyük/küçük harf, Türkçe harf ve aksan fark etmez), ok tuşları, Home, End ve Enter ile gezilir, Esc kapatır. Filtre ve arama hem listeyi hem haritadaki pinleri daraltır. 1280 px altında Liste / Harita geçişi. Harita yüklenemezse liste görünür.
 - Her bayi arama motoruna `AutoRental` olarak bildirilir (JSON-LD, §9); bu bildirim İletişim'den bu sayfaya taşındı. Yükleniyor, boş ve hata durumları vardır.
 - Navbarda "Bayilerimiz" olarak yer alır (§2.8).
 
