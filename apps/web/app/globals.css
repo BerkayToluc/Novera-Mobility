@@ -333,20 +333,17 @@
   }
 }
 
-/* The footer's blocks rise into view as the page scrolls to them (SPEC §2.8). FooterReveal marks an
-   element hidden only after the page has loaded and only if it is below the fold, so without
-   script, or with reduced motion, everything simply shows. */
+/* The footer's blocks settle into place as the page scrolls to them (SPEC §2.8). FooterReveal marks an
+   element only after the page has loaded and only if it is below the fold, so without script, or
+   with reduced motion, everything simply shows. It moves and does not fade: a block at opacity 0
+   fails the contrast check of an accessibility tool that reads the page without scrolling it. */
 [data-reveal] {
-  transition:
-    opacity 0.6s cubic-bezier(0.12, 0.23, 0.5, 1),
-    transform 0.6s cubic-bezier(0.12, 0.23, 0.5, 1);
+  transition: transform 0.6s cubic-bezier(0.12, 0.23, 0.5, 1);
 }
 [data-reveal="hidden"][data-kind="block"] {
-  opacity: 0;
   transform: scale(0.97);
 }
 [data-reveal="hidden"][data-kind="text"] {
-  opacity: 0;
   transform: translateY(3.75rem);
 }
 

@@ -3,7 +3,7 @@
 import { useEffect, useRef, type ReactNode } from "react";
 
 // A footer block that eases into view when the page scrolls to it (after the Framer Simple
-// Footer): "block" fades in from a touch smaller, "text" rises into place. The server's page shows
+// Footer): "block" grows from a touch smaller, "text" rises into place. Neither fades: see globals.css. The server's page shows
 // everything; once in the browser, a block that is below the fold is hidden and shown again when
 // it is a third in view, once. Nothing is hidden with reduced motion or for a block that is
 // already on screen, and the transition itself is in globals.css.
