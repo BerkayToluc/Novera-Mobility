@@ -5,7 +5,6 @@
     "title": "Our fleet solutions",
     "intro": "Four solutions for the pace of your business. If you are not sure which fits, our corporate team will point you in the right direction.",
     "featuredBadge": "Most popular",
-    "viewDetails": "View Details",
     "backToList": "All products",
     "quoteButton": "Get a Quote",
     "ctaTitle": "Get a quote for this solution",
@@ -30,7 +29,24 @@
               "text": "A company management interface that automates expense and fine tracking."
             }
           ]
-        }
+        },
+        "badge": "Most popular",
+        "tagline": "A late-model fleet and the Admin Panel that runs it from one screen, together.",
+        "idealFor": "Companies with a fleet of 10 vehicles or more",
+        "highlights": [
+          {
+            "title": "A fleet that fits",
+            "text": "Cars, SUVs, vans or hybrids, mixed as you need."
+          },
+          {
+            "title": "One screen to run it",
+            "text": "Assignments, contracts, invoices and toll costs in one panel."
+          },
+          {
+            "title": "Live tracking",
+            "text": "Speed, route and fuel data on a live map."
+          }
+        ]
       },
       "vip-mobilite": {
         "title": "Executive and Premium Car Rental (VIP Mobility)",
@@ -47,7 +63,24 @@
               "text": "Greeting, route optimisation and flight tracking through a mobile interface."
             }
           ]
-        }
+        },
+        "badge": "Premium",
+        "tagline": "Prestige cars and priority support for your executives and guests.",
+        "idealFor": "Senior executives and corporate guests",
+        "highlights": [
+          {
+            "title": "E and F segment",
+            "text": "Fully equipped prestige cars such as Audi, BMW and Mercedes."
+          },
+          {
+            "title": "Chauffeur on request",
+            "text": "VIP chauffeur support for meet-and-greet and transfers."
+          },
+          {
+            "title": "Priority concierge",
+            "text": "A dedicated support line for drivers and executives."
+          }
+        ]
       },
       "esnek-kisa-donem": {
         "title": "Flexible & Short-Term Car Rental (SMEs and Individuals)",
@@ -65,7 +98,24 @@
               "text": "If something goes wrong, send your location to the centre and call for help with one tap."
             }
           ]
-        }
+        },
+        "badge": "No commitment",
+        "tagline": "By the day, week or month; hand the car back when the job is done.",
+        "idealFor": "SMEs, project teams and individual drivers",
+        "highlights": [
+          {
+            "title": "Flexible term",
+            "text": "Rent by the day, week or month."
+          },
+          {
+            "title": "Fast delivery",
+            "text": "A car the same day for urgent field work."
+          },
+          {
+            "title": "Digital handover",
+            "text": "Damage records and handover report in the driver app."
+          }
+        ]
       },
       "yesil-filo": {
         "title": "Green Fleet (Electric & Hybrid Car Rental)",
@@ -77,11 +127,36 @@
               "text": "Live battery health and charging station status through the panel, plus reporting of the carbon emissions saved for your company."
             }
           ]
-        }
+        },
+        "badge": "Sustainable",
+        "tagline": "Cut your carbon footprint measurably with an electric and hybrid fleet.",
+        "idealFor": "Companies with a carbon target",
+        "highlights": [
+          {
+            "title": "Electric and hybrid",
+            "text": "A new-generation fleet of current models."
+          },
+          {
+            "title": "Battery and charging",
+            "text": "Battery health and charging status in the panel."
+          },
+          {
+            "title": "Carbon report",
+            "text": "The emission savings in periodic reports."
+          }
+        ]
       }
     },
     "conceptHeading": "Concept",
     "whatYouGetHeading": "What you get",
-    "techHeading": "The technology edge"
+    "techHeading": "The technology edge",
+    "eyebrow": "Products",
+    "open": "Explore",
+    "otherHeading": "Other solutions",
+    "idealForLabel": "Best for",
+    "helpTitle": "Not sure which one fits?",
+    "helpText": "Tell us how many vehicles, for how long and how you use them; our corporate team will choose the right solution with you.",
+    "helpButton": "Get a corporate quote",
+    "helpContact": "Write to us"
   }
 }
