@@ -6,8 +6,10 @@ import { Button } from "@/components/ui/button";
 import { StateMessage } from "@/components/ui/state-message";
 import { PointsToggle } from "@/components/vehicle/points-toggle";
 import { RentButton } from "@/components/vehicle/rent-button";
+import { ResultsViewToggle, type ResultsView } from "@/components/vehicle/results-view-toggle";
 import { ResultsFilter } from "@/components/vehicle/results-filter";
 import { VehicleCard } from "@/components/vehicle/vehicle-card";
+import { VehicleRow } from "@/components/vehicle/vehicle-row";
 import { Link } from "@/i18n/navigation";
 import { getMyPoints } from "@/lib/account-client";
 import type { BranchOption } from "@/lib/branch-options";
@@ -35,6 +37,8 @@ export default async function ResultsPage({ searchParams }: PageProps<"/[locale]
   const search = parseRentalSearch(params);
   const filters = parseVehicleFilters(params);
   const pointsChosen = (Array.isArray(params.puan) ? params.puan[0] : params.puan) === "1";
+  // The list is the default; the grid is chosen with gorunum=izgara.
+  const view: ResultsView = (Array.isArray(params.gorunum) ? params.gorunum[0] : params.gorunum) === "izgara" ? "grid" : "list";
 
   let branches: BranchOption[] | null;
   try {
@@ -127,13 +131,17 @@ export default async function ResultsPage({ searchParams }: PageProps<"/[locale]
         <StateMessage title={t("empty.title")} text={t("empty.text")} />
       ) : (
         <section aria-labelledby="results-heading" className="flex flex-col gap-6">
-          <div className="flex flex-wrap items-center justify-between gap-4">
+          {/* One bar: the count on the left; on the right the points switch, the filters and the view. */}
+          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
             <h2 id="results-heading" className="text-h3 text-fg" aria-live="polite">
               {t("count", { count: shown.length })}
             </h2>
-            <ResultsFilter filters={filters} classOptions={classOptions} />
+            <div className="flex flex-wrap items-center gap-3">
+              {currency === "TRY" && <PointsToggle balance={balance} on={usePoints} />}
+              <ResultsFilter filters={filters} classOptions={classOptions} />
+              <ResultsViewToggle view={view} />
+            </div>
           </div>
-          {currency === "TRY" && <PointsToggle balance={balance} on={usePoints} />}
           {shown.length === 0 ? (
             <StateMessage title={t("noMatch.title")} text={t("noMatch.text")}>
               <Button asChild variant="outline">
@@ -143,12 +151,13 @@ export default async function ResultsPage({ searchParams }: PageProps<"/[locale]
               </Button>
             </StateMessage>
           ) : (
-            <ul className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+            <ul className={view === "grid" ? "grid gap-6 md:grid-cols-2 xl:grid-cols-3" : "flex flex-col gap-4"}>
               {shown.map((offer) => {
                 const points = usePoints ? redeemablePoints(balance ?? 0, offer.totalPrice) : 0;
+                const Item = view === "grid" ? VehicleCard : VehicleRow;
                 return (
-                  <li key={offer.id}>
-                    <VehicleCard
+                  <li key={offer.id} className={view === "grid" ? undefined : "grid"}>
+                    <Item
                       vehicle={offer}
                       pointsPayment={points > 0 ? { points, rest: afterPoints(offer.totalPrice, points) } : undefined}
                       action={

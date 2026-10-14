@@ -75,6 +75,11 @@
       "title": "Bu filtrelere uyan araç yok",
       "text": "Filtreleri gevşetin ya da temizleyin.",
       "clear": "Filtreleri temizle"
+    },
+    "view": {
+      "label": "Görünüm",
+      "list": "Liste görünümü",
+      "grid": "Izgara görünümü"
     }
   }
 }

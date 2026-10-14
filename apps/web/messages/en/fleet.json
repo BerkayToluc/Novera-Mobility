@@ -17,7 +17,6 @@
     "fromPerDay": "from {price} / day",
     "priceFrom": "From",
     "perDayUnit": "/ day",
-    "total": "{days, plural, one {# day} other {# days}} total {price}",
     "consumption": {
       "L_PER_100KM": "{value} L/100 km",
       "KWH_PER_100KM": "{value} kWh/100 km"
@@ -29,7 +28,8 @@
       "taken": "This car was just taken. You can choose another one.",
       "unavailable": "The car could not be held right now. Please try again."
     },
-    "pointsPayment": "{points} points + {price}"
+    "pointsPayment": "{points} points + {price}",
+    "totalLabel": "{days, plural, one {# day} other {# days}} total"
   },
   "FleetPage": {
     "title": "Our Cars",

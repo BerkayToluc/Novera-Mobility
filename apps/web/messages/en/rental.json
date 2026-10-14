@@ -75,6 +75,11 @@
       "title": "No car matches these filters",
       "text": "Loosen the filters or clear them.",
       "clear": "Clear filters"
+    },
+    "view": {
+      "label": "View",
+      "list": "List view",
+      "grid": "Grid view"
     }
   }
 }

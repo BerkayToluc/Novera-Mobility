@@ -17,7 +17,6 @@
     "fromPerDay": "{price} / gün'den başlayan",
     "priceFrom": "Başlayan fiyat",
     "perDayUnit": "/ gün",
-    "total": "{days, plural, one {# gün} other {# gün}} toplam {price}",
     "consumption": {
       "L_PER_100KM": "{value} L/100 km",
       "KWH_PER_100KM": "{value} kWh/100 km"
@@ -29,7 +28,8 @@
       "taken": "Bu araç az önce tutuldu. Başka bir araç seçebilirsiniz.",
       "unavailable": "Araç şu an tutulamadı. Lütfen tekrar deneyin."
     },
-    "pointsPayment": "{points} puan + {price}"
+    "pointsPayment": "{points} puan + {price}",
+    "totalLabel": "{days} gün toplam"
   },
   "FleetPage": {
     "title": "Araçlarımız",
