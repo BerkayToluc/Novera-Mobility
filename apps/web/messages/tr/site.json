@@ -49,7 +49,8 @@
       "youtube": "YouTube"
     },
     "privacyPolicy": "Gizlilik Politikası",
-    "siteTerms": "Kullanım Şartları"
+    "siteTerms": "Kullanım Şartları",
+    "socialSoon": "{network} · yakında"
   },
   "ThemeSwitcher": {
     "label": "Tema",
@@ -65,5 +66,14 @@
       "EUR": "Euro",
       "USD": "ABD doları"
     }
+  },
+  "ContactLink": {
+    "emailHeading": "E-posta adresi",
+    "phoneHeading": "Telefon numarası",
+    "send": "E-posta gönder",
+    "call": "Ara",
+    "copyEmail": "Adresi kopyala",
+    "copyPhone": "Numarayı kopyala",
+    "copied": "Kopyalandı"
   }
 }

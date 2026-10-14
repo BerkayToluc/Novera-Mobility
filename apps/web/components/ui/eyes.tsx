@@ -4,14 +4,14 @@ import { useEffect, useRef } from "react";
 import { cn } from "@/lib/cn";
 
 // Two eyes whose pupils follow the pointer (after the Framer "eyes" component): each eye is a
-// 24 by 36 capsule with a 16 by 22 pupil and a small highlight. Every so often both blink. The
+// 72 by 108 capsule with a 48 by 66 pupil and a small highlight. Every so often both blink. The
 // pupils move by their own room inside the eye, so they stay in it; how far depends on how far the
 // pointer is, so a pointer right beside the eye does not push them to the edge. Decorative.
 // With reduced motion they look straight ahead and never blink; a finger on a touch screen leads
 // them while it is down.
 
-const PUPIL_ROOM = { x: 4, y: 7 }; // (eye 24 - pupil 16) / 2 and (36 - 22) / 2
-const REACH_PX = 120; // how far away the pointer still pushes the pupil all the way
+const PUPIL_ROOM = { x: 12, y: 21 }; // (eye 72 - pupil 48) / 2 and (108 - 66) / 2
+const REACH_PX = 240; // how far away the pointer still pushes the pupil all the way
 
 export function Eyes({ className }: { className?: string }) {
   const rootRef = useRef<HTMLSpanElement>(null);
@@ -74,15 +74,15 @@ export function Eyes({ className }: { className?: string }) {
   }, []);
 
   return (
-    <span ref={rootRef} aria-hidden="true" className={cn("relative inline-flex h-9 w-14 justify-between", className)}>
+    <span ref={rootRef} aria-hidden="true" className={cn("relative inline-flex h-27 w-42 justify-between", className)}>
       {[0, 1].map((side) => (
         <span
           key={side}
           data-eye=""
-          className="relative flex h-9 w-6 items-center justify-center overflow-hidden rounded-full bg-eye-white transition-transform duration-150 data-[blink]:scale-y-10"
+          className="relative flex h-27 w-18 items-center justify-center overflow-hidden rounded-full bg-eye-white transition-transform duration-150 data-[blink]:scale-y-10"
         >
-          <span data-pupil="" className="relative block h-5.5 w-4 rounded-full bg-eye-pupil will-change-transform">
-            <span className="absolute bottom-0.75 left-1/2 size-0.75 -translate-x-1/2 rounded-full bg-eye-white" />
+          <span data-pupil="" className="relative block h-16.5 w-12 rounded-full bg-eye-pupil will-change-transform">
+            <span className="absolute bottom-2 left-1/2 size-2 -translate-x-1/2 rounded-full bg-eye-white" />
           </span>
         </span>
       ))}

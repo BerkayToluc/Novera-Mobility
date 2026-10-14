@@ -47,6 +47,33 @@
       "title": "Araçlar yüklenemedi",
       "text": "Uygun araçları şu an getiremiyoruz. Lütfen tekrar deneyin.",
       "back": "Ana Sayfaya Dön"
+    },
+    "filters": {
+      "button": "Filtrele",
+      "title": "Filtreler",
+      "active": "{count, plural, one {filtre} other {filtre}} etkin",
+      "class": "Sınıf",
+      "transmission": "Vites",
+      "fuel": "Yakıt",
+      "seats": "Koltuk",
+      "seatsAtLeast": "En az {count}",
+      "sort": "Sıralama",
+      "sorts": {
+        "price-asc": "En ucuz",
+        "price-desc": "En pahalı",
+        "newest": "En yeni"
+      },
+      "clear": "Filtreleri temizle"
+    },
+    "points": {
+      "label": "Puanla öde",
+      "balance": "{points} puan",
+      "signIn": "Puanla ödemek için giriş yapın"
+    },
+    "noMatch": {
+      "title": "Bu filtrelere uyan araç yok",
+      "text": "Filtreleri gevşetin ya da temizleyin.",
+      "clear": "Filtreleri temizle"
     }
   }
 }

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { getFormatter, getTranslations } from "next-intl/server";
+import { getTranslations } from "next-intl/server";
 import { Button } from "@/components/ui/button";
 import { CountUp } from "@/components/about/count-up";
 import { StoryTimeline } from "@/components/about/story-timeline";
@@ -14,7 +14,6 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function AboutPage() {
   const t = await getTranslations("AboutPage");
-  const format = await getFormatter();
 
   return (
     <div className="mx-auto flex max-w-content flex-col gap-16 px-4 py-12 md:px-8 xl:gap-24 xl:py-20">
@@ -79,9 +78,8 @@ export default async function AboutPage() {
           {CLAIMS.map((claim) => (
             <li key={claim.key} className="grid gap-2 py-6 md:grid-cols-[10rem_1fr] md:items-baseline md:gap-6 xl:grid-cols-[14rem_1fr] xl:gap-8">
               <p className="text-h1 tabular-nums text-link">
-                {"percent" in claim
-                  ? format.number(claim.value, { style: "percent" })
-                  : format.number(claim.value)}
+                {/* Counts up when the row scrolls into view, as the figures at the top do. */}
+                <CountUp value={claim.value} percent={"percent" in claim} />
               </p>
               <div className="flex max-w-prose flex-col gap-1">
                 <p className="text-h3 text-fg">{t(`claims.${claim.key}.label`)}</p>

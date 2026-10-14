@@ -69,3 +69,29 @@ test("phone: the menu panel has Services as a link and no theme", async ({ page 
   await page.keyboard.press("Escape");
   await expect(panel).toBeHidden();
 });
+
+test("desktop: Products opens when the pointer rests on it, and a highlight follows the pointer", async ({ page }) => {
+  test.skip((page.viewportSize()?.width ?? 0) < 1280, "the inline menu is the desktop layout");
+  await page.goto("/");
+  const trigger = page.getByRole("banner").getByRole("button", { name: "Ürünler" });
+  await trigger.hover();
+  const all = page.getByRole("link", { name: "Tüm ürünler" });
+  await expect(all).toBeVisible();
+  // Opened by hover, the focus stays where it was.
+  await expect(trigger).not.toBeFocused();
+  await all.hover();
+  await expect(all.locator("[aria-hidden=true].absolute")).toHaveCount(1);
+  // Leaving both the title and the panel closes it after a moment.
+  await page.mouse.move(5, 600);
+  await expect(all).toHaveCount(0);
+});
+
+test("desktop: a nav link is named once although its letters roll on hover", async ({ page }) => {
+  test.skip((page.viewportSize()?.width ?? 0) < 1280, "the inline menu is the desktop layout");
+  await page.goto("/");
+  const link = page.getByRole("banner").getByRole("link", { name: "Hizmetler", exact: true });
+  await expect(link).toHaveCount(1);
+  const letter = link.locator("[aria-hidden=true] > span").first();
+  await link.hover();
+  await expect.poll(() => letter.evaluate((el) => getComputedStyle(el).translate)).not.toBe("none");
+});

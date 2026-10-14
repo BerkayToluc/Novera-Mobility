@@ -49,7 +49,8 @@
       "youtube": "YouTube"
     },
     "privacyPolicy": "Privacy Policy",
-    "siteTerms": "Terms of Use"
+    "siteTerms": "Terms of Use",
+    "socialSoon": "{network} · coming soon"
   },
   "ThemeSwitcher": {
     "label": "Theme",
@@ -65,5 +66,14 @@
       "EUR": "Euro",
       "USD": "US dollar"
     }
+  },
+  "ContactLink": {
+    "emailHeading": "Email address",
+    "phoneHeading": "Phone number",
+    "send": "Send email",
+    "call": "Call",
+    "copyEmail": "Copy address",
+    "copyPhone": "Copy number",
+    "copied": "Copied"
   }
 }

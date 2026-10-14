@@ -8,45 +8,83 @@ test.beforeEach(async ({ context }) => {
   ]);
 });
 
-const playState = (page: Page, selector: string) =>
-  page.locator(selector).evaluate((element) => getComputedStyle(element).animationPlayState);
 
-test("the partner strip has no pause button and does not move until it is pointed at or focused", async ({ page }) => {
+const logoX = (page: Page) =>
+  page.locator("section[aria-labelledby=partners-title] [data-logo]").first().evaluate((element) => (element as HTMLElement).style.transform);
+
+test("the partner strip turns by itself, has no pause button, and stops when focus is inside it", async ({ page }) => {
   await page.goto("/");
   const strip = page.getByRole("group", { name: /İş birliği yaptığımız kurumların logoları/ });
   await strip.scrollIntoViewIfNeeded();
   await expect(page.getByRole("button", { name: /Kaydırmayı (durdur|başlat)/ })).toHaveCount(0);
+  // The names are read once: eight partners, the loop's copies hidden.
+  await expect(strip.getByRole("listitem")).toHaveCount(8);
 
-  const track = "section[aria-labelledby=partners-title] [role=group] > div";
-  await expect.poll(() => playState(page, track)).toBe("paused");
+  const before = await logoX(page);
+  await expect.poll(() => logoX(page)).not.toBe(before);
 
-  // Keyboard focus starts it, and moving focus away leaves it where it stopped.
+  // Focus eases it to a stop: two readings a moment apart are the same.
   await strip.focus();
-  await expect.poll(() => playState(page, track)).toBe("running");
+  await page.waitForTimeout(1500);
+  const held = await logoX(page);
+  await page.waitForTimeout(300);
+  expect(await logoX(page)).toBe(held);
+
+  // Focus leaving lets it turn again.
   await page.evaluate(() => (document.activeElement as HTMLElement).blur());
-  await expect.poll(() => playState(page, track)).toBe("paused");
+  await expect.poll(() => logoX(page)).not.toBe(held);
 });
 
-test("the partner strip starts under the pointer", async ({ page, isMobile }) => {
+test("the partner strip stops under the pointer", async ({ page, isMobile }) => {
   test.skip(isMobile, "there is no pointer to hover with");
   await page.goto("/");
   const strip = page.getByRole("group", { name: /İş birliği yaptığımız kurumların logoları/ });
   await strip.scrollIntoViewIfNeeded();
   await strip.hover();
-  await expect.poll(() => playState(page, "section[aria-labelledby=partners-title] [role=group] > div")).toBe("running");
+  await page.waitForTimeout(1500);
+  const held = await logoX(page);
+  await page.waitForTimeout(300);
+  expect(await logoX(page)).toBe(held);
 });
 
-test("the Road Assurance line runs a trail twice once it is on screen, and not at all with reduced motion", async ({ page }) => {
-  await page.goto("/");
-  // Two lines exist, one per layout; only the one in use has a box. A path itself is too thin to
-  // count as visible, so it is found through its svg.
-  const live = page.locator("section[aria-labelledby=guarantee-title] svg:visible path[stroke-linecap=round]");
-  await page.locator("section[aria-labelledby=guarantee-title]").scrollIntoViewIfNeeded();
-  await expect(live.first()).toHaveCSS("animation-name", "road-trail");
-  await expect(live.first()).toHaveCSS("animation-iteration-count", "2");
-
+test("with reduced motion the partner strip stands still and the steps show complete", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await expect(live.first()).toHaveCSS("animation-name", "none");
+  await page.goto("/");
+  const strip = page.getByRole("group", { name: /İş birliği yaptığımız kurumların logoları/ });
+  await strip.scrollIntoViewIfNeeded();
+  const first = await logoX(page);
+  await page.waitForTimeout(500);
+  expect(await logoX(page)).toBe(first);
+  await expect(page.locator("[data-steps][data-armed]")).toHaveCount(0);
+});
+
+test("the Road Assurance steps start unfilled and fill once the band is on screen", async ({ page }) => {
+  await page.goto("/");
+  const steps = page.locator("section[aria-labelledby=guarantee-title] [data-steps]");
+  await expect(steps).toHaveAttribute("data-armed", "");
+  await steps.scrollIntoViewIfNeeded();
+  await expect(steps).not.toHaveAttribute("data-armed", "");
+  await expect(steps.getByRole("listitem")).toHaveCount(5);
+});
+
+test("the gallery's arrows sit on the card's left and right edge and move the slides", async ({ page }) => {
+  await page.goto("/");
+  const gallery = page.getByRole("region", { name: /Kampanyalar/ }).first();
+  const next = page.getByRole("button", { name: "Sonraki kampanya" });
+  const art = page.getByRole("group", { name: "1 / 3" });
+  const previous = page.getByRole("button", { name: "Önceki kampanya" });
+  const nextBox = (await next.boundingBox())!;
+  const previousBox = (await previous.boundingBox())!;
+  const slide = (await art.boundingBox())!;
+  // The left band is on the card's own left edge, the right one on its right edge, both the full
+  // height of the picture (the top of the card on a phone).
+  expect(Math.abs(previousBox.x - slide.x)).toBeLessThanOrEqual(1);
+  expect(Math.abs(nextBox.x + nextBox.width - (slide.x + slide.width))).toBeLessThanOrEqual(1);
+  expect(previousBox.height).toBeGreaterThan(100);
+  expect(nextBox.height).toBeGreaterThan(100);
+  await gallery.hover();
+  await next.click();
+  await expect(page.getByRole("button", { name: "2. kampanyaya git" })).toHaveAttribute("aria-current", "true");
 });
 
 test("the guides slide with an arrow at each side, and there is no all-guides button", async ({ page }) => {
@@ -107,7 +145,15 @@ test("the FAQ has a tab for each topic, rows that open and close, and follows th
   const first = faq.getByRole("button", { name: /Rezervasyonu iptal edebilir miyim/ });
   await expect(first).toHaveAttribute("aria-expanded", "true");
 
+  // Opening another row closes the first: one answer at a time.
+  const second = faq.getByRole("button", { name: /Rezervasyonu iptal edebilir miyim/ }).locator("xpath=ancestor::li/following-sibling::li[1]//button");
+  await second.click();
+  await expect(second).toHaveAttribute("aria-expanded", "true");
+  await expect(first).toHaveAttribute("aria-expanded", "false");
+  await second.click();
+
   // A row closes and opens on its own button, and a closed answer is out of the page.
+  await first.click();
   await first.click();
   await expect(first).toHaveAttribute("aria-expanded", "false");
   await expect(faq.getByText(/24 saat öncesine kadar ücretsiz iptal/)).toHaveCount(0);

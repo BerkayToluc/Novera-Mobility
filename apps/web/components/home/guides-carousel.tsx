@@ -46,7 +46,9 @@ export function GuidesCarousel({ children }: { children: ReactNode }) {
       <ul
         ref={stripRef}
         onScroll={measure}
-        className="-mx-3 flex snap-x snap-mandatory overflow-x-auto [scrollbar-width:none]"
+        // Room above and below for a card that lifts and casts its shadow on hover; a scrolling strip
+        // clips both directions.
+        className="-mx-3 -my-3 flex snap-x snap-mandatory overflow-x-auto py-3 [scrollbar-width:none]"
       >
         {children}
       </ul>
