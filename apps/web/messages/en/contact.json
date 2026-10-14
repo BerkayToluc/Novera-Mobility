@@ -30,9 +30,13 @@
       }
     },
     "branchesLink": {
-      "title": "Your nearest branch",
-      "text": "Address, opening hours and directions for our branches in 14 cities are on the Branches page.",
       "cta": "Our branches"
+    },
+    "helpLink": {
+      "title": "Help centre",
+      "text": "Frequently asked questions, the rental steps and guides in one place. Most answers are there; have a look before you write to us.",
+      "cta": "Go to the help centre",
+      "branches": "Looking for your nearest branch?"
     }
   },
   "ContactForm": {

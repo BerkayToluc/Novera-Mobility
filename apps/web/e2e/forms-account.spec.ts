@@ -156,3 +156,12 @@ test("signing up from the payment page goes back to the booking, and only to it"
   await fillSignUp(page);
   await expect(page).toHaveURL(/\/profil$/);
 });
+
+test("the contact page points to the help centre, with the branches one small link away", async ({ page }) => {
+  await page.goto("/iletisim");
+  const help = page.locator("section[aria-labelledby=help-link-title]");
+  await expect(help.getByRole("heading", { name: "Yardım merkezi" })).toBeVisible();
+  await expect(help.getByRole("link", { name: "Yardım merkezine git" })).toHaveAttribute("href", "/yardim");
+  await expect(help.getByRole("link", { name: "Bayilerimiz" })).toHaveAttribute("href", "/bayilerimiz");
+  await expect(page.getByText("Size en yakın bayi", { exact: true })).toHaveCount(0);
+});
