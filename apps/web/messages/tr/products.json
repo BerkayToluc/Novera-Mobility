@@ -5,7 +5,6 @@
     "title": "Filo çözümlerimiz",
     "intro": "İşinizin temposuna göre dört çözüm. Hangisinin size uyduğundan emin değilseniz kurumsal ekibimiz yönlendirsin.",
     "featuredBadge": "En çok tercih edilen",
-    "viewDetails": "Detayları Gör",
     "backToList": "Tüm ürünler",
     "quoteButton": "Teklif Al",
     "ctaTitle": "Bu çözüm için teklif alın",
@@ -30,7 +29,24 @@
               "text": "Masraf ve ceza takibini otomatikleştiren şirket yönetim arayüzü."
             }
           ]
-        }
+        },
+        "badge": "En çok tercih edilen",
+        "tagline": "Son model filo ve onu tek ekrandan yöneten Admin Paneli, bir arada.",
+        "idealFor": "10 ve üzeri araçlık filosu olan şirketler",
+        "highlights": [
+          {
+            "title": "Size göre filo",
+            "text": "Binek, SUV, ticari ya da hibrit; ihtiyaca göre karışık filo."
+          },
+          {
+            "title": "Tek ekranda yönetim",
+            "text": "Zimmet, sözleşme, fatura ve HGS masrafları aynı panelde."
+          },
+          {
+            "title": "Canlı takip",
+            "text": "Hız, rota ve yakıt verisi canlı haritada."
+          }
+        ]
       },
       "vip-mobilite": {
         "title": "Yönetici ve Premium Araç Kiralama (VIP Mobilite)",
@@ -47,7 +63,24 @@
               "text": "Mobil arayüz üzerinden karşılama, rota optimizasyonu ve uçuş takibi."
             }
           ]
-        }
+        },
+        "badge": "Premium",
+        "tagline": "Yöneticileriniz ve konuklarınız için prestij araç ve öncelikli destek.",
+        "idealFor": "Üst düzey yöneticiler ve kurumsal misafirler",
+        "highlights": [
+          {
+            "title": "E ve F segmenti",
+            "text": "Audi, BMW, Mercedes gibi tam donanımlı prestij araçlar."
+          },
+          {
+            "title": "İsteğe bağlı şoför",
+            "text": "Karşılama ve transferde VIP şoför desteği."
+          },
+          {
+            "title": "Öncelikli konsiyerj",
+            "text": "Sürücüye ve yöneticiye özel destek hattı."
+          }
+        ]
       },
       "esnek-kisa-donem": {
         "title": "Esnek & Kısa Dönem Araç Kiralama (KOBİ ve Bireysel)",
@@ -65,7 +98,24 @@
               "text": "Olası bir aksilikte tek tuşla konumu merkeze iletip yardım çağırabilme."
             }
           ]
-        }
+        },
+        "badge": "Taahhütsüz",
+        "tagline": "Günlük, haftalık ya da aylık; işiniz bitince aracı bırakın.",
+        "idealFor": "KOBİ'ler, proje ekipleri ve bireysel kullanıcılar",
+        "highlights": [
+          {
+            "title": "Esnek süre",
+            "text": "Gün, hafta ya da ay bazında kiralama."
+          },
+          {
+            "title": "Hızlı teslimat",
+            "text": "Acil saha ihtiyaçlarında aynı gün araç."
+          },
+          {
+            "title": "Dijital teslim",
+            "text": "Hasar kaydı ve tutanak sürücü uygulamasında."
+          }
+        ]
       },
       "yesil-filo": {
         "title": "Yeşil Filo (Elektrikli & Hibrit Araç Kiralama)",
@@ -77,11 +127,36 @@
               "text": "Panel üzerinden anlık batarya sağlığı, şarj istasyonu durumu ve şirketinize sağladığı karbon emisyon tasarrufu raporlaması."
             }
           ]
-        }
+        },
+        "badge": "Sürdürülebilir",
+        "tagline": "Elektrikli ve hibrit filo ile karbon ayak izinizi ölçülebilir biçimde azaltın.",
+        "idealFor": "Karbon hedefi olan kurumsal şirketler",
+        "highlights": [
+          {
+            "title": "Elektrikli ve hibrit",
+            "text": "Güncel modellerden oluşan yeni nesil araç parkı."
+          },
+          {
+            "title": "Batarya ve şarj",
+            "text": "Batarya sağlığı ve şarj durumu panelde."
+          },
+          {
+            "title": "Karbon raporu",
+            "text": "Sağlanan emisyon tasarrufu dönemsel raporlarla."
+          }
+        ]
       }
     },
     "conceptHeading": "Konsept",
     "whatYouGetHeading": "Ne alıyorsunuz?",
-    "techHeading": "Teknolojik artısı"
+    "techHeading": "Teknolojik artısı",
+    "eyebrow": "Ürünler",
+    "open": "İncele",
+    "otherHeading": "Diğer çözümler",
+    "idealForLabel": "Kimler için",
+    "helpTitle": "Hangisi size uygun, emin değil misiniz?",
+    "helpText": "Araç sayınızı, süreyi ve kullanım şeklinizi anlatın; kurumsal ekibimiz doğru çözümü birlikte seçsin.",
+    "helpButton": "Kurumsal teklif al",
+    "helpContact": "Bize yazın"
   }
 }
