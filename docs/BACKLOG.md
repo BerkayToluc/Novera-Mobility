@@ -182,6 +182,9 @@ Sıra ve öneri dosyasındaki ek kalite maddeleri G tarafından 10 Ekim 2026'da 
 | 57 | Y73 | Telefon numaralarında gönder/kopyala balonu (SPEC §2.6, v0.9) | FE | Y58 | e2e: iletişim, bayi kartı, acil hat |
 | 58 | Y74 | Kurumsal teklifte seçili ürün şeridi (SPEC §2.2.3, v0.9) | FE | Y60 | e2e (`products`): şerit görünür, kaldırılır, form alanı dolu |
 | 59 | Y75 | e2e: beklenen koşullar için 10 sn bekleme (yük altında giriş yönlendirmesi) | FE | — | Tam takım iki koşuda hatasız |
+| 60 | Y76 | Sonuç çubuğu (SPEC §2.3, v0.10): anahtarda bakiye yok, üstü çizili toplam + "puan + kalan", tek görünüm düğmesi, 768'de fiyat alt satırda | FE | Y66 | e2e (`results-cards`, `results-filters`); 375/768/1280 görüntü; axe |
+| 61 | Y77 | Kurumsal teklif: teslim şehirleri 81 ilden ilk harflerle seçilir (SPEC §2.2.3, v0.10) | FE | Y74 | Birim (81 il, sıra, 200 karakter sınırı); e2e (`quote-cities`): İ listesi, klavye, kaldırma, serbest yazı yok |
+| 62 | Y78 | Duyarlılık taraması ve düzeltmeleri (SPEC §5.7, v0.10): 320 px üst çubuk, sosyal etiketler, rozet düğmeleri, taşma koruma testi | FE | — | 7 genişlikte tam tarama temiz; `e2e/responsive.spec.ts` |
 
 **Backend (paralel).** Frontend örnek veriyle ilerlediği için bunları beklemez; uçlar gelince örnek veri kapatılır.
 
