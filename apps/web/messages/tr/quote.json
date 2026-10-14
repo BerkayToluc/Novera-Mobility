@@ -60,7 +60,13 @@
     "metaTitle": "Kurumsal Teklif",
     "metaDescription": "Firmanız için filo kiralama teklifi isteyin: ihtiyacınızı yazın, satış ekibimiz bir iş günü içinde arasın.",
     "title": "Kurumsal Teklif",
-    "intro": "Araçları istediğiniz yere getiriyor, istediğiniz yerden alıyoruz. İhtiyacınızı yazın, satış ekibimiz sizi arasın."
+    "intro": "Araçları istediğiniz yere getiriyor, istediğiniz yerden alıyoruz. İhtiyacınızı yazın, satış ekibimiz sizi arasın.",
+    "chip": {
+      "label": "Seçtiğiniz ürün",
+      "view": "Ürünü incele",
+      "remove": "Seçimi kaldır",
+      "change": "Başka ürün seçin"
+    }
   },
   "QuoteSteps": {
     "title": "Nasıl ilerliyor?",
