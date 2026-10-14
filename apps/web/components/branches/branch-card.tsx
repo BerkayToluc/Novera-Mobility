@@ -1,6 +1,6 @@
 "use client";
 
-import { Clock, MapPin, Navigation, Phone } from "lucide-react";
+import { Clock, MapPin, Navigation } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { ContactLink } from "@/components/ui/contact-link";
@@ -81,10 +81,7 @@ export function BranchCard({ branch, selected, onShowOnMap, now, distanceKm }: B
       </div>
 
       <div className="flex flex-col items-start">
-        <a href={`tel:${branch.phone.replace(/\s/g, "")}`} className={link}>
-          <Phone aria-hidden="true" className="size-4" />
-          {t("call", { phone: branch.phone })}
-        </a>
+        <ContactLink value={branch.phone} label={t("call", { phone: branch.phone })} className="gap-2 text-link underline underline-offset-4" />
         <ContactLink value={branch.email} label={t("email")} className="gap-2 text-link underline underline-offset-4" />
         <a href={directionsUrl(branch)} target="_blank" rel="noopener noreferrer" className={link}>
           <Navigation aria-hidden="true" className="size-4" />

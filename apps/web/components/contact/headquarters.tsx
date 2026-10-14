@@ -1,7 +1,7 @@
-import { Clock, MapPin, Navigation, Phone } from "lucide-react";
+import { Clock, MapPin, Navigation } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { ContactLink } from "@/components/ui/contact-link";
-import { COMPANY, DEPARTMENTS, HEADQUARTERS, HQ_DIRECTIONS_URL, telHref } from "@/lib/company";
+import { COMPANY, DEPARTMENTS, HEADQUARTERS, HQ_DIRECTIONS_URL } from "@/lib/company";
 
 const link = "inline-flex min-h-11 items-center gap-3 text-link underline underline-offset-4";
 
@@ -26,10 +26,7 @@ export async function Headquarters() {
               <MapPin aria-hidden="true" className="mt-1 size-4 shrink-0 text-link" />
               {HEADQUARTERS.address}
             </p>
-            <a href={telHref(COMPANY.phone)} className={`${link} tabular-nums`}>
-              <Phone aria-hidden="true" className="size-4 shrink-0" />
-              {COMPANY.phone}
-            </a>
+            <ContactLink value={COMPANY.phone} className="tabular-nums text-link underline underline-offset-4" />
             <ContactLink value={COMPANY.email} className="text-link underline underline-offset-4" />
             <p className="flex items-center gap-3 text-body text-fg-muted">
               <Clock aria-hidden="true" className="size-4 shrink-0 text-link" />
