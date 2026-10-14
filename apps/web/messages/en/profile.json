@@ -9,7 +9,8 @@
       "settings": "Settings",
       "company": "Company details",
       "quotes": "My quote requests",
-      "points": "My Points"
+      "points": "My Points",
+      "newRental": "New rental"
     },
     "signedOut": {
       "title": "You need to sign in",
@@ -160,6 +161,25 @@
       },
       "worth": "= worth {worth}",
       "spendCta": "Pay with points"
+    },
+    "welcome": "Welcome, {name}",
+    "pointsChip": "{points} points · {worth}",
+    "nextTrip": {
+      "title": "Your next trip",
+      "daysLeft": "{days, plural, =0 {Starts today} one {# day to go} other {# days to go}}",
+      "viewAll": "My bookings",
+      "none": {
+        "title": "Make your first rental",
+        "text": "You have no trip coming up. Choose a branch and the dates to see the cars that are free.",
+        "cta": "Find a car"
+      }
+    },
+    "quick": {
+      "title": "Quick actions",
+      "newRental": "New rental",
+      "newRentalText": "Choose a branch and the dates to see the free cars.",
+      "help": "Help centre",
+      "helpText": "Frequently asked questions, guides and the rental steps."
     }
   }
 }
