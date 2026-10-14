@@ -28,7 +28,8 @@
       "holding": "Holding the car…",
       "taken": "This car was just taken. You can choose another one.",
       "unavailable": "The car could not be held right now. Please try again."
-    }
+    },
+    "pointsPayment": "{points} points + {price}"
   },
   "FleetPage": {
     "title": "Our Cars",

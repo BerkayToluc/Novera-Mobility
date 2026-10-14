@@ -1,6 +1,6 @@
 generator client {
   provider = "prisma-client"
-  output   = "../generated/prisma"
+  output   = "../src/generated/prisma"
 }
 
 datasource db {
@@ -63,6 +63,21 @@ enum FaqAudience {
   CORPORATE
 }
 
+enum FaqTopic {
+  rezervasyon
+  odeme
+  teslim
+  hasar
+  hesap
+  kurumsal
+}
+
+enum QuoteStatus {
+  RECEIVED
+  IN_REVIEW
+  OFFERED
+}
+
 // ---------- Hesap ----------
 
 model User {
@@ -72,12 +87,20 @@ model User {
   firstName    String
   lastName     String
   accountType  AccountType @default(INDIVIDUAL)
-  companyName  String? // yalnızca kurumsal hesapta (hesabı Novera açar)
-  locale       Locale      @default(TR)
-  theme        Theme       @default(LIGHT)
-  currency     Currency    @default(TRY)
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
+
+  // Kurumsal hesap bilgileri (yalnızca CORPORATE hesapta dolu gelir, hesabı Novera açar)
+  companyName  String?
+  taxOffice    String?
+  companyCity  String?
+  companyPhone String?
+  contactTitle String?
+  salesContact Json? // { "name": "...", "email": "...", "phone": "..." }
+
+  locale    Locale   @default(TR)
+  theme     Theme    @default(LIGHT)
+  currency  Currency @default(TRY)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   reservations      Reservation[]
   quoteRequests     QuoteRequest[]
@@ -192,6 +215,7 @@ model Hold {
   pickupBranchId String
   returnBranchId String
   expiresAt      DateTime
+  clientKey      String?
   createdAt      DateTime @default(now())
 
   vehicleId String
@@ -199,6 +223,7 @@ model Hold {
 
   @@index([vehicleId, startAt, endAt])
   @@index([expiresAt])
+  @@index([clientKey, expiresAt])
 }
 
 model Reservation {
@@ -277,27 +302,38 @@ model Service {
 model FaqItem {
   id        String      @id @default(uuid())
   audience  FaqAudience
+  topic     FaqTopic    @default(rezervasyon)
   question  Json // { "tr": "...", "en": "..." }
   answer    Json
   sortOrder Int         @default(0)
 
   @@index([audience])
+  @@index([topic])
 }
 
-// Alanlar kurumsal kutunun tasarım onayından sonra (BACKLOG Y35) güncellenecek
+// Kurumsal teklif talepleri (GET /me/quotes ve POST /quotes)
 model QuoteRequest {
-  id             String   @id @default(uuid())
+  id             String      @id @default(uuid())
+  number         String      @unique // ör. TKL-2026-00042
+  status         QuoteStatus @default(RECEIVED)
   companyName    String
+  contactName    String?
+  phone          String?
   vehicleCount   Int
   durationMonths Int
   vehicleType    String
+  deliveryCities String?
+  notes          String?
   email          String
-  createdAt      DateTime @default(now())
+  kvkkConsentAt  DateTime    @default(now())
+  createdAt      DateTime    @default(now())
 
   productId String?
   product   Product? @relation(fields: [productId], references: [id])
   userId    String?
   user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
 }
 
 model ContactMessage {

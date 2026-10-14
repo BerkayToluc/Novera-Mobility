@@ -15,9 +15,11 @@ type VehicleCardProps = {
   note?: ReactNode;
   // The card's button, e.g. "Kirala" on the results page.
   action?: ReactNode;
+  // Paying with points: how many, and what is left to pay in money (SPEC §2.3).
+  pointsPayment?: { points: number; rest: Money };
 };
 
-export async function VehicleCard({ vehicle, fromPrice, note, action }: VehicleCardProps) {
+export async function VehicleCard({ vehicle, fromPrice, note, action, pointsPayment }: VehicleCardProps) {
   const t = await getTranslations("Vehicle");
   const d = await getTranslations("Driver");
   const format = await getFormatter();
@@ -64,6 +66,11 @@ export async function VehicleCard({ vehicle, fromPrice, note, action }: VehicleC
           {offer && (
             <p className="text-small tabular-nums text-fg-muted">
               {t("total", { days: offer.days, price: formatMoney(format, offer.totalPrice) })}
+            </p>
+          )}
+          {pointsPayment && (
+            <p className="mt-1 inline-flex rounded-full bg-selected px-3 py-1 text-label tabular-nums text-on-selected">
+              {t("pointsPayment", { points: format.number(pointsPayment.points), price: formatMoney(format, pointsPayment.rest) })}
             </p>
           )}
           {note && <p className="text-small text-fg-muted">{note}</p>}
