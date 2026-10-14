@@ -51,8 +51,15 @@ G'nin kuralı (12 Ekim): **her sayfa ya da bileşen grubu bir dal, bir PR.** Bun
 13. `feat/products-v2`: **Ürünler** (Y60): ton zeminli kartlar ve çizimler, yeni ürün detayı.
 14. `feat/results-filters-points`: **Uygun Araçlar** (Y61): Filtrele paneli ve Puanla öde.
 15. `feat/summary-pricing`: **Rezervasyon özeti** (Y62): ara toplam, kampanya, puan, KDV; kampanya kodu ödemeden özete taşındı.
+16. `feat/points-five`: **1 puan = ₺5** (Y64): değer sabiti, anahtar, özet satırı, Puanlarım ve SSS metinleri, testler.
+17. `feat/driver-18`: **Sürücü kuralı 18 yaş + geçerli ehliyet** (Y65): sınıf ve ülke yıl tablosu kalktı; ABD için uluslararası belge kaldı.
+18. `feat/results-cards-v2`: **Sonuç kartları** (Y66): toplam fiyat önce, 100 km tüketim, liste/ızgara görünümü, tek araç çubuğu.
+19. `feat/contact-help-card`: **İletişim** (Y67): "Size en yakın bayi" yerine Yardım merkezi kartı.
+20. `feat/profile-shell`: **Profil kabuğu** (Y68): karşılama, puan çipi, ikonlu yan menü, sıradaki seyahat, hızlı işlemler.
+21. `feat/profile-trips`: **Rezervasyonlarım** (Y69): durum çipleri, bayi adı ve saat, yol tarifi, bayiyi ara, simüle iptal.
+22. `feat/profile-points-settings`: **Puanlarım ve Ayarlar** (Y70): ₺ karşılığı ve harcama bağlantısı; bildirim, şifre, oturum bölümleri (simüle).
 
-Belge dalları ayrı: `docs/spec-v05` (SPEC v0.5, ADR-22, BACKLOG Y49–Y52), `docs/spec-v06` (SPEC v0.6, BACKLOG Y53) ve `docs/spec-v07` (SPEC v0.7, BACKLOG Y54–Y63; `docs/spec-v06`'nın üzerine kuruludur), bu belgenin dalı `docs/status-visual-tour`.
+Belge dalları ayrı: `docs/spec-v05` (SPEC v0.5, ADR-22, BACKLOG Y49–Y52), `docs/spec-v06` (SPEC v0.6, BACKLOG Y53) `docs/spec-v07` (SPEC v0.7, BACKLOG Y54–Y63; `docs/spec-v06`'nın üzerine kuruludur) ve `docs/spec-v08` (SPEC v0.8, BACKLOG Y64–Y71; `docs/spec-v07`'nin üzerine kuruludur), bu belgenin dalı `docs/status-visual-tour`.
 
 **Eski dallar artık gereksiz:** `feat/fleet-on-home`, `feat/driver-eligibility`, `feat/home-form-branches`, `feat/home-fleet-cards`, `feat/home-strip-guarantee`, `feat/home-app-guides` ve `feat/home-faq` yukarıdaki sayfa dallarının parçalarıydı (aynı commit'ler 4 ve 5'te). Uzağa itildiyse silinebilir, birleştirilmemeli.
 
