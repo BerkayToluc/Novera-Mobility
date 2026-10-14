@@ -9,9 +9,11 @@
 // for each. If two branches both add a line here, keep both: the order does not matter.
 import trAbout from "../messages/tr/about.json";
 import trAuth from "../messages/tr/auth.json";
+import trBranches from "../messages/tr/branches.json";
 import trBooking from "../messages/tr/booking.json";
 import trContact from "../messages/tr/contact.json";
 import trConsent from "../messages/tr/consent.json";
+import trDriver from "../messages/tr/driver.json";
 import trErrors from "../messages/tr/errors.json";
 import trFleet from "../messages/tr/fleet.json";
 import trGuides from "../messages/tr/guides.json";
@@ -29,10 +31,12 @@ import trUi from "../messages/tr/ui.json";
 
 import enAbout from "../messages/en/about.json";
 import enAuth from "../messages/en/auth.json";
+import enBranches from "../messages/en/branches.json";
 import enBooking from "../messages/en/booking.json";
 import enContact from "../messages/en/contact.json";
 import enConsent from "../messages/en/consent.json";
 import enErrors from "../messages/en/errors.json";
+import enDriver from "../messages/en/driver.json";
 import enFleet from "../messages/en/fleet.json";
 import enGuides from "../messages/en/guides.json";
 import enHelp from "../messages/en/help.json";
@@ -52,9 +56,11 @@ import enUi from "../messages/en/ui.json";
 export const tr = {
   ...trAbout,
   ...trAuth,
+  ...trBranches,
   ...trBooking,
   ...trContact,
   ...trConsent,
+  ...trDriver,
   ...trErrors,
   ...trFleet,
   ...trGuides,
@@ -75,9 +81,11 @@ export const tr = {
 export const en: typeof tr = {
   ...enAbout,
   ...enAuth,
+  ...enBranches,
   ...enBooking,
   ...enContact,
   ...enConsent,
+  ...enDriver,
   ...enErrors,
   ...enFleet,
   ...enGuides,

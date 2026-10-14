@@ -1,6 +1,10 @@
-import { ArrowRight, Headset, KeyRound, Siren, TriangleAlert, Truck } from "lucide-react";
+import type { CSSProperties } from "react";
+import { ArrowRight, Check, Headset, KeyRound, Siren, TriangleAlert, Truck } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
+import { cn } from "@/lib/cn";
+import { SplitText, splitTextGroup } from "@/components/ui/split-text";
+import { StepProgress } from "./step-progress";
 
 const STEPS = [
   { key: "stranded", icon: TriangleAlert },
@@ -10,14 +14,23 @@ const STEPS = [
   { key: "replacement", icon: KeyRound },
 ] as const;
 
-// The one dark band on the page (SPEC §5.4, §5.5): the Road Assurance promise told as a single
-// journey along a road, not as five equal boxes. The dashed line is the road's centre marking;
-// each stop on it is one moment of the breakdown. Left to right from xl up, top to bottom below it.
+// One step every second: the line to the next stop takes 0.8 s, the stop turns as it arrives, so
+// the five fill in a little over four seconds. Unfilled (armed) nothing transitions, so the
+// reset on load is instant. The delays read the step's --i.
+function stepDelay(part: "line" | "stop") {
+  return part === "line"
+    ? "[transition-delay:calc(var(--i)*1s+0.3s)] group-data-[armed]/sp:transition-none"
+    : "[transition-delay:calc(var(--i)*1s+0.05s)] group-data-[armed]/sp:transition-none";
+}
+
+// The one dark band on the page (SPEC §5.4, §5.5): the Road Assurance promise told as five stops
+// along one line, filled in order when the band comes into view (StepProgress). Left to right from
+// xl up, top to bottom below it.
 export async function GuaranteeBand() {
   const t = await getTranslations("Guarantee");
 
   return (
-    <section aria-labelledby="guarantee-title" className="bg-band text-on-band">
+    <section id="yol-boyu-guvence" aria-labelledby="guarantee-title" className="scroll-mt-4 bg-band text-on-band">
       <div className="mx-auto flex max-w-content flex-col gap-12 px-4 py-16 md:px-8 xl:gap-16 xl:py-24">
         <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <header className="flex max-w-2xl flex-col gap-4">
@@ -28,35 +41,53 @@ export async function GuaranteeBand() {
           </header>
           <Link
             href={{ pathname: "/hizmetler", query: { hizmet: "1" }, hash: "hizmet-1" }}
-            className="group inline-flex min-h-11 shrink-0 items-center gap-2 self-start text-label text-band-accent hover:underline md:self-auto"
+            className={cn("group inline-flex min-h-11 shrink-0 items-center gap-2 self-start text-label text-band-accent md:self-auto", splitTextGroup)}
           >
-            {t("cta")}
+            <SplitText text={t("cta")} />
             <ArrowRight aria-hidden="true" className="size-4 transition-transform group-hover:translate-x-1" />
           </Link>
         </div>
 
-        <div className="relative">
-          {/* The road: vertical behind the markers below xl, horizontal from xl up. Outside the
-              list, since an <ol> may only hold list items. */}
-          <span
-            aria-hidden="true"
-            className="absolute bottom-6 left-6 top-6 border-l-2 border-dashed border-on-band/40 xl:bottom-auto xl:right-6 xl:border-l-0 xl:border-t-2"
-          />
+        <StepProgress>
           <ol className="relative grid gap-10 xl:grid-cols-5 xl:gap-6">
-          {STEPS.map(({ key, icon: Icon }, index) => (
-            <li key={key} className="relative flex gap-5 xl:flex-col">
-              <span className="relative z-10 inline-flex size-12 shrink-0 items-center justify-center rounded-full border border-on-band/30 bg-band text-band-accent">
-                <Icon aria-hidden="true" className="size-5" />
-              </span>
-              <div className="flex flex-col gap-2 pt-2 xl:pt-0">
-                <span className="sr-only">{index + 1}.</span>
-                <h3 className="text-h3">{t(`steps.${key}.title`)}</h3>
-                <p className="max-w-xs text-body text-on-band/80">{t(`steps.${key}.text`)}</p>
-              </div>
-            </li>
-          ))}
+            {STEPS.map(({ key, icon: Icon }, index) => (
+              <li
+                key={key}
+                style={{ "--i": index } as CSSProperties}
+                className="relative flex gap-5 xl:flex-col xl:items-center xl:text-center"
+              >
+                {/* The stretch of line to the next stop: down to it on a phone and tablet, across to
+                    it from xl up. The fill grows along it, then the next stop turns. */}
+                {index < STEPS.length - 1 && (
+                  <span
+                    aria-hidden="true"
+                    className="absolute -bottom-16 left-6 top-6 w-1 -translate-x-1/2 rounded-full bg-on-band/20 xl:bottom-auto xl:left-1/2 xl:h-1 xl:w-[calc(100%+1.5rem)] xl:translate-x-0 xl:-translate-y-1/2"
+                  >
+                    <span className={cn("block size-full origin-top rounded-full bg-band-accent transition-[scale] duration-800 ease-step xl:origin-left", stepDelay("line"), "group-data-[armed]/sp:scale-y-0 xl:group-data-[armed]/sp:scale-x-0 xl:group-data-[armed]/sp:scale-y-100")} />
+                  </span>
+                )}
+                <span
+                  className={cn(
+                    "relative z-10 inline-flex size-12 shrink-0 items-center justify-center rounded-control border-2 border-band-accent bg-band-accent text-band transition-colors duration-300",
+                    stepDelay("stop"),
+                    "group-data-[armed]/sp:border-on-band/30 group-data-[armed]/sp:bg-band group-data-[armed]/sp:text-band-accent",
+                  )}
+                >
+                  <Icon aria-hidden="true" className={cn("absolute size-5 scale-90 opacity-0 blur-xs transition-[opacity,scale,filter] duration-300", stepDelay("stop"), "group-data-[armed]/sp:scale-100 group-data-[armed]/sp:opacity-100 group-data-[armed]/sp:blur-none")} />
+                  <Check aria-hidden="true" className={cn("absolute size-5 transition-[opacity,scale,filter] duration-300", stepDelay("stop"), "group-data-[armed]/sp:scale-90 group-data-[armed]/sp:opacity-0 group-data-[armed]/sp:blur-xs")} />
+                </span>
+                <div className="flex flex-col gap-1 pt-1 xl:pt-0">
+                  <span aria-hidden="true" className="text-small tabular-nums text-on-band/70">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                  <span className="sr-only">{index + 1}.</span>
+                  <h3 className="text-h3">{t(`steps.${key}.title`)}</h3>
+                  <p className="max-w-xs text-body text-on-band/80">{t(`steps.${key}.text`)}</p>
+                </div>
+              </li>
+            ))}
           </ol>
-        </div>
+        </StepProgress>
       </div>
     </section>
   );

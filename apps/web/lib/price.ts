@@ -13,13 +13,23 @@ type Formatter = ReturnType<typeof useFormatter>;
 // its total, so amounts are never rounded for display.
 //
 // `format` is next-intl's formatter (`useFormatter()` or `await getFormatter()`).
-export function formatMoney(format: Formatter, { amount, currency }: Money): string {
+export function formatMoney(format: Formatter, money: Money): string {
+  return format.number(money.amount / 100, moneyOptions(money));
+}
+
+// The same amount in parts (currency sign, digits, separators), for a price whose sign is set
+// smaller than its figure. Same options as formatMoney, so the two always read alike.
+export function moneyParts(locale: string, money: Money): Intl.NumberFormatPart[] {
+  return new Intl.NumberFormat(locale, moneyOptions(money)).formatToParts(money.amount / 100);
+}
+
+function moneyOptions({ amount, currency }: Money) {
   const whole = amount % 100 === 0;
-  return format.number(amount / 100, {
+  return {
     style: "currency",
     currency,
     currencyDisplay: "narrowSymbol",
     minimumFractionDigits: whole ? 0 : 2,
     maximumFractionDigits: whole ? 0 : 2,
-  });
+  } as const;
 }

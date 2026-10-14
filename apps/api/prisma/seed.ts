@@ -2,7 +2,7 @@
 // Çalıştırma: pnpm --filter @novera/api db:seed
 import "dotenv/config";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { PrismaClient } from "../generated/prisma/client";
+import { PrismaClient } from "../src/generated/prisma/client.js";
 import {
   branches,
   buildVehicles,
@@ -90,7 +90,7 @@ async function main() {
   }
 
   for (const f of faq) {
-    const data = { audience: f.audience, question: f.question, answer: f.answer, sortOrder: f.sortOrder };
+    const data = { audience: f.audience, topic: f.topic, question: f.question, answer: f.answer, sortOrder: f.sortOrder };
     await prisma.faqItem.upsert({ where: { id: f.id }, update: data, create: { id: f.id, ...data } });
   }
 

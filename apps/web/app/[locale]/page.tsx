@@ -1,13 +1,17 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { getTranslations } from "next-intl/server";
 import { AudienceSwitch } from "@/components/home/audience-switch";
 import { AppPromo } from "@/components/home/app-promo";
 import { CampaignArt, type CampaignArtKind } from "@/components/home/campaign-art";
 import { CampaignGallery, type CampaignSlide } from "@/components/home/campaign-gallery";
+import { FleetSection } from "@/components/fleet/fleet-section";
+import { FleetSkeleton } from "@/components/fleet/fleet-skeleton";
 import { QuoteForm } from "@/components/quote/quote-form";
 import { QuoteSteps } from "@/components/quote/quote-steps";
 import { FaqSection } from "@/components/home/faq-section";
 import { GuidesPreview } from "@/components/home/guides-preview";
+import { HowItWorks } from "@/components/home/how-it-works";
 import { GuaranteeBand } from "@/components/home/guarantee-band";
 import { PartnerStrip } from "@/components/home/partner-strip";
 import { RentalSearchForm } from "@/components/rental/rental-search-form";
@@ -16,16 +20,17 @@ import { StateMessage } from "@/components/ui/state-message";
 import { Link } from "@/i18n/navigation";
 import { parseAudience } from "@/lib/audience";
 import type { BranchOption } from "@/lib/branch-options";
-import { getCurrency } from "@/lib/get-currency";
 import { getBranchOptions } from "@/lib/rental-data";
 import { pageMetadata } from "@/lib/seo";
 
 // Anchor of the rental section, so campaign buttons can bring the visitor to the form.
 const RENTAL_ANCHOR = "kiralama";
+// Anchor of the fleet section (SPEC §2.4), for the campaign that points at the cars.
+const FLEET_ANCHOR = "araclarimiz";
 
 const CAMPAIGNS: { id: CampaignArtKind; href: CampaignSlide["href"] }[] = [
   { id: "weekend", href: { pathname: "/", hash: RENTAL_ANCHOR } },
-  { id: "electric", href: "/araclarimiz" },
+  { id: "electric", href: { pathname: "/", hash: FLEET_ANCHOR } },
   { id: "fleet", href: { pathname: "/", query: { tip: "kurumsal" }, hash: RENTAL_ANCHOR } },
 ];
 
@@ -34,13 +39,16 @@ export async function generateMetadata(): Promise<Metadata> {
   return pageMetadata({ href: "/", description: t("metaDescription") });
 }
 
-// Section order of SPEC §2.2: campaigns, the rental box, partners, Road Assurance, the app, FAQ.
+// Section order of SPEC §2.2: campaigns, the rental box, the fleet (Individual tab only), partners,
+// Road Assurance, the app, FAQ.
 // The guides sit between the app and the FAQ (BACKLOG Y40).
 export default async function Home({ searchParams }: PageProps<"/[locale]">) {
   const t = await getTranslations("HomePage");
-  const audience = parseAudience((await searchParams).tip);
+  const params = await searchParams;
+  const audience = parseAudience(params.tip);
+  const requestedModel = Array.isArray(params.arac) ? params.arac[0] : params.arac;
+  const requestedPickup = Array.isArray(params.alis) ? params.alis[0] : params.alis;
   const corporate = audience === "kurumsal";
-  const currency = await getCurrency();
 
   // Only the fetch sits in the try: not reaching the branches is an expected state with its
   // own message, while a rendering bug should still reach the error boundary. The corporate
@@ -48,7 +56,7 @@ export default async function Home({ searchParams }: PageProps<"/[locale]">) {
   let branches: BranchOption[] | null = null;
   if (!corporate) {
     try {
-      branches = await getBranchOptions(currency);
+      branches = await getBranchOptions();
     } catch {
       branches = null;
     }
@@ -93,7 +101,11 @@ export default async function Home({ searchParams }: PageProps<"/[locale]">) {
               <QuoteForm />
             </div>
           ) : branches ? (
-            <RentalSearchForm branches={branches} />
+            <RentalSearchForm
+              branches={branches}
+              // A branch from a link ("rent from here"), only if it exists.
+              initialPickup={branches.some((branch) => branch.id === requestedPickup) ? requestedPickup : undefined}
+            />
           ) : (
             <StateMessage tone="error" title={t("error.title")} text={t("error.text")}>
               <Button asChild>
@@ -103,6 +115,21 @@ export default async function Home({ searchParams }: PageProps<"/[locale]">) {
           )}
         </div>
       </section>
+
+      {/* Cars are picked in the results, not here, so the corporate tab (a request form) has neither these steps nor a fleet. */}
+      {!corporate && (
+        <div className="mx-auto max-w-content px-4 pb-16 md:px-8 xl:pb-24">
+          <HowItWorks />
+        </div>
+      )}
+
+      {!corporate && (
+        <div id={FLEET_ANCHOR} className="mx-auto max-w-content scroll-mt-4 px-4 pb-16 md:px-8 xl:pb-24">
+          <Suspense fallback={<FleetSkeleton />}>
+            <FleetSection requestedModel={requestedModel} />
+          </Suspense>
+        </div>
+      )}
 
       <div className="mx-auto max-w-content px-4 pb-16 md:px-8 xl:pb-24">
         <PartnerStrip />

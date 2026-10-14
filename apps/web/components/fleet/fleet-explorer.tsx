@@ -7,13 +7,13 @@ import type { FleetCategory, FleetModel } from "@/lib/fleet-models";
 import { FleetDialog } from "./fleet-dialog";
 import { FleetModelCard } from "./fleet-model-card";
 
-const ALL = "all";
 const PARAM = "arac";
 
-// The fleet page's interactive part (SPEC §2.4): category chips on top, one clearly headed
-// section per category, and the model dialog. The open model lives in the address as
-// `?arac=<slug>` (ARCHITECTURE ADR-22), written with the History API so nothing is fetched
-// again: a shared link opens the same dialog, Back closes it, Escape closes it.
+// The fleet section's interactive part (SPEC §2.4): category chips on top, the models of the
+// chosen category below (the first one to begin with; there is no "all"), and the model dialog.
+// The open model lives in the address as `?arac=<slug>` (ARCHITECTURE ADR-22), written with the
+// History API so nothing is fetched again: a shared link opens the same dialog, Back closes it,
+// Escape closes it. The rest of the query string (the home page's `?tip=`) is left alone.
 export function FleetExplorer({
   categories,
   initialModel,
@@ -22,7 +22,10 @@ export function FleetExplorer({
   initialModel: string | null;
 }) {
   const t = useTranslations("FleetPage");
-  const [filter, setFilter] = useState<string>(ALL);
+  // A shared link to a model starts on that model's category, so the card is there behind the dialog.
+  const [filter, setFilter] = useState<string>(
+    () => categories.find((category) => category.models.some((model) => model.slug === initialModel))?.slug ?? categories[0].slug,
+  );
   const [openSlug, setOpenSlug] = useState<string | null>(initialModel);
 
   const models = new Map<string, FleetModel>();
@@ -45,7 +48,9 @@ export function FleetExplorer({
   }, []);
 
   function open(slug: string) {
-    window.history.pushState({ fleetDialog: true }, "", `${window.location.pathname}?${PARAM}=${slug}`);
+    const url = new URL(window.location.href);
+    url.searchParams.set(PARAM, slug);
+    window.history.pushState({ fleetDialog: true }, "", url.pathname + url.search + url.hash);
     setOpenSlug(slug);
   }
 
@@ -56,18 +61,18 @@ export function FleetExplorer({
     if (openRef.current === null) return;
     if (window.history.state?.fleetDialog) window.history.back();
     else {
-      window.history.replaceState(window.history.state, "", window.location.pathname);
+      const url = new URL(window.location.href);
+      url.searchParams.delete(PARAM);
+      window.history.replaceState(window.history.state, "", url.pathname + url.search + url.hash);
       setOpenSlug(null);
     }
   }
 
-  const visible = filter === ALL ? categories : categories.filter((category) => category.slug === filter);
-  const total = categories.reduce((sum, category) => sum + category.models.length, 0);
+  const chosen = categories.find((category) => category.slug === filter) ?? categories[0];
 
   return (
     <>
       <div role="group" aria-label={t("filterLabel")} className="flex flex-wrap gap-2">
-        <Chip active={filter === ALL} onClick={() => setFilter(ALL)} label={t("all")} count={total} />
         {categories.map((category) => (
           <Chip
             key={category.slug}
@@ -79,25 +84,13 @@ export function FleetExplorer({
         ))}
       </div>
 
-      <div className="flex flex-col gap-16">
-        {visible.map((category) => (
-          <section key={category.slug} aria-labelledby={`class-${category.slug}`} className="flex flex-col gap-6">
-            <header className="flex items-baseline justify-between gap-4 border-b border-border pb-3">
-              <h2 id={`class-${category.slug}`} className="text-h2 text-fg">
-                {category.name}
-              </h2>
-              <p className="text-small text-fg-muted">{t("modelCount", { count: category.models.length })}</p>
-            </header>
-            <ul className="grid gap-4 xl:grid-cols-2">
-              {category.models.map((model) => (
-                <li key={model.slug}>
-                  <FleetModelCard model={model} onOpen={() => open(model.slug)} />
-                </li>
-              ))}
-            </ul>
-          </section>
+      <ul aria-label={chosen.name} className="flex flex-col gap-4">
+        {chosen.models.map((model) => (
+          <li key={model.slug}>
+            <FleetModelCard model={model} onOpen={() => open(model.slug)} />
+          </li>
         ))}
-      </div>
+      </ul>
 
       <FleetDialog
         model={openSlug ? (models.get(openSlug) ?? null) : null}

@@ -5,7 +5,7 @@ import { cn } from "@/lib/cn";
 
 // Every size keeps a 44px minimum height (WCAG 2.2 AA target size, see CLAUDE.md).
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-control text-label transition-colors disabled:pointer-events-none",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap text-label transition-colors disabled:pointer-events-none",
   {
     variants: {
       variant: {
@@ -19,16 +19,24 @@ const buttonVariants = cva(
           "border border-error bg-surface text-error hover:bg-surface-muted disabled:border-border disabled:text-fg-subtle",
         link: "text-link underline-offset-4 hover:underline disabled:text-fg-subtle",
       },
+      // The header pill and its controls are fully round; everything else keeps the control radius.
+      shape: {
+        control: "rounded-control",
+        pill: "rounded-full",
+      },
       size: {
         default: "min-h-11 px-5",
         // Header controls that sit in a row (currency, language): same height, less padding.
         compact: "min-h-11 px-3",
+        // A link-styled button that sits in text flow: no side padding, so it lines up with the content above it.
+        inline: "min-h-11 px-0",
         lg: "min-h-12 px-6",
         icon: "size-11",
       },
     },
     defaultVariants: {
       variant: "primary",
+      shape: "control",
       size: "default",
     },
   },
@@ -40,9 +48,9 @@ type ButtonProps = ComponentProps<"button"> &
     asChild?: boolean;
   };
 
-function Button({ className, variant, size, asChild = false, ...props }: ButtonProps) {
+function Button({ className, variant, size, shape, asChild = false, ...props }: ButtonProps) {
   const Comp = asChild ? Slot : "button";
-  return <Comp className={cn(buttonVariants({ variant, size }), className)} {...props} />;
+  return <Comp className={cn(buttonVariants({ variant, size, shape }), className)} {...props} />;
 }
 
 export { Button, buttonVariants };

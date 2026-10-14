@@ -229,6 +229,9 @@
   --color-band: var(--novera-band);
   --color-on-band: var(--novera-on-band);
   --color-band-accent: var(--novera-band-accent);
+  /* The eyes in the footer keep their own colours in both themes (SPEC §2.8). */
+  --color-eye-white: #fffefd;
+  --color-eye-pupil: #0c0c0c;
   --color-fg: var(--novera-fg);
   --color-fg-muted: var(--novera-fg-muted);
   --color-fg-subtle: var(--novera-fg-subtle);
@@ -287,6 +290,8 @@
   /* Depth comes from surface tone (canvas vs. surface), not shadows. One shadow for floating layers only. */
   --shadow-*: initial;
   --shadow-overlay: 0 8px 24px rgb(26 28 22 / 0.12);
+  /* The floating header pill (SPEC §5.3): lighter than a menu, since it rests on the page. */
+  --shadow-float: 0 2px 12px rgb(26 28 22 / 0.08);
 
   /* Layout breakpoints from SPEC: 375 (base, no prefix), 768, 1280. */
   --breakpoint-*: initial;
@@ -295,10 +300,28 @@
 
   --container-content: 75rem;
 
-  /* Partner strip (SPEC §2.2.4): the track holds two identical sets, so moving it by half
-     its width loops without a seam. Paused by hover, its own button and reduced motion. */
-  --animate-marquee: marquee 48s linear infinite;
+  /* The Road Assurance line filling from stop to stop (SPEC §5.4, after the Framer StepProgress). */
+  --ease-step: cubic-bezier(0.4, 0, 0.2, 1);
+  /* The footer's easing (SPEC §2.8, after the Framer Simple Footer): a long, soft finish. */
+  --ease-link: cubic-bezier(0.12, 0.23, 0.5, 1);
+  /* The letter roll of the nav links (after the Framer SplitTextHover). */
+  --ease-split: cubic-bezier(0.25, 0.1, 0.25, 1);
+  /* Menus that open and close (after the Framer Pill Dropdown Nav). */
+  --ease-menu: cubic-bezier(0.44, 0, 0.56, 1);
   --animate-fade-in: fade-in 0.3s ease-out;
+  /* The footer links' wave (SPEC §2.8, after the Framer Wavy Nav link): each letter drops 6 px and
+     springs back. The curve overshoots a touch, as the original's spring does. */
+  --animate-wave: wave 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  /* A firm spring for things that swell under the pointer (the social marks). */
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  @keyframes wave {
+    from {
+      transform: translateY(6px);
+    }
+    to {
+      transform: none;
+    }
+  }
   @keyframes fade-in {
     from {
       opacity: 0;
@@ -309,14 +332,20 @@
       transform: none;
     }
   }
-  @keyframes marquee {
-    from {
-      transform: translateX(0);
-    }
-    to {
-      transform: translateX(-50%);
-    }
-  }
+}
+
+/* The footer's blocks settle into place as the page scrolls to them (SPEC §2.8). FooterReveal marks an
+   element only after the page has loaded and only if it is below the fold, so without script, or
+   with reduced motion, everything simply shows. It moves and does not fade: a block at opacity 0
+   fails the contrast check of an accessibility tool that reads the page without scrolling it. */
+[data-reveal] {
+  transition: transform 0.6s cubic-bezier(0.12, 0.23, 0.5, 1);
+}
+[data-reveal="hidden"][data-kind="block"] {
+  transform: scale(0.97);
+}
+[data-reveal="hidden"][data-kind="text"] {
+  transform: translateY(3.75rem);
 }
 
 @layer base {

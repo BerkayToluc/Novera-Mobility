@@ -4,18 +4,28 @@ import { useMemo, useState, type ChangeEvent } from "react";
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { placeReservation } from "@/app/[locale]/odeme/actions";
+import { placeReservation, type DriverBody } from "@/app/[locale]/odeme/actions";
 import { FormError } from "@/components/auth/form-error";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "@/i18n/navigation";
+import { DriverSection } from "./driver-section";
 import { formatCardNumber, formatExpiry, paymentSchema, type PaymentInput } from "@/lib/payment-schema";
 
 // The card fields are only checked here, in the browser: what goes to the server is the
-// booking from the URL and nothing else. The demo notice above the form says the same.
-export function PaymentForm({ query }: { query: Record<string, string> }) {
+// booking from the URL and the driver's details (SPEC §2.10), never the card. The demo notice
+// above the form says the same. The driver section comes first, and the payment button waits for it.
+export function PaymentForm({
+  query,
+  rentalStart,
+}: {
+  query: Record<string, string>;
+  rentalStart: string;
+}) {
   const t = useTranslations("Payment");
+  const d = useTranslations("Driver");
+  const [driver, setDriver] = useState<DriverBody | null>(null);
   const router = useRouter();
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -53,9 +63,10 @@ export function PaymentForm({ query }: { query: Record<string, string> }) {
   };
 
   async function onSubmit() {
+    if (!driver) return;
     setFormError(null);
     try {
-      const result = await placeReservation(query);
+      const result = await placeReservation(query, driver);
       if (result.ok) {
         // The hold is spent by now, so it does not travel on to the confirmation.
         const { tutma: spent, ...rest } = query;
@@ -73,13 +84,16 @@ export function PaymentForm({ query }: { query: Record<string, string> }) {
         router.push({ pathname: "/rezervasyon", query: { ...query, durum: "dolu" } });
         return;
       }
-      setFormError(t(`errors.${result.reason}`));
+      setFormError(t(result.reason === "not_verified" ? "errors.notVerified" : `errors.${result.reason}`));
     } catch {
       setFormError(t("errors.generic"));
     }
   }
 
   return (
+    <div className="flex flex-col gap-6">
+      <DriverSection rentalStart={rentalStart} onReady={setDriver} />
+      <div className="rounded-card border border-border bg-surface p-6 md:p-8">
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-5">
       <FormError message={formError} />
       <Field label={t("fields.holder")} error={errors.holder?.message}>
@@ -111,9 +125,23 @@ export function PaymentForm({ query }: { query: Record<string, string> }) {
           {(props) => <Input inputMode="numeric" autoComplete="cc-csc" maxLength={4} {...props} {...register("cvc")} />}
         </Field>
       </div>
-      <Button type="submit" size="lg" disabled={isSubmitting} aria-busy={isSubmitting} className="self-start">
+      <Button
+        type="submit"
+        size="lg"
+        disabled={isSubmitting || !driver}
+        aria-busy={isSubmitting}
+        aria-describedby={driver ? undefined : "pay-blocked"}
+        className="self-start"
+      >
         {isSubmitting ? t("paying") : t("pay")}
       </Button>
+      {!driver && (
+        <p id="pay-blocked" className="text-small text-fg-muted">
+          {d("payBlocked")}
+        </p>
+      )}
     </form>
+      </div>
+    </div>
   );
 }

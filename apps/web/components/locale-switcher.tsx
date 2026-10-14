@@ -2,13 +2,14 @@
 
 import { useParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
+import { Flag } from "@/components/ui/flags";
 import { switcherItemClasses, type SwitcherTone } from "@/components/ui/switcher-item";
 import { Link, usePathname } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 
 // Each language is named in its own language so a visitor who cannot read the
 // current one still recognises theirs. These names are deliberately not translated.
-const LANGUAGE_NAMES = {
+export const LANGUAGE_NAMES = {
   tr: "Türkçe",
   en: "English",
 } as const satisfies Record<(typeof routing.locales)[number], string>;
@@ -36,6 +37,7 @@ export function LocaleSwitcher({ tone = "default" }: { tone?: SwitcherTone }) {
                 aria-current={isCurrent ? "true" : undefined}
                 className={switcherItemClasses(isCurrent, tone)}
               >
+                <Flag locale={locale} />
                 {LANGUAGE_NAMES[locale]}
               </Link>
             </li>

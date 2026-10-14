@@ -1,16 +1,15 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
+import { UserRound } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { CurrencySwitcher } from "@/components/currency-switcher";
 import { LocaleSwitcher } from "@/components/locale-switcher";
 import { Logo } from "@/components/logo";
-import { ThemeSwitcher } from "@/components/theme-switcher";
 import { BurgerButton } from "@/components/ui/burger-button";
 import { Button } from "@/components/ui/button";
 import { Link, usePathname } from "@/i18n/navigation";
 import type { Currency } from "@/lib/currency";
-import type { Theme } from "@/lib/theme";
 import { MainNav } from "./main-nav";
 
 // Matches Tailwind's `xl` breakpoint, where the inline menu takes over: six links do not fit
@@ -21,11 +20,9 @@ const DESKTOP_QUERY = "(min-width: 80rem)";
 // the page behind it inert. It covers the header, so it repeats the logo and a
 // close button in the same positions; the visitor sees the page chrome stay put.
 export function MobileMenu({
-  initialTheme,
   initialCurrency,
   signedIn,
 }: {
-  initialTheme: Theme;
   initialCurrency: Currency;
   signedIn: boolean;
 }) {
@@ -93,12 +90,13 @@ export function MobileMenu({
         </div>
         <div className="mx-auto flex min-h-0 w-full max-w-content flex-1 flex-col gap-8 overflow-y-auto px-4 pb-8 pt-4">
           <MainNav label={t("navLabel")} orientation="vertical" onNavigate={close} />
-          <Button asChild size="lg" className="w-full">
+          <Button asChild size="lg" shape="pill" className="w-full">
             <Link href={signedIn ? "/profil" : "/giris"} onClick={close}>
+              {signedIn && <UserRound aria-hidden="true" className="size-5" />}
               {signedIn ? t("account") : t("login")}
             </Link>
           </Button>
-          {/* The header shows currency, language and theme from md up; on a phone they live here. */}
+          {/* The header shows currency and language from md up; on a phone they live here. */}
           <section aria-labelledby={preferencesId} className="flex flex-col gap-4 border-t border-border pt-6">
             <h2 id={preferencesId} className="text-label text-fg-muted">
               {t("preferences")}
@@ -110,10 +108,6 @@ export function MobileMenu({
             <div className="flex flex-col gap-2">
               <p className="text-small text-fg-muted">{t("language")}</p>
               <LocaleSwitcher />
-            </div>
-            <div className="flex flex-col gap-2">
-              <p className="text-small text-fg-muted">{t("theme")}</p>
-              <ThemeSwitcher initialTheme={initialTheme} />
             </div>
           </section>
         </div>

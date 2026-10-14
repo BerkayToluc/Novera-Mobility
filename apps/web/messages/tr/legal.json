@@ -33,7 +33,8 @@
           "Kurumsal teklif: firma adı, ihtiyaç duyulan araç sayısı, kiralama süresi, araç tipi.",
           "İletişim formu: ad, e-posta adresi, telefon numarası (isteğe bağlı), konu ve mesajınız.",
           "Hesap: tercihleriniz (dil, tema, para birimi) ve kiralamalarınızdan kazandığınız puanlar.",
-          "Kullanım: dil, tema ve para birimi tercihiniz (çerezler aracılığıyla)."
+          "Kullanım: dil, tema ve para birimi tercihiniz (çerezler aracılığıyla).",
+          "Sürücü uygunluğu: doğum tarihiniz, sürücü belgenizin verildiği ülke, numarası ve veriliş tarihi."
         ]
       },
       {
@@ -44,7 +45,8 @@
           "Kurumsal teklif taleplerinize dönüş yapmak.",
           "Hesabınızı yönetmek ve oturumunuzu sürdürmek.",
           "Puanlarınızı hesaplamak ve tercihlerinizi hesabınızla birlikte hatırlamak.",
-          "Site tercihlerinizi hatırlamak."
+          "Site tercihlerinizi hatırlamak.",
+          "Aracı kullanacak kişinin yaş ve sürücü belgesi koşullarına uygunluğunu rezervasyon sırasında kontrol etmek."
         ]
       },
       {
@@ -62,7 +64,8 @@
       {
         "heading": "Saklama süresi",
         "paragraphs": [
-          "Verileriniz, işleme amacının gerektirdiği süre boyunca ve ilgili mevzuatta öngörülen azami süreler içinde saklanır; süre sonunda silinir, yok edilir veya anonim hale getirilir."
+          "Verileriniz, işleme amacının gerektirdiği süre boyunca ve ilgili mevzuatta öngörülen azami süreler içinde saklanır; süre sonunda silinir, yok edilir veya anonim hale getirilir.",
+          "Sürücü uygunluğu için girdiğiniz doğum tarihi ve sürücü belgesi bilgileri yalnızca rezervasyon sırasında kontrol için kullanılır; hesabınıza, rezervasyon kaydınıza ya da tarayıcınıza kaydedilmez ve sonrasında saklanmaz."
         ]
       },
       {
@@ -156,9 +159,11 @@
       {
         "heading": "Kiracıdan beklenenler",
         "list": [
-          "En az 21 yaşında olmak.",
-          "En az iki yıldır geçerli bir sürücü belgesine sahip olmak.",
+          "18 yaşından büyük olmak ve geçerli bir sürücü belgesine sahip olmak (araç sınıfına göre ek yaş ya da ehliyet yılı şartı yoktur; bazı ülkelerde verilmiş belgelerde uluslararası sürücü belgesi istenir).",
           "Alış sırasında kimlik ve sürücü belgesini ibraz etmek."
+        ],
+        "paragraphs": [
+          "Yaş ve sürücü belgesi koşulları araç sınıfına ve belgenin verildiği ülkeye göre değişir; seçtiğiniz araç için geçerli koşul sonuç ve özet sayfasında gösterilir. Belgeleriniz alışta ayrıca kontrol edilir."
         ]
       },
       {

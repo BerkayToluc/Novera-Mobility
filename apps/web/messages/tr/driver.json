@@ -1,0 +1,47 @@
+{
+  "Driver": {
+    "requirementNote": "18 yaşından büyük ve geçerli ehliyeti olan herkes kiralayabilir.",
+    "conditionsLink": "Kiralama koşulları",
+    "title": "Sürücü bilgileri",
+    "intro": "Aracı kullanacak kişinin kiralama koşullarını karşıladığını kontrol ediyoruz. Bilgileriniz yalnızca bu kontrol için kullanılır; hiçbir yere kaydedilmez.",
+    "demoTitle": "Bu bir deneme doğrulamasıdır",
+    "demoText": "Gerçek bir ehliyet hizmetine bağlanmaz; gerçek ehliyet numaranızı ve kişisel bilgilerinizi girmeyin. Koşullar örnektir.",
+    "demoHint": "Deneme numarası: 12345678 geçerli sayılır; 0 ile bitenin süresi dolmuş, 9 ile bitenin kaydı yok sayılır.",
+    "fields": {
+      "birthDate": "Doğum tarihi",
+      "country": "Ehliyetin verildiği ülke",
+      "countryChoose": "Ülke seçin",
+      "licenceNumber": "Ehliyet numarası",
+      "licenceIssuedAt": "Ehliyet veriliş tarihi",
+      "permit": "Uluslararası sürücü belgem var.",
+      "declaration": "Bilgilerin doğru olduğunu beyan ederim; belgelerim alışta kontrol edilecek."
+    },
+    "countries": {
+      "TR": "Türkiye",
+      "DE": "Almanya",
+      "GB": "Birleşik Krallık",
+      "US": "ABD"
+    },
+    "errors": {
+      "birthDate": "Geçerli bir doğum tarihi seçin.",
+      "country": "Ehliyetin verildiği ülkeyi seçin.",
+      "licenceNumber": "6–12 harf veya rakamdan oluşan bir numara yazın.",
+      "licenceIssuedAt": "Geçerli bir veriliş tarihi seçin.",
+      "licenceBeforeBirth": "Veriliş tarihi doğum tarihinden sonra olmalı.",
+      "permit": "Bu ülkenin ehliyetiyle kiralamak için uluslararası sürücü belgesi gerekir.",
+      "declaration": "Devam etmek için beyanı onaylayın."
+    },
+    "eligible": "Koşulları karşılıyorsunuz ({age} yaşından büyük, geçerli ehliyet).",
+    "ineligibleTitle": "Koşulları karşılamıyorsunuz",
+    "ineligibleAge": "En az {min} yaşında olmalısınız; kiralama başında {have} yaşında olacaksınız.",
+    "verify": "Ehliyetimi doğrula",
+    "verifying": "Doğrulanıyor",
+    "result": {
+      "valid": "Ehliyet doğrulandı (deneme).",
+      "not_found": "Bu numarayla bir ehliyet bulunamadı.",
+      "expired": "Bu ehliyetin süresi dolmuş.",
+      "unavailable": "Doğrulama hizmeti şu an kullanılamıyor. Lütfen daha sonra tekrar deneyin."
+    },
+    "payBlocked": "Ödemeye geçmek için sürücü bilgilerini girip ehliyetinizi doğrulayın."
+  }
+}

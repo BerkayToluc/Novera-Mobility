@@ -4,7 +4,8 @@
     "description": "Kurumsal ve bireysel araç kiralama"
   },
   "LocaleSwitcher": {
-    "label": "Dil seçimi"
+    "label": "Dil seçimi",
+    "current": "Dil: {language}"
   },
   "Header": {
     "skip": "İçeriğe geç",
@@ -14,19 +15,16 @@
     "menuOpen": "Menüyü aç",
     "menuClose": "Menüyü kapat",
     "home": "Araç Kirala",
-    "fleet": "Araçlarımız",
+    "branches": "Bayilerimiz",
     "products": "Ürünler",
     "services": "Hizmetler",
     "about": "Hakkımızda",
     "contact": "İletişim",
     "login": "Giriş Yap",
     "preferences": "Tercihler",
-    "preferencesLabel": "Dil ve tema: {language}",
     "language": "Dil",
-    "theme": "Tema",
     "currency": "Para birimi",
     "allProducts": "Tüm ürünler",
-    "allServices": "Tüm hizmetler",
     "guides": "Rehberler",
     "help": "Yardım",
     "account": "Hesabım"
@@ -51,7 +49,8 @@
       "youtube": "YouTube"
     },
     "privacyPolicy": "Gizlilik Politikası",
-    "siteTerms": "Kullanım Şartları"
+    "siteTerms": "Kullanım Şartları",
+    "socialSoon": "{network} · yakında"
   },
   "ThemeSwitcher": {
     "label": "Tema",
@@ -67,5 +66,14 @@
       "EUR": "Euro",
       "USD": "ABD doları"
     }
+  },
+  "ContactLink": {
+    "emailHeading": "E-posta adresi",
+    "phoneHeading": "Telefon numarası",
+    "send": "E-posta gönder",
+    "call": "Ara",
+    "copyEmail": "Adresi kopyala",
+    "copyPhone": "Numarayı kopyala",
+    "copied": "Kopyalandı"
   }
 }

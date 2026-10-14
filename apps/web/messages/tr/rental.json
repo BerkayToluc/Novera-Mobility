@@ -6,14 +6,28 @@
     "pickupTime": "Alış saati",
     "returnTime": "İade saati",
     "submit": "Ara",
-    "branchPlaceholder": "Bayi seçin",
-    "noVehicles": "Şu an araç yok",
-    "andMore": "+{count}",
     "errors": {
       "pickupBranch": "Alış bayisini seçin.",
       "returnBranch": "Bırakacağınız bayiyi seçin.",
       "dates": "Tarihleri seçin.",
       "order": "İade zamanı, alış zamanından sonra olmalı."
+    },
+    "status": {
+      "placeholder": "Bayi seçin",
+      "always": "7/24 açık",
+      "open": "Şu an açık · kapanış {time}",
+      "closed": "Kapalı · açılış {when} {time}",
+      "closedForGood": "Kapalı",
+      "today": "bugün",
+      "tomorrow": "yarın"
+    },
+    "locate": {
+      "button": "Konumumu kullan",
+      "locating": "Konum alınıyor",
+      "found": "En yakın bayi seçildi: {name}, yaklaşık {km} km.",
+      "denied": "Konum izni verilmedi. Bayiyi listeden seçebilirsiniz.",
+      "failed": "Konumunuz alınamadı. Bayiyi listeden seçebilirsiniz.",
+      "unsupported": "Bu tarayıcı konum paylaşımını desteklemiyor. Bayiyi listeden seçebilirsiniz."
     }
   },
   "ResultsPage": {
@@ -33,6 +47,37 @@
       "title": "Araçlar yüklenemedi",
       "text": "Uygun araçları şu an getiremiyoruz. Lütfen tekrar deneyin.",
       "back": "Ana Sayfaya Dön"
+    },
+    "filters": {
+      "button": "Filtrele",
+      "title": "Filtreler",
+      "active": "{count, plural, one {filtre} other {filtre}} etkin",
+      "class": "Sınıf",
+      "transmission": "Vites",
+      "fuel": "Yakıt",
+      "seats": "Koltuk",
+      "seatsAtLeast": "En az {count}",
+      "sort": "Sıralama",
+      "sorts": {
+        "price-asc": "En ucuz",
+        "price-desc": "En pahalı",
+        "newest": "En yeni"
+      },
+      "clear": "Filtreleri temizle"
+    },
+    "points": {
+      "label": "Puanla öde",
+      "signIn": "Puanla ödemek için giriş yapın",
+      "value": "1 puan = {price}"
+    },
+    "noMatch": {
+      "title": "Bu filtrelere uyan araç yok",
+      "text": "Filtreleri gevşetin ya da temizleyin.",
+      "clear": "Filtreleri temizle"
+    },
+    "view": {
+      "toGrid": "Izgara görünümüne geç",
+      "toList": "Liste görünümüne geç"
     }
   }
 }

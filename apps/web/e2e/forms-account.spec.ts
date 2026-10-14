@@ -34,7 +34,8 @@ test("the corporate quote form sends", async ({ page }) => {
   await page.getByLabel("Telefon").fill("0232 555 01 00");
   await // The choices are chips: the checkbox itself is hidden and its label is what is clicked.
   await page.getByText("SUV", { exact: true }).click();
-  await page.getByLabel("Teslim şehirleri").fill("İzmir");
+  await page.getByRole("combobox", { name: "Teslim şehirleri" }).fill("izm");
+  await page.getByRole("listbox", { name: "Teslim şehirleri" }).getByRole("option", { name: "İzmir" }).click();
   await page.getByRole("checkbox", { name: /aydınlatma|KVKK/i }).check();
   await page.getByRole("button", { name: "Teklif İste" }).click();
   await expect(page.getByRole("heading", { name: "Talebiniz alındı" })).toBeVisible();
@@ -56,7 +57,7 @@ test("the corporate tab signs in to the company pages", async ({ page }) => {
   await page.getByRole("button", { name: "Giriş Yap" }).click();
 
   await expect(page).toHaveURL(/\/profil$/);
-  await expect(page.getByText("Ege Lojistik A.Ş.")).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: /Ege Lojistik/ })).toBeVisible();
   await page.getByRole("link", { name: "Teklif taleplerim" }).click();
   await expect(page.getByText("NVK-2026-48213")).toBeVisible();
   // An individual's pages are not here.
@@ -75,11 +76,12 @@ test("an individual sees upcoming and past trips and points", async ({ page }) =
   await page.getByRole("button", { name: "Giriş Yap" }).click();
   await expect(page).toHaveURL(/\/profil$/);
 
-  await page.getByRole("link", { name: "Rezervasyonlarım" }).click();
+  const nav = page.getByRole("navigation", { name: "Profil bölümleri" });
+  await nav.getByRole("link", { name: "Rezervasyonlarım" }).click();
   await expect(page.getByRole("heading", { name: "Yaklaşan seyahatler" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Geçmiş seyahatler" })).toBeVisible();
 
-  await page.getByRole("link", { name: "Puanlarım" }).click();
+  await nav.getByRole("link", { name: "Puanlarım" }).click();
   await expect(page.getByText("Puan bakiyesi")).toBeVisible();
   await expect(page.getByText("Her ₺100 harcamanız için 1 puan")).toBeVisible();
 });
@@ -97,7 +99,7 @@ test("saved preferences come back at the next sign-in", async ({ page }) => {
   await page.getByRole("group", { name: "Dil" }).getByText("English").click();
   await page.getByRole("group", { name: "Görünüm" }).getByText("Koyu").click();
   await page.getByRole("group", { name: "Para birimi" }).getByText("EUR").click();
-  await page.getByRole("button", { name: "Kaydet" }).click();
+  await page.getByRole("region", { name: "Varsayılan tercihlerim" }).getByRole("button", { name: "Kaydet" }).click();
   await expect(page).toHaveURL(/\/en\/profile\/settings/);
 
   // Another device: this browser forgets its own choices. Only the account remembers them (the
@@ -128,7 +130,7 @@ test("signing up opens the account", async ({ page }) => {
   await page.goto("/kayit");
   await fillSignUp(page);
   await expect(page).toHaveURL(/\/profil$/);
-  await expect(page.getByRole("heading", { level: 1, name: "Profilim" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Hoş geldin, Elif" })).toBeVisible();
 });
 
 test("signing up from the payment page goes back to the booking, and only to it", async ({ page }) => {
@@ -155,4 +157,50 @@ test("signing up from the payment page goes back to the booking, and only to it"
   await page.goto("/kayit?sonra=https://example.org");
   await fillSignUp(page);
   await expect(page).toHaveURL(/\/profil$/);
+});
+
+test("the contact page points to the help centre, with the branches one small link away", async ({ page }) => {
+  await page.goto("/iletisim");
+  const help = page.locator("section[aria-labelledby=help-link-title]");
+  await expect(help.getByRole("heading", { name: "Yardım merkezi" })).toBeVisible();
+  await expect(help.getByRole("link", { name: "Yardım merkezine git" })).toHaveAttribute("href", "/yardim");
+  await expect(help.getByRole("link", { name: "Bayilerimiz" })).toHaveAttribute("href", "/bayilerimiz");
+  await expect(page.getByText("Size en yakın bayi", { exact: true })).toHaveCount(0);
+});
+
+test("the profile greets the person, shows the points and the next trip, and has quick actions", async ({ page }) => {
+  await page.goto("/giris");
+  await page.getByLabel("E-posta").fill("elif@example.com");
+  await page.getByLabel("Şifre", { exact: true }).fill("sifre-1234");
+  await page.getByRole("button", { name: "Giriş Yap" }).click();
+  await expect(page).toHaveURL(/\/profil$/);
+
+  await expect(page.getByRole("heading", { level: 1, name: "Hoş geldin, Elif" })).toBeVisible();
+  // The points chip says what the points are worth (one point is five lira) and opens the points page.
+  const chip = page.getByRole("link", { name: /puan · ₺/ });
+  await expect(chip).toBeVisible();
+  await expect(chip).toHaveAttribute("href", "/profil/puanlar");
+
+  const next = page.locator("section[aria-labelledby=next-trip]");
+  await expect(next.getByText("Sıradaki seyahatiniz")).toBeVisible();
+  await expect(next.getByRole("heading", { name: /Renault Clio/ })).toBeVisible();
+  await expect(next.getByText(/gün kaldı|Bugün başlıyor/)).toBeVisible();
+
+  const quick = page.locator("section[aria-labelledby=quick-title]");
+  await expect(quick.getByRole("link", { name: /Yeni kiralama/ })).toBeVisible();
+  await expect(quick.getByRole("link", { name: /Yardım merkezi/ })).toHaveAttribute("href", "/yardim");
+  // The name form is still there.
+  await expect(page.getByLabel("Ad", { exact: true })).toBeVisible();
+});
+
+test("the profile's links carry an icon each, and the current page is marked", async ({ page }) => {
+  await page.goto("/giris");
+  await page.getByLabel("E-posta").fill("elif@example.com");
+  await page.getByLabel("Şifre", { exact: true }).fill("sifre-1234");
+  await page.getByRole("button", { name: "Giriş Yap" }).click();
+  await expect(page).toHaveURL(/\/profil$/);
+  const nav = page.getByRole("navigation", { name: "Profil bölümleri" });
+  await expect(nav.getByRole("link")).toHaveCount(4);
+  await expect(nav.getByRole("link", { name: "Hesabım" })).toHaveAttribute("aria-current", "page");
+  for (const link of await nav.getByRole("link").all()) await expect(link.locator("svg")).toHaveCount(1);
 });

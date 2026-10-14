@@ -38,7 +38,11 @@
       "intro": "Add them if you like; what you pick shows in the total straight away."
     },
     "vatNote": "Prices include VAT. There is no extra charge for returning at a different branch.",
-    "cancelNote": "You can cancel free of charge up to 24 hours before pick-up. <link>Rental terms</link>"
+    "cancelNote": "You can cancel free of charge up to 24 hours before pick-up. <link>Rental terms</link>",
+    "discount": "Campaign discount ({code}, {percent}%)",
+    "subtotal": "Subtotal",
+    "pointsLine": "Points ({count} points × {value})",
+    "vatIncluded": "VAT (%{percent}) included in the total:"
   },
   "Payment": {
     "metaTitle": "Payment",
@@ -61,13 +65,25 @@
       "unavailable": "The booking service is not available right now. Please try again later.",
       "invalid": "The booking details are not valid. Please start the search again.",
       "signin": "You need to sign in to continue.",
-      "generic": "The booking could not be completed. Please try again."
+      "generic": "The booking could not be completed. Please try again.",
+      "ineligible": "The driver does not meet the conditions.",
+      "notVerified": "The licence could not be confirmed."
     },
     "pay": "Complete Payment",
     "paying": "Processing",
     "summaryTitle": "Your booking",
     "total": "Total",
-    "edit": "Back to summary"
+    "edit": "Back to summary",
+    "promo": {
+      "title": "Campaign code",
+      "label": "Your campaign code",
+      "apply": "Apply",
+      "applying": "Applying",
+      "remove": "Remove",
+      "applied": "{code} applied: {percent}% off.",
+      "unknown": "\"{code}\" is not a valid campaign code.",
+      "hint": "Trial codes: NOVERA10 (10%) and HOSGELDIN (5%). The codes are made up."
+    }
   },
   "Confirmation": {
     "metaTitle": "Booking Confirmation",

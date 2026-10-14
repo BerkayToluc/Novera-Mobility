@@ -4,9 +4,13 @@ import { getFormatter, getLocale, getTranslations } from "next-intl/server";
 import { ExtrasSelect } from "@/components/booking/extras-select";
 import { HoldCountdown } from "@/components/booking/hold-countdown";
 import { HoldEnded } from "@/components/booking/hold-states";
+import { PriceLines } from "@/components/booking/price-lines";
+import { PromoCode } from "@/components/payment/promo-code";
+import { TotalBar } from "@/components/booking/total-bar";
 import { Button } from "@/components/ui/button";
 import { StateMessage } from "@/components/ui/state-message";
 import { GuaranteeStrip } from "@/components/vehicle/guarantee-strip";
+import { PointsToggle } from "@/components/vehicle/points-toggle";
 import { VehicleImage } from "@/components/vehicle/vehicle-image";
 import { Link } from "@/i18n/navigation";
 import { toBookingQuery } from "@/lib/booking";
@@ -27,6 +31,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function BookingSummaryPage({ searchParams }: Props) {
   const t = await getTranslations("BookingSummary");
+  const d = await getTranslations("Driver");
   const format = await getFormatter();
   const locale = (await getLocale()) as "tr" | "en";
   const currency = await getCurrency();
@@ -97,7 +102,7 @@ export default async function BookingSummaryPage({ searchParams }: Props) {
                 <dd className="text-body text-fg">{t("days", { days })}</dd>
               </div>
             </dl>
-            <Button asChild variant="link" className="self-start px-0">
+            <Button asChild variant="link" size="inline" className="self-start">
               <Link href={{ pathname: "/araclar", query: toQuery(booking.search) }}>{t("changeTrip")}</Link>
             </Button>
           </section>
@@ -116,9 +121,13 @@ export default async function BookingSummaryPage({ searchParams }: Props) {
                 </span>
                 <br />
                 <span className="text-fg-muted">{vehicle.vehicleClass.name[locale]}</span>
+                <br />
+                <span className="text-small text-fg-muted">
+                  {d("requirementNote")}
+                </span>
               </p>
             </div>
-            <Button asChild variant="link" className="self-start px-0">
+            <Button asChild variant="link" size="inline" className="self-start">
               <Link href={{ pathname: "/araclar", query: toQuery(booking.search) }}>{t("changeVehicle")}</Link>
             </Button>
           </section>
@@ -143,29 +152,16 @@ export default async function BookingSummaryPage({ searchParams }: Props) {
           <h2 id="price-title" className="text-h3 text-fg">
             {t("priceTitle")}
           </h2>
-          <dl className="flex flex-col gap-2 text-body text-fg">
-            <div className="flex justify-between gap-4">
-              <dt>
-                {t("vehicleLine", {
-                  brand: vehicle.brand,
-                  model: vehicle.model,
-                  price: money(vehicle.dailyPrice),
-                  days,
-                })}
-              </dt>
-              <dd className="tabular-nums">{money(summary.vehicleTotal)}</dd>
-            </div>
-            {summary.extraLines.map(({ extra, cost }) => (
-              <div key={extra.slug} className="flex justify-between gap-4">
-                <dt>{extra.name[locale]}</dt>
-                <dd className="tabular-nums">{money(cost)}</dd>
-              </div>
-            ))}
-            <div className="flex justify-between gap-4 border-t border-border-strong pt-3 text-h3">
-              <dt>{t("total")}</dt>
-              <dd className="tabular-nums">{money(summary.total)}</dd>
-            </div>
-          </dl>
+          <PriceLines vehicle={vehicle} days={days} summary={summary} />
+          {loaded.pointsBalance !== null && (
+            <PointsToggle balance={loaded.pointsBalance} on={booking.usePoints === true} pathname="/rezervasyon" />
+          )}
+          <PromoCode
+            query={query}
+            promo={loaded.promo}
+            percent={summary.discount?.percent ?? null}
+            pathname="/rezervasyon"
+          />
           <p className="text-small text-fg-muted">{t("vatNote")}</p>
           <p className="text-small text-fg">
             {t.rich("cancelNote", {
@@ -178,11 +174,17 @@ export default async function BookingSummaryPage({ searchParams }: Props) {
           </p>
           <p className="text-small text-fg-muted">{t("noHidden")}</p>
           <p className="text-small text-fg-muted">{t("payNote")}</p>
-          <Button asChild size="lg">
+          <Button asChild size="lg" className="max-xl:hidden">
             <Link href={{ pathname: "/odeme", query }}>{t("continue")}</Link>
           </Button>
         </section>
       </div>
+
+      <TotalBar label={t("total")} amount={money(summary.total)}>
+        <Button asChild size="lg">
+          <Link href={{ pathname: "/odeme", query }}>{t("continue")}</Link>
+        </Button>
+      </TotalBar>
     </>,
   );
 }

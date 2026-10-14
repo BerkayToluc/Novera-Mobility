@@ -2,6 +2,7 @@ import "server-only";
 import type { Currency } from "./currency";
 import type { Extra } from "./extra";
 import { ApiUnavailableError } from "./fleet-client";
+import { promoPercent } from "./promo-codes";
 import { summarize, type PriceSummary } from "./price-summary";
 import type { Vehicle } from "./vehicle";
 
@@ -14,8 +15,18 @@ export async function quotePrice(
   days: number,
   extras: Extra[],
   currency: Currency,
+  promoCode?: string,
+  pointsBalance?: number,
 ): Promise<PriceSummary> {
   void currency;
   if (process.env.USE_MOCKS !== "1") throw new ApiUnavailableError();
-  return summarize(vehicle.dailyPrice, days, extras);
+  // An unknown code is simply not applied: the page says so (BookingData.promo), the price is the plain one.
+  const percent = promoCode ? promoPercent(promoCode) : null;
+  return summarize(
+    vehicle.dailyPrice,
+    days,
+    extras,
+    promoCode && percent ? { code: promoCode, percent } : undefined,
+    pointsBalance,
+  );
 }

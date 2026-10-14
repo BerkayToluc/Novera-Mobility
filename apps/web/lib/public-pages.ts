@@ -7,7 +7,7 @@ import type { PageHref } from "./seo";
 // bookings and account pages are left out.
 export const PUBLIC_PAGES: PageHref[] = [
   "/",
-  "/araclarimiz",
+  "/bayilerimiz",
   "/urunler",
   ...PRODUCTS.map((product) => ({ pathname: "/urunler/[slug]", params: { slug: product.slug } }) as const),
   "/hizmetler",

@@ -13,6 +13,9 @@
     },
     "term": "Rental term",
     "terms": {
+      "1": "1 month",
+      "2": "2 months",
+      "3": "3 months",
       "6": "6 months",
       "12": "12 months",
       "24": "24 months",
@@ -28,7 +31,7 @@
       "premium": "Premium"
     },
     "cities": "Delivery cities",
-    "citiesHint": "The cities where you want the cars delivered, for example Istanbul, Ankara.",
+    "citiesHint": "Type the first letters of the city and choose from the list; typing “İ” brings İstanbul and İzmir. Up to 10 cities.",
     "product": "Product you are interested in (optional)",
     "noProduct": "I have not decided yet",
     "note": "Anything else (optional)",
@@ -40,7 +43,7 @@
       "email": "Enter a valid email address.",
       "phone": "Enter a valid phone number with its area code.",
       "needs": "Choose at least one kind of car.",
-      "cities": "Enter at least one delivery city.",
+      "cities": "Choose at least one delivery city from the list.",
       "consent": "Accept the privacy notice to continue.",
       "invalid": "Your request looks incomplete. Check the fields and send it again.",
       "unavailable": "The quote service is not available right now. Please try again later.",
@@ -51,13 +54,23 @@
       "text": "Our sales team will get back to you at {email} and on your phone within one business day.",
       "reference": "Your request number:",
       "again": "Make another request"
-    }
+    },
+    "citiesPlaceholder": "Type a city or choose from the list",
+    "citiesEmpty": "No city starts with these letters.",
+    "citiesRemove": "Remove {city}",
+    "citiesMax": "The most, {max} cities, are chosen"
   },
   "QuotePage": {
     "metaTitle": "Corporate Quote",
     "metaDescription": "Ask for a fleet rental quote for your company: tell us what you need and our sales team will call within one business day.",
     "title": "Corporate Quote",
-    "intro": "We bring the cars where you need them and collect them where you finish. Tell us what you need and our sales team will call you."
+    "intro": "We bring the cars where you need them and collect them where you finish. Tell us what you need and our sales team will call you.",
+    "chip": {
+      "label": "Your chosen product",
+      "view": "See the product",
+      "remove": "Remove",
+      "change": "Choose another product"
+    }
   },
   "QuoteSteps": {
     "title": "How it works",

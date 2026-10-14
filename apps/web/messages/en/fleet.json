@@ -15,7 +15,8 @@
     },
     "perDay": "{price} / day",
     "fromPerDay": "from {price} / day",
-    "total": "{days, plural, one {# day} other {# days}} total {price}",
+    "priceFrom": "From",
+    "perDayUnit": "/ day",
     "consumption": {
       "L_PER_100KM": "{value} L/100 km",
       "KWH_PER_100KM": "{value} kWh/100 km"
@@ -26,11 +27,11 @@
       "holding": "Holding the car…",
       "taken": "This car was just taken. You can choose another one.",
       "unavailable": "The car could not be held right now. Please try again."
-    }
+    },
+    "pointsPayment": "{points} points + {price}",
+    "totalLabel": "{days, plural, one {# day} other {# days}} total"
   },
   "FleetPage": {
-    "metaTitle": "Our Cars",
-    "metaDescription": "Every make and model in the Novera Mobility fleet: economy, compact, SUV, executive and electric cars.",
     "title": "Our Cars",
     "intro": "Every model in our fleet, by category, starting from the best price. Tap a model for the details.",
     "error": {
@@ -38,11 +39,7 @@
       "text": "We cannot show our fleet right now. Please try again.",
       "retry": "Try Again"
     },
-    "ctaTitle": "Found a car you like?",
-    "ctaText": "Choose your location and dates to see the cars available at that branch, with prices.",
-    "ctaButton": "Rent a Car",
     "filterLabel": "Category",
-    "all": "All",
     "modelCount": "{count, plural, one {# model} other {# models}}",
     "card": {
       "details": "show details"

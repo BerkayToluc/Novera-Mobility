@@ -4,7 +4,8 @@
     "description": "Corporate and personal car rental"
   },
   "LocaleSwitcher": {
-    "label": "Language"
+    "label": "Language",
+    "current": "Language: {language}"
   },
   "Header": {
     "skip": "Skip to content",
@@ -14,19 +15,16 @@
     "menuOpen": "Open menu",
     "menuClose": "Close menu",
     "home": "Rent a Car",
-    "fleet": "Our Cars",
+    "branches": "Branches",
     "products": "Products",
     "services": "Services",
     "about": "About Us",
     "contact": "Contact",
     "login": "Log In",
     "preferences": "Preferences",
-    "preferencesLabel": "Language and theme: {language}",
     "language": "Language",
-    "theme": "Theme",
     "currency": "Currency",
     "allProducts": "All products",
-    "allServices": "All services",
     "guides": "Guides",
     "help": "Help",
     "account": "My Account"
@@ -51,7 +49,8 @@
       "youtube": "YouTube"
     },
     "privacyPolicy": "Privacy Policy",
-    "siteTerms": "Terms of Use"
+    "siteTerms": "Terms of Use",
+    "socialSoon": "{network} · coming soon"
   },
   "ThemeSwitcher": {
     "label": "Theme",
@@ -67,5 +66,14 @@
       "EUR": "Euro",
       "USD": "US dollar"
     }
+  },
+  "ContactLink": {
+    "emailHeading": "Email address",
+    "phoneHeading": "Phone number",
+    "send": "Send email",
+    "call": "Call",
+    "copyEmail": "Copy address",
+    "copyPhone": "Copy number",
+    "copied": "Copied"
   }
 }

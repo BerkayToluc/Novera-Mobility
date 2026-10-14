@@ -1,0 +1,47 @@
+{
+  "Driver": {
+    "requirementNote": "Anyone over 18 with a valid driving licence can rent.",
+    "conditionsLink": "Rental terms",
+    "title": "Driver details",
+    "intro": "We check that the person who will drive the car meets the rental conditions. Your details are used for this check only and are not saved anywhere.",
+    "demoTitle": "This is a trial check",
+    "demoText": "It does not connect to a real licence service; do not enter your real licence number or personal details. The conditions are examples.",
+    "demoHint": "Trial number: 12345678 counts as valid; one ending in 0 is expired, one ending in 9 is not on record.",
+    "fields": {
+      "birthDate": "Date of birth",
+      "country": "Country that issued the licence",
+      "countryChoose": "Choose a country",
+      "licenceNumber": "Licence number",
+      "licenceIssuedAt": "Licence issue date",
+      "permit": "I hold an international driving permit.",
+      "declaration": "I declare that this information is correct; my documents will be checked at pick-up."
+    },
+    "countries": {
+      "TR": "Türkiye",
+      "DE": "Germany",
+      "GB": "United Kingdom",
+      "US": "USA"
+    },
+    "errors": {
+      "birthDate": "Choose a valid date of birth.",
+      "country": "Choose the country that issued the licence.",
+      "licenceNumber": "Enter a number of 6–12 letters or digits.",
+      "licenceIssuedAt": "Choose a valid issue date.",
+      "licenceBeforeBirth": "The issue date must be after the date of birth.",
+      "permit": "Renting with a licence from this country needs an international driving permit.",
+      "declaration": "Confirm the declaration to continue."
+    },
+    "eligible": "You meet the conditions (over {age}, valid driving licence).",
+    "ineligibleTitle": "You do not meet the conditions",
+    "ineligibleAge": "You must be at least {min} years old; you will be {have} at the start of the rental.",
+    "verify": "Check my licence",
+    "verifying": "Checking",
+    "result": {
+      "valid": "Licence confirmed (trial).",
+      "not_found": "No licence was found with this number.",
+      "expired": "This licence has expired.",
+      "unavailable": "The check is not available right now. Please try again later."
+    },
+    "payBlocked": "To go on to payment, enter the driver details and check your licence."
+  }
+}

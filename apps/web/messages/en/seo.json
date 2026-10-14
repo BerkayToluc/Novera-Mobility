@@ -6,11 +6,11 @@
     "language": "English",
     "pages": {
       "home": "Home: rent a car",
-      "araclarimiz": "Our Cars",
       "urunler": "Products",
       "hizmetler": "Services",
       "hakkimizda": "About Us",
-      "iletisim": "Contact and branches",
+      "iletisim": "Contact",
+      "bayilerimiz": "Our branches",
       "yardim": "Help centre",
       "rehberler": "Car rental guides",
       "kurumsal-teklif": "Request a corporate quote",

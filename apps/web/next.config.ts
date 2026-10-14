@@ -9,7 +9,7 @@ const securityHeaders = [
   // Kept for browsers that predate `frame-ancestors` in the policy.
   { key: "X-Frame-Options", value: "DENY" },
   // The site uses none of these; denying them keeps an embedded script from asking.
-  { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=()" },
+  { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(self), payment=()" },
   // Two years, subdomains included. Browsers ignore it on plain http, so it is harmless on
   // localhost, but it is only sent in production to avoid pinning a development host.
   ...(process.env.NODE_ENV === "production"

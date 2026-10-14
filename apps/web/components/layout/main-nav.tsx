@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { SplitText, splitTextGroup } from "@/components/ui/split-text";
 import { Link, usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { CONTACT_HREF, NAV_ITEMS, NAV_MENUS } from "./nav-items";
@@ -29,11 +30,11 @@ export function MainNav({ label, orientation = "horizontal", onNavigate, classNa
           // Contact is the way to a person, so it stands apart from the browsing links
           // (SPEC §2.8): outlined, and set off by space rather than sitting in the row.
           const isContact = href === CONTACT_HREF;
-          const menu = href in NAV_MENUS ? NAV_MENUS[href as keyof typeof NAV_MENUS] : null;
-          if (menu && !vertical) {
+          const hasMenu = href in NAV_MENUS;
+          if (hasMenu && !vertical) {
             return (
               <li key={href}>
-                <NavMenu kind={menu} label={t(labelKey)} isCurrent={isCurrent} />
+                <NavMenu label={t(labelKey)} isCurrent={isCurrent} />
               </li>
             );
           }
@@ -47,22 +48,24 @@ export function MainNav({ label, orientation = "horizontal", onNavigate, classNa
                 // rather than overriding a shared one.
                 className={cn(
                   "inline-flex min-h-11 items-center whitespace-nowrap transition-colors",
-                  vertical ? "w-full text-h3" : "text-label",
+                  vertical ? "w-full text-h3" : cn("text-label", splitTextGroup),
                   isContact
                     ? vertical
                       ? "justify-center rounded-control border border-primary px-3"
                       : "rounded-full border border-primary px-4 xl:px-5"
                     : vertical
                       ? "rounded-control px-3"
-                      : "rounded-control px-2",
+                      : "rounded-full px-3",
                   isCurrent
                     ? "bg-selected text-on-selected"
-                    : cn(isContact ? "text-link" : "text-fg", "hover:bg-selected"),
+                    : // On the desktop row the letters roll instead (SplitText); the phone panel,
+                      // which has no pointer to hover with, keeps the fill.
+                      cn(isContact ? "text-link" : "text-fg", vertical && "hover:bg-selected"),
                 )}
               >
-                {t(labelKey)}
+                {vertical ? t(labelKey) : <SplitText text={t(labelKey)} />}
               </Link>
-              {menu && <NavSubList kind={menu} onNavigate={onNavigate} />}
+              {hasMenu && <NavSubList onNavigate={onNavigate} />}
             </li>
           );
         })}

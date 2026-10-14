@@ -2,14 +2,19 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { cookies } from "next/headers";
 import { getCurrency } from "@/lib/get-currency";
 import { getTheme } from "@/lib/get-theme";
+import { DEFAULT_NOTIFICATIONS, NOTIFY_COOKIE, parseNotifications, SESSIONS_REVOKED_COOKIE } from "@/lib/notifications";
 import { MOCK_PREFERENCES_COOKIE, parsePreferences, type Preferences } from "@/lib/preferences";
 import { DeleteAccount } from "./delete-account";
+import { NotificationsForm } from "./notifications-form";
 import { PreferencesForm } from "./preferences-form";
+import { SecuritySection } from "./security-section";
 
-function Section({ title, text, children }: { title: string; text: string; children: React.ReactNode }) {
+function Section({ id, title, text, children }: { id: string; title: string; text: string; children: React.ReactNode }) {
   return (
-    <section className="flex flex-col gap-3 border-b border-border pb-8 last:border-b-0">
-      <h2 className="text-h3 text-fg">{title}</h2>
+    <section aria-labelledby={id} className="flex flex-col gap-3 border-b border-border pb-8 last:border-b-0">
+      <h2 id={id} className="text-h3 text-fg">
+        {title}
+      </h2>
       <p className="max-w-prose text-body text-fg-muted">{text}</p>
       {children}
     </section>
@@ -19,7 +24,10 @@ function Section({ title, text, children }: { title: string; text: string; child
 export async function SettingsView() {
   const t = await getTranslations("Profile.settings");
   // The account's saved defaults when it has any; otherwise what this browser is using now.
-  const saved = parsePreferences((await cookies()).get(MOCK_PREFERENCES_COOKIE)?.value);
+  const jar = await cookies();
+  const saved = parsePreferences(jar.get(MOCK_PREFERENCES_COOKIE)?.value);
+  const notifications = parseNotifications(jar.get(NOTIFY_COOKIE)?.value) ?? DEFAULT_NOTIFICATIONS;
+  const othersRevoked = jar.get(SESSIONS_REVOKED_COOKIE)?.value === "1";
   const initial: Preferences = saved ?? {
     currency: await getCurrency(),
     theme: await getTheme(),
@@ -28,10 +36,16 @@ export async function SettingsView() {
 
   return (
     <div className="flex max-w-xl flex-col gap-8">
-      <Section title={t("defaults.title")} text={t("defaults.text")}>
+      <Section id="settings-defaults" title={t("defaults.title")} text={t("defaults.text")}>
         <PreferencesForm initial={initial} />
       </Section>
-      <Section title={t("danger.title")} text={t("danger.text")}>
+      <Section id="settings-notifications" title={t("notifications.title")} text={t("notifications.text")}>
+        <NotificationsForm initial={notifications} />
+      </Section>
+      <Section id="settings-security" title={t("security.title")} text={t("security.text")}>
+        <SecuritySection othersRevoked={othersRevoked} />
+      </Section>
+      <Section id="settings-danger" title={t("danger.title")} text={t("danger.text")}>
         <DeleteAccount />
       </Section>
     </div>

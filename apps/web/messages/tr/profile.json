@@ -9,7 +9,8 @@
       "settings": "Ayarlar",
       "company": "Firma bilgileri",
       "quotes": "Teklif taleplerim",
-      "points": "Puanlarım"
+      "points": "Puanlarım",
+      "newRental": "Yeni kiralama"
     },
     "signedOut": {
       "title": "Giriş yapmanız gerekiyor",
@@ -41,8 +42,11 @@
       "total": "Toplam",
       "days": "{count, plural, one {# gün} other {# gün}}",
       "status": {
-        "CONFIRMED": "Onaylandı",
-        "CANCELLED": "İptal edildi"
+        "UPCOMING": "Yaklaşan",
+        "ACTIVE": "Devam ediyor",
+        "COMPLETED": "Tamamlandı",
+        "CANCELLED": "İptal edildi",
+        "CONFIRMED": "Onaylandı"
       },
       "empty": {
         "title": "Henüz rezervasyonunuz yok",
@@ -67,8 +71,40 @@
         "title": "Geçmiş seyahatler",
         "empty": {
           "title": "Geçmiş seyahatiniz yok",
-          "text": "Tamamlanan ve iptal edilen kiralamalarınız burada listelenir."
+          "text": "Tamamlanan kiralamalarınız burada listelenir."
         }
+      },
+      "pickup": "Alış",
+      "dropoff": "İade",
+      "duration": "Süre",
+      "directions": "Yol tarifi",
+      "newTab": "(yeni sekmede açılır)",
+      "callBranch": "Bayiyi ara",
+      "filters": {
+        "label": "Rezervasyon durumu",
+        "all": "Tümü",
+        "upcoming": "Yaklaşan",
+        "past": "Geçmiş",
+        "cancelled": "İptal edilen"
+      },
+      "cancelled": {
+        "title": "İptal edilenler",
+        "empty": {
+          "title": "İptal ettiğiniz rezervasyon yok",
+          "text": "İptal ettiğiniz kiralamalar burada listelenir."
+        }
+      },
+      "cancel": {
+        "button": "İptal et",
+        "title": "{car} rezervasyonu iptal edilsin mi?",
+        "free": "Alış zamanına 24 saatten fazla var: iptal ücretsizdir.",
+        "late": "Alış zamanına 24 saatten az kaldı: bu iptal ücretsiz değildir (Kiralama Koşulları).",
+        "points": "İptal edilen rezervasyon puan kazandırmaz.",
+        "keep": "Vazgeç",
+        "confirm": "Evet, iptal et",
+        "cancelling": "İptal ediliyor…",
+        "notCancellable": "Bu rezervasyon artık iptal edilemiyor.",
+        "unavailable": "İptal şu an yapılamıyor. Lütfen daha sonra tekrar deneyin."
       }
     },
     "settings": {
@@ -92,6 +128,43 @@
         "save": "Kaydet",
         "saving": "Kaydediliyor…",
         "saved": "Tercihleriniz kaydedildi."
+      },
+      "notifications": {
+        "title": "Bildirimler",
+        "text": "Hangi e-postaları almak istediğinizi seçin.",
+        "reminders": "Seyahatimden önce hatırlatma e-postası gönderin.",
+        "campaigns": "Kampanya ve fırsat e-postaları gönderin.",
+        "save": "Kaydet",
+        "saving": "Kaydediliyor…",
+        "saved": "Bildirim tercihleriniz kaydedildi."
+      },
+      "security": {
+        "title": "Güvenlik",
+        "text": "Şifrenizi değiştirin ve hesabınızın açık olduğu cihazları görün.",
+        "show": "Şifreyi göster",
+        "hide": "Şifreyi gizle",
+        "password": {
+          "title": "Şifreyi değiştir",
+          "current": "Mevcut şifre",
+          "new": "Yeni şifre",
+          "hint": "En az 8 karakter.",
+          "repeat": "Yeni şifre (tekrar)",
+          "short": "Yeni şifre en az 8 karakter olmalı.",
+          "same": "Yeni şifre mevcut şifrenizden farklı olmalı.",
+          "mismatch": "Şifreler aynı değil.",
+          "save": "Şifreyi değiştir",
+          "saving": "Değiştiriliyor…",
+          "saved": "Şifreniz değiştirildi."
+        },
+        "sessions": {
+          "title": "Açık oturumlar",
+          "this": "Bu cihaz · Tarayıcı",
+          "thisDevice": "Bu cihaz",
+          "now": "Şu an etkin",
+          "phone": "Telefon · Mobil tarayıcı",
+          "twoDays": "2 gün önce",
+          "revoke": "Diğer oturumları kapat"
+        }
       }
     },
     "signOut": "Çıkış yap",
@@ -152,11 +225,35 @@
         "retry": "Tekrar Dene"
       },
       "rules": {
-        "title": "Puanlar nasıl kazanılır?",
+        "title": "Puanlar nasıl kazanılır ve harcanır?",
         "earn": "Her {amount} harcamanız için 1 puan kazanırsınız.",
         "credit": "Puanlar kiralamanız tamamlandığında hesabınıza işlenir.",
-        "cancelled": "İptal edilen rezervasyonlar puan kazandırmaz."
-      }
+        "cancelled": "İptal edilen rezervasyonlar puan kazandırmaz.",
+        "spend": "Puanlar kiralamada harcanır: 1 puan = {value}, toplamın en çok yarısına kadar."
+      },
+      "worth": "= {worth} değerinde",
+      "spendCta": "Puanla öde",
+      "spendNote": "Araç listesinde \"Puanla öde\"yi açın: 1 puan = {value}."
+    },
+    "welcome": "Hoş geldin, {name}",
+    "pointsChip": "{points} puan · {worth}",
+    "nextTrip": {
+      "title": "Sıradaki seyahatiniz",
+      "daysLeft": "{days, plural, =0 {Bugün başlıyor} one {# gün kaldı} other {# gün kaldı}}",
+      "viewAll": "Rezervasyonlarım",
+      "none": {
+        "title": "İlk kiralamanızı yapın",
+        "text": "Yaklaşan bir seyahatiniz yok. Bayiyi ve tarihleri seçin, uygun araçları görün.",
+        "cta": "Araç Ara"
+      },
+      "pickupAt": "{branch}, saat {time}"
+    },
+    "quick": {
+      "title": "Hızlı işlemler",
+      "newRental": "Yeni kiralama",
+      "newRentalText": "Bayi ve tarihleri seçip uygun araçları görün.",
+      "help": "Yardım merkezi",
+      "helpText": "Sık sorulan sorular, rehberler ve kiralama adımları."
     }
   }
 }

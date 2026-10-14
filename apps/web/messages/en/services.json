@@ -1,7 +1,7 @@
 {
   "ServicesPage": {
     "metaTitle": "Services",
-    "metaDescription": "Smart roadside assistance, a 24/7 operations desk, replacement cars, periodic maintenance and emergency response: Novera Mobility services.",
+    "metaDescription": "Smart roadside assistance, a 24/7 operations desk, replacement cars, periodic maintenance and emergency response: how each Novera Mobility service works and which products include it.",
     "title": "Our Services",
     "intro": "Beyond renting a car: we stand by you on the road, across the fleet and at your desk.",
     "listLabel": "Service list",
@@ -13,6 +13,11 @@
           "Partner tow network",
           "Directed to your GPS coordinates",
           "Ready in a crash or breakdown"
+        ],
+        "steps": [
+          "Call us from the app or by phone",
+          "Share your location and we direct the nearest tow truck",
+          "The truck is on its way: follow it live until it arrives"
         ]
       },
       {
@@ -22,6 +27,11 @@
           "Round-the-clock access",
           "Reach us by app or phone",
           "Instant crisis handling"
+        ],
+        "steps": [
+          "Reach us from the app or by phone",
+          "The operations desk takes the situation and opens the case",
+          "We follow you personally until it is solved"
         ]
       },
       {
@@ -31,6 +41,11 @@
           "Starts after a 24-hour breakdown",
           "An equivalent class of car",
           "Delivered to your door"
+        ],
+        "steps": [
+          "When a breakdown passes 24 hours, a replacement is planned automatically",
+          "An equivalent car is prepared for your address",
+          "Take the car and keep working"
         ]
       },
       {
@@ -40,6 +55,11 @@
           "Summer and winter tyre changes",
           "Inspection tracking",
           "Valet service from your address"
+        ],
+        "steps": [
+          "We remind you when a service or tyre change is due",
+          "A valet collects the car from your address",
+          "It comes back serviced and clean"
         ]
       },
       {
@@ -49,11 +69,61 @@
           "One-tap call",
           "Live location sharing",
           "Emergency units directed to you"
+        ],
+        "steps": [
+          "Tap the SOS button in the app once",
+          "Your live location reaches the emergency units",
+          "Teams are directed and the desk calls you"
         ]
       }
     ],
     "ctaTitle": "A solution made for your fleet",
     "ctaText": "Tell us what you need and our corporate team will come back with a quote.",
-    "ctaButton": "Request Quote"
+    "ctaButton": "Request Quote",
+    "stats": {
+      "title": "The service in numbers",
+      "note": "The figures are examples; this site is a fictional learning project.",
+      "items": [
+        {
+          "value": 35,
+          "unit": "min",
+          "label": "average roadside assistance arrival time"
+        },
+        {
+          "value": 15,
+          "unit": "sec",
+          "label": "average answer time of the operations desk"
+        },
+        {
+          "value": 48,
+          "unit": "hours",
+          "label": "to a replacement car at your door"
+        }
+      ]
+    },
+    "cardsLabel": "Services at a glance",
+    "detail": "Details",
+    "stepsTitle": "How it works",
+    "plansTitle": "Which package has it",
+    "plans": {
+      "individual": "Individual",
+      "corporate": "Corporate",
+      "vip": "VIP Mobility"
+    },
+    "coverage": {
+      "title": "Which product includes it",
+      "intro": "The services by product. A service that is not included can be added to a quote by our corporate team.",
+      "caption": "The services by product",
+      "service": "Service",
+      "yes": "Included",
+      "no": "Not included",
+      "seeProduct": "See the product"
+    },
+    "emergency": {
+      "title": "In an emergency",
+      "text": "If you are on the road and something went wrong: pull over somewhere safe first, then call us. We are here 24/7.",
+      "call": "Emergency line",
+      "guarantee": "See the Road Assurance"
+    }
   }
 }

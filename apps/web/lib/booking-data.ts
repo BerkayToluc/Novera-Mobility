@@ -2,11 +2,13 @@ import "server-only";
 import { parseBooking, toBookingQuery, type BookingParams } from "./booking";
 import type { Currency } from "./currency";
 import type { Extra } from "./extra";
+import { getMyPoints } from "./account-server";
 import { getBranches, getExtras, getVehicle } from "./fleet-client";
 import { getHold, type Hold } from "./hold-client";
 import { quotePrice } from "./price-client";
 import type { PriceSummary } from "./price-summary";
 import { rentalDays } from "./rental-search";
+import { getSession } from "./session";
 import type { Branch, Vehicle } from "./vehicle";
 
 type RawParams = Record<string, string | string[] | undefined>;
@@ -23,6 +25,11 @@ export type BookingData = {
   allExtras: Extra[];
   days: number;
   summary: PriceSummary;
+  // The campaign code the visitor entered and whether it took effect; null when none was entered.
+  promo: { code: string; applied: boolean } | null;
+  // The points the signed-in individual account has, when they can be spent on this booking (lira
+  // only); null otherwise. `booking.usePoints` says whether they are being spent.
+  pointsBalance: number | null;
   // The hold on the car, counted down on the summary and payment pages; null when the page
   // does not need one (the confirmation, after the hold is spent).
   hold: Hold | null;
@@ -83,9 +90,25 @@ export async function loadBooking(
   const days = rentalDays(booking.search);
   const extras = allExtras.filter((extra) => booking.extraSlugs.includes(extra.slug));
   const query = toBookingQuery({ ...booking, extraSlugs: extras.map((extra) => extra.slug) });
+  // Points are for a signed-in individual account paying in lira (SPEC §2.3).
+  let pointsBalance: number | null = null;
+  if (currency === "TRY" && (await getSession())?.type === "individual") {
+    try {
+      pointsBalance = (await getMyPoints()).balance;
+    } catch {
+      pointsBalance = null;
+    }
+  }
   let summary: PriceSummary;
   try {
-    summary = await quotePrice(vehicle, days, extras, currency);
+    summary = await quotePrice(
+      vehicle,
+      days,
+      extras,
+      currency,
+      booking.promoCode,
+      booking.usePoints && pointsBalance !== null ? pointsBalance : undefined,
+    );
   } catch {
     return { status: "error", booking };
   }
@@ -99,6 +122,8 @@ export async function loadBooking(
     allExtras,
     days,
     summary,
+    promo: booking.promoCode ? { code: booking.promoCode, applied: summary.discount !== null } : null,
+    pointsBalance,
     hold,
     query,
   };

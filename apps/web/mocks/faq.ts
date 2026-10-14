@@ -96,10 +96,10 @@ const FAQ: FaqItem[] = [
     id: "i10",
     audience: "bireysel",
     topic: "hesap",
-    question: { tr: "Puanlar nasıl kazanılır?", en: "How are points earned?" },
+    question: { tr: "Puanlar nasıl kazanılır ve harcanır?", en: "How are points earned and spent?" },
     answer: {
-      tr: "Her 100 ₺ harcamanız için 1 puan kazanırsınız.",
-      en: "You earn 1 point for every ₺100 you spend.",
+      tr: "Her 100 ₺ harcamanız için 1 puan kazanırsınız. Puanlar kiralamada harcanır: 1 puan 5 ₺ değerindedir ve toplamın en çok yarısını karşılar.",
+      en: "You earn 1 point for every ₺100 you spend. Points are spent on a rental: 1 point is worth ₺5 and covers up to half of the total.",
     },
   },
   {

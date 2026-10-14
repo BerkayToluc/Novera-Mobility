@@ -6,11 +6,11 @@
     "language": "Türkçe",
     "pages": {
       "home": "Ana sayfa: araç kirala",
-      "araclarimiz": "Araçlarımız",
       "urunler": "Ürünler",
       "hizmetler": "Hizmetler",
       "hakkimizda": "Hakkımızda",
-      "iletisim": "İletişim ve bayiler",
+      "iletisim": "İletişim",
+      "bayilerimiz": "Bayilerimiz",
       "yardim": "Yardım merkezi",
       "rehberler": "Araç kiralama rehberleri",
       "kurumsal-teklif": "Kurumsal teklif iste",

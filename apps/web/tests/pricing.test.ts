@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { Extra } from "@/lib/extra";
 import { extraCost } from "@/lib/extra";
 import { pointsForTotal } from "@/lib/points";
+import { normalizePromo, promoPercent } from "@/lib/promo-codes";
 import { summarize } from "@/lib/price-summary";
 
 const try_ = (lira: number) => ({ amount: lira * 100, currency: "TRY" as const });
@@ -34,6 +35,75 @@ describe("summarize", () => {
 
   it("keeps the currency of the daily price", () => {
     expect(summarize({ amount: 3000, currency: "EUR" }, 2, []).total).toEqual({ amount: 6000, currency: "EUR" });
+  });
+});
+
+describe("a campaign code", () => {
+  const promo = { code: "NOVERA10", percent: 10 };
+
+  it("takes a percentage off the car and the extras together, and the lines still add up", () => {
+    const summary = summarize(try_(800), 3, [perDay, fixed], promo);
+    const subtotal = 2400 + 450 + 200;
+    expect(summary.discount).toEqual({ code: "NOVERA10", percent: 10, amount: try_(305) });
+    expect(summary.total).toEqual({ amount: subtotal * 100 - 30500, currency: "TRY" });
+    expect(summary.total.amount + (summary.discount?.amount.amount ?? 0)).toBe(
+      summary.vehicleTotal.amount + summary.extraLines.reduce((sum, line) => sum + line.cost.amount, 0),
+    );
+  });
+
+  it("rounds the discount down to a whole kuruş, never past the percentage", () => {
+    // 5% of 3333 kuruş is 166.65: 166 is taken off.
+    const summary = summarize({ amount: 3333, currency: "TRY" }, 1, [], { code: "HOSGELDIN", percent: 5 });
+    expect(summary.discount?.amount.amount).toBe(166);
+    expect(summary.total.amount).toBe(3333 - 166);
+  });
+
+  it("is null, and the price the plain one, without a code", () => {
+    const summary = summarize(try_(800), 3, []);
+    expect(summary.discount).toBeNull();
+    expect(summary.total).toEqual(try_(2400));
+  });
+});
+
+describe("points and VAT in the summary", () => {
+  it("has a subtotal, no points and the VAT inside the total by default", () => {
+    const summary = summarize(try_(800), 3, []);
+    expect(summary.subtotal).toEqual(try_(2400));
+    expect(summary.points).toBeNull();
+    // A sixth of ₺2.400 is VAT at 20 percent: ₺400.
+    expect(summary.vat).toEqual(try_(400));
+  });
+
+  it("spends the points five lira each, after the code, and takes them off the total", () => {
+    const summary = summarize(try_(800), 3, [], { code: "NOVERA10", percent: 10 }, 165);
+    // ₺2.400 less ₺240 is ₺2.160; 165 points are ₺825 of it (half of ₺2.160 would be 216 points).
+    expect(summary.points).toEqual({ count: 165, amount: try_(825) });
+    expect(summary.total).toEqual(try_(1335));
+    expect(summary.vat).toEqual({ amount: Math.floor((133500 * 20) / 120), currency: "TRY" });
+    expect(summary.subtotal.amount - (summary.discount?.amount.amount ?? 0) - summary.points!.amount.amount).toBe(
+      summary.total.amount,
+    );
+  });
+
+  it("covers at most half of what is left, and ignores a balance in another currency", () => {
+    expect(summarize(try_(800), 3, [], undefined, 99999).points?.count).toBe(240);
+    expect(summarize(try_(800), 3, [], { code: "NOVERA10", percent: 10 }, 99999).points?.count).toBe(216);
+    expect(summarize({ amount: 3000, currency: "EUR" }, 2, [], undefined, 500).points).toBeNull();
+  });
+});
+
+describe("promo codes", () => {
+  it("normalizes what was typed and drops what is not a code", () => {
+    expect(normalizePromo(" novera10 ")).toBe("NOVERA10");
+    expect(normalizePromo("nov era 10")).toBe("NOVERA10");
+    expect(normalizePromo("<script>")).toBeUndefined();
+    expect(normalizePromo("ab")).toBeUndefined();
+    expect(normalizePromo(undefined)).toBeUndefined();
+  });
+  it("knows its codes and only them", () => {
+    expect(promoPercent("NOVERA10")).toBe(10);
+    expect(promoPercent("HOSGELDIN")).toBe(5);
+    expect(promoPercent("NOPE")).toBeNull();
   });
 });
 

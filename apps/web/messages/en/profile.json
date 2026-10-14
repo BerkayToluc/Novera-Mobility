@@ -9,7 +9,8 @@
       "settings": "Settings",
       "company": "Company details",
       "quotes": "My quote requests",
-      "points": "My Points"
+      "points": "My Points",
+      "newRental": "New rental"
     },
     "signedOut": {
       "title": "You need to sign in",
@@ -41,8 +42,11 @@
       "total": "Total",
       "days": "{count, plural, one {# day} other {# days}}",
       "status": {
-        "CONFIRMED": "Confirmed",
-        "CANCELLED": "Cancelled"
+        "UPCOMING": "Upcoming",
+        "ACTIVE": "Under way",
+        "COMPLETED": "Completed",
+        "CANCELLED": "Cancelled",
+        "CONFIRMED": "Confirmed"
       },
       "empty": {
         "title": "You have no bookings yet",
@@ -67,8 +71,40 @@
         "title": "Past trips",
         "empty": {
           "title": "No past trips",
-          "text": "Completed and cancelled rentals are listed here."
+          "text": "Your completed rentals are listed here."
         }
+      },
+      "pickup": "Pick-up",
+      "dropoff": "Return",
+      "duration": "Duration",
+      "directions": "Directions",
+      "newTab": "(opens in a new tab)",
+      "callBranch": "Call the branch",
+      "filters": {
+        "label": "Booking status",
+        "all": "All",
+        "upcoming": "Upcoming",
+        "past": "Past",
+        "cancelled": "Cancelled"
+      },
+      "cancelled": {
+        "title": "Cancelled",
+        "empty": {
+          "title": "You have cancelled no bookings",
+          "text": "Rentals you cancel are listed here."
+        }
+      },
+      "cancel": {
+        "button": "Cancel",
+        "title": "Cancel the {car} booking?",
+        "free": "There are more than 24 hours to pick-up: the cancellation is free.",
+        "late": "There are less than 24 hours to pick-up: this cancellation is not free (Rental Conditions).",
+        "points": "A cancelled booking earns no points.",
+        "keep": "Keep it",
+        "confirm": "Yes, cancel it",
+        "cancelling": "Cancelling…",
+        "notCancellable": "This booking can no longer be cancelled.",
+        "unavailable": "The cancellation cannot be made right now. Please try again later."
       }
     },
     "settings": {
@@ -92,6 +128,43 @@
         "save": "Save",
         "saving": "Saving…",
         "saved": "Your preferences were saved."
+      },
+      "notifications": {
+        "title": "Notifications",
+        "text": "Choose which e-mails you would like to get.",
+        "reminders": "Send me a reminder e-mail before my trip.",
+        "campaigns": "Send me campaign and offer e-mails.",
+        "save": "Save",
+        "saving": "Saving…",
+        "saved": "Your notification choices were saved."
+      },
+      "security": {
+        "title": "Security",
+        "text": "Change your password and see where your account is signed in.",
+        "show": "Show password",
+        "hide": "Hide password",
+        "password": {
+          "title": "Change password",
+          "current": "Current password",
+          "new": "New password",
+          "hint": "At least 8 characters.",
+          "repeat": "New password (again)",
+          "short": "The new password must be at least 8 characters.",
+          "same": "The new password must differ from the current one.",
+          "mismatch": "The passwords do not match.",
+          "save": "Change password",
+          "saving": "Changing…",
+          "saved": "Your password was changed."
+        },
+        "sessions": {
+          "title": "Open sessions",
+          "this": "This device · Browser",
+          "thisDevice": "This device",
+          "now": "Active now",
+          "phone": "Phone · Mobile browser",
+          "twoDays": "2 days ago",
+          "revoke": "Close the other sessions"
+        }
       }
     },
     "signOut": "Sign out",
@@ -115,7 +188,7 @@
       "sent": "Sent",
       "fleet": "Fleet size",
       "term": "Term",
-      "termMonths": "{months} months",
+      "termMonths": "{months, plural, one {# month} other {# months}}",
       "status": {
         "RECEIVED": "Received",
         "IN_REVIEW": "In review",
@@ -152,11 +225,35 @@
         "retry": "Try again"
       },
       "rules": {
-        "title": "How do points work?",
+        "title": "How points are earned and spent",
         "earn": "You earn 1 point for every {amount} you spend.",
         "credit": "Points are added to your account when your rental is completed.",
-        "cancelled": "Cancelled bookings do not earn points."
-      }
+        "cancelled": "Cancelled bookings do not earn points.",
+        "spend": "Points are spent on a rental: 1 point = {value}, up to half of the total."
+      },
+      "worth": "= worth {worth}",
+      "spendCta": "Pay with points",
+      "spendNote": "Turn on \"Pay with points\" in the car list: 1 point = {value}."
+    },
+    "welcome": "Welcome, {name}",
+    "pointsChip": "{points} points · {worth}",
+    "nextTrip": {
+      "title": "Your next trip",
+      "daysLeft": "{days, plural, =0 {Starts today} one {# day to go} other {# days to go}}",
+      "viewAll": "My bookings",
+      "none": {
+        "title": "Make your first rental",
+        "text": "You have no trip coming up. Choose a branch and the dates to see the cars that are free.",
+        "cta": "Find a car"
+      },
+      "pickupAt": "{branch}, at {time}"
+    },
+    "quick": {
+      "title": "Quick actions",
+      "newRental": "New rental",
+      "newRentalText": "Choose a branch and the dates to see the free cars.",
+      "help": "Help centre",
+      "helpText": "Frequently asked questions, guides and the rental steps."
     }
   }
 }

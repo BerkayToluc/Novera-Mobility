@@ -6,14 +6,28 @@
     "pickupTime": "Pick-up time",
     "returnTime": "Return time",
     "submit": "Search",
-    "branchPlaceholder": "Choose a branch",
-    "noVehicles": "No cars right now",
-    "andMore": "+{count}",
     "errors": {
       "pickupBranch": "Choose the pick-up branch.",
       "returnBranch": "Choose the drop-off branch.",
       "dates": "Choose your dates.",
       "order": "The return time must be after the pick-up time."
+    },
+    "status": {
+      "placeholder": "Choose a branch",
+      "always": "Open 24/7",
+      "open": "Open now · closes {time}",
+      "closed": "Closed · opens {when} {time}",
+      "closedForGood": "Closed",
+      "today": "today",
+      "tomorrow": "tomorrow"
+    },
+    "locate": {
+      "button": "Use my location",
+      "locating": "Finding your location",
+      "found": "Nearest branch chosen: {name}, about {km} km away.",
+      "denied": "Location permission was not given. You can choose a branch from the list.",
+      "failed": "Your location could not be found. You can choose a branch from the list.",
+      "unsupported": "This browser does not share its location. You can choose a branch from the list."
     }
   },
   "ResultsPage": {
@@ -33,6 +47,37 @@
       "title": "Cars could not be loaded",
       "text": "We cannot fetch the available cars right now. Please try again.",
       "back": "Back to Home"
+    },
+    "filters": {
+      "button": "Filter",
+      "title": "Filters",
+      "active": "{count, plural, one {filter} other {filters}} on",
+      "class": "Class",
+      "transmission": "Gearbox",
+      "fuel": "Fuel",
+      "seats": "Seats",
+      "seatsAtLeast": "At least {count}",
+      "sort": "Sort by",
+      "sorts": {
+        "price-asc": "Cheapest",
+        "price-desc": "Most expensive",
+        "newest": "Newest"
+      },
+      "clear": "Clear filters"
+    },
+    "points": {
+      "label": "Pay with points",
+      "signIn": "Sign in to pay with points",
+      "value": "1 point = {price}"
+    },
+    "noMatch": {
+      "title": "No car matches these filters",
+      "text": "Loosen the filters or clear them.",
+      "clear": "Clear filters"
+    },
+    "view": {
+      "toGrid": "Switch to grid view",
+      "toList": "Switch to list view"
     }
   }
 }

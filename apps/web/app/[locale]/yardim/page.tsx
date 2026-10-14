@@ -66,9 +66,9 @@ export default async function HelpPage() {
             <Link href="/rehberler">{t("guidesAll")}</Link>
           </Button>
         </header>
-        <ul className="grid gap-6 md:grid-cols-3">
+        <ul className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {GUIDES.slice(0, 3).map((slug) => (
-            <li key={slug}>
+            <li key={slug} className="md:last:col-span-2 xl:last:col-span-1">
               <GuideCard slug={slug} headingAs="h3" />
             </li>
           ))}
