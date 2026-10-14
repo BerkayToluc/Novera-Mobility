@@ -3,7 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { ProfileHeader } from "@/components/profile/profile-header";
 import { ProfileNav } from "@/components/profile/profile-nav";
 import { SignedOutNotice } from "@/components/profile/signed-out-notice";
-import { getMyPoints } from "@/lib/account-client";
+import { getMyPoints } from "@/lib/account-server";
 import { getSession } from "@/lib/session";
 
 // One gate for every profile page: without a session the children never render, the visitor

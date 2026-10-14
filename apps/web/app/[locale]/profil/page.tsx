@@ -5,8 +5,10 @@ import { AccountForm } from "@/components/profile/account-form";
 import { CompanyAccount } from "@/components/profile/company-account";
 import { NextTrip } from "@/components/profile/next-trip";
 import { Link } from "@/i18n/navigation";
-import { getMyReservations } from "@/lib/account-client";
+import { getMyReservations } from "@/lib/account-server";
+import type { BranchDetail } from "@/lib/branch-detail";
 import { currentTime } from "@/lib/clock";
+import { getBranchDetails } from "@/lib/fleet-client";
 import type { Reservation } from "@/lib/reservation";
 import { getSession } from "@/lib/session";
 
@@ -33,6 +35,13 @@ export default async function AccountPage() {
     reservations = null;
   }
 
+  let branches: BranchDetail[] = [];
+  try {
+    branches = await getBranchDetails();
+  } catch {
+    branches = [];
+  }
+
   const quick = [
     { href: { pathname: "/", hash: "kiralama" }, icon: Plus, label: q("newRental"), text: q("newRentalText") },
     { href: "/yardim", icon: LifeBuoy, label: q("help"), text: q("helpText") },
@@ -40,7 +49,7 @@ export default async function AccountPage() {
 
   return (
     <div className="flex flex-col gap-10">
-      {reservations && <NextTrip reservations={reservations} now={currentTime()} />}
+      {reservations && <NextTrip reservations={reservations} now={currentTime()} branches={branches} />}
 
       <section aria-labelledby="quick-title" className="flex flex-col gap-4">
         <h2 id="quick-title" className="text-h3 text-fg">

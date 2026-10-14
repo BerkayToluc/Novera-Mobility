@@ -42,8 +42,11 @@
       "total": "Toplam",
       "days": "{count, plural, one {# gün} other {# gün}}",
       "status": {
-        "CONFIRMED": "Onaylandı",
-        "CANCELLED": "İptal edildi"
+        "UPCOMING": "Yaklaşan",
+        "ACTIVE": "Devam ediyor",
+        "COMPLETED": "Tamamlandı",
+        "CANCELLED": "İptal edildi",
+        "CONFIRMED": "Onaylandı"
       },
       "empty": {
         "title": "Henüz rezervasyonunuz yok",
@@ -68,8 +71,40 @@
         "title": "Geçmiş seyahatler",
         "empty": {
           "title": "Geçmiş seyahatiniz yok",
-          "text": "Tamamlanan ve iptal edilen kiralamalarınız burada listelenir."
+          "text": "Tamamlanan kiralamalarınız burada listelenir."
         }
+      },
+      "pickup": "Alış",
+      "dropoff": "İade",
+      "duration": "Süre",
+      "directions": "Yol tarifi",
+      "newTab": "(yeni sekmede açılır)",
+      "callBranch": "Bayiyi ara",
+      "filters": {
+        "label": "Rezervasyon durumu",
+        "all": "Tümü",
+        "upcoming": "Yaklaşan",
+        "past": "Geçmiş",
+        "cancelled": "İptal edilen"
+      },
+      "cancelled": {
+        "title": "İptal edilenler",
+        "empty": {
+          "title": "İptal ettiğiniz rezervasyon yok",
+          "text": "İptal ettiğiniz kiralamalar burada listelenir."
+        }
+      },
+      "cancel": {
+        "button": "İptal et",
+        "title": "{car} rezervasyonu iptal edilsin mi?",
+        "free": "Alış zamanına 24 saatten fazla var: iptal ücretsizdir.",
+        "late": "Alış zamanına 24 saatten az kaldı: bu iptal ücretsiz değildir (Kiralama Koşulları).",
+        "points": "İptal edilen rezervasyon puan kazandırmaz.",
+        "keep": "Vazgeç",
+        "confirm": "Evet, iptal et",
+        "cancelling": "İptal ediliyor…",
+        "notCancellable": "Bu rezervasyon artık iptal edilemiyor.",
+        "unavailable": "İptal şu an yapılamıyor. Lütfen daha sonra tekrar deneyin."
       }
     },
     "settings": {
@@ -172,7 +207,8 @@
         "title": "İlk kiralamanızı yapın",
         "text": "Yaklaşan bir seyahatiniz yok. Bayiyi ve tarihleri seçin, uygun araçları görün.",
         "cta": "Araç Ara"
-      }
+      },
+      "pickupAt": "{branch}, saat {time}"
     },
     "quick": {
       "title": "Hızlı işlemler",

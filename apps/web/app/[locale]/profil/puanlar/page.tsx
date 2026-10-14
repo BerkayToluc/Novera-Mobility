@@ -4,7 +4,7 @@ import { getFormatter, getLocale, getTranslations } from "next-intl/server";
 import { Button } from "@/components/ui/button";
 import { StateMessage } from "@/components/ui/state-message";
 import { Link, redirect } from "@/i18n/navigation";
-import { getMyPoints } from "@/lib/account-client";
+import { getMyPoints } from "@/lib/account-server";
 import { POINT_STEP, POINT_VALUE, pointsWorth, type PointsAccount } from "@/lib/points";
 import { getSession } from "@/lib/session";
 import { formatMoney } from "@/lib/price";

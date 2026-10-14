@@ -11,7 +11,7 @@ import { ResultsFilter } from "@/components/vehicle/results-filter";
 import { VehicleCard } from "@/components/vehicle/vehicle-card";
 import { VehicleRow } from "@/components/vehicle/vehicle-row";
 import { Link } from "@/i18n/navigation";
-import { getMyPoints } from "@/lib/account-client";
+import { getMyPoints } from "@/lib/account-server";
 import type { BranchOption } from "@/lib/branch-options";
 import { getAvailableVehicles } from "@/lib/fleet-client";
 import { getCurrency } from "@/lib/get-currency";

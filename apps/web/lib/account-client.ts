@@ -15,8 +15,11 @@ export async function deleteAccount(): Promise<void> {
   throw new AuthUnavailableError();
 }
 
-export async function getMyReservations(): Promise<Reservation[]> {
-  if (process.env.USE_MOCKS === "1") return (await import("@/mocks/reservations")).MOCK_RESERVATIONS;
+// `cancelled` is the ids of the sample bookings this browser has cancelled (USE_MOCKS=1 only); the
+// server pages get it from lib/account-server.ts, this file stays free of request APIs because
+// client components import it too.
+export async function getMyReservations(cancelled: string[] = []): Promise<Reservation[]> {
+  if (process.env.USE_MOCKS === "1") return (await import("@/mocks/reservations")).withCancelled(cancelled);
   throw new AuthUnavailableError();
 }
 
@@ -27,7 +30,10 @@ export async function getMyQuoteRequests(): Promise<QuoteRequest[]> {
 }
 
 // Same stance for the points: sample data with USE_MOCKS=1, otherwise the service is unavailable.
-export async function getMyPoints(): Promise<PointsAccount> {
-  if (process.env.USE_MOCKS === "1") return (await import("@/mocks/reservations")).mockPoints(new Date());
+export async function getMyPoints(cancelled: string[] = []): Promise<PointsAccount> {
+  if (process.env.USE_MOCKS === "1") {
+    const { mockPoints, withCancelled } = await import("@/mocks/reservations");
+    return mockPoints(new Date(), withCancelled(cancelled));
+  }
   throw new AuthUnavailableError();
 }
