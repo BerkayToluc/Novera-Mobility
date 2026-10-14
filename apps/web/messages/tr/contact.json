@@ -30,9 +30,13 @@
       }
     },
     "branchesLink": {
-      "title": "Size en yakın bayi",
-      "text": "14 şehirdeki bayilerimizin adresi, çalışma saatleri ve yol tarifi Bayilerimiz sayfasında.",
       "cta": "Bayilerimiz"
+    },
+    "helpLink": {
+      "title": "Yardım merkezi",
+      "text": "Sık sorulan sorular, kiralama adımları ve rehberler tek yerde. Çoğu sorunun yanıtı orada, mesaj yazmadan önce bir göz atın.",
+      "cta": "Yardım merkezine git",
+      "branches": "Size en yakın bayiyi mi arıyorsunuz?"
     }
   },
   "ContactForm": {

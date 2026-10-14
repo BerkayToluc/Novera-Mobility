@@ -41,14 +41,24 @@ export default async function ContactPage() {
         </section>
       </div>
 
-      <section aria-labelledby="branches-link-title" className="flex flex-col items-start gap-4 rounded-card bg-surface-muted p-6 md:p-8">
-        <h2 id="branches-link-title" className="text-h3 text-fg">
-          {t("branchesLink.title")}
+      {/* The help centre answers most questions before a message is written (G, 13 October); the
+          branches stay one small link away. */}
+      <section aria-labelledby="help-link-title" className="flex flex-col items-start gap-4 rounded-card bg-surface-muted p-6 md:p-8">
+        <h2 id="help-link-title" className="text-h3 text-fg">
+          {t("helpLink.title")}
         </h2>
-        <p className="max-w-prose text-body text-fg-muted">{t("branchesLink.text")}</p>
-        <Button asChild variant="outline">
-          <Link href="/bayilerimiz">{t("branchesLink.cta")}</Link>
-        </Button>
+        <p className="max-w-prose text-body text-fg-muted">{t("helpLink.text")}</p>
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+          <Button asChild>
+            <Link href="/yardim">{t("helpLink.cta")}</Link>
+          </Button>
+          <p className="text-body text-fg-muted">
+            {t("helpLink.branches")}{" "}
+            <Link href="/bayilerimiz" className="text-link underline underline-offset-4">
+              {t("branchesLink.cta")}
+            </Link>
+          </p>
+        </div>
       </section>
     </div>
   );
