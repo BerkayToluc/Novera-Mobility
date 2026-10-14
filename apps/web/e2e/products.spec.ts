@@ -43,3 +43,19 @@ test("a product card lifts under the pointer", async ({ page, isMobile }) => {
   await card.hover();
   await expect.poll(() => card.evaluate((element) => getComputedStyle(element).translate)).not.toBe("none");
 });
+
+test("the quote page keeps the chosen product in sight, and the choice can be removed", async ({ page }) => {
+  await page.goto("/urunler/yesil-filo");
+  await page.getByRole("link", { name: "Teklif Al" }).first().click();
+  await expect(page).toHaveURL(/kurumsal-teklif\?urun=yesil-filo$/);
+
+  const chip = page.getByRole("region", { name: "Seçtiğiniz ürün" });
+  await expect(chip.getByText("Yeşil Filo (Elektrikli & Hibrit Araç Kiralama)")).toBeVisible();
+  await expect(chip.getByRole("link", { name: "Ürünü incele" })).toHaveAttribute("href", "/urunler/yesil-filo");
+  // The form's own product field is filled too.
+  await expect(page.getByLabel(/İlgilendiğiniz ürün/)).toHaveValue("yesil-filo");
+
+  await chip.getByRole("link", { name: "Seçimi kaldır" }).click();
+  await expect(page).toHaveURL(/kurumsal-teklif$/);
+  await expect(page.getByRole("region", { name: "Seçtiğiniz ürün" })).toHaveCount(0);
+});

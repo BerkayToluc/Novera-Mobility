@@ -60,7 +60,13 @@
     "metaTitle": "Corporate Quote",
     "metaDescription": "Ask for a fleet rental quote for your company: tell us what you need and our sales team will call within one business day.",
     "title": "Corporate Quote",
-    "intro": "We bring the cars where you need them and collect them where you finish. Tell us what you need and our sales team will call you."
+    "intro": "We bring the cars where you need them and collect them where you finish. Tell us what you need and our sales team will call you.",
+    "chip": {
+      "label": "Your chosen product",
+      "view": "See the product",
+      "remove": "Remove",
+      "change": "Choose another product"
+    }
   },
   "QuoteSteps": {
     "title": "How it works",
