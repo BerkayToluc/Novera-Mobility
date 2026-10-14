@@ -43,8 +43,16 @@ G'nin kuralı (12 Ekim): **her sayfa ya da bileşen grubu bir dal, bir PR.** Bun
 5. `feat/payment-page`: **Ödeme sayfası** (Y52): sürücü bilgileri ve simüle ehliyet doğrulama (sınıf × ehliyet ülkesi kural tablosu, örnek değerler, hiçbir veri saklanmaz, SPEC §2.10) ve kampanya kodu.
 6. `feat/branches-extras`: **Bayilerimiz'in devamı** (Y50): arama kutulu şehir listesi (`feat/branches-page`'in son commit'ini içerir), kartta açık/kapalı, Buradan kirala, Bana en yakın bayiler, bayi türü çipleri, ortalanmış başlık.
 7. `feat/footer-simple`: **Footer** (Y54): Framer Simple Footer'ın ↗ hover okları, bloklarda yerine oturma hareketi, xl altında linklerin markadan önce gelmesi.
+8. `feat/navbar-hover`: **Navbar hover** (Y55): linklerde harf yuvarlama (SplitTextHover), Ürünler menüsü hover'la açılır ve kayan vurgu (Pill Dropdown Nav).
+9. `feat/home-v3`: **Ana sayfa v3** (Y56): galeri okları kartın kenarlarında, iş birlikleri Logo 3D Carousel (kendiliğinden akar, hover/odakta durur), güvence bandı StepProgress, rehber kartı hover, SSS Framer satırları. `feat/footer-simple`'ın değil `feat/navbar-hover`'ın üzerine kuruludur.
+10. `feat/footer-v3`: **Footer v3** (Y57): wavy link hover, sosyal ikonlar (bağlantı değil), 3x göz, boşluklar.
+11. `feat/smart-contact-link`: **E-posta balonu** (Y58): gönder / kopyala.
+12. `feat/about-countup`: **Hakkımızda** (Y59): Sürdürülebilirlik rakamları görününce sayar.
+13. `feat/products-v2`: **Ürünler** (Y60): ton zeminli kartlar ve çizimler, yeni ürün detayı.
+14. `feat/results-filters-points`: **Uygun Araçlar** (Y61): Filtrele paneli ve Puanla öde.
+15. `feat/summary-pricing`: **Rezervasyon özeti** (Y62): ara toplam, kampanya, puan, KDV; kampanya kodu ödemeden özete taşındı.
 
-Belge dalları ayrı: `docs/spec-v05` (SPEC v0.5, ADR-22, BACKLOG Y49–Y52) ve `docs/spec-v06` (SPEC v0.6, BACKLOG Y53), bu belgenin dalı `docs/status-visual-tour`.
+Belge dalları ayrı: `docs/spec-v05` (SPEC v0.5, ADR-22, BACKLOG Y49–Y52), `docs/spec-v06` (SPEC v0.6, BACKLOG Y53) ve `docs/spec-v07` (SPEC v0.7, BACKLOG Y54–Y63; `docs/spec-v06`'nın üzerine kuruludur), bu belgenin dalı `docs/status-visual-tour`.
 
 **Eski dallar artık gereksiz:** `feat/fleet-on-home`, `feat/driver-eligibility`, `feat/home-form-branches`, `feat/home-fleet-cards`, `feat/home-strip-guarantee`, `feat/home-app-guides` ve `feat/home-faq` yukarıdaki sayfa dallarının parçalarıydı (aynı commit'ler 4 ve 5'te). Uzağa itildiyse silinebilir, birleştirilmemeli.
 
