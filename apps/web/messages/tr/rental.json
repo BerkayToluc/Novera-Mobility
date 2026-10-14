@@ -67,7 +67,6 @@
     },
     "points": {
       "label": "Puanla öde",
-      "balance": "{points} puan = {worth}",
       "signIn": "Puanla ödemek için giriş yapın",
       "value": "1 puan = {price}"
     },
@@ -77,9 +76,8 @@
       "clear": "Filtreleri temizle"
     },
     "view": {
-      "label": "Görünüm",
-      "list": "Liste görünümü",
-      "grid": "Izgara görünümü"
+      "toGrid": "Izgara görünümüne geç",
+      "toList": "Liste görünümüne geç"
     }
   }
 }
