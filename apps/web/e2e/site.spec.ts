@@ -96,7 +96,7 @@ test.describe("with the banner out of the way", () => {
   test("the city filter narrows the branches", async ({ page }) => {
     await page.goto("/bayilerimiz");
     // Hydration finishes after the first paint; the button is there but does nothing until then.
-    const city = page.getByRole("button", { name: "Şehir" });
+    const city = page.getByRole("button", { name: "Şehir", exact: true });
     await expect.poll(async () => {
       await city.click();
       return page.getByRole("combobox", { name: "Şehir ara" }).isVisible();
@@ -117,7 +117,7 @@ test.describe("with the banner out of the way", () => {
 
   test("the city list can be searched and chosen from the keyboard", async ({ page }) => {
     await page.goto("/bayilerimiz");
-    const city = page.getByRole("button", { name: "Şehir" });
+    const city = page.getByRole("button", { name: "Şehir", exact: true });
     await expect.poll(async () => {
       await city.click();
       return page.getByRole("combobox", { name: "Şehir ara" }).isVisible();
@@ -140,7 +140,7 @@ test.describe("with the banner out of the way", () => {
 
   test("a city that does not exist is said so in the list, and the branches stay", async ({ page }) => {
     await page.goto("/bayilerimiz");
-    const city = page.getByRole("button", { name: "Şehir" });
+    const city = page.getByRole("button", { name: "Şehir", exact: true });
     await expect.poll(async () => {
       await city.click();
       return page.getByRole("combobox", { name: "Şehir ara" }).isVisible();

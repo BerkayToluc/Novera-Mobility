@@ -34,13 +34,30 @@
       "email": "E-posta gönder",
       "directions": "Yol tarifi al",
       "newTab": "(yeni sekmede açılır)",
-      "showOnMap": "Haritada göster"
+      "showOnMap": "Haritada göster",
+      "rentHere": "Buradan kirala",
+      "distance": "yaklaşık {km} km"
     },
     "cityLabel": "Şehir",
     "allCities": "Tüm şehirler",
     "countFiltered": "{total} bayiden {count} tanesi gösteriliyor",
     "citySearch": "Şehir ara",
     "citySearchPlaceholder": "Şehir adı yazın",
-    "noCity": "Eşleşen şehir yok."
+    "noCity": "Eşleşen şehir yok.",
+    "kindLabel": "Bayi türü",
+    "kinds": {
+      "all": "Tümü",
+      "airport": "Havalimanı",
+      "city": "Şehir merkezi"
+    },
+    "near": {
+      "button": "Bana en yakın bayiler",
+      "locating": "Konum alınıyor",
+      "clear": "Sıralamayı kaldır",
+      "active": "Bayiler size en yakından başlayarak sıralandı.",
+      "denied": "Konum izni verilmedi. Bayileri şehre göre süzebilirsiniz.",
+      "failed": "Konumunuz alınamadı. Bayileri şehre göre süzebilirsiniz.",
+      "unsupported": "Bu tarayıcı konum paylaşımını desteklemiyor. Bayileri şehre göre süzebilirsiniz."
+    }
   }
 }

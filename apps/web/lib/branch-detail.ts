@@ -16,6 +16,14 @@ export type BranchDetail = Branch & {
   openingHours: OpeningHours;
 };
 
+export type BranchKind = "airport" | "city";
+
+// An airport desk or a city office. The branches carry no such field yet, so it is read from the
+// name ("… Havalimanı"); when the API gives each branch a type, this is where it is replaced.
+export function branchKind(branch: Pick<Branch, "name">): BranchKind {
+  return normalizeSearch(branch.name).includes("havalimani") ? "airport" : "city";
+}
+
 // Lowercases the Turkish way and drops accents, so "izmir", "İzmir" and "IZMIR" all find
 // the same branch and "sisli" finds "Şişli".
 export function normalizeSearch(value: string): string {

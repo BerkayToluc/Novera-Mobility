@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type Ref } from "react";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import {
   SelectMenu,
   SelectMenuContent,
@@ -10,7 +10,7 @@ import {
   SelectMenuValue,
 } from "@/components/ui/select-menu";
 import type { BranchOption } from "@/lib/branch-options";
-import { openingStatus } from "@/lib/opening-status";
+import { useOpeningLabel } from "@/lib/use-opening-label";
 
 type BranchSelectProps = {
   options: BranchOption[];
@@ -27,20 +27,11 @@ type BranchSelectProps = {
 // answers "can I get there now". The status is read when the list opens, in Turkey's time.
 export function BranchSelect({ options, value, onChange, id, labelledBy, ref, ...aria }: BranchSelectProps) {
   const t = useTranslations("RentalSearch.status");
-  const locale = useLocale();
+  const label = useOpeningLabel();
   const [now, setNow] = useState(() => new Date());
 
-  // A date that falls on the weekday, for the day's name in the visitor's language.
-  const dayName = (weekday: number) =>
-    new Intl.DateTimeFormat(locale, { weekday: "long", timeZone: "UTC" }).format(new Date(Date.UTC(2024, 0, 7 + weekday)));
-
   function status(option: BranchOption) {
-    const result = openingStatus(option.openingHours, now);
-    if (result.state === "always") return t("always");
-    if (result.state === "open") return t("open", { time: result.until });
-    if (result.state === "closed-for-good") return t("closedForGood");
-    const when = result.daysAhead === 0 ? t("today") : result.daysAhead === 1 ? t("tomorrow") : dayName(result.weekday);
-    return t("closed", { when, time: result.opensAt });
+    return label(option.openingHours, now).text;
   }
 
   return (

@@ -1,17 +1,28 @@
+"use client";
+
 import { Clock, Mail, MapPin, Navigation, Phone } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
+import { Link } from "@/i18n/navigation";
 import { directionsUrl, type BranchDetail, type DayHours } from "@/lib/branch-detail";
 import { cn } from "@/lib/cn";
+import { useOpeningLabel } from "@/lib/use-opening-label";
 
 type BranchCardProps = {
   branch: BranchDetail;
   selected: boolean;
   onShowOnMap: () => void;
+  // The time the status is read at; null until the page is in the browser, so the server's
+  // clock and the browser's never disagree on the page.
+  now: Date | null;
+  // How far the visitor is, in whole kilometres, once they have shared their position.
+  distanceKm?: number;
 };
 
-export function BranchCard({ branch, selected, onShowOnMap }: BranchCardProps) {
+export function BranchCard({ branch, selected, onShowOnMap, now, distanceKm }: BranchCardProps) {
   const t = useTranslations("BranchesPage.card");
+  const label = useOpeningLabel();
+  const status = now ? label(branch.openingHours, now) : null;
 
   const hours = (value: DayHours) => {
     if (!value) return t("closed");
@@ -33,9 +44,21 @@ export function BranchCard({ branch, selected, onShowOnMap }: BranchCardProps) {
         selected ? "border-focus" : "border-border",
       )}
     >
-      <header>
-        <h3 className="text-h3 text-fg">{branch.name}</h3>
-        <p className="text-small text-fg-muted">{branch.city}</p>
+      <header className="flex flex-col gap-2">
+        <div>
+          <h3 className="text-h3 text-fg">{branch.name}</h3>
+          <p className="text-small text-fg-muted">
+            {branch.city}
+            {distanceKm !== undefined && <span className="tabular-nums"> · {t("distance", { km: distanceKm })}</span>}
+          </p>
+        </div>
+        {/* Open or closed right now (the dot is only for the eye: the words say it). */}
+        {status && (
+          <p className="flex items-center gap-2 text-small text-fg">
+            <span aria-hidden="true" className={cn("size-2 shrink-0 rounded-full", status.open ? "bg-success" : "bg-fg-subtle")} />
+            {status.text}
+          </p>
+        )}
       </header>
 
       <p className="flex items-start gap-2 text-body text-fg">
@@ -72,10 +95,18 @@ export function BranchCard({ branch, selected, onShowOnMap }: BranchCardProps) {
         </a>
       </div>
 
-      <Button type="button" variant="outline" onClick={onShowOnMap} className="self-start">
-        {t("showOnMap")}
-        <span className="sr-only"> {branch.name}</span>
-      </Button>
+      <div className="flex flex-wrap gap-3">
+        <Button asChild>
+          <Link href={{ pathname: "/", query: { alis: branch.id }, hash: "kiralama" }}>
+            {t("rentHere")}
+            <span className="sr-only"> {branch.name}</span>
+          </Link>
+        </Button>
+        <Button type="button" variant="outline" onClick={onShowOnMap}>
+          {t("showOnMap")}
+          <span className="sr-only"> {branch.name}</span>
+        </Button>
+      </div>
     </article>
   );
 }

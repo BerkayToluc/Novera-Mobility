@@ -229,6 +229,9 @@
   --color-band: var(--novera-band);
   --color-on-band: var(--novera-on-band);
   --color-band-accent: var(--novera-band-accent);
+  /* The eyes in the footer keep their own colours in both themes (SPEC §2.8). */
+  --color-eye-white: #fffefd;
+  --color-eye-pupil: #0c0c0c;
   --color-fg: var(--novera-fg);
   --color-fg-muted: var(--novera-fg-muted);
   --color-fg-subtle: var(--novera-fg-subtle);
@@ -302,6 +305,8 @@
   --animate-marquee: marquee 48s linear infinite;
   /* The trail on the Road Assurance line (SPEC §5.4): twice along the road, under five seconds. */
   --animate-road-trail: road-trail 2.4s linear 2 both;
+  /* The footer's easing (SPEC §2.8, after the Framer Simple Footer): a long, soft finish. */
+  --ease-link: cubic-bezier(0.12, 0.23, 0.5, 1);
   --animate-fade-in: fade-in 0.3s ease-out;
   @keyframes road-trail {
     from {
@@ -329,6 +334,20 @@
       transform: translateX(-50%);
     }
   }
+}
+
+/* The footer's blocks settle into place as the page scrolls to them (SPEC §2.8). FooterReveal marks an
+   element only after the page has loaded and only if it is below the fold, so without script, or
+   with reduced motion, everything simply shows. It moves and does not fade: a block at opacity 0
+   fails the contrast check of an accessibility tool that reads the page without scrolling it. */
+[data-reveal] {
+  transition: transform 0.6s cubic-bezier(0.12, 0.23, 0.5, 1);
+}
+[data-reveal="hidden"][data-kind="block"] {
+  transform: scale(0.97);
+}
+[data-reveal="hidden"][data-kind="text"] {
+  transform: translateY(3.75rem);
 }
 
 @layer base {

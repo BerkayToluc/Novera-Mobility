@@ -26,6 +26,8 @@ type RentalSearchFormProps = {
   branches: BranchOption[];
   // A search already made (the results page): the form starts as the visitor left it.
   initial?: RentalSearch;
+  // A branch to start from, e.g. from "rent from here" on the branches page; the return follows it.
+  initialPickup?: string;
 };
 
 // No dates yet: the visitor has not picked a range, which is what the schema then asks for.
@@ -38,7 +40,7 @@ const EMPTY = {
 
 type Locate = { state: "idle" } | { state: "locating" } | { state: "found"; name: string; km: number } | { state: "denied" | "failed" | "unsupported" };
 
-export function RentalSearchForm({ branches, initial }: RentalSearchFormProps) {
+export function RentalSearchForm({ branches, initial, initialPickup }: RentalSearchFormProps) {
   const t = useTranslations("RentalSearch");
   const router = useRouter();
   const [locate, setLocate] = useState<Locate>({ state: "idle" });
@@ -54,7 +56,11 @@ export function RentalSearchForm({ branches, initial }: RentalSearchFormProps) {
     [t],
   );
 
-  const defaultValues = initial ? fromRentalSearch(initial) : EMPTY;
+  const defaultValues = initial
+    ? fromRentalSearch(initial)
+    : initialPickup
+      ? { ...EMPTY, pickupBranchId: initialPickup, returnBranchId: initialPickup }
+      : EMPTY;
   const { control, handleSubmit, setValue, formState } = useForm<RentalSearchInput>({
     resolver: zodResolver(schema),
     mode: "onTouched",
