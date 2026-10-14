@@ -84,12 +84,12 @@ export function CityPicker({ value, onChange, id, ...aria }: CityPickerProps) {
       <div
         onClick={() => inputRef.current?.focus()}
         className={cn(
-          "flex min-h-11 w-full flex-wrap items-center gap-1.5 rounded-control border border-border-strong bg-surface px-2 py-1.5 text-body text-fg focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-focus",
+          "flex min-h-11 w-full flex-wrap items-center gap-1.5 rounded-control border border-border-strong bg-surface px-2 py-0.5 text-body text-fg focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-focus",
           aria["aria-invalid"] && "border-error",
         )}
       >
         {chosen.map((city) => (
-          <span key={city} className="inline-flex min-h-8 items-center gap-1 rounded-full bg-selected pl-3 pr-1 text-small text-on-selected">
+          <span key={city} className="inline-flex min-h-11 items-center gap-1 rounded-full bg-selected pl-4 pr-1 text-small text-on-selected">
             {city}
             <button
               type="button"
@@ -98,7 +98,7 @@ export function CityPicker({ value, onChange, id, ...aria }: CityPickerProps) {
                 remove(city);
               }}
               aria-label={t("citiesRemove", { city })}
-              className="inline-flex size-8 items-center justify-center rounded-full hover:bg-border"
+              className="inline-flex size-11 items-center justify-center rounded-full hover:bg-border"
             >
               <X aria-hidden="true" className="size-4" />
             </button>
@@ -128,7 +128,7 @@ export function CityPicker({ value, onChange, id, ...aria }: CityPickerProps) {
           // The options take the click on mousedown, so the list is still there when it lands.
           onBlur={() => setOpen(false)}
           onKeyDown={onKeyDown}
-          className="min-h-8 min-w-32 flex-1 bg-transparent px-1 outline-none disabled:cursor-not-allowed"
+          className="min-h-11 min-w-32 flex-1 bg-transparent px-1 outline-none disabled:cursor-not-allowed"
         />
       </div>
 

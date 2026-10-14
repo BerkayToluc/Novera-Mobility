@@ -20,7 +20,7 @@ export async function SiteHeader() {
 
   return (
     <header className="px-4 pt-4 md:px-8 md:pt-6">
-      <div className="mx-auto flex h-16 max-w-content items-center gap-2 rounded-full border border-border bg-surface px-3 shadow-float md:px-4 xl:gap-4 xl:px-6">
+      <div className="mx-auto flex h-16 max-w-content items-center gap-1 rounded-full border border-border bg-surface px-2 shadow-float md:gap-2 md:px-4 xl:gap-4 xl:px-6">
         <Link href="/" aria-label={t("homeLabel")} className="inline-flex min-h-11 shrink-0 items-center px-1">
           <Logo className="h-9 w-auto" />
         </Link>
