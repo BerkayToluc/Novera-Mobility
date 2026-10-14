@@ -154,6 +154,11 @@ Sıra ve öneri dosyasındaki ek kalite maddeleri G tarafından 10 Ekim 2026'da 
 | 30 | Y30 | Güvenlik başlıkları: CSP, HSTS, `X-Content-Type-Options`, `Referrer-Policy` | FE | Y27 | Başlıklar yanıtta var; harita, analytics ve formlar çalışıyor |
 | 31 | Y31 | CI'da kırık link kontrolü | FE | Y29 | Bilerek kırılan bir link CI'ı kırmızı yapıyor |
 | 32 | Y32 | Hız: Core Web Vitals hedefleri (SPEC §9), mobil Lighthouse raporu ve düzeltmeler | FE | Y15–Y29 | LCP, INP, CLS hedefte; rapor PR'da |
+| **10 · Navbar ve sayfa düzeni (11 Ekim, SPEC v0.5)** | | | | | |
+| 33 | Y49 | Navbar: yüzen açık hap (Framer "Modern Navbar"), Bayilerimiz linki, tema navbardan kalkar, dil menüsü bayraklı, hesap simgesi, Hizmetler düz link, yalnızca Ürünler açılır (SPEC §2.8) | FE | Y14, Y37 | 375/768/1280'de doğru; menüler klavyeyle gezilebiliyor; axe temiz; tema kontrolü navbarda yok |
+| 34 | Y50 | Bayilerimiz sayfası `/bayilerimiz`: bayi listesi, filtre, harita ve JSON-LD İletişim'den taşınır; İletişim'de yalnızca bağlantı (SPEC §2.6.1) | FE | Y49 | Filtre `/bayilerimiz`'de çalışıyor; İletişim'de bayi bölümü yok; sitemap'te var |
+| 35 | Y51 | Filo ana sayfada: kiralama kutusunun altında kategori çipli bölüm ("Tümü" yok, ilk kategori seçili), `/araclarimiz` kalkar, `?arac=` diğer parametreleri korur (SPEC §2.4) | FE | Y50 | Kart penceresi `/`'de açılıp Esc ile kapanıyor, odak karta dönüyor; eski rota ve nav öğesi yok |
+| 36 | Y52 | Sürücü uygunluğu (SPEC §2.10): sınıf ve ehliyet ülkesine göre kural tablosu, `/odeme`'de "Sürücü bilgileri" (doğum tarihi, ülke, simüle ehliyet doğrulama, beyan), sunucu eyleminde yeniden kontrol, karar öncesi koşul satırı; veri saklanmaz; KVKK metni güncellenir. Backend sözleşmesi (sınıf kuralı, 422) ayrı | FE | Y49 | Uygun ve uygun olmayan iki yol e2e'de; doğum tarihi adreste ve depolamada yok; axe temiz |
 
 **Backend (paralel).** Frontend örnek veriyle ilerlediği için bunları beklemez; uçlar gelince örnek veri kapatılır.
 
