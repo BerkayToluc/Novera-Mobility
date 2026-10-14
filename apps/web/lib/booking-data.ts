@@ -23,6 +23,8 @@ export type BookingData = {
   allExtras: Extra[];
   days: number;
   summary: PriceSummary;
+  // The campaign code the visitor entered and whether it took effect; null when none was entered.
+  promo: { code: string; applied: boolean } | null;
   // The hold on the car, counted down on the summary and payment pages; null when the page
   // does not need one (the confirmation, after the hold is spent).
   hold: Hold | null;
@@ -85,7 +87,7 @@ export async function loadBooking(
   const query = toBookingQuery({ ...booking, extraSlugs: extras.map((extra) => extra.slug) });
   let summary: PriceSummary;
   try {
-    summary = await quotePrice(vehicle, days, extras, currency);
+    summary = await quotePrice(vehicle, days, extras, currency, booking.promoCode);
   } catch {
     return { status: "error", booking };
   }
@@ -99,6 +101,7 @@ export async function loadBooking(
     allExtras,
     days,
     summary,
+    promo: booking.promoCode ? { code: booking.promoCode, applied: summary.discount !== null } : null,
     hold,
     query,
   };

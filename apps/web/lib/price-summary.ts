@@ -4,6 +4,8 @@ import { extraCost, type Extra } from "./extra";
 export type PriceSummary = {
   vehicleTotal: Money;
   extraLines: { extra: Extra; cost: Money }[];
+  // A campaign code taken off the whole booking; null when there is none (or it is not a code).
+  discount: { code: string; percent: number; amount: Money } | null;
   total: Money;
 };
 
@@ -15,11 +17,16 @@ export function summarize(
   dailyPrice: Money,
   days: number | null,
   extras: Extra[],
+  promo?: { code: string; percent: number },
 ): PriceSummary {
   const { currency } = dailyPrice;
   const money = (amount: number): Money => ({ amount, currency: currency as Currency });
   const vehicleTotal = money(days ? dailyPrice.amount * days : 0);
   const extraLines = extras.map((extra) => ({ extra, cost: extraCost(extra, days ?? 1) }));
-  const total = money(extraLines.reduce((sum, line) => sum + line.cost.amount, vehicleTotal.amount));
-  return { vehicleTotal, extraLines, total };
+  const subtotal = extraLines.reduce((sum, line) => sum + line.cost.amount, vehicleTotal.amount);
+  // Rounded down to a whole kuruş or cent, so the discount is never more than the percentage says
+  // and the lines still add up to the total.
+  const discount = promo ? { ...promo, amount: money(Math.floor((subtotal * promo.percent) / 100)) } : null;
+  const total = money(subtotal - (discount?.amount.amount ?? 0));
+  return { vehicleTotal, extraLines, discount, total };
 }

@@ -38,7 +38,8 @@
       "intro": "İsterseniz ekleyin; seçtikleriniz toplama hemen yansır."
     },
     "vatNote": "Fiyatlara KDV dahildir. Farklı bayiye bırakmak için ek ücret alınmaz.",
-    "cancelNote": "Alış zamanından 24 saat öncesine kadar ücretsiz iptal edebilirsiniz. <link>Kiralama koşulları</link>"
+    "cancelNote": "Alış zamanından 24 saat öncesine kadar ücretsiz iptal edebilirsiniz. <link>Kiralama koşulları</link>",
+    "discount": "Kampanya indirimi ({code}, %{percent})"
   },
   "Payment": {
     "metaTitle": "Ödeme",
@@ -69,7 +70,17 @@
     "paying": "İşleniyor",
     "summaryTitle": "Rezervasyonunuz",
     "total": "Toplam",
-    "edit": "Özete dön"
+    "edit": "Özete dön",
+    "promo": {
+      "title": "Kampanya kodu",
+      "label": "Kampanya kodunuz",
+      "apply": "Uygula",
+      "applying": "Uygulanıyor",
+      "remove": "Kaldır",
+      "applied": "{code} uygulandı: %{percent} indirim.",
+      "unknown": "\"{code}\" geçerli bir kampanya kodu değil.",
+      "hint": "Deneme kodları: NOVERA10 (%10) ve HOSGELDIN (%5). Kodlar kurguseldir."
+    }
   },
   "Confirmation": {
     "metaTitle": "Rezervasyon Onayı",

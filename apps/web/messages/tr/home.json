@@ -72,6 +72,23 @@
         "googlePlay": "Google Play"
       },
       "soon": "Uygulama mağazalarda yakında. Rozetler henüz bağlantı değildir."
+    },
+    "how": {
+      "title": "Nasıl çalışır?",
+      "steps": {
+        "choose": {
+          "title": "Bayi ve tarihi seçin",
+          "text": "Alış ve iade bayisini, tarihleri seçin; uygun araçlar fiyatlarıyla gelir."
+        },
+        "rent": {
+          "title": "Aracınızı kiralayın",
+          "text": "Seçtiğiniz aracı 15 dakika sizin için tutarız; ek hizmetleri ekleyip ödemeyi tamamlayın."
+        },
+        "pickup": {
+          "title": "Teslim alın, yola çıkın",
+          "text": "Belgelerinizle bayiye uğrayın; Yol Boyu Güvence yolculuğunuz boyunca yanınızda."
+        }
+      }
     }
   },
   "Guarantee": {

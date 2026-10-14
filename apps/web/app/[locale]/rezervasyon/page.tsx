@@ -170,6 +170,12 @@ export default async function BookingSummaryPage({ searchParams }: Props) {
                 <dd className="tabular-nums">{money(cost)}</dd>
               </div>
             ))}
+            {summary.discount && (
+              <div className="flex justify-between gap-4 text-success">
+                <dt>{t("discount", { code: summary.discount.code, percent: summary.discount.percent })}</dt>
+                <dd className="tabular-nums">−{money(summary.discount.amount)}</dd>
+              </div>
+            )}
             <div className="flex justify-between gap-4 border-t border-border-strong pt-3 text-h3">
               <dt>{t("total")}</dt>
               <dd className="tabular-nums">{money(summary.total)}</dd>

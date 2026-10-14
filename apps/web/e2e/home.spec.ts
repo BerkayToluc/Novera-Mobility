@@ -126,3 +126,33 @@ test("the FAQ has a tab for each topic, rows that open and close, and follows th
   await expect(corporate.getByRole("button", { name: /En az kaç araç için teklif alabilirim/ })).toBeVisible();
   await expect(corporate.getByRole("button", { name: /Rezervasyonu iptal edebilir miyim/ })).toHaveCount(0);
 });
+
+test("Use my location picks the nearest branch and says how far it is", async ({ page, context }) => {
+  // Moda, a couple of kilometres from the Kadıköy branch.
+  await context.grantPermissions(["geolocation"]);
+  await context.setGeolocation({ latitude: 40.98, longitude: 29.03 });
+  await page.goto("/");
+  await page.getByRole("button", { name: "Konumumu kullan" }).click();
+
+  await expect(page.getByRole("combobox", { name: "Alış bayisi" })).toContainText("İstanbul · Kadıköy");
+  // The return branch follows, as it does for a hand-picked pick-up.
+  await expect(page.getByRole("combobox", { name: "Bırakacağınız bayi" })).toContainText("İstanbul · Kadıköy");
+  await expect(page.locator("#kiralama").getByRole("status")).toContainText(/En yakın bayi seçildi: İstanbul · Kadıköy, yaklaşık \d+ km/);
+});
+
+test("Use my location says so when the position is refused, and leaves the branch to the list", async ({ page, context }) => {
+  await context.clearPermissions();
+  await page.goto("/");
+  await page.getByRole("button", { name: "Konumumu kullan" }).click();
+  await expect(page.locator("#kiralama").getByRole("status")).toContainText(/Konum izni verilmedi|Konumunuz alınamadı/);
+  await expect(page.getByRole("combobox", { name: "Alış bayisi" })).toContainText("Bayi seçin");
+});
+
+test("the how-it-works steps are on the Individual tab and not on the Corporate one", async ({ page }) => {
+  await page.goto("/");
+  const steps = page.locator("section[aria-labelledby=how-title]");
+  await expect(steps.getByRole("heading", { level: 2, name: "Nasıl çalışır?" })).toBeVisible();
+  await expect(steps.getByRole("listitem")).toHaveCount(3);
+  await page.goto("/?tip=kurumsal");
+  await expect(page.locator("section[aria-labelledby=how-title]")).toHaveCount(0);
+});
