@@ -159,6 +159,7 @@ Sıra ve öneri dosyasındaki ek kalite maddeleri G tarafından 10 Ekim 2026'da 
 | 34 | Y50 | Bayilerimiz sayfası `/bayilerimiz`: bayi listesi, filtre, harita ve JSON-LD İletişim'den taşınır; İletişim'de yalnızca bağlantı (SPEC §2.6.1) | FE | Y49 | Filtre `/bayilerimiz`'de çalışıyor; İletişim'de bayi bölümü yok; sitemap'te var |
 | 35 | Y51 | Filo ana sayfada: kiralama kutusunun altında kategori çipli bölüm ("Tümü" yok, ilk kategori seçili), `/araclarimiz` kalkar, `?arac=` diğer parametreleri korur (SPEC §2.4) | FE | Y50 | Kart penceresi `/`'de açılıp Esc ile kapanıyor, odak karta dönüyor; eski rota ve nav öğesi yok |
 | 36 | Y52 | Sürücü uygunluğu (SPEC §2.10): sınıf ve ehliyet ülkesine göre kural tablosu, `/odeme`'de "Sürücü bilgileri" (doğum tarihi, ülke, simüle ehliyet doğrulama, beyan), sunucu eyleminde yeniden kontrol, karar öncesi koşul satırı; veri saklanmaz; KVKK metni güncellenir. Backend sözleşmesi (sınıf kuralı, 422) ayrı | FE | Y49 | Uygun ve uygun olmayan iki yol e2e'de; doğum tarihi adreste ve depolamada yok; axe temiz |
+| 37 | Y53 | Ana sayfa rötuşları (SPEC v0.6): kurumsal süre 1/2/3 ay, bayi listesinde çalışma durumu, tek sütun araç kartı ve fiyat bloğu, şerit hover'da akar, güvence bandında akan çizgi, mağaza işaretleri, oklu rehber kaydırıcı, konu sekmeli SSS | FE | Y49–Y52 | Her bölüm 375/768/1280'de doğru; axe temiz; durdur düğmesi yok ve hareket kendiliğinden başlamıyor |
 
 **Backend (paralel).** Frontend örnek veriyle ilerlediği için bunları beklemez; uçlar gelince örnek veri kapatılır.
 
