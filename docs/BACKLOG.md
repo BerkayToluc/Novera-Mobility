@@ -178,6 +178,10 @@ Sıra ve öneri dosyasındaki ek kalite maddeleri G tarafından 10 Ekim 2026'da 
 | 53 | Y69 | Rezervasyonlarım: durum çipleri, bayi adı ve saat, yol tarifi, bayiyi ara, simüle iptal (SPEC §2.9, v0.8) | FE | Y68 | e2e (`profile-trips`); iptal puanı düşürür |
 | 54 | Y70 | Puanlarım ve Ayarlar: ₺ karşılığı, harcama bağlantısı; bildirim, şifre ve oturum bölümleri simüle (SPEC §2.9, v0.8) | FE | Y69 | e2e (`profile-settings`); axe temiz |
 | 55 | Y71 | **Backend'e öneri:** rezervasyon iptali (`POST /me/reservations/{id}/cancel`, puan düşümü), bildirim tercihleri, şifre değiştirme, oturum listesi ve kapatma, puan harcama | BE | Y69 | OpenAPI güncel; ön yüzün çerez simülasyonları kalkar |
+| 56 | Y72 | Hizmetler sayfası yenilendi (SPEC §2.5, v0.9): kart ızgarası, rakamlar, nasıl işler, paket etiketleri, ürün tablosu, acil durum bandı | FE | Y58 | e2e (`services`); 375/768/1280 taşma yok; axe temiz; eski `?hizmet=N#hizmet-N` bağlantıları çalışır |
+| 57 | Y73 | Telefon numaralarında gönder/kopyala balonu (SPEC §2.6, v0.9) | FE | Y58 | e2e: iletişim, bayi kartı, acil hat |
+| 58 | Y74 | Kurumsal teklifte seçili ürün şeridi (SPEC §2.2.3, v0.9) | FE | Y60 | e2e (`products`): şerit görünür, kaldırılır, form alanı dolu |
+| 59 | Y75 | e2e: beklenen koşullar için 10 sn bekleme (yük altında giriş yönlendirmesi) | FE | — | Tam takım iki koşuda hatasız |
 
 **Backend (paralel).** Frontend örnek veriyle ilerlediği için bunları beklemez; uçlar gelince örnek veri kapatılır.
 
