@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { StateMessage } from "@/components/ui/state-message";
 import { Link, redirect } from "@/i18n/navigation";
 import { getMyPoints } from "@/lib/account-client";
-import { POINT_STEP, type PointsAccount } from "@/lib/points";
+import { POINT_STEP, POINT_VALUE, pointsWorth, type PointsAccount } from "@/lib/points";
 import { getSession } from "@/lib/session";
 import { formatMoney } from "@/lib/price";
 
@@ -51,6 +51,7 @@ export default async function PointsPage() {
             <div>
               <dt className="text-small text-fg-muted">{t("balance")}</dt>
               <dd className="text-display tabular-nums text-fg">{format.number(account.balance)}</dd>
+              <dd className="text-small text-fg-muted">{t("worth", { worth: formatMoney(format, pointsWorth(account.balance)) })}</dd>
             </div>
           </div>
           <div className="flex items-center gap-4 rounded-card border border-border bg-surface p-6">
@@ -103,6 +104,7 @@ export default async function PointsPage() {
           </h3>
           <ul className="flex max-w-prose flex-col gap-2 text-body text-fg-muted">
             <li>{t("rules.earn", { amount: formatMoney(format, POINT_STEP) })}</li>
+            <li>{t("rules.spend", { value: formatMoney(format, POINT_VALUE) })}</li>
             <li>{t("rules.credit")}</li>
             <li>{t("rules.cancelled")}</li>
           </ul>

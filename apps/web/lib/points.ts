@@ -17,15 +17,21 @@ export type PointsEntry = { id: string; date: string; reservationNumber: string;
 
 export type PointsAccount = { balance: number; pending: number; entries: PointsEntry[] };
 
-// Paying with points (SPEC §2.3, G's decision): one point is worth one lira, and points cover at
-// most half of a total, so a rental is never free. Only lira totals, like earning (above).
-export const POINT_VALUE: Money = { amount: 100, currency: "TRY" };
+// Paying with points (SPEC §2.3, G's decision, 15 October): one point is worth five lira, and
+// points cover at most half of a total, so a rental is never free. Only lira totals, like earning
+// (above). Earning one point per ₺100 and spending it at ₺5 gives back five percent.
+export const POINT_VALUE: Money = { amount: 500, currency: "TRY" };
 export const MAX_POINTS_SHARE = 0.5;
 
 export function redeemablePoints(balance: number, total: Money): number {
   if (total.currency !== POINT_VALUE.currency) return 0;
   const cap = Math.floor((total.amount * MAX_POINTS_SHARE) / POINT_VALUE.amount);
   return Math.max(0, Math.min(Math.floor(balance), cap));
+}
+
+// What a number of points is worth in money.
+export function pointsWorth(points: number): Money {
+  return { amount: Math.floor(points) * POINT_VALUE.amount, currency: POINT_VALUE.currency };
 }
 
 // What is left to pay in money once the points are spent.

@@ -74,19 +74,20 @@ describe("points and VAT in the summary", () => {
     expect(summary.vat).toEqual(try_(400));
   });
 
-  it("spends the points a lira each, after the code, and takes them off the total", () => {
-    const summary = summarize(try_(800), 3, [], { code: "NOVERA10", percent: 10 }, 340);
-    // ₺2.400 less ₺240 is ₺2.160; 340 points are ₺340 of it.
-    expect(summary.points).toEqual({ count: 340, amount: try_(340) });
-    expect(summary.total).toEqual(try_(1820));
-    expect(summary.vat).toEqual({ amount: Math.floor((182000 * 20) / 120), currency: "TRY" });
+  it("spends the points five lira each, after the code, and takes them off the total", () => {
+    const summary = summarize(try_(800), 3, [], { code: "NOVERA10", percent: 10 }, 165);
+    // ₺2.400 less ₺240 is ₺2.160; 165 points are ₺825 of it (half of ₺2.160 would be 216 points).
+    expect(summary.points).toEqual({ count: 165, amount: try_(825) });
+    expect(summary.total).toEqual(try_(1335));
+    expect(summary.vat).toEqual({ amount: Math.floor((133500 * 20) / 120), currency: "TRY" });
     expect(summary.subtotal.amount - (summary.discount?.amount.amount ?? 0) - summary.points!.amount.amount).toBe(
       summary.total.amount,
     );
   });
 
   it("covers at most half of what is left, and ignores a balance in another currency", () => {
-    expect(summarize(try_(800), 3, [], undefined, 99999).points?.count).toBe(1200);
+    expect(summarize(try_(800), 3, [], undefined, 99999).points?.count).toBe(240);
+    expect(summarize(try_(800), 3, [], { code: "NOVERA10", percent: 10 }, 99999).points?.count).toBe(216);
     expect(summarize({ amount: 3000, currency: "EUR" }, 2, [], undefined, 500).points).toBeNull();
   });
 });

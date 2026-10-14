@@ -152,11 +152,14 @@
         "retry": "Tekrar Dene"
       },
       "rules": {
-        "title": "Puanlar nasıl kazanılır?",
+        "title": "Puanlar nasıl kazanılır ve harcanır?",
         "earn": "Her {amount} harcamanız için 1 puan kazanırsınız.",
         "credit": "Puanlar kiralamanız tamamlandığında hesabınıza işlenir.",
-        "cancelled": "İptal edilen rezervasyonlar puan kazandırmaz."
-      }
+        "cancelled": "İptal edilen rezervasyonlar puan kazandırmaz.",
+        "spend": "Puanlar kiralamada harcanır: 1 puan = {value}, toplamın en çok yarısına kadar."
+      },
+      "worth": "= {worth} değerinde",
+      "spendCta": "Puanla öde"
     }
   }
 }

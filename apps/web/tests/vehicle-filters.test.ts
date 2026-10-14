@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { afterPoints, redeemablePoints } from "@/lib/points";
+import { afterPoints, pointsWorth, redeemablePoints } from "@/lib/points";
 import { activeFilterCount, applyVehicleFilters, NO_FILTERS, parseVehicleFilters, toFilterQuery } from "@/lib/vehicle-filters";
 import type { VehicleOffer } from "@/lib/vehicle";
 
@@ -57,9 +57,11 @@ describe("vehicle filters", () => {
 
 describe("paying with points", () => {
   const total = { amount: 240_000, currency: "TRY" as const };
-  it("is worth a lira a point and covers at most half", () => {
-    expect(redeemablePoints(340, total)).toBe(340);
-    expect(redeemablePoints(5000, total)).toBe(1200);
+  it("is worth five lira a point and covers at most half", () => {
+    // Half of ₺2.400 is ₺1.200: 240 points.
+    expect(redeemablePoints(100, total)).toBe(100);
+    expect(redeemablePoints(340, total)).toBe(240);
+    expect(redeemablePoints(5000, total)).toBe(240);
     expect(redeemablePoints(0, total)).toBe(0);
     expect(redeemablePoints(-5, total)).toBe(0);
   });
@@ -67,6 +69,7 @@ describe("paying with points", () => {
     expect(redeemablePoints(340, { amount: 24_000, currency: "EUR" })).toBe(0);
   });
   it("leaves the rest to pay in money", () => {
-    expect(afterPoints(total, 340)).toEqual({ amount: 206_000, currency: "TRY" });
+    expect(afterPoints(total, 100)).toEqual({ amount: 190_000, currency: "TRY" });
+    expect(pointsWorth(165)).toEqual({ amount: 82_500, currency: "TRY" });
   });
 });

@@ -152,11 +152,14 @@
         "retry": "Try again"
       },
       "rules": {
-        "title": "How do points work?",
+        "title": "How points are earned and spent",
         "earn": "You earn 1 point for every {amount} you spend.",
         "credit": "Points are added to your account when your rental is completed.",
-        "cancelled": "Cancelled bookings do not earn points."
-      }
+        "cancelled": "Cancelled bookings do not earn points.",
+        "spend": "Points are spent on a rental: 1 point = {value}, up to half of the total."
+      },
+      "worth": "= worth {worth}",
+      "spendCta": "Pay with points"
     }
   }
 }
