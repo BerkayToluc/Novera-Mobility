@@ -66,5 +66,14 @@
       "EUR": "Euro",
       "USD": "ABD doları"
     }
+  },
+  "ContactLink": {
+    "emailHeading": "E-posta adresi",
+    "phoneHeading": "Telefon numarası",
+    "send": "E-posta gönder",
+    "call": "Ara",
+    "copyEmail": "Adresi kopyala",
+    "copyPhone": "Numarayı kopyala",
+    "copied": "Kopyalandı"
   }
 }

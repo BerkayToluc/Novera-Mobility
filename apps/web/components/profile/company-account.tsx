@@ -1,6 +1,7 @@
 import { Mail } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 import { Button } from "@/components/ui/button";
+import { ContactLink } from "@/components/ui/contact-link";
 import { Link } from "@/i18n/navigation";
 import type { Session } from "@/lib/session";
 
@@ -49,9 +50,7 @@ export async function CompanyAccount({ session }: { session: Session }) {
           </span>
           <h3 className="text-h3 text-fg">{t("salesTitle")}</h3>
           <p className="text-body text-fg-muted">{t("salesText")}</p>
-          <a href={`mailto:${company.salesContact}`} className="inline-flex min-h-11 items-center text-link underline underline-offset-4">
-            {company.salesContact}
-          </a>
+          <ContactLink value={company.salesContact} icon={false} className="text-link underline underline-offset-4" />
           <Button asChild variant="outline">
             <Link href={{ pathname: "/iletisim", hash: "mesaj" }}>{t("changeButton")}</Link>
           </Button>

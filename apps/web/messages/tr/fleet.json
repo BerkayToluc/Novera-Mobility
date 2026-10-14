@@ -28,7 +28,8 @@
       "holding": "Araç tutuluyor…",
       "taken": "Bu araç az önce tutuldu. Başka bir araç seçebilirsiniz.",
       "unavailable": "Araç şu an tutulamadı. Lütfen tekrar deneyin."
-    }
+    },
+    "pointsPayment": "{points} puan + {price}"
   },
   "FleetPage": {
     "title": "Araçlarımız",

@@ -12,6 +12,8 @@ export type BookingParams = {
   holdId?: string;
   // A campaign code the visitor entered on the payment page (kod), already normalized.
   promoCode?: string;
+  // The visitor chose to pay with points on the results page (puan=1).
+  usePoints?: boolean;
 };
 
 type RawParams = Record<string, string | string[] | undefined>;
@@ -25,15 +27,24 @@ export function parseBooking(params: RawParams): BookingParams | null {
   const extraSlugs = [...new Set((first(params.ek) ?? "").split(",").filter(Boolean))];
   const holdId = first(params.tutma);
   const promoCode = normalizePromo(first(params.kod));
-  return { search, vehicleSlug, extraSlugs, ...(holdId ? { holdId } : {}), ...(promoCode ? { promoCode } : {}) };
+  const usePoints = first(params.puan) === "1";
+  return {
+    search,
+    vehicleSlug,
+    extraSlugs,
+    ...(holdId ? { holdId } : {}),
+    ...(promoCode ? { promoCode } : {}),
+    ...(usePoints ? { usePoints } : {}),
+  };
 }
 
-export function toBookingQuery({ search, vehicleSlug, extraSlugs, holdId, promoCode }: BookingParams) {
+export function toBookingQuery({ search, vehicleSlug, extraSlugs, holdId, promoCode, usePoints }: BookingParams) {
   return {
     ...toQuery(search),
     arac: vehicleSlug,
     ...(extraSlugs.length ? { ek: extraSlugs.join(",") } : {}),
     ...(holdId ? { tutma: holdId } : {}),
     ...(promoCode ? { kod: promoCode } : {}),
+    ...(usePoints ? { puan: "1" } : {}),
   };
 }
