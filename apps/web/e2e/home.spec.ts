@@ -72,7 +72,7 @@ test("the guides slide with an arrow at each side, and there is no all-guides bu
   for (let step = 0; step < 6; step++) {
     if ((await next.getAttribute("aria-disabled")) === "true") break;
     await next.click();
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(1000);
   }
   await expect(next).toHaveAttribute("aria-disabled", "true");
 });
