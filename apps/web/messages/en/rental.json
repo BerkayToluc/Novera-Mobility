@@ -67,8 +67,9 @@
     },
     "points": {
       "label": "Pay with points",
-      "balance": "{points} points",
-      "signIn": "Sign in to pay with points"
+      "balance": "{points} points = {worth}",
+      "signIn": "Sign in to pay with points",
+      "value": "1 point = {price}"
     },
     "noMatch": {
       "title": "No car matches these filters",

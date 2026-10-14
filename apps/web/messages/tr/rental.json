@@ -67,8 +67,9 @@
     },
     "points": {
       "label": "Puanla öde",
-      "balance": "{points} puan",
-      "signIn": "Puanla ödemek için giriş yapın"
+      "balance": "{points} puan = {worth}",
+      "signIn": "Puanla ödemek için giriş yapın",
+      "value": "1 puan = {price}"
     },
     "noMatch": {
       "title": "Bu filtrelere uyan araç yok",

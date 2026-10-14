@@ -41,7 +41,7 @@
     "cancelNote": "Alış zamanından 24 saat öncesine kadar ücretsiz iptal edebilirsiniz. <link>Kiralama koşulları</link>",
     "discount": "Kampanya indirimi ({code}, %{percent})",
     "subtotal": "Ara toplam",
-    "pointsLine": "Puan ({count} puan)",
+    "pointsLine": "Puan ({count} puan × {value})",
     "vatIncluded": "Toplamın KDV'si (%{percent}) dahildir:"
   },
   "Payment": {

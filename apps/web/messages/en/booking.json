@@ -41,7 +41,7 @@
     "cancelNote": "You can cancel free of charge up to 24 hours before pick-up. <link>Rental terms</link>",
     "discount": "Campaign discount ({code}, {percent}%)",
     "subtotal": "Subtotal",
-    "pointsLine": "Points ({count} points)",
+    "pointsLine": "Points ({count} points × {value})",
     "vatIncluded": "VAT (%{percent}) included in the total:"
   },
   "Payment": {

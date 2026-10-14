@@ -24,13 +24,15 @@ test("points chosen on the results come off the summary, and can be switched off
   await page.waitForURL(/\/rezervasyon\?.*puan=1/);
 
   const panel = page.locator("section[aria-labelledby=price-title]");
-  const line = panel.getByText(/^Puan \(\d+ puan\)$/);
+  const line = panel.getByText(/^Puan \(\d+ puan × ₺5\)$/);
   await expect(line).toBeVisible();
   await expect(panel.getByText("Ara toplam")).toBeVisible();
   // The balance is smaller than half of ₺2.400, so all of it is spent and the total is ₺2.400 less it.
   const spent = Number((await line.innerText()).match(/\d+/)![0]);
   expect(spent).toBeGreaterThan(0);
-  await expect(panel.getByText(`−₺${spent}`)).toBeVisible();
+  // One point is five lira: the line takes off five times the points.
+  await expect(panel.getByText(`−₺${(spent * 5).toLocaleString("tr-TR")}`)).toBeVisible();
+  await expect(panel.getByRole("switch", { name: /Puanla öde/ })).toContainText("1 puan = ₺5");
 
   await panel.getByRole("switch", { name: /Puanla öde/ }).click();
   await expect(page).not.toHaveURL(/puan=1/);

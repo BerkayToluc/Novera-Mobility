@@ -5,6 +5,8 @@ import { useFormatter, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { Link, useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
+import { POINT_VALUE, pointsWorth } from "@/lib/points";
+import { formatMoney } from "@/lib/price";
 
 // "Puanla öde" on the results page (SPEC §2.3): a switch that turns each card's price into points
 // plus money. Only for a signed-in individual account paying in lira; anyone else sees a line that
@@ -66,7 +68,10 @@ export function PointsToggle({
         />
       </span>
       {t("label")}
-      <span className="text-small font-normal tabular-nums text-fg-muted">{t("balance", { points: format.number(balance) })}</span>
+      <span className="flex flex-col text-small font-normal leading-tight tabular-nums text-fg-muted">
+        <span>{t("balance", { points: format.number(balance), worth: formatMoney(format, pointsWorth(balance)) })}</span>
+        <span>{t("value", { price: formatMoney(format, POINT_VALUE) })}</span>
+      </span>
     </button>
   );
 }

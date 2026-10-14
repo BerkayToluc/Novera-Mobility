@@ -1,4 +1,5 @@
 import { getFormatter, getLocale, getTranslations } from "next-intl/server";
+import { POINT_VALUE } from "@/lib/points";
 import { VAT_PERCENT, type PriceSummary } from "@/lib/price-summary";
 import { formatMoney } from "@/lib/price";
 import type { Vehicle } from "@/lib/vehicle";
@@ -48,7 +49,7 @@ export async function PriceLines({ vehicle, days, summary }: { vehicle: Vehicle;
         )}
         {summary.points && (
           <div className="flex justify-between gap-4 text-success">
-            <dt>{t("pointsLine", { count: format.number(summary.points.count) })}</dt>
+            <dt>{t("pointsLine", { count: format.number(summary.points.count), value: money(POINT_VALUE) })}</dt>
             <dd className="whitespace-nowrap tabular-nums">−{money(summary.points.amount)}</dd>
           </div>
         )}
