@@ -1,7 +1,7 @@
 {
   "ServicesPage": {
     "metaTitle": "Hizmetler",
-    "metaDescription": "Akıllı yol yardım, 7/24 operasyon masası, yedek araç, periyodik bakım ve acil durum müdahale: Novera Mobility hizmetleri.",
+    "metaDescription": "Akıllı yol yardım, 7/24 operasyon masası, yedek araç, periyodik bakım ve acil durum müdahale: Novera Mobility hizmetleri, nasıl işlediği ve hangi ürünlere dahil olduğu.",
     "title": "Hizmetlerimiz",
     "intro": "Araç kiralamanın ötesinde: yolda, filoda ve masa başında yanınızdayız.",
     "listLabel": "Hizmet listesi",
@@ -13,6 +13,11 @@
           "Anlaşmalı çekici ağı",
           "GPS koordinatınıza göre yönlendirme",
           "Kaza ve arıza anında devrede"
+        ],
+        "steps": [
+          "Uygulamadan ya da telefonla bizi arayın",
+          "Konumunuzu paylaşın, bize en yakın çekiciyi yönlendirelim",
+          "Çekici yolda: ekip gelene kadar canlı takip edin"
         ]
       },
       {
@@ -22,6 +27,11 @@
           "7/24 kesintisiz erişim",
           "Uygulama veya telefonla bağlanma",
           "Anında kriz yönetimi"
+        ],
+        "steps": [
+          "Uygulamadan ya da telefonla bağlanın",
+          "Operasyon masası durumu alır ve kaydı açar",
+          "Çözüm bitene kadar sizi bizzat takip ederiz"
         ]
       },
       {
@@ -31,6 +41,11 @@
           "24 saati aşan arızada devreye girer",
           "Eşdeğer sınıfta araç",
           "Kapınıza teslim"
+        ],
+        "steps": [
+          "Arıza 24 saati aşınca yedek araç otomatik planlanır",
+          "Eşdeğer sınıfta araç adresinize hazırlanır",
+          "Aracınızı teslim alın, işiniz durmasın"
         ]
       },
       {
@@ -40,6 +55,11 @@
           "Yaz/kış lastiği değişimi",
           "Muayene takibi",
           "Adresten vale ile servis"
+        ],
+        "steps": [
+          "Bakım ve lastik zamanı gelince sizi hatırlatırız",
+          "Vale adresinizden aracı alır",
+          "Araç servisten ve temiz hâlde geri gelir"
         ]
       },
       {
@@ -49,11 +69,61 @@
           "Tek dokunuşla çağrı",
           "Canlı konum paylaşımı",
           "Acil müdahale birimlerinin yönlendirilmesi"
+        ],
+        "steps": [
+          "Uygulamadaki SOS düğmesine bir kez dokunun",
+          "Canlı konumunuz acil müdahale birimlerine ulaşır",
+          "Ekipler yönlendirilir, masa sizi arar"
         ]
       }
     ],
     "ctaTitle": "Filonuz için size özel çözüm",
     "ctaText": "İhtiyacınızı anlatın, kurumsal ekibimiz teklifle dönsün.",
-    "ctaButton": "Teklif İste"
+    "ctaButton": "Teklif İste",
+    "stats": {
+      "title": "Rakamlarla hizmet",
+      "note": "Rakamlar örnektir; bu site kurgusal bir öğrenme projesidir.",
+      "items": [
+        {
+          "value": 35,
+          "unit": "dk",
+          "label": "ortalama yol yardım ulaşım süresi"
+        },
+        {
+          "value": 15,
+          "unit": "sn",
+          "label": "operasyon masasının ortalama yanıt süresi"
+        },
+        {
+          "value": 48,
+          "unit": "saat",
+          "label": "içinde teslim edilen yedek araç"
+        }
+      ]
+    },
+    "cardsLabel": "Hizmetlere genel bakış",
+    "detail": "Ayrıntı",
+    "stepsTitle": "Nasıl işler?",
+    "plansTitle": "Hangi pakette var?",
+    "plans": {
+      "individual": "Bireysel",
+      "corporate": "Kurumsal",
+      "vip": "VIP Mobilite"
+    },
+    "coverage": {
+      "title": "Hangi ürüne dahil?",
+      "intro": "Hizmetlerin ürünlere göre dağılımı. Dahil olmayanı kurumsal ekibimiz teklife ekleyebilir.",
+      "caption": "Hizmetlerin ürünlere göre dağılımı",
+      "service": "Hizmet",
+      "yes": "Dahil",
+      "no": "Dahil değil",
+      "seeProduct": "Ürünü incele"
+    },
+    "emergency": {
+      "title": "Acil durumda",
+      "text": "Yoldaysanız ve bir şey ters gittiyse: önce güvenli bir yere çekin, sonra bizi arayın. 7/24 buradayız.",
+      "call": "Acil hat",
+      "guarantee": "Yol Boyu Güvence'yi inceleyin"
+    }
   }
 }

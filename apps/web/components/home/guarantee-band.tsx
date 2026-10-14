@@ -30,7 +30,7 @@ export async function GuaranteeBand() {
   const t = await getTranslations("Guarantee");
 
   return (
-    <section aria-labelledby="guarantee-title" className="bg-band text-on-band">
+    <section id="yol-boyu-guvence" aria-labelledby="guarantee-title" className="scroll-mt-4 bg-band text-on-band">
       <div className="mx-auto flex max-w-content flex-col gap-12 px-4 py-16 md:px-8 xl:gap-16 xl:py-24">
         <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <header className="flex max-w-2xl flex-col gap-4">

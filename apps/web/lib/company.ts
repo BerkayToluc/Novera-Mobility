@@ -4,6 +4,8 @@
 export const COMPANY = {
   email: "iletisim@novera.example",
   phone: "+90 212 555 00 00",
+  // The 24/7 emergency line (SPEC §2.5, v0.9); made up, in the same 555 range.
+  sosPhone: "+90 850 555 00 11",
 } as const;
 
 // The head office the contact page shows (SPEC §2.6). Made up, like the rest.
