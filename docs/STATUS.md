@@ -44,7 +44,7 @@ G'nin kuralı (12 Ekim): **her sayfa ya da bileşen grubu bir dal, bir PR.** Bun
 6. `feat/branches-extras`: **Bayilerimiz'in devamı** (Y50): arama kutulu şehir listesi (`feat/branches-page`'in son commit'ini içerir), kartta açık/kapalı, Buradan kirala, Bana en yakın bayiler, bayi türü çipleri, ortalanmış başlık.
 7. `feat/footer-simple`: **Footer** (Y54): Framer Simple Footer'ın ↗ hover okları, bloklarda yerine oturma hareketi, xl altında linklerin markadan önce gelmesi.
 8. `feat/navbar-hover`: **Navbar hover** (Y55): linklerde harf yuvarlama (SplitTextHover), Ürünler menüsü hover'la açılır ve kayan vurgu (Pill Dropdown Nav).
-9. `feat/home-v3`: **Ana sayfa v3** (Y56): galeri okları kartın kenarlarında, iş birlikleri Logo 3D Carousel (kendiliğinden akar, hover/odakta durur), güvence bandı StepProgress, rehber kartı hover, SSS Framer satırları. `feat/footer-simple`'ın değil `feat/navbar-hover`'ın üzerine kuruludur.
+9. `feat/home-v3`: **Ana sayfa v3** (Y56): galeri okları kartın kenarlarında, iş birlikleri Logo 3D Carousel (kendiliğinden akar, hover/odakta durur), güvence bandı StepProgress, rehber kartı hover, SSS Framer satırları. Zincirde `feat/navbar-hover`'ın üzerine kuruludur.
 10. `feat/footer-v3`: **Footer v3** (Y57): wavy link hover, sosyal ikonlar (bağlantı değil), 3x göz, boşluklar.
 11. `feat/smart-contact-link`: **E-posta balonu** (Y58): gönder / kopyala.
 12. `feat/about-countup`: **Hakkımızda** (Y59): Sürdürülebilirlik rakamları görününce sayar.
