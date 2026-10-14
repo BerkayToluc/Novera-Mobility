@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { checkEligibility, fullYears, isIsoDate, rentalStartDate } from "@/lib/driver-eligibility";
-import { classRequirement, requirementsFor } from "@/lib/driver-rules";
+import { MIN_AGE, requirementsFor } from "@/lib/driver-rules";
 import { driverSchema } from "@/lib/driver-schema";
 
 const names = <T extends string>(...keys: T[]) => Object.fromEntries(keys.map((key) => [key, key])) as Record<T, T>;
@@ -40,47 +40,38 @@ describe("rentalStartDate", () => {
 });
 
 describe("requirements", () => {
-  it("is the class's rule plus the licence country's", () => {
-    expect(requirementsFor("economy", "TR")).toEqual({ minAge: 21, minLicenceYears: 2, internationalPermit: false });
-    expect(requirementsFor("suv", "DE")).toEqual({ minAge: 23, minLicenceYears: 4, internationalPermit: false });
-    expect(requirementsFor("suv", "US")).toEqual({ minAge: 23, minLicenceYears: 5, internationalPermit: true });
-    expect(requirementsFor("executive", "GB")).toEqual({ minAge: 25, minLicenceYears: 6, internationalPermit: false });
-  });
-  it("falls back to the old general rule for an unknown class", () => {
-    expect(classRequirement("hovercraft")).toEqual({ minAge: 21, minLicenceYears: 2 });
+  it("is eighteen for every licence country, and the permit only for the US", () => {
+    expect(MIN_AGE).toBe(18);
+    expect(requirementsFor("TR")).toEqual({ minAge: 18, internationalPermit: false });
+    expect(requirementsFor("DE")).toEqual({ minAge: 18, internationalPermit: false });
+    expect(requirementsFor("GB")).toEqual({ minAge: 18, internationalPermit: false });
+    expect(requirementsFor("US")).toEqual({ minAge: 18, internationalPermit: true });
   });
 });
 
 describe("checkEligibility", () => {
-  const economyTr = requirementsFor("economy", "TR");
+  const tr = requirementsFor("TR");
   const start = "2026-12-14";
 
-  it("passes someone who turns 21 on the first day and has two full years", () => {
-    const result = checkEligibility({ birthDate: "2005-12-14", licenceIssuedAt: "2024-12-14" }, economyTr, start);
-    expect(result).toMatchObject({ ok: true, reasons: [], ageYears: 21, licenceYears: 2 });
+  it("passes someone who turns 18 on the first day, whatever their years of licence", () => {
+    const result = checkEligibility({ birthDate: "2008-12-14", licenceIssuedAt: "2026-12-01" }, tr, start);
+    expect(result).toMatchObject({ ok: true, reasons: [], ageYears: 18 });
   });
-  it("fails someone a day short of 21", () => {
-    const result = checkEligibility({ birthDate: "2005-12-15", licenceIssuedAt: "2020-01-01" }, economyTr, start);
+  it("fails someone a day short of 18", () => {
+    const result = checkEligibility({ birthDate: "2008-12-15", licenceIssuedAt: "2026-01-01" }, tr, start);
     expect(result.ok).toBe(false);
     expect(result.reasons).toEqual(["age"]);
   });
-  it("fails a licence a day short of the years it needs", () => {
-    const result = checkEligibility({ birthDate: "1990-01-01", licenceIssuedAt: "2024-12-15" }, economyTr, start);
-    expect(result.reasons).toEqual(["licence_years"]);
-  });
-  it("reports both reasons together", () => {
-    const result = checkEligibility({ birthDate: "2010-01-01", licenceIssuedAt: "2026-01-01" }, economyTr, start);
-    expect(result.reasons).toEqual(["age", "licence_years"]);
-  });
-  it("asks more of a foreign licence: the same driver passes with a Turkish one and fails with a US one", () => {
-    const driver = { birthDate: "1995-05-05", licenceIssuedAt: "2023-12-01" }; // 3 years of licence
-    expect(checkEligibility(driver, requirementsFor("suv", "TR"), start).ok).toBe(true);
-    expect(checkEligibility(driver, requirementsFor("suv", "US"), start).reasons).toEqual(["licence_years"]);
+  it("treats every licence country alike for age and date", () => {
+    const driver = { birthDate: "1995-05-05", licenceIssuedAt: "2023-12-01" };
+    for (const country of ["TR", "DE", "GB", "US"] as const) {
+      expect(checkEligibility(driver, requirementsFor(country), start).ok).toBe(true);
+    }
   });
   it("counts on the rental's first day, not on today", () => {
-    const driver = { birthDate: "2005-12-14", licenceIssuedAt: "2020-01-01" };
-    expect(checkEligibility(driver, economyTr, "2026-12-13").ok).toBe(false);
-    expect(checkEligibility(driver, economyTr, "2026-12-14").ok).toBe(true);
+    const driver = { birthDate: "2008-12-14", licenceIssuedAt: "2020-01-01" };
+    expect(checkEligibility(driver, tr, "2026-12-13").ok).toBe(false);
+    expect(checkEligibility(driver, tr, "2026-12-14").ok).toBe(true);
   });
 });
 

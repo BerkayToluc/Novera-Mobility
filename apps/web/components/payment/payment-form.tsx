@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "@/i18n/navigation";
-import type { toQuery } from "@/lib/rental-search";
 import { DriverSection } from "./driver-section";
 import { formatCardNumber, formatExpiry, paymentSchema, type PaymentInput } from "@/lib/payment-schema";
 
@@ -19,14 +18,10 @@ import { formatCardNumber, formatExpiry, paymentSchema, type PaymentInput } from
 // above the form says the same. The driver section comes first, and the payment button waits for it.
 export function PaymentForm({
   query,
-  classSlug,
   rentalStart,
-  resultsQuery,
 }: {
   query: Record<string, string>;
-  classSlug: string;
   rentalStart: string;
-  resultsQuery: ReturnType<typeof toQuery>;
 }) {
   const t = useTranslations("Payment");
   const d = useTranslations("Driver");
@@ -97,7 +92,7 @@ export function PaymentForm({
 
   return (
     <div className="flex flex-col gap-6">
-      <DriverSection classSlug={classSlug} rentalStart={rentalStart} resultsQuery={resultsQuery} onReady={setDriver} />
+      <DriverSection rentalStart={rentalStart} onReady={setDriver} />
       <div className="rounded-card border border-border bg-surface p-6 md:p-8">
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-5">
       <FormError message={formError} />

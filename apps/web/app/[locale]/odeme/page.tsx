@@ -17,7 +17,6 @@ import { loadBooking } from "@/lib/booking-data";
 import { currentTime } from "@/lib/clock";
 import { getCurrency } from "@/lib/get-currency";
 import { formatMoney } from "@/lib/price";
-import { toQuery } from "@/lib/rental-search";
 import { getSession } from "@/lib/session";
 
 type Props = { searchParams: Promise<Record<string, string | string[] | undefined>> };
@@ -85,9 +84,7 @@ export default async function PaymentPage({ searchParams }: Props) {
           </div>
           <PaymentForm
             query={loaded.query}
-            classSlug={loaded.vehicle.vehicleClass.slug}
             rentalStart={rentalStartDate(loaded.booking.search.startAt)}
-            resultsQuery={toQuery(loaded.booking.search)}
           />
         </div>
 

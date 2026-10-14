@@ -11,19 +11,15 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
-import { Link } from "@/i18n/navigation";
 import { checkEligibility, isIsoDate } from "@/lib/driver-eligibility";
 import { isLicenceCountry, LICENCE_COUNTRIES, needsInternationalPermit, requirementsFor } from "@/lib/driver-rules";
 import { driverSchema, type DriverInput } from "@/lib/driver-schema";
 import type { LicenceStatus } from "@/lib/licence-client";
-import type { toQuery } from "@/lib/rental-search";
 
 type Props = {
   // The booked car's class decides the rule (SPEC §2.10); the rental's first day is when it is counted.
-  classSlug: string;
   rentalStart: string;
   // The search that led here, so "choose another car" goes back to its results.
-  resultsQuery: ReturnType<typeof toQuery>;
   // The driver's details once they are valid, eligible and checked; null while any of that is missing.
   onReady: (driver: DriverBody | null) => void;
 };
@@ -31,7 +27,7 @@ type Props = {
 // The driver's details and the (simulated) licence check, above the card form (SPEC §2.10). It only
 // reports upward when the driver may drive this car: the payment button waits for that. Nothing is
 // written to the address, the browser's storage or a cookie; reloading empties the fields.
-export function DriverSection({ classSlug, rentalStart, resultsQuery, onReady }: Props) {
+export function DriverSection({ rentalStart, onReady }: Props) {
   const t = useTranslations("Driver");
   const [result, setResult] = useState<{ key: string; status: LicenceStatus } | null>(null);
   const [checking, setChecking] = useState(false);
@@ -82,7 +78,7 @@ export function DriverSection({ classSlug, rentalStart, resultsQuery, onReady }:
   // What the check is about: any change to it throws a finished check away.
   const key = [values.birthDate, values.country, values.licenceNumber.trim(), values.licenceIssuedAt, values.permit].join("|");
 
-  const requirements = country ? requirementsFor(classSlug, country) : null;
+  const requirements = country ? requirementsFor(country) : null;
   const eligibility =
     requirements && isIsoDate(values.birthDate) && isIsoDate(values.licenceIssuedAt)
       ? checkEligibility(values, requirements, rentalStart)
@@ -189,7 +185,7 @@ export function DriverSection({ classSlug, rentalStart, resultsQuery, onReady }:
 
       {requirements && eligibility?.ok && (
         <p role="status" className="text-body text-fg">
-          {t("eligible", { age: requirements.minAge, years: requirements.minLicenceYears })}
+          {t("eligible", { age: requirements.minAge })}
         </p>
       )}
       {requirements && eligibility && !eligibility.ok && (
@@ -199,22 +195,7 @@ export function DriverSection({ classSlug, rentalStart, resultsQuery, onReady }:
             {eligibility.reasons.includes("age") && (
               <li>{t("ineligibleAge", { min: requirements.minAge, have: eligibility.ageYears })}</li>
             )}
-            {eligibility.reasons.includes("licence_years") && country && (
-              <li>
-                {t("ineligibleLicence", {
-                  min: requirements.minLicenceYears,
-                  country: t(`countries.${country}`),
-                  have: eligibility.licenceYears,
-                })}
-              </li>
-            )}
           </ul>
-          <Link
-            href={{ pathname: "/araclar", query: resultsQuery }}
-            className="inline-flex min-h-11 items-center self-start text-label text-link underline underline-offset-4"
-          >
-            {t("chooseAnother")}
-          </Link>
         </div>
       )}
 

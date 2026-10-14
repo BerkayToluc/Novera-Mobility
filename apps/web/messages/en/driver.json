@@ -1,10 +1,9 @@
 {
   "Driver": {
-    "requirement": "At least {age} years old · {years} years of licence",
-    "requirementNote": "The years of licence can rise with the country that issued the licence.",
+    "requirementNote": "Anyone over 18 with a valid driving licence can rent.",
     "conditionsLink": "Rental terms",
     "title": "Driver details",
-    "intro": "We check that the person who will drive meets the conditions for this car. Your details are used only for this check; they are not saved anywhere.",
+    "intro": "We check that the person who will drive the car meets the rental conditions. Your details are used for this check only and are not saved anywhere.",
     "demoTitle": "This is a trial check",
     "demoText": "It does not connect to a real licence service; do not enter your real licence number or personal details. The conditions are examples.",
     "demoHint": "Trial number: 12345678 counts as valid; one ending in 0 is expired, one ending in 9 is not on record.",
@@ -32,11 +31,9 @@
       "permit": "Renting with a licence from this country needs an international driving permit.",
       "declaration": "Confirm the declaration to continue."
     },
-    "eligible": "You meet the conditions for this car (at least {age} years old, {years} years of licence).",
-    "ineligibleTitle": "You do not meet the conditions for this car",
+    "eligible": "You meet the conditions (over {age}, valid driving licence).",
+    "ineligibleTitle": "You do not meet the conditions",
     "ineligibleAge": "You must be at least {min} years old; you will be {have} at the start of the rental.",
-    "ineligibleLicence": "Your licence must be at least {min} years old (for a {country} licence); it will be {have} at the start of the rental.",
-    "chooseAnother": "Choose another car",
     "verify": "Check my licence",
     "verifying": "Checking",
     "result": {
