@@ -170,6 +170,14 @@ Sıra ve öneri dosyasındaki ek kalite maddeleri G tarafından 10 Ekim 2026'da 
 | 45 | Y61 | Uygun Araçlar: Filtrele paneli ve "Puanla öde" (SPEC §2.3, v0.7); `lib/vehicle-filters.ts`, `lib/points.ts` | FE | Y53 | Birim testleri (filtre, puan 1:1, en çok yarısı); e2e; puan yalnızca bireysel + TL |
 | 46 | Y62 | Rezervasyon özeti: ara toplam, kampanya, puan ve KDV satırları; kampanya kodu ödemeden özete taşındı (SPEC §2.3, v0.7) | FE | Y61 | Birim ve e2e (KDV = toplamın 1/6'sı, puan kodundan sonra); ödeme sayfasında kod kutusu yok |
 | 47 | Y63 | **Backend'e öneri:** `POST /reservations/price` gövdesine `usePoints` ve yanıta `points`/`vat` alanları; rezervasyon oluştururken harcanan puanın düşülmesi | BE | Y62 | OpenAPI güncel; ön yüzün mock'u yerine API kullanılır |
+| 48 | Y64 | Puan değeri 1 puan = ₺5 (SPEC §2.3, §2.9, v0.8): anahtar, özet satırı, Puanlarım ve SSS'de yazar | FE | Y61 | Birim testleri (yarısı sınırı, ₺ karşılığı); e2e; metinler `POINT_VALUE`'dan biçimlenir |
+| 49 | Y65 | Sürücü kuralı 18 yaş + geçerli ehliyet (SPEC §2.10, v0.8): sınıf ve ülke yıl tablosu kalktı, ABD için uluslararası belge kaldı | FE | Y52 | `tests/driver.test.ts`, `e2e/driver.spec.ts` yeni kural; kartlarda yaş/ehliyet satırı yok; Kiralama Koşulları metni güncel |
+| 50 | Y66 | Sonuç kartları (SPEC §2.3, v0.8): toplam fiyat önce, 100 km tüketim, liste/ızgara görünümü, tek araç çubuğu | FE | Y61 | e2e (`results-cards`); 375/768/1280 taşma yok; axe temiz |
+| 51 | Y67 | İletişim: "Size en yakın bayi" yerine Yardım merkezi kartı (SPEC §2.6, v0.8) | FE | — | e2e: kart `/yardim`'e gider, Bayilerimiz küçük bağlantı |
+| 52 | Y68 | Profil kabuğu: karşılama başlığı, puan çipi, ikonlu yan menü, sıradaki seyahat ve hızlı işlemler (SPEC §2.9, v0.8) | FE | Y64 | e2e (`forms-account`); axe `/profil/*` temiz; iskelet sayfa düzeninde |
+| 53 | Y69 | Rezervasyonlarım: durum çipleri, bayi adı ve saat, yol tarifi, bayiyi ara, simüle iptal (SPEC §2.9, v0.8) | FE | Y68 | e2e (`profile-trips`); iptal puanı düşürür |
+| 54 | Y70 | Puanlarım ve Ayarlar: ₺ karşılığı, harcama bağlantısı; bildirim, şifre ve oturum bölümleri simüle (SPEC §2.9, v0.8) | FE | Y69 | e2e (`profile-settings`); axe temiz |
+| 55 | Y71 | **Backend'e öneri:** rezervasyon iptali (`POST /me/reservations/{id}/cancel`, puan düşümü), bildirim tercihleri, şifre değiştirme, oturum listesi ve kapatma, puan harcama | BE | Y69 | OpenAPI güncel; ön yüzün çerez simülasyonları kalkar |
 
 **Backend (paralel).** Frontend örnek veriyle ilerlediği için bunları beklemez; uçlar gelince örnek veri kapatılır.
 
