@@ -128,6 +128,43 @@
         "save": "Save",
         "saving": "Saving…",
         "saved": "Your preferences were saved."
+      },
+      "notifications": {
+        "title": "Notifications",
+        "text": "Choose which e-mails you would like to get.",
+        "reminders": "Send me a reminder e-mail before my trip.",
+        "campaigns": "Send me campaign and offer e-mails.",
+        "save": "Save",
+        "saving": "Saving…",
+        "saved": "Your notification choices were saved."
+      },
+      "security": {
+        "title": "Security",
+        "text": "Change your password and see where your account is signed in.",
+        "show": "Show password",
+        "hide": "Hide password",
+        "password": {
+          "title": "Change password",
+          "current": "Current password",
+          "new": "New password",
+          "hint": "At least 8 characters.",
+          "repeat": "New password (again)",
+          "short": "The new password must be at least 8 characters.",
+          "same": "The new password must differ from the current one.",
+          "mismatch": "The passwords do not match.",
+          "save": "Change password",
+          "saving": "Changing…",
+          "saved": "Your password was changed."
+        },
+        "sessions": {
+          "title": "Open sessions",
+          "this": "This device · Browser",
+          "thisDevice": "This device",
+          "now": "Active now",
+          "phone": "Phone · Mobile browser",
+          "twoDays": "2 days ago",
+          "revoke": "Close the other sessions"
+        }
       }
     },
     "signOut": "Sign out",
@@ -195,7 +232,8 @@
         "spend": "Points are spent on a rental: 1 point = {value}, up to half of the total."
       },
       "worth": "= worth {worth}",
-      "spendCta": "Pay with points"
+      "spendCta": "Pay with points",
+      "spendNote": "Turn on \"Pay with points\" in the car list: 1 point = {value}."
     },
     "welcome": "Welcome, {name}",
     "pointsChip": "{points} points · {worth}",
