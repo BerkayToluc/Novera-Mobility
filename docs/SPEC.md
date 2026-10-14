@@ -1,6 +1,6 @@
 # Novera Mobility: Ürün Tanımı (SPEC)
 
-> Durum: **Taslak v0.6** · 12 Ekim 2026 (v0.6: G'nin 12 Ekim ana sayfa rötuşları: kurumsal süre 1/2/3 ay, bayi satırında çalışma durumu, tek sütun araç kartı ve fiyat bloğu, durdur düğmesi yerine kullanıcı başlatan şerit, güvence bandında akan çizgi, mağaza işaretleri, oklu rehber kaydırıcı, konu sekmeli SSS; §2.2, §2.4, §2.9, §5.4) · v0.5: 11 Ekim (v0.4: 10 Ekim, v0.3: 9 Ekim, v0.2: 4 Ekim 2026). v0.5: G'nin 11 Ekim navbar ve sayfa düzeni geri bildirimi (yüzen hap navbar, Bayilerimiz sayfası, filonun ana sayfaya taşınması; §2.1, §2.4, §2.6, §2.8, §5.3, §8)
+> Durum: **Taslak v0.7** · 14 Ekim 2026 (v0.7: G'nin 13-14 Ekim kararları: Framer bileşenleriyle navbar, şerit, güvence bandı, SSS, footer, e-posta bağlantıları; ürün sayfaları; sonuç filtresi, puanla ödeme, özet fiyat satırları ve KDV, kampanya kodunun özete taşınması; §2.2, §2.3, §2.5, §2.6, §2.7, §2.8, §5.4, §5.6) · v0.6: 12 Ekim 2026 (v0.6: G'nin 12 Ekim ana sayfa rötuşları: kurumsal süre 1/2/3 ay, bayi satırında çalışma durumu, tek sütun araç kartı ve fiyat bloğu, durdur düğmesi yerine kullanıcı başlatan şerit, güvence bandında akan çizgi, mağaza işaretleri, oklu rehber kaydırıcı, konu sekmeli SSS; §2.2, §2.4, §2.9, §5.4) · v0.5: 11 Ekim (v0.4: 10 Ekim, v0.3: 9 Ekim, v0.2: 4 Ekim 2026). v0.5: G'nin 11 Ekim navbar ve sayfa düzeni geri bildirimi (yüzen hap navbar, Bayilerimiz sayfası, filonun ana sayfaya taşınması; §2.1, §2.4, §2.6, §2.8, §5.3, §8)
 > Sahipler: G (frontend), arkadaş (backend)
 > İçerik kaynağı: G'nin proje sohbetindeki ilk mesajı (misyon, vizyon, hakkımızda). v0.3: G'nin 9 Ekim site güncellemesi mesajı ve aynı gün verdiği cevaplar (sayfa yapısı, ürün ve hizmet içeriği, kalite gereksinimleri). v0.4: G'nin 10 Ekim tasarım geri bildirimi (yeni renk paleti, beyaz zemin, tercihlerin navbara taşınması, ana sayfa ve Araçlarımız düzeni).
 > Açık kararlar §10'da. Değişiklikler PR ile yapılır.
@@ -69,6 +69,7 @@ v0.2'deki kitleye göre değişen "araç sınıfları" ("Size uygun sınıfı se
 
 - 3–4 slayt. Her slaytta görsel, başlık, kısa metin ve tek bir CTA. Metinler çeviri dosyasında.
 - **Otomatik geçiş yok.** Geçiş oklar, noktalar ve kaydırmayla (dokunmatikte sürükleme) yapılır; klavyeyle kullanılabilir.
+- **Oklar fotoğrafın içinde (v0.7, G):** alttaki iki düğme kalktı. Sol ok kartın en solunda, sağ ok en sağında, kartın boydan boya yüksekliğinde buzlu bir şerit (`backdrop-blur`) olarak durur; üzerinde yuvarlak beyaz bir ok vardır. Fare ve klavye ile galeriye gelince görünür (hover'ı olmayan dokunmatik cihazlarda hep görünür); metin sütunu sol şeride yer bırakır. Noktalar altta kalır.
 - İlk slaytın görseli sayfanın en büyük görselidir (LCP); öncelikli yüklenir, diğerleri tembel yüklenir.
 - Görseller fotoğraf kararına kadar yer tutucu (§10). İçeriğin sabit mi API'den mi geleceği açık karar; şimdilik sabit.
 
@@ -90,15 +91,15 @@ v0.2'deki kitleye göre değişen "araç sınıfları" ("Size uygun sınıfı se
 #### 2.2.4 İş birlikleri
 
 - 8 kurgusal şirket logosu (SVG). Gerçek marka logosu kullanılmaz.
-- Görsel ve davranış referansı: Framer "InfiniteLogoMarquee". Logolar gri ve soluktur, üzerine gelince renklenir ve hafifçe büyür. **Şerit kendiliğinden akmaz (v0.6, G):** durur; fare üzerine geldiğinde ya da klavye odağı şeride girdiğinde sola doğru akar, ayrılınca bulunduğu yerde durur.
-- **Durdur / Oynat düğmesi kalktı (v0.6):** hareket kendiliğinden başlamadığı, kullanıcının üzerine gelmesi ya da odaklamasıyla başladığı için WCAG 2.2.2 (beş saniyeden uzun otomatik hareket) sorun olmaz. Şerit klavyeyle odaklanabilir (`tabindex=0`, adlı grup); dokunmatikte şerit yatay kaydırılır. `prefers-reduced-motion` açıksa şerit hiç hareket etmez.
+- Görsel ve davranış referansı: Framer "InfiniteLogoMarquee". Logolar gri ve soluktur, üzerine gelince renklenir ve hafifçe büyür. **Şerit kendiliğinden akar, üzerine gelince durur (v0.7, G; v0.6'daki "kendiliğinden akmaz" kararı geri alındı):** Framer "Logo 3D Carousel" davranışı: logolar sola doğru süzülür, ortada büyür (en çok 1,25 kat), kenarlara doğru küçülür, solar ve hafifçe bulanıklaşır (en çok 2 px); kenarlar maskelenir. Fare üzerine gelince ya da klavye odağı şeride girince yumuşakça yavaşlayıp durur, ayrılınca devam eder. Yatay sürüklenebilir. Ekranda değilken çalışmaz.
+- **Durdur / Oynat düğmesi kalktı (v0.6):** hareket kendiliğinden başlamadığı, kullanıcının üzerine gelmesi ya da odaklamasıyla başladığı için WCAG 2.2.2 (beş saniyeden uzun otomatik hareket) sorun olmaz. **WCAG 2.2.2 notu (v0.7):** şerit kendiliğinden hareket eder; üzerine gelince ya da odaklanınca durması ve sürüklenebilmesi hareketi kullanıcının denetimine verir, ama fare ya da klavye kullanamayan biri için ayrı bir durdurma düğmesi yoktur; G bunu bilerek kabul etti. Şerit klavyeyle odaklanabilir (`tabindex=0`, adlı grup). `prefers-reduced-motion` açıksa şerit hiç hareket etmez, logolar ortada büyüyerek sabit durur.
 - Ekran okuyucu logoları bir kez okur; döngü için tekrarlanan kopyalar gizlidir.
 
 #### 2.2.5 Sık sorulan sorular
 
 - **v0.6 (G):** kategori sekmeli SSS bileşeni (sekmede kayan dolgu animasyonu, satırda dönen artı simgesi, `framer-motion`); altta iletişim çağrısı.
 - Sekmeler **konulardır** (Rezervasyon, Ödeme, Teslim, Hasar ve arıza, Hesap, Kurumsal; yalnızca sorusu olanlar), Yardım merkeziyle aynı veri. Bireysel / Kurumsal ayrımı kiralama kutusunda seçili olan sekmeden gelir: Kurumsal seçiliyse kurumsal sorular, değilse bireysel sorular görünür.
-- Satırlar bağımsız açılır (her biri kendi düğmesiyle). Arama kutusu ve soru numarası yok (§5.6: sırası olmayan içeriğe numara verilmez).
+- **Satır görünümü (v0.7, G: Framer "FAQs"):** satırlar tek bir yumuşak kapsayıcıda ayrı kartlar olarak üst üste durur; **aynı anda tek cevap açıktır** (v0.6'daki "bağımsız açılır" kaldırıldı); artı simgesi iki ince çizgidir, açılınca dikey çizgi yatıya döner ve eksiye dönüşür; cevap yaylı açılır (sertlik 500, sönüm 60). Her konunun ilk sorusu açık başlar. Arama kutusu ve soru numarası yok (§5.6: sırası olmayan içeriğe numara verilmez).
 - Altta "Sorunuz mu kaldı?" ve İletişim sayfasına bağlantı.
 - Açılma animasyonu `prefers-reduced-motion`'da kapalıdır.
 - İçerik API'den gelir (`GET /faq?audience=`); yükleniyor, boş ve hata durumları vardır.
@@ -122,7 +123,13 @@ Ana sayfa (Kurumsal) → form → "Talebiniz alındı" → satış ekibi arar. �
 **Bayi bulma:**
 Bayilerimiz → şehir filtresi ve/veya arama → liste ve haritadaki pinler daralır → bayi kartı (adres, çalışma saatleri, `tel:` telefon, e-posta, yol tarifi linki).
 
-**Kampanya kodu (v0.6, G):** ödeme sayfasında fiyat bloğunun yanında bir kod kutusu. Kod adreste durur (kişisel veri değil), sunucu fiyatı kodla hesaplar; indirim özette, ödemede ve onayda ayrı bir satırdır ve araç ile ek hizmetlerin toplamından düşer. Tanımsız kod "geçerli değil" der, fiyat değişmez. Deneme kodları kurgusaldır (NOVERA10 %10, HOSGELDIN %5).
+**Kampanya kodu (v0.6, G; v0.7: rezervasyon özetine taşındı):** rezervasyon özetinde "Fiyat özeti" panelinin içinde bir kod kutusu (ödeme sayfasında artık yoktur; orada kod ve indirim salt okunur satırlardır). Kod adreste durur (kişisel veri değil), sunucu fiyatı kodla hesaplar; indirim özette, ödemede ve onayda ayrı bir satırdır ve araç ile ek hizmetlerin toplamından düşer. Tanımsız kod "geçerli değil" der, fiyat değişmez. Deneme kodları kurgusaldır (NOVERA10 %10, HOSGELDIN %5).
+
+**Uygun Araçlar'da filtre (v0.7, G):** "N araç bulundu" başlığının sağında bir **Filtrele** düğmesi (etkin filtre sayısı rozetle) bir panel açar: sınıf (aramada bulunan sınıflar), vites, yakıt, en az koltuk ve sıralama (en ucuz, en pahalı, en yeni). Seçim hemen uygulanır ve adreste durur (`sinif`, `vites`, `yakit`, `koltuk`, `sirala`), arama parametreleriyle birlikte paylaşılabilir; aynı çip yeniden basılınca grubu temizler; "Filtreleri temizle" hepsini sıfırlar. Filtreye uyan araç yoksa kendi boş durumu ve temizleme bağlantısı gösterilir. Süzme sunucuda yapılır.
+
+**Puanla öde (v0.7, G; v1'deki "puanla ödeme yok" kararı değişti):** yalnızca **giriş yapmış bireysel hesapta ve TL'de**. Sonuç listesinin üstünde bir anahtar ("Puanla öde, 165 puan"); açıkken her kart "340 puan + ₺2.060" gibi puan ve kalan parayı gösterir ve "Kirala" seçimi (`puan=1`) rezervasyon özetine taşır. **1 puan = ₺1; puan, kampanya kodundan sonra kalan tutarın en çok yarısını karşılar** (bir kiralama bedava olmaz). Oturum yoksa anahtar yerine "Puanla ödemek için giriş yapın" bağlantısı görünür; TL dışında hiç gösterilmez. Özet sayfasında aynı anahtar bulunur. Backend sözleşmesinde yoktur: `POST /reservations/price` gövdesine `usePoints` önerilir (BE'ye iletilecek); mock'ta fiyatı sunucu hesaplar.
+
+**Fiyat özeti satırları (v0.7, G):** araç, ek hizmetler, (bir şey düşülüyorsa) **ara toplam**, **kampanya indirimi**, **puan** (−₺165, 165 puan), **toplam** ve altında **toplamın içindeki KDV** ("Toplamın KDV'si (%20) dahildir: ₺332,50"). KDV (%20, kurgusal oran) fiyatın içindedir, üstüne eklenmez: toplamın altıda biridir. Aynı satırlar özette, ödeme sayfasındaki kısa özette ve onayda görünür.
 
 ### 2.4 Araçlarımız (ana sayfa bölümü)
 
@@ -136,7 +143,7 @@ Bayilerimiz → şehir filtresi ve/veya arama → liste ve haritadaki pinler dar
 
 ### 2.5 Ürünler ve hizmetler
 
-- Arayüz şimdiki haliyle kalır; G ileride modernleştirecek. Bu sürümde yalnızca içerik değişir (Ek A).
+- **v0.7 (G): ürün sayfaları yenilendi.** Liste: dört kart, her biri kendi tonunda yumuşak bir zeminde (zeytin, taş, ege mavisi, yaprak) ve köşesinde sitenin renkleriyle çizilmiş küçük bir çizimle (filo panosu, VIP araç, takvim, yaprak); öne çıkan ürün tam genişlikte ilk sırada, diğer üçü altında; üzerine gelince kart yükselir, çizim büyür ve döner. Altta "Hangisi size uygun?" çağrısı. Detay: ürünün tonunda bir hero (rozet, başlık, konsept, "kimler için", Teklif Al), "Ne alıyorsunuz?" için üç ikonlu kart, numaralı "Teknolojik artısı" paneli, xl'de yapışkan teklif kartı ve "Diğer çözümler".
 - Ürün detayı üç bölümdür: **Konsept**, **Ne Alıyorsunuz?**, **Teknolojik Artısı** (v0.2'deki "Neler dahil" ve "Kimler için" yerine). Ürün kartında başlık, Konsept metni ve "En çok tercih edilen" rozeti (yalnızca Akıllı Kurumsal Filo Kiralama).
 - Hizmetlerde her hizmetin başlığı, Ek A'daki tek cümlelik açıklaması ve 3 kısa maddesi bulunur. Maddeleri Claude yazar (G onayladı), Ek A'daki iddiaların dışına çıkmaz.
 - Ürün adresleri yeni slug'larla değişir (Ek A). Site yayında olmadığı için eski adreslere yönlendirme gerekmez.
@@ -150,6 +157,8 @@ Yukarıdan aşağıya:
 3. **Departman e-postaları:** Pazarlama, Satış, İş Birlikleri; her biri ayrı `mailto:` bağlantısı.
 4. **İletişim formu:** ad soyad, e-posta, telefon (isteğe bağlı), konu, mesaj, KVKK onay kutusu; gönderince "Mesajınız alındı" durumu (§9).
 5. **Bayilerimiz'e bağlantı (v0.5):** bayi listesi ve harita Bayilerimiz sayfasına taşındı (§2.6.1); İletişim'de kısa bir "Bayilerimiz" bağlantısı kalır.
+
+**E-posta bağlantıları (v0.7, G: Framer "Smart Contact Link"):** sitedeki e-posta adresleri (genel merkez, departmanlar, bayi kartı, kurumsal hesap) düz `mailto:` yerine bir düğmedir; basılınca üstünde bir balon açılır: "E-posta gönder" (`mailto:`) ve "Adresi kopyala" (panoya kopyalar, "Kopyalandı" der). Balon yaylı açılır, ekran kenarından taşmaz; dışarı tıklayınca, Esc'ye basınca (odak düğmeye döner) ya da Tab ile çıkınca kapanır. Adres "@" içeriyorsa e-posta, değilse telefon kabul edilir (telefonlara henüz uygulanmadı).
 
 Genel merkez ve departman bilgileri kurgusaldır ve sabit içeriktir (çeviri dosyası); e-postalar gerçek bir kişiye gitmeyen ayrılmış bir alan adıyla yazılır (`.example`). Bayi verisi API'den gelir.
 
@@ -179,6 +188,8 @@ Mobil:    (hap) [Logo]                                                     [hesa
 - **Görünüm (v0.5, G):** navbar sayfanın üstünde yüzen, tam yuvarlak bir **hap**tır (referans Framer "Modern Navbar"): beyaz zemin (koyu temada yüzey rengi), ince çizgi, hafif gölge; solda logo, linkler bir arada, sağda tercihler ve hesap. Link üzerine gelince yuvarlak, hafif dolgulu bir hap belirir. Navbar sayfayla kayar, yapışmaz (odaktaki öğeyi örtmesin, WCAG 2.2). Mobilde aynı hap daha küçük köşeyle durur.
 - Linkler: Araç Kirala · Bayilerimiz · Ürünler · Hizmetler · Hakkımızda. **İletişim, diğer linklerden farklı görünür** (çerçeveli hap) ve **belirgin bir boşlukla ayrı durur**; hesap simgesinden de ayırt edilebilir. Mobil menüde de aynı vurgu.
 - **Hesap (v0.5, G):** giriş yapılmamışsa zeminden ayrışan dolgulu **Giriş Yap** butonu (v0.4, G); giriş yapmışsa yazı yok, yuvarlak bir **kullanıcı simgesi** (`aria-label` "Hesabım") profile gider.
+- **Link hover'ı (v0.7, G: Framer "SplitTextHover"):** üzerine gelince ya da odaklanınca harfler sırayla (0,3 sn, harf başına 20 ms) yukarı yuvarlanır, altından aynı harfler gelir; ekran okuyucu kelimeyi bir kez okur. Mobil menüde (hover yok) eski dolgu kalır. Aynı efekt "Yol Boyu Güvence'yi inceleyin" bağlantısındadır.
+- **Ürünler menüsü (v0.7, G: Framer "Pill Dropdown Nav"):** tıklamanın yanında imleç başlığın üstünde durunca da açılır (120 ms içeri, 200 ms dışarı gecikme; dokunmatikte yalnızca tıklama), ok döner, panel 10 px altta yaylı açılır ve imlecin ya da odağın bulunduğu satırın arkasında bir vurgu kayar. Hover'la açılınca odak yerinde kalır; klavye ve Esc davranışı değişmedi.
 - **Ürünler (v0.5, G):** yalnızca Ürünler açılır menüdür; açılınca 4 ürün listelenir, her biri kendi sayfasına gider. Masaüstünde başlık menüyü açan bir düğmedir; liste sayfası menünün son maddesidir ("Tüm ürünler →"), çünkü hem link hem açılır menü olan bir öğe tıklanınca ne olacağını belirsizleştirir. Klavyeyle açılıp gezilebilir, Esc kapatır; mobil menüde başlık liste sayfasına gider ve öğeler altında girintili listelenir. **Hizmetler (v0.5) açılır değildir**, düz bir linktir; hizmetler kendi sayfasındaki akordeondadır.
 - **Para birimi (v0.4, G):** navbarda kendi açılır menüsü; düğmede seçili birimin simgesi ve kodu (`₺ TRY`), listede `₺ TRY`, `€ EUR`, `$ USD`. Linklerle aynı yazı ve üzerine gelme diliyle yazılır.
 - **Dil (v0.5, G):** kendi açılır menüsü; düğmede bayrak ve kod (`TR`), listede bayrak ve dilin kendi adı (Türkçe, English). Bayraklar satır içi SVG'dir (emoji bayrak bazı sistemlerde harf olarak çizilir), dekoratiftir; İngilizce için İngiliz bayrağı. Mobilde para birimi ve dil hamburger menünün içindedir. Footer'da tercih yok.
@@ -187,9 +198,10 @@ Mobil:    (hap) [Logo]                                                     [hesa
 - Navbar'da ayrı "Kurumsal Teklif" linki yok (G'nin kararı); kurumsal giriş noktası ana sayfadaki seçim ve ürün sayfaları.
 - Hamburger = site gezintisi. Altı bağlantı 1280px altında yan yana sığmadığı için hamburger mobilde ve tablette görünür, satır içi menü 1280px ve üstünde. Profil menüsü = hesap (her ekranda).
 - Giriş yapılmamışsa Profil yerine "Giriş Yap".
-- **Footer (v0.7, G):** iletişim sütunu kalktı (bilgiler İletişim sayfasında); yerine **Bizi takip edin** sütunu (ikon + ad, tıklanamaz, "yakında" notu). Logonun ve sloganın altında, imleci izleyen bir **göz çifti** (Framer "eyes", süs; gözbebekleri gözün içinde kalır, birkaç sn'de bir göz kırpar; hareket azalt açıksa düz bakar). Keşfet linkleri iki sütun (Rehberler ve Yardım dahil); alt şeritte yalnızca telif notu.
-- **Footer:** referans Framer "Simple Footer", açık zeminde (`stone-100`; sayfadaki tek koyu bant Yol Boyu Güvence kalır, §5.4): solda logo, kısa tanım ve altında telif + "kurgusal proje" notu; sağda sade sütunlar: Keşfet linkleri, Yasal linkler (5 sayfa ve "Çerez tercihleri"), iletişim. **Bizi takip edin** (v0.4, G): sosyal medya ikonları görünür ama şimdilik tıklanamaz (bağlantı değil; kurgusal şirketin hesabı yok, adres uydurulmaz). Ekran okuyucu için "yakında" bilgisi taşır.
-- Dil (TR/EN), tema (açık/koyu/sistem; **varsayılan açık**) ve para birimi (TRY/EUR/USD) seçimi navbardaki tercih panelindedir; giriş yapan kullanıcıda tercih hesaba kaydedilir. Tutarlar günlük kurla çevrilir (ARCHITECTURE ADR-15); ödeme sahte olduğu için hangi para birimi seçilirse seçilsin para alınmaz.
+- **Footer (v0.7, G):** ↗ oku kalktı; linklerde Framer "Wavy Nav link" efekti: üzerine gelince harfler sırayla 6 px aşağıdan yaylı yerine oturur ve altta ince bir çizgi soldan sağa uzar (hareket azalt açıksa yalnızca çizgi). **İletişim sütunu kalktı** (bilgiler İletişim sayfasında); yerine "Bizi takip edin" sütunu: dört yuvarlak sosyal ikon (Framer "Quick Social Links"), üzerine gelince ya da odaklanınca tabanından 1,25 kat büyür ve üstünde "Instagram · yakında" etiketi yükselir; **bağlantı değildir** (hesap yok), klavyeyle odaklanır. Logonun ve sloganın yanında imleci izleyen bir **göz çifti** (Framer "eyes", süs; 72×108 px gözler, göz kırpar; hareket azalt açıksa düz bakar). Keşfet linkleri iki sütun (Rehberler ve Yardım dahil); alt şeritte yalnızca telif notu; sütun boşlukları tutarlıdır.
+- **Footer (v0.6, G: Framer "Simple Footer" tam anlamıyla; ok efekti v0.7'de wavy ile değişti):** link üzerine gelince ya da odaklanınca yanında küçük bir ↗ oku belirir (saydamlıktan görünüre, küçükten normale; 0,6 sn, yumuşak bitişli eğri; okun yeri ayrılmıştır, metin kaymaz). Marka bloğu (xl'de %43) ve alt şerit biraz küçükten yerine oturur, link sütunları aşağıdan yükselir; sayfa o bloğa kaydırılınca bir kez olur, hareket azalt açıksa ya da blok zaten ekrandaysa hiç olmaz. Hareket yalnızca yer ve ölçektir, solma yoktur (opaklığı 0 olan blok kontrast denetiminde hata sayılır). xl altında linkler markadan önce gelir. Sosyal ikonlar bağlantı olmadığı için hover almaz.
+- **Footer (düzen):** referans Framer "Simple Footer", açık zeminde (`stone-100`; sayfadaki tek koyu bant Yol Boyu Güvence kalır, §5.4): solda logo, kısa tanım ve altında telif + "kurgusal proje" notu; sağda sade sütunlar: Keşfet linkleri, Yasal linkler (5 sayfa ve "Çerez tercihleri"), iletişim. **Bizi takip edin** (v0.4, G): sosyal medya ikonları görünür ama şimdilik tıklanamaz (bağlantı değil; kurgusal şirketin hesabı yok, adres uydurulmaz). Ekran okuyucu için "yakında" bilgisi taşır.
+- Dil (TR/EN) ve para birimi (TRY/EUR/USD) seçimi navbardadır; tema (açık/koyu/sistem; **varsayılan açık**) Profil > Ayarlar'dadır. Giriş yapan kullanıcıda üçü de hesaba kaydedilir. Tutarlar günlük kurla çevrilir (ARCHITECTURE ADR-15); ödeme sahte olduğu için hangi para birimi seçilirse seçilsin para alınmaz.
 
 ### 2.9 Hesap, puan, yardım ve rehberler (v0.4)
 
@@ -197,7 +209,7 @@ G'nin 10 Ekim istekleri. Her biri BACKLOG M7'de sırası gelince yapılır.
 
 - **Bireysel ve kurumsal giriş:** giriş sayfasında iki sekme (`/giris`, `?tip=kurumsal`). Kurumsal sekme firma e-postasıyla giriş yapar. Kurumsal hesap basittir: firma bilgisi, teklif talepleri ve iletişim kişisi; filo yönetim paneli kapsam dışı (§3). Kayıt bireyseldir; kurumsal hesap satış görüşmesinden sonra Novera tarafından açılır (öneri; backend ile netleşecek). Backend'de hesap türü gerekir.
 - **Ayarlar:** giriş yapan kullanıcı varsayılan para birimini, dili ve temayı seçer; seçim hesaba kaydedilir ve her girişte uygulanır.
-- **Puan sistemi:** gösterim ve kurallar. Tamamlanan her rezervasyon, toplam tutarın her tam ₺100'ü için 1 puan kazandırır (ek hizmetler dahil, aşağı yuvarlanır; ₺2.850 = 28 puan; G onayladı, 10 Ekim). İptal edilen rezervasyon puan kazandırmaz. Profilde bakiye, kazanım geçmişi ve kurallar görünür. Puanla ödeme v1'de yok; hesabı backend yapar.
+- **Puan sistemi:** gösterim ve kurallar. Tamamlanan her rezervasyon, toplam tutarın her tam ₺100'ü için 1 puan kazandırır (ek hizmetler dahil, aşağı yuvarlanır; ₺2.850 = 28 puan; G onayladı, 10 Ekim). İptal edilen rezervasyon puan kazandırmaz. Profilde bakiye, kazanım geçmişi ve kurallar görünür. **Puanla ödeme (v0.7, G):** puan, sonuç listesinde "Puanla öde" ile harcanır: 1 puan = ₺1, en çok kalan tutarın yarısı, yalnızca TL ve bireysel hesap (§2.3). Hesabı backend yapar.
 - **Rezervasyonlarım:** yaklaşan ve geçmiş seyahatler ayrı listelenir; her seyahatte tarih, bayi, araç, tutar ve kazanılan puan.
 - **Yardım (`/yardim`):** İletişim'den ayrı. Konulara göre gruplanmış sorular (rezervasyon, ödeme, araç teslimi, hasar ve arıza, hesap), arama, rehberlere bağlantılar; cevap bulunamazsa İletişim'e yönlendirme. SSS içeriğiyle aynı kaynaktan beslenir, ana sayfadaki SSS'nin geniş hâlidir.
 - **Araç kiralama rehberleri (`/rehberler`):** 4–6 kısa rehber (ör. gerekli belgeler, yakıt ve teslim kuralları, farklı bayiye iade, hasar durumunda ne yapılır, elektrikli araç kullanımı). Metinleri Claude yazar, iddia uydurmaz. Ana sayfada rehberlerin hepsi yan yana oklarla (sol ve sağ kenarda) kaydırılır; "Tüm rehberler" düğmesi yoktur (v0.6, G), `/rehberler` footer'dan, Yardım'dan ve rehber sayfalarından açılır.
@@ -246,7 +258,7 @@ Bunlar sitede **sadece tanıtım içeriği** olarak yer alır, işlevsel olarak 
 - Kurumsal müşterinin siteden kendi başına rezervasyon yapması (kurumsal akış form + görüşme, §2.2.3)
 - Kariyer, basın/medya sayfaları
 - Kurumsal filo yönetim paneli ("Filom": araç, sürücü, fatura takibi). Basit kurumsal hesap (giriş, firma bilgisi, taleplerim) v0.4'te kapsama girdi (§2.9)
-- Puanla ödeme ya da indirim (puanlar v1'de yalnızca kazanılır ve gösterilir)
+- Puanla ödeme backend'de (puanlar v0.7'den beri ön yüzde harcanabilir; kesin hesap ve düşüm API işidir)
 
 ---
 
@@ -362,7 +374,7 @@ Gövde metni en fazla ~68 karakter genişliğinde tutulur.
   - Sayfa akışında bir kez **koyu zeytin bant** (`olive-900`) kullanılır: Yol Boyu Güvence bölümü. Açık sayfada tek koyu bölüm, dikkati oraya toplar.
   - Büyük, kenarları yuvarlatılmış fotoğraflar; araç fotoğraflarında doğal ışık ve açık hava.
 - **Hareket:** varsayılan olarak yalnızca durum değişikliğini anlatan geçişler (anahtar değişince alanın yumuşak geçişi, pencere açılıp kapanması). Kaydırınca beliren dekoratif animasyon yok.
-  - **İstisnalar (v0.3, G'nin onayı):** iş birlikleri şeridi (üzerine gelince/odaklanınca akış; kendiliğinden başlamaz, v0.6), Yol Boyu Güvence bandındaki çizgi (görününce iki tur akan bir iz, sonra durur; v0.6, G), Hakkımızda sayaçları (görününce bir kez sayar), Hikayemiz zaman çizelgesi (seçim değişince geçiş), SSS'nin yaylı açılması, galeri slayt geçişi.
+  - **İstisnalar (v0.3, G'nin onayı):** iş birlikleri şeridi (v0.7: kendiliğinden akar, üzerine gelince/odaklanınca durur), Yol Boyu Güvence adımları (görününce bir kez sırayla dolar, sonra durur; v0.7, G: Framer "StepProgress"; v0.6'daki akan iz kalktı), nav ve footer linklerinde harf hover'ı, ürün kartlarının hover'ı, Smart Contact Link balonu, sosyal ikonların büyümesi, göz çiftinin imleci izlemesi, Hakkımızda sayaçları ve **Sürdürülebilirlik rakamları** (görününce bir kez sayar; v0.7: yüzdeler 0'dan tam puanlarla sayar), Hikayemiz zaman çizelgesi (seçim değişince geçiş), SSS'nin yaylı açılması, galeri slayt geçişi.
   - Kendiliğinden başlayan bir geçiş yok: galeri ve zaman çizelgesini kullanıcı ilerletir.
   - `prefers-reduced-motion` açıksa hareketli her şey durur ya da anında geçer.
 
@@ -376,7 +388,7 @@ Hakkımızda metnindeki "Sadece Araç Kiralamıyoruz, Yol Boyu Güvence Sunuyoru
 
 ### 5.6 Kaçınılacaklar
 
-Eşit üç sütunlu ikon+başlık+gri metin kartları, gerekçesiz gradient, sırası olmayan içeriğe 01/02/03, her bölümde aynı ortalanmış yerleşim, amaçsız animasyon, saf siyah metin, saf gri nötrler.
+Eşit üç sütunlu ikon+başlık+gri metin kartları, gerekçesiz gradient (**tek istisna, v0.7, G:** ürün kartları ve ürün sayfasının hero'su, temanın kendi tonlarından yumuşak bir zeminle; her ürünün kendi tonu vardır), sırası olmayan içeriğe 01/02/03, her bölümde aynı ortalanmış yerleşim, amaçsız animasyon, saf siyah metin, saf gri nötrler.
 
 ### 5.7 Erişilebilirlik
 
