@@ -67,16 +67,21 @@ test("the Road Assurance steps start unfilled and fill once the band is on scree
   await expect(steps.getByRole("listitem")).toHaveCount(5);
 });
 
-test("the gallery's arrows sit inside the picture and move the slides", async ({ page }) => {
+test("the gallery's arrows sit on the card's left and right edge and move the slides", async ({ page }) => {
   await page.goto("/");
   const gallery = page.getByRole("region", { name: /Kampanyalar/ }).first();
   const next = page.getByRole("button", { name: "Sonraki kampanya" });
   const art = page.getByRole("group", { name: "1 / 3" });
-  const arrow = (await next.boundingBox())!;
+  const previous = page.getByRole("button", { name: "Önceki kampanya" });
+  const nextBox = (await next.boundingBox())!;
+  const previousBox = (await previous.boundingBox())!;
   const slide = (await art.boundingBox())!;
-  // The band runs the full height of the picture, inside the slide's right edge.
-  expect(arrow.x + arrow.width).toBeLessThanOrEqual(slide.x + slide.width + 1);
-  expect(arrow.height).toBeGreaterThan(100);
+  // The left band is on the card's own left edge, the right one on its right edge, both the full
+  // height of the picture (the top of the card on a phone).
+  expect(Math.abs(previousBox.x - slide.x)).toBeLessThanOrEqual(1);
+  expect(Math.abs(nextBox.x + nextBox.width - (slide.x + slide.width))).toBeLessThanOrEqual(1);
+  expect(previousBox.height).toBeGreaterThan(100);
+  expect(nextBox.height).toBeGreaterThan(100);
   await gallery.hover();
   await next.click();
   await expect(page.getByRole("button", { name: "2. kampanyaya git" })).toHaveAttribute("aria-current", "true");

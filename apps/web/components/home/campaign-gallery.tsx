@@ -67,7 +67,7 @@ export function CampaignGallery({ slides }: { slides: CampaignSlide[] }) {
             aria-label={t("slideLabel", { index: index + 1, total: slides.length })}
             className="grid w-full shrink-0 snap-start overflow-hidden bg-surface-muted md:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]"
           >
-            <div className="order-2 flex flex-col items-start justify-center gap-4 p-6 md:order-1 md:p-10 xl:p-14">
+            <div className="order-2 flex flex-col items-start justify-center gap-4 p-6 md:order-1 md:p-10 md:pl-24 xl:p-14 xl:pl-28">
               {/* The page's h1 is the rental heading below (SPEC §2.2); campaigns are h2. */}
               <h2 className="text-h1 text-fg">{slide.title}</h2>
               <p className="max-w-md text-body text-fg-muted">{slide.text}</p>
@@ -81,13 +81,12 @@ export function CampaignGallery({ slides }: { slides: CampaignSlide[] }) {
           </div>
         ))}
       </div>
-      {/* Laid over the strip on the slides' own grid, so the bands cover exactly the picture: the
-          top of the slide on a phone, its right column from md up. */}
-      <div className="pointer-events-none absolute inset-0 grid overflow-hidden rounded-media md:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
-        <div className="relative aspect-[16/10] self-start md:col-start-2 md:aspect-auto md:self-stretch">
-          <GalleryArrow side="previous" label={t("previous")} onClick={(event) => go(targetRef.current - 1, event.timeStamp)} />
-          <GalleryArrow side="next" label={t("next")} onClick={(event) => go(targetRef.current + 1, event.timeStamp)} />
-        </div>
+      {/* Laid over the strip: the bands run down the card's own left and right edge (G), over the
+          picture on a phone, where it is the top of the card, and the whole height from md up. The
+          text column keeps room for the left band (its padding below). */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 aspect-[16/10] overflow-hidden rounded-t-media md:inset-y-0 md:aspect-auto md:rounded-media">
+        <GalleryArrow side="previous" label={t("previous")} onClick={(event) => go(targetRef.current - 1, event.timeStamp)} />
+        <GalleryArrow side="next" label={t("next")} onClick={(event) => go(targetRef.current + 1, event.timeStamp)} />
       </div>
       </div>
 
