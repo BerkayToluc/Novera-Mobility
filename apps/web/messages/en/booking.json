@@ -39,7 +39,10 @@
     },
     "vatNote": "Prices include VAT. There is no extra charge for returning at a different branch.",
     "cancelNote": "You can cancel free of charge up to 24 hours before pick-up. <link>Rental terms</link>",
-    "discount": "Campaign discount ({code}, {percent}%)"
+    "discount": "Campaign discount ({code}, {percent}%)",
+    "subtotal": "Subtotal",
+    "pointsLine": "Points ({count} points)",
+    "vatIncluded": "VAT (%{percent}) included in the total:"
   },
   "Payment": {
     "metaTitle": "Payment",

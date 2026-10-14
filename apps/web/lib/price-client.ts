@@ -16,10 +16,17 @@ export async function quotePrice(
   extras: Extra[],
   currency: Currency,
   promoCode?: string,
+  pointsBalance?: number,
 ): Promise<PriceSummary> {
   void currency;
   if (process.env.USE_MOCKS !== "1") throw new ApiUnavailableError();
   // An unknown code is simply not applied: the page says so (BookingData.promo), the price is the plain one.
   const percent = promoCode ? promoPercent(promoCode) : null;
-  return summarize(vehicle.dailyPrice, days, extras, promoCode && percent ? { code: promoCode, percent } : undefined);
+  return summarize(
+    vehicle.dailyPrice,
+    days,
+    extras,
+    promoCode && percent ? { code: promoCode, percent } : undefined,
+    pointsBalance,
+  );
 }

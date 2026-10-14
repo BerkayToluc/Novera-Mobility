@@ -7,7 +7,6 @@ import { HoldCountdown } from "@/components/booking/hold-countdown";
 import { HoldEnded } from "@/components/booking/hold-states";
 import { TotalBar } from "@/components/booking/total-bar";
 import { PaymentForm } from "@/components/payment/payment-form";
-import { PromoCode } from "@/components/payment/promo-code";
 import { Button } from "@/components/ui/button";
 import { StateMessage } from "@/components/ui/state-message";
 import { GuaranteeStrip } from "@/components/vehicle/guarantee-strip";
@@ -94,7 +93,6 @@ export default async function PaymentPage({ searchParams }: Props) {
 
         <div className="flex flex-col gap-4 xl:sticky xl:top-24">
           <BookingBrief data={loaded} title={t("summaryTitle")} />
-          <PromoCode query={loaded.query} promo={loaded.promo} percent={loaded.summary.discount?.percent ?? null} />
           <GuaranteeStrip />
           <Button asChild variant="link" size="inline" className="self-start">
             <Link href={{ pathname: "/rezervasyon", query: loaded.query }}>{t("edit")}</Link>

@@ -65,6 +65,32 @@ describe("a campaign code", () => {
   });
 });
 
+describe("points and VAT in the summary", () => {
+  it("has a subtotal, no points and the VAT inside the total by default", () => {
+    const summary = summarize(try_(800), 3, []);
+    expect(summary.subtotal).toEqual(try_(2400));
+    expect(summary.points).toBeNull();
+    // A sixth of ₺2.400 is VAT at 20 percent: ₺400.
+    expect(summary.vat).toEqual(try_(400));
+  });
+
+  it("spends the points a lira each, after the code, and takes them off the total", () => {
+    const summary = summarize(try_(800), 3, [], { code: "NOVERA10", percent: 10 }, 340);
+    // ₺2.400 less ₺240 is ₺2.160; 340 points are ₺340 of it.
+    expect(summary.points).toEqual({ count: 340, amount: try_(340) });
+    expect(summary.total).toEqual(try_(1820));
+    expect(summary.vat).toEqual({ amount: Math.floor((182000 * 20) / 120), currency: "TRY" });
+    expect(summary.subtotal.amount - (summary.discount?.amount.amount ?? 0) - summary.points!.amount.amount).toBe(
+      summary.total.amount,
+    );
+  });
+
+  it("covers at most half of what is left, and ignores a balance in another currency", () => {
+    expect(summarize(try_(800), 3, [], undefined, 99999).points?.count).toBe(1200);
+    expect(summarize({ amount: 3000, currency: "EUR" }, 2, [], undefined, 500).points).toBeNull();
+  });
+});
+
 describe("promo codes", () => {
   it("normalizes what was typed and drops what is not a code", () => {
     expect(normalizePromo(" novera10 ")).toBe("NOVERA10");

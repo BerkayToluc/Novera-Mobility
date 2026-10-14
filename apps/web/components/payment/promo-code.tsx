@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { useRouter } from "@/i18n/navigation";
 import { normalizePromo } from "@/lib/promo-codes";
 
-// The campaign code box on the payment page (SPEC §2.3). The code is kept in the address (kod),
+// The campaign code box on the booking summary (SPEC §2.3, G: it moved here from the payment page). The code is kept in the address (kod),
 // so the server prices the booking with it and the summary and the confirmation show the same
 // total; it is not personal data. Applying and removing go through the address, not through the
 // payment form: Enter in this box must not pay.
@@ -17,8 +17,10 @@ export function PromoCode({
   query,
   promo,
   percent,
+  pathname = "/rezervasyon",
 }: {
   query: Record<string, string>;
+  pathname?: "/rezervasyon" | "/odeme";
   // What the server made of the code in the address: not entered, entered and taken, or not a code.
   promo: { code: string; applied: boolean } | null;
   percent: number | null;
@@ -32,14 +34,14 @@ export function PromoCode({
     setPending(true);
     const { kod: previous, ...rest } = query;
     void previous;
-    router.replace({ pathname: "/odeme", query: code ? { ...rest, kod: code } : rest });
+    router.replace({ pathname, query: code ? { ...rest, kod: code } : rest }, { scroll: false });
     // The page asks the server again; the box is free once the new address is in.
     setTimeout(() => setPending(false), 600);
   }
 
   return (
-    <section aria-labelledby="promo-title" className="flex flex-col gap-3 rounded-card border border-border bg-surface p-6">
-      <h2 id="promo-title" className="flex items-center gap-2 text-h3 text-fg">
+    <section aria-labelledby="promo-title" className="flex flex-col gap-3 border-t border-border-strong pt-4">
+      <h2 id="promo-title" className="flex items-center gap-2 text-label text-fg">
         <Tag aria-hidden="true" className="size-5 text-link" />
         {t("title")}
       </h2>
