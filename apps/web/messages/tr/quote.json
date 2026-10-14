@@ -31,7 +31,7 @@
       "premium": "Premium"
     },
     "cities": "Teslim şehirleri",
-    "citiesHint": "Araçları teslim etmemizi istediğiniz şehirler, örneğin İstanbul, Ankara.",
+    "citiesHint": "Şehir adının ilk harflerini yazın ve listeden seçin; örneğin “İ” yazınca İstanbul ve İzmir gelir. En fazla 10 şehir.",
     "product": "İlgilendiğiniz ürün (isteğe bağlı)",
     "noProduct": "Henüz karar vermedim",
     "note": "Eklemek istedikleriniz (isteğe bağlı)",
@@ -43,7 +43,7 @@
       "email": "Geçerli bir e-posta adresi yazın.",
       "phone": "Alan koduyla birlikte geçerli bir telefon numarası yazın.",
       "needs": "En az bir araç türü seçin.",
-      "cities": "En az bir teslim şehri yazın.",
+      "cities": "Listeden en az bir teslim şehri seçin.",
       "consent": "Devam etmek için aydınlatma metnini onaylayın.",
       "invalid": "Talebiniz eksik görünüyor. Alanları kontrol edip tekrar gönderin.",
       "unavailable": "Teklif servisi şu an kullanılamıyor. Lütfen daha sonra tekrar deneyin.",
@@ -54,7 +54,11 @@
       "text": "Satış ekibimiz {email} adresine ve verdiğiniz telefona bir iş günü içinde dönüş yapacak.",
       "reference": "Talep numaranız:",
       "again": "Yeni talep oluştur"
-    }
+    },
+    "citiesPlaceholder": "Şehir yazın veya listeden seçin",
+    "citiesEmpty": "Bu harflerle başlayan şehir yok.",
+    "citiesRemove": "{city} şehrini kaldır",
+    "citiesMax": "En fazla {max} şehir seçildi"
   },
   "QuotePage": {
     "metaTitle": "Kurumsal Teklif",
