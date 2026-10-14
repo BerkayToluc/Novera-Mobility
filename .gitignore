@@ -24,3 +24,5 @@ coverage/
 # Playwright
 test-results/
 playwright-report/
+
+apps/api/src/generated/
