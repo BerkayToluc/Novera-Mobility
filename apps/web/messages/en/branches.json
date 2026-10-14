@@ -3,7 +3,6 @@
     "metaTitle": "Our Branches",
     "metaDescription": "Novera Mobility's branches in 14 cities: address, opening hours, phone and directions. Filter by city and see them on the map.",
     "title": "Our Branches",
-    "intro": "Filter by city or search by branch name, district or address; the list and the map narrow together.",
     "searchLabel": "Search branches",
     "searchPlaceholder": "Branch name, district or address",
     "viewLabel": "View",
@@ -39,6 +38,9 @@
     },
     "cityLabel": "City",
     "allCities": "All cities",
-    "countFiltered": "Showing {count} of {total} branches"
+    "countFiltered": "Showing {count} of {total} branches",
+    "citySearch": "Search cities",
+    "citySearchPlaceholder": "Type a city",
+    "noCity": "No city matches."
   }
 }

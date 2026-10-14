@@ -33,10 +33,7 @@ export default async function BranchesPage() {
     <div className="mx-auto flex max-w-content flex-col gap-8 px-4 py-12 md:px-8 xl:py-16">
       {/* Each branch is described to search engines as a car rental place (ADR-18). */}
       {branches?.map((branch) => <JsonLd key={branch.id} data={branchJsonLd(branch)} />)}
-      <header className="flex flex-col gap-3">
-        <h1 className="text-h1 text-fg">{t("title")}</h1>
-        <p className="max-w-prose text-body text-fg-muted">{t("intro")}</p>
-      </header>
+      <h1 className="text-h1 text-fg">{t("title")}</h1>
 
       {branches ? (
         // The key is public by design (ARCHITECTURE ADR-09): it is restricted by referrer in

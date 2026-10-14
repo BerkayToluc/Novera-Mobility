@@ -3,7 +3,6 @@
     "metaTitle": "Bayilerimiz",
     "metaDescription": "Novera Mobility'nin 14 şehirdeki bayileri: adres, çalışma saatleri, telefon ve yol tarifi. Şehre göre süzün, haritada görün.",
     "title": "Bayilerimiz",
-    "intro": "Şehre göre süzün ya da bayi adı, ilçe veya adresle arayın; liste ve harita birlikte daralır.",
     "searchLabel": "Bayi ara",
     "searchPlaceholder": "Bayi adı, ilçe veya adres",
     "viewLabel": "Görünüm",
@@ -39,6 +38,9 @@
     },
     "cityLabel": "Şehir",
     "allCities": "Tüm şehirler",
-    "countFiltered": "{total} bayiden {count} tanesi gösteriliyor"
+    "countFiltered": "{total} bayiden {count} tanesi gösteriliyor",
+    "citySearch": "Şehir ara",
+    "citySearchPlaceholder": "Şehir adı yazın",
+    "noCity": "Eşleşen şehir yok."
   }
 }
