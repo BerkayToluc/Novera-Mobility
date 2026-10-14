@@ -8,7 +8,6 @@
     "back": "Tüm rehberler",
     "homeTitle": "Araç kiralama rehberleri",
     "homeIntro": "Kiralamadan önce merak edilenler, kısa ve net.",
-    "viewAll": "Tüm rehberler",
     "moreTitle": "Diğer rehberler",
     "helpTitle": "Cevabı bulamadınız mı?",
     "helpText": "Ekibimiz yardımcı olsun.",
@@ -159,6 +158,12 @@
           }
         ]
       }
+    },
+    "carousel": {
+      "label": "Araç kiralama rehberleri",
+      "roledescription": "kaydırıcı",
+      "previous": "Önceki rehberler",
+      "next": "Sonraki rehberler"
     }
   }
 }

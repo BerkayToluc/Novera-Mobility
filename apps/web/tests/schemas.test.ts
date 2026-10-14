@@ -81,6 +81,11 @@ describe("quoteSchema", () => {
     expect(issues(schema.safeParse({ ...quote, needs: [] }))).toContain("needs");
   });
 
+  it("accepts the rental terms of one, two and three months, and nothing between the listed ones", () => {
+    for (const term of ["1", "2", "3", "6", "12", "24", "36+"]) expect(schema.safeParse({ ...quote, term }).success).toBe(true);
+    for (const term of ["0", "4", "5", "7", "13", ""]) expect(schema.safeParse({ ...quote, term }).success).toBe(false);
+  });
+
   it("only accepts a known product, or none", () => {
     expect(schema.safeParse({ ...quote, product: "yesil-filo" }).success).toBe(true);
     expect(schema.safeParse({ ...quote, product: "made-up" }).success).toBe(false);

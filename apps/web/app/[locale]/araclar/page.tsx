@@ -28,7 +28,7 @@ export default async function ResultsPage({ searchParams }: PageProps<"/[locale]
 
   let branches: BranchOption[] | null;
   try {
-    branches = await getBranchOptions(currency);
+    branches = await getBranchOptions();
   } catch {
     branches = null;
   }

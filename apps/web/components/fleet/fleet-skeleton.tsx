@@ -20,7 +20,7 @@ export async function FleetSkeleton() {
             <div key={index} className="h-11 w-28 animate-pulse rounded-full bg-surface-muted" />
           ))}
         </div>
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="flex flex-col gap-4">
           {Array.from({ length: 4 }, (_, index) => (
             <div key={index} className="h-36 animate-pulse rounded-card bg-surface-muted md:h-44" />
           ))}
