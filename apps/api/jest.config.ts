@@ -17,7 +17,12 @@ const config: Config = {
   transform: {
     '^.+\\.(t|j)s$': 'ts-jest',
   },
-  moduleNameMapper: pathsToModuleNameMapper(paths, { prefix: '<rootDir>/' }),
+  moduleNameMapper: {
+    // Source files import each other with a `.js` extension (module: nodenext);
+    // on disk they are `.ts`, so Jest has to look them up without the extension.
+    '^(\\.{1,2}/.*)\\.js$': '$1',
+    ...pathsToModuleNameMapper(paths, { prefix: '<rootDir>/' }),
+  },
   collectCoverageFrom: [
     'src/**/*.(t|j)s',
     'libs/**/*.(t|j)s',
@@ -25,6 +30,8 @@ const config: Config = {
   ],
   coverageDirectory: './coverage',
   testEnvironment: 'node',
+  // The first run compiles the generated Prisma client and talks to a real database.
+  testTimeout: 30000,
 };
 
 export default config;
