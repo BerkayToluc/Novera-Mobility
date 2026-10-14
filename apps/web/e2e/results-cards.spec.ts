@@ -26,11 +26,12 @@ test("a card says how much it burns per 100 km, and nothing about age or years o
   await expect(page.getByText(/En az \d+ yaş/)).toHaveCount(0);
 });
 
-test("the list is the default; the view button switches to three cards across and back", async ({ page, isMobile }) => {
+test("the list is the default; the one view button changes to three cards across and back", async ({ page, isMobile }) => {
   await page.goto(RESULTS);
-  const list = page.getByRole("button", { name: "Liste görünümü" });
-  const grid = page.getByRole("button", { name: "Izgara görünümü" });
-  await expect(list).toHaveAttribute("aria-pressed", "true");
+  // One button, named for the view it goes to; there is no second one.
+  const toGrid = page.getByRole("button", { name: "Izgara görünümüne geç" });
+  await expect(toGrid).toBeVisible();
+  await expect(page.getByRole("button", { name: "Liste görünümüne geç" })).toHaveCount(0);
   await expect(page).not.toHaveURL(/gorunum=/);
 
   const articles = page.getByRole("article");
@@ -40,9 +41,11 @@ test("the list is the default; the view button switches to three cards across an
   expect(second.y).toBeGreaterThan(first.y + first.height - 1);
   expect(Math.abs(second.x - first.x)).toBeLessThan(2);
 
-  await grid.click();
+  await toGrid.click();
   await expect(page).toHaveURL(/gorunum=izgara/);
-  await expect(grid).toHaveAttribute("aria-pressed", "true");
+  const toList = page.getByRole("button", { name: "Liste görünümüne geç" });
+  await expect(toList).toBeVisible();
+  await expect(page.getByRole("button", { name: "Izgara görünümüne geç" })).toHaveCount(0);
   if (!isMobile) {
     const a = (await articles.nth(0).boundingBox())!;
     const b = (await articles.nth(1).boundingBox())!;
@@ -53,14 +56,15 @@ test("the list is the default; the view button switches to three cards across an
   // The search stays in the address.
   await expect(page).toHaveURL(/alis=istanbul-kadikoy/);
 
-  await list.click();
+  await toList.click();
   await expect(page).not.toHaveURL(/gorunum=/);
+  await expect(page.getByRole("button", { name: "Izgara görünümüne geç" })).toBeVisible();
 });
 
 test("the bar holds the count, the filter and the view side by side, without overflow", async ({ page }) => {
   await page.goto(RESULTS);
   await expect(page.getByRole("button", { name: /Filtrele/ })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Liste görünümü" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Izgara görünümüne geç" })).toBeVisible();
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
   expect(overflow).toBeLessThanOrEqual(0);
 });

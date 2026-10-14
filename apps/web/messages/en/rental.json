@@ -67,7 +67,6 @@
     },
     "points": {
       "label": "Pay with points",
-      "balance": "{points} points = {worth}",
       "signIn": "Sign in to pay with points",
       "value": "1 point = {price}"
     },
@@ -77,9 +76,8 @@
       "clear": "Clear filters"
     },
     "view": {
-      "label": "View",
-      "list": "List view",
-      "grid": "Grid view"
+      "toGrid": "Switch to grid view",
+      "toList": "Switch to list view"
     }
   }
 }

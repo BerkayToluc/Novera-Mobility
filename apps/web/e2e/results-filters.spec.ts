@@ -79,6 +79,13 @@ test("a signed-in individual can pay with points: each card shows points plus mo
   await expect(toggle).toHaveAttribute("aria-checked", "true");
   const first = page.getByRole("article").first();
   await expect(first).toContainText(/\d[\d.]* puan \+ ₺/);
+  // The full total is struck through, and the points plus the rest stand beside it.
+  const struck = first.locator("del");
+  await expect(struck).toHaveText("₺2.400");
+  await expect(struck).toHaveCSS("text-decoration-line", "line-through");
+  // The switch no longer carries the balance, only what one point is worth.
+  await expect(toggle).not.toContainText("165 puan =");
+  await expect(toggle).toContainText("1 puan = ₺5");
 
   await first.getByRole("button", { name: /Kirala/ }).click();
   await page.waitForURL(/\/rezervasyon\?.*puan=1/);

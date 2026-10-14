@@ -30,22 +30,34 @@ export async function VehiclePrice({
     : t("perDay", { price: formatMoney(format, vehicle.dailyPrice) });
 
   return (
-    <div className={cn("flex flex-col gap-0.5", align === "end" && "md:items-end md:text-right")}>
+    <div className={cn("flex flex-col gap-0.5", align === "end" && "xl:items-end xl:text-right")}>
       {offer ? (
         <>
           <span className="text-small text-fg-muted">{t("totalLabel", { days: offer.days })}</span>
-          <p data-total="" className="text-h2 tabular-nums text-fg">
-            {formatMoney(format, offer.totalPrice)}
+          {/* With points chosen the full total is struck through and what is left to pay stands beside it. */}
+          <p className={cn("flex flex-wrap items-baseline gap-x-3 gap-y-1", align === "end" && "xl:justify-end")}>
+            {pointsPayment ? (
+              <>
+                <del data-total="" className="text-h3 tabular-nums text-fg-muted">
+                  {formatMoney(format, offer.totalPrice)}
+                </del>
+                <strong className="text-h3 tabular-nums text-fg">
+                  {t("pointsPayment", {
+                    points: format.number(pointsPayment.points),
+                    price: formatMoney(format, pointsPayment.rest),
+                  })}
+                </strong>
+              </>
+            ) : (
+              <span data-total="" className="text-h2 tabular-nums text-fg">
+                {formatMoney(format, offer.totalPrice)}
+              </span>
+            )}
           </p>
           <p className="text-body tabular-nums text-fg-muted">{daily}</p>
         </>
       ) : (
         <p className="text-h3 tabular-nums text-fg">{daily}</p>
-      )}
-      {pointsPayment && (
-        <p className="mt-1 inline-flex w-fit rounded-full bg-selected px-3 py-1 text-label tabular-nums text-on-selected">
-          {t("pointsPayment", { points: format.number(pointsPayment.points), price: formatMoney(format, pointsPayment.rest) })}
-        </p>
       )}
       {note && <p className="text-small text-fg-muted">{note}</p>}
       <p className="text-small text-fg-muted">{t("vatIncluded")}</p>

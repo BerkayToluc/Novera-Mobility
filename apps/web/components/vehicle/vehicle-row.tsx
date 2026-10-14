@@ -12,7 +12,7 @@ export async function VehicleRow({ vehicle, note, action, pointsPayment }: Vehic
   const facts = await getVehicleFacts(vehicle);
 
   return (
-    <article className="grid grid-cols-[7rem_minmax(0,1fr)] items-center gap-x-4 gap-y-3 rounded-card border border-border bg-surface p-3 md:grid-cols-[14rem_minmax(0,1fr)_auto] md:gap-x-6 md:p-4 xl:grid-cols-[16rem_minmax(0,1fr)_auto]">
+    <article className="grid grid-cols-[7rem_minmax(0,1fr)] items-center gap-x-4 gap-y-3 rounded-card border border-border bg-surface p-3 md:grid-cols-[14rem_minmax(0,1fr)] md:gap-x-6 md:p-4 xl:grid-cols-[16rem_minmax(0,1fr)_auto]">
       <VehicleImage imageUrl={vehicle.imageUrl} brand={vehicle.brand} model={vehicle.model} />
 
       <div className="flex min-w-0 flex-col gap-2">
@@ -34,9 +34,10 @@ export async function VehicleRow({ vehicle, note, action, pointsPayment }: Vehic
         </ul>
       </div>
 
-      <div className="col-span-2 flex flex-col gap-3 border-t border-border pt-3 md:col-span-1 md:w-60 md:border-l md:border-t-0 md:pl-6 md:pt-0">
+      {/* A row of its own under the photo and the facts up to xl (the middle column needs the width); from xl it is the right-hand column. */}
+      <div className="col-span-2 flex flex-col gap-3 border-t border-border pt-3 md:flex-row md:items-center md:justify-between md:gap-6 xl:col-span-1 xl:w-96 xl:flex-col xl:items-stretch xl:justify-start xl:gap-3 xl:border-l xl:border-t-0 xl:pl-6 xl:pt-0">
         <VehiclePrice vehicle={vehicle} note={note} pointsPayment={pointsPayment} align="end" />
-        {action}
+        <div className="md:w-56 md:shrink-0 xl:w-auto">{action}</div>
       </div>
     </article>
   );
