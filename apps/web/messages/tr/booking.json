@@ -39,7 +39,10 @@
     },
     "vatNote": "Fiyatlara KDV dahildir. Farklı bayiye bırakmak için ek ücret alınmaz.",
     "cancelNote": "Alış zamanından 24 saat öncesine kadar ücretsiz iptal edebilirsiniz. <link>Kiralama koşulları</link>",
-    "discount": "Kampanya indirimi ({code}, %{percent})"
+    "discount": "Kampanya indirimi ({code}, %{percent})",
+    "subtotal": "Ara toplam",
+    "pointsLine": "Puan ({count} puan)",
+    "vatIncluded": "Toplamın KDV'si (%{percent}) dahildir:"
   },
   "Payment": {
     "metaTitle": "Ödeme",

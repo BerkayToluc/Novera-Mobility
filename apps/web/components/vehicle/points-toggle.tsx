@@ -9,7 +9,15 @@ import { cn } from "@/lib/cn";
 // "Puanla öde" on the results page (SPEC §2.3): a switch that turns each card's price into points
 // plus money. Only for a signed-in individual account paying in lira; anyone else sees a line that
 // says what it would take. The choice is `puan=1` in the address, and "Kirala" carries it on.
-export function PointsToggle({ balance, on }: { balance: number | null; on: boolean }) {
+export function PointsToggle({
+  balance,
+  on,
+  pathname = "/araclar",
+}: {
+  balance: number | null;
+  on: boolean;
+  pathname?: "/araclar" | "/rezervasyon";
+}) {
   const t = useTranslations("ResultsPage.points");
   const format = useFormatter();
   const router = useRouter();
@@ -32,7 +40,7 @@ export function PointsToggle({ balance, on }: { balance: number | null; on: bool
       if (key !== "puan") query[key] = value;
     });
     if (!on) query.puan = "1";
-    router.replace({ pathname: "/araclar", query }, { scroll: false });
+    router.replace({ pathname, query }, { scroll: false });
   }
 
   return (

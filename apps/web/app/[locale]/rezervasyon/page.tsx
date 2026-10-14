@@ -4,10 +4,13 @@ import { getFormatter, getLocale, getTranslations } from "next-intl/server";
 import { ExtrasSelect } from "@/components/booking/extras-select";
 import { HoldCountdown } from "@/components/booking/hold-countdown";
 import { HoldEnded } from "@/components/booking/hold-states";
+import { PriceLines } from "@/components/booking/price-lines";
+import { PromoCode } from "@/components/payment/promo-code";
 import { TotalBar } from "@/components/booking/total-bar";
 import { Button } from "@/components/ui/button";
 import { StateMessage } from "@/components/ui/state-message";
 import { GuaranteeStrip } from "@/components/vehicle/guarantee-strip";
+import { PointsToggle } from "@/components/vehicle/points-toggle";
 import { VehicleImage } from "@/components/vehicle/vehicle-image";
 import { Link } from "@/i18n/navigation";
 import { toBookingQuery } from "@/lib/booking";
@@ -152,35 +155,16 @@ export default async function BookingSummaryPage({ searchParams }: Props) {
           <h2 id="price-title" className="text-h3 text-fg">
             {t("priceTitle")}
           </h2>
-          <dl className="flex flex-col gap-2 text-body text-fg">
-            <div className="flex justify-between gap-4">
-              <dt>
-                {t("vehicleLine", {
-                  brand: vehicle.brand,
-                  model: vehicle.model,
-                  price: money(vehicle.dailyPrice),
-                  days,
-                })}
-              </dt>
-              <dd className="tabular-nums">{money(summary.vehicleTotal)}</dd>
-            </div>
-            {summary.extraLines.map(({ extra, cost }) => (
-              <div key={extra.slug} className="flex justify-between gap-4">
-                <dt>{extra.name[locale]}</dt>
-                <dd className="tabular-nums">{money(cost)}</dd>
-              </div>
-            ))}
-            {summary.discount && (
-              <div className="flex justify-between gap-4 text-success">
-                <dt>{t("discount", { code: summary.discount.code, percent: summary.discount.percent })}</dt>
-                <dd className="tabular-nums">−{money(summary.discount.amount)}</dd>
-              </div>
-            )}
-            <div className="flex justify-between gap-4 border-t border-border-strong pt-3 text-h3">
-              <dt>{t("total")}</dt>
-              <dd className="tabular-nums">{money(summary.total)}</dd>
-            </div>
-          </dl>
+          <PriceLines vehicle={vehicle} days={days} summary={summary} />
+          {loaded.pointsBalance !== null && (
+            <PointsToggle balance={loaded.pointsBalance} on={booking.usePoints === true} pathname="/rezervasyon" />
+          )}
+          <PromoCode
+            query={query}
+            promo={loaded.promo}
+            percent={summary.discount?.percent ?? null}
+            pathname="/rezervasyon"
+          />
           <p className="text-small text-fg-muted">{t("vatNote")}</p>
           <p className="text-small text-fg">
             {t.rich("cancelNote", {
