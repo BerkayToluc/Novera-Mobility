@@ -47,6 +47,33 @@
       "title": "Cars could not be loaded",
       "text": "We cannot fetch the available cars right now. Please try again.",
       "back": "Back to Home"
+    },
+    "filters": {
+      "button": "Filter",
+      "title": "Filters",
+      "active": "{count, plural, one {filter} other {filters}} on",
+      "class": "Class",
+      "transmission": "Gearbox",
+      "fuel": "Fuel",
+      "seats": "Seats",
+      "seatsAtLeast": "At least {count}",
+      "sort": "Sort by",
+      "sorts": {
+        "price-asc": "Cheapest",
+        "price-desc": "Most expensive",
+        "newest": "Newest"
+      },
+      "clear": "Clear filters"
+    },
+    "points": {
+      "label": "Pay with points",
+      "balance": "{points} points",
+      "signIn": "Sign in to pay with points"
+    },
+    "noMatch": {
+      "title": "No car matches these filters",
+      "text": "Loosen the filters or clear them.",
+      "clear": "Clear filters"
     }
   }
 }

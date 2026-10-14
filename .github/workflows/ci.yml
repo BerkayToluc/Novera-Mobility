@@ -8,6 +8,21 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
+    # A real PostgreSQL for the API integration tests (availability query, holds).
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: novera
+          POSTGRES_PASSWORD: novera
+          POSTGRES_DB: novera_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U novera -d novera_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     steps:
       - uses: actions/checkout@v4
 
@@ -20,6 +35,19 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      # The generated Prisma client is not in Git (apps/api/src/generated is ignored), so CI has to
+      # produce it before anything that type-checks the API: lint is type-aware, build compiles it.
+      # generate never connects to a database; the address only has to exist for the config file.
+      - name: Generate Prisma client
+        run: pnpm --filter @novera/api exec prisma generate
+        env:
+          DATABASE_URL: postgresql://novera:novera@localhost:5432/novera
+
+      - name: Migrate test database
+        run: pnpm --filter @novera/api exec prisma migrate deploy
+        env:
+          DATABASE_URL: postgresql://novera:novera@localhost:5432/novera_test
+
       - name: Lint
         run: pnpm -r --if-present run lint
 
@@ -28,6 +56,8 @@ jobs:
 
       - name: Test
         run: pnpm -r --if-present run test
+        env:
+          TEST_DATABASE_URL: postgresql://novera:novera@localhost:5432/novera_test
 
       - name: Build
         run: pnpm -r --if-present run build

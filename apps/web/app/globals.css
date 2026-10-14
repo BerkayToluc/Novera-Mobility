@@ -309,6 +309,19 @@
   /* Menus that open and close (after the Framer Pill Dropdown Nav). */
   --ease-menu: cubic-bezier(0.44, 0, 0.56, 1);
   --animate-fade-in: fade-in 0.3s ease-out;
+  /* The footer links' wave (SPEC §2.8, after the Framer Wavy Nav link): each letter drops 6 px and
+     springs back. The curve overshoots a touch, as the original's spring does. */
+  --animate-wave: wave 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  /* A firm spring for things that swell under the pointer (the social marks). */
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  @keyframes wave {
+    from {
+      transform: translateY(6px);
+    }
+    to {
+      transform: none;
+    }
+  }
   @keyframes fade-in {
     from {
       opacity: 0;
