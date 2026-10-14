@@ -58,8 +58,12 @@ G'nin kuralı (12 Ekim): **her sayfa ya da bileşen grubu bir dal, bir PR.** Bun
 20. `feat/profile-shell`: **Profil kabuğu** (Y68): karşılama, puan çipi, ikonlu yan menü, sıradaki seyahat, hızlı işlemler.
 21. `feat/profile-trips`: **Rezervasyonlarım** (Y69): durum çipleri, bayi adı ve saat, yol tarifi, bayiyi ara, simüle iptal.
 22. `feat/profile-points-settings`: **Puanlarım ve Ayarlar** (Y70): ₺ karşılığı ve harcama bağlantısı; bildirim, şifre, oturum bölümleri (simüle).
+23. `feat/services-v2`: **Hizmetler** (Y72): kart ızgarası, rakamlar, nasıl işler, paket etiketleri, ürün tablosu, acil durum bandı.
+24. `feat/phone-contact-link`: **Telefon balonu** (Y73): gönder/kopyala, iletişim ve bayi kartlarında.
+25. `feat/quote-product-chip`: **Kurumsal teklif** (Y74): seçili ürün şeridi.
+26. `test/e2e-expect-timeout`: **e2e** (Y75): beklenen koşullar için 10 sn.
 
-Belge dalları ayrı: `docs/spec-v05` (SPEC v0.5, ADR-22, BACKLOG Y49–Y52), `docs/spec-v06` (SPEC v0.6, BACKLOG Y53) `docs/spec-v07` (SPEC v0.7, BACKLOG Y54–Y63; `docs/spec-v06`'nın üzerine kuruludur) ve `docs/spec-v08` (SPEC v0.8, BACKLOG Y64–Y71; `docs/spec-v07`'nin üzerine kuruludur), bu belgenin dalı `docs/status-visual-tour`.
+Belge dalları ayrı: `docs/spec-v05` (SPEC v0.5, ADR-22, BACKLOG Y49–Y52), `docs/spec-v06` (SPEC v0.6, BACKLOG Y53) `docs/spec-v07` (SPEC v0.7, BACKLOG Y54–Y63; `docs/spec-v06`'nın üzerine kuruludur) `docs/spec-v08` (SPEC v0.8, BACKLOG Y64–Y71; `docs/spec-v07`'nin üzerine kuruludur) ve `docs/spec-v09` (SPEC v0.9, BACKLOG Y72–Y75; `docs/spec-v08`'in üzerine kuruludur), bu belgenin dalı `docs/status-visual-tour`.
 
 **Eski dallar artık gereksiz:** `feat/fleet-on-home`, `feat/driver-eligibility`, `feat/home-form-branches`, `feat/home-fleet-cards`, `feat/home-strip-guarantee`, `feat/home-app-guides` ve `feat/home-faq` yukarıdaki sayfa dallarının parçalarıydı (aynı commit'ler 4 ve 5'te). Uzağa itildiyse silinebilir, birleştirilmemeli.
 
