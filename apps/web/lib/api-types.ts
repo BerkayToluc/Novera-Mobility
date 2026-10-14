@@ -134,12 +134,8 @@ export interface paths {
         /**
          * Müsait araçlar (arama sonuçları)
          * @description Alış bayisinde, verilen aralıkta müsait olan araçlar. Aynı modelden birden fazla müsait araç varsa
-         *     model başına bir sonuç döner (`vehicleId` müsait olanlardan biridir). Rezervasyonla çakışanlar
-         *     ve süresi dolmamış bir tutmayla (`/holds`) tutulan araçlar listede çıkmaz.
+         *     model başına bir sonuç döner (`vehicleId` müsait olanlardan biridir).
          *     Fiyatlar seçilen para biriminde, ek hizmetler hariçtir.
-         *
-         *     **Tarih ve bayi parametreleri zorunludur.** Tarihsiz çağrı yoktur; model başına bayi listesi
-         *     (Araçlarımız sayfası) için `GET /vehicle-models` kullanılır.
          */
         get: {
             parameters: {
@@ -265,11 +261,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Aracı 15 dakika tut ("Kirala")
-         * @description Giriş gerekmez (giriş ödemeden hemen önce istenir). Seçilen aracı verilen aralık için 15 dakika tutar;
-         *     bu sürede araç başka aramalarda müsait görünmez. Dönen `expiresAt` geri sayım içindir.
-         *     Aynı IP için eşzamanlı tutma sayısı sınırlıdır (`429 RATE_LIMITED`); araç tutulamıyorsa
-         *     `409 VEHICLE_UNAVAILABLE`.
+         * Aracı 15 dakika geçici tut (Kirala butonunda)
+         * @description Seçilen aracı 15 dakika boyunca başka aramalara kapatır (BACKLOG Y48).
          */
         post: {
             parameters: {
@@ -295,49 +288,9 @@ export interface paths {
                 };
                 409: components["responses"]["Conflict"];
                 422: components["responses"]["ValidationFailed"];
-                429: components["responses"]["TooManyRequests"];
             };
         };
         delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/holds/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /**
-         * Tutmayı bırak
-         * @description Kullanıcı aramayı değiştirir ya da vazgeçerse aracı hemen serbest bırakır. Olmayan veya süresi dolmuş tutmada da `204` döner.
-         */
-        delete: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Bırakıldı */
-                204: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-            };
-        };
         options?: never;
         head?: never;
         patch?: never;
@@ -399,9 +352,8 @@ export interface paths {
         put?: never;
         /**
          * Rezervasyon oluştur (sahte ödeme ekranında)
-         * @description Giriş gerekir. Rezervasyon `CONFIRMED` oluşur, para alınmaz. `holdId` verilirse ve tutma geçerliyse
-         *     araç o tutmaya göre alınır, tutma silinir. Süresi dolmuşsa müsaitlik işlem içinde tekrar kontrol edilir;
-         *     araç hâlâ boşsa devam edilir, değilse `409 VEHICLE_UNAVAILABLE`. Puan aynı işlemde yazılır.
+         * @description Giriş gerekir. Rezervasyon `CONFIRMED` oluşur, para alınmaz. Müsaitlik işlem içinde tekrar kontrol edilir;
+         *     çakışmada `409 VEHICLE_UNAVAILABLE`. Puan aynı işlemde yazılır.
          */
         post: {
             parameters: {
@@ -463,6 +415,46 @@ export interface paths {
                     };
                     content: {
                         "application/json": components["schemas"]["Reservation"][];
+                    };
+                };
+                401: components["responses"]["Unauthorized"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/quotes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Kurumsal teklif taleplerim
+         * @description Kurumsal kullanıcının geçmişten bugüne oluşturduğu filo teklif talepleri listesi.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Teklif talepleri listesi */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["QuoteSummary"][];
                     };
                 };
                 401: components["responses"]["Unauthorized"];
@@ -842,8 +834,8 @@ export interface paths {
         /** Sık sorulan sorular */
         get: {
             parameters: {
-                query: {
-                    audience: components["schemas"]["FaqAudience"];
+                query?: {
+                    audience?: components["schemas"]["FaqAudience"];
                 };
                 header?: never;
                 path?: never;
@@ -993,7 +985,7 @@ export interface paths {
         put?: never;
         /**
          * Kurumsal teklif / görüşme talebi
-         * @description Alanlar geçicidir (BACKLOG Y35). `website` görünmeyen tuzak alandır: doluysa `422 SPAM_DETECTED`.
+         * @description `website` görünmeyen tuzak alandır: doluysa `422 SPAM_DETECTED`.
          *     Giriş yapmış kurumsal kullanıcıda talep hesaba bağlanır.
          */
         post: {
@@ -1083,7 +1075,7 @@ export interface components {
              * @description Sabit makine kodu.
              * @enum {string}
              */
-            code: "BAD_REQUEST" | "VALIDATION_FAILED" | "UNAUTHENTICATED" | "INVALID_CREDENTIALS" | "EMAIL_TAKEN" | "NOT_FOUND" | "VEHICLE_UNAVAILABLE" | "INVALID_DATE_RANGE" | "RESET_TOKEN_INVALID" | "SPAM_DETECTED" | "RATE_LIMITED";
+            code: "BAD_REQUEST" | "VALIDATION_FAILED" | "UNAUTHENTICATED" | "INVALID_CREDENTIALS" | "EMAIL_TAKEN" | "NOT_FOUND" | "VEHICLE_UNAVAILABLE" | "HOLD_EXPIRED" | "INVALID_DATE_RANGE" | "RESET_TOKEN_INVALID" | "SPAM_DETECTED" | "RATE_LIMITED";
             /** @description Geliştirici için İngilizce metin. Ekranda gösterilmez. */
             message: string;
             /**
@@ -1118,6 +1110,8 @@ export interface components {
         Received: {
             /** @example true */
             received: boolean;
+            /** @example TKL-2026-00042 */
+            referenceNumber?: string | null;
         };
         /** @description Her alan `"08:30-19:00"` biçiminde ya da `"closed"`. */
         OpeningHours: {
@@ -1219,28 +1213,6 @@ export interface components {
             /** Format: date-time */
             updatedAt: string;
         };
-        ReservationRequest: {
-            /** Format: uuid */
-            vehicleId: string;
-            /** Format: uuid */
-            pickupBranchId: string;
-            /** Format: uuid */
-            returnBranchId: string;
-            /** Format: date-time */
-            startAt: string;
-            /** Format: date-time */
-            endAt: string;
-            currency: components["schemas"]["Currency"];
-            /**
-             * Format: uuid
-             * @description `POST /holds` cevabındaki tutma. Yalnızca `POST /reservations` kullanır; isteğe bağlı.
-             */
-            holdId?: string;
-            extras?: {
-                slug: string;
-                quantity: number;
-            }[];
-        };
         HoldRequest: {
             /** Format: uuid */
             vehicleId: string;
@@ -1258,11 +1230,27 @@ export interface components {
             id: string;
             /** Format: uuid */
             vehicleId: string;
-            /**
-             * Format: date-time
-             * @description Tutmanın bittiği an (UTC). Geri sayım bununla yapılır; istemci saatine güvenilmez.
-             */
+            /** Format: date-time */
             expiresAt: string;
+        };
+        ReservationRequest: {
+            /** Format: uuid */
+            vehicleId: string;
+            /** Format: uuid */
+            holdId?: string | null;
+            /** Format: uuid */
+            pickupBranchId: string;
+            /** Format: uuid */
+            returnBranchId: string;
+            /** Format: date-time */
+            startAt: string;
+            /** Format: date-time */
+            endAt: string;
+            currency: components["schemas"]["Currency"];
+            extras?: {
+                slug: string;
+                quantity: number;
+            }[];
         };
         PriceLine: {
             /** @enum {string} */
@@ -1319,6 +1307,17 @@ export interface components {
             }[];
             rules: components["schemas"]["LocalizedText"];
         };
+        SalesContact: {
+            /** @example Selin Kaya */
+            name: string;
+            /**
+             * Format: email
+             * @example kurumsal@novera.example
+             */
+            email: string;
+            /** @example +90 212 555 01 99 */
+            phone: string;
+        };
         User: {
             /** Format: uuid */
             id: string;
@@ -1329,12 +1328,14 @@ export interface components {
             /** @enum {string} */
             accountType: "INDIVIDUAL" | "CORPORATE";
             companyName: string | null;
+            taxOffice?: string | null;
+            companyCity?: string | null;
+            companyPhone?: string | null;
+            contactTitle?: string | null;
+            salesContact?: components["schemas"]["SalesContact"] | null;
             /** @enum {string} */
             locale: "tr" | "en";
-            /**
-             * @description Varsayılan `light`.
-             * @enum {string}
-             */
+            /** @enum {string} */
             theme: "light" | "dark" | "system";
             currency: components["schemas"]["Currency"];
         };
@@ -1364,9 +1365,13 @@ export interface components {
         };
         /** @enum {string} */
         FaqAudience: "INDIVIDUAL" | "CORPORATE";
+        /** @enum {string} */
+        FaqTopic: "rezervasyon" | "odeme" | "teslim" | "hasar" | "hesap" | "kurumsal";
         FaqItem: {
             /** Format: uuid */
             id: string;
+            audience: components["schemas"]["FaqAudience"];
+            topic: components["schemas"]["FaqTopic"];
             question: components["schemas"]["LocalizedText"];
             answer: components["schemas"]["LocalizedText"];
         };
@@ -1387,13 +1392,32 @@ export interface components {
             summary: components["schemas"]["LocalizedText"];
             points: components["schemas"]["LocalizedList"];
         };
-        /** @description Geçici alanlar (BACKLOG Y35). */
+        /** @enum {string} */
+        QuoteStatus: "RECEIVED" | "IN_REVIEW" | "OFFERED";
+        QuoteSummary: {
+            /** Format: uuid */
+            id: string;
+            /** @example TKL-2026-00042 */
+            number: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** @example 10 */
+            vehicleCount: number;
+            /** @example 24 */
+            durationMonths: number;
+            productSlug?: string | null;
+            status: components["schemas"]["QuoteStatus"];
+        };
         QuoteRequest: {
             companyName: string;
+            contactName?: string | null;
+            phone?: string | null;
             vehicleCount: number;
             durationMonths: number;
-            /** @description Araç sınıfı slug'ı veya serbest metin. */
+            /** @description Araç sınıfı slug'ı veya virgülle ayrılmış ihtiyaç türleri. */
             vehicleType: string;
+            deliveryCities?: string | null;
+            notes?: string | null;
             /** Format: email */
             email: string;
             productSlug?: string | null;

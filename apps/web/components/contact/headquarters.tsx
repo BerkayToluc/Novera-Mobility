@@ -1,5 +1,6 @@
-import { Clock, Mail, MapPin, Navigation, Phone } from "lucide-react";
+import { Clock, MapPin, Navigation, Phone } from "lucide-react";
 import { getTranslations } from "next-intl/server";
+import { ContactLink } from "@/components/ui/contact-link";
 import { COMPANY, DEPARTMENTS, HEADQUARTERS, HQ_DIRECTIONS_URL, telHref } from "@/lib/company";
 
 const link = "inline-flex min-h-11 items-center gap-3 text-link underline underline-offset-4";
@@ -11,8 +12,11 @@ export async function Headquarters() {
 
   return (
     <div className="flex flex-col gap-8">
-      <section aria-labelledby="hq-title" className="overflow-hidden rounded-card border border-border bg-surface">
-        <HeadquartersArt />
+      <section aria-labelledby="hq-title" className="rounded-card border border-border bg-surface">
+        {/* Clipped here rather than on the card, so the address's bubble can rise above the card. */}
+        <div className="overflow-hidden rounded-t-card">
+          <HeadquartersArt />
+        </div>
         <div className="flex flex-col gap-4 p-6">
           <h2 id="hq-title" className="text-h2 text-fg">
             {t("title")}
@@ -26,10 +30,7 @@ export async function Headquarters() {
               <Phone aria-hidden="true" className="size-4 shrink-0" />
               {COMPANY.phone}
             </a>
-            <a href={`mailto:${COMPANY.email}`} className={link}>
-              <Mail aria-hidden="true" className="size-4 shrink-0" />
-              {COMPANY.email}
-            </a>
+            <ContactLink value={COMPANY.email} className="text-link underline underline-offset-4" />
             <p className="flex items-center gap-3 text-body text-fg-muted">
               <Clock aria-hidden="true" className="size-4 shrink-0 text-link" />
               {t("hours")}
@@ -54,9 +55,7 @@ export async function Headquarters() {
                 <p className="text-label text-fg">{t(`departments.${key}.name`)}</p>
                 <p className="text-small text-fg-muted">{t(`departments.${key}.text`)}</p>
               </div>
-              <a href={`mailto:${email}`} className="inline-flex min-h-11 items-center text-body text-link underline underline-offset-4">
-                {email}
-              </a>
+              <ContactLink value={email} icon={false} className="text-body text-link underline underline-offset-4" />
             </li>
           ))}
         </ul>
