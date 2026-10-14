@@ -1,12 +1,12 @@
 import type { ReactNode } from "react";
-import { Cog, Fuel, Luggage, Users } from "lucide-react";
-import { getFormatter, getLocale, getTranslations } from "next-intl/server";
+import { getLocale } from "next-intl/server";
 import type { Money } from "@/lib/currency";
-import { formatMoney } from "@/lib/price";
 import type { Vehicle, VehicleOffer } from "@/lib/vehicle";
+import { getVehicleFacts } from "./vehicle-facts";
 import { VehicleImage } from "./vehicle-image";
+import { VehiclePrice } from "./vehicle-price";
 
-type VehicleCardProps = {
+export type VehicleViewProps = {
   vehicle: Vehicle | VehicleOffer;
   // On the fleet page a model is shown once, at the lowest price among its cars.
   fromPrice?: Money;
@@ -18,18 +18,10 @@ type VehicleCardProps = {
   pointsPayment?: { points: number; rest: Money };
 };
 
-export async function VehicleCard({ vehicle, fromPrice, note, action, pointsPayment }: VehicleCardProps) {
-  const t = await getTranslations("Vehicle");
-  const format = await getFormatter();
+// One car as a card, for the grid view of the results (SPEC §2.3).
+export async function VehicleCard({ vehicle, fromPrice, note, action, pointsPayment }: VehicleViewProps) {
   const locale = (await getLocale()) as "tr" | "en";
-  const offer = "totalPrice" in vehicle ? vehicle : null;
-
-  const specs = [
-    { icon: Users, label: t("seats", { count: vehicle.seats }) },
-    { icon: Luggage, label: t("bags", { count: vehicle.bags }) },
-    { icon: Cog, label: t(`transmission.${vehicle.transmission}`) },
-    { icon: Fuel, label: t(`fuel.${vehicle.fuelType}`) },
-  ];
+  const facts = await getVehicleFacts(vehicle);
 
   return (
     <article className="flex h-full flex-col gap-4 rounded-card border border-border bg-surface p-4">
@@ -44,31 +36,15 @@ export async function VehicleCard({ vehicle, fromPrice, note, action, pointsPaym
           </p>
         </div>
         <ul className="grid grid-cols-2 gap-x-3 gap-y-2 text-small text-fg-muted">
-          {specs.map(({ icon: Icon, label }) => (
-            <li key={label} className="flex items-center gap-2">
+          {facts.map(({ key, icon: Icon, label }) => (
+            <li key={key} className="flex items-center gap-2">
               <Icon aria-hidden="true" className="size-4 shrink-0" />
               {label}
             </li>
           ))}
         </ul>
         <div className="mt-auto border-t border-border pt-3">
-          <p className="text-h3 tabular-nums text-fg">
-            {fromPrice
-              ? t("fromPerDay", { price: formatMoney(format, fromPrice) })
-              : t("perDay", { price: formatMoney(format, vehicle.dailyPrice) })}
-          </p>
-          {offer && (
-            <p className="text-small tabular-nums text-fg-muted">
-              {t("total", { days: offer.days, price: formatMoney(format, offer.totalPrice) })}
-            </p>
-          )}
-          {pointsPayment && (
-            <p className="mt-1 inline-flex rounded-full bg-selected px-3 py-1 text-label tabular-nums text-on-selected">
-              {t("pointsPayment", { points: format.number(pointsPayment.points), price: formatMoney(format, pointsPayment.rest) })}
-            </p>
-          )}
-          {note && <p className="text-small text-fg-muted">{note}</p>}
-          <p className="text-small text-fg-muted">{t("vatIncluded")}</p>
+          <VehiclePrice vehicle={vehicle} fromPrice={fromPrice} note={note} pointsPayment={pointsPayment} />
         </div>
         {action}
       </div>

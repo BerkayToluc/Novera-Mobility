@@ -55,7 +55,7 @@ test("a filter with no match says so, and offers to clear it", async ({ page }) 
 test("the order can be changed: most expensive first", async ({ page }) => {
   await page.goto(`${RESULTS}&sirala=azalan`);
   const prices = await page.getByRole("article").evaluateAll((cards) =>
-    cards.map((card) => Number((card.querySelector("p.text-h3")?.textContent ?? "").replace(/[^\d]/g, ""))),
+    cards.map((card) => Number((card.querySelector("[data-total]")?.textContent ?? "").replace(/[^\d]/g, ""))),
   );
   expect(prices.length).toBeGreaterThan(1);
   expect(prices).toEqual([...prices].sort((a, b) => b - a));
