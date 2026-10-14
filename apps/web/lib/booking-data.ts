@@ -2,7 +2,7 @@ import "server-only";
 import { parseBooking, toBookingQuery, type BookingParams } from "./booking";
 import type { Currency } from "./currency";
 import type { Extra } from "./extra";
-import { getMyPoints } from "./account-client";
+import { getMyPoints } from "./account-server";
 import { getBranches, getExtras, getVehicle } from "./fleet-client";
 import { getHold, type Hold } from "./hold-client";
 import { quotePrice } from "./price-client";

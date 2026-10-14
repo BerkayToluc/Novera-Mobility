@@ -42,8 +42,11 @@
       "total": "Total",
       "days": "{count, plural, one {# day} other {# days}}",
       "status": {
-        "CONFIRMED": "Confirmed",
-        "CANCELLED": "Cancelled"
+        "UPCOMING": "Upcoming",
+        "ACTIVE": "Under way",
+        "COMPLETED": "Completed",
+        "CANCELLED": "Cancelled",
+        "CONFIRMED": "Confirmed"
       },
       "empty": {
         "title": "You have no bookings yet",
@@ -68,8 +71,40 @@
         "title": "Past trips",
         "empty": {
           "title": "No past trips",
-          "text": "Completed and cancelled rentals are listed here."
+          "text": "Your completed rentals are listed here."
         }
+      },
+      "pickup": "Pick-up",
+      "dropoff": "Return",
+      "duration": "Duration",
+      "directions": "Directions",
+      "newTab": "(opens in a new tab)",
+      "callBranch": "Call the branch",
+      "filters": {
+        "label": "Booking status",
+        "all": "All",
+        "upcoming": "Upcoming",
+        "past": "Past",
+        "cancelled": "Cancelled"
+      },
+      "cancelled": {
+        "title": "Cancelled",
+        "empty": {
+          "title": "You have cancelled no bookings",
+          "text": "Rentals you cancel are listed here."
+        }
+      },
+      "cancel": {
+        "button": "Cancel",
+        "title": "Cancel the {car} booking?",
+        "free": "There are more than 24 hours to pick-up: the cancellation is free.",
+        "late": "There are less than 24 hours to pick-up: this cancellation is not free (Rental Conditions).",
+        "points": "A cancelled booking earns no points.",
+        "keep": "Keep it",
+        "confirm": "Yes, cancel it",
+        "cancelling": "Cancelling…",
+        "notCancellable": "This booking can no longer be cancelled.",
+        "unavailable": "The cancellation cannot be made right now. Please try again later."
       }
     },
     "settings": {
@@ -172,7 +207,8 @@
         "title": "Make your first rental",
         "text": "You have no trip coming up. Choose a branch and the dates to see the cars that are free.",
         "cta": "Find a car"
-      }
+      },
+      "pickupAt": "{branch}, at {time}"
     },
     "quick": {
       "title": "Quick actions",

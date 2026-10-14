@@ -25,6 +25,8 @@ const RESERVATIONS: Reservation[] = [
     vehicle: { brand: "Renault", model: "Clio" },
     pickupCity: "İzmir",
     returnCity: "Ankara",
+    pickupBranchId: "istanbul-kadikoy",
+    returnBranchId: "istanbul-kadikoy",
     pointsEarned: 37,
   },
   {
@@ -38,6 +40,8 @@ const RESERVATIONS: Reservation[] = [
     vehicle: { brand: "Toyota", model: "Corolla Hybrid" },
     pickupCity: "İstanbul",
     returnCity: "İstanbul",
+    pickupBranchId: "istanbul-kadikoy",
+    returnBranchId: "istanbul-kadikoy",
     pointsEarned: 0,
   },
 ];
@@ -66,10 +70,10 @@ export default async function ProfileGalleryPage() {
         <AccountForm user={USER} />
       </Section>
       <Section title="Bookings: list">
-        <ReservationList reservations={RESERVATIONS} now={Date.parse("2026-10-10T12:00:00Z")} />
+        <ReservationList reservations={RESERVATIONS} now={Date.parse("2026-10-10T12:00:00Z")} branches={[]} filter="all" />
       </Section>
       <Section title="Bookings: empty">
-        <ReservationList reservations={[]} now={Date.parse("2026-10-10T12:00:00Z")} />
+        <ReservationList reservations={[]} now={Date.parse("2026-10-10T12:00:00Z")} branches={[]} filter="all" />
       </Section>
       <Section title="Bookings: error">
         <StateMessage tone="error" title={t("error.title")} text={t("error.text")} />

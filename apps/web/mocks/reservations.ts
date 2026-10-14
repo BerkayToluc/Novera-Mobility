@@ -20,6 +20,8 @@ const DRAFTS: Draft[] = [
     vehicle: { brand: "Volkswagen", model: "Passat" },
     pickupCity: "İstanbul",
     returnCity: "İzmir",
+    pickupBranchId: "istanbul-kadikoy",
+    returnBranchId: "izmir-adnan-menderes",
   },
   {
     id: "r4",
@@ -32,6 +34,8 @@ const DRAFTS: Draft[] = [
     vehicle: { brand: "Renault", model: "Clio" },
     pickupCity: "Ankara",
     returnCity: "Ankara",
+    pickupBranchId: "ankara-esenboga",
+    returnBranchId: "ankara-esenboga",
   },
   {
     id: "r3",
@@ -44,6 +48,8 @@ const DRAFTS: Draft[] = [
     vehicle: { brand: "Toyota", model: "Corolla Hybrid" },
     pickupCity: "Antalya",
     returnCity: "Antalya",
+    pickupBranchId: "antalya-havalimani",
+    returnBranchId: "antalya-havalimani",
   },
   {
     id: "r2",
@@ -56,6 +62,8 @@ const DRAFTS: Draft[] = [
     vehicle: { brand: "Hyundai", model: "Tucson" },
     pickupCity: "İzmir",
     returnCity: "İzmir",
+    pickupBranchId: "izmir-adnan-menderes",
+    returnBranchId: "izmir-adnan-menderes",
   },
   {
     id: "r1",
@@ -68,6 +76,8 @@ const DRAFTS: Draft[] = [
     vehicle: { brand: "Fiat", model: "Egea" },
     pickupCity: "İstanbul",
     returnCity: "Bursa",
+    pickupBranchId: "istanbul-kadikoy",
+    returnBranchId: "bursa-nilufer",
   },
 ];
 
@@ -77,9 +87,17 @@ export const MOCK_RESERVATIONS: Reservation[] = DRAFTS.map((draft) => ({
   pointsEarned: draft.status === "CONFIRMED" ? pointsForTotal(draft.totalPrice) : 0,
 }));
 
+// The sample bookings with the ones this browser cancelled marked as such (a cancelled booking
+// earns no points). `cancelled` is the list of ids kept in the cookie.
+export function withCancelled(cancelled: string[]): Reservation[] {
+  return MOCK_RESERVATIONS.map((reservation) =>
+    cancelled.includes(reservation.id) ? { ...reservation, status: "CANCELLED" as const, pointsEarned: 0 } : reservation,
+  );
+}
+
 // Points are credited when a rental is completed; a booking still ahead only has points pending.
-export function mockPoints(now: Date): PointsAccount {
-  const confirmed = MOCK_RESERVATIONS.filter((reservation) => reservation.status === "CONFIRMED");
+export function mockPoints(now: Date, reservations: Reservation[] = MOCK_RESERVATIONS): PointsAccount {
+  const confirmed = reservations.filter((reservation) => reservation.status === "CONFIRMED");
   const done = confirmed.filter((reservation) => new Date(reservation.endAt) <= now);
   const ahead = confirmed.filter((reservation) => new Date(reservation.endAt) > now);
   return {

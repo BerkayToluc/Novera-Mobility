@@ -2,16 +2,25 @@ import { ArrowRight, CalendarDays, MapPin } from "lucide-react";
 import { getFormatter, getTranslations } from "next-intl/server";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
-import type { Reservation } from "@/lib/reservation";
+import type { BranchDetail } from "@/lib/branch-detail";
+import { reservationPhase, type Reservation } from "@/lib/reservation";
 
 // "Your next trip" at the top of the account page (SPEC §2.9, v0.8): the soonest booking still
 // ahead, with how long to go; or an invitation to make the first one. `now` comes from the caller.
-export async function NextTrip({ reservations, now }: { reservations: Reservation[]; now: number }) {
+export async function NextTrip({
+  reservations,
+  now,
+  branches,
+}: {
+  reservations: Reservation[];
+  now: number;
+  branches: BranchDetail[];
+}) {
   const t = await getTranslations("Profile.nextTrip");
   const format = await getFormatter();
 
   const next = reservations
-    .filter((reservation) => reservation.status === "CONFIRMED" && new Date(reservation.endAt).getTime() > now)
+    .filter((reservation) => ["UPCOMING", "ACTIVE"].includes(reservationPhase(reservation, now)))
     .sort((a, b) => new Date(a.startAt).getTime() - new Date(b.startAt).getTime())[0];
 
   if (!next) {
@@ -31,6 +40,9 @@ export async function NextTrip({ reservations, now }: { reservations: Reservatio
   const days = Math.max(0, Math.ceil((new Date(next.startAt).getTime() - now) / 86_400_000));
   const date = (value: string) => format.dateTime(new Date(value), { day: "numeric", month: "long", year: "numeric" });
   const sameCity = next.pickupCity === next.returnCity;
+  // The branch the trip starts at, with its name and the time, when the branches are known.
+  const pickup = branches.find((branch) => branch.id === next.pickupBranchId);
+  const pickupTime = format.dateTime(new Date(next.startAt), { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Istanbul" });
 
   return (
     <section
@@ -49,7 +61,7 @@ export async function NextTrip({ reservations, now }: { reservations: Reservatio
           </li>
           <li className="flex items-center gap-2">
             <MapPin aria-hidden="true" className="size-4 shrink-0" />
-            {sameCity ? next.pickupCity : `${next.pickupCity} → ${next.returnCity}`}
+            {pickup ? t("pickupAt", { branch: `${pickup.city} · ${pickup.name}`, time: pickupTime }) : sameCity ? next.pickupCity : `${next.pickupCity} → ${next.returnCity}`}
           </li>
         </ul>
       </div>
