@@ -44,7 +44,7 @@ export default async function PointsPage() {
     content = (
       <>
         <div className="grid gap-4 md:grid-cols-2">
-          <div className="flex items-center gap-4 rounded-card bg-surface-muted p-6">
+          <div className="flex flex-wrap items-center gap-4 rounded-card bg-surface-muted p-6">
             <span className="inline-flex size-12 items-center justify-center rounded-full bg-surface text-link">
               <Coins aria-hidden="true" className="size-6" />
             </span>
@@ -53,6 +53,13 @@ export default async function PointsPage() {
               <dd className="text-display tabular-nums text-fg">{format.number(account.balance)}</dd>
               <dd className="text-small text-fg-muted">{t("worth", { worth: formatMoney(format, pointsWorth(account.balance)) })}</dd>
             </dl>
+            {/* Points are spent where the cars are listed: the "Puanla öde" switch on the results. */}
+            <div className="flex w-full flex-col items-start gap-1 border-t border-border pt-4">
+              <Button asChild>
+                <Link href={{ pathname: "/", hash: "kiralama" }}>{t("spendCta")}</Link>
+              </Button>
+              <p className="text-small text-fg-muted">{t("spendNote", { value: formatMoney(format, POINT_VALUE) })}</p>
+            </div>
           </div>
           <div className="flex items-center gap-4 rounded-card border border-border bg-surface p-6">
             <span className="inline-flex size-12 items-center justify-center rounded-full bg-surface-muted text-fg-muted">

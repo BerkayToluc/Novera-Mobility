@@ -128,6 +128,43 @@
         "save": "Kaydet",
         "saving": "Kaydediliyor…",
         "saved": "Tercihleriniz kaydedildi."
+      },
+      "notifications": {
+        "title": "Bildirimler",
+        "text": "Hangi e-postaları almak istediğinizi seçin.",
+        "reminders": "Seyahatimden önce hatırlatma e-postası gönderin.",
+        "campaigns": "Kampanya ve fırsat e-postaları gönderin.",
+        "save": "Kaydet",
+        "saving": "Kaydediliyor…",
+        "saved": "Bildirim tercihleriniz kaydedildi."
+      },
+      "security": {
+        "title": "Güvenlik",
+        "text": "Şifrenizi değiştirin ve hesabınızın açık olduğu cihazları görün.",
+        "show": "Şifreyi göster",
+        "hide": "Şifreyi gizle",
+        "password": {
+          "title": "Şifreyi değiştir",
+          "current": "Mevcut şifre",
+          "new": "Yeni şifre",
+          "hint": "En az 8 karakter.",
+          "repeat": "Yeni şifre (tekrar)",
+          "short": "Yeni şifre en az 8 karakter olmalı.",
+          "same": "Yeni şifre mevcut şifrenizden farklı olmalı.",
+          "mismatch": "Şifreler aynı değil.",
+          "save": "Şifreyi değiştir",
+          "saving": "Değiştiriliyor…",
+          "saved": "Şifreniz değiştirildi."
+        },
+        "sessions": {
+          "title": "Açık oturumlar",
+          "this": "Bu cihaz · Tarayıcı",
+          "thisDevice": "Bu cihaz",
+          "now": "Şu an etkin",
+          "phone": "Telefon · Mobil tarayıcı",
+          "twoDays": "2 gün önce",
+          "revoke": "Diğer oturumları kapat"
+        }
       }
     },
     "signOut": "Çıkış yap",
@@ -195,7 +232,8 @@
         "spend": "Puanlar kiralamada harcanır: 1 puan = {value}, toplamın en çok yarısına kadar."
       },
       "worth": "= {worth} değerinde",
-      "spendCta": "Puanla öde"
+      "spendCta": "Puanla öde",
+      "spendNote": "Araç listesinde \"Puanla öde\"yi açın: 1 puan = {value}."
     },
     "welcome": "Hoş geldin, {name}",
     "pointsChip": "{points} puan · {worth}",

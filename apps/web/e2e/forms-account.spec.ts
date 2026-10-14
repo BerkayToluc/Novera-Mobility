@@ -98,7 +98,7 @@ test("saved preferences come back at the next sign-in", async ({ page }) => {
   await page.getByRole("group", { name: "Dil" }).getByText("English").click();
   await page.getByRole("group", { name: "Görünüm" }).getByText("Koyu").click();
   await page.getByRole("group", { name: "Para birimi" }).getByText("EUR").click();
-  await page.getByRole("button", { name: "Kaydet" }).click();
+  await page.getByRole("region", { name: "Varsayılan tercihlerim" }).getByRole("button", { name: "Kaydet" }).click();
   await expect(page).toHaveURL(/\/en\/profile\/settings/);
 
   // Another device: this browser forgets its own choices. Only the account remembers them (the
