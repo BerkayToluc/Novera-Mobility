@@ -2,9 +2,10 @@
 
 import { useId } from "react";
 import { useTranslations } from "next-intl";
-import type { FieldErrors, UseFormRegister } from "react-hook-form";
+import { Controller, type Control, type FieldErrors, type UseFormRegister } from "react-hook-form";
 import { ConsentCheckbox } from "@/components/form/consent-checkbox";
 import { Honeypot } from "@/components/form/honeypot";
+import { CityPicker } from "@/components/ui/city-picker";
 import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
@@ -15,6 +16,7 @@ import { FLEET_SIZES, QUOTE_NEEDS, QUOTE_TERMS, type QuoteInput } from "@/lib/qu
 
 type QuoteFieldsProps = {
   register: UseFormRegister<QuoteInput>;
+  control: Control<QuoteInput>;
   errors: FieldErrors<QuoteInput>;
   // The quote page also asks which product the visitor has in mind; the home box does not.
   withProduct?: boolean;
@@ -22,7 +24,7 @@ type QuoteFieldsProps = {
 
 // The inputs of the corporate request, laid out as a two-column grid from `md`. The caller
 // owns the <form>, the grid and the submit button.
-export function QuoteFields({ register, errors, withProduct = false }: QuoteFieldsProps) {
+export function QuoteFields({ register, control, errors, withProduct = false }: QuoteFieldsProps) {
   const t = useTranslations("QuoteForm");
   const products = useTranslations("ProductsPage");
   const needsHintId = useId();
@@ -98,7 +100,23 @@ export function QuoteFields({ register, errors, withProduct = false }: QuoteFiel
       </fieldset>
 
       <Field label={t("cities")} hint={t("citiesHint")} error={errors.cities?.message} className="md:col-span-2">
-        {(control) => <Input autoComplete="off" {...control} {...register("cities")} />}
+        {(props) => (
+          // The cities are chosen from the list of provinces, not typed (SPEC §2.2.3, v0.9); the form
+          // keeps them as one string, "İstanbul, Ankara", as before.
+          <Controller
+            control={control}
+            name="cities"
+            render={({ field }) => (
+              <CityPicker
+                value={field.value}
+                onChange={field.onChange}
+                id={props.id}
+                aria-describedby={props["aria-describedby"]}
+                aria-invalid={props["aria-invalid"]}
+              />
+            )}
+          />
+        )}
       </Field>
 
       {withProduct && (

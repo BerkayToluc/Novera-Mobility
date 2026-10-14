@@ -36,6 +36,7 @@ export function QuoteForm({ initialProduct = "", withProduct = false }: { initia
 
   const {
     register,
+    control,
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
@@ -99,7 +100,7 @@ export function QuoteForm({ initialProduct = "", withProduct = false }: { initia
     >
       <FormError message={formError} />
       <div className="grid gap-5 md:grid-cols-2">
-        <QuoteFields register={register} errors={errors} withProduct={withProduct} />
+        <QuoteFields register={register} control={control} errors={errors} withProduct={withProduct} />
       </div>
       <Button type="submit" size="lg" disabled={isSubmitting} aria-busy={isSubmitting} className="md:self-start">
         {isSubmitting ? t("submitting") : t("submit")}

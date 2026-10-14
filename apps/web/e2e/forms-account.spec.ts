@@ -34,7 +34,8 @@ test("the corporate quote form sends", async ({ page }) => {
   await page.getByLabel("Telefon").fill("0232 555 01 00");
   await // The choices are chips: the checkbox itself is hidden and its label is what is clicked.
   await page.getByText("SUV", { exact: true }).click();
-  await page.getByLabel("Teslim şehirleri").fill("İzmir");
+  await page.getByRole("combobox", { name: "Teslim şehirleri" }).fill("izm");
+  await page.getByRole("listbox", { name: "Teslim şehirleri" }).getByRole("option", { name: "İzmir" }).click();
   await page.getByRole("checkbox", { name: /aydınlatma|KVKK/i }).check();
   await page.getByRole("button", { name: "Teklif İste" }).click();
   await expect(page.getByRole("heading", { name: "Talebiniz alındı" })).toBeVisible();
