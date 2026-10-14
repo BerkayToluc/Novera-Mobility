@@ -4,14 +4,15 @@ import type { DriverRequirements } from "./driver-rules";
 // and going through a time zone could move it by one (SPEC §2.10, ADR-16).
 export type DriverDates = { birthDate: string; licenceIssuedAt: string };
 
-export type EligibilityReason = "age" | "licence_years";
+// Only the age can fail here: the licence must be a real date in the past (the form's schema)
+// and the simulated check says whether it is on record and in date.
+export type EligibilityReason = "age";
 
 export type Eligibility = {
   ok: boolean;
   reasons: EligibilityReason[];
   // What the driver has on the rental's first day, for the message.
   ageYears: number;
-  licenceYears: number;
 };
 
 const ISO_DATE = /^(\d{4})-(\d{2})-(\d{2})$/;
@@ -38,13 +39,11 @@ export function fullYears(from: string, to: string): number {
   return years;
 }
 
-// Counted on the first day of the rental, not today: someone who turns 21 the day before pickup
+// Counted on the first day of the rental, not today: someone who turns 18 the day before pickup
 // may rent. `now` never enters, so the result is the same on every machine.
 export function checkEligibility(driver: DriverDates, requirements: DriverRequirements, rentalStart: string): Eligibility {
   const ageYears = fullYears(driver.birthDate, rentalStart);
-  const licenceYears = fullYears(driver.licenceIssuedAt, rentalStart);
   const reasons: EligibilityReason[] = [];
   if (ageYears < requirements.minAge) reasons.push("age");
-  if (licenceYears < requirements.minLicenceYears) reasons.push("licence_years");
-  return { ok: reasons.length === 0, reasons, ageYears, licenceYears };
+  return { ok: reasons.length === 0, reasons, ageYears };
 }

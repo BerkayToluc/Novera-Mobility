@@ -1,10 +1,9 @@
 {
   "Driver": {
-    "requirement": "En az {age} yaş · {years} yıl ehliyet",
-    "requirementNote": "Ehliyet yılı, ehliyetin verildiği ülkeye göre artabilir.",
+    "requirementNote": "18 yaşından büyük ve geçerli ehliyeti olan herkes kiralayabilir.",
     "conditionsLink": "Kiralama koşulları",
     "title": "Sürücü bilgileri",
-    "intro": "Aracı kullanacak kişinin bu araç için koşulları karşıladığını kontrol ediyoruz. Bilgileriniz yalnızca bu kontrol için kullanılır; hiçbir yere kaydedilmez.",
+    "intro": "Aracı kullanacak kişinin kiralama koşullarını karşıladığını kontrol ediyoruz. Bilgileriniz yalnızca bu kontrol için kullanılır; hiçbir yere kaydedilmez.",
     "demoTitle": "Bu bir deneme doğrulamasıdır",
     "demoText": "Gerçek bir ehliyet hizmetine bağlanmaz; gerçek ehliyet numaranızı ve kişisel bilgilerinizi girmeyin. Koşullar örnektir.",
     "demoHint": "Deneme numarası: 12345678 geçerli sayılır; 0 ile bitenin süresi dolmuş, 9 ile bitenin kaydı yok sayılır.",
@@ -32,11 +31,9 @@
       "permit": "Bu ülkenin ehliyetiyle kiralamak için uluslararası sürücü belgesi gerekir.",
       "declaration": "Devam etmek için beyanı onaylayın."
     },
-    "eligible": "Bu araç için koşulları karşılıyorsunuz (en az {age} yaş, {years} yıl ehliyet).",
-    "ineligibleTitle": "Bu araç için koşulları karşılamıyorsunuz",
+    "eligible": "Koşulları karşılıyorsunuz ({age} yaşından büyük, geçerli ehliyet).",
+    "ineligibleTitle": "Koşulları karşılamıyorsunuz",
     "ineligibleAge": "En az {min} yaşında olmalısınız; kiralama başında {have} yaşında olacaksınız.",
-    "ineligibleLicence": "Ehliyetiniz en az {min} yıllık olmalı ({country} ehliyeti için); kiralama başında {have} yıllık olacak.",
-    "chooseAnother": "Başka araç seç",
     "verify": "Ehliyetimi doğrula",
     "verifying": "Doğrulanıyor",
     "result": {

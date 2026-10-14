@@ -66,7 +66,7 @@ export async function placeReservation(
   if (!parsed.success) return { ok: false, reason: "invalid" };
   const details = parsed.data;
 
-  const requirements = requirementsFor(loaded.vehicle.vehicleClass.slug, details.country);
+  const requirements = requirementsFor(details.country);
   const eligibility = checkEligibility(details, requirements, rentalStartDate(loaded.booking.search.startAt));
   if (!eligibility.ok) return { ok: false, reason: "ineligible", reasons: eligibility.reasons };
   // A country that asks for an international permit gets no reservation without the declaration.

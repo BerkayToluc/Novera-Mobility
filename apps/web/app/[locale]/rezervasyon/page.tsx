@@ -14,7 +14,6 @@ import { PointsToggle } from "@/components/vehicle/points-toggle";
 import { VehicleImage } from "@/components/vehicle/vehicle-image";
 import { Link } from "@/i18n/navigation";
 import { toBookingQuery } from "@/lib/booking";
-import { classRequirement } from "@/lib/driver-rules";
 import { loadBooking } from "@/lib/booking-data";
 import { currentTime } from "@/lib/clock";
 import { getCurrency } from "@/lib/get-currency";
@@ -124,8 +123,6 @@ export default async function BookingSummaryPage({ searchParams }: Props) {
                 <span className="text-fg-muted">{vehicle.vehicleClass.name[locale]}</span>
                 <br />
                 <span className="text-small text-fg-muted">
-                  {d("requirement", { age: classRequirement(vehicle.vehicleClass.slug).minAge, years: classRequirement(vehicle.vehicleClass.slug).minLicenceYears })}
-                  {" · "}
                   {d("requirementNote")}
                 </span>
               </p>
