@@ -43,28 +43,28 @@ export default async function PointsPage() {
     const date = (value: string) => format.dateTime(new Date(value), { dateStyle: "long" });
     content = (
       <>
-        <dl className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-4 md:grid-cols-2">
           <div className="flex items-center gap-4 rounded-card bg-surface-muted p-6">
             <span className="inline-flex size-12 items-center justify-center rounded-full bg-surface text-link">
               <Coins aria-hidden="true" className="size-6" />
             </span>
-            <div>
+            <dl>
               <dt className="text-small text-fg-muted">{t("balance")}</dt>
               <dd className="text-display tabular-nums text-fg">{format.number(account.balance)}</dd>
               <dd className="text-small text-fg-muted">{t("worth", { worth: formatMoney(format, pointsWorth(account.balance)) })}</dd>
-            </div>
+            </dl>
           </div>
           <div className="flex items-center gap-4 rounded-card border border-border bg-surface p-6">
             <span className="inline-flex size-12 items-center justify-center rounded-full bg-surface-muted text-fg-muted">
               <Hourglass aria-hidden="true" className="size-6" />
             </span>
-            <div>
+            <dl>
               <dt className="text-small text-fg-muted">{t("pending")}</dt>
               <dd className="text-h1 tabular-nums text-fg">{format.number(account.pending)}</dd>
               <dd className="text-small text-fg-muted">{t("pendingNote")}</dd>
-            </div>
+            </dl>
           </div>
-        </dl>
+        </div>
 
         <section aria-labelledby="points-history" className="flex flex-col gap-4">
           <h3 id="points-history" className="text-h3 text-fg">

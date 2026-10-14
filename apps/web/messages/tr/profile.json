@@ -9,7 +9,8 @@
       "settings": "Ayarlar",
       "company": "Firma bilgileri",
       "quotes": "Teklif taleplerim",
-      "points": "Puanlarım"
+      "points": "Puanlarım",
+      "newRental": "Yeni kiralama"
     },
     "signedOut": {
       "title": "Giriş yapmanız gerekiyor",
@@ -160,6 +161,25 @@
       },
       "worth": "= {worth} değerinde",
       "spendCta": "Puanla öde"
+    },
+    "welcome": "Hoş geldin, {name}",
+    "pointsChip": "{points} puan · {worth}",
+    "nextTrip": {
+      "title": "Sıradaki seyahatiniz",
+      "daysLeft": "{days, plural, =0 {Bugün başlıyor} one {# gün kaldı} other {# gün kaldı}}",
+      "viewAll": "Rezervasyonlarım",
+      "none": {
+        "title": "İlk kiralamanızı yapın",
+        "text": "Yaklaşan bir seyahatiniz yok. Bayiyi ve tarihleri seçin, uygun araçları görün.",
+        "cta": "Araç Ara"
+      }
+    },
+    "quick": {
+      "title": "Hızlı işlemler",
+      "newRental": "Yeni kiralama",
+      "newRentalText": "Bayi ve tarihleri seçip uygun araçları görün.",
+      "help": "Yardım merkezi",
+      "helpText": "Sık sorulan sorular, rehberler ve kiralama adımları."
     }
   }
 }
