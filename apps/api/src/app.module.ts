@@ -9,6 +9,8 @@ import { HoldsModule } from './holds/holds.module.js';
 import { ContentModule } from './content/content.module.js';
 import { FormsModule } from './forms/forms.module.js';
 import { AuthModule } from './auth/auth.module.js';
+import { ReservationsModule } from './reservations/reservations.module.js';
+
 
 @Module({
   imports: [
@@ -20,6 +22,7 @@ import { AuthModule } from './auth/auth.module.js';
     ContentModule,
     FormsModule,
     AuthModule,
+    ReservationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
