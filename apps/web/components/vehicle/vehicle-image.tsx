@@ -21,6 +21,8 @@ export function VehicleImage({ imageUrl, brand, model, decorative = false, class
         alt={decorative ? "" : `${brand} ${model}`}
         width={640}
         height={400}
+        // Cards are at most about a third of the page wide; without this the 1920 px variant is fetched.
+        sizes="(min-width: 1280px) 420px, (min-width: 768px) 50vw, 100vw"
         className={cn("aspect-16/10 w-full rounded-media object-cover", className)}
       />
     );
