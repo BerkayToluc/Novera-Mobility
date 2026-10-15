@@ -59,7 +59,7 @@ test("the corporate tab signs in to the company pages", async ({ page }) => {
   await expect(page).toHaveURL(/\/profil$/);
   await expect(page.getByRole("heading", { level: 1, name: /Ege Lojistik/ })).toBeVisible();
   await page.getByRole("link", { name: "Teklif taleplerim" }).click();
-  await expect(page.getByText("NVK-2026-48213")).toBeVisible();
+  await expect(page.getByText("TKL-2026-48213")).toBeVisible();
   // An individual's pages are not here.
   await expect(page.getByRole("link", { name: "Puanlarım" })).toHaveCount(0);
 

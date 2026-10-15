@@ -23,7 +23,9 @@ export const contactSchema = (m: ContactErrorMessages) =>
       .refine(
         (value) => value === "" || (/^\+?[\d\s()-]+$/.test(value) && value.replace(/\D/g, "").length >= 10),
         m.phone,
-      ),
+      )
+      // The API takes at most 30 characters (docs/api/openapi.yaml).
+      .max(30, m.phone),
     topic: z.enum(CONTACT_TOPICS),
     message: z.string().trim().min(10, m.message).max(2000, m.message),
     consent: z.boolean().refine((value) => value, m.consent),

@@ -59,7 +59,7 @@ export function QuoteForm({ initialProduct = "", withProduct = false }: { initia
     try {
       const result = await submitQuote(values);
       if (result.ok) setSent({ email: values.email, reference: result.reference });
-      else setFormError(t(result.reason === "invalid" ? "errors.invalid" : "errors.unavailable"));
+      else setFormError(t(result.reason === "invalid" ? "errors.invalid" : result.reason === "rate_limited" ? "errors.rateLimited" : "errors.unavailable"));
     } catch {
       setFormError(t("errors.generic"));
     }
