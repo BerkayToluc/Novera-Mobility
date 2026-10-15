@@ -8,6 +8,7 @@ import { CatalogModule } from './catalog/catalog.module.js';
 import { HoldsModule } from './holds/holds.module.js';
 import { ContentModule } from './content/content.module.js';
 import { FormsModule } from './forms/forms.module.js';
+import { AuthModule } from './auth/auth.module.js';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { FormsModule } from './forms/forms.module.js';
     CatalogModule,
     ContentModule,
     FormsModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
