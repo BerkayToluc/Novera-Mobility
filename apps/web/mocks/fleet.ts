@@ -115,7 +115,7 @@ function buildVehicles(): Vehicle[] {
         consumption: model.consumption,
         description: DESCRIPTIONS[model.slug],
         dailyPrice: { amount: model.dailyKurus, currency: "TRY" },
-        imageUrl: null,
+        imageUrl: `/fleet/${model.slug}.webp`,
         vehicleClass: CLASSES[model.class],
         branchId,
       });
