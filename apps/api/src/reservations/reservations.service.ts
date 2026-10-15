@@ -1,0 +1,186 @@
+import { Inject, Injectable } from '@nestjs/common';
+import type { UserRow } from '../auth/user-view.js';
+import { PrismaService } from '../prisma/prisma.service.js';
+import {
+  PricingService,
+  hasConflict,
+  vehicleUnavailable,
+  type ConflictDb,
+  type PricingDb,
+} from './pricing.service.js';
+import { POINTS_RULES, pointsForTotal } from './points.rules.js';
+import { parseReservationRequest, type ValidReservationRequest } from './reservation-input.js';
+import {
+  RESERVATION_INCLUDE,
+  toReservationView,
+  type ReservationRow,
+} from './reservation-view.js';
+
+const NUMBER_ATTEMPTS = 5;
+
+function isUniqueViolation(error: unknown): boolean {
+  return typeof error === 'object' && error !== null && (error as { code?: unknown }).code === 'P2002';
+}
+
+// Numara yılı Türkiye saatine göre belirlenir (ADR-16).
+function istanbulYear(date: Date): number {
+  return Number(
+    new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Istanbul', year: 'numeric' }).format(date),
+  );
+}
+
+@Injectable()
+export class ReservationsService {
+  constructor(
+    @Inject(PrismaService) private readonly prisma: PrismaService,
+    @Inject(PricingService) private readonly pricing: PricingService,
+  ) {}
+
+  // POST /reservations: her şey TEK işlemde olur (araç kilidi, müsaitlik, fiyat, kayıt, puan, tutmanın silinmesi).
+  async create(user: UserRow, input: unknown) {
+    const request = parseReservationRequest(input);
+    await this.pricing.assertBranchesExist(request);
+
+    // Numara çakışması (P2002) işlemi bozar; bu yüzden yeniden deneme İŞLEMİN DIŞINDADIR.
+    for (let attempt = 0; attempt < NUMBER_ATTEMPTS; attempt += 1) {
+      try {
+        return await this.createOnce(user, request);
+      } catch (error) {
+        if (!isUniqueViolation(error)) throw error;
+      }
+    }
+    throw new Error('Could not allocate a reservation number');
+  }
+
+  private async createOnce(user: UserRow, request: ValidReservationRequest) {
+    return this.prisma.$transaction(async (tx) => {
+      // Aracın satırını kilitle: aynı araç için gelen diğer istekler bu işlem bitene kadar bekler,
+      // sonra çakışmayı görüp 409 alır (kilit yoksa iki kişi aynı aracı alabilir).
+      await tx.$queryRaw`SELECT "id" FROM "Vehicle" WHERE "id" = ${request.vehicleId} FOR UPDATE`;
+
+      const now = new Date();
+
+      // Tutma: aynı araç/bayi/saatler için geçerliyse istemcinin kendi tutmasıdır (engel olmaz, işlem sonunda silinir).
+      // Süresi dolmuş ya da uymayan tutma sorun değildir; müsaitlik aşağıda yine kontrol edilir (openapi).
+      let ownHoldId: string | null = null;
+      if (request.holdId) {
+        const hold = await tx.hold.findUnique({ where: { id: request.holdId } });
+        if (
+          hold &&
+          hold.vehicleId === request.vehicleId &&
+          hold.pickupBranchId === request.pickupBranchId &&
+          hold.returnBranchId === request.returnBranchId &&
+          hold.startAt.getTime() === request.startAt.getTime() &&
+          hold.endAt.getTime() === request.endAt.getTime()
+        ) {
+          ownHoldId = hold.id;
+        }
+      }
+
+      if (await hasConflict(tx as unknown as ConflictDb, request, ownHoldId, now)) {
+        throw vehicleUnavailable();
+      }
+
+      // Toplamı sunucu hesaplar; istemciden fiyat alınmaz.
+      const price = await this.pricing.calculate(tx as unknown as PricingDb, request);
+
+      const slugs = request.extras.map((selection) => selection.slug);
+      const extraRows = slugs.length
+        ? await tx.extra.findMany({ where: { slug: { in: slugs } }, select: { id: true, slug: true } })
+        : [];
+      const extraId = new Map(extraRows.map((row) => [row.slug, row.id]));
+
+      const prefix = `NVR-${istanbulYear(now)}-`;
+      const last = await tx.reservation.findFirst({
+        where: { number: { startsWith: prefix } },
+        orderBy: { number: 'desc' },
+        select: { number: true },
+      });
+      const lastSerial = last ? Number(last.number.slice(prefix.length)) : 0;
+      const number = `${prefix}${String((Number.isFinite(lastSerial) ? lastSerial : 0) + 1).padStart(5, '0')}`;
+
+      const [vehicleLine, ...extraLines] = price.lines;
+      const created = await tx.reservation.create({
+        data: {
+          number,
+          status: 'CONFIRMED',
+          startAt: request.startAt,
+          endAt: request.endAt,
+          days: price.days,
+          currency: price.currency,
+          exchangeRate: price.exchangeRate,
+          vehicleDailyPrice: vehicleLine!.unitPrice.amount,
+          totalPrice: price.total.amount,
+          userId: user.id,
+          vehicleId: request.vehicleId,
+          pickupBranchId: request.pickupBranchId,
+          returnBranchId: request.returnBranchId,
+          extras: {
+            create: request.extras.map((selection, index) => ({
+              quantity: selection.quantity,
+              unitPrice: extraLines[index]!.unitPrice.amount,
+              totalPrice: extraLines[index]!.total.amount,
+              extraId: extraId.get(selection.slug)!,
+            })),
+          },
+        },
+        select: { id: true },
+      });
+
+      // Puan aynı işlemde yazılır; bakiyeye KİRALAMA BİTİNCE geçer (GET /me/points tarihe bakar).
+      const points = pointsForTotal(price.total.amount, price.currency, price.exchangeRate);
+      if (points > 0) {
+        await tx.pointTransaction.create({
+          data: { userId: user.id, reservationId: created.id, points },
+        });
+      }
+
+      if (ownHoldId) await tx.hold.delete({ where: { id: ownHoldId } });
+
+      const row = await tx.reservation.findUniqueOrThrow({
+        where: { id: created.id },
+        include: RESERVATION_INCLUDE,
+      });
+      return toReservationView(row as unknown as ReservationRow);
+    });
+  }
+
+  // GET /me/reservations: yeniden eskiye (kiralama başlangıcına göre).
+  async listMine(userId: string) {
+    const rows = await this.prisma.reservation.findMany({
+      where: { userId },
+      orderBy: { startAt: 'desc' },
+      include: RESERVATION_INCLUDE,
+    });
+    return rows.map((row) => toReservationView(row as unknown as ReservationRow));
+  }
+
+  // GET /me/points: bakiye = bitmiş kiralamaların puanı, `pending` = henüz bitmemiş olanların.
+  // İptal edilen rezervasyon sayılmaz. Geçmişteki tarih, puanın hesaba geçtiği an (kiralamanın bitişi) olur.
+  async points(userId: string, now: Date = new Date()) {
+    const rows = await this.prisma.pointTransaction.findMany({
+      where: { userId },
+      include: { reservation: { select: { number: true, status: true, endAt: true } } },
+    });
+    let balance = 0;
+    let pending = 0;
+    const history: Array<{ points: number; reservationNumber: string | null; createdAt: string }> = [];
+    for (const row of rows) {
+      const reservation = row.reservation;
+      if (reservation && reservation.status !== 'CONFIRMED') continue;
+      const creditedAt = reservation ? reservation.endAt : row.createdAt;
+      if (creditedAt.getTime() > now.getTime()) {
+        pending += row.points;
+      } else {
+        balance += row.points;
+        history.push({
+          points: row.points,
+          reservationNumber: reservation?.number ?? null,
+          createdAt: creditedAt.toISOString(),
+        });
+      }
+    }
+    history.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    return { balance, pending, history, rules: POINTS_RULES };
+  }
+}
