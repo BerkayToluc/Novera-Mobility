@@ -105,6 +105,21 @@ model User {
   reservations      Reservation[]
   quoteRequests     QuoteRequest[]
   pointTransactions PointTransaction[]
+  sessions          Session[]
+}
+
+// Giriş oturumu (BACKLOG #34). Çerezdeki rastgele anahtarın yalnızca SHA-256 özeti saklanır.
+model Session {
+  id        String   @id @default(uuid())
+  tokenHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
 }
 
 // Puan kazanımı. Bakiye = bu kayıtların toplamı. Puanla ödeme v1'de yok.
