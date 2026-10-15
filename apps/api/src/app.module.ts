@@ -7,6 +7,7 @@ import { PrismaModule } from './prisma/prisma.module.js';
 import { CatalogModule } from './catalog/catalog.module.js';
 import { HoldsModule } from './holds/holds.module.js';
 import { ContentModule } from './content/content.module.js';
+import { FormsModule } from './forms/forms.module.js';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { ContentModule } from './content/content.module.js';
     HoldsModule,
     CatalogModule,
     ContentModule,
+    FormsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
