@@ -28,7 +28,9 @@ export const quoteSchema = (m: QuoteErrorMessages) =>
       .string()
       .trim()
       .regex(/^\+?[\d\s()-]+$/, m.phone)
-      .refine((value) => value.replace(/\D/g, "").length >= 10, m.phone),
+      .refine((value) => value.replace(/\D/g, "").length >= 10, m.phone)
+      // The API takes at most 30 characters (docs/api/openapi.yaml).
+      .max(30, m.phone),
     fleetSize: z.enum(FLEET_SIZES),
     term: z.enum(QUOTE_TERMS),
     needs: z.array(z.enum(QUOTE_NEEDS)).min(1, m.needs),

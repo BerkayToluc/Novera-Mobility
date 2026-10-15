@@ -16,14 +16,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { CONTACT_TOPICS, EMPTY_CONTACT, contactSchema, type ContactInput } from "@/lib/contact";
 import { sendContact } from "@/lib/contact-actions";
 
-type Sent = { email: string; reference: string };
+// The API gives no number for a message, so the reference may be missing (null).
 
 // The contact form (SPEC §2.6). Once sent it turns into the confirmation in place, with a
 // reference the visitor can quote; see the quote form for the same pattern.
 export function ContactForm() {
   const t = useTranslations("ContactForm");
   const [formError, setFormError] = useState<string | null>(null);
-  const [sent, setSent] = useState<Sent | null>(null);
+  const [sent, setSent] = useState<{ email: string; reference: string | null } | null>(null);
 
   const schema = useMemo(
     () =>
@@ -55,7 +55,7 @@ export function ContactForm() {
     try {
       const result = await sendContact(values);
       if (result.ok) setSent({ email: values.email, reference: result.reference });
-      else setFormError(t(result.reason === "invalid" ? "errors.invalid" : "errors.unavailable"));
+      else setFormError(t(result.reason === "invalid" ? "errors.invalid" : result.reason === "rate_limited" ? "errors.rateLimited" : "errors.unavailable"));
     } catch {
       setFormError(t("errors.generic"));
     }
@@ -67,9 +67,11 @@ export function ContactForm() {
         title={t("sent.title")}
         text={t("sent.text", { email: sent.email })}
         detail={
-          <p className="text-body text-fg">
-            {t("sent.reference")} <strong className="tabular-nums">{sent.reference}</strong>
-          </p>
+          sent.reference ? (
+            <p className="text-body text-fg">
+              {t("sent.reference")} <strong className="tabular-nums">{sent.reference}</strong>
+            </p>
+          ) : undefined
         }
       >
         <Button

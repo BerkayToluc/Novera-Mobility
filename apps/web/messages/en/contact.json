@@ -63,7 +63,8 @@
       "consent": "Accept the privacy notice to continue.",
       "invalid": "Your message looks incomplete. Check the fields and send it again.",
       "unavailable": "The message service is not available right now. Please try again later.",
-      "generic": "Your message could not be sent. Please try again."
+      "generic": "Your message could not be sent. Please try again.",
+      "rateLimited": "Too many attempts. Please try again in a while."
     },
     "sent": {
       "title": "We have your message",
