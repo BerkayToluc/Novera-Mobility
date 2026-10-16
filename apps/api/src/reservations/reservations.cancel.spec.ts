@@ -22,6 +22,7 @@ function row(over: Row = {}): Row {
     exchangeRate: 1,
     vehicleDailyPrice: 100000,
     totalPrice: 300000,
+    pointsUsed: 0,
     createdAt: NOW,
     userId: OWNER,
     vehicle: {

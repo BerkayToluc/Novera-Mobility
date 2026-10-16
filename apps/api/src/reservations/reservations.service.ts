@@ -4,10 +4,13 @@ import { PrismaService } from '../prisma/prisma.service.js';
 import {
   PricingService,
   hasConflict,
+  requirePointsAccount,
   vehicleUnavailable,
+  withPoints,
   type ConflictDb,
   type PricingDb,
 } from './pricing.service.js';
+import { loadPointsLedger, type LedgerDb } from './points-balance.js';
 import { POINTS_RULES, pointsForTotal } from './points.rules.js';
 import { parseReservationRequest, type ValidReservationRequest } from './reservation-input.js';
 import {
@@ -68,6 +71,12 @@ export class ReservationsService {
       // Aracın satırını kilitle: aynı araç için gelen diğer istekler bu işlem bitene kadar bekler,
       // sonra çakışmayı görüp 409 alır (kilit yoksa iki kişi aynı aracı alabilir).
       await tx.$queryRaw`SELECT "id" FROM "Vehicle" WHERE "id" = ${request.vehicleId} FOR UPDATE`;
+      // Paying with points: lock the account too (always after the vehicle, so locks never cross), so two
+      // reservations made at the same moment cannot spend the same points twice.
+      if (request.usePoints) {
+        requirePointsAccount(user, request.currency);
+        await tx.$queryRaw`SELECT "id" FROM "User" WHERE "id" = ${user.id} FOR UPDATE`;
+      }
 
       const now = new Date();
 
@@ -93,7 +102,11 @@ export class ReservationsService {
       }
 
       // Toplamı sunucu hesaplar; istemciden fiyat alınmaz.
-      const price = await this.pricing.calculate(tx as unknown as PricingDb, request);
+      let price = await this.pricing.calculate(tx as unknown as PricingDb, request);
+      if (request.usePoints) {
+        const ledger = await loadPointsLedger(tx as unknown as LedgerDb, user.id, now);
+        price = withPoints(price, ledger.balance);
+      }
 
       const slugs = request.extras.map((selection) => selection.slug);
       const extraRows = slugs.length
@@ -122,6 +135,7 @@ export class ReservationsService {
           exchangeRate: price.exchangeRate,
           vehicleDailyPrice: vehicleLine!.unitPrice.amount,
           totalPrice: price.total.amount,
+          pointsUsed: price.pointsUsed,
           userId: user.id,
           vehicleId: request.vehicleId,
           pickupBranchId: request.pickupBranchId,
@@ -139,7 +153,8 @@ export class ReservationsService {
       });
 
       // Puan aynı işlemde yazılır; bakiyeye KİRALAMA BİTİNCE geçer (GET /me/points tarihe bakar).
-      const points = pointsForTotal(price.total.amount, price.currency, price.exchangeRate);
+      // Points are earned on the money actually paid (the part paid with points earns nothing).
+      const points = pointsForTotal(price.payable.amount, price.currency, price.exchangeRate);
       if (points > 0) {
         await tx.pointTransaction.create({
           data: { userId: user.id, reservationId: created.id, points },
@@ -185,32 +200,10 @@ export class ReservationsService {
     return toReservationView(row as unknown as ReservationRow);
   }
 
-  // GET /me/points: bakiye = bitmiş kiralamaların puanı, `pending` = henüz bitmemiş olanların.
-  // İptal edilen rezervasyon sayılmaz. Geçmişteki tarih, puanın hesaba geçtiği an (kiralamanın bitişi) olur.
+  // GET /me/points: bakiye = bitmiş kiralamaların puanı eksi harcananlar, `pending` = henüz bitmemiş olanların.
+  // İptal edilen rezervasyon sayılmaz (harcanan puan iade olur). Geçmişte harcamalar eksi puanla görünür.
   async points(userId: string, now: Date = new Date()) {
-    const rows = await this.prisma.pointTransaction.findMany({
-      where: { userId },
-      include: { reservation: { select: { number: true, status: true, endAt: true } } },
-    });
-    let balance = 0;
-    let pending = 0;
-    const history: Array<{ points: number; reservationNumber: string | null; createdAt: string }> = [];
-    for (const row of rows) {
-      const reservation = row.reservation;
-      if (reservation && reservation.status !== 'CONFIRMED') continue;
-      const creditedAt = reservation ? reservation.endAt : row.createdAt;
-      if (creditedAt.getTime() > now.getTime()) {
-        pending += row.points;
-      } else {
-        balance += row.points;
-        history.push({
-          points: row.points,
-          reservationNumber: reservation?.number ?? null,
-          createdAt: creditedAt.toISOString(),
-        });
-      }
-    }
-    history.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
-    return { balance, pending, history, rules: POINTS_RULES };
+    const ledger = await loadPointsLedger(this.prisma, userId, now);
+    return { ...ledger, rules: POINTS_RULES };
   }
 }

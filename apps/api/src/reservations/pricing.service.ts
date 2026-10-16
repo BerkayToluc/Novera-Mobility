@@ -1,6 +1,10 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { unauthenticated } from '../auth/auth.errors.js';
+import type { UserRow } from '../auth/user-view.js';
 import { validationFailed } from '../forms/form-input.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { loadPointsLedger } from './points-balance.js';
+import { pointsWorthMinor, redeemablePoints } from './points.rules.js';
 import {
   parseReservationRequest,
   type CurrencyCode,
@@ -36,6 +40,9 @@ export interface PriceBreakdown {
   days: number;
   lines: PriceLine[];
   total: Money;
+  // Points paid with (0 when not used) and what is left to pay in money after them.
+  pointsUsed: number;
+  payable: Money;
 }
 
 // Veritabanı erişiminin fiyat için gereken kısmı (hem PrismaService hem işlem içi `tx` uyar).
@@ -48,6 +55,25 @@ export function rentalDays(startAt: Date, endAt: Date): number {
 }
 
 // TRY kuruşunu hedef para biriminin alt birimine çevirir.
+// Paying with points needs a signed-in individual account and a lira reservation.
+export function requirePointsAccount(user: UserRow | null, currency: CurrencyCode): UserRow {
+  if (!user) throw unauthenticated();
+  if (user.accountType !== 'INDIVIDUAL' || currency !== 'TRY') {
+    throw validationFailed({ usePoints: 'NOT_ALLOWED' }, 'Points can only be used by individual accounts, in TRY');
+  }
+  return user;
+}
+
+// Spends as many points as allowed (balance and the half-of-total cap) on a calculated price.
+export function withPoints(breakdown: PriceBreakdown, balance: number): PriceBreakdown {
+  const pointsUsed = redeemablePoints(balance, breakdown.total.amount);
+  return {
+    ...breakdown,
+    pointsUsed,
+    payable: { amount: breakdown.total.amount - pointsWorthMinor(pointsUsed), currency: breakdown.currency },
+  };
+}
+
 export function convertMinor(tryMinor: number, rate: number, currency: CurrencyCode): number {
   return currency === 'TRY' ? tryMinor : Math.round(tryMinor * rate);
 }
@@ -96,10 +122,15 @@ export async function hasConflict(
 export class PricingService {
   constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
 
-  async price(input: unknown): Promise<PriceBreakdown> {
+  async price(input: unknown, user: UserRow | null = null): Promise<PriceBreakdown> {
     const request = parseReservationRequest(input);
+    const account = request.usePoints ? requirePointsAccount(user, request.currency) : null;
     await this.assertBranchesExist(request);
-    const breakdown = await this.calculate(this.prisma, request);
+    let breakdown = await this.calculate(this.prisma, request);
+    if (account) {
+      const ledger = await loadPointsLedger(this.prisma, account.id, new Date());
+      breakdown = withPoints(breakdown, ledger.balance);
+    }
     if (await hasConflict(this.prisma, request, request.holdId, new Date())) {
       throw vehicleUnavailable();
     }
@@ -178,7 +209,15 @@ export class PricingService {
     }
 
     const total = lines.reduce((sum, line) => sum + line.total.amount, 0);
-    return { currency, exchangeRate: rate, days, lines, total: money(total) };
+    return {
+      currency,
+      exchangeRate: rate,
+      days,
+      lines,
+      total: money(total),
+      pointsUsed: 0,
+      payable: money(total),
+    };
   }
 
   private async getRate(db: PricingDb, currency: CurrencyCode): Promise<number> {

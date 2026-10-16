@@ -271,6 +271,7 @@ model Reservation {
   exchangeRate      Decimal  @default(1) @db.Decimal(18, 8) // rezervasyon anındaki kur (1 TRY = ? currency)
   vehicleDailyPrice Int
   totalPrice        Int
+  pointsUsed        Int      @default(0) // puanla ödenen kısım (1 puan = ₺5, yalnızca TRY); iptalde iade sayılır
 
   createdAt DateTime @default(now())
 

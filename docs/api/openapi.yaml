@@ -186,7 +186,9 @@ paths:
     post:
       tags: [reservations]
       summary: Fiyat dökümü (rezervasyon özeti)
-      description: Rezervasyon oluşturmadan kalem kalem fiyatı hesaplar. Giriş gerekmez. Toplamı sunucu hesaplar.
+      description: |
+        Rezervasyon oluşturmadan kalem kalem fiyatı hesaplar. Giriş gerekmez (yalnızca `usePoints: true` ise gerekir).
+        Toplamı sunucu hesaplar; `usePoints` ile `pointsUsed` ve ödenecek `payable` tutar da döner.
       requestBody:
         required: true
         content:
@@ -198,6 +200,7 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/PriceBreakdown" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
         "409": { $ref: "#/components/responses/Conflict" }
         "422": { $ref: "#/components/responses/ValidationFailed" }
 
@@ -833,6 +836,14 @@ components:
             properties:
               slug: { type: string }
               quantity: { type: integer, minimum: 1, maximum: 10 }
+        usePoints:
+          type: boolean
+          description: |
+            Puanla öde. 1 puan = 5 TL; puan toplamın en çok yarısını karşılar (bir kiralama bedava olmaz).
+            Yalnızca giriş yapmış bireysel hesapta ve TL'de: oturum yoksa `401`, kurumsal hesap ya da TL dışı
+            para birimi `422` (`fieldErrors.usePoints: NOT_ALLOWED`). Harcanan puan, bakiyeden ve toplamın yarısından
+            fazla olamaz; sunucu en çok kullanılabilecek kadarını kullanır (yetmiyorsa 0). Harcanan puan hemen
+            bakiyeden düşer, rezervasyon iptal edilirse iade edilir. Kazanılan puan, puanla ödenen kısım hariç tutardan hesaplanır.
 
     HoldRequest:
       type: object
@@ -883,6 +894,8 @@ components:
           type: array
           items: { $ref: "#/components/schemas/PriceLine" }
         total: { $ref: "#/components/schemas/Money" }
+        pointsUsed: { type: integer, description: Puanla ödenen puan (kullanılmadıysa 0). }
+        payable: { $ref: "#/components/schemas/Money" } # total eksi puanın karşılığı: ödenecek para
 
     Reservation:
       type: object
@@ -917,7 +930,7 @@ components:
             type: object
             required: [points, createdAt]
             properties:
-              points: { type: integer }
+              points: { type: integer, description: Harcamalar eksi puanla görünür. }
               reservationNumber: { type: string, nullable: true }
               createdAt: { type: string, format: date-time, description: Puanın hesaba geçtiği an (kiralamanın bitişi). }
         rules: { $ref: "#/components/schemas/LocalizedText" }

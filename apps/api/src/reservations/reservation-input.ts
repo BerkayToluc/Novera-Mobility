@@ -26,6 +26,8 @@ export interface ValidReservationRequest {
   endAt: Date;
   currency: CurrencyCode;
   extras: ExtraSelection[];
+  // Pay part of the total with points (individual account, TRY only; checked where the account is known).
+  usePoints: boolean;
 }
 
 export function isThirtyMinuteSlot(date: Date): boolean {
@@ -102,6 +104,13 @@ export function parseReservationRequest(input: unknown): ValidReservationRequest
 
   const extras = parseExtras(body.extras, errors);
 
+  let usePoints = false;
+  const rawUsePoints = body.usePoints;
+  if (rawUsePoints !== undefined && rawUsePoints !== null) {
+    if (typeof rawUsePoints === 'boolean') usePoints = rawUsePoints;
+    else errors.usePoints = 'INVALID_FORMAT';
+  }
+
   if (
     Object.keys(errors).length > 0 ||
     !vehicleId ||
@@ -113,7 +122,7 @@ export function parseReservationRequest(input: unknown): ValidReservationRequest
     throw validationFailed(errors, 'Reservation request validation failed');
   }
 
-  return { vehicleId, holdId, pickupBranchId, returnBranchId, startAt, endAt, currency, extras };
+  return { vehicleId, holdId, pickupBranchId, returnBranchId, startAt, endAt, currency, extras, usePoints };
 }
 
 function parseExtras(raw: unknown, errors: Record<string, string>): ExtraSelection[] {
