@@ -30,6 +30,7 @@ export const routing = defineRouting({
     "/giris": { tr: "/giris", en: "/login" },
     "/kayit": { tr: "/kayit", en: "/register" },
     "/sifre-sifirla": { tr: "/sifre-sifirla", en: "/reset-password" },
+    "/sifre-sifirla/yeni": { tr: "/sifre-sifirla/yeni", en: "/reset-password/new" },
     "/profil": { tr: "/profil", en: "/profile" },
     "/profil/rezervasyonlar": { tr: "/profil/rezervasyonlar", en: "/profile/bookings" },
     "/profil/puanlar": { tr: "/profil/puanlar", en: "/profile/points" },

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { loginSchema, registerSchema } from "@/lib/auth-schemas";
+import { loginSchema, registerSchema, resetPasswordSchema } from "@/lib/auth-schemas";
 import { contactSchema, EMPTY_CONTACT } from "@/lib/contact";
 import { formatCardNumber, paymentSchema } from "@/lib/payment-schema";
 import { emptyQuote, quoteSchema } from "@/lib/quote";
@@ -104,5 +104,15 @@ describe("auth schemas", () => {
     const base = { firstName: "Elif", lastName: "Yıldız", email: "elif@example.com", consent: true };
     expect(issues(registerSchema(messages).safeParse({ ...base, password: "short" }))).toContain("passwordMin");
     expect(registerSchema(messages).safeParse({ ...base, password: "long-enough-1" }).success).toBe(true);
+  });
+});
+
+describe("resetPasswordSchema", () => {
+  const schema = resetPasswordSchema(names("required", "email", "passwordMin", "consent"));
+
+  it("asks for a password of at least eight characters", () => {
+    expect(issues(schema.safeParse({ password: "" }))).toContain("required");
+    expect(issues(schema.safeParse({ password: "1234567" }))).toContain("passwordMin");
+    expect(schema.safeParse({ password: "12345678" }).success).toBe(true);
   });
 });

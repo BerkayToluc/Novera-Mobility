@@ -204,3 +204,34 @@ test("the profile's links carry an icon each, and the current page is marked", a
   await expect(nav.getByRole("link", { name: "Hesabım" })).toHaveAttribute("aria-current", "page");
   for (const link of await nav.getByRole("link").all()) await expect(link.locator("svg")).toHaveCount(1);
 });
+
+test("a new password can be set from the link in the e-mail", async ({ page }) => {
+  await page.goto("/sifre-sifirla/yeni?token=abc123");
+  await page.getByLabel("Yeni şifre").fill("kisa");
+  await page.getByRole("button", { name: "Şifreyi Kaydet" }).click();
+  await expect(page.getByText("Şifre en az 8 karakter olmalıdır.")).toBeVisible();
+
+  await page.getByLabel("Yeni şifre").fill("yeni-uzun-sifre-1");
+  await page.getByRole("button", { name: "Şifreyi Kaydet" }).click();
+  await expect(page.getByRole("status")).toContainText("Şifreniz değişti");
+  await page.locator("#main").getByRole("link", { name: "Giriş Yap" }).click();
+  await expect(page).toHaveURL(/\/giris$/);
+});
+
+test("a reset link that is missing or no longer works asks for a new one", async ({ page }) => {
+  for (const address of ["/sifre-sifirla/yeni", "/sifre-sifirla/yeni?token=expired"]) {
+    await page.goto(address);
+    if (address.endsWith("expired")) {
+      await page.getByLabel("Yeni şifre").fill("yeni-uzun-sifre-1");
+      await page.getByRole("button", { name: "Şifreyi Kaydet" }).click();
+    }
+    await expect(page.locator("#main").getByRole("alert")).toContainText("geçersiz");
+    await page.getByRole("link", { name: "Yeni bağlantı iste" }).click();
+    await expect(page).toHaveURL(/\/sifre-sifirla$/);
+  }
+});
+
+test("the reset page is also served in English", async ({ page }) => {
+  await page.goto("/en/reset-password/new?token=abc123");
+  await expect(page.getByRole("heading", { level: 1, name: "Set a new password" })).toBeVisible();
+});
