@@ -106,6 +106,7 @@ model User {
   quoteRequests     QuoteRequest[]
   pointTransactions PointTransaction[]
   sessions          Session[]
+  passwordResetTokens   PasswordResetToken[]
 }
 
 // Giriş oturumu (BACKLOG #34). Çerezdeki rastgele anahtarın yalnızca SHA-256 özeti saklanır.
@@ -114,6 +115,21 @@ model Session {
   tokenHash String   @unique
   expiresAt DateTime
   createdAt DateTime @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+// Single-use password reset link (BACKLOG #27, issue #36). Only the SHA-256 hash of the token is stored.
+model PasswordResetToken {
+  id        String    @id @default(uuid())
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
 
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)

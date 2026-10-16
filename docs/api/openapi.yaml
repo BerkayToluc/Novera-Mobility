@@ -360,7 +360,10 @@ paths:
       summary: Şifre sıfırlama bağlantısı iste
       description: |
         E-posta kayıtlı olsun olmasın her zaman `202` döner (kullanıcı varlığı sızdırılmaz).
-        Gerçek e-posta gönderilmez; bağlantı sunucu konsoluna yazılır.
+        Gerçek e-posta gönderilmez; bağlantı sunucu konsoluna yazılır (canlıda yazılmaz, e-posta BACKLOG #49).
+        Bağlantı biçimi: `{WEB_URL}/{tr|en}/sifre-sifirla/yeni?token=...`. Bağlantı 1 saat geçerlidir ve
+        bir hesapta aynı anda tek bağlantı yaşar (yenisi eskisini geçersiz kılar).
+        Sınır: istemci başına 5, e-posta başına 3 istek/saat (`429 RATE_LIMITED`).
       requestBody:
         required: true
         content:
@@ -391,8 +394,15 @@ paths:
                 password: { type: string, minLength: 8 }
       responses:
         "204":
-          description: Şifre değişti; eski token geçersiz olur
-        "422": { $ref: "#/components/responses/ValidationFailed" }
+          description: Şifre değişti. Bağlantı kullanılmış sayılır ve hesabın tüm oturumları kapanır (yeniden giriş gerekir).
+        "422":
+          description: |
+            Alanlar geçersiz (`VALIDATION_FAILED`, ör. `password: TOO_SHORT`; bağlantı bu durumda harcanmaz) ya da
+            bağlantı geçersiz, kullanılmış veya süresi dolmuş (`RESET_TOKEN_INVALID`; üçü ayırt edilmez).
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
 
   /faq:
     get:
