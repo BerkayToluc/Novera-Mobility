@@ -102,6 +102,30 @@ describeDb('POST /quotes kurumsal teklif (gerçek PostgreSQL)', () => {
     expect(saved).toBe(5);
   });
 
+  it('oturumdaki hesaba bağlanır; GET /me/quotes yalnızca kendi taleplerini yeniden eskiye döner', async () => {
+    const owner = await prisma.user.create({
+      data: { email: `quote-${run}-owner@sirket.example`, passwordHash: 'x', firstName: 'A', lastName: 'B', accountType: 'CORPORATE' },
+    });
+    const other = await prisma.user.create({
+      data: { email: `quote-${run}-other@sirket.example`, passwordHash: 'x', firstName: 'C', lastName: 'D' },
+    });
+    try {
+      const first = await service.create(valid('mine1'), client(), owner.id);
+      const second = await service.create(valid('mine2'), client(), owner.id);
+      await service.create(valid('theirs'), client(), other.id);
+      await service.create(valid('anon'), client());
+
+      const list = await service.listMine(owner.id);
+      expect(list.map((q) => q.number)).toEqual([second.referenceNumber, first.referenceNumber]);
+      expect(list[0]).toMatchObject({ vehicleCount: 10, durationMonths: 24, productSlug: null, status: 'RECEIVED' });
+      expect(typeof list[0].createdAt).toBe('string');
+      expect(await service.listMine(randomUUID())).toEqual([]);
+    } finally {
+      await prisma.quoteRequest.deleteMany({ where: { userId: { in: [owner.id, other.id] } } });
+      await prisma.user.deleteMany({ where: { id: { in: [owner.id, other.id] } } });
+    }
+  });
+
   it('isteğe bağlı alanlar boş bırakılabilir', async () => {
     const result = await service.create(
       { companyName: company('min'), email: `quote-${run}-min@sirket.example`, vehicleCount: 1, durationMonths: 1, vehicleType: 'suv', consent: true },
