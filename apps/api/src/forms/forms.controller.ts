@@ -1,17 +1,22 @@
-import { Body, Controller, Post, Req } from '@nestjs/common';
-import { ApiBody, ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, Inject, Post, Req, UseGuards } from '@nestjs/common';
+import { ApiBody, ApiCookieAuth, ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
+import { AuthService } from '../auth/auth.service.js';
+import { CurrentUser, SessionGuard } from '../auth/session.guard.js';
+import { SESSION_COOKIE, readCookie } from '../auth/session-token.js';
+import type { UserRow } from '../auth/user-view.js';
 import { ContactService } from './contact.service.js';
 import { asFormInput } from './form-input.js';
-import { QuotesService, type QuoteReceived } from './quotes.service.js';
+import { QuotesService, type QuoteReceived, type QuoteSummaryView } from './quotes.service.js';
 import { clientKeyOf } from './rate-limiter.js';
 
 @ApiTags('forms')
 @Controller()
 export class FormsController {
   constructor(
-    private readonly contactService: ContactService,
-    private readonly quotesService: QuotesService,
+    @Inject(ContactService) private readonly contactService: ContactService,
+    @Inject(QuotesService) private readonly quotesService: QuotesService,
+    @Inject(AuthService) private readonly auth: AuthService,
   ) {}
 
   @Post('contact')
@@ -57,7 +62,18 @@ export class FormsController {
     },
   })
   @ApiCreatedResponse({ description: 'Talep alındı, talep numarası döner' })
-  quote(@Body() body: unknown, @Req() request: Request): Promise<QuoteReceived> {
-    return this.quotesService.create(asFormInput(body), clientKeyOf(request));
+  async quote(@Body() body: unknown, @Req() request: Request): Promise<QuoteReceived> {
+    // Visitors may send a request; when a session is present the request is linked to the account.
+    const token = readCookie(request.headers.cookie, SESSION_COOKIE);
+    const user = token ? await this.auth.authenticate(token) : null;
+    return this.quotesService.create(asFormInput(body), clientKeyOf(request), user?.id ?? null);
+  }
+
+  @Get('me/quotes')
+  @UseGuards(SessionGuard)
+  @ApiCookieAuth()
+  @ApiOkResponse({ description: 'Hesabın kendi teklif talepleri, yeniden eskiye' })
+  mine(@CurrentUser() user: UserRow): Promise<QuoteSummaryView[]> {
+    return this.quotesService.listMine(user.id);
   }
 }

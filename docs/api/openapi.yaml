@@ -257,6 +257,23 @@ paths:
               schema: { $ref: "#/components/schemas/Points" }
         "401": { $ref: "#/components/responses/Unauthorized" }
 
+  /me/quotes:
+    get:
+      tags: [me]
+      summary: Kurumsal teklif taleplerim
+      description: Hesaba bağlı teklif talepleri, yeniden eskiye. Giriş yapılmışken gönderilen `POST /quotes` talepleri hesaba bağlanır.
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Teklif talepleri listesi
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/QuoteSummary" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
   /me:
     get:
       tags: [me]
@@ -623,6 +640,22 @@ components:
           description: Alt birimin (kuruş/cent) tam sayısı. 125000 TRY = ₺1.250.
           example: 125000
         currency: { $ref: "#/components/schemas/Currency" }
+
+    QuoteStatus:
+      type: string
+      enum: [RECEIVED, IN_REVIEW, OFFERED]
+
+    QuoteSummary:
+      type: object
+      required: [id, number, createdAt, vehicleCount, durationMonths, status]
+      properties:
+        id: { type: string, format: uuid }
+        number: { type: string, example: TKL-2026-00042 }
+        createdAt: { type: string, format: date-time }
+        vehicleCount: { type: integer, example: 10 }
+        durationMonths: { type: integer, example: 24 }
+        productSlug: { type: string, nullable: true }
+        status: { $ref: "#/components/schemas/QuoteStatus" }
 
     Received:
       type: object

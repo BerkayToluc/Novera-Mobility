@@ -20,6 +20,17 @@ export interface QuoteReceived {
   referenceNumber: string;
 }
 
+// GET /me/quotes: one row of the account's own quote requests (contract: QuoteSummary).
+export interface QuoteSummaryView {
+  id: string;
+  number: string;
+  createdAt: string;
+  vehicleCount: number;
+  durationMonths: number;
+  productSlug: string | null;
+  status: 'RECEIVED' | 'IN_REVIEW' | 'OFFERED';
+}
+
 function isUniqueViolation(error: unknown): boolean {
   return (
     typeof error === 'object' &&
@@ -43,7 +54,7 @@ export class QuotesService {
     private readonly limiter: RateLimiter,
   ) {}
 
-  async create(input: FormInput, clientKey: string): Promise<QuoteReceived> {
+  async create(input: FormInput, clientKey: string, userId: string | null = null): Promise<QuoteReceived> {
     if (!this.limiter.allow(`quotes:${clientKey}`, QUOTE_LIMIT_PER_HOUR, HOUR_MS)) {
       throw rateLimited();
     }
@@ -87,9 +98,36 @@ export class QuotesService {
       deliveryCities,
       notes,
       productId,
+      userId,
       kvkkConsentAt: new Date(),
     });
     return { received: true, referenceNumber };
+  }
+
+  // GET /me/quotes: the signed-in account's own requests, newest first.
+  async listMine(userId: string): Promise<QuoteSummaryView[]> {
+    const rows = await this.prisma.quoteRequest.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        number: true,
+        createdAt: true,
+        vehicleCount: true,
+        durationMonths: true,
+        status: true,
+        product: { select: { slug: true } },
+      },
+    });
+    return rows.map((row) => ({
+      id: row.id,
+      number: row.number,
+      createdAt: row.createdAt.toISOString(),
+      vehicleCount: row.vehicleCount,
+      durationMonths: row.durationMonths,
+      productSlug: row.product?.slug ?? null,
+      status: row.status,
+    }));
   }
 
   // Numara yılın son numarasının bir fazlasıdır (TKL-2026-00042). İki istek aynı anda
@@ -105,6 +143,7 @@ export class QuotesService {
     deliveryCities: string | null;
     notes: string | null;
     productId: string | null;
+    userId: string | null;
     kvkkConsentAt: Date;
   }): Promise<string> {
     const prefix = `TKL-${istanbulYear(new Date())}-`;
