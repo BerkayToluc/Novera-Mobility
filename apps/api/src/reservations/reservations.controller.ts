@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, Inject, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Inject, Param, Post, UseGuards } from '@nestjs/common';
 import { ApiBody, ApiCookieAuth, ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { CurrentUser, SessionGuard } from '../auth/session.guard.js';
 import type { UserRow } from '../auth/user-view.js';
@@ -63,6 +63,15 @@ export class ReservationsController {
   @ApiOkResponse({ description: 'Rezervasyonlarım, yeniden eskiye' })
   mine(@CurrentUser() user: UserRow) {
     return this.reservations.listMine(user.id);
+  }
+
+  @Post('me/reservations/:id/cancel')
+  @HttpCode(200)
+  @UseGuards(SessionGuard)
+  @ApiCookieAuth()
+  @ApiOkResponse({ description: 'İptal edilen rezervasyon (status CANCELLED)' })
+  cancel(@CurrentUser() user: UserRow, @Param('id') id: string) {
+    return this.reservations.cancel(user.id, id);
   }
 
   @Get('me/points')

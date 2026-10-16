@@ -243,6 +243,32 @@ paths:
                 items: { $ref: "#/components/schemas/Reservation" }
         "401": { $ref: "#/components/responses/Unauthorized" }
 
+  /me/reservations/{id}/cancel:
+    post:
+      tags: [me]
+      summary: Rezervasyonu iptal et
+      description: |
+        Yalnızca kiralama başlamadan iptal edilir. İptalle araç hemen yeniden müsait olur ve rezervasyon
+        puan kazandırmaz. Zaten iptal edilmiş rezervasyonda aynı sonuç (200) döner. Başkasının ya da
+        olmayan rezervasyon `404 NOT_FOUND`. Kiralama başlamışsa `409 RESERVATION_NOT_CANCELLABLE`.
+        Ücretsiz iptal penceresi (alışa 24 saat) şimdilik yalnızca bilgidir, para akışı yoktur.
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: İptal edilen rezervasyon (durum CANCELLED, kazanılan puan 0)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Reservation" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409": { $ref: "#/components/responses/Conflict" }
+
   /me/points:
     get:
       tags: [me]
@@ -554,7 +580,7 @@ components:
         application/json:
           schema: { $ref: "#/components/schemas/Error" }
     Conflict:
-      description: Çakışma (`VEHICLE_UNAVAILABLE`)
+      description: Çakışma (`VEHICLE_UNAVAILABLE`, `RESERVATION_NOT_CANCELLABLE`)
       content:
         application/json:
           schema: { $ref: "#/components/schemas/Error" }

@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import type { UserRow } from '../auth/user-view.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import {
@@ -17,6 +17,17 @@ import {
 } from './reservation-view.js';
 
 const NUMBER_ATTEMPTS = 5;
+
+function reservationNotFound(): HttpException {
+  return new HttpException({ code: 'NOT_FOUND', message: 'Reservation not found' }, HttpStatus.NOT_FOUND);
+}
+
+function notCancellable(): HttpException {
+  return new HttpException(
+    { code: 'RESERVATION_NOT_CANCELLABLE', message: 'The rental has already started, it can no longer be cancelled' },
+    HttpStatus.CONFLICT,
+  );
+}
 
 function isUniqueViolation(error: unknown): boolean {
   return typeof error === 'object' && error !== null && (error as { code?: unknown }).code === 'P2002';
@@ -153,6 +164,25 @@ export class ReservationsService {
       include: RESERVATION_INCLUDE,
     });
     return rows.map((row) => toReservationView(row as unknown as ReservationRow));
+  }
+
+  // POST /me/reservations/{id}/cancel: yalnızca kiralama BAŞLAMADAN iptal edilir (ücretsiz/ücretli ayrımı
+  // ödeme gelince; şimdilik para akışı yok). İptal tek bir koşullu güncellemedir, yarış olursa biri kazanır.
+  // Zaten iptal edilmişse aynı sonuç döner (tekrar çağrı zararsız). Başkasının ya da olmayan rezervasyon: 404.
+  // Araç, iptalle hemen yeniden müsait olur (çakışma yalnız CONFIRMED'a bakar); puan kaydı durur ama
+  // GET /me/points iptal edilenleri saymaz.
+  async cancel(userId: string, id: string, now: Date = new Date()) {
+    const claimed = await this.prisma.reservation.updateMany({
+      where: { id, userId, status: 'CONFIRMED', startAt: { gt: now } },
+      data: { status: 'CANCELLED' },
+    });
+    const row = await this.prisma.reservation.findFirst({
+      where: { id, userId },
+      include: RESERVATION_INCLUDE,
+    });
+    if (!row) throw reservationNotFound();
+    if (claimed.count === 0 && row.status === 'CONFIRMED') throw notCancellable();
+    return toReservationView(row as unknown as ReservationRow);
   }
 
   // GET /me/points: bakiye = bitmiş kiralamaların puanı, `pending` = henüz bitmemiş olanların.
