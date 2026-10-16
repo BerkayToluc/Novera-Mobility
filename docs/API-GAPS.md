@@ -10,20 +10,23 @@ API gerçeklendiğinde ön yüzde **bir uyarlayıcı katman** gerekecek (taklit 
 |---|---|---|
 | SSS konusu | `topic`: `rezervasyon`, `odeme`, `teslim`, `hasar`, `hesap`, `kurumsal` (Yardım merkezi bu gruplara göre) | `FaqItem`'da yok |
 | Kurumsal hesap bilgisi | firma adı, vergi dairesi, şehir, telefon, yetkili ünvanı, satış iletişimi (`/profil` kurumsal sayfa) | `User.companyName` var; diğerleri yok |
-| Teklif talepleri listesi | `GET /me/quotes`: referans, tarih, araç sayısı, süre, durum (`RECEIVED`, `IN_REVIEW`, `OFFERED`) | Uç yok |
-| Bekleyen puan | Puanlarım sayfasında "bekleyen puan" | `Points`'te yok. Uyarlayıcıda, `/me/reservations` içindeki henüz bitmemiş `CONFIRMED` rezervasyonların `pointsEarned` toplamından türetilebilir; BE için gerekmiyor |
 
 ## Biçim farkları (ön yüz uyarlayıcıda çevirecek)
 
 | Konu | Ön yüz (ara tip) | Sözleşme |
 |---|---|---|
-| Rezervasyon | düz: `vehicle.brand/model`, `pickupCity`, `returnCity`, `totalPrice` | iç içe: `vehicle.model`, `pickupBranch`, `returnBranch`, `price` (`PriceBreakdown`) |
+| Rezervasyon | düz: `vehicle.brand/model`, `pickupCity`, `returnCity`, `totalPrice` | iç içe: `vehicle.model`, `pickupBranch`, `returnBranch`, `price`; `lib/api-mappers.ts` çevirir |
 | Hesap türü | `individual` / `corporate` | `INDIVIDUAL` / `CORPORATE` |
 | SSS hedef kitlesi | `bireysel` / `kurumsal` | `INDIVIDUAL` / `CORPORATE` (`audience` sorgu parametresi) |
 | Çalışma saatleri | `{ open, close }` ya da `null` | `"08:30-19:00"` ya da `"closed"` |
-| Puan geçmişi | `{ id, date, reservationNumber, points }` | `history[{ points, reservationNumber?, createdAt }]`, kural metni `rules` (iki dilli) |
+| Puan geçmişi | `{ points, reservationNumber, createdAt }` (`history`, ön yüz `PointsAccount`) | `history[{ points, reservationNumber?, createdAt }]`, `pending` ve kural metni `rules` (ön yüz kuralı kendi çevirisinden gösterir) |
 | Tutma kimliği | örnek veride `<bitiş ms>.<araç>` | `uuid`; ön yüz kimliği olduğu gibi taşır, biçimine güvenmez |
 | Bayi / araç / ek hizmet | ara tipler | `Branch`, `VehicleModel`, `Extra` şemaları; alanlar büyük ölçüde örtüşüyor |
+
+## Bağlandı (16 Ekim)
+
+- `GET /me/reservations`, `/me/points`, `/me/quotes`, `POST /reservations`, `POST /me/reservations/{id}/cancel` ve şifre sıfırlama uçları ön yüzde gerçek çağrıya bağlı (`lib/api-account.ts`, `lib/reservation-client.ts`, `lib/password-reset-actions.ts`). Bekleyen puan ve teklif talepleri sözleşmeye eklendi, buradan çıkarıldı.
+- Giriş, kayıt, `/me` (profil, hesap silme), araç/bayi/tutma/fiyat uçları ön yüzde hâlâ taklit veriyle; bu yüzden yukarıdaki çağrılar giriş bağlanana kadar yalnızca `USE_MOCKS` kapalıyken gerçek uca gider.
 
 ## Doğru çıkanlar
 

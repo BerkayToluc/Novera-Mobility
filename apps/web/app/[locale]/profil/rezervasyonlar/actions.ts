@@ -1,17 +1,23 @@
 "use server";
 
 import { cookies } from "next/headers";
+import { cancelMyReservation } from "@/lib/api-account";
 import { currentTime } from "@/lib/clock";
 import { CANCELLED_COOKIE, reservationPhase } from "@/lib/reservation";
 import { getSession } from "@/lib/session";
 
-// The sample data is fixed, so a cancellation is kept in a cookie and applied when the bookings
-// are read (USE_MOCKS=1 only). The real call is `POST /me/reservations/{id}/cancel`, which does not
-// exist yet (BACKLOG).
 export type CancelResult = { ok: true } | { ok: false; reason: "unavailable" | "not_cancellable" };
 
+// Cancels one of the signed-in visitor's bookings. With USE_MOCKS=1 the sample data is fixed, so a
+// cancellation is kept in a cookie and applied when the bookings are read. Otherwise it is
+// `POST /me/reservations/{id}/cancel`, which frees the car again and takes the points back; the API
+// decides whether the booking can still be cancelled.
 export async function cancelReservation(id: string): Promise<CancelResult> {
-  if (process.env.USE_MOCKS !== "1") return { ok: false, reason: "unavailable" };
+  if (process.env.USE_MOCKS !== "1") {
+    const outcome = await cancelMyReservation(id);
+    if (outcome === "cancelled") return { ok: true };
+    return { ok: false, reason: outcome };
+  }
   if ((await getSession())?.type !== "individual") return { ok: false, reason: "unavailable" };
 
   const { MOCK_RESERVATIONS } = await import("@/mocks/reservations");

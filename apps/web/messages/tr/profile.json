@@ -188,6 +188,7 @@
       "sent": "Gönderildi",
       "fleet": "Filo büyüklüğü",
       "term": "Süre",
+      "vehicles": "{count} araç",
       "termMonths": "{months} ay",
       "status": {
         "RECEIVED": "Alındı",
@@ -213,6 +214,7 @@
       "pendingNote": "Yaklaşan kiralamalarınız tamamlanınca hesabınıza işlenir.",
       "history": "Kazanım geçmişi",
       "earnedFor": "{number} numaralı kiralama",
+      "earnedOther": "Kazanılan puan",
       "earned": "Kazanılan puan:",
       "empty": {
         "title": "Henüz puan kazanmadınız",

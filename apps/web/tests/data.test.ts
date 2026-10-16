@@ -137,7 +137,7 @@ describe("sample account data", () => {
 
   it("splits points into earned and pending by the end of the rental", () => {
     const account = mockPoints(new Date("2026-10-10T12:00:00Z"));
-    expect(account.balance).toBe(account.entries.reduce((sum, entry) => sum + entry.points, 0));
+    expect(account.balance).toBe(account.history.reduce((sum, entry) => sum + entry.points, 0));
     expect(account.balance).toBe(165);
     expect(account.pending).toBe(75);
   });

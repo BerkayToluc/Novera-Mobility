@@ -77,7 +77,7 @@ export default async function PointsPage() {
           <h3 id="points-history" className="text-h3 text-fg">
             {t("history")}
           </h3>
-          {account.entries.length === 0 ? (
+          {account.history.length === 0 ? (
             <StateMessage title={t("empty.title")} text={t("empty.text")}>
               <Button asChild>
                 <Link href={{ pathname: "/", hash: "araclarimiz" }}>{t("empty.cta")}</Link>
@@ -85,15 +85,17 @@ export default async function PointsPage() {
             </StateMessage>
           ) : (
             <ul className="overflow-hidden rounded-card border border-border bg-surface">
-              {account.entries.map((entry) => (
+              {account.history.map((entry, index) => (
                 <li
-                  key={entry.id}
+                  key={`${entry.createdAt}-${entry.reservationNumber ?? index}`}
                   className="flex items-center justify-between gap-4 border-t border-border px-5 py-4 first:border-t-0"
                 >
                   <div className="flex flex-col gap-1">
-                    <p className="text-body text-fg">{t("earnedFor", { number: entry.reservationNumber })}</p>
+                    <p className="text-body text-fg">
+                      {entry.reservationNumber ? t("earnedFor", { number: entry.reservationNumber }) : t("earnedOther")}
+                    </p>
                     <p className="text-small text-fg-muted">
-                      <time dateTime={entry.date}>{date(entry.date)}</time>
+                      <time dateTime={entry.createdAt}>{date(entry.createdAt)}</time>
                     </p>
                   </div>
                   <p className="shrink-0 text-h3 tabular-nums text-fg">
