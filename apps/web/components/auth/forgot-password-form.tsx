@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { AuthUnavailableError, requestPasswordReset } from "@/lib/auth-client";
+import { AuthRateLimitedError, AuthUnavailableError, requestPasswordReset } from "@/lib/auth-client";
 import { forgotPasswordSchema, type ForgotPasswordInput } from "@/lib/auth-schemas";
 import { FormError } from "./form-error";
 import { useAuthErrorMessages } from "./use-auth-messages";
@@ -35,7 +35,9 @@ export function ForgotPasswordForm() {
       await requestPasswordReset(values);
       setSentTo(values.email);
     } catch (error) {
-      setFormError(error instanceof AuthUnavailableError ? t("errors.unavailable") : t("errors.generic"));
+      if (error instanceof AuthRateLimitedError) setFormError(t("errors.rateLimited"));
+      else if (error instanceof AuthUnavailableError) setFormError(t("errors.unavailable"));
+      else setFormError(t("errors.generic"));
     }
   }
 

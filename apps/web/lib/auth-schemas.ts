@@ -38,6 +38,10 @@ export const registerSchema = (m: AuthErrorMessages) =>
 export const forgotPasswordSchema = (m: AuthErrorMessages) =>
   z.object({ email: emailField(m) });
 
+export const resetPasswordSchema = (m: AuthErrorMessages) =>
+  z.object({ password: z.string().min(1, m.required).min(PASSWORD_MIN_LENGTH, m.passwordMin) });
+
 export type LoginInput = z.infer<ReturnType<typeof loginSchema>>;
 export type RegisterInput = z.infer<ReturnType<typeof registerSchema>>;
 export type ForgotPasswordInput = z.infer<ReturnType<typeof forgotPasswordSchema>>;
+export type ResetPasswordInput = z.infer<ReturnType<typeof resetPasswordSchema>>;
