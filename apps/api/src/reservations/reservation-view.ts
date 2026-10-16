@@ -1,4 +1,5 @@
 import type { PriceBreakdown, PriceLine } from './pricing.service.js';
+import { pointsWorthMinor } from './points.rules.js';
 import type { CurrencyCode } from './reservation-input.js';
 
 // Veritabanındaki rezervasyon satırından openapi.yaml `Reservation` cevabını üretir.
@@ -14,6 +15,7 @@ export type ReservationRow = {
   exchangeRate: unknown; // Prisma Decimal
   vehicleDailyPrice: number;
   totalPrice: number;
+  pointsUsed: number;
   createdAt: Date;
   vehicle: {
     id: string;
@@ -78,6 +80,8 @@ export function toPriceBreakdown(row: ReservationRow): PriceBreakdown {
     days: row.days,
     lines,
     total: money(row.totalPrice),
+    pointsUsed: row.pointsUsed,
+    payable: money(row.totalPrice - pointsWorthMinor(row.pointsUsed)),
   };
 }
 
