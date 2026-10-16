@@ -54,6 +54,9 @@ test("a filter with no match says so, and offers to clear it", async ({ page }) 
 
 test("the order can be changed: most expensive first", async ({ page }) => {
   await page.goto(`${RESULTS}&sirala=azalan`);
+  // Wait for the cards to render before reading them; evaluateAll does not wait.
+  await expect(page.getByRole("article").first()).toBeVisible();
+  await expect(page.locator("[data-total]").nth(1)).toBeVisible();
   const prices = await page.getByRole("article").evaluateAll((cards) =>
     cards.map((card) => Number((card.querySelector("[data-total]")?.textContent ?? "").replace(/[^\d]/g, ""))),
   );
