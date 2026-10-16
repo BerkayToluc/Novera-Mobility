@@ -103,11 +103,10 @@ export function mockPoints(now: Date, reservations: Reservation[] = MOCK_RESERVA
   return {
     balance: done.reduce((sum, reservation) => sum + reservation.pointsEarned, 0),
     pending: ahead.reduce((sum, reservation) => sum + reservation.pointsEarned, 0),
-    entries: done.map((reservation) => ({
-      id: reservation.id,
-      date: reservation.endAt,
-      reservationNumber: reservation.number,
+    history: done.map((reservation) => ({
       points: reservation.pointsEarned,
+      reservationNumber: reservation.number,
+      createdAt: reservation.endAt,
     })),
   };
 }

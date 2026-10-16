@@ -3,7 +3,7 @@ import { getFormatter, getLocale, getTranslations } from "next-intl/server";
 import { Button } from "@/components/ui/button";
 import { StateMessage } from "@/components/ui/state-message";
 import { Link, redirect } from "@/i18n/navigation";
-import { getMyQuoteRequests } from "@/lib/account-client";
+import { getMyQuoteRequests } from "@/lib/account-server";
 import type { QuoteRequest } from "@/lib/quote-request";
 import { getSession } from "@/lib/session";
 
@@ -67,11 +67,11 @@ export default async function QuoteRequestsPage() {
               </div>
               <div>
                 <dt className="text-small text-fg-muted">{t("fleet")}</dt>
-                <dd className="text-fg">{request.fleetSize}</dd>
+                <dd className="text-fg">{t("vehicles", { count: request.vehicleCount })}</dd>
               </div>
               <div>
                 <dt className="text-small text-fg-muted">{t("term")}</dt>
-                <dd className="text-fg">{t("termMonths", { months: request.termMonths })}</dd>
+                <dd className="text-fg">{t("termMonths", { months: request.durationMonths })}</dd>
               </div>
             </dl>
           </li>

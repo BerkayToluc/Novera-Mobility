@@ -188,6 +188,7 @@
       "sent": "Sent",
       "fleet": "Fleet size",
       "term": "Term",
+      "vehicles": "{count, plural, one {# vehicle} other {# vehicles}}",
       "termMonths": "{months, plural, one {# month} other {# months}}",
       "status": {
         "RECEIVED": "Received",
@@ -213,6 +214,7 @@
       "pendingNote": "They are added to your account when your upcoming rentals are completed.",
       "history": "Earning history",
       "earnedFor": "Rental {number}",
+      "earnedOther": "Points earned",
       "earned": "Points earned:",
       "empty": {
         "title": "No points yet",

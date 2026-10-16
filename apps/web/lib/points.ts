@@ -11,11 +11,12 @@ export function pointsForTotal(total: Money): number {
   return Math.floor(total.amount / POINT_STEP.amount);
 }
 
-// Interim shape of `GET /me/points` (BACKLOG Y46): what the account has earned so far, and what
-// is on its way from rentals not yet completed.
-export type PointsEntry = { id: string; date: string; reservationNumber: string; points: number };
+// `GET /me/points`, as the account page uses it: what has been earned so far (a rental counts when it
+// ends), and what is on its way from rentals not yet completed. `createdAt` is the moment the points
+// reached the account; `reservationNumber` is null when no booking is behind the entry.
+export type PointsEntry = { points: number; reservationNumber: string | null; createdAt: string };
 
-export type PointsAccount = { balance: number; pending: number; entries: PointsEntry[] };
+export type PointsAccount = { balance: number; pending: number; history: PointsEntry[] };
 
 // Paying with points (SPEC §2.3, G's decision, 15 October): one point is worth five lira, and
 // points cover at most half of a total, so a rental is never free. Only lira totals, like earning
