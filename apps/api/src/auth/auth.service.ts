@@ -3,6 +3,7 @@ import { PrismaService } from '../prisma/prisma.service.js';
 import { FormReader, rateLimited, validationFailed, type FormInput } from '../forms/form-input.js';
 import { RateLimiter } from '../forms/rate-limiter.js';
 import { emailTaken, invalidCredentials } from './auth.errors.js';
+import { cleanUserAgent } from './device.js';
 import { hashPassword, verifyAgainstDummy, verifyPassword } from './password.js';
 import { SESSION_DAYS, hashSessionToken, newSessionToken } from './session-token.js';
 import type { UserRow } from './user-view.js';
@@ -42,7 +43,7 @@ export class AuthService {
     @Inject(RateLimiter) private readonly limiter: RateLimiter,
   ) {}
 
-  async register(input: FormInput, clientKey: string): Promise<SessionStart> {
+  async register(input: FormInput, clientKey: string, userAgent: unknown = null): Promise<SessionStart> {
     if (!this.limiter.allow(`register:${clientKey}`, REGISTER_LIMIT_PER_HOUR, HOUR_MS)) {
       throw rateLimited();
     }
@@ -68,7 +69,7 @@ export class AuthService {
           passwordHash,
           firstName,
           lastName,
-          sessions: { create: { tokenHash: hashSessionToken(token), expiresAt } },
+          sessions: { create: { tokenHash: hashSessionToken(token), expiresAt, userAgent: cleanUserAgent(userAgent) } },
         },
       });
       return { user, token, expiresAt };
@@ -79,7 +80,7 @@ export class AuthService {
     }
   }
 
-  async login(input: FormInput, clientKey: string): Promise<SessionStart> {
+  async login(input: FormInput, clientKey: string, userAgent: unknown = null): Promise<SessionStart> {
     const form = new FormReader(input);
     const email = form.email('email').toLowerCase();
     const password = this.readPassword(input.password, form, false);
@@ -107,7 +108,7 @@ export class AuthService {
         where: { userId: user.id, expiresAt: { lt: new Date() } },
       }),
       this.prisma.session.create({
-        data: { tokenHash: hashSessionToken(token), expiresAt, userId: user.id },
+        data: { tokenHash: hashSessionToken(token), expiresAt, userId: user.id, userAgent: cleanUserAgent(userAgent) },
       }),
     ]);
     return { user, token, expiresAt };
@@ -142,6 +143,8 @@ export class AuthService {
       locale?: 'TR' | 'EN';
       theme?: 'LIGHT' | 'DARK' | 'SYSTEM';
       currency?: 'TRY' | 'EUR' | 'USD';
+      notifyReminders?: boolean;
+      notifyCampaigns?: boolean;
     } = {};
 
     for (const name of ['firstName', 'lastName'] as const) {
@@ -171,6 +174,22 @@ export class AuthService {
       const currency = CURRENCIES.find((candidate) => candidate === input.currency);
       if (currency) data.currency = currency;
       else errors.currency = 'INVALID_FORMAT';
+    }
+
+    // E-posta tercihleri: { notifications: { reminders?: boolean, campaigns?: boolean } }, gönderilen alan güncellenir.
+    if (input.notifications !== undefined) {
+      const raw = input.notifications;
+      if (raw === null || typeof raw !== 'object' || Array.isArray(raw)) {
+        errors.notifications = 'INVALID_FORMAT';
+      } else {
+        const { reminders, campaigns } = raw as Record<string, unknown>;
+        if (reminders !== undefined && typeof reminders !== 'boolean') errors.notifications = 'INVALID_FORMAT';
+        else if (campaigns !== undefined && typeof campaigns !== 'boolean') errors.notifications = 'INVALID_FORMAT';
+        else {
+          if (reminders !== undefined) data.notifyReminders = reminders;
+          if (campaigns !== undefined) data.notifyCampaigns = campaigns;
+        }
+      }
     }
 
     if (Object.keys(errors).length > 0) {

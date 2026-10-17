@@ -99,6 +99,9 @@ model User {
   locale    Locale   @default(TR)
   theme     Theme    @default(LIGHT)
   currency  Currency @default(TRY)
+  // E-posta tercihleri (SPEC §2.9): seyahat öncesi hatırlatma varsayılan açık, kampanya varsayılan kapalı (pazarlama için onay gerekir)
+  notifyReminders Boolean @default(true)
+  notifyCampaigns Boolean @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -114,6 +117,7 @@ model Session {
   id        String   @id @default(uuid())
   tokenHash String   @unique
   expiresAt DateTime
+  userAgent String? // girişte tarayıcının bildirdiği; "açık oturumlar" listesinde cihaz adı için
   createdAt DateTime @default(now())
 
   userId String
@@ -264,6 +268,7 @@ model Reservation {
   startAt DateTime
   endAt   DateTime
   days    Int
+  pointsUsed        Int      @default(0) // puanla ödenen kısım (1 puan = ₺5, yalnızca TRY); iptalde iade sayılır
 
   // Aşağıdaki tüm tutarlar `currency` biriminin alt biriminde (kuruş/cent) saklanır.
   // Birim fiyatlar önce çevrilir, sonra günle çarpılır: kalemlerin toplamı = totalPrice.
@@ -271,7 +276,6 @@ model Reservation {
   exchangeRate      Decimal  @default(1) @db.Decimal(18, 8) // rezervasyon anındaki kur (1 TRY = ? currency)
   vehicleDailyPrice Int
   totalPrice        Int
-  pointsUsed        Int      @default(0) // puanla ödenen kısım (1 puan = ₺5, yalnızca TRY); iptalde iade sayılır
 
   createdAt DateTime @default(now())
 

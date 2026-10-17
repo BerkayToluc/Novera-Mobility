@@ -16,6 +16,8 @@ export interface UserRow {
   locale: 'TR' | 'EN';
   theme: 'LIGHT' | 'DARK' | 'SYSTEM';
   currency: 'TRY' | 'EUR' | 'USD';
+  notifyReminders: boolean;
+  notifyCampaigns: boolean;
 }
 
 export interface UserResponse {
@@ -33,6 +35,7 @@ export interface UserResponse {
   locale: 'tr' | 'en';
   theme: 'light' | 'dark' | 'system';
   currency: 'TRY' | 'EUR' | 'USD';
+  notifications: { reminders: boolean; campaigns: boolean };
 }
 
 // JSON alanının biçimi bozuksa (eksik/yanlış tür) satış iletişimi yokmuş gibi davranılır.
@@ -61,5 +64,6 @@ export function toUserResponse(user: UserRow): UserResponse {
     locale: user.locale === 'EN' ? 'en' : 'tr',
     theme: user.theme.toLowerCase() as UserResponse['theme'],
     currency: user.currency,
+    notifications: { reminders: user.notifyReminders, campaigns: user.notifyCampaigns },
   };
 }

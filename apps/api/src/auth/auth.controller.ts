@@ -48,7 +48,7 @@ export class AuthController {
     @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
   ): Promise<UserResponse> {
-    const session = await this.authService.register(asFormInput(body), clientKeyOf(request));
+    const session = await this.authService.register(asFormInput(body), clientKeyOf(request), request.headers['user-agent']);
     setSessionCookie(response, session);
     return toUserResponse(session.user);
   }
@@ -71,7 +71,7 @@ export class AuthController {
     @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
   ): Promise<UserResponse> {
-    const session = await this.authService.login(asFormInput(body), clientKeyOf(request));
+    const session = await this.authService.login(asFormInput(body), clientKeyOf(request), request.headers['user-agent']);
     setSessionCookie(response, session);
     return toUserResponse(session.user);
   }

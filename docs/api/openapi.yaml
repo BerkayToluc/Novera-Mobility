@@ -186,9 +186,7 @@ paths:
     post:
       tags: [reservations]
       summary: Fiyat dökümü (rezervasyon özeti)
-      description: |
-        Rezervasyon oluşturmadan kalem kalem fiyatı hesaplar. Giriş gerekmez (yalnızca `usePoints: true` ise gerekir).
-        Toplamı sunucu hesaplar; `usePoints` ile `pointsUsed` ve ödenecek `payable` tutar da döner.
+      description: Rezervasyon oluşturmadan kalem kalem fiyatı hesaplar. Giriş gerekmez. Toplamı sunucu hesaplar.
       requestBody:
         required: true
         content:
@@ -200,7 +198,6 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/PriceBreakdown" }
-        "401": { $ref: "#/components/responses/Unauthorized" }
         "409": { $ref: "#/components/responses/Conflict" }
         "422": { $ref: "#/components/responses/ValidationFailed" }
 
@@ -319,7 +316,7 @@ paths:
     patch:
       tags: [me]
       summary: Profil ve tercihleri güncelle
-      description: Ad, soyad, dil, tema ve varsayılan para birimi. E-posta değiştirilemez.
+      description: Ad, soyad, dil, tema, varsayılan para birimi ve e-posta bildirim tercihleri. E-posta değiştirilemez.
       security:
         - cookieAuth: []
       requestBody:
@@ -344,6 +341,71 @@ paths:
       responses:
         "204": { description: Silindi }
         "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /me/password:
+    post:
+      tags: [me]
+      summary: Şifre değiştir
+      description: |
+        Mevcut şifre doğrulanır; yeni şifre en az 8 karakter olur ve eskisinden farklıdır. Başarılı olunca bu oturum
+        dışındaki TÜM oturumlar kapanır ve bekleyen şifre sıfırlama bağlantıları geçersiz olur.
+        Mevcut şifre yanlışsa `422` (`fieldErrors.currentPassword: INCORRECT`; oturum açık kalır, 401 değildir).
+        Yeni şifre için `TOO_SHORT`, `TOO_LONG`, `SAME_AS_CURRENT`. 15 dakikada en çok 5 deneme (`429`).
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PasswordChange" }
+      responses:
+        "204": { description: Şifre değişti }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
+  /me/sessions:
+    get:
+      tags: [me]
+      summary: Açık oturumlarım
+      description: "Hesabın açık oturumları, yeniden eskiye. İsteği yapan oturum `current: true` ile işaretlidir."
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Açık oturumlar
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/SessionInfo" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+    delete:
+      tags: [me]
+      summary: Diğer oturumları kapat
+      description: Bu oturum dışındaki tüm oturumlar kapanır.
+      security:
+        - cookieAuth: []
+      responses:
+        "204": { description: Kapandı }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /me/sessions/{id}:
+    delete:
+      tags: [me]
+      summary: Bir oturumu kapat
+      description: Hesabın bir oturumunu kapatır. Başkasının ya da olmayan oturum `404 NOT_FOUND`. Kapatılan şu anki oturumsa çerez de silinir.
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "204": { description: Kapandı }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
 
   /auth/register:
     post:
@@ -836,14 +898,6 @@ components:
             properties:
               slug: { type: string }
               quantity: { type: integer, minimum: 1, maximum: 10 }
-        usePoints:
-          type: boolean
-          description: |
-            Puanla öde. 1 puan = 5 TL; puan toplamın en çok yarısını karşılar (bir kiralama bedava olmaz).
-            Yalnızca giriş yapmış bireysel hesapta ve TL'de: oturum yoksa `401`, kurumsal hesap ya da TL dışı
-            para birimi `422` (`fieldErrors.usePoints: NOT_ALLOWED`). Harcanan puan, bakiyeden ve toplamın yarısından
-            fazla olamaz; sunucu en çok kullanılabilecek kadarını kullanır (yetmiyorsa 0). Harcanan puan hemen
-            bakiyeden düşer, rezervasyon iptal edilirse iade edilir. Kazanılan puan, puanla ödenen kısım hariç tutardan hesaplanır.
 
     HoldRequest:
       type: object
@@ -894,8 +948,6 @@ components:
           type: array
           items: { $ref: "#/components/schemas/PriceLine" }
         total: { $ref: "#/components/schemas/Money" }
-        pointsUsed: { type: integer, description: Puanla ödenen puan (kullanılmadıysa 0). }
-        payable: { $ref: "#/components/schemas/Money" } # total eksi puanın karşılığı: ödenecek para
 
     Reservation:
       type: object
@@ -930,7 +982,7 @@ components:
             type: object
             required: [points, createdAt]
             properties:
-              points: { type: integer, description: Harcamalar eksi puanla görünür. }
+              points: { type: integer }
               reservationNumber: { type: string, nullable: true }
               createdAt: { type: string, format: date-time, description: Puanın hesaba geçtiği an (kiralamanın bitişi). }
         rules: { $ref: "#/components/schemas/LocalizedText" }
@@ -949,6 +1001,32 @@ components:
         locale: { type: string, enum: [tr, en] }
         theme: { type: string, enum: [light, dark, system], description: Varsayılan `light`. }
         currency: { $ref: "#/components/schemas/Currency" }
+        notifications: { $ref: "#/components/schemas/Notifications" }
+
+    Notifications:
+      type: object
+      description: E-posta tercihleri. Varsayılan hatırlatma açık, kampanya kapalı (pazarlama postası için onay gerekir).
+      required: [reminders, campaigns]
+      properties:
+        reminders: { type: boolean, description: Seyahat öncesi hatırlatma e-postası. }
+        campaigns: { type: boolean, description: Kampanya e-postaları. }
+
+    PasswordChange:
+      type: object
+      required: [currentPassword, newPassword]
+      properties:
+        currentPassword: { type: string }
+        newPassword: { type: string, minLength: 8, maxLength: 128 }
+
+    SessionInfo:
+      type: object
+      required: [id, current, createdAt, expiresAt]
+      properties:
+        id: { type: string, format: uuid }
+        current: { type: boolean, description: İsteği yapan oturum. }
+        device: { type: string, nullable: true, example: Chrome · Windows, description: Girişte tarayıcının bildirdiğinden çıkarılan kısa ad; bilinmiyorsa null. }
+        createdAt: { type: string, format: date-time, description: Oturumun açıldığı an. }
+        expiresAt: { type: string, format: date-time }
 
     UserUpdate:
       type: object
@@ -959,6 +1037,12 @@ components:
         locale: { type: string, enum: [tr, en] }
         theme: { type: string, enum: [light, dark, system] }
         currency: { $ref: "#/components/schemas/Currency" }
+        notifications:
+          type: object
+          description: Gönderilen alanlar güncellenir.
+          properties:
+            reminders: { type: boolean }
+            campaigns: { type: boolean }
 
     RegisterRequest:
       type: object
