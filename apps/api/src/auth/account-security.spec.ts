@@ -2,6 +2,7 @@ import 'reflect-metadata';
 import { HttpException, Global, Module, type INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { RateLimiter } from '../forms/rate-limiter.js';
+import { configureApp } from '../app.setup.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { AccountSecurityService, CHANGE_PASSWORD_LIMIT_PER_15_MIN } from './account-security.service.js';
 import { AuthModule } from './auth.module.js';
@@ -176,6 +177,7 @@ describe('account security over HTTP', () => {
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({ imports: [FakePrismaModule, AuthModule] }).compile();
     app = moduleRef.createNestApplication();
+    configureApp(app);
     await app.listen(0);
     base = await app.getUrl();
   });

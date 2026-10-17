@@ -1,24 +1,12 @@
-import { createHash } from 'node:crypto';
 import { Body, Controller, Post, Req } from '@nestjs/common';
 import { ApiBody, ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
+import { clientKeyOf } from '../forms/rate-limiter.js';
 import {
   HoldsService,
   type CreateHoldInput,
   type HoldResponse,
 } from './holds.service.js';
-
-// Hız sınırı için istemciyi tanır: IP adresinin özeti (hash). IP'nin kendisi saklanmaz.
-// Tarayıcı Next üzerinden geldiği için gerçek adres X-Forwarded-For başlığındadır.
-// Not: API'ye doğrudan erişilebiliyorsa bu başlık taklit edilebilir; güvenlik
-// gözden geçirmesinde (BACKLOG #39) yeniden bakılacak.
-function clientKeyOf(request: Request): string {
-  const header = request.headers['x-forwarded-for'];
-  const raw = Array.isArray(header) ? header[0] : header;
-  const forwarded = raw?.split(',')[0]?.trim();
-  const address = forwarded || request.ip || 'unknown';
-  return createHash('sha256').update(address).digest('hex').slice(0, 32);
-}
 
 @ApiTags('reservations')
 @Controller()

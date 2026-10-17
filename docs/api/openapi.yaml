@@ -681,6 +681,8 @@ components:
             - RESET_TOKEN_INVALID
             - SPAM_DETECTED
             - RATE_LIMITED
+            - PAYLOAD_TOO_LARGE
+            - INTERNAL_ERROR
         message:
           type: string
           description: Geliştirici için İngilizce metin. Ekranda gösterilmez.

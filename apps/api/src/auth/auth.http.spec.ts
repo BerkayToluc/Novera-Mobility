@@ -1,6 +1,7 @@
 import 'reflect-metadata';
 import { Global, Module, type INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
+import { configureApp } from '../app.setup.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { AuthModule } from './auth.module.js';
 import { FakePrisma } from './auth.testing.js';
@@ -21,6 +22,7 @@ describe('auth HTTP akışı (çerez + korumalı uçlar)', () => {
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({ imports: [FakePrismaModule, AuthModule] }).compile();
     app = moduleRef.createNestApplication();
+    configureApp(app);
     await app.listen(0);
     base = await app.getUrl();
   });
