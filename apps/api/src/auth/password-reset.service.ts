@@ -62,7 +62,9 @@ export class PasswordResetService {
       }),
     ]);
 
-    await this.notifier.send(email, this.linkFor(user.locale, token));
+    // Not awaited: sending can take seconds, and waiting would make the answer slower for real accounts than
+    // for unknown e-mails. The notifier never throws; the catch is only a safety net.
+    void this.notifier.send(email, this.linkFor(user.locale, token), user.locale).catch(() => undefined);
   }
 
   async resetPassword(input: FormInput, clientKey: string): Promise<void> {
