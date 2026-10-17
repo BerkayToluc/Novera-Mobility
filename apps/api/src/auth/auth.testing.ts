@@ -28,11 +28,13 @@ export class FakePrisma {
         locale: 'TR',
         theme: 'LIGHT',
         currency: 'TRY',
+        notifyReminders: true,
+        notifyCampaigns: false,
         ...fields,
       };
       this.users.push(user);
       if (sessions?.create) {
-        this.sessions.push({ id: randomUUID(), userId: user.id, ...sessions.create });
+        this.sessions.push({ id: randomUUID(), createdAt: new Date(), userId: user.id, ...sessions.create });
       }
       return user;
     },
@@ -54,8 +56,14 @@ export class FakePrisma {
       if (!session) return null;
       return { ...session, user: this.users.find((u) => u.id === session.userId) };
     },
+    findMany: async ({ where }: { where: Row }) =>
+      this.sessions
+        .filter((s) => s.userId === where.userId && (!where.expiresAt?.gt || s.expiresAt > where.expiresAt.gt))
+        .sort((a, b) => b.createdAt - a.createdAt),
+    findFirst: async ({ where }: { where: Row }) =>
+      this.sessions.find((s) => s.id === where.id && s.userId === where.userId) ?? null,
     create: async ({ data }: { data: Row }) => {
-      const session = { id: randomUUID(), ...data };
+      const session = { id: randomUUID(), createdAt: new Date(), ...data };
       this.sessions.push(session);
       return session;
     },
@@ -63,13 +71,18 @@ export class FakePrisma {
       const before = this.sessions.length;
       this.sessions = this.sessions.filter((s) => {
         if (where.id && s.id !== where.id) return true;
-        if (where.tokenHash && s.tokenHash !== where.tokenHash) return true;
+        if (typeof where.tokenHash === 'string' && s.tokenHash !== where.tokenHash) return true;
+        if (where.tokenHash?.not && s.tokenHash === where.tokenHash.not) return true;
         if (where.userId && s.userId !== where.userId) return true;
         if (where.expiresAt?.lt && !(s.expiresAt < where.expiresAt.lt)) return true;
         return false;
       });
       return { count: before - this.sessions.length };
     },
+  };
+
+  passwordResetToken: { deleteMany: (args: { where: Row }) => Promise<{ count: number }> } = {
+    deleteMany: async () => ({ count: 0 }),
   };
 
   async $transaction(operations: Promise<unknown>[]): Promise<unknown[]> {

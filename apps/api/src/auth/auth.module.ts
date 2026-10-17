@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { RateLimiter } from '../forms/rate-limiter.js';
+import { AccountSecurityService } from './account-security.service.js';
 import { AuthController } from './auth.controller.js';
 import { AuthService } from './auth.service.js';
 import { MeController } from './me.controller.js';
@@ -12,7 +13,7 @@ import { SessionGuard } from './session.guard.js';
 // AuthService and PasswordResetService share one RateLimiter so their counters live in one place.
 @Module({
   controllers: [AuthController, MeController, PasswordResetController],
-  providers: [AuthService, PasswordResetService, ResetLinkNotifier, SessionGuard, RateLimiter],
+  providers: [AuthService, AccountSecurityService, PasswordResetService, ResetLinkNotifier, SessionGuard, RateLimiter],
   exports: [AuthService, SessionGuard],
 })
 export class AuthModule {}
