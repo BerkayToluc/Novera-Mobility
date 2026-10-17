@@ -12,7 +12,11 @@ export class PrismaService
     if (!connectionString) {
       throw new Error('DATABASE_URL environment variable is not set');
     }
-    super({ adapter: new PrismaPg({ connectionString }) });
+    // A hosted database may suspend when idle (Neon does after 5 minutes) and cut the connections. Idle
+    // connections are closed first, here, and a wake-up from sleep gets time to answer.
+    super({
+      adapter: new PrismaPg({ connectionString, max: 10, idleTimeoutMillis: 30_000, connectionTimeoutMillis: 15_000 }),
+    });
   }
 
   async onModuleInit() {

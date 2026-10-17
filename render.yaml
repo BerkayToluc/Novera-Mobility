@@ -1,0 +1,33 @@
+# Render Blueprint for the API (BACKLOG 40). The web app goes to Vercel and the database to Neon; see docs/DEPLOY.md.
+# Secrets are not written here: Render asks for the ones marked `sync: false` when the Blueprint is created.
+services:
+  - type: web
+    name: novera-api
+    runtime: node
+    region: frankfurt
+    plan: free
+    # devDependencies are needed to build (Nest CLI) and to run migrations (Prisma CLI), hence --prod=false.
+    buildCommand: corepack enable && pnpm install --frozen-lockfile --prod=false && pnpm --filter @novera/api exec prisma generate && pnpm --filter @novera/api build
+    # Applies new migrations, then starts the API. Safe to run on every start.
+    startCommand: pnpm --filter @novera/api exec prisma migrate deploy && pnpm --filter @novera/api start:prod
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # How many proxies sit in front of the API: Render's own load balancer is one.
+      - key: TRUST_PROXY_HOPS
+        value: "1"
+      # The secret the web server sends with every call. Render makes it; copy it to Vercel as API_ACCESS_KEY.
+      - key: API_ACCESS_KEY
+        generateValue: true
+      # Neon's direct connection string (not the pooled one), with ?sslmode=require.
+      - key: DATABASE_URL
+        sync: false
+      # The public address of the web site, https://..., used in the password reset e-mail.
+      - key: WEB_URL
+        sync: false
+      # Password reset e-mail through Resend. Leave both empty to send no e-mail yet.
+      - key: RESEND_API_KEY
+        sync: false
+      - key: MAIL_FROM
+        sync: false

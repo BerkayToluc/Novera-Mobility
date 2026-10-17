@@ -16,6 +16,9 @@ yeni testler ve `pnpm audit`.
 | S6 | Orta | Canlıda `WEB_URL` unutulursa parola sıfırlama bağlantıları `http://localhost:3000` adresine giderdi. | Canlıda `DATABASE_URL` ve `https://` ile başlayan `WEB_URL` yoksa sunucu açılmaz, nedeni yazar. Geçersiz `TRUST_PROXY_HOPS` her ortamda açılışı durdurur. |
 | S7 | Düşük | SIGTERM'de veritabanı bağlantısı düzgün kapanmıyordu. | `enableShutdownHooks()`. |
 | S8 | Düşük | `.env.example` içinde anahtarsız, açıklamasız bir `http://localhost:3000` satırı vardı. | Açıklamaya çevrildi; yeni değişkenler eklendi. |
+| S9 | Yüksek | Yayında API, barındırıcının verdiği herkese açık bir adreste durur; biri doğrudan çağırıp `X-Forwarded-For` uydurabilir (S1'in kapıdan dönmesi). | Web ile API arasında paylaşılan gizli anahtar (`API_ACCESS_KEY`, başlık `X-Novera-Key`). Anahtarsız her istek `404`; ziyaretçi adresi (`X-Novera-Client-IP`) yalnızca anahtar doğruysa kabul edilir. Canlıda anahtar yoksa API açılmaz. `/health` açık kalır, yalnızca `{status:'ok'}` döner. |
+| S10 | Orta | Parola sıfırlama bağlantısı canlıda hiçbir yere gönderilmiyordu. | Resend ile gerçek e-posta (HTTPS, SMTP değil). Gönderim yanıtı beklemez, hata fırlatmaz, günlüğe e-posta adresi ya da bağlantı yazmaz; hesap var/yok durumları yanıt süresiyle de ayırt edilemez hale geldi. |
+| S11 | Düşük | Boşta kalan veritabanı bağlantıları (Neon 5 dakikada uyur) kopabilir. | Havuz ayarı: en çok 10 bağlantı, boşta 30 sn sonra kapanır, uyanma için 15 sn bekler. |
 
 ## İncelendi, sorun bulunmadı
 
@@ -35,18 +38,28 @@ yeni testler ve `pnpm audit`.
 
 1. **Hesap silme için parola istemek.** `DELETE /me` yalnızca oturum çerezine bakıyor; çalınmış bir oturum hesabı siler. Parola (`currentPassword`) istemek sözleşme ve ön yüz değişikliği gerektirir (G).
 2. **Girişte hesap bazlı sınır:** biri bir e-postaya 10 yanlış deneme yaparak o kişinin girişini 15 dakika kilitleyebilir. Kaba kuvveti durdurmanın bedeli bu; ileride ek sınır ya da bekleme ile yumuşatılabilir.
-3. **Parola sıfırlama isteği süre farkı:** hesap varsa veritabanı yazması olduğu için yanıt biraz geç gelir; ölçülerek hesap varlığı tahmin edilebilir (düşük risk, sınırlı).
+3. **Parola sıfırlama isteği süre farkı:** e-posta gönderimi artık beklenmiyor (S10); geriye yalnızca hesap varken yapılan iki küçük veritabanı yazması kaldı. Fark çok küçük ve ağ gürültüsünün içinde kalır; ek önlem gerekmez.
 4. **Kayıtta `EMAIL_TAKEN`:** hesap varlığını açık eder; sözleşmeye göre bilinçli (kullanıcıya doğru mesaj). Sınır: saatte 10 kayıt/istemci.
 5. **Açık okuma uçlarına sınır yok** (`/vehicles`, `/reservations/price`, ...). Yayında CDN/yük dengeleyici düzeyinde istek sınırı eklenmesi önerilir.
 6. **Bellek içi sınırlayıcı** tek sunucuda çalışır ve yeniden başlayınca sıfırlanır. Birden fazla API sunucusu çalıştırılırsa ortak bir depo (ör. Redis) gerekir.
 
-## Yayın (BACKLOG 40, issue #49) için zorunlu kontrol listesi
+## Yayın (BACKLOG 40, issue #49) kontrol listesi
 
-- [ ] `NODE_ENV=production` (aksi halde oturum çerezi `Secure` olmaz).
-- [ ] API portu internete **açık olmamalı**: yalnızca web sunucusu erişebilmeli (özel ağ, güvenlik duvarı ya da `HOST=127.0.0.1`). Doğrudan erişilebilen bir API'de `X-Forwarded-For` taklit edilebilir.
-- [ ] `TRUST_PROXY_HOPS`, API'den önceki proxy sayısına eşit olmalı. Web'in sunucu eylemleri gelen `X-Forwarded-For` başlığını olduğu gibi API'ye iletir (`api-post.ts`, `api-request.ts`); web'in önünde başlığa gerçek adresi **ekleyen** bir yük dengeleyici varsa (Vercel, Cloudflare, nginx) varsayılan `1` doğrudur. Web doğrudan internete açıksa başlığı ziyaretçi yazar: önüne proxy konmalı. Zincir uzunsa (ör. Cloudflare → nginx → Next) değer büyütülür.
+Adım adım uygulama: `docs/DEPLOY.md`. Burada yalnızca güvenlik açısından zorunlu olanlar.
+
+- [ ] `NODE_ENV=production` (aksi halde oturum çerezi `Secure` olmaz). `render.yaml` ayarlar.
+- [ ] `API_ACCESS_KEY` hem API'de hem web'de **aynı** değerde (en az 32 karakter). Web'in bu anahtarı ve ziyaretçi adresini göndermesi `apps/web/lib/api-headers.ts` ile yapılır. Anahtar olmadan canlı API açılmaz; yanlışsa her çağrı `404` olur.
+- [ ] `TRUST_PROXY_HOPS`: API'den önce kaç proxy var. Render'da `1` (Render'ın yük dengeleyicisi). Ziyaretçi adresi anahtarla gelen `X-Novera-Client-IP` başlığından alınır; canlıda her istek anahtarla geldiği için bu ayar pratikte yalnızca `/health` için geçerlidir, yine de doğru tutulur.
 - [ ] `WEB_URL=https://...` ve `DATABASE_URL` tanımlı (yoksa API açılmaz).
 - [ ] `/docs` kapalı kalmalı (`ENABLE_DOCS` boş).
-- [ ] Parola sıfırlama bağlantıları için gerçek e-posta sağlayıcısı: canlıda bağlantı şimdilik yalnızca "istek geldi" uyarısı yazar, kimseye gitmez (`reset-link-notifier.ts`).
-- [ ] Veritabanı yedeği ve geri yükleme denemesi; veritabanı parolası geliştirme değerinden (`novera_dev`) farklı olmalı.
+- [ ] `RESEND_API_KEY` ve `MAIL_FROM` (alan adı Resend'de doğrulanmış) ya da bilinçli olarak boş: boşsa canlıda parola sıfırlama e-postası gitmez.
+- [ ] Veritabanı yedeği alınıyor ve geri yükleme **denendi** (`DEPLOY.md` 9. adım). Veritabanı parolası geliştirme değerinden (`novera_dev`) farklı.
+- [ ] Google Maps anahtarı siteye (HTTP referrer) kısıtlı.
+- [ ] Canlıda `curl`/`Invoke-WebRequest` ile anahtarsız istek `404`, `/docs` `404` (`DEPLOY.md` 8. adım).
 - [ ] Web tarafı (G): CSP ve HSTS zaten var (`next.config.ts`, `proxy.ts`); canlı alan adında doğrulanmalı.
+
+## Bilinen sınırlar (canlıda)
+
+- Render Free uyur; UptimeRobot ile uyanık tutulur ama Render istediği zaman yeniden başlatabilir. Başlama sırasında hız sınırı sayaçları sıfırlanır.
+- Hız sınırlayıcı tek sunucuda çalışır; Render Free zaten tek örnek (instance) ile sınırlı.
+- Neon Free'nin geri dönüş penceresi 6 saattir; uzun süreli yedek haftalık elle alınır.
