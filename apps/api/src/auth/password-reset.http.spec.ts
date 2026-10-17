@@ -1,6 +1,7 @@
 import 'reflect-metadata';
 import { Global, Module, type INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
+import { configureApp } from '../app.setup.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { AuthModule } from './auth.module.js';
 import { hashPassword, verifyPassword } from './password.js';
@@ -25,6 +26,7 @@ describe('password reset over HTTP', () => {
       .useValue({ send: async (_email: string, link: string) => void sent.push(link) })
       .compile();
     app = moduleRef.createNestApplication();
+    configureApp(app);
     await app.listen(0);
     base = await app.getUrl();
   });
