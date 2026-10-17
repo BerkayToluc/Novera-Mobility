@@ -109,7 +109,17 @@ describe("calls to the API", () => {
     const [url, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
     expect(url).toBe("http://api.test/me/reservations");
     expect(init.method).toBe("GET");
-    expect(init.headers).toMatchObject({ Cookie: "novera_session=abc" });
+    expect(init.headers).toMatchObject({ Cookie: "novera_session=abc", "X-Novera-Client-IP": "203.0.113.7" });
+    expect(init.headers).not.toHaveProperty("X-Novera-Key");
+  });
+
+  it("sends the shared key when API_ACCESS_KEY is set", async () => {
+    vi.stubEnv("API_ACCESS_KEY", "secret");
+    const fetchMock = respond(200, []);
+    vi.stubGlobal("fetch", fetchMock);
+    await fetchMyReservations();
+    const [, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
+    expect(init.headers).toMatchObject({ "X-Novera-Key": "secret" });
   });
 
   it("throws, so the page shows its error state, when the API is not there or the session is gone", async () => {

@@ -1,5 +1,6 @@
 import "server-only";
-import { cookies, headers } from "next/headers";
+import { cookies } from "next/headers";
+import { apiHeaders } from "./api-headers";
 
 // What came back from a call to the API, for the calls that need more outcomes than api-post.ts
 // offers: a signed-in read (401), a booking that was taken (409), a missing record (404), an empty
@@ -18,8 +19,9 @@ const SESSION_COOKIE = "novera_session";
 
 type ErrorBody = { code?: string; fieldErrors?: Record<string, string> };
 
-// A call from the server to the API on behalf of the visitor: their address (`X-Forwarded-For`, so
-// the per-address limits see them and not this server) and their session cookie travel along.
+// A call from the server to the API on behalf of the visitor: their address (`X-Novera-Client-IP`, so
+// the per-address limits see them and not this server), the shared key (`X-Novera-Key`) and their
+// session cookie travel along.
 // Without API_URL the service is simply not there.
 export async function apiRequest<T = null>(
   method: "GET" | "POST",
@@ -29,14 +31,13 @@ export async function apiRequest<T = null>(
   const base = process.env.API_URL;
   if (!base) return { status: "unavailable" };
 
-  const forwarded = (await headers()).get("x-forwarded-for");
   const session = (await cookies()).get(SESSION_COOKIE)?.value;
   try {
     const response = await fetch(`${base}${path}`, {
       method,
       headers: {
         ...(body === undefined ? {} : { "Content-Type": "application/json" }),
-        ...(forwarded ? { "X-Forwarded-For": forwarded } : {}),
+        ...(await apiHeaders()),
         ...(session ? { Cookie: `${SESSION_COOKIE}=${session}` } : {}),
       },
       body: body === undefined ? undefined : JSON.stringify(body),

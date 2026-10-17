@@ -79,7 +79,7 @@ describe("apiPost", () => {
     expect(result).toEqual({ status: "ok", data: { received: true } });
     const [url, init] = fetchMock.mock.calls[0];
     expect(url).toBe("http://api.test/quotes");
-    expect(init.headers["X-Forwarded-For"]).toBe("203.0.113.7");
+    expect(init.headers["X-Novera-Client-IP"]).toBe("203.0.113.7");
     expect(init.headers.Cookie).toBe("novera_session=abc");
   });
 

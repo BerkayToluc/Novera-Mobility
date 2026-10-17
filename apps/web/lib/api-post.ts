@@ -1,5 +1,6 @@
 import "server-only";
-import { cookies, headers } from "next/headers";
+import { cookies } from "next/headers";
+import { apiHeaders } from "./api-headers";
 
 // What came back from a JSON POST to the API (ARCHITECTURE ADR-14, ADR-20). The forms need only
 // these outcomes: it worked, the API found a field wrong, the honeypot caught a bot, the visitor
@@ -16,22 +17,21 @@ const SESSION_COOKIE = "novera_session";
 
 // A JSON POST from a server action to the API. Two things from the visitor's own request are passed
 // on, because from here the API would otherwise see only this server:
-// - the visitor's address (`X-Forwarded-For`): the API limits forms per address (ten an hour), and
-//   without it every visitor would share one limit and the eleventh form on the whole site would be
-//   refused;
+// - the visitor's address (`X-Novera-Client-IP`) and the shared key (`X-Novera-Key`), see api-headers.ts:
+//   the API limits forms per address (ten an hour), and without it every visitor would share one limit
+//   and the eleventh form on the whole site would be refused;
 // - the session cookie, so a signed-in corporate account's quote is tied to the account.
 export async function apiPost<T>(path: string, body: unknown): Promise<ApiPostResult<T>> {
   const base = process.env.API_URL;
   if (!base) return { status: "unavailable" };
 
-  const forwarded = (await headers()).get("x-forwarded-for");
   const session = (await cookies()).get(SESSION_COOKIE)?.value;
   try {
     const response = await fetch(`${base}${path}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        ...(forwarded ? { "X-Forwarded-For": forwarded } : {}),
+        ...(await apiHeaders()),
         ...(session ? { Cookie: `${SESSION_COOKIE}=${session}` } : {}),
       },
       body: JSON.stringify(body),
