@@ -9,7 +9,7 @@ import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Link, useRouter } from "@/i18n/navigation";
-import { AuthUnavailableError, login } from "@/lib/auth-client";
+import { AuthRateLimitedError, AuthUnavailableError, InvalidCredentialsError, login } from "@/lib/auth-client";
 import { loginSchema, type LoginInput } from "@/lib/auth-schemas";
 import type { AccountType } from "@/lib/session";
 import { FormError } from "./form-error";
@@ -44,7 +44,10 @@ export function LoginForm({ next, kind = "individual" }: { next?: Record<string,
       // The header reads the session on the server, so it has to be asked again.
       router.refresh();
     } catch (error) {
-      setFormError(error instanceof AuthUnavailableError ? t("errors.unavailable") : t("errors.generic"));
+      if (error instanceof InvalidCredentialsError) setFormError(t("errors.invalidCredentials"));
+      else if (error instanceof AuthRateLimitedError) setFormError(t("errors.rateLimited"));
+      else if (error instanceof AuthUnavailableError) setFormError(t("errors.unavailable"));
+      else setFormError(t("errors.generic"));
     }
   }
 

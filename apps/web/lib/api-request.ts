@@ -1,21 +1,20 @@
 import "server-only";
 import { cookies } from "next/headers";
 import { apiHeaders } from "./api-headers";
+import { parseSessionCookie, SESSION_COOKIE, type SessionCookieChange } from "./session-cookie";
 
 // What came back from a call to the API, for the calls that need more outcomes than api-post.ts
 // offers: a signed-in read (401), a booking that was taken (409), a missing record (404), an empty
 // answer (204 and 202). `code` is the API's machine code (`VEHICLE_UNAVAILABLE`, `RESET_TOKEN_INVALID`).
 export type ApiResult<T> =
-  | { status: "ok"; data: T }
+  // `sessionCookie` is set when the answer started or ended the session (sign-in, sign-up, sign-out).
+  | { status: "ok"; data: T; sessionCookie?: SessionCookieChange }
   | { status: "invalid"; code?: string; fieldErrors: Record<string, string> }
   | { status: "unauthorized" }
   | { status: "not_found" }
   | { status: "conflict"; code?: string }
   | { status: "rate_limited" }
   | { status: "unavailable" };
-
-// The name of the session cookie the API sets (openapi `cookieAuth`).
-const SESSION_COOKIE = "novera_session";
 
 type ErrorBody = { code?: string; fieldErrors?: Record<string, string> };
 
@@ -44,9 +43,10 @@ export async function apiRequest<T = null>(
       cache: "no-store",
     });
     if (response.ok) {
+      const sessionCookie = parseSessionCookie(response.headers.getSetCookie());
       // 202 and 204 carry no body; reading one would throw.
-      if (response.status === 202 || response.status === 204) return { status: "ok", data: null as T };
-      return { status: "ok", data: (await response.json()) as T };
+      if (response.status === 202 || response.status === 204) return { status: "ok", data: null as T, sessionCookie };
+      return { status: "ok", data: (await response.json()) as T, sessionCookie };
     }
     if (response.status === 401) return { status: "unauthorized" };
     if (response.status === 404) return { status: "not_found" };

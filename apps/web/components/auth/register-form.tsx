@@ -10,7 +10,7 @@ import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Link, useRouter } from "@/i18n/navigation";
-import { AuthUnavailableError, register as registerAccount } from "@/lib/auth-client";
+import { AuthRateLimitedError, AuthUnavailableError, EmailTakenError, register as registerAccount } from "@/lib/auth-client";
 import { PASSWORD_MIN_LENGTH, registerSchema, type RegisterInput } from "@/lib/auth-schemas";
 import { FormError } from "./form-error";
 import { useAuthErrorMessages } from "./use-auth-messages";
@@ -55,7 +55,10 @@ export function RegisterForm({ next }: { next?: Record<string, string> }) {
       // The header reads the session on the server, so it has to be asked again.
       router.refresh();
     } catch (error) {
-      setFormError(error instanceof AuthUnavailableError ? t("errors.unavailable") : t("errors.generic"));
+      if (error instanceof EmailTakenError) setFormError(t("errors.emailTaken"));
+      else if (error instanceof AuthRateLimitedError) setFormError(t("errors.rateLimited"));
+      else if (error instanceof AuthUnavailableError) setFormError(t("errors.unavailable"));
+      else setFormError(t("errors.generic"));
     }
   }
 

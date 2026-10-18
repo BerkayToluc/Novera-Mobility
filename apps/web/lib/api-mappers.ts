@@ -1,5 +1,6 @@
 import type { components } from "./api-types";
 import type { PointsAccount } from "./points";
+import type { Session } from "./session";
 import type { QuoteRequest } from "./quote-request";
 import type { Reservation } from "./reservation";
 
@@ -49,4 +50,13 @@ export function quoteFromApi(quote: Schemas["QuoteSummary"]): QuoteRequest {
     durationMonths: quote.durationMonths,
     status: quote.status,
   };
+}
+
+// `GET /me` as the signed-in session. The API knows a corporate account's company name only; the
+// tax office, city, phone, contact title and sales contact are left out and the company page shows
+// the rows it has (docs/API-GAPS.md).
+export function sessionFromApi(user: Schemas["User"]): Session {
+  const base = { id: user.id, firstName: user.firstName, lastName: user.lastName, email: user.email };
+  if (user.accountType === "CORPORATE") return { type: "corporate", user: base, company: { name: user.companyName ?? "" } };
+  return { type: "individual", user: base };
 }

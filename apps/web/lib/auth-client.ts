@@ -3,10 +3,9 @@ import { forgotPassword, resetPassword as resetPasswordAction } from "./password
 import type { ForgotPasswordInput, LoginInput, RegisterInput } from "./auth-schemas";
 import type { AccountType } from "./session";
 
-// Sign-in and sign-up are not connected to the API yet (BACKLOG #25, #27); until they are, every call says so
-// plainly instead of pretending to succeed: a fake "signed in" would mislead and could
-// leak into a real build. When the API lands, only this file changes; the forms already
-// handle loading and failure.
+// The sign-in, sign-up and sign-out calls are server actions (auth-actions.ts); this file turns what
+// they answer into errors the forms can tell apart. A service that cannot be reached says so
+// plainly: nobody is ever shown a fake "signed in".
 export class AuthUnavailableError extends Error {
   constructor() {
     super("The authentication service is not connected yet.");
@@ -17,15 +16,38 @@ export class AuthUnavailableError extends Error {
 // Resolves to the language the account saved, or undefined to stay in the current one.
 export async function login(input: LoginInput, kind: AccountType = "individual"): Promise<"tr" | "en" | undefined> {
   const result = await signIn(kind, input.email, input.password);
-  if (!result.ok) throw new AuthUnavailableError();
+  if (!result.ok) throw failure(result.reason);
   return result.locale ?? undefined;
 }
 
 // Resolves to the language the new account starts with, as login does.
 export async function register(input: RegisterInput): Promise<"tr" | "en" | undefined> {
   const result = await signUp(input);
-  if (!result.ok) throw new AuthUnavailableError();
+  if (!result.ok) throw failure(result.reason);
   return result.locale ?? undefined;
+}
+
+// The e-mail or the password is wrong; the API does not say which, so neither does the form.
+export class InvalidCredentialsError extends Error {
+  constructor() {
+    super("The e-mail or password is wrong.");
+    this.name = "InvalidCredentialsError";
+  }
+}
+
+// Sign-up with an address that already has an account.
+export class EmailTakenError extends Error {
+  constructor() {
+    super("An account with this e-mail already exists.");
+    this.name = "EmailTakenError";
+  }
+}
+
+function failure(reason: "unavailable" | "invalid" | "email_taken" | "rate_limited"): Error {
+  if (reason === "invalid") return new InvalidCredentialsError();
+  if (reason === "email_taken") return new EmailTakenError();
+  if (reason === "rate_limited") return new AuthRateLimitedError();
+  return new AuthUnavailableError();
 }
 
 // Too many requests from this address or for this e-mail (the API allows a few an hour).
