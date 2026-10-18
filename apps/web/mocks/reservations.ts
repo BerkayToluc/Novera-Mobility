@@ -2,19 +2,30 @@ import { pointsForTotal } from "@/lib/points";
 import type { PointsAccount } from "@/lib/points";
 import type { Reservation } from "@/lib/reservation";
 
-// Sample reservations of the individual sample account (BACKLOG Y43, Y44), around 10 October
-// 2026: two coming up, three behind it (one of them cancelled, which earns nothing).
+// Sample reservations of the individual sample account (BACKLOG Y43, Y44): two coming up, three
+// behind it (one of them cancelled, which earns nothing). Their dates are worked out from the time
+// of the call, not fixed, so the ones "coming up" never turn into past ones as the calendar moves
+// (the tests that cancel one, and the points that wait for another, depend on that).
 const total = (lira: number) => ({ amount: lira * 100, currency: "TRY" as const });
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+// `days` from the start of today (UTC), at the given time of day.
+const dayAt = (now: number, days: number, time: string) => {
+  const midnight = Math.floor(now / DAY_MS) * DAY_MS;
+  const [hours, minutes] = time.split(":").map(Number);
+  return new Date(midnight + days * DAY_MS + hours * 3_600_000 + minutes * 60_000).toISOString().replace(".000Z", "Z");
+};
 
 type Draft = Omit<Reservation, "pointsEarned">;
 
-const DRAFTS: Draft[] = [
+const drafts = (now: number): Draft[] => [
   {
     id: "r5",
     number: "NVR-2026-00231",
     status: "CONFIRMED",
-    startAt: "2026-11-06T09:00:00Z",
-    endAt: "2026-11-09T18:00:00Z",
+    startAt: dayAt(now, 30, "09:00"),
+    endAt: dayAt(now, 33, "18:00"),
     days: 3,
     totalPrice: total(4860),
     vehicle: { brand: "Volkswagen", model: "Passat" },
@@ -27,8 +38,8 @@ const DRAFTS: Draft[] = [
     id: "r4",
     number: "NVR-2026-00207",
     status: "CONFIRMED",
-    startAt: "2026-10-18T10:00:00Z",
-    endAt: "2026-10-20T10:00:00Z",
+    startAt: dayAt(now, 2, "10:00"),
+    endAt: dayAt(now, 4, "10:00"),
     days: 2,
     totalPrice: total(2790),
     vehicle: { brand: "Renault", model: "Clio" },
@@ -41,8 +52,8 @@ const DRAFTS: Draft[] = [
     id: "r3",
     number: "NVR-2026-00142",
     status: "CONFIRMED",
-    startAt: "2026-08-02T08:30:00Z",
-    endAt: "2026-08-09T08:30:00Z",
+    startAt: dayAt(now, -75, "08:30"),
+    endAt: dayAt(now, -68, "08:30"),
     days: 7,
     totalPrice: total(11340),
     vehicle: { brand: "Toyota", model: "Corolla Hybrid" },
@@ -55,8 +66,8 @@ const DRAFTS: Draft[] = [
     id: "r2",
     number: "NVR-2026-00098",
     status: "CANCELLED",
-    startAt: "2026-06-12T12:00:00Z",
-    endAt: "2026-06-14T12:00:00Z",
+    startAt: dayAt(now, -125, "12:00"),
+    endAt: dayAt(now, -123, "12:00"),
     days: 2,
     totalPrice: total(3120),
     vehicle: { brand: "Hyundai", model: "Tucson" },
@@ -69,8 +80,8 @@ const DRAFTS: Draft[] = [
     id: "r1",
     number: "NVR-2026-00031",
     status: "CONFIRMED",
-    startAt: "2026-03-20T09:00:00Z",
-    endAt: "2026-03-23T09:00:00Z",
+    startAt: dayAt(now, -210, "09:00"),
+    endAt: dayAt(now, -207, "09:00"),
     days: 3,
     totalPrice: total(5230),
     vehicle: { brand: "Fiat", model: "Egea" },
@@ -82,21 +93,23 @@ const DRAFTS: Draft[] = [
 ];
 
 // Points follow the rule, never typed by hand, so the fixture cannot disagree with it.
-export const MOCK_RESERVATIONS: Reservation[] = DRAFTS.map((draft) => ({
-  ...draft,
-  pointsEarned: draft.status === "CONFIRMED" ? pointsForTotal(draft.totalPrice) : 0,
-}));
+export function mockReservations(now: number = Date.now()): Reservation[] {
+  return drafts(now).map((draft) => ({
+    ...draft,
+    pointsEarned: draft.status === "CONFIRMED" ? pointsForTotal(draft.totalPrice) : 0,
+  }));
+}
 
 // The sample bookings with the ones this browser cancelled marked as such (a cancelled booking
 // earns no points). `cancelled` is the list of ids kept in the cookie.
-export function withCancelled(cancelled: string[]): Reservation[] {
-  return MOCK_RESERVATIONS.map((reservation) =>
+export function withCancelled(cancelled: string[], now: number = Date.now()): Reservation[] {
+  return mockReservations(now).map((reservation) =>
     cancelled.includes(reservation.id) ? { ...reservation, status: "CANCELLED" as const, pointsEarned: 0 } : reservation,
   );
 }
 
 // Points are credited when a rental is completed; a booking still ahead only has points pending.
-export function mockPoints(now: Date, reservations: Reservation[] = MOCK_RESERVATIONS): PointsAccount {
+export function mockPoints(now: Date, reservations: Reservation[] = mockReservations(now.getTime())): PointsAccount {
   const confirmed = reservations.filter((reservation) => reservation.status === "CONFIRMED");
   const done = confirmed.filter((reservation) => new Date(reservation.endAt) <= now);
   const ahead = confirmed.filter((reservation) => new Date(reservation.endAt) > now);

@@ -20,10 +20,10 @@ export async function cancelReservation(id: string): Promise<CancelResult> {
   }
   if ((await getSession())?.type !== "individual") return { ok: false, reason: "unavailable" };
 
-  const { MOCK_RESERVATIONS } = await import("@/mocks/reservations");
+  const { mockReservations } = await import("@/mocks/reservations");
   const jar = await cookies();
   const already = (jar.get(CANCELLED_COOKIE)?.value ?? "").split(",").filter(Boolean);
-  const reservation = MOCK_RESERVATIONS.find((entry) => entry.id === id);
+  const reservation = mockReservations(currentTime()).find((entry) => entry.id === id);
   // Only a booking that is still ahead can be cancelled, and only once.
   if (!reservation || already.includes(id) || reservationPhase(reservation, currentTime()) !== "UPCOMING") {
     return { ok: false, reason: "not_cancellable" };
