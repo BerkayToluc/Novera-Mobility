@@ -32,7 +32,7 @@ export async function VehicleCard({ vehicle, fromPrice, note, action, pointsPaym
             {vehicle.brand} {vehicle.model}
           </h3>
           <p className="text-small text-fg-muted">
-            {vehicle.vehicleClass.name[locale]} · {vehicle.year}
+            {vehicle.year ? `${vehicle.vehicleClass.name[locale]} · ${vehicle.year}` : vehicle.vehicleClass.name[locale]}
           </p>
         </div>
         <ul className="grid grid-cols-2 gap-x-3 gap-y-2 text-small text-fg-muted">

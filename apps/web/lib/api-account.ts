@@ -3,6 +3,7 @@ import { apiRequest } from "./api-request";
 import { pointsFromApi, quoteFromApi, reservationFromApi } from "./api-mappers";
 import type { components } from "./api-types";
 import { ApiUnavailableError } from "./fleet-client";
+import type { AccountSession } from "./account-sessions";
 import type { PointsAccount } from "./points";
 import type { QuoteRequest } from "./quote-request";
 import type { Reservation } from "./reservation";
@@ -39,4 +40,16 @@ export async function cancelMyReservation(id: string): Promise<CancelOutcome> {
   if (result.status === "ok") return "cancelled";
   if (result.status === "not_found" || result.status === "conflict") return "not_cancellable";
   return "unavailable";
+}
+
+export async function fetchMySessions(): Promise<AccountSession[]> {
+  const result = await apiRequest<Schemas["SessionInfo"][]>("GET", "/me/sessions");
+  if (result.status !== "ok") throw new ApiUnavailableError();
+  return result.data.map((entry) => ({
+    id: entry.id,
+    current: entry.current,
+    device: entry.device ?? null,
+    createdAt: entry.createdAt,
+    expiresAt: entry.expiresAt,
+  }));
 }

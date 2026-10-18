@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { FormError } from "@/components/auth/form-error";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "@/i18n/navigation";
 import { deleteAccount } from "@/lib/account-client";
 import { AuthUnavailableError } from "@/lib/auth-client";
 
@@ -12,6 +13,7 @@ import { AuthUnavailableError } from "@/lib/auth-client";
 export function DeleteAccount() {
   const t = useTranslations("Profile.settings.danger");
   const errorT = useTranslations("Auth.errors");
+  const router = useRouter();
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -26,6 +28,9 @@ export function DeleteAccount() {
     setError(null);
     try {
       await deleteAccount();
+      // The account and its session are gone: back to the home page, and the header asks the server again.
+      router.push("/");
+      router.refresh();
     } catch (failure) {
       setError(failure instanceof AuthUnavailableError ? errorT("unavailable") : errorT("generic"));
     } finally {

@@ -14,7 +14,8 @@
       "teslim": "Pick-up and return",
       "hasar": "Damage and breakdowns",
       "hesap": "Account",
-      "kurumsal": "Corporate"
+      "kurumsal": "Corporate",
+      "genel": "General"
     },
     "results": "{count, plural, =0 {No results} one {Showing 1 question} other {Showing # questions}}",
     "open": "Open",

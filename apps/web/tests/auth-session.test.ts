@@ -148,7 +148,11 @@ describe("getSession", () => {
     const fetchMock = answer(200, user);
     vi.stubGlobal("fetch", fetchMock);
     const session = await getSession();
-    expect(session).toEqual({ type: "individual", user: { id: "u1", firstName: "Elif", lastName: "Yıldız", email: "elif@example.com" } });
+    expect(session).toEqual({
+      type: "individual",
+      user: { id: "u1", firstName: "Elif", lastName: "Yıldız", email: "elif@example.com" },
+      preferences: { currency: "EUR", locale: "en", theme: "dark" },
+    });
     const [url, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
     expect(url).toBe("http://api.test/me");
     expect(init.headers).toMatchObject({ Cookie: "novera_session=tok123" });

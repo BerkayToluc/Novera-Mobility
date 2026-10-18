@@ -1,8 +1,11 @@
 import { getLocale, getTranslations } from "next-intl/server";
 import { cookies } from "next/headers";
+import { getSession } from "@/lib/session";
 import { getCurrency } from "@/lib/get-currency";
 import { getTheme } from "@/lib/get-theme";
-import { DEFAULT_NOTIFICATIONS, NOTIFY_COOKIE, parseNotifications, SESSIONS_REVOKED_COOKIE } from "@/lib/notifications";
+import { getMySessions } from "@/lib/account-server";
+import type { AccountSession } from "@/lib/account-sessions";
+import { DEFAULT_NOTIFICATIONS, NOTIFY_COOKIE, parseNotifications } from "@/lib/notifications";
 import { MOCK_PREFERENCES_COOKIE, parsePreferences, type Preferences } from "@/lib/preferences";
 import { DeleteAccount } from "./delete-account";
 import { NotificationsForm } from "./notifications-form";
@@ -23,11 +26,18 @@ function Section({ id, title, text, children }: { id: string; title: string; tex
 
 export async function SettingsView() {
   const t = await getTranslations("Profile.settings");
-  // The account's saved defaults when it has any; otherwise what this browser is using now.
+  // What the account saved: from the API, or from the sample account's cookies. Without either, what this
+  // browser is using now.
+  const session = await getSession();
   const jar = await cookies();
-  const saved = parsePreferences(jar.get(MOCK_PREFERENCES_COOKIE)?.value);
-  const notifications = parseNotifications(jar.get(NOTIFY_COOKIE)?.value) ?? DEFAULT_NOTIFICATIONS;
-  const othersRevoked = jar.get(SESSIONS_REVOKED_COOKIE)?.value === "1";
+  const saved = session?.preferences ?? parsePreferences(jar.get(MOCK_PREFERENCES_COOKIE)?.value);
+  const notifications = session?.notifications ?? parseNotifications(jar.get(NOTIFY_COOKIE)?.value) ?? DEFAULT_NOTIFICATIONS;
+  let sessions: AccountSession[] | null;
+  try {
+    sessions = await getMySessions();
+  } catch {
+    sessions = null;
+  }
   const initial: Preferences = saved ?? {
     currency: await getCurrency(),
     theme: await getTheme(),
@@ -43,7 +53,7 @@ export async function SettingsView() {
         <NotificationsForm initial={notifications} />
       </Section>
       <Section id="settings-security" title={t("security.title")} text={t("security.text")}>
-        <SecuritySection othersRevoked={othersRevoked} />
+        <SecuritySection sessions={sessions} />
       </Section>
       <Section id="settings-danger" title={t("danger.title")} text={t("danger.text")}>
         <DeleteAccount />

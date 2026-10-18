@@ -14,7 +14,8 @@ export async function CompanyAccount({ session }: { session: Session }) {
   const { company, user } = session;
   if (!company) return null;
 
-  const contactTitle = company.contactTitle?.[locale];
+  const title = company.contactTitle;
+  const contactTitle = typeof title === "string" ? title : title?.[locale];
   const rows = [
     { label: t("name"), value: company.name },
     { label: t("taxOffice"), value: company.taxOffice },

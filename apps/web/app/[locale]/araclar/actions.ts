@@ -14,7 +14,7 @@ export async function startRental(params: Record<string, string>): Promise<Start
   if (!booking) return { ok: false, reason: "unavailable" };
 
   try {
-    const hold = await createHold(booking.vehicleSlug);
+    const hold = await createHold(booking.vehicleSlug, booking.search);
     return { ok: true, query: toBookingQuery({ ...booking, extraSlugs: [], holdId: hold.id }) };
   } catch (error) {
     return { ok: false, reason: error instanceof VehicleUnavailableError ? "taken" : "unavailable" };

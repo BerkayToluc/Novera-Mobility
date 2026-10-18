@@ -154,6 +154,7 @@
           "mismatch": "Şifreler aynı değil.",
           "save": "Şifreyi değiştir",
           "saving": "Değiştiriliyor…",
+          "incorrect": "Mevcut şifre yanlış.",
           "saved": "Şifreniz değiştirildi."
         },
         "sessions": {
@@ -162,7 +163,9 @@
           "thisDevice": "Bu cihaz",
           "now": "Şu an etkin",
           "phone": "Telefon · Mobil tarayıcı",
-          "twoDays": "2 gün önce",
+          "since": "{date} tarihinde açıldı",
+          "unknown": "Bilinmeyen cihaz",
+          "error": "Oturumlar şu an yüklenemedi.",
           "revoke": "Diğer oturumları kapat"
         }
       }

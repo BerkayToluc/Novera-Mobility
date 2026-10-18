@@ -2,28 +2,31 @@
 
 import { useState, useTransition } from "react";
 import { Laptop, Smartphone } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 import { FormError } from "@/components/auth/form-error";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 import { PasswordInput } from "@/components/ui/password-input";
 import { changePassword, revokeOtherSessions } from "@/lib/account-actions";
+import type { AccountSession } from "@/lib/account-sessions";
 
-// Security (SPEC §2.9, v0.8): change the password, and see where the account is signed in. Both
-// are simulated while the API has no such calls (the sessions are a made-up list).
-export function SecuritySection({ othersRevoked }: { othersRevoked: boolean }) {
+// Security (SPEC §2.9, v0.8): change the password, and see where the account is signed in
+// (`POST /me/password`, `GET /me/sessions`). `sessions` is null when the list could not be loaded.
+export function SecuritySection({ sessions: initialSessions }: { sessions: AccountSession[] | null }) {
+  const format = useFormatter();
   const t = useTranslations("Profile.settings.security");
   const authT = useTranslations("Auth");
   const errorT = useTranslations("Auth.errors");
   const [current, setCurrent] = useState("");
   const [next, setNext] = useState("");
   const [repeat, setRepeat] = useState("");
-  const [fieldError, setFieldError] = useState<"short" | "same" | "mismatch" | "current" | null>(null);
+  const [fieldError, setFieldError] = useState<"short" | "same" | "mismatch" | "current" | "incorrect" | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
   const [pending, startTransition] = useTransition();
-  const [revoked, setRevoked] = useState(othersRevoked);
+  const [sessions, setSessions] = useState(initialSessions);
   const [revoking, startRevoke] = useTransition();
+  const [revokeError, setRevokeError] = useState<string | null>(null);
 
   function onSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -35,7 +38,9 @@ export function SecuritySection({ othersRevoked }: { othersRevoked: boolean }) {
     startTransition(async () => {
       const result = await changePassword(current, next);
       if (!result.ok) {
-        setFormError(result.reason === "unavailable" ? errorT("unavailable") : errorT("generic"));
+        if (result.reason === "incorrect") setFieldError("incorrect");
+        else if (result.reason === "rate_limited") setFormError(errorT("rateLimited"));
+        else setFormError(result.reason === "unavailable" ? errorT("unavailable") : errorT("generic"));
         return;
       }
       setSaved(true);
@@ -45,10 +50,7 @@ export function SecuritySection({ othersRevoked }: { othersRevoked: boolean }) {
     });
   }
 
-  const sessions = [
-    { id: "this", icon: Laptop, name: t("sessions.this"), when: t("sessions.now"), current: true },
-    ...(revoked ? [] : [{ id: "phone", icon: Smartphone, name: t("sessions.phone"), when: t("sessions.twoDays"), current: false }]),
-  ];
+  const others = sessions?.some((entry) => !entry.current) ?? false;
 
   const show = t("show");
   const hide = t("hide");
@@ -63,7 +65,7 @@ export function SecuritySection({ othersRevoked }: { othersRevoked: boolean }) {
             {t("password.saved")}
           </p>
         )}
-        <Field label={t("password.current")} error={fieldError === "current" ? authT("errors.required") : undefined}>
+        <Field label={t("password.current")} error={fieldError === "current" ? authT("errors.required") : fieldError === "incorrect" ? t("password.incorrect") : undefined}>
           {(props) => (
             <PasswordInput autoComplete="current-password" showLabel={show} hideLabel={hide} value={current} onChange={(e) => setCurrent(e.target.value)} {...props} />
           )}
@@ -91,21 +93,37 @@ export function SecuritySection({ othersRevoked }: { othersRevoked: boolean }) {
         <h3 id="sessions-title" className="text-label text-fg">
           {t("sessions.title")}
         </h3>
-        <ul className="flex flex-col divide-y divide-border rounded-card border border-border bg-surface">
-          {sessions.map(({ id, icon: Icon, name, when, current: isCurrent }) => (
-            <li key={id} className="flex items-center gap-4 px-4 py-3">
-              <Icon aria-hidden="true" className="size-5 shrink-0 text-fg-muted" />
-              <div className="flex min-w-0 flex-1 flex-col">
-                <p className="text-body text-fg">
-                  {name}
-                  {isCurrent && <span className="ml-2 rounded-full bg-selected px-2 py-0.5 text-small text-on-selected">{t("sessions.thisDevice")}</span>}
-                </p>
-                <p className="text-small text-fg-muted">{when}</p>
-              </div>
-            </li>
-          ))}
-        </ul>
-        {!revoked && (
+        {sessions === null ? (
+          <p role="alert" className="rounded-control border border-error p-3 text-small text-error">
+            {t("sessions.error")}
+          </p>
+        ) : (
+          <ul className="flex flex-col divide-y divide-border rounded-card border border-border bg-surface">
+            {sessions.map((entry) => {
+              const Icon = /iphone|android|mobile/i.test(entry.device ?? "") ? Smartphone : Laptop;
+              return (
+                <li key={entry.id} className="flex items-center gap-4 px-4 py-3">
+                  <Icon aria-hidden="true" className="size-5 shrink-0 text-fg-muted" />
+                  <div className="flex min-w-0 flex-1 flex-col">
+                    <p className="text-body text-fg">
+                      {entry.device ?? t("sessions.unknown")}
+                      {entry.current && (
+                        <span className="ml-2 rounded-full bg-selected px-2 py-0.5 text-small text-on-selected">{t("sessions.thisDevice")}</span>
+                      )}
+                    </p>
+                    <p className="text-small text-fg-muted">
+                      {entry.current
+                        ? t("sessions.now")
+                        : t("sessions.since", { date: format.dateTime(new Date(entry.createdAt), { dateStyle: "long" }) })}
+                    </p>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+        {revokeError && <FormError message={revokeError} />}
+        {others && (
           <Button
             type="button"
             variant="outline"
@@ -114,8 +132,10 @@ export function SecuritySection({ othersRevoked }: { othersRevoked: boolean }) {
             className="self-start"
             onClick={() =>
               startRevoke(async () => {
+                setRevokeError(null);
                 const result = await revokeOtherSessions();
-                if (result.ok) setRevoked(true);
+                if (result.ok) setSessions((current) => current?.filter((entry) => entry.current) ?? current);
+                else setRevokeError(errorT(result.reason === "unavailable" ? "unavailable" : "generic"));
               })
             }
           >

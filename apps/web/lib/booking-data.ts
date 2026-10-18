@@ -4,7 +4,7 @@ import type { Currency } from "./currency";
 import type { Extra } from "./extra";
 import { getMyPoints } from "./account-server";
 import { getBranches, getExtras, getVehicle } from "./fleet-client";
-import { getHold, type Hold } from "./hold-client";
+import { getHold, VehicleUnavailableError, type Hold } from "./hold-client";
 import { quotePrice } from "./price-client";
 import type { PriceSummary } from "./price-summary";
 import { rentalDays } from "./rental-search";
@@ -61,7 +61,7 @@ export async function loadBooking(
   let branches: Branch[];
   try {
     [vehicle, allExtras, branches] = await Promise.all([
-      getVehicle(booking.vehicleSlug, currency),
+      getVehicle(booking.vehicleSlug, currency, booking.search.pickupBranchId),
       getExtras(currency),
       getBranches(),
     ]);
@@ -101,15 +101,19 @@ export async function loadBooking(
   }
   let summary: PriceSummary;
   try {
-    summary = await quotePrice(
+    summary = await quotePrice({
       vehicle,
       days,
       extras,
       currency,
-      booking.promoCode,
-      booking.usePoints && pointsBalance !== null ? pointsBalance : undefined,
-    );
-  } catch {
+      search: booking.search,
+      holdId: booking.holdId,
+      promoCode: booking.promoCode,
+      pointsBalance: booking.usePoints && pointsBalance !== null ? pointsBalance : undefined,
+    });
+  } catch (error) {
+    // The car went to someone else while the visitor looked at it: the same screen as a hold that ran out.
+    if (error instanceof VehicleUnavailableError) return { status: "expired", booking };
     return { status: "error", booking };
   }
   return {

@@ -6,6 +6,8 @@ import { apiRequest } from "./api-request";
 import { sessionFromApi } from "./api-mappers";
 import type { components } from "./api-types";
 import { SESSION_COOKIE } from "./session-cookie";
+import type { Notifications } from "./notifications";
+import type { Preferences } from "./preferences";
 import type { LocalizedText } from "./vehicle";
 
 export type SessionUser = {
@@ -25,12 +27,20 @@ export type CompanyInfo = {
   taxOffice?: string;
   city?: string;
   phone?: string;
-  contactTitle?: LocalizedText;
+  // The sample account has it in both languages, the API sends one text.
+  contactTitle?: LocalizedText | string;
   // The Novera team that opened the account and answers for it.
   salesContact?: string;
 };
 
-export type Session = { type: AccountType; user: SessionUser; company?: CompanyInfo };
+// `preferences` and `notifications` are what the account saved; the sample accounts keep theirs in cookies.
+export type Session = {
+  type: AccountType;
+  user: SessionUser;
+  company?: CompanyInfo;
+  preferences?: Preferences;
+  notifications?: Notifications;
+};
 
 // The cookie that stands in for the real session in development (BACKLOG #25). It only means
 // something with USE_MOCKS=1; otherwise it is ignored, so a production build can never be "signed
