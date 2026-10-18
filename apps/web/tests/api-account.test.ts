@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { cancelMyReservation, fetchMyPoints, fetchMyQuoteRequests, fetchMyReservations } from "../lib/api-account";
+import { cancelMyReservation, fetchMyPoints, fetchMyQuoteRequests, fetchMyReceipt, fetchMyReservations } from "../lib/api-account";
 import { pointsFromApi, quoteFromApi, reservationFromApi } from "../lib/api-mappers";
 import type { components } from "../lib/api-types";
 import type { BookingData } from "../lib/booking-data";
@@ -120,6 +120,42 @@ describe("calls to the API", () => {
     await fetchMyReservations();
     const [, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
     expect(init.headers).toMatchObject({ "X-Novera-Key": "secret" });
+  });
+
+  it("finds a reservation by its number for the confirmation, with the price as stored", async () => {
+    const stored = {
+      ...apiReservation,
+      price: {
+        currency: "TRY",
+        exchangeRate: 1,
+        days: 3,
+        lines: [
+          { type: "VEHICLE", label: { tr: "Toyota", en: "Toyota" }, quantity: 3, unitPrice: { amount: 100000, currency: "TRY" }, total: { amount: 300000, currency: "TRY" } },
+          { type: "EXTRA", label: { tr: "Wi-Fi", en: "Wi-Fi" }, quantity: 3, unitPrice: { amount: 8000, currency: "TRY" }, total: { amount: 24000, currency: "TRY" } },
+        ],
+        total: { amount: 324000, currency: "TRY" },
+      },
+      vehicle: { id: "v1", model: { brand: "Toyota", model: "Corolla Hybrid", class: { slug: "e", name: { tr: "Ekonomik", en: "Economy" } } } },
+    };
+    vi.stubGlobal("fetch", respond(200, [{ ...stored, number: "NVR-2026-00999" }, stored]));
+    const receipt = await fetchMyReceipt("NVR-2026-00123");
+    expect(receipt).toMatchObject({
+      number: "NVR-2026-00123",
+      days: 3,
+      pointsEarned: 48,
+      vehicle: { brand: "Toyota", dailyPrice: { amount: 100000, currency: "TRY" } },
+      pickup: { city: "İstanbul", name: "İstanbul Kadıköy" },
+    });
+    expect(receipt?.summary.total).toEqual({ amount: 324000, currency: "TRY" });
+    expect(receipt?.summary.extraLines.map((line) => line.extra.name.tr)).toEqual(["Wi-Fi"]);
+    expect(await fetchMyReceipt("NVR-2026-00001")).toBeNull();
+  });
+
+  it("has no receipt for a visitor who is not signed in, and fails when the API is down", async () => {
+    vi.stubGlobal("fetch", respond(401, { code: "UNAUTHENTICATED" }));
+    expect(await fetchMyReceipt("NVR-2026-00123")).toBeNull();
+    vi.stubGlobal("fetch", respond(503));
+    await expect(fetchMyReceipt("NVR-2026-00123")).rejects.toThrow();
   });
 
   it("throws, so the page shows its error state, when the API is not there or the session is gone", async () => {

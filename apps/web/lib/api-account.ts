@@ -1,6 +1,6 @@
 import "server-only";
 import { apiRequest } from "./api-request";
-import { pointsFromApi, quoteFromApi, reservationFromApi } from "./api-mappers";
+import { pointsFromApi, quoteFromApi, receiptFromApi, reservationFromApi, type Receipt } from "./api-mappers";
 import type { components } from "./api-types";
 import { ApiUnavailableError } from "./fleet-client";
 import type { AccountSession } from "./account-sessions";
@@ -52,4 +52,14 @@ export async function fetchMySessions(): Promise<AccountSession[]> {
     createdAt: entry.createdAt,
     expiresAt: entry.expiresAt,
   }));
+}
+
+// The reservation with this number among the signed-in visitor's own, or null when there is none (a
+// wrong number, someone else's, a visitor who is not signed in). There is no call for a single one.
+export async function fetchMyReceipt(number: string): Promise<Receipt | null> {
+  const result = await apiRequest<Schemas["Reservation"][]>("GET", "/me/reservations");
+  if (result.status === "unauthorized") return null;
+  if (result.status !== "ok") throw new ApiUnavailableError();
+  const found = result.data.find((reservation) => reservation.number === number);
+  return found ? receiptFromApi(found) : null;
 }

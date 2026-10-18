@@ -205,3 +205,45 @@ export function summaryFromApi(breakdown: ApiPriceBreakdown, extras: Extra[]): P
     vat: { amount: Math.floor((payable.amount * VAT_PERCENT) / (100 + VAT_PERCENT)), currency: breakdown.currency },
   };
 }
+
+// ---- Confirmation ----
+
+// A reservation as the confirmation page shows it, read back from `GET /me/reservations`: the booking
+// as stored, so it does not depend on the address or on the car still being free.
+export type Receipt = {
+  number: string;
+  vehicle: Pick<Vehicle, "brand" | "model" | "dailyPrice">;
+  className: { tr: string; en: string };
+  pickup: { city: string; name: string };
+  dropoff: { city: string; name: string };
+  startAt: string;
+  endAt: string;
+  days: number;
+  summary: PriceSummary;
+  pointsEarned: number;
+};
+
+export function receiptFromApi(reservation: Schemas["Reservation"]): Receipt {
+  const price = reservation.price as ApiPriceBreakdown;
+  const vehicleLine = price.lines.find((line) => line.type === "VEHICLE");
+  // The stored lines carry no extra's slug; the name and the unit price are what the lines show.
+  const extras: Extra[] = price.lines
+    .filter((line) => line.type === "EXTRA")
+    .map((line, index) => ({ slug: `extra-${index}`, name: line.label, price: line.unitPrice, pricing: "FIXED" }));
+  return {
+    number: reservation.number,
+    vehicle: {
+      brand: reservation.vehicle.model.brand,
+      model: reservation.vehicle.model.model,
+      dailyPrice: vehicleLine?.unitPrice ?? price.total,
+    },
+    className: reservation.vehicle.model.class.name,
+    pickup: { city: reservation.pickupBranch.city, name: reservation.pickupBranch.name },
+    dropoff: { city: reservation.returnBranch.city, name: reservation.returnBranch.name },
+    startAt: reservation.startAt,
+    endAt: reservation.endAt,
+    days: price.days,
+    summary: summaryFromApi(price, extras),
+    pointsEarned: reservation.pointsEarned,
+  };
+}
