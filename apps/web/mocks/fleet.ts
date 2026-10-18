@@ -4,7 +4,7 @@
 // rates below, is made up. The counts follow SPEC §4.1: 15 branches in 14 cities
 // (Istanbul has two) and 15 car models, each in one to four branches.
 import type { Currency, Money } from "@/lib/currency";
-import { localToInstant, rentalDays, type RentalSearch } from "@/lib/rental-search";
+import { rentalDays, type RentalSearch } from "@/lib/rental-search";
 import type {
   Branch,
   Consumption,
@@ -149,11 +149,11 @@ export function mockVehicles(currency: Currency): Vehicle[] {
 }
 
 // The cars at the pick-up branch. A rental longer than 30 days finds nothing, so the
-// empty state can be reached without a branch that has no cars.
+// empty state can be reached without a branch that has no cars. The start is not checked against the
+// clock: the tests search fixed dates, and a date that has passed would turn them all into empty results.
 export function mockAvailable(search: RentalSearch, currency: Currency): VehicleOffer[] {
   const days = rentalDays(search);
-  const start = localToInstant(search.startAt);
-  if (days > 30 || start.getTime() < Date.now() - 24 * 60 * 60 * 1000) return [];
+  if (days > 30) return [];
   return VEHICLES.filter((vehicle) => vehicle.branchId === search.pickupBranchId).map((vehicle) => {
     const priced = inCurrency(vehicle, currency);
     return { ...priced, days, totalPrice: { amount: priced.dailyPrice.amount * days, currency } };

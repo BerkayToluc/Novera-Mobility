@@ -4,8 +4,9 @@ import { telHref } from "@/lib/company";
 import { groupFleet } from "@/lib/fleet-models";
 import { createHold, getHold, HOLD_MINUTES } from "@/lib/hold-client";
 import { branchJsonLd } from "@/lib/structured-data";
+import type { Reservation } from "@/lib/reservation";
 import type { Vehicle } from "@/lib/vehicle";
-import { MOCK_RESERVATIONS, mockPoints } from "@/mocks/reservations";
+import { mockPoints, mockReservations } from "@/mocks/reservations";
 
 afterEach(() => vi.unstubAllEnvs());
 
@@ -130,7 +131,7 @@ describe("structured data", () => {
 
 describe("sample account data", () => {
   it("earns points only on confirmed rentals", () => {
-    for (const reservation of MOCK_RESERVATIONS) {
+    for (const reservation of mockReservations()) {
       if (reservation.status === "CANCELLED") expect(reservation.pointsEarned).toBe(0);
     }
   });
@@ -141,6 +142,26 @@ describe("sample account data", () => {
     expect(account.balance).toBe(165);
     expect(account.pending).toBe(75);
   });
+});
+
+describe("sample reservations are relative to the calendar", () => {
+  const DAY = 24 * 60 * 60 * 1000;
+
+  // Whatever day it is, the same two bookings are coming up and the same three are behind it.
+  it.each(["2026-10-10T12:00:00Z", "2026-10-18T10:30:00Z", "2027-06-01T00:00:00Z", "2031-01-01T23:59:00Z"])(
+    "keeps two bookings ahead and three behind on %s",
+    (day: string) => {
+      const now = new Date(day).getTime();
+      const sample: Reservation[] = mockReservations(now);
+      const ahead = sample.filter((reservation) => new Date(reservation.startAt).getTime() > now);
+      expect(ahead.map((reservation) => reservation.number)).toEqual(["NVR-2026-00231", "NVR-2026-00207"]);
+      expect(sample.filter((reservation) => new Date(reservation.endAt).getTime() <= now)).toHaveLength(3);
+      // The next trip stays the Clio, and it starts at least a day away, so it can still be cancelled.
+      expect(new Date(sample.find((reservation) => reservation.id === "r4")!.startAt).getTime() - now).toBeGreaterThan(DAY);
+      const points = mockPoints(new Date(now), sample);
+      expect([points.balance, points.pending]).toEqual([165, 75]);
+    },
+  );
 });
 
 describe("telHref", () => {
