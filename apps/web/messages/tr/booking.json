@@ -99,6 +99,10 @@
       "text": "Bu sayfaya rezervasyon yaptıktan sonra gelinir.",
       "action": "Araç Ara"
     },
+    "error": {
+      "title": "Rezervasyon yüklenemedi",
+      "text": "Rezervasyonunuz alındı ama şu an gösterilemiyor. Rezervasyonlarım sayfasından görebilirsiniz."
+    },
     "points": "Bu kiralamayla {count, plural, one {# puan} other {# puan}} kazanacaksınız."
   },
   "HoldStates": {

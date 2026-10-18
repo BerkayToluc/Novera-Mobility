@@ -99,6 +99,10 @@
       "text": "You get to this page after making a booking.",
       "action": "Search Cars"
     },
+    "error": {
+      "title": "The reservation could not be loaded",
+      "text": "Your reservation was made but cannot be shown right now. You can see it under My bookings."
+    },
     "points": "This rental earns you {count, plural, one {# point} other {# points}}."
   },
   "HoldStates": {

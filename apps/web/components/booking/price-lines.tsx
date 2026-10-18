@@ -8,7 +8,15 @@ import type { Vehicle } from "@/lib/vehicle";
 // form and on the confirmation: the car, the extras, a subtotal when something comes off, the
 // campaign code, the points, the total, and how much of the total is VAT (it is inside the price,
 // not on top of it). The lines come from the summary the server priced; nothing is added up here.
-export async function PriceLines({ vehicle, days, summary }: { vehicle: Vehicle; days: number; summary: PriceSummary }) {
+export async function PriceLines({
+  vehicle,
+  days,
+  summary,
+}: {
+  vehicle: Pick<Vehicle, "brand" | "model" | "dailyPrice">;
+  days: number;
+  summary: PriceSummary;
+}) {
   const t = await getTranslations("BookingSummary");
   const format = await getFormatter();
   const locale = (await getLocale()) as "tr" | "en";
