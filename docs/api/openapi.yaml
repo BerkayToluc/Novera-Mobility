@@ -992,7 +992,7 @@ components:
     # ---------- Hesap ----------
     User:
       type: object
-      required: [id, email, firstName, lastName, accountType, companyName, locale, theme, currency]
+      required: [id, email, firstName, lastName, accountType, companyName, taxOffice, companyCity, companyPhone, contactTitle, salesContact, locale, theme, currency]
       properties:
         id: { type: string, format: uuid }
         email: { type: string, format: email }
@@ -1000,6 +1000,19 @@ components:
         lastName: { type: string }
         accountType: { type: string, enum: [INDIVIDUAL, CORPORATE] }
         companyName: { type: string, nullable: true }
+        taxOffice: { type: string, nullable: true, description: Vergi dairesi. Yalnızca kurumsal hesapta dolu; bireyselde `null`. }
+        companyCity: { type: string, nullable: true, description: Şirketin şehri. Yalnızca kurumsal hesapta dolu. }
+        companyPhone: { type: string, nullable: true, description: Şirket telefonu. Yalnızca kurumsal hesapta dolu. }
+        contactTitle: { type: string, nullable: true, description: Yetkilinin ünvanı. Yalnızca kurumsal hesapta dolu. }
+        salesContact:
+          type: object
+          nullable: true
+          description: Hesabın satış temsilcisi. Yalnızca kurumsal hesapta dolu; yoksa `null`.
+          required: [name, email, phone]
+          properties:
+            name: { type: string }
+            email: { type: string, format: email }
+            phone: { type: string }
         locale: { type: string, enum: [tr, en] }
         theme: { type: string, enum: [light, dark, system], description: Varsayılan `light`. }
         currency: { $ref: "#/components/schemas/Currency" }
