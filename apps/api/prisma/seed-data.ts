@@ -67,6 +67,23 @@ export type ModelSeed = {
   branchKeys: string[];
 };
 
+// Fotoğraflar web uygulamasının `public/fleet` klasöründe durur (apps/web/public/fleet/<dosya>.webp);
+// `imageUrl` web sitesine göre yoldur. Dosyası olmayan modelde `null` kalır ve web yer tutucu gösterir.
+// Yeni bir fotoğraf eklenince buraya da satır eklenir ve `pnpm db:seed` yeniden çalıştırılır.
+export const modelImages: Record<string, string> = {
+  "fiat-egea": "/fleet/fiat-egea.webp",
+  "renault-clio": "/fleet/renault-clio.webp",
+  "hyundai-i20": "/fleet/hyundai-i20.webp",
+  "toyota-corolla-hybrid": "/fleet/toyota-corolla-hybrid.webp",
+  "renault-megane-sedan": "/fleet/renault-megane.webp",
+  "nissan-qashqai": "/fleet/nissan-qashqai.webp",
+  "dacia-duster": "/fleet/dacia-duster.webp",
+  "togg-t10x": "/fleet/togg-t10x.webp",
+  "tesla-model-y": "/fleet/tesla-model-y.webp",
+  "bmw-5-serisi": "/fleet/bmw-5-serisi.webp",
+  "mercedes-e-serisi": "/fleet/mercedes-e-serisi.webp",
+};
+
 export const models: ModelSeed[] = [
   { id: uid(3, 1), slug: "fiat-egea", brand: "Fiat", model: "Egea", classSlug: "ekonomik", seats: 5, bags: 3, transmission: "MANUAL", fuelType: "PETROL", consumption: 6.1, consumptionUnit: "L_PER_100KM", dailyPrice: 125000, description: { tr: "Geniş bagajı ve sade kullanımıyla şehir içi ve uzun yol için pratik sedan.", en: "A practical sedan with a roomy boot, easy for the city and the open road." }, branchKeys: ["ist-ihl", "ank", "izm", "adn"] },
   { id: uid(3, 2), slug: "renault-clio", brand: "Renault", model: "Clio", classSlug: "ekonomik", seats: 5, bags: 2, transmission: "MANUAL", fuelType: "PETROL", consumption: 5.4, consumptionUnit: "L_PER_100KM", dailyPrice: 115000, description: { tr: "Kompakt boyutu ve düşük tüketimiyle şehir içinde park etmesi kolay.", en: "Compact and frugal, easy to park in town." }, branchKeys: ["ist-kdk", "brs", "esk", "sms"] },
