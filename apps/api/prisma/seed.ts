@@ -9,6 +9,7 @@ import {
   classes,
   extras,
   faq,
+  modelImages,
   models,
   products,
   rates,
@@ -60,6 +61,7 @@ async function main() {
       consumptionUnit: m.consumptionUnit,
       dailyPrice: m.dailyPrice,
       description: m.description,
+      imageUrl: modelImages[m.slug] ?? null,
       classId,
     };
     await prisma.vehicleModel.upsert({ where: { slug: m.slug }, update: data, create: { id: m.id, slug: m.slug, ...data } });
