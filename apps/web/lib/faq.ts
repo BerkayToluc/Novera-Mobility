@@ -5,7 +5,8 @@ import type { LocalizedText } from "./vehicle";
 // will return the same, with both languages per ARCHITECTURE ADR-17.
 // `topic` groups the questions in the help centre (SPEC §2.9); the Prisma model has no such
 // column yet, so the backend needs one before the API can serve it.
-export const FAQ_TOPICS = ["rezervasyon", "odeme", "teslim", "hasar", "hesap", "kurumsal"] as const;
+// "genel" holds the questions the API sends without a topic (the contract has none yet, docs/API-GAPS.md).
+export const FAQ_TOPICS = ["rezervasyon", "odeme", "teslim", "hasar", "hesap", "kurumsal", "genel"] as const;
 export type FaqTopic = (typeof FAQ_TOPICS)[number];
 
 export type FaqItem = {

@@ -19,6 +19,11 @@ export function localToInstant(local: string): Date {
   return new Date(`${local}:00${ISTANBUL_OFFSET}`);
 }
 
+// The moment the API wants: UTC, ISO 8601, no milliseconds ("2026-10-12T07:00:00Z").
+export function toUtc(local: string): string {
+  return localToInstant(local).toISOString().replace(".000Z", "Z");
+}
+
 type RawParams = Record<string, string | string[] | undefined>;
 
 const first = (value: string | string[] | undefined) => (Array.isArray(value) ? value[0] : value);

@@ -21,7 +21,7 @@ export async function VehicleRow({ vehicle, note, action, pointsPayment }: Vehic
             {vehicle.brand} {vehicle.model}
           </h3>
           <p className="text-small text-fg-muted">
-            {vehicle.vehicleClass.name[locale]} · {vehicle.year}
+            {vehicle.year ? `${vehicle.vehicleClass.name[locale]} · ${vehicle.year}` : vehicle.vehicleClass.name[locale]}
           </p>
         </div>
         <ul className="flex flex-wrap gap-1.5">

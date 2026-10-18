@@ -658,7 +658,7 @@ export interface paths {
         head?: never;
         /**
          * Profil ve tercihleri güncelle
-         * @description Ad, soyad, dil, tema ve varsayılan para birimi. E-posta değiştirilemez.
+         * @description Ad, soyad, dil, tema, varsayılan para birimi ve e-posta bildirim tercihleri. E-posta değiştirilemez.
          */
         patch: {
             parameters: {
@@ -686,6 +686,156 @@ export interface paths {
                 422: components["responses"]["ValidationFailed"];
             };
         };
+        trace?: never;
+    };
+    "/me/password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Şifre değiştir
+         * @description Mevcut şifre doğrulanır; yeni şifre en az 8 karakter olur ve eskisinden farklıdır. Başarılı olunca bu oturum
+         *     dışındaki TÜM oturumlar kapanır ve bekleyen şifre sıfırlama bağlantıları geçersiz olur.
+         *     Mevcut şifre yanlışsa `422` (`fieldErrors.currentPassword: INCORRECT`; oturum açık kalır, 401 değildir).
+         *     Yeni şifre için `TOO_SHORT`, `TOO_LONG`, `SAME_AS_CURRENT`. 15 dakikada en çok 5 deneme (`429`).
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["PasswordChange"];
+                };
+            };
+            responses: {
+                /** @description Şifre değişti */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                401: components["responses"]["Unauthorized"];
+                422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/sessions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Açık oturumlarım
+         * @description Hesabın açık oturumları, yeniden eskiye. İsteği yapan oturum `current: true` ile işaretlidir.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Açık oturumlar */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SessionInfo"][];
+                    };
+                };
+                401: components["responses"]["Unauthorized"];
+            };
+        };
+        put?: never;
+        post?: never;
+        /**
+         * Diğer oturumları kapat
+         * @description Bu oturum dışındaki tüm oturumlar kapanır.
+         */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Kapandı */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                401: components["responses"]["Unauthorized"];
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/sessions/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Bir oturumu kapat
+         * @description Hesabın bir oturumunu kapatır. Başkasının ya da olmayan oturum `404 NOT_FOUND`. Kapatılan şu anki oturumsa çerez de silinir.
+         */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Kapandı */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                401: components["responses"]["Unauthorized"];
+                404: components["responses"]["NotFound"];
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/auth/register": {
@@ -1185,7 +1335,7 @@ export interface components {
              * @description Sabit makine kodu.
              * @enum {string}
              */
-            code: "BAD_REQUEST" | "VALIDATION_FAILED" | "UNAUTHENTICATED" | "INVALID_CREDENTIALS" | "EMAIL_TAKEN" | "NOT_FOUND" | "VEHICLE_UNAVAILABLE" | "INVALID_DATE_RANGE" | "RESET_TOKEN_INVALID" | "SPAM_DETECTED" | "RATE_LIMITED";
+            code: "BAD_REQUEST" | "VALIDATION_FAILED" | "UNAUTHENTICATED" | "INVALID_CREDENTIALS" | "EMAIL_TAKEN" | "NOT_FOUND" | "VEHICLE_UNAVAILABLE" | "INVALID_DATE_RANGE" | "RESET_TOKEN_INVALID" | "SPAM_DETECTED" | "RATE_LIMITED" | "PAYLOAD_TOO_LARGE" | "INTERNAL_ERROR";
             /** @description Geliştirici için İngilizce metin. Ekranda gösterilmez. */
             message: string;
             /**
@@ -1453,6 +1603,21 @@ export interface components {
             /** @enum {string} */
             accountType: "INDIVIDUAL" | "CORPORATE";
             companyName: string | null;
+            /** @description Vergi dairesi. Yalnızca kurumsal hesapta dolu; bireyselde `null`. */
+            taxOffice: string | null;
+            /** @description Şirketin şehri. Yalnızca kurumsal hesapta dolu. */
+            companyCity: string | null;
+            /** @description Şirket telefonu. Yalnızca kurumsal hesapta dolu. */
+            companyPhone: string | null;
+            /** @description Yetkilinin ünvanı. Yalnızca kurumsal hesapta dolu. */
+            contactTitle: string | null;
+            /** @description Hesabın satış temsilcisi. Yalnızca kurumsal hesapta dolu; yoksa `null`. */
+            salesContact: {
+                name: string;
+                /** Format: email */
+                email: string;
+                phone: string;
+            } | null;
             /** @enum {string} */
             locale: "tr" | "en";
             /**
@@ -1461,6 +1626,36 @@ export interface components {
              */
             theme: "light" | "dark" | "system";
             currency: components["schemas"]["Currency"];
+            notifications?: components["schemas"]["Notifications"];
+        };
+        /** @description E-posta tercihleri. Varsayılan hatırlatma açık, kampanya kapalı (pazarlama postası için onay gerekir). */
+        Notifications: {
+            /** @description Seyahat öncesi hatırlatma e-postası. */
+            reminders: boolean;
+            /** @description Kampanya e-postaları. */
+            campaigns: boolean;
+        };
+        PasswordChange: {
+            currentPassword: string;
+            newPassword: string;
+        };
+        SessionInfo: {
+            /** Format: uuid */
+            id: string;
+            /** @description İsteği yapan oturum. */
+            current: boolean;
+            /**
+             * @description Girişte tarayıcının bildirdiğinden çıkarılan kısa ad; bilinmiyorsa null.
+             * @example Chrome · Windows
+             */
+            device?: string | null;
+            /**
+             * Format: date-time
+             * @description Oturumun açıldığı an.
+             */
+            createdAt: string;
+            /** Format: date-time */
+            expiresAt: string;
         };
         /** @description Gönderilen alanlar güncellenir. */
         UserUpdate: {
@@ -1471,6 +1666,11 @@ export interface components {
             /** @enum {string} */
             theme?: "light" | "dark" | "system";
             currency?: components["schemas"]["Currency"];
+            /** @description Gönderilen alanlar güncellenir. */
+            notifications?: {
+                reminders?: boolean;
+                campaigns?: boolean;
+            };
         };
         RegisterRequest: {
             /** Format: email */

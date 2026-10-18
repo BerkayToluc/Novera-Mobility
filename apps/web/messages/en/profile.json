@@ -154,6 +154,7 @@
           "mismatch": "The passwords do not match.",
           "save": "Change password",
           "saving": "Changing…",
+          "incorrect": "The current password is wrong.",
           "saved": "Your password was changed."
         },
         "sessions": {
@@ -162,7 +163,9 @@
           "thisDevice": "This device",
           "now": "Active now",
           "phone": "Phone · Mobile browser",
-          "twoDays": "2 days ago",
+          "since": "Signed in on {date}",
+          "unknown": "Unknown device",
+          "error": "The sessions could not be loaded right now.",
           "revoke": "Close the other sessions"
         }
       }

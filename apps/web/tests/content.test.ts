@@ -82,7 +82,8 @@ describe("FAQ sample data", () => {
 
   it("covers every help topic", () => {
     const used = new Set(items.map((item) => item.topic));
-    for (const topic of FAQ_TOPICS) expect(used, topic).toContain(topic);
+    // "genel" is only for the API's questions, which come without a topic.
+    for (const topic of FAQ_TOPICS.filter((value) => value !== "genel")) expect(used, topic).toContain(topic);
   });
 
   it("keeps each audience to its own questions", () => {

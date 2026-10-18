@@ -24,7 +24,8 @@ export type Vehicle = {
   modelSlug: string;
   brand: string;
   model: string;
-  year: number;
+  // The contract carries no model year (docs/API-GAPS.md); the cards leave it out when it is missing.
+  year?: number;
   seats: number;
   bags: number;
   transmission: Transmission;

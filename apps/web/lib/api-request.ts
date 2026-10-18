@@ -23,7 +23,7 @@ type ErrorBody = { code?: string; fieldErrors?: Record<string, string> };
 // session cookie travel along.
 // Without API_URL the service is simply not there.
 export async function apiRequest<T = null>(
-  method: "GET" | "POST",
+  method: "GET" | "POST" | "PATCH" | "DELETE",
   path: string,
   body?: unknown,
 ): Promise<ApiResult<T>> {

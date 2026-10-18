@@ -10,6 +10,8 @@ import { mockPoints, mockReservations } from "@/mocks/reservations";
 
 afterEach(() => vi.unstubAllEnvs());
 
+const search = { pickupBranchId: "istanbul-kadikoy", returnBranchId: "istanbul-kadikoy", startAt: "2026-12-14T10:00", endAt: "2026-12-17T10:00" };
+
 const branch = (overrides: Partial<BranchDetail> = {}): BranchDetail => ({
   id: "izmir-adnan-menderes",
   name: "Adnan Menderes Havalimanı",
@@ -95,7 +97,7 @@ describe("holds (sample data)", () => {
   it("holds a car for 15 minutes", async () => {
     vi.stubEnv("USE_MOCKS", "1");
     const before = Date.now();
-    const hold = await createHold("clio");
+    const hold = await createHold("clio", search);
     const length = new Date(hold.expiresAt).getTime() - before;
     expect(length).toBeGreaterThanOrEqual(HOLD_MINUTES * 60_000 - 1000);
     expect(length).toBeLessThanOrEqual(HOLD_MINUTES * 60_000 + 1000);
@@ -103,7 +105,7 @@ describe("holds (sample data)", () => {
 
   it("finds a live hold for its own car only", async () => {
     vi.stubEnv("USE_MOCKS", "1");
-    const hold = await createHold("clio");
+    const hold = await createHold("clio", search);
     expect(await getHold(hold.id, "clio")).toMatchObject({ id: hold.id });
     expect(await getHold(hold.id, "egea")).toBeNull();
   });
@@ -116,7 +118,7 @@ describe("holds (sample data)", () => {
 
   it("pretends nothing without sample data", async () => {
     vi.stubEnv("USE_MOCKS", "");
-    await expect(createHold("clio")).rejects.toThrow();
+    await expect(createHold("clio", search)).rejects.toThrow();
   });
 });
 

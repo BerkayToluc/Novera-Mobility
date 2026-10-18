@@ -62,7 +62,7 @@ function DialogContent({ model, titleId, onClose }: { model: FleetModel; titleId
           <h2 id={titleId} className="text-h2 text-fg">
             {model.brand} {model.model}
           </h2>
-          <p className="text-small text-fg-muted">{model.year}</p>
+          {model.year && <p className="text-small text-fg-muted">{model.year}</p>}
         </div>
         <Button variant="ghost" size="icon" onClick={onClose} aria-label={t("close")} autoFocus>
           <X aria-hidden="true" className="size-5" />

@@ -68,6 +68,6 @@ export function applyVehicleFilters(offers: VehicleOffer[], filters: VehicleFilt
   const byPrice = (a: VehicleOffer, b: VehicleOffer) => a.dailyPrice.amount - b.dailyPrice.amount;
   // Ties keep the cheapest-first order, so a sort by year is stable and readable.
   if (filters.sort === "price-desc") return kept.sort((a, b) => byPrice(b, a));
-  if (filters.sort === "newest") return kept.sort((a, b) => b.year - a.year || byPrice(a, b));
+  if (filters.sort === "newest") return kept.sort((a, b) => (b.year ?? 0) - (a.year ?? 0) || byPrice(a, b));
   return kept.sort(byPrice);
 }

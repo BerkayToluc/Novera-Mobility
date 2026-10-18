@@ -23,11 +23,27 @@ API gerçeklendiğinde ön yüzde **bir uyarlayıcı katman** gerekecek (taklit 
 | Tutma kimliği | örnek veride `<bitiş ms>.<araç>` | `uuid`; ön yüz kimliği olduğu gibi taşır, biçimine güvenmez |
 | Bayi / araç / ek hizmet | ara tipler | `Branch`, `VehicleModel`, `Extra` şemaları; alanlar büyük ölçüde örtüşüyor |
 
+## Hâlâ sözleşmede eksik (17 Ekim, katalog ve kiralama akışı bağlanırken görüldü)
+
+| Konu | Ön yüz | Sözleşme / API |
+|---|---|---|
+| Model yılı | Kartlarda "Sınıf · yıl" ve "En yeni" sıralaması | `VehicleModelBase`'de `year` yok; ön yüz yılı gizler, sıralama fiyata düşer |
+| SSS konusu | Yardım merkezi konuya göre gruplar | `FaqItem`'da `topic` yok; hepsi "Genel" altında görünür |
+| Tutmayı sorgulama | Özet ve ödeme sayfaları geri sayım için bitiş zamanını ister | `GET /holds/{id}` yok (`DELETE` de uygulanmamış). Ön yüz tutma kimliğini `<uuid>.<bitişMs>` olarak adreste taşır; API'ye yalnızca uuid gider |
+| Puanla ödeme | `usePoints` gönderir, `pointsUsed` ve `payable` okur | API'de var, `openapi.yaml`'da yok |
+| Kampanya kodu | Örnek kodlar (`kod=`) | API'de yok; gerçek modda indirim hiç uygulanmaz ve sayfa "kod geçersiz" der |
+| Tek araç | Özet sayfası aracı model + araç kimliğinden kurar (`/vehicle-models`) | Tek araç ucu yok |
+
+## Bağlandı (17 Ekim)
+
+- Katalog ve akış: `GET /branches`, `/vehicle-models`, `/vehicles`, `/extras`, `POST /holds`, `POST /reservations/price`, `GET /faq` (`lib/fleet-client.ts`, `hold-client.ts`, `price-client.ts`, `faq-client.ts`). `USE_MOCKS=1` yalnızca testler ve yerel çalışma için duruyor.
+- Hesap: `PATCH /me` (ad, tercihler, bildirimler), `DELETE /me`, `POST /me/password`, `GET /me/sessions`, `DELETE /me/sessions` (`lib/account-actions.ts`).
+- Ehliyet doğrulama ürünün kendi deneme özelliği; artık canlıda da çalışır.
+
 ## Bağlandı (16 Ekim)
 
 - `GET /me/reservations`, `/me/points`, `/me/quotes`, `POST /reservations`, `POST /me/reservations/{id}/cancel` ve şifre sıfırlama uçları ön yüzde gerçek çağrıya bağlı (`lib/api-account.ts`, `lib/reservation-client.ts`, `lib/password-reset-actions.ts`). Bekleyen puan ve teklif talepleri sözleşmeye eklendi, buradan çıkarıldı.
 - Giriş, kayıt, çıkış ve oturum (`POST /auth/login`, `/auth/register`, `/auth/logout`, `GET /me`) ön yüzde gerçek uca bağlı (`lib/auth-actions.ts`, `lib/session.ts`): API'nin `novera_session` çerezi tarayıcıya kopyalanır, `getSession()` onu `GET /me` ile okur.
-- Profil güncelleme, hesap silme, tercihler, bildirimler, şifre değiştirme, oturumlar; araç/bayi/tutma/fiyat uçları ön yüzde hâlâ taklit veriyle (`USE_MOCKS` kapalıyken "kullanılamıyor" der).
 
 ## Doğru çıkanlar
 

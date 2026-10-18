@@ -3,25 +3,25 @@ import { apiRequest } from "./api-request";
 import type { components } from "./api-types";
 import type { BookingData } from "./booking-data";
 import { ApiUnavailableError } from "./fleet-client";
-import { VehicleUnavailableError } from "./hold-client";
-import { localToInstant } from "./rental-search";
+import { holdApiId, VehicleUnavailableError } from "./hold-client";
+import { toUtc } from "./rental-search";
 
 type Schemas = components["schemas"];
 
 // How a booking is shaped for `POST /reservations` (docs/api/openapi.yaml, `ReservationRequest`). The
 // moments are the visitor's Istanbul wall-clock times turned into UTC; the currency is the one the
-// visitor saw the total in. Extras go one each: the site has no quantity picker. A campaign code and
-// points are not part of the contract yet, so they are not sent.
-export function reservationToApi(data: BookingData): Schemas["ReservationRequest"] {
-  const utc = (local: string) => localToInstant(local).toISOString().replace(".000Z", "Z");
+// visitor saw the total in. Extras go one each: the site has no quantity picker. Paying with points
+// goes as `usePoints` (the API spends what it may). A campaign code is not in the contract, so it is not sent.
+export function reservationToApi(data: BookingData): Schemas["ReservationRequest"] & { usePoints?: boolean } {
   return {
     vehicleId: data.vehicle.id,
     pickupBranchId: data.pickup.id,
     returnBranchId: data.dropoff.id,
-    startAt: utc(data.booking.search.startAt),
-    endAt: utc(data.booking.search.endAt),
+    startAt: toUtc(data.booking.search.startAt),
+    endAt: toUtc(data.booking.search.endAt),
     currency: data.summary.total.currency,
-    ...(data.hold ? { holdId: data.hold.id } : {}),
+    ...(data.hold ? { holdId: holdApiId(data.hold.id) } : {}),
+    ...(data.booking.usePoints && data.pointsBalance !== null ? { usePoints: true } : {}),
     ...(data.extras.length > 0 ? { extras: data.extras.map((extra) => ({ slug: extra.slug, quantity: 1 })) } : {}),
   };
 }

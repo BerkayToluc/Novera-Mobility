@@ -1,6 +1,8 @@
 import "server-only";
 import { cookies } from "next/headers";
-import { fetchMyPoints, fetchMyQuoteRequests, fetchMyReservations } from "./api-account";
+import type { AccountSession } from "./account-sessions";
+import { fetchMyPoints, fetchMyQuoteRequests, fetchMyReservations, fetchMySessions } from "./api-account";
+import { SESSIONS_REVOKED_COOKIE } from "./notifications";
 import type { PointsAccount } from "./points";
 import type { QuoteRequest } from "./quote-request";
 import { CANCELLED_COOKIE, type Reservation } from "./reservation";
@@ -31,4 +33,18 @@ export async function getMyPoints(): Promise<PointsAccount> {
 export async function getMyQuoteRequests(): Promise<QuoteRequest[]> {
   if (!mocksEnabled()) return fetchMyQuoteRequests();
   return (await import("@/mocks/quotes")).MOCK_QUOTE_REQUESTS;
+}
+
+// Where the account is signed in. The sample account has this browser and one phone, until the others are closed.
+export async function getMySessions(): Promise<AccountSession[]> {
+  if (!mocksEnabled()) return fetchMySessions();
+  const now = Date.now();
+  const revoked = (await cookies()).get(SESSIONS_REVOKED_COOKIE)?.value === "1";
+  const iso = (ms: number) => new Date(ms).toISOString();
+  return [
+    { id: "this", current: true, device: "Chrome · Windows", createdAt: iso(now), expiresAt: iso(now + 30 * 86_400_000) },
+    ...(revoked
+      ? []
+      : [{ id: "phone", current: false, device: "Safari · iPhone", createdAt: iso(now - 2 * 86_400_000), expiresAt: iso(now + 28 * 86_400_000) }]),
+  ];
 }

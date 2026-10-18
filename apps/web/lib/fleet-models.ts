@@ -10,7 +10,7 @@ export type FleetModel = {
   slug: string;
   brand: string;
   model: string;
-  year: number;
+  year?: number;
   seats: number;
   bags: number;
   transmission: Transmission;
