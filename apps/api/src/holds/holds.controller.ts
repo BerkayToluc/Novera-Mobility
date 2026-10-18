@@ -1,5 +1,5 @@
-import { Body, Controller, Post, Req } from '@nestjs/common';
-import { ApiBody, ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Delete, HttpCode, Param, Post, Req } from '@nestjs/common';
+import { ApiBody, ApiCreatedResponse, ApiNoContentResponse, ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
 import { clientKeyOf } from '../forms/rate-limiter.js';
 import {
@@ -49,5 +49,12 @@ export class HoldsController {
     @Req() request: Request,
   ): Promise<HoldResponse> {
     return this.holdsService.create(body ?? {}, clientKeyOf(request));
+  }
+
+  @Delete('holds/:id')
+  @HttpCode(204)
+  @ApiNoContentResponse({ description: 'Tutma bırakıldı (olmayan ya da süresi dolmuş tutmada da 204)' })
+  release(@Param('id') id: string, @Req() request: Request): Promise<void> {
+    return this.holdsService.release(id, clientKeyOf(request));
   }
 }

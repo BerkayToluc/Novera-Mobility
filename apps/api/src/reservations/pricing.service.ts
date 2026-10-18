@@ -29,6 +29,9 @@ interface Localized {
 }
 export interface PriceLine {
   type: 'VEHICLE' | 'EXTRA';
+  // The model's slug on the vehicle line, the extra's slug on an extra line, so a client can match a
+  // line to what it chose without comparing the printed label.
+  slug: string;
   label: Localized;
   quantity: number;
   unitPrice: Money;
@@ -187,6 +190,7 @@ export class PricingService {
     const lines: PriceLine[] = [
       {
         type: 'VEHICLE',
+        slug: model.slug,
         label: { tr: `${model.brand} ${model.model}`, en: `${model.brand} ${model.model}` },
         quantity: days,
         unitPrice: money(vehicleUnit),
@@ -201,6 +205,7 @@ export class PricingService {
       const quantity = extra.pricing === 'PER_DAY' ? selection.quantity * days : selection.quantity;
       lines.push({
         type: 'EXTRA',
+        slug: extra.slug,
         label: { tr: extra.nameTr, en: extra.nameEn },
         quantity,
         unitPrice: money(unit),

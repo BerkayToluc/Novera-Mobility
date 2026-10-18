@@ -19,6 +19,7 @@ export type ReservationRow = {
   createdAt: Date;
   vehicle: {
     id: string;
+    year: number;
     vehicleModel: {
       slug: string;
       brand: string;
@@ -40,7 +41,7 @@ export type ReservationRow = {
     quantity: number;
     unitPrice: number;
     totalPrice: number;
-    extra: { nameTr: string; nameEn: string; pricing: 'PER_DAY' | 'FIXED' };
+    extra: { slug: string; nameTr: string; nameEn: string; pricing: 'PER_DAY' | 'FIXED' };
   }>;
   pointTransaction: { points: number } | null;
 };
@@ -59,6 +60,7 @@ export function toPriceBreakdown(row: ReservationRow): PriceBreakdown {
   const lines: PriceLine[] = [
     {
       type: 'VEHICLE',
+      slug: model.slug,
       label: { tr: `${model.brand} ${model.model}`, en: `${model.brand} ${model.model}` },
       quantity: row.days,
       unitPrice: money(row.vehicleDailyPrice),
@@ -67,6 +69,7 @@ export function toPriceBreakdown(row: ReservationRow): PriceBreakdown {
     ...row.extras.map(
       (item): PriceLine => ({
         type: 'EXTRA',
+        slug: item.extra.slug,
         label: { tr: item.extra.nameTr, en: item.extra.nameEn },
         quantity: item.extra.pricing === 'PER_DAY' ? item.quantity * row.days : item.quantity,
         unitPrice: money(item.unitPrice),
@@ -93,6 +96,7 @@ export function toReservationView(row: ReservationRow) {
     status: row.status,
     vehicle: {
       id: row.vehicle.id,
+      year: row.vehicle.year,
       model: {
         slug: model.slug,
         brand: model.brand,

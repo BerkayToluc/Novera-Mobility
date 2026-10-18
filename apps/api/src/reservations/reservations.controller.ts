@@ -73,6 +73,14 @@ export class ReservationsController {
     return this.reservations.listMine(user.id);
   }
 
+  @Get('me/reservations/:id')
+  @UseGuards(SessionGuard)
+  @ApiCookieAuth()
+  @ApiOkResponse({ description: 'Tek rezervasyon (yalnızca kendi rezervasyonu)' })
+  one(@CurrentUser() user: UserRow, @Param('id') id: string) {
+    return this.reservations.getMine(user.id, id);
+  }
+
   @Post('me/reservations/:id/cancel')
   @HttpCode(200)
   @UseGuards(SessionGuard)

@@ -310,6 +310,7 @@ export class CatalogService {
 
       offerByModelSlug.set(m.slug, {
         vehicleId: v.id,
+        year: v.year,
         model: {
           slug: m.slug,
           brand: m.brand,

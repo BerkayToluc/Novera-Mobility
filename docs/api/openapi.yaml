@@ -176,7 +176,10 @@ paths:
     delete:
       tags: [reservations]
       summary: Tutmayı bırak
-      description: Kullanıcı aramayı değiştirir ya da vazgeçerse aracı hemen serbest bırakır. Olmayan veya süresi dolmuş tutmada da `204` döner.
+      description: |
+        Kullanıcı aramayı değiştirir ya da vazgeçerse aracı hemen serbest bırakır. Tutmayı yalnızca onu
+        açan istemci bırakabilir (`POST /holds` ile aynı istemci anahtarı). Olmayan, süresi dolmuş ya da
+        başkasına ait tutmada da `204` döner; çağrı güvenle tekrarlanabilir ve kimin neyi tuttuğunu göstermez.
       parameters:
         - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
       responses:
@@ -186,7 +189,10 @@ paths:
     post:
       tags: [reservations]
       summary: Fiyat dökümü (rezervasyon özeti)
-      description: Rezervasyon oluşturmadan kalem kalem fiyatı hesaplar. Giriş gerekmez. Toplamı sunucu hesaplar.
+      description: |
+        Rezervasyon oluşturmadan kalem kalem fiyatı hesaplar. Giriş gerekmez; toplamı sunucu hesaplar.
+        `usePoints: true` ile istenirse giriş gerekir (`401`) ve cevap, hesabın bakiyesiyle harcanabilecek
+        puanı (`pointsUsed`) ve parayla ödenecek tutarı (`payable`) içerir.
       requestBody:
         required: true
         content:
@@ -198,6 +204,7 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/PriceBreakdown" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
         "409": { $ref: "#/components/responses/Conflict" }
         "422": { $ref: "#/components/responses/ValidationFailed" }
 
@@ -209,6 +216,8 @@ paths:
         Giriş gerekir. Rezervasyon `CONFIRMED` oluşur, para alınmaz. `holdId` verilirse ve tutma geçerliyse
         araç o tutmaya göre alınır, tutma silinir. Süresi dolmuşsa müsaitlik işlem içinde tekrar kontrol edilir;
         araç hâlâ boşsa devam edilir, değilse `409 VEHICLE_UNAVAILABLE`. Puan aynı işlemde yazılır.
+        `usePoints: true` ise puan düşümü de aynı işlemde yapılır; cevaptaki `price.pointsUsed` ve
+        `price.payable` kesin değerlerdir. Kazanılan puan, parayla ödenen tutar (`payable`) üzerinden hesaplanır.
       security:
         - cookieAuth: []
       requestBody:
@@ -242,6 +251,29 @@ paths:
                 type: array
                 items: { $ref: "#/components/schemas/Reservation" }
         "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /me/reservations/{id}:
+    get:
+      tags: [me]
+      summary: Tek rezervasyon
+      description: |
+        Giriş yapmış kullanıcının tek rezervasyonu (onay sayfası, `GET /me/reservations` listesinden ya da
+        `POST /reservations` cevabındaki `id` ile). Başkasının ya da olmayan rezervasyon `404 NOT_FOUND`.
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: Rezervasyon
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Reservation" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
 
   /me/reservations/{id}/cancel:
     post:
@@ -516,10 +548,14 @@ paths:
     get:
       tags: [content]
       summary: Sık sorulan sorular
+      description: |
+        `audience` verilirse yalnızca o kitlenin soruları döner (ana sayfa, kitle sekmesine göre).
+        Verilmezse tüm sorular döner (Yardım merkezi); her kayıt kendi `audience` ve `topic` değerini taşır.
+        Sıra: önce bireysel, sonra kurumsal; her kitle kendi içinde `sortOrder` sırasıyla.
       parameters:
         - name: audience
           in: query
-          required: true
+          required: false
           schema: { $ref: "#/components/schemas/FaqAudience" }
       responses:
         "200":
@@ -843,9 +879,10 @@ components:
 
     VehicleOffer:
       type: object
-      required: [vehicleId, model, branch, days, dailyPrice, totalPrice]
+      required: [vehicleId, year, model, branch, days, dailyPrice, totalPrice]
       properties:
         vehicleId: { type: string, format: uuid }
+        year: { type: integer, example: 2025, description: Aracın model yılı (`vehicleId` olan fiziksel araç). }
         model: { $ref: "#/components/schemas/VehicleModelBase" }
         branch: { $ref: "#/components/schemas/BranchRef" }
         days: { type: integer, example: 3 }
@@ -892,6 +929,14 @@ components:
           type: string
           format: uuid
           description: "`POST /holds` cevabındaki tutma. Yalnızca `POST /reservations` kullanır; isteğe bağlı."
+        usePoints:
+          type: boolean
+          default: false
+          description: |
+            Puanla öde. Giriş gerekir; yalnızca bireysel hesapta ve `currency: TRY` iken kullanılabilir
+            (aksi halde `422`, `fieldErrors.usePoints: NOT_ALLOWED`). 1 puan ₺5'dir; harcanan puan, bakiye ve
+            toplamın yarısıyla sınırlıdır, kiralama bedava olmaz. Kaç puanın harcandığını sunucu hesaplar
+            (`pointsUsed`); istemci puan sayısı göndermez.
         extras:
           type: array
           items:
@@ -924,9 +969,13 @@ components:
 
     PriceLine:
       type: object
-      required: [type, label, quantity, unitPrice, total]
+      required: [type, slug, label, quantity, unitPrice, total]
       properties:
         type: { type: string, enum: [VEHICLE, EXTRA] }
+        slug:
+          type: string
+          description: Araç satırında modelin, ek hizmet satırında ek hizmetin `slug` değeri. Satırı adıyla değil bununla eşleştirin.
+          example: cocuk-koltugu
         label: { $ref: "#/components/schemas/LocalizedText" }
         quantity:
           type: integer
@@ -939,7 +988,7 @@ components:
       description: |
         Birim fiyatlar önce hedef para biriminin alt birimine çevrilir, sonra adet/günle çarpılır;
         bu yüzden satır toplamlarının toplamı `total`'a tam eşittir (ekranda yuvarlama yok).
-      required: [currency, exchangeRate, days, lines, total]
+      required: [currency, exchangeRate, days, lines, total, pointsUsed, payable]
       properties:
         currency: { $ref: "#/components/schemas/Currency" }
         exchangeRate:
@@ -949,7 +998,17 @@ components:
         lines:
           type: array
           items: { $ref: "#/components/schemas/PriceLine" }
-        total: { $ref: "#/components/schemas/Money" }
+        total:
+          allOf:
+            - $ref: "#/components/schemas/Money"
+          description: Kalemlerin toplamı (puan düşülmeden).
+        pointsUsed:
+          type: integer
+          description: Bu rezervasyonda puanla ödenen puan sayısı (kullanılmadıysa 0). İptalde iade edilir.
+        payable:
+          allOf:
+            - $ref: "#/components/schemas/Money"
+          description: Puan düşüldükten sonra parayla ödenecek tutar (`total` − `pointsUsed` × ₺5). Puan kullanılmadıysa `total`'a eşittir.
 
     Reservation:
       type: object
@@ -960,9 +1019,10 @@ components:
         status: { type: string, enum: [CONFIRMED, CANCELLED] }
         vehicle:
           type: object
-          required: [id, model]
+          required: [id, year, model]
           properties:
             id: { type: string, format: uuid }
+            year: { type: integer, example: 2025 }
             model: { $ref: "#/components/schemas/VehicleModelBase" }
         pickupBranch: { $ref: "#/components/schemas/BranchRef" }
         returnBranch: { $ref: "#/components/schemas/BranchRef" }
@@ -984,7 +1044,7 @@ components:
             type: object
             required: [points, createdAt]
             properties:
-              points: { type: integer }
+              points: { type: integer, description: Kazanılan puan artı, rezervasyonda harcanan puan eksi işaretlidir. }
               reservationNumber: { type: string, nullable: true }
               createdAt: { type: string, format: date-time, description: Puanın hesaba geçtiği an (kiralamanın bitişi). }
         rules: { $ref: "#/components/schemas/LocalizedText" }
@@ -1083,11 +1143,18 @@ components:
       type: string
       enum: [INDIVIDUAL, CORPORATE]
 
+    FaqTopic:
+      type: string
+      description: Sorunun konusu (Yardım merkezi bu değere göre gruplar).
+      enum: [rezervasyon, odeme, teslim, hasar, hesap, kurumsal]
+
     FaqItem:
       type: object
-      required: [id, question, answer]
+      required: [id, audience, topic, question, answer]
       properties:
         id: { type: string, format: uuid }
+        audience: { $ref: "#/components/schemas/FaqAudience" }
+        topic: { $ref: "#/components/schemas/FaqTopic" }
         question: { $ref: "#/components/schemas/LocalizedText" }
         answer: { $ref: "#/components/schemas/LocalizedText" }
 

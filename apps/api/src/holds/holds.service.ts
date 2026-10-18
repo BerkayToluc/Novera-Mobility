@@ -5,7 +5,7 @@ import { PrismaService } from '../prisma/prisma.service.js';
 export const HOLD_MINUTES = 15;
 // Aynı istemcinin aynı anda tutabileceği araç sayısı (biri tüm araçları kilitlemesin).
 export const MAX_ACTIVE_HOLDS_PER_CLIENT = 5;
-// Süresi dolmuş tutmalar bu kadar süre sonra silinir (DELETE ucu sözleşmede yok).
+// Süresi dolmuş tutmalar bu kadar süre sonra silinir (kullanıcı vazgeçmezse DELETE çağrılmaz).
 const STALE_HOLD_AGE_MS = 60 * 60 * 1000;
 
 const UUID_REGEX =
@@ -174,6 +174,14 @@ export class HoldsService {
       },
       { maxWait: 5000, timeout: 10000 },
     );
+  }
+
+  // DELETE /holds/{id}: the visitor changed the search or gave up, so the car is free again at once.
+  // Only the client that made the hold can release it (the same key the limit uses). A missing, expired
+  // or someone else's hold is a quiet no-op, so the call can be repeated and never tells who holds what.
+  async release(id: string, clientKey: string): Promise<void> {
+    if (!UUID_REGEX.test(id)) return;
+    await this.prisma.hold.deleteMany({ where: { id, clientKey } });
   }
 
   private toResponse(hold: {

@@ -23,13 +23,13 @@ class FakeDb {
       id: IDS.vehicle,
       active: true,
       branchId: IDS.pickup,
-      vehicleModel: { brand: 'Toyota', model: 'Corolla', dailyPrice: 125000 },
+      vehicleModel: { slug: 'toyota-corolla', brand: 'Toyota', model: 'Corolla', dailyPrice: 125000 },
     },
     {
       id: IDS.vehicle2,
       active: false,
       branchId: IDS.pickup,
-      vehicleModel: { brand: 'Fiat', model: 'Egea', dailyPrice: 90000 },
+      vehicleModel: { slug: 'fiat-egea', brand: 'Fiat', model: 'Egea', dailyPrice: 90000 },
     },
   ];
   extras: Row[] = [
@@ -196,6 +196,7 @@ describe('PricingService.price', () => {
     expect(result.lines).toEqual([
       {
         type: 'VEHICLE',
+        slug: 'toyota-corolla',
         label: { tr: 'Toyota Corolla', en: 'Toyota Corolla' },
         quantity: 3,
         unitPrice: { amount: 125000, currency: 'TRY' },
@@ -203,6 +204,7 @@ describe('PricingService.price', () => {
       },
       {
         type: 'EXTRA',
+        slug: 'cocuk-koltugu',
         label: { tr: 'Çocuk koltuğu', en: 'Child seat' },
         quantity: 6,
         unitPrice: { amount: 12345, currency: 'TRY' },
@@ -210,6 +212,7 @@ describe('PricingService.price', () => {
       },
       {
         type: 'EXTRA',
+        slug: 'ek-surucu',
         label: { tr: 'Ek sürücü', en: 'Additional driver' },
         quantity: 1,
         unitPrice: { amount: 50000, currency: 'TRY' },

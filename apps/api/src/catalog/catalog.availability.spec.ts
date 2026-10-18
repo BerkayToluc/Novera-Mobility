@@ -24,6 +24,7 @@ const END = new Date(START.getTime() + 3 * DAY); // 3 gün
 type Money = { amount: number; currency: string };
 type Offer = {
   vehicleId: string;
+  year: number;
   days: number;
   dailyPrice: Money;
   totalPrice: Money;
@@ -196,6 +197,12 @@ describeDb('GET /vehicles müsaitlik sorgusu (gerçek PostgreSQL)', () => {
       expect(offers[0].days).toBe(3);
       expect(offers[0].dailyPrice).toEqual({ amount: DAILY, currency: 'TRY' });
       expect(offers[0].totalPrice).toEqual({ amount: DAILY * 3, currency: 'TRY' });
+    });
+
+    it('teklif aracın model yılını taşır', async () => {
+      const { branchId } = await scenario();
+      const offers = await search(branchId);
+      expect(offers[0].year).toBe(2026);
     });
 
     const overlaps: Array<[string, Date, Date]> = [
