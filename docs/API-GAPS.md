@@ -9,7 +9,7 @@ API gerçeklendiğinde ön yüzde **bir uyarlayıcı katman** gerekecek (taklit 
 | Konu | Ön yüz ne bekliyor | Sözleşmede |
 |---|---|---|
 | SSS konusu | `topic`: `rezervasyon`, `odeme`, `teslim`, `hasar`, `hesap`, `kurumsal` (Yardım merkezi bu gruplara göre) | `FaqItem`'da yok |
-| Kurumsal hesap bilgisi | firma adı, vergi dairesi, şehir, telefon, yetkili ünvanı, satış iletişimi (`/profil` kurumsal sayfa) | `User.companyName` var; diğerleri yok |
+| Kurumsal hesap bilgisi | firma adı, vergi dairesi, şehir, telefon, yetkili ünvanı, satış iletişimi (`/profil` kurumsal sayfa) | `User.companyName` var; diğerleri yok. Gerçek oturumda sayfa yalnızca bilinen satırları gösterir, satış e-postası olarak `satis@` adresini kullanır |
 
 ## Biçim farkları (ön yüz uyarlayıcıda çevirecek)
 
@@ -26,7 +26,8 @@ API gerçeklendiğinde ön yüzde **bir uyarlayıcı katman** gerekecek (taklit 
 ## Bağlandı (16 Ekim)
 
 - `GET /me/reservations`, `/me/points`, `/me/quotes`, `POST /reservations`, `POST /me/reservations/{id}/cancel` ve şifre sıfırlama uçları ön yüzde gerçek çağrıya bağlı (`lib/api-account.ts`, `lib/reservation-client.ts`, `lib/password-reset-actions.ts`). Bekleyen puan ve teklif talepleri sözleşmeye eklendi, buradan çıkarıldı.
-- Giriş, kayıt, `/me` (profil, hesap silme), araç/bayi/tutma/fiyat uçları ön yüzde hâlâ taklit veriyle; bu yüzden yukarıdaki çağrılar giriş bağlanana kadar yalnızca `USE_MOCKS` kapalıyken gerçek uca gider.
+- Giriş, kayıt, çıkış ve oturum (`POST /auth/login`, `/auth/register`, `/auth/logout`, `GET /me`) ön yüzde gerçek uca bağlı (`lib/auth-actions.ts`, `lib/session.ts`): API'nin `novera_session` çerezi tarayıcıya kopyalanır, `getSession()` onu `GET /me` ile okur.
+- Profil güncelleme, hesap silme, tercihler, bildirimler, şifre değiştirme, oturumlar; araç/bayi/tutma/fiyat uçları ön yüzde hâlâ taklit veriyle (`USE_MOCKS` kapalıyken "kullanılamıyor" der).
 
 ## Doğru çıkanlar
 

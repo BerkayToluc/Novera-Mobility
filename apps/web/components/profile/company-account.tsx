@@ -3,6 +3,7 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { Button } from "@/components/ui/button";
 import { ContactLink } from "@/components/ui/contact-link";
 import { Link } from "@/i18n/navigation";
+import { DEPARTMENTS } from "@/lib/company";
 import type { Session } from "@/lib/session";
 
 // The corporate account page (SPEC §2.9): who the company is and who speaks for it. Read-only
@@ -13,6 +14,7 @@ export async function CompanyAccount({ session }: { session: Session }) {
   const { company, user } = session;
   if (!company) return null;
 
+  const contactTitle = company.contactTitle?.[locale];
   const rows = [
     { label: t("name"), value: company.name },
     { label: t("taxOffice"), value: company.taxOffice },
@@ -20,10 +22,10 @@ export async function CompanyAccount({ session }: { session: Session }) {
     { label: t("phone"), value: company.phone },
     {
       label: t("contactPerson"),
-      value: `${user.firstName} ${user.lastName}, ${company.contactTitle[locale]}`,
+      value: contactTitle ? `${user.firstName} ${user.lastName}, ${contactTitle}` : `${user.firstName} ${user.lastName}`,
     },
     { label: t("email"), value: user.email },
-  ];
+  ].filter((row): row is { label: string; value: string } => Boolean(row.value));
 
   return (
     <section aria-labelledby="company-title" className="flex flex-col gap-6">
@@ -50,7 +52,7 @@ export async function CompanyAccount({ session }: { session: Session }) {
           </span>
           <h3 className="text-h3 text-fg">{t("salesTitle")}</h3>
           <p className="text-body text-fg-muted">{t("salesText")}</p>
-          <ContactLink value={company.salesContact} icon={false} className="text-link underline underline-offset-4" />
+          <ContactLink value={company.salesContact ?? DEPARTMENTS[1].email} icon={false} className="text-link underline underline-offset-4" />
           <Button asChild variant="outline">
             <Link href={{ pathname: "/iletisim", hash: "mesaj" }}>{t("changeButton")}</Link>
           </Button>
