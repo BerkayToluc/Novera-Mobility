@@ -181,6 +181,17 @@ export class ReservationsService {
     return rows.map((row) => toReservationView(row as unknown as ReservationRow));
   }
 
+  // GET /me/reservations/{id}: one reservation of the signed-in user (the confirmation page reads it by
+  // the id from the list or the create answer). Someone else's or an unknown id is 404, like cancel.
+  async getMine(userId: string, id: string) {
+    const row = await this.prisma.reservation.findFirst({
+      where: { id, userId },
+      include: RESERVATION_INCLUDE,
+    });
+    if (!row) throw reservationNotFound();
+    return toReservationView(row as unknown as ReservationRow);
+  }
+
   // POST /me/reservations/{id}/cancel: yalnızca kiralama BAŞLAMADAN iptal edilir (ücretsiz/ücretli ayrımı
   // ödeme gelince; şimdilik para akışı yok). İptal tek bir koşullu güncellemedir, yarış olursa biri kazanır.
   // Zaten iptal edilmişse aynı sonuç döner (tekrar çağrı zararsız). Başkasının ya da olmayan rezervasyon: 404.

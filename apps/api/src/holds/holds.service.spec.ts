@@ -207,6 +207,63 @@ describeDb('POST /holds araç tutma (gerçek PostgreSQL)', () => {
     });
   });
 
+  describe('tutmayı bırakma (DELETE /holds/{id})', () => {
+    const queryOf = (s: { branchId: string }) => ({
+      pickupBranchId: s.branchId,
+      returnBranchId: s.branchId,
+      startAt: START.toISOString(),
+      endAt: END.toISOString(),
+    });
+
+    it('tutmayı açan istemci bırakır: araç hemen yeniden müsait olur', async () => {
+      const s = await scenario();
+      const client = `client-${randomUUID()}`;
+      const hold = await holds.create(holdInput(s), client);
+      expect(await catalog.getAvailableVehicles(queryOf(s))).toHaveLength(0);
+
+      await holds.release(hold.id, client);
+
+      expect(await prisma.hold.count({ where: { id: hold.id } })).toBe(0);
+      expect(await catalog.getAvailableVehicles(queryOf(s))).toHaveLength(1);
+    });
+
+    it('bırakılan aracı başka bir istemci hemen tutabilir', async () => {
+      const s = await scenario();
+      const client = `client-${randomUUID()}`;
+      const hold = await holds.create(holdInput(s), client);
+      await holds.release(hold.id, client);
+      const next = await holds.create(holdInput(s), `client-${randomUUID()}`);
+      expect(next.vehicleId).toBe(s.vehicleId);
+    });
+
+    it('başkasının tutmasını bırakamaz: sessizce hiçbir şey olmaz, tutma yerinde kalır', async () => {
+      const s = await scenario();
+      const hold = await holds.create(holdInput(s), `client-${randomUUID()}`);
+      await expect(holds.release(hold.id, `client-${randomUUID()}`)).resolves.toBeUndefined();
+      expect(await prisma.hold.count({ where: { id: hold.id } })).toBe(1);
+    });
+
+    it('olmayan, geçersiz biçimli ya da zaten bırakılmış tutmada da hata vermez', async () => {
+      const s = await scenario();
+      const client = `client-${randomUUID()}`;
+      const hold = await holds.create(holdInput(s), client);
+      await holds.release(hold.id, client);
+      await expect(holds.release(hold.id, client)).resolves.toBeUndefined();
+      await expect(holds.release(randomUUID(), client)).resolves.toBeUndefined();
+      await expect(holds.release('bu-bir-uuid-degil', client)).resolves.toBeUndefined();
+    });
+
+    it('bırakmak istemcinin diğer tutmalarına dokunmaz', async () => {
+      const a = await scenario();
+      const b = await scenario();
+      const client = `client-${randomUUID()}`;
+      const first = await holds.create(holdInput(a), client);
+      const second = await holds.create(holdInput(b), client);
+      await holds.release(first.id, client);
+      expect(await prisma.hold.count({ where: { id: second.id } })).toBe(1);
+    });
+  });
+
   describe('çakışma (409 VEHICLE_UNAVAILABLE)', () => {
     it('başka istemci aynı aracı aynı aralıkta tutamaz', async () => {
       const s = await scenario();

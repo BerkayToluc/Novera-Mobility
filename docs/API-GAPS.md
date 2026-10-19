@@ -6,10 +6,7 @@ API gerçeklendiğinde ön yüzde **bir uyarlayıcı katman** gerekecek (taklit 
 
 ## Sözleşmede eksik, ön yüz bunu gösteriyor (BE'ye iletilecek)
 
-| Konu | Ön yüz ne bekliyor | Sözleşmede |
-|---|---|---|
-| SSS konusu | `topic`: `rezervasyon`, `odeme`, `teslim`, `hasar`, `hesap`, `kurumsal` (Yardım merkezi bu gruplara göre) | `FaqItem`'da yok |
-| Kurumsal hesap bilgisi | firma adı, vergi dairesi, şehir, telefon, yetkili ünvanı, satış iletişimi (`/profil` kurumsal sayfa) | `User.companyName` var; diğerleri yok. Gerçek oturumda sayfa yalnızca bilinen satırları gösterir, satış e-postası olarak `satis@` adresini kullanır |
+12 Ekim'de bu tabloda iki satır vardı (SSS `topic`, kurumsal hesap bilgisi); ikisi de sözleşmeye girdi, bkz. aşağıdaki "Bağlandı (18 Ekim)".
 
 ## Biçim farkları (ön yüz uyarlayıcıda çevirecek)
 
@@ -23,16 +20,25 @@ API gerçeklendiğinde ön yüzde **bir uyarlayıcı katman** gerekecek (taklit 
 | Tutma kimliği | örnek veride `<bitiş ms>.<araç>` | `uuid`; ön yüz kimliği olduğu gibi taşır, biçimine güvenmez |
 | Bayi / araç / ek hizmet | ara tipler | `Branch`, `VehicleModel`, `Extra` şemaları; alanlar büyük ölçüde örtüşüyor |
 
-## Hâlâ sözleşmede eksik (17 Ekim, katalog ve kiralama akışı bağlanırken görüldü)
+## Hâlâ sözleşmede eksik (18 Ekim itibarıyla)
 
 | Konu | Ön yüz | Sözleşme / API |
 |---|---|---|
-| Model yılı | Kartlarda "Sınıf · yıl" ve "En yeni" sıralaması | `VehicleModelBase`'de `year` yok; ön yüz yılı gizler, sıralama fiyata düşer |
-| SSS konusu | Yardım merkezi konuya göre gruplar | `FaqItem`'da `topic` yok; hepsi "Genel" altında görünür |
-| Tutmayı sorgulama | Özet ve ödeme sayfaları geri sayım için bitiş zamanını ister | `GET /holds/{id}` yok (`DELETE` de uygulanmamış). Ön yüz tutma kimliğini `<uuid>.<bitişMs>` olarak adreste taşır; API'ye yalnızca uuid gider |
-| Puanla ödeme | `usePoints` gönderir, `pointsUsed` ve `payable` okur | API'de var, `openapi.yaml`'da yok |
-| Kampanya kodu | Örnek kodlar (`kod=`) | API'de yok; gerçek modda indirim hiç uygulanmaz ve sayfa "kod geçersiz" der |
+| Kampanya kodu | Örnek kodlar (`kod=`) | API'de yok; gerçek modda indirim hiç uygulanmaz ve sayfa "kod geçersiz" der. Sıradaki iş (`promoCode`) |
+| Tutmayı sorgulama | Özet ve ödeme sayfaları geri sayım için bitiş zamanını ister | `GET /holds/{id}` yok ve eklenmesi planlı değil: ön yüz tutma kimliğini `<uuid>.<bitişMs>` olarak adreste taşır, API'ye yalnızca uuid gider |
 | Tek araç | Özet sayfası aracı model + araç kimliğinden kurar (`/vehicle-models`) | Tek araç ucu yok |
+| Model yılı, model listesinde | Araçlarımız sayfası | `year` aracın (`VehicleOffer`, `Reservation.vehicle`) alanıdır; `GET /vehicle-models` model başına döner ve yıl taşımaz |
+
+## Bağlandı (18 Ekim)
+
+Sözleşme API'ye hizalandı (`docs/api/openapi.yaml`); ön yüz `pnpm --filter @novera/web gen:api` ile tipleri yeniden üretir.
+
+- `year`: `VehicleOffer.year` ve `Reservation.vehicle.year` (fiziksel aracın model yılı).
+- SSS: `FaqItem.audience` ve `FaqItem.topic` döner; `GET /faq` için `audience` artık isteğe bağlı (verilmezse tüm sorular, Yardım merkezi için).
+- Puanla ödeme: `ReservationRequest.usePoints`, `PriceBreakdown.pointsUsed` ve `payable` (`POST /reservations/price` ve `POST /reservations`, ayrıca `price` olarak rezervasyonda).
+- `PriceLine.slug`: araç satırında modelin, ek hizmet satırında ek hizmetin slug'ı.
+- `GET /me/reservations/{id}`: tek rezervasyon (başkasının ya da olmayan için 404).
+- `DELETE /holds/{id}`: tutmayı bırakır; yalnızca tutmayı açan istemci bırakabilir, olmayan ya da başkasının tutması sessizce `204`.
 
 ## Bağlandı (17 Ekim)
 

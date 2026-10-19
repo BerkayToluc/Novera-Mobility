@@ -102,7 +102,23 @@ describeDb('POST /reservations (gerçek PostgreSQL)', () => {
     expect(list[0]!.number).toMatch(/^NVR-\d{4}-\d{5}$/);
     expect(list[0]!.price.total).toEqual({ amount: 375000, currency: 'TRY' });
     expect(list[0]!.pointsEarned).toBe(37);
+    expect(list[0]!.vehicle.year).toBe(2030);
+    expect(list[0]!.price.lines[0]).toMatchObject({ type: 'VEHICLE', slug: `t-model-${run}` });
+    expect(list[0]!.price).toMatchObject({ pointsUsed: 0, payable: { amount: 375000, currency: 'TRY' } });
     const points = await service.points(user.id, new Date('2031-06-14T00:00:00Z'));
     expect(points.balance).toBe(37);
+  });
+
+  it('tek rezervasyon numarasıyla değil kimliğiyle okunur; başkası göremez', async () => {
+    const [mine] = await service.listMine(user.id);
+    const one = await service.getMine(user.id, mine!.id);
+    expect(one).toEqual(mine);
+
+    await expect(service.getMine('00000000-0000-4000-8000-000000000000', mine!.id)).rejects.toMatchObject({
+      status: 404,
+    });
+    await expect(service.getMine(user.id, '00000000-0000-4000-8000-000000000000')).rejects.toMatchObject({
+      status: 404,
+    });
   });
 });
