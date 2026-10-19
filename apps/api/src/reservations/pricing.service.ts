@@ -28,9 +28,10 @@ interface Localized {
   en: string;
 }
 export interface PriceLine {
-  type: 'VEHICLE' | 'EXTRA';
-  // The model's slug on the vehicle line, the extra's slug on an extra line, so a client can match a
-  // line to what it chose without comparing the printed label.
+  // DISCOUNT is a campaign code taken off: one line, last, with a negative amount, so the lines still add up to `total`.
+  type: 'VEHICLE' | 'EXTRA' | 'DISCOUNT';
+  // The model's slug on the vehicle line, the extra's slug on an extra line, the code on a discount line, so a
+  // client can match a line to what it chose without comparing the printed label.
   slug: string;
   label: Localized;
   quantity: number;
@@ -42,14 +43,17 @@ export interface PriceBreakdown {
   exchangeRate: number;
   days: number;
   lines: PriceLine[];
+  // The lines added up: car and extras minus the campaign code, before points.
   total: Money;
+  // The code that was sent and whether it took anything off; null when no code was sent.
+  promo: { code: string; applied: boolean; percent: number | null } | null;
   // Points paid with (0 when not used) and what is left to pay in money after them.
   pointsUsed: number;
   payable: Money;
 }
 
 // Veritabanı erişiminin fiyat için gereken kısmı (hem PrismaService hem işlem içi `tx` uyar).
-export type PricingDb = Pick<PrismaService, 'vehicle' | 'extra' | 'exchangeRate'>;
+export type PricingDb = Pick<PrismaService, 'vehicle' | 'extra' | 'exchangeRate' | 'promoCode'>;
 export type ConflictDb = Pick<PrismaService, 'reservation' | 'hold'>;
 
 // Gün sayısı: ceil((bitiş - başlangıç) / 24 saat), en az 1.
@@ -75,6 +79,17 @@ export function withPoints(breakdown: PriceBreakdown, balance: number): PriceBre
     pointsUsed,
     payable: { amount: breakdown.total.amount - pointsWorthMinor(pointsUsed), currency: breakdown.currency },
   };
+}
+
+// A code works when it is on and now is inside its dates (a missing date is no limit).
+export function isPromoUsable(
+  code: { active: boolean; validFrom: Date | null; validUntil: Date | null },
+  now: Date,
+): boolean {
+  if (!code.active) return false;
+  if (code.validFrom && now.getTime() < code.validFrom.getTime()) return false;
+  if (code.validUntil && now.getTime() >= code.validUntil.getTime()) return false;
+  return true;
 }
 
 export function convertMinor(tryMinor: number, rate: number, currency: CurrencyCode): number {
@@ -158,7 +173,7 @@ export class PricingService {
 
   // Fiyatı hesaplar. Müsaitliğe bakmaz (çağıran bakar): rezervasyon, aracı kilitledikten sonra
   // bunu aynı işlem içinde çağırır.
-  async calculate(db: PricingDb, request: ValidReservationRequest): Promise<PriceBreakdown> {
+  async calculate(db: PricingDb, request: ValidReservationRequest, now: Date = new Date()): Promise<PriceBreakdown> {
     const { currency } = request;
     const days = rentalDays(request.startAt, request.endAt);
 
@@ -213,6 +228,31 @@ export class PricingService {
       });
     }
 
+    // A campaign code takes a percentage off the car and the extras together (SPEC §2.3). Rounded down to a
+    // whole kuruş or cent, so it is never more than the percentage says. A code that does not exist, is
+    // switched off or is outside its dates is simply not applied; the answer says so (`promo.applied`).
+    const subtotal = lines.reduce((sum, line) => sum + line.total.amount, 0);
+    let promo: PriceBreakdown['promo'] = null;
+    if (request.promoCode) {
+      const found = await db.promoCode.findUnique({ where: { code: request.promoCode } });
+      const usable = found && isPromoUsable(found, now) ? found : null;
+      promo = { code: request.promoCode, applied: usable !== null, percent: usable?.percent ?? null };
+      const discount = usable ? Math.floor((subtotal * usable.percent) / 100) : 0;
+      if (usable && discount > 0) {
+        lines.push({
+          type: 'DISCOUNT',
+          slug: usable.code,
+          label: {
+            tr: `Kampanya kodu ${usable.code} (%${usable.percent})`,
+            en: `Campaign code ${usable.code} (${usable.percent}% off)`,
+          },
+          quantity: 1,
+          unitPrice: money(-discount),
+          total: money(-discount),
+        });
+      }
+    }
+
     const total = lines.reduce((sum, line) => sum + line.total.amount, 0);
     return {
       currency,
@@ -220,6 +260,7 @@ export class PricingService {
       days,
       lines,
       total: money(total),
+      promo,
       pointsUsed: 0,
       payable: money(total),
     };

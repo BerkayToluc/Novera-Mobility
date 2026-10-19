@@ -24,10 +24,13 @@ API gerçeklendiğinde ön yüzde **bir uyarlayıcı katman** gerekecek (taklit 
 
 | Konu | Ön yüz | Sözleşme / API |
 |---|---|---|
-| Kampanya kodu | Örnek kodlar (`kod=`) | API'de yok; gerçek modda indirim hiç uygulanmaz ve sayfa "kod geçersiz" der. Sıradaki iş (`promoCode`) |
 | Tutmayı sorgulama | Özet ve ödeme sayfaları geri sayım için bitiş zamanını ister | `GET /holds/{id}` yok ve eklenmesi planlı değil: ön yüz tutma kimliğini `<uuid>.<bitişMs>` olarak adreste taşır, API'ye yalnızca uuid gider |
 | Tek araç | Özet sayfası aracı model + araç kimliğinden kurar (`/vehicle-models`) | Tek araç ucu yok |
 | Model yılı, model listesinde | Araçlarımız sayfası | `year` aracın (`VehicleOffer`, `Reservation.vehicle`) alanıdır; `GET /vehicle-models` model başına döner ve yıl taşımaz |
+
+## Bağlandı (19 Ekim)
+
+- Kampanya kodu: `ReservationRequest.promoCode`; indirim `PriceLine` olarak gelir (`type: DISCOUNT`, eksi tutar, en sonda), `PriceBreakdown.promo` kodun uygulanıp uygulanmadığını söyler. Kodlar veritabanındadır (`PromoCode`: `NOVERA10` %10, `HOSGELDIN` %5; tohumla gelir). Kuralları web'inkiyle aynıdır: yüzde araç ve ek hizmetlerin toplamından düşer ve aşağı yuvarlanır, puan kalanın en çok yarısını karşılar. `POST /reservations/price` olmayan kodu hata saymaz (`promo.applied: false`, fiyat düz); `POST /reservations` `422 UNKNOWN_CODE` verir.
 
 ## Bağlandı (18 Ekim)
 

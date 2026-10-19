@@ -28,6 +28,15 @@ export interface ValidReservationRequest {
   extras: ExtraSelection[];
   // Pay part of the total with points (individual account, TRY only; checked where the account is known).
   usePoints: boolean;
+  // A campaign code, normalized (upper case, no spaces); null when none was sent.
+  promoCode: string | null;
+}
+
+// What a visitor typed, made comparable, the same way the web does it: no spaces, upper case, letters and
+// digits only, 3 to 20 characters. Anything else is not a code at all.
+export function normalizePromoCode(raw: string): string | null {
+  const code = raw.trim().toLocaleUpperCase('en').replace(/\s+/g, '');
+  return /^[A-Z0-9]{3,20}$/.test(code) ? code : null;
 }
 
 export function isThirtyMinuteSlot(date: Date): boolean {
@@ -111,6 +120,14 @@ export function parseReservationRequest(input: unknown): ValidReservationRequest
     else errors.usePoints = 'INVALID_FORMAT';
   }
 
+  let promoCode: string | null = null;
+  const rawPromo = body.promoCode;
+  if (rawPromo !== undefined && rawPromo !== null && rawPromo !== '') {
+    const normalized = typeof rawPromo === 'string' ? normalizePromoCode(rawPromo) : null;
+    if (normalized) promoCode = normalized;
+    else errors.promoCode = 'INVALID_FORMAT';
+  }
+
   if (
     Object.keys(errors).length > 0 ||
     !vehicleId ||
@@ -122,7 +139,7 @@ export function parseReservationRequest(input: unknown): ValidReservationRequest
     throw validationFailed(errors, 'Reservation request validation failed');
   }
 
-  return { vehicleId, holdId, pickupBranchId, returnBranchId, startAt, endAt, currency, extras, usePoints };
+  return { vehicleId, holdId, pickupBranchId, returnBranchId, startAt, endAt, currency, extras, usePoints, promoCode };
 }
 
 function parseExtras(raw: unknown, errors: Record<string, string>): ExtraSelection[] {

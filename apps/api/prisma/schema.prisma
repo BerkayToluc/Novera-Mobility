@@ -269,6 +269,10 @@ model Reservation {
   endAt   DateTime
   days    Int
   pointsUsed        Int      @default(0) // puanla ödenen kısım (1 puan = ₺5, yalnızca TRY); iptalde iade sayılır
+  // Kampanya kodu: kod ve yüzde, rezervasyon anındaki haliyle saklanır (kod sonradan değişse de bu rezervasyon aynı kalır).
+  promoCode         String?
+  promoPercent      Int?
+  discountAmount    Int      @default(0) // kodun düştüğü tutar, `currency` biriminin alt biriminde
 
   // Aşağıdaki tüm tutarlar `currency` biriminin alt biriminde (kuruş/cent) saklanır.
   // Birim fiyatlar önce çevrilir, sonra günle çarpılır: kalemlerin toplamı = totalPrice.
@@ -294,6 +298,17 @@ model Reservation {
 
   @@index([vehicleId, startAt, endAt])
   @@index([userId])
+}
+
+// Kampanya kodları (SPEC §2.3): araç ve ek hizmetlerin toplamından yüzde olarak düşer.
+// Kod büyük harfle saklanır; aranırken de büyük harfe çevrilir.
+model PromoCode {
+  id         String    @id @default(uuid())
+  code       String    @unique
+  percent    Int // 1-90 arası tam sayı (tohum ve test bunu korur)
+  active     Boolean   @default(true)
+  validFrom  DateTime? // boşsa hemen geçerli
+  validUntil DateTime? // boşsa süresiz
 }
 
 model ReservationExtra {

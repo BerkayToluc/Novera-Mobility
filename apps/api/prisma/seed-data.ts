@@ -269,3 +269,9 @@ export const services = [
     points: { tr: ["Tek dokunuşla çağrı", "Canlı konumunuz iletilir", "Acil müdahale birimleri yönlendirilir"], en: ["One-tap call", "Your live location is sent", "Emergency units are dispatched"] },
   },
 ];
+
+// Kampanya kodları (SPEC §2.3, kurgusal). Yüzde, araç ve ek hizmetlerin toplamından düşer.
+export const promoCodes = [
+  { code: "NOVERA10", percent: 10 },
+  { code: "HOSGELDIN", percent: 5 },
+];
