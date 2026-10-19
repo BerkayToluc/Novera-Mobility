@@ -1,5 +1,6 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import type { UserRow } from '../auth/user-view.js';
+import { validationFailed } from '../forms/form-input.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import {
   PricingService,
@@ -102,7 +103,12 @@ export class ReservationsService {
       }
 
       // Toplamı sunucu hesaplar; istemciden fiyat alınmaz.
-      let price = await this.pricing.calculate(tx as unknown as PricingDb, request);
+      let price = await this.pricing.calculate(tx as unknown as PricingDb, request, now);
+      // The price page shows an unknown code as "not valid" and charges the plain price; a booking must not
+      // quietly do that, because the visitor was told a discount would be taken off.
+      if (price.promo && !price.promo.applied) {
+        throw validationFailed({ promoCode: 'UNKNOWN_CODE' }, 'The campaign code is not valid');
+      }
       if (request.usePoints) {
         const ledger = await loadPointsLedger(tx as unknown as LedgerDb, user.id, now);
         price = withPoints(price, ledger.balance);
@@ -123,7 +129,10 @@ export class ReservationsService {
       const lastSerial = last ? Number(last.number.slice(prefix.length)) : 0;
       const number = `${prefix}${String((Number.isFinite(lastSerial) ? lastSerial : 0) + 1).padStart(5, '0')}`;
 
-      const [vehicleLine, ...extraLines] = price.lines;
+      // The discount line, when there is one, is last, so the extras still line up with `request.extras`.
+      const [vehicleLine, ...restLines] = price.lines;
+      const extraLines = restLines.filter((line) => line.type === 'EXTRA');
+      const discountLine = restLines.find((line) => line.type === 'DISCOUNT');
       const created = await tx.reservation.create({
         data: {
           number,
@@ -136,6 +145,9 @@ export class ReservationsService {
           vehicleDailyPrice: vehicleLine!.unitPrice.amount,
           totalPrice: price.total.amount,
           pointsUsed: price.pointsUsed,
+          promoCode: discountLine ? price.promo!.code : null,
+          promoPercent: discountLine ? price.promo!.percent : null,
+          discountAmount: discountLine ? -discountLine.total.amount : 0,
           userId: user.id,
           vehicleId: request.vehicleId,
           pickupBranchId: request.pickupBranchId,

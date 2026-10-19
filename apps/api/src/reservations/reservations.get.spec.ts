@@ -23,6 +23,9 @@ function row(over: Row = {}): Row {
     vehicleDailyPrice: 100000,
     totalPrice: 324000,
     pointsUsed: 10,
+    promoCode: null,
+    promoPercent: null,
+    discountAmount: 0,
     createdAt: NOW,
     userId: OWNER,
     vehicle: {
@@ -110,5 +113,26 @@ describe('ReservationsService.getMine', () => {
     const unknown = await failure(service.getMine(OWNER, 'nope'));
     expect(unknown.getStatus()).toBe(404);
     expect(unknown.getResponse()).toEqual(other.getResponse());
+  });
+
+  it('shows the campaign code as a last, negative line, as it was when the booking was made', async () => {
+    // 300 000 car + 24 000 extra = 324 000; 10% off = 32 400, so the stored total is 291 600.
+    const view = await setup([
+      row({ promoCode: 'NOVERA10', promoPercent: 10, discountAmount: 32400, totalPrice: 291600, pointsUsed: 0 }),
+    ]).getMine(OWNER, 'r1');
+    expect(view.price.lines.map((line) => [line.type, line.slug, line.total.amount])).toEqual([
+      ['VEHICLE', 'toyota-corolla', 300000],
+      ['EXTRA', 'cocuk-koltugu', 24000],
+      ['DISCOUNT', 'NOVERA10', -32400],
+    ]);
+    expect(view.price.promo).toEqual({ code: 'NOVERA10', applied: true, percent: 10 });
+    expect(view.price.total).toEqual({ amount: 291600, currency: 'TRY' });
+    expect(view.price.lines.reduce((sum, line) => sum + line.total.amount, 0)).toBe(view.price.total.amount);
+  });
+
+  it('has no discount line and no promo when no code was used', async () => {
+    const view = await setup([row()]).getMine(OWNER, 'r1');
+    expect(view.price.promo).toBeNull();
+    expect(view.price.lines.some((line) => line.type === 'DISCOUNT')).toBe(false);
   });
 });

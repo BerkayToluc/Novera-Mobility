@@ -191,6 +191,7 @@ paths:
       summary: Fiyat dökümü (rezervasyon özeti)
       description: |
         Rezervasyon oluşturmadan kalem kalem fiyatı hesaplar. Giriş gerekmez; toplamı sunucu hesaplar.
+        `promoCode` verilirse indirim ayrı bir satır olarak gelir (`type: DISCOUNT`).
         `usePoints: true` ile istenirse giriş gerekir (`401`) ve cevap, hesabın bakiyesiyle harcanabilecek
         puanı (`pointsUsed`) ve parayla ödenecek tutarı (`payable`) içerir.
       requestBody:
@@ -929,6 +930,19 @@ components:
           type: string
           format: uuid
           description: "`POST /holds` cevabındaki tutma. Yalnızca `POST /reservations` kullanır; isteğe bağlı."
+        promoCode:
+          type: string
+          nullable: true
+          pattern: "^[A-Za-z0-9]{3,20}$"
+          example: NOVERA10
+          description: |
+            Kampanya kodu. Büyük/küçük harf ve boşluk fark etmez; sunucu büyük harfe çevirir. Kod, araç ve
+            ek hizmetlerin toplamından yüzde olarak düşer (aşağı yuvarlanır), sonra puan uygulanır.
+            Biçime uymayan değer `422` (`fieldErrors.promoCode: INVALID_FORMAT`).
+            **`POST /reservations/price`**: olmayan, kapalı ya da tarihi geçmiş kod hata değildir; fiyat
+            düz kalır ve cevaptaki `promo.applied` `false` olur ("kod geçerli değil" denir).
+            **`POST /reservations`**: böyle bir kodla rezervasyon yapılmaz (`422`, `fieldErrors.promoCode:
+            UNKNOWN_CODE`), çünkü ziyaretçi indirim göreceğini sanmıştır.
         usePoints:
           type: boolean
           description: |
@@ -970,10 +984,15 @@ components:
       type: object
       required: [type, slug, label, quantity, unitPrice, total]
       properties:
-        type: { type: string, enum: [VEHICLE, EXTRA] }
+        type:
+          type: string
+          enum: [VEHICLE, EXTRA, DISCOUNT]
+          description: |
+            `DISCOUNT`, kampanya kodunun düştüğü tutardır: tek satır, her zaman en sonda, tutarları **eksi**.
+            Böylece satırların toplamı yine `total`'a tam eşit kalır.
         slug:
           type: string
-          description: Araç satırında modelin, ek hizmet satırında ek hizmetin `slug` değeri. Satırı adıyla değil bununla eşleştirin.
+          description: Araç satırında modelin, ek hizmet satırında ek hizmetin, indirim satırında kodun `slug` değeri. Satırı adıyla değil bununla eşleştirin.
           example: cocuk-koltugu
         label: { $ref: "#/components/schemas/LocalizedText" }
         quantity:
@@ -987,7 +1006,7 @@ components:
       description: |
         Birim fiyatlar önce hedef para biriminin alt birimine çevrilir, sonra adet/günle çarpılır;
         bu yüzden satır toplamlarının toplamı `total`'a tam eşittir (ekranda yuvarlama yok).
-      required: [currency, exchangeRate, days, lines, total, pointsUsed, payable]
+      required: [currency, exchangeRate, days, lines, total, promo, pointsUsed, payable]
       properties:
         currency: { $ref: "#/components/schemas/Currency" }
         exchangeRate:
@@ -1000,7 +1019,16 @@ components:
         total:
           allOf:
             - $ref: "#/components/schemas/Money"
-          description: Kalemlerin toplamı (puan düşülmeden).
+          description: "Kalemlerin toplamı: araç ve ek hizmetler eksi kampanya indirimi, puan düşülmeden."
+        promo:
+          type: object
+          nullable: true
+          description: "İstekte kod gönderildiyse kodun ne olduğu; gönderilmediyse `null`. Rezervasyonda her zaman `applied: true`."
+          required: [code, applied, percent]
+          properties:
+            code: { type: string, example: NOVERA10 }
+            applied: { type: boolean, description: Kod fiyattan bir şey düştü mü. }
+            percent: { type: integer, nullable: true, description: Uygulanan yüzde; `applied` `false` ise `null`. }
         pointsUsed:
           type: integer
           description: Bu rezervasyonda puanla ödenen puan sayısı (kullanılmadıysa 0). İptalde iade edilir.
