@@ -931,9 +931,8 @@ components:
           description: "`POST /holds` cevabındaki tutma. Yalnızca `POST /reservations` kullanır; isteğe bağlı."
         usePoints:
           type: boolean
-          default: false
           description: |
-            Puanla öde. Giriş gerekir; yalnızca bireysel hesapta ve `currency: TRY` iken kullanılabilir
+            Puanla öde (gönderilmezse `false`). Giriş gerekir; yalnızca bireysel hesapta ve `currency: TRY` iken kullanılabilir
             (aksi halde `422`, `fieldErrors.usePoints: NOT_ALLOWED`). 1 puan ₺5'dir; harcanan puan, bakiye ve
             toplamın yarısıyla sınırlıdır, kiralama bedava olmaz. Kaç puanın harcandığını sunucu hesaplar
             (`pointsUsed`); istemci puan sayısı göndermez.
@@ -1044,7 +1043,7 @@ components:
             type: object
             required: [points, createdAt]
             properties:
-              points: { type: integer, description: Kazanılan puan artı, rezervasyonda harcanan puan eksi işaretlidir. }
+              points: { type: integer, description: "Kazanılan puan artı, rezervasyonda harcanan puan eksi işaretlidir." }
               reservationNumber: { type: string, nullable: true }
               createdAt: { type: string, format: date-time, description: Puanın hesaba geçtiği an (kiralamanın bitişi). }
         rules: { $ref: "#/components/schemas/LocalizedText" }
