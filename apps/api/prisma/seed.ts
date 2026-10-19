@@ -12,6 +12,7 @@ import {
   modelImages,
   models,
   products,
+  promoCodes,
   rates,
   services,
 } from "./seed-data";
@@ -91,6 +92,14 @@ async function main() {
     });
   }
 
+  for (const c of promoCodes) {
+    await prisma.promoCode.upsert({
+      where: { code: c.code },
+      update: { percent: c.percent, active: true },
+      create: c,
+    });
+  }
+
   for (const f of faq) {
     const data = { audience: f.audience, topic: f.topic, question: f.question, answer: f.answer, sortOrder: f.sortOrder };
     await prisma.faqItem.upsert({ where: { id: f.id }, update: data, create: { id: f.id, ...data } });
@@ -116,7 +125,7 @@ async function main() {
   console.log("Seed tamam:");
   console.log(`  ${classes.length} sınıf, ${branches.length} bayi, ${models.length} model, ${vehicles.length} araç`);
   console.log(`  ${extras.length} ek hizmet, ${rates.length} kur, ${faq.length} SSS`);
-  console.log(`  ${products.length} ürün, ${services.length} hizmet`);
+  console.log(`  ${products.length} ürün, ${services.length} hizmet, ${promoCodes.length} kampanya kodu`);
 }
 
 main()

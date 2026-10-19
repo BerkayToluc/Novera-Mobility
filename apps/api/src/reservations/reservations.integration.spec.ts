@@ -28,6 +28,7 @@ describeDb('POST /reservations (gerçek PostgreSQL)', () => {
   let branchId = '';
   let user: UserRow;
   const ids = { classId: '', modelId: '', userId: '' };
+  const CODE = `T${randomUUID().slice(0, 8).toUpperCase()}`;
 
   beforeAll(async () => {
     process.env.DATABASE_URL = databaseUrl;
@@ -65,9 +66,11 @@ describeDb('POST /reservations (gerçek PostgreSQL)', () => {
     });
     ids.userId = created.id;
     user = created as unknown as UserRow;
+    await prisma.promoCode.create({ data: { code: CODE, percent: 10 } });
   });
 
   afterAll(async () => {
+    await prisma.promoCode.deleteMany({ where: { code: CODE } });
     await prisma.user.deleteMany({ where: { id: ids.userId } }); // puanlar cascade silinir
     await prisma.reservation.deleteMany({ where: { vehicleId } });
     await prisma.vehicle.deleteMany({ where: { id: vehicleId } });
@@ -119,6 +122,68 @@ describeDb('POST /reservations (gerçek PostgreSQL)', () => {
     });
     await expect(service.getMine(user.id, '00000000-0000-4000-8000-000000000000')).rejects.toMatchObject({
       status: 404,
+    });
+  });
+
+  describe('kampanya kodu', () => {
+    // Başka günler: yukarıdaki testler START-END aralığındaki aracı almıştır.
+    const PROMO_START = new Date(START.getTime() + 20 * DAY);
+    const promoBody = (days: number, over: Record<string, unknown> = {}) => ({
+      ...body(),
+      startAt: new Date(PROMO_START.getTime()).toISOString(),
+      endAt: new Date(PROMO_START.getTime() + days * DAY).toISOString(),
+      ...over,
+    });
+
+    it('olmayan kodla rezervasyon yapılmaz: 422 UNKNOWN_CODE, kayıt oluşmaz', async () => {
+      const before = await prisma.reservation.count({ where: { vehicleId } });
+      const error = await service.create(user, promoBody(3, { promoCode: 'YOKBOYLEKOD' })).then(
+        () => null,
+        (e: unknown) => e as HttpException,
+      );
+      expect(error).toBeInstanceOf(HttpException);
+      expect(error!.getStatus()).toBe(422);
+      expect(error!.getResponse()).toMatchObject({ fieldErrors: { promoCode: 'UNKNOWN_CODE' } });
+      expect(await prisma.reservation.count({ where: { vehicleId } })).toBe(before);
+    });
+
+    it('kod rezervasyonla saklanır; liste ve tek okuma aynı indirim satırını verir', async () => {
+      const created = await service.create(user, promoBody(3, { promoCode: CODE.toLowerCase() }));
+      // 3 gün × ₺1.250 = 375 000 kuruş; yüzde 10 = 37 500.
+      expect(created.price.promo).toEqual({ code: CODE, applied: true, percent: 10 });
+      expect(created.price.lines.map((line) => line.type)).toEqual(['VEHICLE', 'DISCOUNT']);
+      expect(created.price.lines[1]!.total).toEqual({ amount: -37500, currency: 'TRY' });
+      expect(created.price.total).toEqual({ amount: 337500, currency: 'TRY' });
+      expect(created.price.payable).toEqual({ amount: 337500, currency: 'TRY' });
+
+      const row = await prisma.reservation.findUniqueOrThrow({ where: { id: created.id } });
+      expect(row).toMatchObject({ promoCode: CODE, promoPercent: 10, discountAmount: 37500, totalPrice: 337500 });
+
+      expect(await service.getMine(user.id, created.id)).toEqual(created);
+      const listed = (await service.listMine(user.id)).find((r) => r.id === created.id);
+      expect(listed).toEqual(created);
+    });
+
+    it('puan, indirimli tutar üzerinden kazanılır', async () => {
+      const [created] = (await service.listMine(user.id)).filter((r) => r.price.promo?.code === CODE);
+      // 337 500 kuruş = ₺3.375 → tam ₺100'lük 33 adım; indirimsiz 37 olurdu.
+      expect(created!.pointsEarned).toBe(33);
+    });
+
+    it('kod sonradan kapansa da eski rezervasyon aynı indirimi gösterir', async () => {
+      const [created] = (await service.listMine(user.id)).filter((r) => r.price.promo?.code === CODE);
+      await prisma.promoCode.update({ where: { code: CODE }, data: { active: false, percent: 50 } });
+      const again = await service.getMine(user.id, created!.id);
+      expect(again.price.lines[1]!.total).toEqual({ amount: -37500, currency: 'TRY' });
+      expect(again.price.promo).toEqual({ code: CODE, applied: true, percent: 10 });
+    });
+
+    it('kapatılmış kodla yeni rezervasyon yapılamaz', async () => {
+      const error = await service.create(user, promoBody(2, { startAt: new Date(PROMO_START.getTime() + 30 * DAY).toISOString(), endAt: new Date(PROMO_START.getTime() + 32 * DAY).toISOString(), promoCode: CODE })).then(
+        () => null,
+        (e: unknown) => e as HttpException,
+      );
+      expect(error!.getStatus()).toBe(422);
     });
   });
 });

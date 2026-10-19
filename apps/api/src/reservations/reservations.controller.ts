@@ -21,6 +21,7 @@ const RESERVATION_BODY = {
       endAt: { type: 'string', format: 'date-time' },
       currency: { type: 'string', enum: ['TRY', 'EUR', 'USD'] },
       usePoints: { type: 'boolean', description: 'Puanla öde (bireysel hesap, yalnızca TL)' },
+      promoCode: { type: 'string', nullable: true, description: 'Kampanya kodu (büyük/küçük harf fark etmez)' },
       extras: {
         type: 'array',
         items: {

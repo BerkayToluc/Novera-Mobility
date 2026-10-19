@@ -16,6 +16,9 @@ export type ReservationRow = {
   vehicleDailyPrice: number;
   totalPrice: number;
   pointsUsed: number;
+  promoCode: string | null;
+  promoPercent: number | null;
+  discountAmount: number;
   createdAt: Date;
   vehicle: {
     id: string;
@@ -77,12 +80,27 @@ export function toPriceBreakdown(row: ReservationRow): PriceBreakdown {
       }),
     ),
   ];
+  // The code taken off, as it was when the reservation was made (the code may have changed since).
+  if (row.promoCode && row.discountAmount > 0) {
+    lines.push({
+      type: 'DISCOUNT',
+      slug: row.promoCode,
+      label: {
+        tr: `Kampanya kodu ${row.promoCode} (%${row.promoPercent ?? 0})`,
+        en: `Campaign code ${row.promoCode} (${row.promoPercent ?? 0}% off)`,
+      },
+      quantity: 1,
+      unitPrice: money(-row.discountAmount),
+      total: money(-row.discountAmount),
+    });
+  }
   return {
     currency: row.currency,
     exchangeRate: Number(row.exchangeRate),
     days: row.days,
     lines,
     total: money(row.totalPrice),
+    promo: row.promoCode ? { code: row.promoCode, applied: true, percent: row.promoPercent } : null,
     pointsUsed: row.pointsUsed,
     payable: money(row.totalPrice - pointsWorthMinor(row.pointsUsed)),
   };
