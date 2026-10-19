@@ -157,6 +157,13 @@
           "incorrect": "The current password is wrong.",
           "saved": "Your password was changed."
         },
+        "setPassword": {
+          "title": "Set a password",
+          "text": "Your account was opened with Google and has no password yet. We will email you a link to set one.",
+          "send": "Send the link to set a password",
+          "sending": "Sending…",
+          "sent": "We sent the link to {email}. Check your inbox."
+        },
         "sessions": {
           "title": "Open sessions",
           "this": "This device · Browser",

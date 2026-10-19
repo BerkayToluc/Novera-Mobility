@@ -40,6 +40,6 @@ describe("buildCsp", () => {
 
   it("ignores an analytics address that is not a URL", () => {
     vi.stubEnv("ANALYTICS_SCRIPT_URL", "not a url");
-    expect(directive(buildCsp("n"), "connect-src")).toBe("'self' https://maps.googleapis.com https://maps.gstatic.com");
+    expect(directive(buildCsp("n"), "connect-src")).toBe("'self' https://maps.googleapis.com https://maps.gstatic.com https://accounts.google.com");
   });
 });

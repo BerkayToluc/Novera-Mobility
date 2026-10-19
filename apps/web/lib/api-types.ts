@@ -316,7 +316,9 @@ export interface paths {
         post?: never;
         /**
          * Tutmayı bırak
-         * @description Kullanıcı aramayı değiştirir ya da vazgeçerse aracı hemen serbest bırakır. Olmayan veya süresi dolmuş tutmada da `204` döner.
+         * @description Kullanıcı aramayı değiştirir ya da vazgeçerse aracı hemen serbest bırakır. Tutmayı yalnızca onu
+         *     açan istemci bırakabilir (`POST /holds` ile aynı istemci anahtarı). Olmayan, süresi dolmuş ya da
+         *     başkasına ait tutmada da `204` döner; çağrı güvenle tekrarlanabilir ve kimin neyi tuttuğunu göstermez.
          */
         delete: {
             parameters: {
@@ -354,7 +356,10 @@ export interface paths {
         put?: never;
         /**
          * Fiyat dökümü (rezervasyon özeti)
-         * @description Rezervasyon oluşturmadan kalem kalem fiyatı hesaplar. Giriş gerekmez. Toplamı sunucu hesaplar.
+         * @description Rezervasyon oluşturmadan kalem kalem fiyatı hesaplar. Giriş gerekmez; toplamı sunucu hesaplar.
+         *     `promoCode` verilirse indirim ayrı bir satır olarak gelir (`type: DISCOUNT`).
+         *     `usePoints: true` ile istenirse giriş gerekir (`401`) ve cevap, hesabın bakiyesiyle harcanabilecek
+         *     puanı (`pointsUsed`) ve parayla ödenecek tutarı (`payable`) içerir.
          */
         post: {
             parameters: {
@@ -378,6 +383,7 @@ export interface paths {
                         "application/json": components["schemas"]["PriceBreakdown"];
                     };
                 };
+                401: components["responses"]["Unauthorized"];
                 409: components["responses"]["Conflict"];
                 422: components["responses"]["ValidationFailed"];
             };
@@ -402,6 +408,8 @@ export interface paths {
          * @description Giriş gerekir. Rezervasyon `CONFIRMED` oluşur, para alınmaz. `holdId` verilirse ve tutma geçerliyse
          *     araç o tutmaya göre alınır, tutma silinir. Süresi dolmuşsa müsaitlik işlem içinde tekrar kontrol edilir;
          *     araç hâlâ boşsa devam edilir, değilse `409 VEHICLE_UNAVAILABLE`. Puan aynı işlemde yazılır.
+         *     `usePoints: true` ise puan düşümü de aynı işlemde yapılır; cevaptaki `price.pointsUsed` ve
+         *     `price.payable` kesin değerlerdir. Kazanılan puan, parayla ödenen tutar (`payable`) üzerinden hesaplanır.
          */
         post: {
             parameters: {
@@ -466,6 +474,50 @@ export interface paths {
                     };
                 };
                 401: components["responses"]["Unauthorized"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/reservations/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Tek rezervasyon
+         * @description Giriş yapmış kullanıcının tek rezervasyonu (onay sayfası, `GET /me/reservations` listesinden ya da
+         *     `POST /reservations` cevabındaki `id` ile). Başkasının ya da olmayan rezervasyon `404 NOT_FOUND`.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Rezervasyon */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Reservation"];
+                    };
+                };
+                401: components["responses"]["Unauthorized"];
+                404: components["responses"]["NotFound"];
             };
         };
         put?: never;
@@ -703,6 +755,8 @@ export interface paths {
          *     dışındaki TÜM oturumlar kapanır ve bekleyen şifre sıfırlama bağlantıları geçersiz olur.
          *     Mevcut şifre yanlışsa `422` (`fieldErrors.currentPassword: INCORRECT`; oturum açık kalır, 401 değildir).
          *     Yeni şifre için `TOO_SHORT`, `TOO_LONG`, `SAME_AS_CURRENT`. 15 dakikada en çok 5 deneme (`429`).
+         *     Hesabın şifresi yoksa (`User.hasPassword` `false`, Google ile açılmış) `409` (`PASSWORD_NOT_SET`): şifre
+         *     `/auth/forgot-password` ile e-postadaki bağlantıdan belirlenir.
          */
         post: {
             parameters: {
@@ -884,6 +938,96 @@ export interface paths {
                 };
                 422: components["responses"]["ValidationFailed"];
                 429: components["responses"]["TooManyRequests"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/google": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Google ile giriş veya kayıt (yalnızca bireysel)
+         * @description Web'deki Google düğmesinin verdiği ID token (`credential`) gönderilir; API imzayı, hedef kitleyi (Client ID),
+         *     süreyi ve e-postanın doğrulanmış olmasını denetler. Başarılı olunca oturum çerezi set edilir.
+         *     - Bu Google hesabı daha önce bağlandıysa `200`.
+         *     - Aynı e-postayla şifreli bir bireysel hesap varsa hesap Google'a bağlanır (`200`). Güvenlik için o hesabın
+         *       şifresi silinir ve açık oturumları kapanır; kişi Google ile ya da "şifremi unuttum" ile devam eder.
+         *     - Hesap yoksa yeni bireysel hesap açılır (`201`) ve `consent: true` gerekir. Onay yoksa `422`
+         *       (`fieldErrors.consent: CONSENT_REQUIRED`) döner ve hesap açılmaz; ön yüz onay kutusunu gösterip aynı
+         *       `credential` ile `consent: true` göndererek yeniden dener.
+         *     Kurumsal hesaplar Google ile giriş yapamaz (`403`, `GOOGLE_NOT_ALLOWED`). 15 dakikada istemci başına en çok
+         *     10 deneme (`429`). Sunucuda `GOOGLE_CLIENT_ID` yoksa `503` (`GOOGLE_SIGNIN_UNAVAILABLE`).
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["GoogleSignInRequest"];
+                };
+            };
+            responses: {
+                /** @description Mevcut hesapla oturum açıldı */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["User"];
+                    };
+                };
+                /** @description Yeni hesap açıldı, oturum açıldı */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["User"];
+                    };
+                };
+                /** @description Google belirteci doğrulanamadı (`GOOGLE_TOKEN_INVALID`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Bu hesap Google ile giriş yapamaz (`GOOGLE_NOT_ALLOWED`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
+                /** @description Google ile giriş bu sunucuda ayarlı değil (`GOOGLE_SIGNIN_UNAVAILABLE`) */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
             };
         };
         delete?: never;
@@ -1091,11 +1235,16 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Sık sorulan sorular */
+        /**
+         * Sık sorulan sorular
+         * @description `audience` verilirse yalnızca o kitlenin soruları döner (ana sayfa, kitle sekmesine göre).
+         *     Verilmezse tüm sorular döner (Yardım merkezi); her kayıt kendi `audience` ve `topic` değerini taşır.
+         *     Sıra: önce bireysel, sonra kurumsal; her kitle kendi içinde `sortOrder` sırasıyla.
+         */
         get: {
             parameters: {
-                query: {
-                    audience: components["schemas"]["FaqAudience"];
+                query?: {
+                    audience?: components["schemas"]["FaqAudience"];
                 };
                 header?: never;
                 path?: never;
@@ -1461,6 +1610,11 @@ export interface components {
         VehicleOffer: {
             /** Format: uuid */
             vehicleId: string;
+            /**
+             * @description Aracın model yılı (`vehicleId` olan fiziksel araç).
+             * @example 2025
+             */
+            year: number;
             model: components["schemas"]["VehicleModelBase"];
             branch: components["schemas"]["BranchRef"];
             /** @example 3 */
@@ -1504,6 +1658,24 @@ export interface components {
              * @description `POST /holds` cevabındaki tutma. Yalnızca `POST /reservations` kullanır; isteğe bağlı.
              */
             holdId?: string;
+            /**
+             * @description Kampanya kodu. Büyük/küçük harf ve boşluk fark etmez; sunucu büyük harfe çevirir. Kod, araç ve
+             *     ek hizmetlerin toplamından yüzde olarak düşer (aşağı yuvarlanır), sonra puan uygulanır.
+             *     Biçime uymayan değer `422` (`fieldErrors.promoCode: INVALID_FORMAT`).
+             *     **`POST /reservations/price`**: olmayan, kapalı ya da tarihi geçmiş kod hata değildir; fiyat
+             *     düz kalır ve cevaptaki `promo.applied` `false` olur ("kod geçerli değil" denir).
+             *     **`POST /reservations`**: böyle bir kodla rezervasyon yapılmaz (`422`, `fieldErrors.promoCode:
+             *     UNKNOWN_CODE`), çünkü ziyaretçi indirim göreceğini sanmıştır.
+             * @example NOVERA10
+             */
+            promoCode?: string | null;
+            /**
+             * @description Puanla öde (gönderilmezse `false`). Giriş gerekir; yalnızca bireysel hesapta ve `currency: TRY` iken kullanılabilir
+             *     (aksi halde `422`, `fieldErrors.usePoints: NOT_ALLOWED`). 1 puan ₺5'dir; harcanan puan, bakiye ve
+             *     toplamın yarısıyla sınırlıdır, kiralama bedava olmaz. Kaç puanın harcandığını sunucu hesaplar
+             *     (`pointsUsed`); istemci puan sayısı göndermez.
+             */
+            usePoints?: boolean;
             extras?: {
                 slug: string;
                 quantity: number;
@@ -1533,8 +1705,17 @@ export interface components {
             expiresAt: string;
         };
         PriceLine: {
-            /** @enum {string} */
-            type: "VEHICLE" | "EXTRA";
+            /**
+             * @description `DISCOUNT`, kampanya kodunun düştüğü tutardır: tek satır, her zaman en sonda, tutarları **eksi**.
+             *     Böylece satırların toplamı yine `total`'a tam eşit kalır.
+             * @enum {string}
+             */
+            type: "VEHICLE" | "EXTRA" | "DISCOUNT";
+            /**
+             * @description Araç satırında modelin, ek hizmet satırında ek hizmetin, indirim satırında kodun `slug` değeri. Satırı adıyla değil bununla eşleştirin.
+             * @example cocuk-koltugu
+             */
+            slug: string;
             label: components["schemas"]["LocalizedText"];
             /** @description Araç için gün sayısı; ek hizmet için adet (günlük ek hizmette adet × gün). */
             quantity: number;
@@ -1551,7 +1732,21 @@ export interface components {
             exchangeRate: number;
             days: number;
             lines: components["schemas"]["PriceLine"][];
+            /** @description Kalemlerin toplamı: araç ve ek hizmetler eksi kampanya indirimi, puan düşülmeden. */
             total: components["schemas"]["Money"];
+            /** @description İstekte kod gönderildiyse kodun ne olduğu; gönderilmediyse `null`. Rezervasyonda her zaman `applied: true`. */
+            promo: {
+                /** @example NOVERA10 */
+                code: string;
+                /** @description Kod fiyattan bir şey düştü mü. */
+                applied: boolean;
+                /** @description Uygulanan yüzde; `applied` `false` ise `null`. */
+                percent: number | null;
+            } | null;
+            /** @description Bu rezervasyonda puanla ödenen puan sayısı (kullanılmadıysa 0). İptalde iade edilir. */
+            pointsUsed: number;
+            /** @description Puan düşüldükten sonra parayla ödenecek tutar (`total` − `pointsUsed` × ₺5). Puan kullanılmadıysa `total`'a eşittir. */
+            payable: components["schemas"]["Money"];
         };
         Reservation: {
             /** Format: uuid */
@@ -1563,6 +1758,8 @@ export interface components {
             vehicle: {
                 /** Format: uuid */
                 id: string;
+                /** @example 2025 */
+                year: number;
                 model: components["schemas"]["VehicleModelBase"];
             };
             pickupBranch: components["schemas"]["BranchRef"];
@@ -1583,6 +1780,7 @@ export interface components {
             /** @description Kiralaması henüz bitmemiş (yaklaşan) rezervasyonların puanı. */
             pending: number;
             history: {
+                /** @description Kazanılan puan artı, rezervasyonda harcanan puan eksi işaretlidir. */
                 points: number;
                 reservationNumber?: string | null;
                 /**
@@ -1627,6 +1825,10 @@ export interface components {
             theme: "light" | "dark" | "system";
             currency: components["schemas"]["Currency"];
             notifications?: components["schemas"]["Notifications"];
+            /** @description `false` ise hesap Google ile açılmış ve henüz şifresi yok (şifre belirlemek için `/auth/forgot-password` akışı kullanılır, `/me/password` 409 döner). */
+            hasPassword: boolean;
+            /** @description Hesap bir Google hesabına bağlı mı. */
+            googleLinked: boolean;
         };
         /** @description E-posta tercihleri. Varsayılan hatırlatma açık, kampanya kapalı (pazarlama postası için onay gerekir). */
         Notifications: {
@@ -1681,6 +1883,12 @@ export interface components {
             /** @description Gizlilik/KVKK onayı. `false` ise `fieldErrors.consent = CONSENT_REQUIRED`. */
             consent: boolean;
         };
+        GoogleSignInRequest: {
+            /** @description Google Identity Services'in verdiği ID token. */
+            credential: string;
+            /** @description Gizlilik/KVKK onayı. Yeni hesap açılacaksa `true` olmalı; mevcut hesapta gerekmez. */
+            consent?: boolean;
+        };
         LoginRequest: {
             /** Format: email */
             email: string;
@@ -1688,9 +1896,16 @@ export interface components {
         };
         /** @enum {string} */
         FaqAudience: "INDIVIDUAL" | "CORPORATE";
+        /**
+         * @description Sorunun konusu (Yardım merkezi bu değere göre gruplar).
+         * @enum {string}
+         */
+        FaqTopic: "rezervasyon" | "odeme" | "teslim" | "hasar" | "hesap" | "kurumsal";
         FaqItem: {
             /** Format: uuid */
             id: string;
+            audience: components["schemas"]["FaqAudience"];
+            topic: components["schemas"]["FaqTopic"];
             question: components["schemas"]["LocalizedText"];
             answer: components["schemas"]["LocalizedText"];
         };

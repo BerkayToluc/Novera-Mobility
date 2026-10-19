@@ -53,7 +53,7 @@ export async function SettingsView() {
         <NotificationsForm initial={notifications} />
       </Section>
       <Section id="settings-security" title={t("security.title")} text={t("security.text")}>
-        <SecuritySection sessions={sessions} />
+        <SecuritySection sessions={sessions} hasPassword={session?.hasPassword ?? true} email={session?.user.email ?? ""} />
       </Section>
       <Section id="settings-danger" title={t("danger.title")} text={t("danger.text")}>
         <DeleteAccount />

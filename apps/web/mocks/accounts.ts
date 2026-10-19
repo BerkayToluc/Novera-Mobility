@@ -5,6 +5,16 @@ import type { Session } from "@/lib/session";
 export const MOCK_INDIVIDUAL: Session = {
   type: "individual",
   user: { id: "u-individual", firstName: "Elif", lastName: "Yıldız", email: "elif.yildiz@example.com" },
+  hasPassword: true,
+  googleLinked: false,
+};
+
+// The account a sample Google sign-up creates: opened with Google, so it has no password yet.
+export const MOCK_GOOGLE: Session = {
+  type: "individual",
+  user: { id: "u-google", firstName: "Ece", lastName: "Aydın", email: "ece.aydin@example.com" },
+  hasPassword: false,
+  googleLinked: true,
 };
 
 export const MOCK_CORPORATE: Session = {
@@ -18,4 +28,6 @@ export const MOCK_CORPORATE: Session = {
     contactTitle: { tr: "Filo Yöneticisi", en: "Fleet Manager" },
     salesContact: "satis@novera.example",
   },
+  hasPassword: true,
+  googleLinked: false,
 };
