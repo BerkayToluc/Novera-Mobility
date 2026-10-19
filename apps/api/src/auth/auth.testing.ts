@@ -9,8 +9,10 @@ export class FakePrisma {
   sessions: Row[] = [];
 
   user = {
-    findUnique: async ({ where }: { where: { email?: string; id?: string } }) =>
-      this.users.find((u) => (where.email ? u.email === where.email : u.id === where.id)) ?? null,
+    findUnique: async ({ where }: { where: { email?: string; id?: string; googleSub?: string } }) =>
+      this.users.find((u) =>
+        where.email ? u.email === where.email : where.googleSub ? u.googleSub === where.googleSub : u.id === where.id,
+      ) ?? null,
     create: async ({ data }: { data: Row }) => {
       const { sessions, ...fields } = data;
       if (this.users.some((u) => u.email === fields.email)) {
@@ -30,6 +32,7 @@ export class FakePrisma {
         currency: 'TRY',
         notifyReminders: true,
         notifyCampaigns: false,
+        googleSub: null,
         ...fields,
       };
       this.users.push(user);

@@ -2,7 +2,8 @@
 export interface UserRow {
   id: string;
   email: string;
-  passwordHash: string;
+  passwordHash: string | null;
+  googleSub: string | null;
   firstName: string;
   lastName: string;
   accountType: 'INDIVIDUAL' | 'CORPORATE';
@@ -36,6 +37,9 @@ export interface UserResponse {
   theme: 'light' | 'dark' | 'system';
   currency: 'TRY' | 'EUR' | 'USD';
   notifications: { reminders: boolean; campaigns: boolean };
+  // false: the account was opened with Google and has no password yet.
+  hasPassword: boolean;
+  googleLinked: boolean;
 }
 
 // JSON alanının biçimi bozuksa (eksik/yanlış tür) satış iletişimi yokmuş gibi davranılır.
@@ -65,5 +69,7 @@ export function toUserResponse(user: UserRow): UserResponse {
     theme: user.theme.toLowerCase() as UserResponse['theme'],
     currency: user.currency,
     notifications: { reminders: user.notifyReminders, campaigns: user.notifyCampaigns },
+    hasPassword: user.passwordHash !== null,
+    googleLinked: user.googleSub !== null,
   };
 }

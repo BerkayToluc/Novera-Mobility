@@ -61,6 +61,7 @@ E-posta ayarı olmadan site çalışır; "Şifremi unuttum" bağlantısı gönde
    - `DATABASE_URL`: Neon adresi (1. adım).
    - `WEB_URL`: şimdilik `https://novera-mobility.vercel.app` yaz (Vercel'in vereceği adres farklıysa 6. adımda düzeltiriz).
    - `RESEND_API_KEY`, `MAIL_FROM`: 3. adımdaki değerler, e-posta istemiyorsan boş bırak.
+   - `GOOGLE_CLIENT_ID`: Google ile giriş istemiyorsan boş bırak; sonradan eklenir (bkz. aşağıdaki "Google ile giriş").
    - `API_ACCESS_KEY` sorulmaz, Render kendisi üretir.
 3. **Apply**. İlk kurulum birkaç dakika sürer. Günlükte (Logs) en sonda `Your service is live` görmelisin.
 
@@ -138,3 +139,13 @@ Vercel → **Settings → Domains** → alan adını ekle ve DNS kayıtlarını 
 | Giriş yapınca hemen çıkış oluyor | Çerez `Secure` ve site `http` üzerinden açılıyor. Canlıda her zaman `https` kullan. |
 | Parola sıfırlama e-postası gelmiyor | `RESEND_API_KEY`/`MAIL_FROM` boş ya da alan adı doğrulanmamış. Render günlüğünde `The mail provider answered 4xx` satırına bak (e-posta adresi günlüğe yazılmaz). |
 | İlk istek yavaş | Neon uykudan uyanıyor (birkaç yüz ms); normal. |
+
+## Google ile giriş (isteğe bağlı)
+
+Siteye "Google ile devam et" düğmesi koymak için bir kez Google Cloud'da Client ID üretilir. Sır değildir, gizli anahtar gerekmez.
+
+1. console.cloud.google.com → proje oluştur (ör. `novera-mobility`).
+2. **APIs & Services → OAuth consent screen**: uygulama adı `Novera Mobility`, destek e-postası kendi adresin, kapsamlar yalnızca `email`, `profile`, `openid` (varsayılan). Test aşamasında kullanıcı türü **External**; "Publish app" yapılana kadar yalnızca eklediğin test kullanıcıları girebilir.
+3. **Credentials → Create credentials → OAuth client ID** → türü **Web application**. **Authorized JavaScript origins**: `https://novera-mobility.vercel.app` ve yerelde denemek için `http://localhost:3000` (yol ya da sondaki `/` yazma). "Authorized redirect URIs" boş kalır.
+4. Çıkan Client ID'yi (`...apps.googleusercontent.com`) **aynı değerle** iki yere gir: Render → `GOOGLE_CLIENT_ID` ve Vercel → `NEXT_PUBLIC_GOOGLE_CLIENT_ID`. İkisini de **yeniden dağıt** (Render otomatik başlar, Vercel için Redeploy).
+5. Canlıda kontrol: giriş sayfasında Google düğmesi görünür; yanlış değer girilirse düğme "invalid client" der, API ise `401 GOOGLE_TOKEN_INVALID` döner. `GOOGLE_CLIENT_ID` boşsa API `503 GOOGLE_SIGNIN_UNAVAILABLE` verir ve web düğmeyi göstermez.

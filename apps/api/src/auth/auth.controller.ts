@@ -3,6 +3,7 @@ import { ApiBody, ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swa
 import type { Request, Response } from 'express';
 import { asFormInput } from '../forms/form-input.js';
 import { clientKeyOf } from '../forms/rate-limiter.js';
+import { GoogleAuthService } from './google-auth.service.js';
 import { AuthService, type SessionStart } from './auth.service.js';
 import { SESSION_COOKIE, readCookie } from './session-token.js';
 import { toUserResponse, type UserResponse } from './user-view.js';
@@ -26,7 +27,10 @@ export function clearSessionCookie(response: Response): void {
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
-  constructor(@Inject(AuthService) private readonly authService: AuthService) {}
+  constructor(
+    @Inject(AuthService) private readonly authService: AuthService,
+    @Inject(GoogleAuthService) private readonly googleAuth: GoogleAuthService,
+  ) {}
 
   @Post('register')
   @ApiBody({
@@ -84,5 +88,31 @@ export class AuthController {
   ): Promise<void> {
     await this.authService.logout(readCookie(request.headers.cookie, SESSION_COOKIE));
     clearSessionCookie(response);
+  }
+
+  // 200 for an existing account, 201 when this call opened a new one.
+  @Post('google')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: ['credential'],
+      properties: { credential: { type: 'string', maxLength: 4096 }, consent: { type: 'boolean' } },
+    },
+  })
+  @ApiOkResponse({ description: 'Mevcut hesapla oturum açıldı (çerez set edilir)' })
+  @ApiCreatedResponse({ description: 'Yeni hesap oluşturuldu, oturum açıldı (çerez set edilir)' })
+  async google(
+    @Body() body: unknown,
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<UserResponse> {
+    const { session, created } = await this.googleAuth.signIn(
+      asFormInput(body),
+      clientKeyOf(request),
+      request.headers['user-agent'],
+    );
+    setSessionCookie(response, session);
+    response.status(created ? 201 : 200);
+    return toUserResponse(session.user);
   }
 }

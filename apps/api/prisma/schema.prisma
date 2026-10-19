@@ -83,7 +83,10 @@ enum QuoteStatus {
 model User {
   id           String      @id @default(uuid())
   email        String      @unique
-  passwordHash String
+  // Boş: hesap yalnızca Google ile açılmış, parola henüz belirlenmemiş (şifre sıfırlama ile belirlenir)
+  passwordHash String?
+  // Google hesabının değişmez kimliği (ID token `sub`); e-posta değişse de aynı kalır
+  googleSub    String?     @unique
   firstName    String
   lastName     String
   accountType  AccountType @default(INDIVIDUAL)

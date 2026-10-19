@@ -99,6 +99,11 @@ export class AuthService {
       await verifyAgainstDummy(password);
       throw invalidCredentials();
     }
+    if (user.passwordHash === null) {
+      // Google-only account: same work and same answer as a wrong password.
+      await verifyAgainstDummy(password);
+      throw invalidCredentials();
+    }
     if (!(await verifyPassword(password, user.passwordHash))) throw invalidCredentials();
 
     const token = newSessionToken();

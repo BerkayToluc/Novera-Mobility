@@ -2,6 +2,7 @@ import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { FormReader, rateLimited, validationFailed, type FormInput } from '../forms/form-input.js';
 import { RateLimiter } from '../forms/rate-limiter.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { passwordNotSet } from './auth.errors.js';
 import { describeDevice } from './device.js';
 import { hashPassword, verifyPassword } from './password.js';
 import type { UserRow } from './user-view.js';
@@ -37,6 +38,8 @@ export class AccountSecurityService {
     if (!this.limiter.allow(`change-password:${user.id}`, CHANGE_PASSWORD_LIMIT_PER_15_MIN, QUARTER_HOUR_MS)) {
       throw rateLimited();
     }
+
+    if (user.passwordHash === null) throw passwordNotSet();
 
     const form = new FormReader(input);
     const current = input.currentPassword;
