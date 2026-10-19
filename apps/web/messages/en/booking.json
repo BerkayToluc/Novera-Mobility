@@ -67,6 +67,7 @@
       "signin": "You need to sign in to continue.",
       "generic": "The booking could not be completed. Please try again.",
       "ineligible": "The driver does not meet the conditions.",
+      "promo": "The campaign code is no longer valid; the price was worked out again without it. Check the summary and try again.",
       "notVerified": "The licence could not be confirmed."
     },
     "pay": "Complete Payment",

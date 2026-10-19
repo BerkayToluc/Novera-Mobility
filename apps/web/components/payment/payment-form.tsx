@@ -84,6 +84,15 @@ export function PaymentForm({
         router.push({ pathname: "/rezervasyon", query: { ...query, durum: "dolu" } });
         return;
       }
+      // The campaign code stopped being valid while paying: the page prices the booking again without it,
+      // and the visitor decides whether to go on.
+      if (result.reason === "promo") {
+        const { kod: dropped, ...withoutCode } = query;
+        void dropped;
+        router.replace({ pathname: "/odeme", query: withoutCode });
+        setFormError(t("errors.promo"));
+        return;
+      }
       setFormError(t(result.reason === "not_verified" ? "errors.notVerified" : `errors.${result.reason}`));
     } catch {
       setFormError(t("errors.generic"));

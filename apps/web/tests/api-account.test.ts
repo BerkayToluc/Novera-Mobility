@@ -5,7 +5,7 @@ import type { components } from "../lib/api-types";
 import type { BookingData } from "../lib/booking-data";
 import { VehicleUnavailableError } from "../lib/hold-client";
 import { resetPassword } from "../lib/password-reset-actions";
-import { createReservation, reservationToApi } from "../lib/reservation-client";
+import { createReservation, PromoCodeError, reservationToApi } from "../lib/reservation-client";
 
 vi.mock("next/headers", () => ({
   headers: async () => new Headers({ "x-forwarded-for": "203.0.113.7" }),
@@ -130,10 +130,13 @@ describe("calls to the API", () => {
         exchangeRate: 1,
         days: 3,
         lines: [
-          { type: "VEHICLE", label: { tr: "Toyota", en: "Toyota" }, quantity: 3, unitPrice: { amount: 100000, currency: "TRY" }, total: { amount: 300000, currency: "TRY" } },
-          { type: "EXTRA", label: { tr: "Wi-Fi", en: "Wi-Fi" }, quantity: 3, unitPrice: { amount: 8000, currency: "TRY" }, total: { amount: 24000, currency: "TRY" } },
+          { type: "VEHICLE", slug: "toyota-corolla-hybrid", label: { tr: "Toyota", en: "Toyota" }, quantity: 3, unitPrice: { amount: 100000, currency: "TRY" }, total: { amount: 300000, currency: "TRY" } },
+          { type: "EXTRA", slug: "wifi", label: { tr: "Wi-Fi", en: "Wi-Fi" }, quantity: 3, unitPrice: { amount: 8000, currency: "TRY" }, total: { amount: 24000, currency: "TRY" } },
         ],
         total: { amount: 324000, currency: "TRY" },
+        promo: null,
+        pointsUsed: 0,
+        payable: { amount: 324000, currency: "TRY" },
       },
       vehicle: { id: "v1", model: { brand: "Toyota", model: "Corolla Hybrid", class: { slug: "e", name: { tr: "Ekonomik", en: "Economy" } } } },
     };
@@ -190,6 +193,18 @@ describe("calls to the API", () => {
     summary: { total: { amount: 486000, currency: "EUR" } },
     hold: { id: "h1" },
   } as unknown as BookingData;
+
+  it("sends the campaign code only when it took something off", () => {
+    const withCode = (applied: boolean) => ({ ...booking, promo: { code: "NOVERA10", applied } }) as unknown as BookingData;
+    expect(reservationToApi(withCode(true))).toMatchObject({ promoCode: "NOVERA10" });
+    expect(reservationToApi(withCode(false))).not.toHaveProperty("promoCode");
+    expect(reservationToApi(booking)).not.toHaveProperty("promoCode");
+  });
+
+  it("turns a code the API no longer knows into its own error", async () => {
+    vi.stubGlobal("fetch", respond(422, { code: "VALIDATION_FAILED", fieldErrors: { promoCode: "UNKNOWN_CODE" } }));
+    await expect(createReservation(booking)).rejects.toBeInstanceOf(PromoCodeError);
+  });
 
   it("sends a booking in the contract's shape, with the times in UTC", () => {
     expect(reservationToApi(booking)).toEqual({

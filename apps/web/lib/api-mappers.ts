@@ -1,6 +1,5 @@
 import type { components } from "./api-types";
 import type { BranchDetail, DayHours } from "./branch-detail";
-import type { Money } from "./currency";
 import type { Extra } from "./extra";
 import { VAT_PERCENT, type PriceSummary } from "./price-summary";
 import type { PointsAccount } from "./points";
@@ -159,7 +158,7 @@ export function offerFromApi(offer: Schemas["VehicleOffer"]): VehicleOffer {
     branchId: offer.branch.id,
     dailyPrice: offer.dailyPrice,
   });
-  return { ...vehicle, days: offer.days, totalPrice: offer.totalPrice };
+  return { ...vehicle, year: offer.year, days: offer.days, totalPrice: offer.totalPrice };
 }
 
 // The car of a booking, from its model. The price here is the model's lowest; the booking's own comes
@@ -178,31 +177,35 @@ export const extraFromApi = (extra: Schemas["Extra"]): Extra => ({
 
 // ---- Price ----
 
-// `POST /reservations/price` also answers how many points were spent and what is left to pay
-// (`pointsUsed`, `payable`) when the request asks for points; the contract file does not list them yet.
-export type ApiPriceBreakdown = Schemas["PriceBreakdown"] & { pointsUsed?: number; payable?: Money };
-
-// The API's lines as the summary shows them. The extras come back in the order they were asked for, one
-// line each. Total, points and what is left to pay are the server's (ADR-15): nothing is added up here.
-// The API has no campaign codes, so there is never a discount.
-export function summaryFromApi(breakdown: ApiPriceBreakdown, extras: Extra[]): PriceSummary {
+// The API's lines as the summary shows them: the car, the extras (matched by slug, in the order asked), and
+// the campaign code's line, a last one with a negative amount. Everything is the server's (ADR-15), nothing
+// is added up here: `total` is already without the discount, `payable` is what is left after the points.
+// A code that took nothing off (`promo.applied: false`) has no discount line, so there is no discount.
+export function summaryFromApi(breakdown: Schemas["PriceBreakdown"], extras: Extra[]): PriceSummary {
+  const { currency } = breakdown;
   const vehicleLine = breakdown.lines.find((line) => line.type === "VEHICLE");
+  const discountLine = breakdown.lines.find((line) => line.type === "DISCOUNT");
   const extraLines = breakdown.lines
     .filter((line) => line.type === "EXTRA")
-    .flatMap((line, index) => (extras[index] ? [{ extra: extras[index], cost: line.total }] : []));
-  const payable = breakdown.payable ?? breakdown.total;
-  const pointsUsed = breakdown.pointsUsed ?? 0;
+    .flatMap((line) => {
+      const extra = extras.find((candidate) => candidate.slug === line.slug);
+      return extra ? [{ extra, cost: line.total }] : [];
+    });
+  const discountAmount = discountLine ? Math.abs(discountLine.total.amount) : 0;
+  const { payable, pointsUsed } = breakdown;
   return {
-    vehicleTotal: vehicleLine?.total ?? { amount: 0, currency: breakdown.currency },
+    vehicleTotal: vehicleLine?.total ?? { amount: 0, currency },
     extraLines,
-    subtotal: breakdown.total,
-    discount: null,
-    points:
-      pointsUsed > 0
-        ? { count: pointsUsed, amount: { amount: breakdown.total.amount - payable.amount, currency: breakdown.currency } }
+    // The car and the extras together, before the code.
+    subtotal: { amount: breakdown.total.amount + discountAmount, currency },
+    discount:
+      discountLine && breakdown.promo?.applied
+        ? { code: breakdown.promo.code, percent: breakdown.promo.percent ?? 0, amount: { amount: discountAmount, currency } }
         : null,
+    points:
+      pointsUsed > 0 ? { count: pointsUsed, amount: { amount: breakdown.total.amount - payable.amount, currency } } : null,
     total: payable,
-    vat: { amount: Math.floor((payable.amount * VAT_PERCENT) / (100 + VAT_PERCENT)), currency: breakdown.currency },
+    vat: { amount: Math.floor((payable.amount * VAT_PERCENT) / (100 + VAT_PERCENT)), currency },
   };
 }
 
@@ -224,12 +227,12 @@ export type Receipt = {
 };
 
 export function receiptFromApi(reservation: Schemas["Reservation"]): Receipt {
-  const price = reservation.price as ApiPriceBreakdown;
+  const price = reservation.price;
   const vehicleLine = price.lines.find((line) => line.type === "VEHICLE");
-  // The stored lines carry no extra's slug; the name and the unit price are what the lines show.
+  // The stored lines say which extra they are by slug; the name and the unit price are what they show.
   const extras: Extra[] = price.lines
     .filter((line) => line.type === "EXTRA")
-    .map((line, index) => ({ slug: `extra-${index}`, name: line.label, price: line.unitPrice, pricing: "FIXED" }));
+    .map((line) => ({ slug: line.slug, name: line.label, price: line.unitPrice, pricing: "FIXED" }));
   return {
     number: reservation.number,
     vehicle: {

@@ -67,6 +67,7 @@
       "signin": "Devam etmek için giriş yapmanız gerekiyor.",
       "generic": "Rezervasyon tamamlanamadı. Lütfen tekrar deneyin.",
       "ineligible": "Sürücü koşulları karşılanmıyor.",
+      "promo": "Kampanya kodu artık geçerli değil; fiyat kod olmadan yeniden hesaplandı. Özeti kontrol edip ödemeyi tekrar deneyin.",
       "notVerified": "Ehliyet doğrulanamadı."
     },
     "pay": "Ödemeyi Tamamla",

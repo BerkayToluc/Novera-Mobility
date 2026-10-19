@@ -198,6 +198,7 @@ describe("the price", () => {
     lines: [
       {
         type: "VEHICLE",
+        slug: "toyota-corolla-hybrid",
         label: { tr: "T", en: "T" },
         quantity: 3,
         unitPrice: { amount: 100000, currency: "TRY" },
@@ -205,6 +206,7 @@ describe("the price", () => {
       },
       {
         type: "EXTRA",
+        slug: "wifi",
         label: { tr: "Wi-Fi", en: "Wi-Fi" },
         quantity: 3,
         unitPrice: { amount: 8000, currency: "TRY" },
@@ -212,6 +214,7 @@ describe("the price", () => {
       },
     ],
     total: { amount: 324000, currency: "TRY" },
+    promo: null,
     pointsUsed: 100,
     payable: { amount: 274000, currency: "TRY" },
   };
@@ -246,10 +249,47 @@ describe("the price", () => {
   });
 
   it("shows the plain total when no points are spent, and the VAT inside it", () => {
-    const summary = summaryFromApi({ ...breakdown, pointsUsed: 0, payable: undefined } as never, [wifi]);
+    const summary = summaryFromApi({ ...breakdown, pointsUsed: 0, payable: breakdown.total } as never, [wifi]);
     expect(summary.total).toEqual({ amount: 324000, currency: "TRY" });
     expect(summary.points).toBeNull();
     expect(summary.vat.amount).toBe(54000);
+  });
+
+  it("takes the campaign code off the car and the extras, then the points off what is left", () => {
+    // 3 days of the car (₺3.000) and the Wi-Fi (₺240): ₺3.240, 10% is ₺324, so ₺2.916; 100 points are ₺500.
+    const discounted = {
+      ...breakdown,
+      lines: [...breakdown.lines, { type: "DISCOUNT", slug: "NOVERA10", label: { tr: "NOVERA10", en: "NOVERA10" }, quantity: 1, unitPrice: { amount: -32400, currency: "TRY" }, total: { amount: -32400, currency: "TRY" } }],
+      total: { amount: 291600, currency: "TRY" },
+      promo: { code: "NOVERA10", applied: true, percent: 10 },
+      pointsUsed: 100,
+      payable: { amount: 241600, currency: "TRY" },
+    };
+    const summary = summaryFromApi(discounted as never, [wifi]);
+    expect(summary.subtotal).toEqual({ amount: 324000, currency: "TRY" });
+    expect(summary.discount).toEqual({ code: "NOVERA10", percent: 10, amount: { amount: 32400, currency: "TRY" } });
+    expect(summary.points).toEqual({ count: 100, amount: { amount: 50000, currency: "TRY" } });
+    expect(summary.total).toEqual({ amount: 241600, currency: "TRY" });
+    // The lines still add up: the car and the extras, minus the code, minus the points.
+    expect(summary.vehicleTotal.amount + summary.extraLines[0].cost.amount - summary.discount!.amount.amount - summary.points!.amount.amount).toBe(
+      summary.total.amount,
+    );
+  });
+
+  it("shows no discount for a code that took nothing off, and still names it", () => {
+    const summary = summaryFromApi(
+      { ...breakdown, pointsUsed: 0, payable: breakdown.total, promo: { code: "ESKI", applied: false, percent: null } } as never,
+      [wifi],
+    );
+    expect(summary.discount).toBeNull();
+    expect(summary.subtotal).toEqual(summary.total);
+  });
+
+  it("sends the code with the price", async () => {
+    const fetchMock = respond(200, { ...breakdown, pointsUsed: 0, payable: breakdown.total });
+    vi.stubGlobal("fetch", fetchMock);
+    await quotePrice({ vehicle, days: 3, extras: [], currency: "TRY", search, promoCode: "NOVERA10" });
+    expect(JSON.parse(initOf(fetchMock).body as string)).toMatchObject({ promoCode: "NOVERA10" });
   });
 
   it("tells a car that was taken", async () => {
