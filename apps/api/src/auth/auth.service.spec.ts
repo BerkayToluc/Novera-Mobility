@@ -216,6 +216,7 @@ describe('toUserResponse satış iletişimi', () => {
     id: 'u1', email: 'a@b.co', passwordHash: 'x', firstName: 'A', lastName: 'B',
     accountType: 'CORPORATE' as const, companyName: 'Firma', taxOffice: null, companyCity: null,
     companyPhone: null, contactTitle: null, locale: 'TR' as const, theme: 'LIGHT' as const, currency: 'TRY' as const,
+    googleSub: null, notifyReminders: true, notifyCampaigns: false,
   };
 
   it('JSON alanı tam ise satış iletişimini döner', () => {

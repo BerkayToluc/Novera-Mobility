@@ -26,6 +26,9 @@ services:
       # The public address of the web site, https://..., used in the password reset e-mail.
       - key: WEB_URL
         sync: false
+      # Google sign-in: the OAuth Client ID (not a secret). Leave empty to switch it off.
+      - key: GOOGLE_CLIENT_ID
+        sync: false
       # Password reset e-mail through Resend. Leave both empty to send no e-mail yet.
       - key: RESEND_API_KEY
         sync: false

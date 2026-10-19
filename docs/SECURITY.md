@@ -34,6 +34,15 @@ yeni testler ve `pnpm audit`.
 - **CSRF:** `SameSite=Lax` + yalnızca JSON gövdeli POST/PATCH/DELETE. Çapraz site isteğine çerez eklenmez. Kodda tarayıcıdan `/api` çağrısı bulunmadı; tüm çağrılar sunucudan gidiyor.
 - **Bağımlılıklar (`pnpm audit`):** üretim bağımlılıklarında 3 bulgu var (`mysql2` 2 adet, `deepmerge-ts` 1 adet); hepsi Prisma **komut satırı aracının** içinden geliyor, çalışan API'de kullanılmıyor (veritabanı sürücüsü `pg`). Geliştirme bağımlılığı `@nestjs/mau` içinde `undici` ve `tmp` bulguları var; canlıya girmez. Prisma ve Nest güncellemelerinde `pnpm audit` tekrar çalıştırılmalı.
 
+## Google ile giriş (`POST /auth/google`)
+
+- **Doğrulama:** Google'ın ID token'ı API'de `jose` ile doğrulanır: imza (Google'ın herkese açık anahtarları, RS256), `iss` (`accounts.google.com`), `aud` (bizim `GOOGLE_CLIENT_ID`), süre ve `email_verified === true`. İstemci sırrı yoktur. Token tarayıcıdan gelir ama başkasının token'ı bizim Client ID'mize ait olmadığı için kabul edilmez.
+- **Hesap ele geçirme (pre-hijack) önlemi:** parolayla kayıtta e-posta doğrulanmıyor. Biri başkasının adresiyle önceden kayıt açmış olabilir. Gerçek sahibi Google ile girince hesap bağlanır, **parola silinir, tüm oturumlar ve sıfırlama bağlantıları iptal edilir**. Sahibi Google ile ya da "şifremi unuttum" ile devam eder.
+- **Yalnızca bireysel hesap:** kurumsal hesabı Novera açar; aynı e-postayla Google denemesi `403`.
+- **Onay:** yeni hesapta KVKK onayı (`consent: true`) olmadan hesap açılmaz (`422`).
+- **Sınır:** 15 dakikada istemci başına 10 deneme. Parolasız hesapta parola girişi, yanlış parola gibi aynı cevabı ve aynı işi yapar (hesap varlığı sızmaz).
+- **Veri:** Google'dan yalnızca `sub`, e-posta ve ad saklanır. `googleSub` yanıtta çıkmaz (`googleLinked` bayrağı çıkar).
+
 ## Karar bekleyenler (kodda değiştirilmedi)
 
 1. **Hesap silme için parola istemek.** `DELETE /me` yalnızca oturum çerezine bakıyor; çalınmış bir oturum hesabı siler. Parola (`currentPassword`) istemek sözleşme ve ön yüz değişikliği gerektirir (G).
