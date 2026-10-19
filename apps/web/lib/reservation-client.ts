@@ -3,6 +3,14 @@ import { apiRequest } from "./api-request";
 import type { components } from "./api-types";
 import type { BookingData } from "./booking-data";
 import { ApiUnavailableError } from "./fleet-client";
+
+// The campaign code is no longer valid (openapi 422, `fieldErrors.promoCode: UNKNOWN_CODE`).
+export class PromoCodeError extends Error {
+  constructor() {
+    super("The campaign code is no longer valid.");
+    this.name = "PromoCodeError";
+  }
+}
 import { holdApiId, VehicleUnavailableError } from "./hold-client";
 import { toUtc } from "./rental-search";
 
@@ -12,7 +20,7 @@ type Schemas = components["schemas"];
 // moments are the visitor's Istanbul wall-clock times turned into UTC; the currency is the one the
 // visitor saw the total in. Extras go one each: the site has no quantity picker. Paying with points
 // goes as `usePoints` (the API spends what it may). A campaign code is not in the contract, so it is not sent.
-export function reservationToApi(data: BookingData): Schemas["ReservationRequest"] & { usePoints?: boolean } {
+export function reservationToApi(data: BookingData): Schemas["ReservationRequest"] {
   return {
     vehicleId: data.vehicle.id,
     pickupBranchId: data.pickup.id,
@@ -22,6 +30,9 @@ export function reservationToApi(data: BookingData): Schemas["ReservationRequest
     currency: data.summary.total.currency,
     ...(data.hold ? { holdId: holdApiId(data.hold.id) } : {}),
     ...(data.booking.usePoints && data.pointsBalance !== null ? { usePoints: true } : {}),
+    // Only a code that took something off: one the visitor was told is not valid would be refused (422), and
+    // one that was applied but not sent would charge the full price after showing the discounted one.
+    ...(data.promo?.applied ? { promoCode: data.promo.code } : {}),
     ...(data.extras.length > 0 ? { extras: data.extras.map((extra) => ({ slug: extra.slug, quantity: 1 })) } : {}),
   };
 }
@@ -42,5 +53,7 @@ export async function createReservation(data: BookingData): Promise<{ number: st
   const result = await apiRequest<Schemas["Reservation"]>("POST", "/reservations", reservationToApi(data));
   if (result.status === "ok") return { number: result.data.number };
   if (result.status === "conflict" && result.code === "VEHICLE_UNAVAILABLE") throw new VehicleUnavailableError();
+  // A code that is unknown, closed or out of date by now: the visitor saw a discount that would not be given.
+  if (result.status === "invalid" && result.fieldErrors.promoCode === "UNKNOWN_CODE") throw new PromoCodeError();
   throw new ApiUnavailableError();
 }

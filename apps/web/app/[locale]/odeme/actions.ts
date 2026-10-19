@@ -7,7 +7,7 @@ import { LICENCE_COUNTRIES, needsInternationalPermit, requirementsFor, type Lice
 import { getCurrency } from "@/lib/get-currency";
 import { VehicleUnavailableError } from "@/lib/hold-client";
 import { verifyLicence, type LicenceStatus } from "@/lib/licence-client";
-import { createReservation } from "@/lib/reservation-client";
+import { createReservation, PromoCodeError } from "@/lib/reservation-client";
 import { getSession } from "@/lib/session";
 
 // What the driver section sends along with the booking. It is checked again here, in its plainest
@@ -26,7 +26,7 @@ export type DriverBody = z.input<typeof driverBody>;
 export type PlaceReservationResult =
   | { ok: true; number: string }
   // `expired`: the 15-minute hold ran out; `taken`: someone else got the car (SPEC §2.3).
-  | { ok: false; reason: "invalid" | "signin" | "unavailable" | "expired" | "taken" }
+  | { ok: false; reason: "invalid" | "signin" | "unavailable" | "expired" | "taken" | "promo" }
   // The driver does not meet the class's conditions for the licence's country, or the check of the
   // licence did not come back valid (SPEC §2.10).
   | { ok: false; reason: "ineligible"; reasons: EligibilityReason[] }
@@ -81,6 +81,7 @@ export async function placeReservation(
     return { ok: true, ...(await createReservation(loaded)) };
   } catch (error) {
     if (error instanceof VehicleUnavailableError) return { ok: false, reason: "taken" };
+    if (error instanceof PromoCodeError) return { ok: false, reason: "promo" };
     return { ok: false, reason: "unavailable" };
   }
 }
