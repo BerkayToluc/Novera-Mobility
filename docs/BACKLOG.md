@@ -198,6 +198,55 @@ Sıra ve öneri dosyasındaki ek kalite maddeleri G tarafından 10 Ekim 2026'da 
 | Y47 | Kullanıcı tercihleri: varsayılan para birimi, dil, tema hesapta (#28'in genişlemesi) | BE | #28 | Tercih kaydedilip girişte dönüyor |
 | Y48 | Araç tutma: Kirala'da seçilen araç 15 dakika tutulur, süre dolunca serbest kalır; tutulan araç başka aramada müsait görünmez; tutma bitiş zamanı ISO 8601 UTC döner; çakışma `409 VEHICLE_UNAVAILABLE` (SPEC §2.3, ARCHITECTURE "Backend ile netleşecekler") | BE | #21, #22 | İki oturum aynı aracı alamıyor; 15 dakika sonra araç yeniden müsait |
 
+## M8 · Yönetim paneli ve ürün/hizmet içeriği (20 Ekim 2026, SPEC v0.11)
+
+Açıklama, sıra ve görev dağılımı: [ROADMAP.md](ROADMAP.md); tasarım: [ADMIN.md](ADMIN.md) ve [FLEET.md](FLEET.md). Sahip: **BE = Berkay, FE = G**. Her fazda önce BE işi `main`'e girer, sonra o fazın FE işi başlar. Y5 (ürün ve hizmet sayfalarını API'ye bağla) Y84'tür.
+
+| # | İş | Sahip | Bağımlı |
+|---|---|---|---|
+| Y79 | Belgeler: SPEC v0.11, ADR-24, ADR-25, ADMIN.md, FLEET.md, ROADMAP.md | İKİ | — |
+| Y80 | Google ile giriş ön yüzü | FE | #258 |
+| Y81 | Rol, `AdminGuard`, işlem kaydı, `admin:create`, `GET /admin/summary` | BE | Y79 |
+| Y82 | Yönetim kabuğu, iki panelin ortak bileşenleri, Özet | FE | Y81 |
+| Y83 | Ürün ve hizmet içerik modeli, seed, `/admin/products`, `/admin/services` | BE | Y81 |
+| Y84 | Ürün ve hizmet sayfaları API'den (Y5) | FE | Y83 |
+| Y85 | Yönetim > Ürünler ve Hizmetler | FE | Y82, Y83 |
+| Y86 | `/admin/reservations`, `/admin/quotes`, `/admin/contact-messages` | BE | Y81 |
+| Y87 | Yönetim > Rezervasyonlar, Teklifler, Mesajlar | FE | Y82, Y86 |
+| Y88 | `/admin/promo-codes`, `/admin/faq` | BE | Y81 |
+| Y89 | Kiralık filo uçları (modeller, bayiler, araçlar, ek hizmetler) | BE | Y81 |
+| Y90 | Yönetim > Kampanya kodları ve SSS | FE | Y82, Y88 |
+| Y91 | Yönetim > Kiralık filo | FE | Y82, Y89 |
+| Y92 | `Company`, `/admin/companies` (kullanıcı daveti), `/admin/users` (devre dışı bırakma) | BE | Y81 |
+| Y93 | Yönetim > Kurumsal müşteriler, Kullanıcılar, İşlem kaydı | FE | Y82, Y92 |
+
+## M9 · Filom: kurumsal filo paneli (20 Ekim 2026, SPEC v0.11)
+
+| # | İş | Sahip | Bağımlı |
+|---|---|---|---|
+| Y94 | Filom verisi (personel, sözleşme, filo aracı, zimmet, okuma), `CompanyGuard`, `/fleet/*` ilk uçlar, örnek şirket seed'i | BE | Y92 |
+| Y95 | Yönetim > Sözleşmeler, filo araçları, okumalar (istisna: Berkay) | FE (Berkay) | Y82, Y94 |
+| Y96 | Filom kabuğu: Özet, Araçlar, Personel, Zimmet, Sözleşmeler | FE | Y82, Y94 |
+| Y97 | Faturalar ve masraflar (otomatik personel eşleme), yenileme talebi | BE | Y94 |
+| Y98 | Yönetim > Faturalar ve Filo masrafları (istisna: Berkay) | FE (Berkay) | Y95, Y97 |
+| Y99 | Filom > Faturalar ve Masraflar | FE | Y96, Y97 |
+| Y100 | `/fleet/reports` (maliyet, kilometre, karbon, batarya) | BE | Y97 |
+| Y101 | Filom > Raporlar | FE | Y96, Y100 |
+
+## M10 · Yayın tamamlama (20 Ekim 2026)
+
+| # | İş | Sahip | Bağımlı |
+|---|---|---|---|
+| Y102 | Rezervasyon onayı, hatırlatma ve kurumsal davet e-postaları | BE | Resend alan adı |
+| Y103 | SECURITY.md açık kararları (hesap silmede doğrulama, giriş kilidi, açık uçlara hız sınırı) | BE | — |
+| Y104 | Hesap silmede doğrulama alanı | FE | Y103 |
+| Y105 | Fotoğraflar ve görsel sıkıştırma | FE | — |
+| Y106 | Lighthouse ve ekran okuyucu denetimi (#47'nin kalanı) | FE | Y105 |
+| Y107 | Canlı ortam tamamlama (site adresi, analytics, Maps anahtarı, anahtar kontrolü, yedek) | İKİ | — |
+| Y108 | Son kabul (SPEC §8 canlıda, iki panel turu), STATUS.md v1, `v1.0.0` | İKİ | Hepsi |
+
+Bitti sayılması için ölçütler ROADMAP §3'teki tablolarda. **GitHub issue numaraları:** issue'lar açılınca buraya yazılır.
+
 ---
 
 ## İlk gün ne yapılır?

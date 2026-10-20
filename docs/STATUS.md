@@ -1,5 +1,7 @@
 # Proje durumu
 
+> **20 Ekim 2026:** Bu belgenin §2–§5'i 11 Ekim anlık görüntüsüdür ve büyük ölçüde eskidi (bekleyen dalların hepsi birleşti, API canlıda, taklitlerin çoğu gerçek uca bağlandı; bkz. [API-GAPS.md](API-GAPS.md)). Kalan işler ve görev dağılımı için güncel kaynak [ROADMAP.md](ROADMAP.md). Bu belge v1 sonunda (BACKLOG Y100) yeniden yazılacak.
+
 Son güncelleme: 2026-10-11. Bu belge bir anlık görüntüdür; kalıcı kararlar ARCHITECTURE'a, kapsam SPEC'e, iş listesi BACKLOG'a aittir. Çelişki olursa onlar kazanır. Dalların `main`'de olup olmadığını bu belgeye değil `git fetch` sonrası git'e sorun.
 
 **Güncel plan:** SPEC v0.4, ARCHITECTURE v0.2 ve BACKLOG M7 (sıralı iş listesi). Hepsi `main`'de.

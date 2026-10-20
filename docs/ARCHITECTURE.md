@@ -1,6 +1,6 @@
 # Novera Mobility: Mimari Kararlar (ARCHITECTURE)
 
-> Durum: **Taslak v0.2** · 9 Ekim 2026 (v0.1: 4 Ekim 2026). v0.2: SPEC v0.3 için ADR-18 ile ADR-23 ve "Backend ile netleşecekler" eklendi.
+> Durum: **Taslak v0.3** · 20 Ekim 2026 (v0.1: 4 Ekim 2026). v0.2 (9 Ekim): SPEC v0.3 için ADR-18 ile ADR-23 ve "Backend ile netleşecekler" eklendi. v0.3: SPEC v0.11 için ADR-24 (Yönetim paneli) ve ADR-25 (Filom).
 > Ekip belirli bir teknoloji tercihi belirtmedi; seçimler SPEC'teki ihtiyaçlara göre yapıldı.
 > Her karar *Bağlam / Alternatifler / Sonuç / Ödünleşim* düzeninde. Bir karar değişirse burada güncellenir, eski hali "Değiştirildi" notuyla kalır.
 > Sürüm numaraları bilerek yazılmadı: kurulum günü her paketin **güncel kararlı** sürümü kullanılır ve `package.json`'a sabitlenir.
@@ -166,7 +166,7 @@ Tek dil: **TypeScript**, frontend'de de backend'de de.
 
 - **Hata biçimi:** `{ "code": "VALIDATION_FAILED", "message": "geliştirici için İngilizce metin", "fieldErrors": { "email": "EMAIL_TAKEN" } }`. `code` ve `fieldErrors` değerleri **sabit makine kodlarıdır** (`INVALID_CREDENTIALS`, `EMAIL_TAKEN`, `VEHICLE_UNAVAILABLE`...); frontend metni kendi çeviri dosyasından gösterir, `message` ekranda gösterilmez. HTTP kodları: 400/422 doğrulama, 401 oturum yok, 404, 409 çakışma.
 - **Dil:** Çevrilen alanlar **iki dille birlikte** döner (`"name": { "tr": "Ekonomik", "en": "Economy" }`). Cevap dile göre değişmez; dil değişince yeniden istek gerekmez, önbellekleme ve mock basit kalır.
-- **Sayfalama:** Yok, düz liste (15 model, 15 bayi; SPEC §4.1). Sunucu yalnızca müsaitliği (tarih + lokasyon) filtreler; sınıf, yakıt, vites gibi filtreleri frontend yapar. İletişim sayfasındaki bayi filtresi (şehir) ve araması da tarayıcıda yapılır.
+- **Sayfalama:** Yok, düz liste (15 model, 15 bayi; SPEC §4.1). İstisna: yönetim paneli uçları (`/admin/*`) sayfalıdır, bkz. ADR-24. Sunucu yalnızca müsaitliği (tarih + lokasyon) filtreler; sınıf, yakıt, vites gibi filtreleri frontend yapar. İletişim sayfasındaki bayi filtresi (şehir) ve araması da tarayıcıda yapılır.
 - **Ürün ve hizmet içeriği API'den gelir** (SPEC §7): `Product`, `Service` modelleri ve `GET /products`, `GET /products/:slug`, `GET /services` uçları, iki dilli alanlarla. Teklif isteği ürün slug'ını (`akilli-kurumsal-filo`) isteğe bağlı taşır. Sayfalar API gelene kadar çeviri dosyalarındaki metinle (SPEC Ek A) çalışır, sonra API'ye bağlanır (BACKLOG Y5).
 
 ## ADR-18 · SEO: meta verisi, robots, sitemap, yapılandırılmış veri
@@ -229,6 +229,27 @@ Tek dil: **TypeScript**, frontend'de de backend'de de.
 
 - **Sonuç:** 404 `app/[locale]/not-found.tsx`'tedir (var). 500 için `app/[locale]/error.tsx`: header ve footer korunur, "Tekrar dene" sayfayı yeniden dener. Kök layout'un kendisi çökerse `app/global-error.tsx` devreye girer; kendi `<html>`'ini yazar ve metni provider olmadan çeviri dosyasından doğrudan okur. Hata sayfaları `noindex`'tir.
 - **Ödünleşim:** `global-error` layout'u kullanamadığı için tema ve dil çerezini kendisi okur; görünümü sade tutulur.
+
+## ADR-24 · Yönetim paneli (SPEC §2.11, v0.3)
+
+- **Bağlam:** Novera çalışanları ürün ve hizmet metinlerini, kampanya kodlarını, SSS'yi, filoyu, rezervasyonları, teklif taleplerini ve kullanıcıları koddan bağımsız yönetmeli. Ayrıntılı tasarım `docs/ADMIN.md`.
+- **Alternatifler:** (a) ayrı bir uygulama (`apps/admin`) ve ayrı yayın; (b) hazır bir yönetim aracı (ör. veritabanına bağlanan bir panel); (c) mevcut Next uygulamasında ayrı bir bölüm.
+- **Sonuç:** (c). Panel `apps/web` içinde `app/[locale]/yonetim` altındadır (EN `/en/admin`), aynı tasarım token'larını, çeviri düzenini, oturum çerezini ve API vekilini (ADR-14) kullanır. Yetki API'de denetlenir: `User.role` (`CUSTOMER`, `ADMIN`) ve `/admin/*` uçlarının önündeki `AdminGuard`; web'deki rol kontrolü yalnızca yönlendirme içindir. Yönetici hesabı komut satırından açılır (`pnpm admin:create`), Google ile giriş yapamaz, oturumu 12 saattir. Değiştiren her istek `AdminAuditLog`'a yazılır (değerler değil, değişen alanlar).
+- **ADR-17'den farklar** (yalnızca `/admin/*` için): listeler sayfalıdır (`?page=&pageSize=`, cevap `{ items, total, page, pageSize }`, `pageSize` en çok 100) ve sunucuda süzülür; düzenlenen kayıt `updatedAt` taşır, arada değişmişse `409 STALE_WRITE`. Yeni hata kodları: `FORBIDDEN` (403), `STALE_WRITE`, `IN_USE`, `INVALID_TRANSITION` (409). Herkese açık uçların kuralları değişmez.
+- **Önbellek:** herkese açık ürün ve hizmet uçlarını web etiketli önbellekle (`products`, `services`) okur; panelden kayıt yapan sunucu eylemi `revalidateTag` çağırır.
+- **Ödünleşim:** panel hatası sitenin derlemesini etkileyebilir ve panel kodu sitenin paketine girer (yalnızca `/yonetim` rotalarında yüklenir). Ayrı uygulama bunu önlerdi ama iki yayın, iki oturum ve iki tasarım kurulumu demekti; iki kişilik ekip için (c) daha az iş.
+
+## ADR-25 · Filom: kurumsal filo paneli (SPEC §2.12, v0.3)
+
+- **Bağlam:** kurumsal müşteri kendi filosunu (araç, personel, zimmet, sözleşme, fatura, masraf, rapor) görmeli ve yönetmeli; veri Novera'nın Yönetim panelinden girilir. Ayrıntılı tasarım `docs/FLEET.md`.
+- **Sonuç:**
+  - Yer: `apps/web` içinde `app/[locale]/filom` (EN `/en/my-fleet`); ADR-24'ün ortak liste ve form bileşenlerini kullanır.
+  - **Şirket kavramı:** yeni `Company` modeli; kurumsal `User` kayıtları `companyId` ile bağlanır. Bugün `User` üzerindeki firma alanları migration'la taşınır, `GET /me` yanıtının biçimi değişmez.
+  - **Ayrı araç tablosu:** uzun dönem filo araçları `FleetVehicle`'dır, kiralık `Vehicle`'dan ayrıdır; müsaitlik ve arama kodu filo araçlarını hiç görmez.
+  - **Yetki:** `/fleet/*` uçları `CompanyGuard` arkasında (oturum + kurumsal hesap + şirket); her sorgu `companyId` ile süzülür, başka şirketin kaydı `404`. Yönetim tarafı `/admin/companies/*` vb., ADR-24 kuralları.
+  - **Türetilen değerler saklanmaz:** faturanın "gecikti" durumu, masrafın personeli (zimmetten), rapor toplamları sorgu anında hesaplanır; böylece geriye dönük düzeltme tutarsızlık bırakmaz.
+  - Tutarlar TRY alt birimde (ADR-15'in para birimi çevirisi Filom'da uygulanmaz).
+- **Ödünleşim:** `Company`'ye taşıma mevcut kurumsal hesaplara dokunan bir migration'dır; testle korunur. Ayrı araç tablosu bir aracın hem kiralık hem filo olmasını engeller; v1'de bu gerekmiyor.
 
 ## Backend ile netleşecekler (BACKLOG #6, `openapi.yaml`)
 

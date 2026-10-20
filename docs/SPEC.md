@@ -1,6 +1,6 @@
 # Novera Mobility: Ürün Tanımı (SPEC)
 
-> Durum: **Taslak v0.10** · 17 Ekim 2026 (v0.10: G'nin 17 Ekim ince ayarları: Puanla öde anahtarında bakiye yazısı kalktı, üstü çizili toplam ve yanında "puan + kalan", tek görünüm düğmesi, kurumsal tekliften teslim şehirlerinin listeden seçilmesi, tam duyarlılık taraması; §2.2.3, §2.3, §5.7) · v0.9: 16 Ekim 2026 (v0.9: G'nin 16 Ekim kararları: Hizmetler sayfasının yenilenmesi (kartlar, nasıl işler, paketler, rakamlar, ürün tablosu, acil durum bandı), telefon numaralarında gönder/kopyala balonu, kurumsal teklifte seçili ürün; §2.2.3, §2.5, §2.6) · v0.8: 15 Ekim 2026 (v0.8: G'nin 15 Ekim kararları: 1 puan = ₺5, sürücü kuralı 18 yaş ve geçerli ehliyet, sonuç kartlarında toplam fiyat önce ve 100 km yakıt, liste/ızgara görünümü, İletişim'de Yardım kartı, profilin yenilenmesi; §2.3, §2.6, §2.9, §2.10) · v0.7: 14 Ekim 2026 (v0.7: G'nin 13-14 Ekim kararları: Framer bileşenleriyle navbar, şerit, güvence bandı, SSS, footer, e-posta bağlantıları; ürün sayfaları; sonuç filtresi, puanla ödeme, özet fiyat satırları ve KDV, kampanya kodunun özete taşınması; §2.2, §2.3, §2.5, §2.6, §2.7, §2.8, §5.4, §5.6) · v0.6: 12 Ekim 2026 (v0.6: G'nin 12 Ekim ana sayfa rötuşları: kurumsal süre 1/2/3 ay, bayi satırında çalışma durumu, tek sütun araç kartı ve fiyat bloğu, durdur düğmesi yerine kullanıcı başlatan şerit, güvence bandında akan çizgi, mağaza işaretleri, oklu rehber kaydırıcı, konu sekmeli SSS; §2.2, §2.4, §2.9, §5.4) · v0.5: 11 Ekim (v0.4: 10 Ekim, v0.3: 9 Ekim, v0.2: 4 Ekim 2026). v0.5: G'nin 11 Ekim navbar ve sayfa düzeni geri bildirimi (yüzen hap navbar, Bayilerimiz sayfası, filonun ana sayfaya taşınması; §2.1, §2.4, §2.6, §2.8, §5.3, §8)
+> Durum: **Taslak v0.11** · 20 Ekim 2026 (v0.11: Berkay'ın 20 Ekim önerisi, G'nin onayına: iki panel kapsama girer: Novera çalışanları için **Yönetim paneli** ve kurumsal müşteri için **Filom** (Ek A'da satılan "Novera Admin Paneli"); ürün ve hizmet içeriği panelle birlikte API'ye taşınır, kurumsal hesabı Novera panelden açar; §2.1, §2.9, §2.11, §2.12, §3, §10; ayrıntı docs/ADMIN.md, docs/FLEET.md) · v0.10: 17 Ekim 2026 (v0.10: G'nin 17 Ekim ince ayarları: Puanla öde anahtarında bakiye yazısı kalktı, üstü çizili toplam ve yanında "puan + kalan", tek görünüm düğmesi, kurumsal tekliften teslim şehirlerinin listeden seçilmesi, tam duyarlılık taraması; §2.2.3, §2.3, §5.7) · v0.9: 16 Ekim 2026 (v0.9: G'nin 16 Ekim kararları: Hizmetler sayfasının yenilenmesi (kartlar, nasıl işler, paketler, rakamlar, ürün tablosu, acil durum bandı), telefon numaralarında gönder/kopyala balonu, kurumsal teklifte seçili ürün; §2.2.3, §2.5, §2.6) · v0.8: 15 Ekim 2026 (v0.8: G'nin 15 Ekim kararları: 1 puan = ₺5, sürücü kuralı 18 yaş ve geçerli ehliyet, sonuç kartlarında toplam fiyat önce ve 100 km yakıt, liste/ızgara görünümü, İletişim'de Yardım kartı, profilin yenilenmesi; §2.3, §2.6, §2.9, §2.10) · v0.7: 14 Ekim 2026 (v0.7: G'nin 13-14 Ekim kararları: Framer bileşenleriyle navbar, şerit, güvence bandı, SSS, footer, e-posta bağlantıları; ürün sayfaları; sonuç filtresi, puanla ödeme, özet fiyat satırları ve KDV, kampanya kodunun özete taşınması; §2.2, §2.3, §2.5, §2.6, §2.7, §2.8, §5.4, §5.6) · v0.6: 12 Ekim 2026 (v0.6: G'nin 12 Ekim ana sayfa rötuşları: kurumsal süre 1/2/3 ay, bayi satırında çalışma durumu, tek sütun araç kartı ve fiyat bloğu, durdur düğmesi yerine kullanıcı başlatan şerit, güvence bandında akan çizgi, mağaza işaretleri, oklu rehber kaydırıcı, konu sekmeli SSS; §2.2, §2.4, §2.9, §5.4) · v0.5: 11 Ekim (v0.4: 10 Ekim, v0.3: 9 Ekim, v0.2: 4 Ekim 2026). v0.5: G'nin 11 Ekim navbar ve sayfa düzeni geri bildirimi (yüzen hap navbar, Bayilerimiz sayfası, filonun ana sayfaya taşınması; §2.1, §2.4, §2.6, §2.8, §5.3, §8)
 > Sahipler: G (frontend), arkadaş (backend)
 > İçerik kaynağı: G'nin proje sohbetindeki ilk mesajı (misyon, vizyon, hakkımızda). v0.3: G'nin 9 Ekim site güncellemesi mesajı ve aynı gün verdiği cevaplar (sayfa yapısı, ürün ve hizmet içeriği, kalite gereksinimleri). v0.4: G'nin 10 Ekim tasarım geri bildirimi (yeni renk paleti, beyaz zemin, tercihlerin navbara taşınması, ana sayfa ve Araçlarımız düzeni).
 > Açık kararlar §10'da. Değişiklikler PR ile yapılır.
@@ -41,6 +41,8 @@
 | Yasal | `/kvkk`, `/cerez-politikasi`, `/kiralama-kosullari`, `/gizlilik-politikasi`, `/kullanim-sartlari` | `/en/privacy-notice`, `/en/cookie-policy`, `/en/rental-terms`, `/en/privacy-policy`, `/en/terms-of-use` | Kurgusal metin. KVKK aydınlatma metni ile gizlilik politikası ayrı belgelerdir (v0.3) |
 | Araç kiralama rehberleri | `/rehberler`, `/rehberler/:slug` | `/en/guides`, `/en/guides/:slug` | Kısa rehber yazıları; ana sayfada kartlarla (v0.4, §2.9) |
 | Yardım | `/yardim` | `/en/help` | İletişim'den ayrı yardım merkezi (v0.4, §2.9) |
+| Yönetim paneli | `/yonetim/...` | `/en/admin/...` | Yalnızca Novera çalışanı (yönetici rolü); `noindex`; navbar ve footer'da bağlantı yok, yalnızca yöneticinin profil menüsünde (v0.11, §2.11) |
+| Filom | `/filom/...` | `/en/my-fleet/...` | Filo sözleşmesi olan kurumsal müşterinin paneli: araçlar, personel, zimmet, sözleşmeler, faturalar, masraflar, raporlar; `noindex`, hesap menüsünden (v0.11, §2.12) |
 | 404 | — | — | Markalı, ana sayfaya dönüş |
 | 500 | — | — | Markalı hata sayfası: tekrar dene + ana sayfa (v0.3) |
 
@@ -210,7 +212,7 @@ Mobil:    (hap) [Logo]                                                     [hesa
 
 G'nin 10 Ekim istekleri. Her biri BACKLOG M7'de sırası gelince yapılır.
 
-- **Bireysel ve kurumsal giriş:** giriş sayfasında iki sekme (`/giris`, `?tip=kurumsal`). Kurumsal sekme firma e-postasıyla giriş yapar. Kurumsal hesap basittir: firma bilgisi, teklif talepleri ve iletişim kişisi; filo yönetim paneli kapsam dışı (§3). Kayıt bireyseldir; kurumsal hesap satış görüşmesinden sonra Novera tarafından açılır (öneri; backend ile netleşecek). Backend'de hesap türü gerekir.
+- **Bireysel ve kurumsal giriş:** giriş sayfasında iki sekme (`/giris`, `?tip=kurumsal`). Kurumsal sekme firma e-postasıyla giriş yapar. Kurumsal hesap firma bilgisi, teklif talepleri ve iletişim kişisini gösterir; şirketin filo sözleşmesi varsa ayrıca **Filom** paneline girer (v0.11, §2.12). Kayıt bireyseldir; kurumsal hesap satış görüşmesinden sonra Novera tarafından **Yönetim panelinden** açılır (v0.11, §2.11): hesap parolasız açılır, kişiye şifre belirleme bağlantısı gider.
 - **Ayarlar:** giriş yapan kullanıcı varsayılan para birimini, dili ve temayı seçer; seçim hesaba kaydedilir ve her girişte uygulanır.
 - **Puan sistemi:** gösterim ve kurallar. Tamamlanan her rezervasyon, toplam tutarın her tam ₺100'ü için 1 puan kazandırır (ek hizmetler dahil, aşağı yuvarlanır; ₺2.850 = 28 puan; G onayladı, 10 Ekim). İptal edilen rezervasyon puan kazandırmaz. Profilde bakiye (**"165 puan = ₺825 değerinde"**), bekleyen puan, kazanım geçmişi, "Puanla öde" düğmesi ve kurallar (kazanma: her ₺100 = 1 puan; harcama: 1 puan = ₺5, toplamın en çok yarısı) görünür. Kazanılan değerin %5'i harcamada geri döner; G bilerek böyle seçti. **Puanla ödeme (v0.7, G; değer v0.8'de ₺5):** puan, sonuç listesinde "Puanla öde" ile harcanır: 1 puan = ₺5, en çok kalan tutarın yarısı, yalnızca TL ve bireysel hesap (§2.3). Hesabı backend yapar.
 - **Profil yenilendi (v0.8, G):** başlıkta baş harf rozeti, "Hoş geldin, Elif", e-posta, puan çipi ("165 puan · ₺825", Puanlarım'a bağlantı) ve çıkış; xl'de solda ikonlu dikey menü ve altında "Yeni kiralama" düğmesi, daha dar ekranda ikonlu yatay sekmeler. **Hesabım** üstte "Sıradaki seyahatiniz" kartı (araç, tarih, alış bayisi ve saati, "N gün kaldı"; seyahat yoksa "İlk kiralamanızı yapın"), hızlı işlemler (Yeni kiralama, Yardım merkezi) ve ad/soyad formudur. Her sayfanın yükleniyor iskeleti sayfa düzenindedir. Kurumsal hesapta aynı kabuk, sekmeler Firma bilgileri, Teklif taleplerim, Ayarlar.
@@ -236,19 +238,41 @@ Kiralayan kişinin aracı koşullara göre kullanıp kullanamayacağının kontr
 
 ---
 
+### 2.11 Yönetim paneli (v0.11)
+
+Novera çalışanlarının siteyi koddan bağımsız yönettiği iç ekranlar (`/yonetim`). Tasarım, uçlar ve veri modeli: `docs/ADMIN.md`; iş sırası: `docs/ROADMAP.md`.
+
+- **Kim:** yalnızca yönetici rolündeki hesap. Yönetici hesabı siteden açılmaz, komut satırından açılır; Google ile giriş yapamaz; oturumu 12 saat sürer. Yetkisiz kullanıcı sayfayı 404 olarak görür.
+- **Ne yönetilir:** ürünler ve hizmetler (iki dilli metinler, sıra, yayında mı), rezervasyonlar (arama, detay, iptal), kurumsal teklif talepleri (durum, iç not), iletişim mesajları (ele alındı), kampanya kodları, SSS, kiralık filo (model fiyatı ve açıklaması, bayi bilgileri, araçlar, ek hizmetler), kullanıcılar (devre dışı bırakma), kurumsal müşteriler (şirket, kullanıcı daveti, filo sözleşmeleri ve araçları, kilometre ve batarya okumaları, aylık faturalar, HGS ve ceza kayıtları; Filom'un verisi buradan girilir, §2.12) ve salt okunur işlem kaydı.
+- **Ürün ve hizmet sayfaları** içeriği panelle birlikte API'den okur (ARCHITECTURE ADR-17, BACKLOG Y5); sayfaların görünümü değişmez. Sayfa iskeleti metinleri (başlıklar, düğmeler, rakamlar bandı) çeviri dosyasında kalır.
+- **v1'de yok:** dosya yükleme, ikinci rol, iki adımlı doğrulama, raporlar, kampanya galerisi ve iş ortağı logolarının yönetimi, yeni model ve bayi ekleme.
+- Panel de sitenin geri kalanı gibi iki dillidir, WCAG 2.2 AA'dır ve 375/768/1280'de taşmaz; öncelikli genişlik 1280'dir.
+
+### 2.12 Filom: kurumsal filo paneli (v0.11)
+
+Ek A'daki Akıllı Kurumsal Filo Kiralama ve Yeşil Filo ürünlerinde satılan panelin çalışan hâli (pazarlama adı "Novera Admin Paneli", ekrandaki adı **Filom**). Tasarım, uçlar ve veri modeli: `docs/FLEET.md`.
+
+- **Kim:** filo sözleşmesi olan şirketin kurumsal kullanıcıları (bir şirketin birden fazla kullanıcısı olabilir, hepsi filo yöneticisidir). Sözleşmesi olmayan kurumsal hesapta Filom boş durum ve teklif çağrısı gösterir. Bir şirket başka şirketin hiçbir kaydını göremez.
+- **Ekranlar:** Özet (araç sayısı, bu ayın faturası, açık masraflar, biten sözleşmeler, yaklaşan bakım ve muayene), Araçlar (zimmet, kilometre, yakıt/şarj, batarya sağlığı, masraflar), Personel, Zimmet (araç kimde, geçmiş), Sözleşmeler (kalan gün, yenileme talebi), Faturalar, Masraflar (HGS, trafik cezası, bakım; o anda zimmetli personele otomatik eşlenir, personele yansıtılır ya da itiraz edilir), Raporlar (araç, departman ve ay bazında maliyet; Yeşil Filo için karbon tasarrufu ve batarya sağlığı).
+- **Veri nereden gelir:** sözleşme, filo aracı, okumalar, faturalar ve masraflar Novera tarafından Yönetim panelinden girilir (§2.11) ya da seed'le gelir; müşteri personelini, zimmeti ve masrafın personele yansıtılmasını yönetir. Tutarlar TL'dir.
+- **Kurgusal olanlar ekranda yazar:** faturalar "örnek fatura, yasal belge değildir"; karbon tasarrufu "örnek hesap"; okumalar canlı cihazdan gelmez.
+- **v1'de yok:** canlı GPS ve harita, telematik cihaz bağlantısı, Driver App, SOS, gerçek e-fatura ve ödeme, müşterinin araç eklemesi ya da sözleşme imzalaması, şirket içi roller (§3).
+- Personel bilgisi kişisel veridir; ehliyet bilgisi saklanmaz (§2.10 ilkesi); KVKK metnine kurumsal müşteri personeli bölümü eklenir.
+
 ## 3. Kapsam dışı (v1)
 
 Bunlar sitede **sadece tanıtım içeriği** olarak yer alır, işlevsel olarak geliştirilmez (G'nin kararı):
 
-- Novera Admin Paneli
+- ~~Novera Admin Paneli~~ **v0.11'de kapsama girdi:** kurumsal müşteri paneli Filom (§2.12) ve Novera'nın Yönetim paneli (§2.11). Canlı GPS, telematik, Driver App ve SOS aşağıda kapsam dışı kalır
 - Novera Driver App, dijital hasar tutanağı
-- Canlı GPS / telematik takip
+- Canlı GPS / telematik takip (Filom'daki kilometre ve batarya değerleri elle girilen ya da örnek okumalardır, §2.12)
+- Gerçek e-fatura ve fatura ödemesi (Filom faturaları örnektir)
 - SOS butonu ve canlı çekici yönlendirme
 - Gerçek ödeme entegrasyonu (ödeme ekranı sahte, para alınmaz)
 - Çoklu araç sepeti
 - Kurumsal müşterinin siteden kendi başına rezervasyon yapması (kurumsal akış form + görüşme, §2.2.3)
 - Kariyer, basın/medya sayfaları
-- Kurumsal filo yönetim paneli ("Filom": araç, sürücü, fatura takibi). Basit kurumsal hesap (giriş, firma bilgisi, taleplerim) v0.4'te kapsama girdi (§2.9)
+- ~~Kurumsal filo yönetim paneli ("Filom")~~ **v0.11'de kapsama girdi** (§2.12)
 - Puanla ödeme backend'de (puanlar v0.7'den beri ön yüzde harcanabilir; kesin hesap ve düşüm API işidir)
 
 ---
@@ -477,7 +501,7 @@ Sonraya bırakılanlar (G onayladı): breadcrumb, Lighthouse CI.
 | Fotoğraf kaynağı (stok / üretilmiş / yer tutucu) | G | Galeri, araçlar, Hikayemiz, genel merkez |
 | Analytics aracı: Vercel Web Analytics veya Umami | G | Yayın ortamına bağlı (ADR-12, ADR-19); ücretsiz plan koşulları doğrulanmadı |
 | Kampanya içeriği sabit mi, API'den mi | İKİ | Şimdilik sabit |
-| Kurumsal hesap nasıl açılır | İKİ | Öneri: satış görüşmesinden sonra Novera açar, sitede kurumsal kayıt yok |
+| ~~Kurumsal hesap nasıl açılır~~ | İKİ | Karar (v0.11): satış görüşmesinden sonra Novera Yönetim panelinden açar, sitede kurumsal kayıt yok (§2.9, §2.11) |
 | Yayın ortamı ve alan adı | İKİ | Canonical, sitemap ve görsel alan adı buna bağlı |
 
 ---
