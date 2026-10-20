@@ -14,7 +14,7 @@ import { SESSION_COOKIE } from "./session-cookie";
 // `incorrect`: the current password is wrong; `rate_limited`: too many tries.
 export type ActionResult =
   | { ok: true }
-  | { ok: false; reason: "unavailable" | "invalid" | "incorrect" | "rate_limited" | "signin" };
+  | { ok: false; reason: "unavailable" | "invalid" | "incorrect" | "no_password" | "rate_limited" | "signin" };
 
 type User = components["schemas"]["User"];
 
@@ -61,6 +61,8 @@ export async function changePassword(current: string, next: string): Promise<Act
   if (result.status === "invalid" && result.fieldErrors.currentPassword === "INCORRECT") {
     return { ok: false, reason: "incorrect" };
   }
+  // An account opened with Google has no password to change: it sets one through the reset link.
+  if (result.status === "conflict" && result.code === "PASSWORD_NOT_SET") return { ok: false, reason: "no_password" };
   return outcome(result);
 }
 

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { getTranslations } from "next-intl/server";
 import { AuthShell } from "@/components/auth/auth-shell";
+import { GoogleSignIn } from "@/components/auth/google-sign-in";
 import { RegisterForm } from "@/components/auth/register-form";
 import { Link } from "@/i18n/navigation";
 import { parseBooking, toBookingQuery } from "@/lib/booking";
@@ -18,6 +20,7 @@ export default async function RegisterPage({ searchParams }: Props) {
   const params = await searchParams;
   const booking = params.sonra === "odeme" ? parseBooking(params) : null;
   const next = booking ? toBookingQuery(booking) : undefined;
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
 
   return (
     <AuthShell
@@ -35,7 +38,10 @@ export default async function RegisterPage({ searchParams }: Props) {
         </>
       }
     >
-      <RegisterForm next={next} />
+      <div className="flex flex-col gap-6">
+        <RegisterForm next={next} />
+        <GoogleSignIn clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || null} sample={process.env.USE_MOCKS === "1"} nonce={nonce} next={next} />
+      </div>
     </AuthShell>
   );
 }

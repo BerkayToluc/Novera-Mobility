@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { getTranslations } from "next-intl/server";
 import { AuthShell } from "@/components/auth/auth-shell";
+import { GoogleSignIn } from "@/components/auth/google-sign-in";
 import { LoginForm } from "@/components/auth/login-form";
 import { LoginTabs } from "@/components/auth/login-tabs";
 import { Link } from "@/i18n/navigation";
@@ -24,6 +26,9 @@ export default async function LoginPage({ searchParams }: Props) {
   const next = booking ? toBookingQuery(booking) : undefined;
   // A booking is only ever paid for by an individual, so the corporate tab does not carry it.
   const corporate = params.tip === "kurumsal" && !booking;
+
+  // The script tag of Google's button must carry this request's nonce (proxy.ts).
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
 
   const linkClasses = "inline-flex min-h-11 items-center text-link underline underline-offset-4";
 
@@ -51,7 +56,11 @@ export default async function LoginPage({ searchParams }: Props) {
         )
       }
     >
-      <LoginForm key={corporate ? "corporate" : "individual"} kind={corporate ? "corporate" : "individual"} next={next} />
+      <div className="flex flex-col gap-6">
+        <LoginForm key={corporate ? "corporate" : "individual"} kind={corporate ? "corporate" : "individual"} next={next} />
+        {/* Corporate accounts are opened by Novera and cannot use Google. */}
+        {!corporate && <GoogleSignIn clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || null} sample={process.env.USE_MOCKS === "1"} nonce={nonce} next={next} />}
+      </div>
     </AuthShell>
   );
 }

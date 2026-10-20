@@ -1,4 +1,4 @@
-import { signIn, signUp } from "./auth-actions";
+import { signIn, signInWithGoogle, signUp } from "./auth-actions";
 import { forgotPassword, resetPassword as resetPasswordAction } from "./password-reset-actions";
 import type { ForgotPasswordInput, LoginInput, RegisterInput } from "./auth-schemas";
 import type { AccountType } from "./session";
@@ -50,6 +50,38 @@ function failure(reason: "unavailable" | "invalid" | "email_taken" | "rate_limit
   return new AuthUnavailableError();
 }
 
+// Google sign-in: the Google account has no Novera account yet and the privacy consent is needed to open one.
+export class GoogleConsentRequiredError extends Error {
+  constructor() {
+    super("Opening an account with Google needs the privacy consent.");
+    this.name = "GoogleConsentRequiredError";
+  }
+}
+
+// A corporate account cannot sign in with Google.
+export class GoogleNotAllowedError extends Error {
+  constructor() {
+    super("This account cannot sign in with Google.");
+    this.name = "GoogleNotAllowedError";
+  }
+}
+
+// Google's token was not accepted.
+export class GoogleTokenInvalidError extends Error {
+  constructor() {
+    super("The Google sign-in could not be verified.");
+    this.name = "GoogleTokenInvalidError";
+  }
+}
+
+// The API has no Google client set, so Google sign-in is off there.
+export class GoogleNotConfiguredError extends Error {
+  constructor() {
+    super("Google sign-in is not set up.");
+    this.name = "GoogleNotConfiguredError";
+  }
+}
+
 // Too many requests from this address or for this e-mail (the API allows a few an hour).
 export class AuthRateLimitedError extends Error {
   constructor() {
@@ -64,6 +96,18 @@ export class ResetLinkInvalidError extends Error {
     super("The password reset link is not valid.");
     this.name = "ResetLinkInvalidError";
   }
+}
+
+// Resolves to the language the account saved, like login.
+export async function loginWithGoogle(credential: string, consent?: boolean): Promise<"tr" | "en" | undefined> {
+  const result = await signInWithGoogle(credential, consent);
+  if (result.ok) return result.locale ?? undefined;
+  if (result.reason === "consent_required") throw new GoogleConsentRequiredError();
+  if (result.reason === "not_allowed") throw new GoogleNotAllowedError();
+  if (result.reason === "invalid_token") throw new GoogleTokenInvalidError();
+  if (result.reason === "not_configured") throw new GoogleNotConfiguredError();
+  if (result.reason === "rate_limited") throw new AuthRateLimitedError();
+  throw new AuthUnavailableError();
 }
 
 export async function requestPasswordReset(input: ForgotPasswordInput): Promise<void> {

@@ -5,7 +5,7 @@ import { apiRequest } from "./api-request";
 import type { components } from "./api-types";
 import { CURRENCY_COOKIE, CURRENCY_COOKIE_MAX_AGE } from "./currency";
 import { MOCK_PREFERENCES_COOKIE, parsePreferences } from "./preferences";
-import { MOCK_SESSION_COOKIE, type AccountType } from "./session";
+import { MOCK_GOOGLE_COOKIE, MOCK_SESSION_COOKIE, type AccountType } from "./session";
 import { SESSION_COOKIE, type SessionCookieChange } from "./session-cookie";
 import { THEME_COOKIE, THEME_COOKIE_MAX_AGE } from "./theme";
 
@@ -44,6 +44,51 @@ async function applyPreferences(user: User): Promise<"tr" | "en"> {
   jar.set(THEME_COOKIE, user.theme, { path: "/", maxAge: THEME_COOKIE_MAX_AGE, sameSite: "lax" });
   jar.set(CURRENCY_COOKIE, user.currency, { path: "/", maxAge: CURRENCY_COOKIE_MAX_AGE, sameSite: "lax" });
   return user.locale;
+}
+
+// What came of a Google sign-in. `consent_required`: the Google account has no Novera account yet, and
+// opening one needs the privacy consent; `not_allowed`: a corporate account cannot use Google;
+// `invalid_token`: Google's token was not accepted; `not_configured`: the API has no Google client set.
+export type GoogleSignInResult =
+  | { ok: true; locale: "tr" | "en" | null }
+  | { ok: false; reason: "consent_required" | "not_allowed" | "invalid_token" | "rate_limited" | "not_configured" | "unavailable" };
+
+// `POST /auth/google`: the ID token (`credential`) Google's button gave the browser. 200 is an account that
+// exists (a password account with the same e-mail is tied to Google, and its password is dropped), 201 a new
+// one, which needs `consent: true`; without it the API answers 422 CONSENT_REQUIRED and opens nothing, and
+// the form asks and sends the same credential again. With USE_MOCKS=1 the sample account signs in, and the
+// MOCK_GOOGLE_COOKIE hook plays the other answers.
+export async function signInWithGoogle(credential: string, consent?: boolean): Promise<GoogleSignInResult> {
+  if (typeof credential !== "string" || credential === "") return { ok: false, reason: "invalid_token" };
+
+  if (!mocksEnabled()) {
+    const result = await apiRequest<User>("POST", "/auth/google", { credential, ...(consent ? { consent: true } : {}) });
+    if (result.status === "ok") {
+      if (!(await keepSession(result.sessionCookie))) return { ok: false, reason: "unavailable" };
+      return { ok: true, locale: await applyPreferences(result.data) };
+    }
+    if (result.status === "invalid" && result.fieldErrors.consent === "CONSENT_REQUIRED") return { ok: false, reason: "consent_required" };
+    if (result.status === "forbidden") return { ok: false, reason: "not_allowed" };
+    if (result.status === "unauthorized") return { ok: false, reason: "invalid_token" };
+    if (result.status === "rate_limited") return { ok: false, reason: "rate_limited" };
+    if (result.status === "unavailable" && result.code === "GOOGLE_SIGNIN_UNAVAILABLE") return { ok: false, reason: "not_configured" };
+    return { ok: false, reason: "unavailable" };
+  }
+
+  const jar = await cookies();
+  const hook = jar.get(MOCK_GOOGLE_COOKIE)?.value;
+  if (hook === "corporate") return { ok: false, reason: "not_allowed" };
+  if (hook === "invalid") return { ok: false, reason: "invalid_token" };
+  if (hook === "limit") return { ok: false, reason: "rate_limited" };
+  if (hook === "down") return { ok: false, reason: "not_configured" };
+  if (hook === "new") {
+    if (!consent) return { ok: false, reason: "consent_required" };
+    jar.delete(MOCK_GOOGLE_COOKIE);
+    jar.set(MOCK_SESSION_COOKIE, "google", { httpOnly: true, sameSite: "lax", path: "/" });
+    return { ok: true, locale: null };
+  }
+  jar.set(MOCK_SESSION_COOKIE, "individual", { httpOnly: true, sameSite: "lax", path: "/" });
+  return { ok: true, locale: parsePreferences(jar.get(MOCK_PREFERENCES_COOKIE)?.value)?.locale ?? null };
 }
 
 // `POST /auth/login`: one endpoint for both tabs; a corporate account is told by `accountType` in the

@@ -157,6 +157,13 @@
           "incorrect": "Mevcut şifre yanlış.",
           "saved": "Şifreniz değiştirildi."
         },
+        "setPassword": {
+          "title": "Şifre belirle",
+          "text": "Hesabınız Google ile açıldı ve henüz bir şifresi yok. E-postanıza bir bağlantı gönderelim, şifrenizi oradan belirleyin.",
+          "send": "Şifre belirleme bağlantısı gönder",
+          "sending": "Gönderiliyor…",
+          "sent": "Bağlantıyı {email} adresine gönderdik. Gelen kutunuzu kontrol edin."
+        },
         "sessions": {
           "title": "Açık oturumlar",
           "this": "Bu cihaz · Tarayıcı",

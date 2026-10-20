@@ -8,11 +8,20 @@ import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 import { PasswordInput } from "@/components/ui/password-input";
 import { changePassword, revokeOtherSessions } from "@/lib/account-actions";
+import { AuthRateLimitedError, requestPasswordReset } from "@/lib/auth-client";
 import type { AccountSession } from "@/lib/account-sessions";
 
 // Security (SPEC §2.9, v0.8): change the password, and see where the account is signed in
 // (`POST /me/password`, `GET /me/sessions`). `sessions` is null when the list could not be loaded.
-export function SecuritySection({ sessions: initialSessions }: { sessions: AccountSession[] | null }) {
+export function SecuritySection({
+  sessions: initialSessions,
+  hasPassword,
+  email,
+}: {
+  sessions: AccountSession[] | null;
+  hasPassword: boolean;
+  email: string;
+}) {
   const format = useFormatter();
   const t = useTranslations("Profile.settings.security");
   const authT = useTranslations("Auth");
@@ -50,6 +59,21 @@ export function SecuritySection({ sessions: initialSessions }: { sessions: Accou
     });
   }
 
+  // An account opened with Google has no password yet: it sets one through the e-mailed reset link.
+  const [linkSent, setLinkSent] = useState(false);
+  const [sendingLink, startSendLink] = useTransition();
+  function sendLink() {
+    setFormError(null);
+    startSendLink(async () => {
+      try {
+        await requestPasswordReset({ email });
+        setLinkSent(true);
+      } catch (failure) {
+        setFormError(failure instanceof AuthRateLimitedError ? errorT("rateLimited") : errorT("unavailable"));
+      }
+    });
+  }
+
   const others = sessions?.some((entry) => !entry.current) ?? false;
 
   const show = t("show");
@@ -57,6 +81,22 @@ export function SecuritySection({ sessions: initialSessions }: { sessions: Accou
 
   return (
     <div className="flex flex-col gap-8">
+      {!hasPassword ? (
+        <div className="flex flex-col gap-3">
+          <h3 className="text-label text-fg">{t("setPassword.title")}</h3>
+          <p className="max-w-prose text-body text-fg-muted">{t("setPassword.text")}</p>
+          <FormError message={formError} />
+          {linkSent ? (
+            <p role="status" className="rounded-control bg-surface-muted p-3 text-small text-fg">
+              {t("setPassword.sent", { email })}
+            </p>
+          ) : (
+            <Button type="button" disabled={sendingLink} aria-busy={sendingLink} className="self-start" onClick={sendLink}>
+              {sendingLink ? t("setPassword.sending") : t("setPassword.send")}
+            </Button>
+          )}
+        </div>
+      ) : (
       <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
         <h3 className="text-label text-fg">{t("password.title")}</h3>
         <FormError message={formError} />
@@ -88,6 +128,7 @@ export function SecuritySection({ sessions: initialSessions }: { sessions: Accou
           {pending ? t("password.saving") : t("password.save")}
         </Button>
       </form>
+      )}
 
       <section aria-labelledby="sessions-title" className="flex flex-col gap-3">
         <h3 id="sessions-title" className="text-label text-fg">

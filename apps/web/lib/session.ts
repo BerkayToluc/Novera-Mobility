@@ -1,7 +1,7 @@
 import "server-only";
 import { cache } from "react";
 import { cookies } from "next/headers";
-import { MOCK_CORPORATE, MOCK_INDIVIDUAL } from "@/mocks/accounts";
+import { MOCK_CORPORATE, MOCK_GOOGLE, MOCK_INDIVIDUAL } from "@/mocks/accounts";
 import { apiRequest } from "./api-request";
 import { sessionFromApi } from "./api-mappers";
 import type { components } from "./api-types";
@@ -40,12 +40,21 @@ export type Session = {
   company?: CompanyInfo;
   preferences?: Preferences;
   notifications?: Notifications;
+  // false for an account opened with Google that has not set a password yet; it sets one through the
+  // reset link (the password change refuses it). googleLinked: the account is tied to a Google account.
+  hasPassword: boolean;
+  googleLinked: boolean;
 };
 
 // The cookie that stands in for the real session in development (BACKLOG #25). It only means
 // something with USE_MOCKS=1; otherwise it is ignored, so a production build can never be "signed
 // in" by setting a cookie by hand.
 export const MOCK_SESSION_COOKIE = "novera-mock-session";
+
+// Test hook, USE_MOCKS=1 only: what the sample Google sign-in answers. Not set: the sample account
+// signs in. "new": a new account, which asks for the privacy consent first; "corporate", "invalid",
+// "limit" and "down" play the refusals, so every message can be reached without Google.
+export const MOCK_GOOGLE_COOKIE = "novera-mock-google";
 
 // Who is signed in. With USE_MOCKS=1 a sample account stands in for the visitor. Otherwise the
 // httpOnly session cookie the API set (session-cookie.ts, ARCHITECTURE ADR-08) is sent to `GET /me`:
@@ -58,6 +67,7 @@ export const getSession = cache(async (): Promise<Session | null> => {
     const value = jar.get(MOCK_SESSION_COOKIE)?.value;
     if (value === "corporate") return MOCK_CORPORATE;
     if (value === "individual") return MOCK_INDIVIDUAL;
+    if (value === "google") return MOCK_GOOGLE;
     return null;
   }
   if (!jar.get(SESSION_COOKIE)?.value) return null;

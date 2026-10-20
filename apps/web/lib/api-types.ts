@@ -755,6 +755,8 @@ export interface paths {
          *     dışındaki TÜM oturumlar kapanır ve bekleyen şifre sıfırlama bağlantıları geçersiz olur.
          *     Mevcut şifre yanlışsa `422` (`fieldErrors.currentPassword: INCORRECT`; oturum açık kalır, 401 değildir).
          *     Yeni şifre için `TOO_SHORT`, `TOO_LONG`, `SAME_AS_CURRENT`. 15 dakikada en çok 5 deneme (`429`).
+         *     Hesabın şifresi yoksa (`User.hasPassword` `false`, Google ile açılmış) `409` (`PASSWORD_NOT_SET`): şifre
+         *     `/auth/forgot-password` ile e-postadaki bağlantıdan belirlenir.
          */
         post: {
             parameters: {
@@ -936,6 +938,96 @@ export interface paths {
                 };
                 422: components["responses"]["ValidationFailed"];
                 429: components["responses"]["TooManyRequests"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/google": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Google ile giriş veya kayıt (yalnızca bireysel)
+         * @description Web'deki Google düğmesinin verdiği ID token (`credential`) gönderilir; API imzayı, hedef kitleyi (Client ID),
+         *     süreyi ve e-postanın doğrulanmış olmasını denetler. Başarılı olunca oturum çerezi set edilir.
+         *     - Bu Google hesabı daha önce bağlandıysa `200`.
+         *     - Aynı e-postayla şifreli bir bireysel hesap varsa hesap Google'a bağlanır (`200`). Güvenlik için o hesabın
+         *       şifresi silinir ve açık oturumları kapanır; kişi Google ile ya da "şifremi unuttum" ile devam eder.
+         *     - Hesap yoksa yeni bireysel hesap açılır (`201`) ve `consent: true` gerekir. Onay yoksa `422`
+         *       (`fieldErrors.consent: CONSENT_REQUIRED`) döner ve hesap açılmaz; ön yüz onay kutusunu gösterip aynı
+         *       `credential` ile `consent: true` göndererek yeniden dener.
+         *     Kurumsal hesaplar Google ile giriş yapamaz (`403`, `GOOGLE_NOT_ALLOWED`). 15 dakikada istemci başına en çok
+         *     10 deneme (`429`). Sunucuda `GOOGLE_CLIENT_ID` yoksa `503` (`GOOGLE_SIGNIN_UNAVAILABLE`).
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["GoogleSignInRequest"];
+                };
+            };
+            responses: {
+                /** @description Mevcut hesapla oturum açıldı */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["User"];
+                    };
+                };
+                /** @description Yeni hesap açıldı, oturum açıldı */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["User"];
+                    };
+                };
+                /** @description Google belirteci doğrulanamadı (`GOOGLE_TOKEN_INVALID`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Bu hesap Google ile giriş yapamaz (`GOOGLE_NOT_ALLOWED`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
+                /** @description Google ile giriş bu sunucuda ayarlı değil (`GOOGLE_SIGNIN_UNAVAILABLE`) */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
             };
         };
         delete?: never;
@@ -1733,6 +1825,10 @@ export interface components {
             theme: "light" | "dark" | "system";
             currency: components["schemas"]["Currency"];
             notifications?: components["schemas"]["Notifications"];
+            /** @description `false` ise hesap Google ile açılmış ve henüz şifresi yok (şifre belirlemek için `/auth/forgot-password` akışı kullanılır, `/me/password` 409 döner). */
+            hasPassword: boolean;
+            /** @description Hesap bir Google hesabına bağlı mı. */
+            googleLinked: boolean;
         };
         /** @description E-posta tercihleri. Varsayılan hatırlatma açık, kampanya kapalı (pazarlama postası için onay gerekir). */
         Notifications: {
@@ -1786,6 +1882,12 @@ export interface components {
             lastName: string;
             /** @description Gizlilik/KVKK onayı. `false` ise `fieldErrors.consent = CONSENT_REQUIRED`. */
             consent: boolean;
+        };
+        GoogleSignInRequest: {
+            /** @description Google Identity Services'in verdiği ID token. */
+            credential: string;
+            /** @description Gizlilik/KVKK onayı. Yeni hesap açılacaksa `true` olmalı; mevcut hesapta gerekmez. */
+            consent?: boolean;
         };
         LoginRequest: {
             /** Format: email */

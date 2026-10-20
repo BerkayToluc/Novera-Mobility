@@ -12,9 +12,11 @@ export type ApiResult<T> =
   | { status: "invalid"; code?: string; fieldErrors: Record<string, string> }
   | { status: "unauthorized" }
   | { status: "not_found" }
+  | { status: "forbidden"; code?: string }
   | { status: "conflict"; code?: string }
   | { status: "rate_limited" }
-  | { status: "unavailable" };
+  // `code` is set when the API itself answered (a 5xx with its own code); not when it could not be reached.
+  | { status: "unavailable"; code?: string };
 
 type ErrorBody = { code?: string; fieldErrors?: Record<string, string> };
 
@@ -52,11 +54,12 @@ export async function apiRequest<T = null>(
     if (response.status === 404) return { status: "not_found" };
     if (response.status === 429) return { status: "rate_limited" };
     const error = (await response.json().catch(() => null)) as ErrorBody | null;
+    if (response.status === 403) return { status: "forbidden", code: error?.code };
     if (response.status === 409) return { status: "conflict", code: error?.code };
     if (response.status === 422) {
       return { status: "invalid", code: error?.code, fieldErrors: error?.fieldErrors ?? {} };
     }
-    return { status: "unavailable" };
+    return { status: "unavailable", code: error?.code };
   } catch {
     return { status: "unavailable" };
   }
