@@ -1,5 +1,33 @@
 # Güvenlik gözden geçirmesi (BACKLOG 39, issue #48)
 
+> **v2 (22 Ekim 2026):** bu belge güvenlik kararlarının kaydı olarak sürer. 22 Ekim keşfinde bulunan açıklar (bir kritik, beş yüksek) [QUALITY.md](QUALITY.md) §1.1'de `G-xx` kimlikleriyle duruyor ve Faz 1–2'de kapanır. Her iş kapandıkça ilgili satır aşağıdaki "v2'de düzeltilenler" tablosuna, hız sınırı değişiklikleri "Hız sınırı tablosu"na yazılır (V2-09'dan sonra tek kaynak burasıdır). Son tur ve bu belgenin v2 sürümü V2-22'dir.
+>
+> **Düzeltme (22 Ekim):** S9'daki "canlıda anahtar yoksa API açılmaz" ifadesi kodda karşılanmıyor: `assertRuntimeEnv` `API_ACCESS_KEY`'e bakmıyor, anahtar yoksa `apiAccess` her isteği geçiriyor. Bugün yalnızca `render.yaml`'ın anahtarı üretmesi koruyor. QUALITY G-03, düzeltmesi V2-04.
+
+## v2'de düzeltilenler
+
+| QUALITY # | İş | PR | Not |
+|---|---|---|---|
+| — | — | — | Faz 1 başladıkça doldurulur |
+
+## v2 açık bulgular (özet)
+
+Tam liste, seviye ve dosya:satır [QUALITY.md](QUALITY.md) §1.1'de.
+
+| QUALITY # | Seviye | Konu | İş |
+|---|---|---|---|
+| G-01 | Kritik | Geçmiş tarihli rezervasyonla anında puan | V2-02 |
+| G-02 | Yüksek | Rezervasyon oluşturmada sınır ve tavan yok | V2-03 |
+| G-03 | Yüksek | Anahtarsız API açılıyor | V2-04 |
+| G-04, G-05 | Yüksek | Kampanya kodu tahmini, tavan yok; seed canlıda kodları ve kurları ezer | V2-05 |
+| G-06 | Yüksek | `USE_MOCKS` üretime sızarsa giriş koruması atlanır | V2-06 |
+| G-10 | Yüksek | Web server action'larında doğrulama yok | V2-08 |
+| G-07, G-08, G-09, G-11–G-15 | Orta | Fail-open `NODE_ENV`, `/api` yönlendirmesi, etkisiz `ValidationPipe`, sınırsız uçlar, parola özeti ve oturum süresi, hesap silmede doğrulama, giriş kilidi | V2-04, V2-06, V2-07, V2-09, V2-10 |
+
+## Yönetim paneli ve Filom (v2, tasarım)
+
+Kurallar [ADMIN.md](ADMIN.md) §6 ve [FLEET.md](FLEET.md) §6'da; uygulandıkça (V2-23, V2-35) burada "Bu PR'da düzeltilenler" düzeninde kayda geçer. Özet: yetki API'de (`AdminGuard`, `CompanyGuard`), yönetici hesabı yalnızca komut satırından, yönetici oturumu 12 saat ve Google kapalı, değiştiren her işlem `AuditLog`'a (alan adları, değer değil), şirketler arası erişim 404, dosya yükleme ADR-28 kurallarıyla.
+
 Tarih: 17 Ekim 2026. Kapsam: `apps/api` kodu, `docs/api/openapi.yaml` sözleşmesi ve web'in API'yi çağırma şekli
 (`apps/web/lib/api-post.ts`, `api-request.ts`, `next.config.ts`). Yöntem: kodun satır satır okunması,
 yeni testler ve `pnpm audit`.

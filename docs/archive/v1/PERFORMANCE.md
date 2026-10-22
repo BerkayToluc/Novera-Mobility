@@ -1,3 +1,5 @@
+> **Arşiv (v1, 22 Ekim 2026'da taşındı).** Bu belge artık güncellenmez; yalnızca referanstır. Güncel belgeler için [docs/README.md](../../README.md). Göreli bağlantılar taşınmadan önceki konuma göre yazılmıştır.
+
 # Hız ölçümü (BACKLOG Y32)
 
 Hedef (SPEC §9, mobil): LCP < 2,5 sn · INP < 200 ms · CLS < 0,1.

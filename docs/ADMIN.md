@@ -1,144 +1,181 @@
-# Yönetim paneli (tasarım)
+# Yönetim paneli (ADMIN)
 
-> Durum: **Taslak v0.1** · 20 Ekim 2026 · Sahipler: Berkay (backend), G (frontend)
-> Kapsam kararı SPEC §2.11'de (v0.11), mimari karar ARCHITECTURE ADR-24'te, iş sırası [ROADMAP.md](ROADMAP.md)'de.
-> Bu belge "ne yapılacak ve nasıl" sorusunu cevaplar. Uçların kesin biçimi her işin PR'ında `docs/api/openapi.yaml`'a yazılır; çelişki olursa sözleşme kazanır.
+> Durum: **v2.0** · 22 Ekim 2026. Kapsam SPEC §3.B, mimari ARCHITECTURE ADR-24, ADR-27, ADR-28; işler BACKLOG Faz 3–6 ve Faz 10.
+> Berkay'ın 20 Ekim taslağı ([archive/v1/ADMIN.md](archive/v1/ADMIN.md)) temel alındı. Farklar: bayi ve model **eklenebilir**, model fotoğrafı yüklenir; ürün/hizmet/SSS metinleri panelden düzenlenmez; talepler modülü eklendi.
+> Uçların kesin biçimi her işin PR'ında `docs/api/openapi.yaml`'a yazılır; çelişki olursa sözleşme kazanır.
 
-## 1. Ne bu, ne değil
+## 1. Ne bu
 
-**Yönetim paneli**, Novera çalışanlarının siteyi koddan bağımsız yönettiği iç ekranlardır: ürün ve hizmet metinleri, kampanya kodları, SSS, kiralık filo, rezervasyonlar, teklif talepleri, iletişim mesajları, kullanıcılar ve **kurumsal müşteriler** (şirket, sözleşme, filo aracı, fatura, masraf).
+Novera çalışanının siteyi koddan bağımsız yönettiği iç ekranlar: katalog (kampanya kodları, bayiler, araç modelleri, araçlar, ek hizmetler), operasyon (rezervasyonlar, teklifler, mesajlar, talepler), kurumsal müşteriler ve Filom verisi, kullanıcılar, işlem kaydı.
 
-Sitede iki panel vardır, ikisi de v0.11'de kapsama girdi:
+İki panel vardır ve ekranda adları karışmaz:
 
-| Ad | Ne | Belge |
-|---|---|---|
-| **Yönetim paneli** (`/yonetim`) | Novera çalışanının iç aracı | Bu belge |
-| **Filom** (`/filom`) | Kurumsal müşterinin filo paneli; SPEC Ek A'da "Novera Admin Paneli" diye satılan ürün (zimmet, sözleşme, fatura, HGS ve ceza, raporlar) | [FLEET.md](FLEET.md) |
+| Ad | Kim | Adres | Belge |
+|---|---|---|---|
+| **Yönetim paneli** | Novera çalışanı (`ADMIN`) | `/yonetim` · `/en/admin` | Bu belge |
+| **Filom** | Kurumsal müşterinin filo yöneticisi | `/filom` · `/en/my-fleet` | [FLEET.md](FLEET.md) |
 
-Filom'un verisini (sözleşme, filo aracı, fatura, masraf) Novera çalışanı bu panelden girer; müşteri Filom'da görür ve kendi tarafını (personel, zimmet, masrafı personele yansıtma) yönetir (FLEET.md §1). Ekranda karışmasın diye Novera'nın paneli **Yönetim paneli**, müşterininki **Filom** adını taşır; "Admin Paneli" yalnızca ürün sayfasındaki pazarlama adıdır.
-
-**v1'de yok** (bilerek; Filom'un kapsam dışıları FLEET.md §1'de): dosya yükleme (görseller depoya yine PR ile girer, panel yalnızca yolu seçer), çoklu rol (yalnızca `ADMIN`), iki adımlı doğrulama (bkz. §8, sonraya), toplu içe/dışa aktarma, raporlar ve grafikler, kampanya galerisi ve iş ortağı logoları (SPEC §10'daki "kampanya içeriği sabit mi" kararı açık kalır), sayfa iskeleti metinleri (başlıklar, düğmeler, rakamlar bandı: çeviri dosyasında kalır).
+"Novera Admin Paneli" yalnızca ürün sayfalarındaki pazarlama adıdır ve Filom'u anlatır.
 
 ## 2. Kim girer
 
-- **Rol:** `User.role` alanı, değerleri `CUSTOMER` (varsayılan) ve `ADMIN`. Hesap türünden (`accountType`: bireysel/kurumsal) ayrıdır.
+- **Rol:** `User.role` alanının değerleri `CUSTOMER` (varsayılan) ve `ADMIN`. Hesap türünden (`accountType`) ayrıdır.
 - **Yönetici hesabı siteden açılmaz.** Kayıt, Google ile giriş ya da panelin kendisi rol veremez. Berkay komut satırından açar:
-  ```
+  ```powershell
   cd apps\api
   $env:DATABASE_URL = '<Neon adresi>'
   pnpm admin:create --email yonetici@novera.example --name "Ad Soyad"
   Remove-Item Env:DATABASE_URL
   ```
-  Komut parolayı ekrandan ister (sohbete, dosyaya ya da geçmişe yazılmaz), en az 12 karakter şartı vardır. Aynı komut `--revoke` ile rolü geri alır.
-- **Giriş:** normal `/giris` sayfası, e-posta + parola. Yönetici hesabında **Google ile giriş kapalıdır** (`403 GOOGLE_NOT_ALLOWED`); hesap bağlama yöneticinin parolasını silerdi (bkz. SECURITY.md, Google ile giriş).
-- **Oturum:** yöneticinin oturumu 30 gün değil **12 saat** sürer. Rol geri alınınca açık oturumları kapanır.
-- **Yetkisi olmayan:** `/yonetim/*` sayfaları sunucuda rol bakar. Giriş yoksa `/giris?next=/yonetim`, giriş var ama rol yoksa **404** (sayfanın varlığı belli edilmez). API tarafında `/admin/*` uçları oturum yoksa `401`, rol yoksa `403 FORBIDDEN` döner.
+  Komut parolayı ekrandan ister (sohbete, dosyaya ya da geçmişe yazılmaz), en az 12 karakter şartı vardır. `--revoke` rolü geri alır ve açık oturumları kapatır.
+- **Giriş:** normal `/giris` sayfası, e-posta + parola. Yönetici hesabında Google ile giriş kapalıdır (`403 GOOGLE_NOT_ALLOWED`).
+- **Oturum:** 12 saat (müşteride 30 gün), boşta kalma süresi 1 saat.
+- **Yetkisiz:**
+  - Web: `/yonetim/*` sayfaları sunucuda rol bakar. Giriş yoksa `/giris?sonra=yonetim`, rol yoksa **404**.
+  - API: `/admin/*` oturum yoksa `401`, rol yoksa `403 FORBIDDEN`.
 
 ## 3. Ekranlar
 
-Adres TR `/yonetim/...`, EN `/en/admin/...` (`i18n/routing.ts`). Tüm sayfalar `noindex`, sitemap ve `llms.txt` dışında, navbar ve footer'da bağlantı yok. Yönetici giriş yaptığında profil menüsünde tek bir "Yönetim paneli" bağlantısı görünür.
+Tüm sayfalar `noindex`, sitemap ve `llms.txt` dışında; navbar ve footer'da bağlantı yok. Yönetici giriş yapınca hesap menüsünde tek bir "Yönetim paneli" bağlantısı görünür. Yerleşim kuralları [DESIGN.md](DESIGN.md) §8.
 
-Yerleşim: solda menü (xl), dar ekranda üstte açılır menü; içerik alanında başlık, tek birincil düğme (ör. "Yeni ürün"), liste ya da form. Site tasarım token'larını kullanır; ayrı tema yok. Mobilde kullanılabilir olmalı ama öncelik 1280 px (çalışan masaüstünde kullanır); 375 ve 768'de taşma olmaz, tablo kutusunda yatay kayar.
+| Ekran | Adres (TR) | Ne yapılır | İş |
+|---|---|---|---|
+| Özet | `/yonetim` | Bugün başlayan ve biten kiralamalar, son 7 günün rezervasyon sayısı, yanıt bekleyen teklif, mesaj ve talep sayısı; her kart süzgeçli listeye gider | V2-25 |
+| Kampanya kodları | `/yonetim/kampanya-kodlari` | Liste (kod, yüzde, geçerlilik, kullanım / tavan, durum), yeni, düzenle, pasifleştir | V2-26 |
+| Bayiler | `/yonetim/bayiler`, `.../yeni`, `.../:id` | Liste (şehir süzgeci, açık/kapalı), **yeni bayi**, düzenle, **kapat / yeniden aç** | V2-27 |
+| Araç modelleri | `/yonetim/modeller`, `.../yeni`, `.../:slug` | Liste (sınıf, yakıt, fiyat, araç sayısı, durum), **yeni model (fotoğraf yükleme)**, düzenle, **kaldır** (pasifleştir) / geri al | V2-29 |
+| Araçlar | `/yonetim/araclar` | Liste (plaka, model, bayi, yıl, durum; süzgeç), **yeni araç**, bayisini değiştir, **kaldır** (pasifleştir) / geri al | V2-30 |
+| Ek hizmetler | `/yonetim/ek-hizmetler` | Ad (TR/EN) ve fiyat düzenleme | V2-30 |
+| Rezervasyonlar | `/yonetim/rezervasyonlar`, `.../:numara` | Ara (numara, e-posta), süz (durum, alış bayisi, tarih), detay (fiyat dökümü, kod, puan), iptal | V2-31 |
+| Teklif talepleri | `/yonetim/teklifler`, `.../:numara` | Liste, durum değiştir, iç not | V2-32 |
+| Mesajlar | `/yonetim/mesajlar`, `.../:id` | İletişim formu mesajları, "ele alındı" | V2-32 |
+| Şirketler | `/yonetim/sirketler`, `.../:id` | Şirket bilgisi, kullanıcı davet et, sözleşmeler | V2-33 |
+| Sözleşme | `/yonetim/sirketler/:id/sozlesmeler/:numara` | Filo araçları (ekle, iade), bakım ve muayene tarihleri, okuma girişi | V2-35 |
+| Faturalar | `/yonetim/faturalar` | Dönem seç → "Faturaları oluştur", liste, ödendi işareti | V2-37 |
+| Filo masrafları | `/yonetim/filo-masraflari` | HGS, ceza, bakım kaydı girişi (plakayla), liste | V2-38 |
+| Talepler | `/yonetim/talepler`, `.../:numara` | Servis ve transfer talepleri; tür ve durum süzgeci, atanan kişi, durum ilerletme, not | V2-41, V2-42 |
+| Kullanıcılar | `/yonetim/kullanicilar`, `.../:id` | Ara, detay (rezervasyonlar, puan, şirket), hesabı kapat / yeniden aç | V2-34 |
+| İşlem kaydı | `/yonetim/kayit` | Kim, ne zaman, neyi değiştirdi; süzgeç: yönetici, alan, tarih (salt okunur) | V2-34 |
 
-| Ekran | Adres | Ne yapılır |
-|---|---|---|
-| Özet | `/yonetim` | Bugün başlayan ve biten kiralamalar, son 7 günün rezervasyon sayısı, yanıt bekleyen teklif ve mesaj sayısı (her biri ilgili listeye süzgeçli bağlantı) |
-| Ürünler | `/yonetim/urunler`, `/yonetim/urunler/:slug` | Liste (sıra, yayında mı, öne çıkan), düzenle, yeni, yayından kaldır, sırayı değiştir |
-| Hizmetler | `/yonetim/hizmetler`, `/yonetim/hizmetler/:slug` | Ürünlerle aynı; ek olarak hangi paketlerde ve hangi ürünlerde olduğu |
-| Rezervasyonlar | `/yonetim/rezervasyonlar`, `.../:numara` | Ara (numara, e-posta), süz (durum, alış bayisi, tarih aralığı), detay (fiyat dökümü, kod, puan), iptal |
-| Teklif talepleri | `/yonetim/teklifler`, `.../:numara` | Liste, durum değiştir, iç not |
-| Mesajlar | `/yonetim/mesajlar`, `.../:id` | İletişim formu mesajları, "ele alındı" işareti |
-| Kampanya kodları | `/yonetim/kampanya-kodlari` | Liste, yeni, düzenle (yüzde, tarih aralığı, etkin) |
-| SSS | `/yonetim/sss` | Soru/cevap (TR/EN), kitle, konu, sıra |
-| Kiralık filo | `/yonetim/filo/modeller`, `/bayiler`, `/araclar`, `/ek-hizmetler` | Model fiyatı ve açıklaması, görsel yolu; bayi bilgileri ve çalışma saatleri; araç (plaka, yıl, bayi, etkin); ek hizmet adı ve fiyatı |
-| Kullanıcılar | `/yonetim/kullanicilar`, `.../:id` | Ara, detay (rezervasyonlar, puan, şirketi), hesabı devre dışı bırak / aç |
-| Kurumsal müşteriler | `/yonetim/sirketler`, `.../:id` | Şirket bilgisi, kullanıcılarını davet et (kurumsal hesap açma), sözleşmeler (FLEET.md §4) |
-| Filo sözleşmeleri ve araçları | `/yonetim/sirketler/:id/sozlesmeler/:numara` | Sözleşmenin filo araçları (ekle, iade), bakım ve muayene tarihleri, kilometre/batarya okuması girişi |
-| Faturalar | `/yonetim/faturalar` | Dönem seç → "Faturaları oluştur", liste, ödendi işareti |
-| Filo masrafları | `/yonetim/filo-masraflari` | HGS, ceza, bakım kaydı girişi (plakayla), liste |
-| İşlem kaydı | `/yonetim/kayit` | Kim, ne zaman, neyi değiştirdi (salt okunur) |
+### 3.1 Katalog kuralları
 
-### Ortak davranışlar (G, Y82'de bir kez yapar, sonra her ekran kullanır)
+**Kampanya kodları**
+- **Biçim:** kod büyük harf, 3–20 karakter (`normalizePromoCode`); yüzde 1–90.
+- **Alanlar:** geçerlilik aralığı (`validFrom`, `validUntil`, ikisi de isteğe bağlı), toplam kullanım tavanı (`maxRedemptions`, boşsa sınırsız), kişi başı tek kullanım (`oncePerUser`, varsayılan açık).
+- Bir rezervasyonda kullanılmış kod silinmez, pasifleştirilir (`IN_USE`). Kullanım sayısı iptal edilmemiş rezervasyonlardan hesaplanır.
+- Kod kullanımı rezervasyon anında satır kilidiyle sayılır; tavan aşılırsa `422 CODE_EXHAUSTED`.
 
-- **Liste:** tablo, sayfalama (20'şer), arama kutusu, süzgeç çipleri; süzgeç ve sayfa adreste durur (`?durum=CONFIRMED&sayfa=2`), paylaşılabilir. Yükleniyor iskeleti, boş durum ("Henüz teklif talebi yok"), hata durumu.
-- **İki dilli alan:** her metin alanı TR ve EN sekmeli tek bileşen; ikisi de zorunlu. Liste alanları (ör. 3 madde) satır ekle/sil/yukarı/aşağı.
-- **Kaydet:** sunucu eylemi API'ye gider; alan hataları alanın yanında (API'nin `fieldErrors` kodları çeviri dosyasından), başarıda kısa bildirim. Kaydetmeden sayfadan çıkılırsa uyarı.
-- **Aynı kaydı iki kişi düzenlerse:** form kaydın `updatedAt` değerini geri gönderir; arada başkası kaydettiyse API `409 STALE_WRITE` döner, ekran "Bu kayıt siz düzenlerken değişti, sayfayı yenileyin" der ve girilenleri kaybetmez.
-- **Geri alınamayan işlem** (rezervasyon iptali, hesabı devre dışı bırakma, silme): onay penceresi, işlemin adı düğmede ("Rezervasyonu iptal et"), varsayılan odak "Vazgeç"te.
-- **Erişilebilirlik:** sitenin geri kalanı gibi WCAG 2.2 AA; tablo başlıkları `<th scope>`, sıralama düğmesinde `aria-sort`, bildirimler `aria-live`.
-- **Metinler:** `messages/tr/admin.json` ve `messages/en/admin.json` (CLAUDE.md kuralı). Panel iki dilde çalışır.
+**Bayiler**
+- **Alanlar:** ad, şehir (81 il listesinden), adres, enlem/boylam (haritadan seç ya da elle gir), telefon, e-posta, tür (`CITY`, `AIRPORT`), çalışma saatleri (hafta içi, cumartesi, pazar; her biri açılış-kapanış ya da kapalı).
+  - Bugün tür addan çıkarılıyor (`apps/web/lib/branch-detail.ts:19-22`); v2'de alan olur.
+- **Yeni bayi:** hemen sitede görünür (Bayilerimiz, arama seçici, harita, JSON-LD, sitemap). İçinde araç olmadığı için aramada "uygun araç yok" boş durumu çıkar.
+- **Kapatma (`closedAt`):** bayide gelecekte başlayan ya da biten rezervasyon, etkin tutma ya da etkin araç varsa `409 IN_USE` döner; ekran nedenini listeler ("3 gelecek rezervasyon, 4 araç"). Önce araçlar başka bayiye taşınır ya da kaldırılır.
+  - Kapanan bayi aramada, Bayilerimiz'de, haritada ve sitemap'te görünmez; geçmiş rezervasyonlarda adıyla kalır.
+  - Bayi silinmez, yeniden açılabilir.
+
+**Araç modelleri**
+- **Alanlar:** marka, model, slug (oluşturulurken addan önerilir, **sonra değişmez**: `?arac=` bağlantıları bozulmasın), sınıf, yakıt, vites, koltuk, bagaj, tüketim ve birimi, günlük fiyat (TRY), açıklama (TR/EN), fotoğraf.
+- **Fotoğraf** (ADR-28): JPEG/PNG/WebP, en çok 5 MB, en az 1200 px genişlik. Yükleme önizlemeli; alt metin model adından üretilir.
+- **Fiyat değişikliği** yeni aramalarda geçerlidir; var olan rezervasyonun tutarı değişmez (tutar rezervasyonda donmuştur).
+- **Kaldırma (`retiredAt`):** gelecek rezervasyonu ya da etkin tutması olan modelde `409 IN_USE`. Kaldırılan modelin etkin araçları da pasifleşir. Ana sayfa filo bölümünde, aramada ve `?arac=` penceresinde görünmez; geçmiş rezervasyon kartlarında görünür.
+- Yeni sınıf eklenmez (sınıflar sabit).
+
+**Araçlar**
+- **Alanlar:** model, plaka (Türk plaka biçimi, büyük harf, benzersiz), model yılı (2015 – bu yıl + 1), bayi.
+- **Kaldırma** (`active = false`): gelecek rezervasyonu ya da etkin tutması olan araçta `409 IN_USE`. Bayi değişikliği de aynı kurala bağlıdır.
+- Kapalı bayiye ya da kaldırılmış modele araç eklenemez (`422`).
+
+**Ek hizmetler:** yalnızca ad ve fiyat düzenlenir; yeni ek hizmet eklenmez (fiyat hesabı türlerine bağlı).
+
+### 3.2 Operasyon kuralları
+
+- **Rezervasyon iptali:** nedeni zorunludur. Kullanıcı iptaliyle aynı sonucu verir: harcanan puan geri döner, bekleyen puan düşer. Başlamış rezervasyon iptal edilemez (`INVALID_TRANSITION`). Kullanıcıya e-posta gider (V2-44).
+- **Teklif durumu:** `RECEIVED → IN_REVIEW → OFFERED → CLOSED`; geri gidiş yoktur. İç not müşteriye görünmez. Filom'dan gelen sözleşme yenileme talebi de buraya düşer.
+- **Mesaj:** "ele alındı" işareti (`handledAt`, `handledById`) geri alınabilir.
+- **Talepler:** durum akışı türe göredir (SPEC §3.D, ADR-31). Yönetici "atanan" alanına çekici, servis ya da şoför bilgisini serbest metinle yazar; her adım zaman çizelgesine girer.
+
+### 3.3 Hesap kuralları
+
+- **Kurumsal hesap açma** (kurumsal hesap açmanın tek yolu):
+  1. Yönetici şirketi açar: ad, vergi dairesi, şehir, telefon, satış temsilcisi.
+  2. Şirket sayfasından kullanıcı davet eder: e-posta, ad, soyad, ünvan.
+  3. API parolasız bir `CORPORATE` hesap açar, şirkete bağlar ve 7 gün geçerli şifre belirleme bağlantısı gönderir (şifre sıfırlama akışı, ayrı metin).
+  - Aynı e-posta varsa `409 EMAIL_TAKEN`. Bireysel hesabı kurumsala çevirmek yoktur.
+- **Hesap kapatma (`disabledAt`):** tüm oturumlar kapanır. Giriş ve Google girişi `401 INVALID_CREDENTIALS` ile reddedilir (hesabın durumu sızmaz). Gelecek rezervasyonlar **iptal edilmez**; ekran sayısını gösterir, gerekirse yönetici tek tek iptal eder. Yönetici kendini ve başka bir yöneticiyi kapatamaz.
+
+### 3.4 Ortak davranışlar (V2-24'te bir kez yapılır)
+
+- **Liste:** tablo, 20'şer sayfalama, arama, süzgeç çipleri. Süzgeç ve sayfa adreste durur (`?durum=CONFIRMED&sayfa=2`), paylaşılabilir. Yükleniyor iskeleti, boş ve hata durumu vardır.
+- **İki dilli alan:** TR ve EN sekmeli tek bileşen, ikisi de zorunlu.
+- **Kaydet:** server action, ADR-26 şemasıyla doğrular, API'ye gider. Alan hataları alanın yanında (`fieldErrors` kodu çeviri dosyasından), başarıda bildirim (`aria-live`). Kaydedilmemiş değişiklikle sayfadan çıkılırsa uyarı.
+- **Çakışma:** form `updatedAt` taşır. `409 STALE_WRITE` gelirse "Bu kayıt siz düzenlerken değişti" uyarısı çıkar, girilenler kaybolmaz.
+- **Geri alınamayan işlem:** onay penceresi, düğmede işlemin adı, varsayılan odak "Vazgeç".
+- **Erişilebilirlik:** `<th scope>`, `aria-sort`, klavyeyle tam kullanım, WCAG 2.2 AA.
+- **Metinler:** `messages/tr/admin.json`, `messages/en/admin.json`.
 
 ## 4. API
 
-Tüm uçlar `/admin` önekiyle, `AdminGuard` (oturum + `role = ADMIN`) arkasında. Mevcut kurallar geçerli (ADR-17: hata biçimi, iki dilli alanlar, tutarlar alt birimde, zamanlar UTC). Farklar ADR-24'te:
+Tüm uçlar `/admin` önekli, `AdminGuard` arkasında, ADR-24 kurallarıyla (sayfalama, `STALE_WRITE`, yeni hata kodları). Değiştiren her istek işlem kaydına yazılır, `Content-Type: application/json` dışındakiler `415` döner, sınır dakikada 120/yönetici.
 
-- **Sayfalama var:** `?page=1&pageSize=20` (en çok 100), cevap `{ items, total, page, pageSize }`. Sıralama `?sort=createdAt:desc`.
-- **Yeni hata kodları:** `FORBIDDEN` (403), `STALE_WRITE` (409), `IN_USE` (409, ör. teklif bağlı ürün silinemez), `INVALID_TRANSITION` (409, ör. iptal edilmiş rezervasyon yeniden iptal edilemez).
-- **Değiştiren her istek** (`POST`, `PATCH`, `DELETE`) işlem kaydına bir satır yazar (§5).
-- **Hız sınırı:** yönetici başına dakikada 120 istek (kazara döngüye karşı).
+| Alan | Uçlar |
+|---|---|
+| Özet | `GET /admin/summary` |
+| Kampanya kodları | `GET/POST /admin/promo-codes`, `GET/PATCH /admin/promo-codes/{code}`, `DELETE /admin/promo-codes/{code}` (yalnızca hiç kullanılmamışsa) |
+| Bayiler | `GET/POST /admin/branches`, `GET/PATCH /admin/branches/{id}`, `POST /admin/branches/{id}/close`, `POST /admin/branches/{id}/reopen` |
+| Araç modelleri | `GET/POST /admin/vehicle-models`, `GET/PATCH /admin/vehicle-models/{slug}`, `POST /admin/vehicle-models/{slug}/retire`, `POST /admin/vehicle-models/{slug}/restore` |
+| Araçlar | `GET/POST /admin/vehicles`, `PATCH /admin/vehicles/{id}` (bayi, `active`) |
+| Ek hizmetler | `GET /admin/extras`, `PATCH /admin/extras/{slug}` |
+| Rezervasyonlar | `GET /admin/reservations`, `GET /admin/reservations/{number}`, `POST /admin/reservations/{number}/cancel` |
+| Teklifler | `GET /admin/quotes`, `GET/PATCH /admin/quotes/{number}` |
+| Mesajlar | `GET /admin/contact-messages`, `GET/PATCH /admin/contact-messages/{id}` |
+| Şirketler ve Filom verisi | `/admin/companies/*`, `/admin/contracts/*`, `/admin/fleet-vehicles/*`, `/admin/invoices/*`, `/admin/fleet-expenses/*` ([FLEET.md](FLEET.md) §4) |
+| Talepler | `GET /admin/requests`, `GET /admin/requests/{number}`, `POST /admin/requests/{number}/status` (`{ status, note?, assignee? }`) |
+| Kullanıcılar | `GET /admin/users`, `GET /admin/users/{id}`, `POST /admin/users/{id}/disable`, `POST /admin/users/{id}/enable` |
+| İşlem kaydı | `GET /admin/audit-log` |
 
-| Alan | Uçlar | Notlar |
-|---|---|---|
-| Özet | `GET /admin/summary` | Sayılar (§3 Özet) |
-| Ürünler | `GET/POST /admin/products`, `GET/PATCH/DELETE /admin/products/{slug}`, `POST /admin/products/order` | `slug` oluşturulduktan sonra değişmez (adresler bozulmasın). Teklif talebi bağlı ürün silinmez (`IN_USE`), yayından kaldırılır |
-| Hizmetler | `GET/POST /admin/services`, `GET/PATCH/DELETE /admin/services/{slug}`, `POST /admin/services/order` | Hangi ürünlere dahil olduğu hizmetin üzerinde (`productSlugs`) |
-| Rezervasyonlar | `GET /admin/reservations`, `GET /admin/reservations/{number}`, `POST /admin/reservations/{number}/cancel` | İptal kullanıcı iptaliyle aynı kural (puan iadesi, bekleyen puan düşer); neden zorunlu, işlem kaydına girer |
-| Teklifler | `GET /admin/quotes`, `GET/PATCH /admin/quotes/{number}` | `status` ve `internalNote`. Geçişler: RECEIVED → IN_REVIEW → OFFERED → CLOSED (yeni değer); geri gidiş yok |
-| Mesajlar | `GET /admin/contact-messages`, `GET/PATCH /admin/contact-messages/{id}` | `handled: true/false` |
-| Kampanya kodları | `GET/POST /admin/promo-codes`, `PATCH/DELETE /admin/promo-codes/{code}` | Kod büyük harf, 3–20 karakter (`normalizePromoCode`), yüzde 1–90. Bir rezervasyonda kullanılmış kod silinmez, pasifleştirilir (`IN_USE`) |
-| SSS | `GET/POST /admin/faq`, `PATCH/DELETE /admin/faq/{id}`, `POST /admin/faq/order` | |
-| Kiralık filo | `GET/PATCH /admin/vehicle-models/{slug}`, `GET/PATCH /admin/branches/{id}`, `GET/POST /admin/vehicles`, `PATCH /admin/vehicles/{id}`, `GET/PATCH /admin/extras/{slug}` | v1'de yeni model, bayi ve ek hizmet **eklenmez** (seed'le gelir); yalnızca düzenlenir. Araç eklenir ve pasifleştirilir; geleceğe rezervasyonu olan araç pasifleştirilemez (`IN_USE`) |
-| Kullanıcılar | `GET /admin/users`, `GET /admin/users/{id}`, `POST /admin/users/{id}/disable`, `POST /admin/users/{id}/enable` | Bkz. aşağıda |
-| Kurumsal müşteriler ve Filom verisi | `/admin/companies/*`, `/admin/contracts/*`, `/admin/fleet-vehicles/*`, `/admin/invoices/*`, `/admin/fleet-expenses/*` | Tam liste FLEET.md §4 |
-| İşlem kaydı | `GET /admin/audit-log` | Süzgeç: yönetici, alan, tarih |
+**Herkese açık uçlarda değişen:**
+- `GET /branches` kapalı bayileri, `GET /vehicle-models` kaldırılmış modelleri döndürmez.
+- `GET /me` cevabına `role` eklenir.
+- `GET /products*` ve `/services` kalkar (ADR-32).
 
-**Kurumsal hesap açma** (SPEC §2.9 ve §10'daki "kurumsal hesap nasıl açılır" kararını kapatır): yönetici önce şirketi açar (ad, vergi dairesi, şehir, telefon, satış temsilcisi), sonra şirketin sayfasından kullanıcı davet eder (e-posta, ad, soyad, ünvan; `POST /admin/companies/{id}/users`). API **parolasız** bir `CORPORATE` hesap açar, şirkete bağlar (Google ile giriş PR'ından beri `passwordHash` boş olabilir) ve kişiye şifre belirleme bağlantısı gönderir (mevcut şifre sıfırlama akışı, 7 gün geçerli ayrı bir metinle). Aynı e-posta varsa `409 EMAIL_TAKEN`; bireysel hesabı kurumsala çevirmek v1'de yok.
-
-**Devre dışı bırakma:** `User.disabledAt` dolar, tüm oturumları kapanır, giriş ve Google girişi `401 INVALID_CREDENTIALS` ile reddedilir (hesabın durumu sızmaz). Rezervasyonları ve puanları durur. Yönetici kendini devre dışı bırakamaz.
-
-**Herkese açık uçlarda değişen:** `GET /products`, `/products/{slug}`, `/services` yalnızca yayındaki kayıtları döner ve web'in bugün çeviri dosyasından okuduğu tüm alanları taşır (§6). `GET /me` yanıtına `role` eklenir.
+**Fotoğraf yükleme** API'den değil web sunucusundan yapılır (ADR-28): `POST /admin/vehicle-models` ve `PATCH` yalnızca dönen `imageUrl`'i alır, API izinli alan adını denetler.
 
 ## 5. Veri modeli değişiklikleri
 
-Her biri ait olduğu işin migration'ında gelir (ROADMAP'teki iş numarasıyla):
-
 | Model | Değişiklik | İş |
 |---|---|---|
-| `User` | `role Role @default(CUSTOMER)`, `disabledAt DateTime?`, `companyId String?` | Y81, Y92 |
-| `Company` ve Filom tabloları | FLEET.md §5 | Y92, Y94, Y97 |
-| `AdminAuditLog` (yeni) | `id, at, actorId, companyId?` (Filom'dan gelen müşteri işleminde dolu), `action` (ör. `product.update`), `entity`, `entityId`, `summary Json` (değişen alan adları; parola, belirteç ve kişisel veri **değerleri** yazılmaz) | Y81 |
-| `Product` | `badge`, `tagline`, `idealFor` (iki dilli metin), `highlights` (3 × başlık+metin), `techPoints` (başlık isteğe bağlı + metin), `tone` (`OLIVE/STONE/AEGEAN/LEAF`), `published`, `updatedAt` | Y83 |
-| `Service` | `steps` (3 adım), `icon` (izinli liste: `truck, headset, key, wrench, siren`), `plans` (`INDIVIDUAL/CORPORATE/VIP` listesi), `published`, `updatedAt`; ürünle çoka-çok `ProductService` | Y83 |
-| `QuoteRequest` | `internalNote String?`, `updatedAt`; `QuoteStatus`'a `CLOSED` | Y86 |
-| `ContactMessage` | `handledAt DateTime?`, `handledById String?` | Y86 |
-| `PromoCode`, `FaqItem`, `VehicleModel`, `Branch`, `Vehicle`, `Extra` | `updatedAt` (çakışma denetimi için) | Y88, Y89 |
+| `User` | `role Role @default(CUSTOMER)`, `disabledAt DateTime?`, `companyId String?` (+ firma alanları `Company`'ye taşınır) | V2-23, V2-33, V2-34 |
+| `Session` | `lastUsedAt`, yönetici oturumu için kısa `expiresAt` | V2-10, V2-23 |
+| `AuditLog` (yeni) | `id, at, actorId, companyId?, action` (ör. `branch.close`)`, entity, entityId, fields String[]`. Değer ve kişisel veri yazılmaz. Silinemez, panelden düzenlenemez | V2-23 |
+| `PromoCode` | `maxRedemptions Int?`, `oncePerUser Boolean @default(true)`, `createdAt`, `updatedAt`; CHECK `percent BETWEEN 1 AND 90` | V2-05, V2-26 |
+| `Branch` | `kind BranchKind` (`CITY`, `AIRPORT`), `closedAt DateTime?`, `createdAt`, `updatedAt` | V2-27 |
+| `VehicleModel` | `retiredAt DateTime?`, `createdAt`, `updatedAt`; `imageUrl` izinli kaynak | V2-29 |
+| `Vehicle`, `Extra` | `createdAt`, `updatedAt` | V2-11, V2-30 |
+| `Reservation` | `updatedAt`, `cancelledAt`, `cancelReason String?`, `cancelledById String?` | V2-11, V2-31 |
+| `QuoteRequest` | `internalNote String?`, `updatedAt`; `QuoteStatus`'a `CLOSED`; kaynak (`WEB`, `FLEET_RENEWAL`) | V2-32, V2-38 |
+| `ContactMessage` | `handledAt DateTime?`, `handledById String?` | V2-32 |
+| `Product` | Metin alanları kalkar, yalnızca `slug`; `Service` tablosu kalkar | V2-17 |
+| `Company` ve Filom tabloları | [FLEET.md](FLEET.md) §5 | V2-33, V2-35, V2-37, V2-38 |
+| `ServiceRequest`, `ServiceRequestEvent` | ADR-31 | V2-41 |
 
-Seed bu alanları web'in bugünkü çeviri dosyalarından (TR ve EN) doldurur; böylece Y84'te sayfalar API'ye geçtiğinde ekranda hiçbir metin değişmez.
+## 6. Güvenlik
 
-## 6. Ürün ve hizmet sayfalarının API'ye geçişi (Y5)
+- Yetki **API'de** denetlenir. Her `/admin` ucu için "oturumsuz 401, müşteri 403, yönetici 200" testi zorunludur.
+- İşlem kaydı silinemez; kişisel veri değeri yazmaz.
+- Paneldeki listeler kişisel veri gösterir (ad, e-posta, telefon); erişim yalnızca `ADMIN` rolüyle mümkündür. Okuma kaydı v2'de tutulmaz; [SECURITY.md](SECURITY.md)'de yazılır.
+- CSRF: `SameSite=Lax` çerez, istekler web sunucusundan, JSON gövde; ek olarak JSON dışı içerik türüne `415`.
+- Dosya yükleme kuralları ADR-28; yükleme action'ı yönetici oturumunu API'ye sorarak doğrular (`GET /me` → `role`).
+- v2'de yok, sonraya: iki adımlı doğrulama (TOTP), ikinci rol, okuma kaydı, CSV içe/dışa aktarma.
 
-Bugün `apps/web/lib/products.ts`, `lib/services-data.ts` ve `messages/*/products.json`, `services.json` içindeki **öğe** metinleri sabit. Geçişte:
+## 7. Test
 
-1. Y83 (BE) alanları ekler ve seed'i çeviri dosyalarından doldurur.
-2. Y84 (FE) sayfaları, navbar'daki Ürünler menüsünü, sitemap'i, `llms.txt`'i, JSON-LD'yi ve kurumsal teklif sayfasındaki ürün şeridini API'den okutur; çeviri dosyalarından öğe metinlerini siler (sayfa iskeleti metinleri kalır). `services-data.ts`'teki paket ve ürün tablosu verisi de API'den gelir; ikonlar izinli listedeki adla eşlenir.
-3. Önbellek: web bu uçları `next: { tags: ['products'] }` / `['services']` ile 10 dakika saklar. Yönetim panelinde kayıt yapan sunucu eylemi `revalidateTag` çağırır, değişiklik hemen sitede görünür.
-4. API kapalıysa sayfa hata durumunu gösterir (CLAUDE.md: her veri sayfasının yükleniyor, boş ve hata durumu); eski metin yedek olarak tutulmaz.
-
-## 7. Güvenlik
-
-- Yetki **API'de** denetlenir; web'deki rol kontrolü yalnızca kullanıcı deneyimidir. Her `/admin` ucu için "oturumsuz 401, müşteri 403" testi zorunludur.
-- İşlem kaydı silinemez ve panelden düzenlenemez. Kişisel veri değeri yazmaz, yalnızca hangi alanın değiştiğini yazar.
-- Yönetici oturumu 12 saat; Google ile giriş kapalı; parola en az 12 karakter.
-- Paneldeki listeler kişisel veri gösterir (ad, e-posta, telefon). KVKK açısından erişim işlem kaydında değil (okuma kaydı tutulmaz, v1), yalnızca yetkili rolle sınırlıdır. SECURITY.md'ye eklenir.
-- CSRF: mevcut düzen (SameSite=Lax çerez, istekler web sunucusundan, JSON gövde). Ayrıca `/admin` değiştiren uçlar `Content-Type: application/json` dışındaki istekleri `415` ile reddeder.
-- Görsel yolu alanı yalnızca `/images/` ile başlayan site içi yolları ya da `next.config.ts`'te izinli alan adlarını kabul eder.
-
-## 8. Sonraya bırakılanlar
-
-İki adımlı doğrulama (TOTP), ikinci rol (`EDITOR`: yalnızca içerik), görsel yükleme (nesne depolama), okuma kaydı, CSV içe/dışa aktarma (ör. HGS listesi yükleme), kampanya galerisinin panelden yönetimi, yeni model ve bayi ekleme.
-
-## 9. Test
-
-- **BE:** her uç için birim (servis) ve HTTP testleri (yetki: 401/403/200; doğrulama: 422; çakışma: 409 `STALE_WRITE`); veritabanlı entegrasyon testi rezervasyon iptali, kurumsal hesap açma ve kampanya kodu silme yasağı için.
-- **FE:** `USE_MOCKS=1` ile yönetim akışlarının e2e testi (giriş → ürün düzenle → sitede görünür; rezervasyon iptali; yetkisiz kullanıcı 404). Mock'lar sözleşmeden üretilen tiplere bağlı.
-- **Canlı:** her faz bitince bir kez elle: yönetici girişi, bir kaydı değiştirip sitede görmek.
+- **API:**
+  - her uç için servis ve HTTP testleri: yetki 401/403/200, doğrulama 422, çakışma 409 `STALE_WRITE`, `IN_USE`;
+  - veritabanlı entegrasyon testleri: bayi kapatma engeli, model kaldırma, rezervasyon iptalinde puan, kampanya kodu tavanı (eşzamanlı iki istek), kurumsal davet.
+- **Web:** `USE_MOCKS=1` ile e2e:
+  - yetkisiz 404;
+  - bayi ekle → Bayilerimiz'de görün → kapat → kaybolsun;
+  - model ekle (fotoğraf mock'u) → filo bölümünde görün;
+  - kod ekle → özet sayfasında kullan;
+  - rezervasyon iptali onay penceresi.
+- **Canlı:** her faz sonunda G önizlemede bir tur yapar (WORKFLOW.md).

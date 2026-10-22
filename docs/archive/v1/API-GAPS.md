@@ -1,3 +1,5 @@
+> **Arşiv (v1, 22 Ekim 2026'da taşındı).** Bu belge artık güncellenmez; yalnızca referanstır. Güncel belgeler için [docs/README.md](../../README.md). Göreli bağlantılar taşınmadan önceki konuma göre yazılmıştır.
+
 # Ön yüz ve API sözleşmesi arasındaki farklar
 
 12 Ekim 2026. `docs/api/openapi.yaml` v0.1 ile ön yüzün ara tipleri (`apps/web/lib/*.ts`) karşılaştırıldı. Sözleşmeden üretilen tipler `apps/web/lib/api-types.ts` içinde (`pnpm --filter @novera/web gen:api`); ortak parçalar (`Currency`, `Money`, `LocalizedText`) derleyici testiyle sözleşmeye bağlı (`tests/api-contract.test.ts`).

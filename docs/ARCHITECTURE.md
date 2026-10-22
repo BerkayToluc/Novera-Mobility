@@ -1,312 +1,198 @@
-# Novera Mobility: Mimari Kararlar (ARCHITECTURE)
+# Novera Mobility: Mimari (ARCHITECTURE)
 
-> Durum: **Taslak v0.3** · 20 Ekim 2026 (v0.1: 4 Ekim 2026). v0.2 (9 Ekim): SPEC v0.3 için ADR-18 ile ADR-23 ve "Backend ile netleşecekler" eklendi. v0.3: SPEC v0.11 için ADR-24 (Yönetim paneli) ve ADR-25 (Filom).
-> Ekip belirli bir teknoloji tercihi belirtmedi; seçimler SPEC'teki ihtiyaçlara göre yapıldı.
-> Her karar *Bağlam / Alternatifler / Sonuç / Ödünleşim* düzeninde. Bir karar değişirse burada güncellenir, eski hali "Değiştirildi" notuyla kalır.
-> Sürüm numaraları bilerek yazılmadı: kurulum günü her paketin **güncel kararlı** sürümü kullanılır ve `package.json`'a sabitlenir.
-
----
-
-## Genel bakış
-
-```
-                ┌──────────────────────────┐
-  Tarayıcı ───▶ │  apps/web  (Next.js)     │  Sayfalar, arayüz, çok dillilik
-                └────────────┬─────────────┘
-                             │ HTTPS + JSON (OpenAPI sözleşmesi)
-                             │ tarayıcı /api/* çağırır, Next iletir (ADR-14)
-                ┌────────────▼─────────────┐
-                │  apps/api  (NestJS)      │  İş kuralları, kimlik doğrulama
-                └────────────┬─────────────┘
-                             │ Prisma
-                ┌────────────▼─────────────┐
-                │  PostgreSQL              │  Kalıcı veri
-                └──────────────────────────┘
-  Google Maps JS API: tarayıcıdan doğrudan (sadece İletişim sayfası)
-```
-
-Tek dil: **TypeScript**, frontend'de de backend'de de.
+> Durum: **v2.0** · 22 Ekim 2026 · Karar sahibi: G (PM), uygulayan: Berkay.
+> v1'in ADR'lerinin tam metni (bağlam, alternatifler, ödünleşim) [archive/v1/ARCHITECTURE.md](archive/v1/ARCHITECTURE.md) içindedir; aşağıda özetleri ve bugünkü durumları var. v2'nin yeni kararları ADR-24'ten başlar.
+> Her karar *Bağlam / Karar / Sonuçları* düzenindedir. Bir karar değişirse burada güncellenir, eski hâli "Değiştirildi" notuyla kalır.
 
 ---
 
-## ADR-01 · Tek repo (monorepo), pnpm workspaces
+## 1. Sistem bugün
 
-- **Bağlam:** İki kişi, tek ürün. API sözleşmesi iki tarafı da ilgilendiriyor; bir özelliğin frontend ve backend değişikliği aynı PR'da görülebilmeli.
-- **Alternatifler:** İki ayrı repo (frontend / backend). Turborepo veya Nx gibi ek araçlar.
-- **Sonuç:** Tek repo, `pnpm` workspaces. Yapı: `apps/web`, `apps/api`, `packages/` (ileride paylaşılan tipler için).
-- **Ödünleşim:** Herkes tüm kodu görür (öğrenme hedefi için artı). Ek build aracı yok; ihtiyaç doğarsa Turborepo sonradan eklenebilir.
+```
+ Tarayıcı ──HTTPS──▶ apps/web (Next.js 16, Vercel)
+                      │  Sayfalar, sunucu bileşenleri, server action'lar, CSP nonce (proxy.ts)
+                      │  API'yi YALNIZCA sunucudan çağırır (lib/api-request.ts, api-post.ts)
+                      │  Başlıklar: X-Novera-Key (paylaşılan gizli anahtar), X-Novera-Client-IP,
+                      │             Cookie: novera_session (API'nin çerezi web'e kopyalanır)
+                      ▼
+                     apps/api (NestJS 12, Render Free, Frankfurt)
+                      │  Modüller: auth, catalog, holds, reservations, forms, content, health, common
+                      │  Anahtarsız istek 404 · hata biçimi {code, message, fieldErrors}
+                      ▼
+                     PostgreSQL 17 (Neon Free, Frankfurt) ── Prisma 7
 
-## ADR-02 · Frontend: Next.js (App Router) + TypeScript
+ Yan servisler: Resend (e-posta, HTTPS) · UptimeRobot (/health, 5 dk) · Google Maps JS (tarayıcıdan) ·
+                Google Identity (Google ile giriş, ID token API'de doğrulanır) · günlük kur güncelleme görevi
+```
 
-- **Bağlam:** Ürün, hizmet ve hakkımızda sayfaları arama motorlarında bulunmalı (SEO). Kiralama akışı etkileşimli. İki dil (TR/EN) URL seviyesinde. G hazır component'ler getirecek; bunların çoğu React tabanlı.
-- **Alternatifler:**
-  - *Vite + React (SPA):* Basit, ama sayfalar tarayıcıda oluştuğu için SEO zayıf.
-  - *Astro:* İçerik sayfalarında çok hızlı, ama kiralama akışı gibi uygulama tarafı ağırlaşınca React kadar doğal değil; hazır component ekosistemi daha dar.
-- **Sonuç:** Next.js App Router. İçerik sayfaları statik üretilir, kiralama akışı sunucu ve istemci component'lerinin karışımı.
-- **Değiştirildi (ADR-13):** Tema tercihi çerezden okunduğu için sayfalar artık istek anında sunucuda üretilir, derleme zamanında değil. Sayfalar yine sunucuda üretilmiş HTML olarak döndüğü için SEO etkilenmez.
-- **Ödünleşim:** Öğrenme eğrisi SPA'dan dik (sunucu/istemci component ayrımı). Karşılığında SEO, görsel optimizasyonu ve yönlendirme hazır gelir. Belge: [nextjs.org/docs](https://nextjs.org/docs)
+- **Tek dil:** TypeScript (web ve API). Monorepo, pnpm workspaces; `packages/` bugün boş.
+- **Web:** `app/[locale]/...` (next-intl, TR öneksiz, EN `/en`), `components/<özellik>/`, `lib/` (API istemcileri, action'lar, şemalar), `mocks/` (yalnızca `USE_MOCKS=1`), `messages/tr|en/<özellik>.json`. Testler: `tests/` (Vitest), `e2e/` (Playwright).
+- **API:** `src/<alan>/` (controller + service + spec), `prisma/schema.prisma`, `prisma/migrations/` (11 migration), `prisma/seed.ts` (sabit UUID'li, tekrar çalıştırılabilir).
+- **Sözleşme:** `docs/api/openapi.yaml`; web tipleri `pnpm --filter @novera/web gen:api` ile `lib/api-types.ts`'e üretilir.
+- **CI** (`.github/workflows/ci.yml`): Postgres servisli; lint, typecheck, test, build, iç link kontrolü, Playwright (örnek veriyle).
 
-## ADR-03 · Stil: Tailwind CSS + tasarım token'ları
+## 2. v1 kararları (ADR-01–23) ve bugünkü durum
 
-- **Bağlam:** SPEC §5'te renk, font, boşluk, köşe yarıçapı tanımlı. Bu değerlerin tek bir yerde durması ve hiçbir component'te ham hex yazılmaması gerekiyor. Hazır component'lerin (ör. shadcn/ui) büyük kısmı Tailwind ile yazılıyor.
-- **Alternatifler:** CSS Modules + CSS değişkenleri (sade, ama hazır component'leri uyarlarken her birini baştan yazmak gerekir). styled-components (çalışma zamanı maliyeti, Next.js sunucu component'leriyle uyumu zahmetli).
-- **Sonuç:** Tailwind CSS. Token'lar CSS değişkeni olarak tek dosyada tanımlanır ve Tailwind temasına bağlanır. Kural: **component içinde ham renk/boşluk değeri yok**, sadece token sınıfları.
-- **Ödünleşim:** HTML'de uzun sınıf listeleri. Karşılığında hazır component'ler neredeyse doğrudan uyarlanır. Belge: [tailwindcss.com/docs](https://tailwindcss.com/docs)
-
-## ADR-04 · Çok dillilik: next-intl
-
-- **Bağlam:** Türkçe ana dil, İngilizce v1'de var. URL yapısı `/` (TR), `/en/...` (EN).
-- **Alternatifler:** Next.js'in yerleşik yönlendirmesiyle elle çözüm; i18next.
-- **Sonuç:** next-intl. Metinler özellik başına ayrı dosyalarda: `messages/tr/<özellik>.json` ve `messages/en/<özellik>.json`; her dosya `i18n/messages.ts` içinde bir satırla kaydedilir. Tek dosya yerine bölünmesinin sebebi: her yeni özellik aynı yere anahtar eklediği için iki branch her merge'de çakışıyordu. İngilizce dosyaların Türkçe ile aynı anahtarlara sahip olması derleme zamanında zorunludur. Sayfaya gömülü metin yazılmaz.
-- **Yollar:** `i18n/routing.ts` içindeki `pathnames` tablosu Türkçe yolları (SPEC §2.1) anahtar olarak tutar; `/en` altında İngilizce karşılıkları gösterilir (`/araclar` ↔ `/en/cars`). Klasör adları (`app/[locale]/araclar`) Türkçe kalır. Yeni bir sayfa eklenince yolu bu tabloya da eklenmelidir; `Link` ve `usePathname` bu tabloya göre tiplenir.
-- **Ödünleşim:** Her metin bir anahtar üzerinden yazılır, ilk başta yavaş hissettirir; ikinci dil eklemek sonradan dosya doldurmaktan ibaret olur. Belge: [next-intl.dev](https://next-intl.dev/)
-
-## ADR-05 · Backend: NestJS + TypeScript
-
-- **Bağlam:** Ekip "şirkette çalışır gibi" öğrenmek istiyor. Backend REST API sunacak, kimlik doğrulama, rezervasyon, teklif ve bayi verisini yönetecek. API sözleşmesi otomatik belgelenmeli.
-- **Alternatifler:**
-  - *Express / Fastify:* Hafif ve basit, ama yapı tamamen ekibe kalır; iki kişilik öğrenme projesinde dağınıklığa açık.
-  - *Spring Boot (Java) / ASP.NET (C#):* Kurumsal dünyada çok yaygın, ama frontend'le dil paylaşılmaz; tipler iki kez yazılır.
-- **Sonuç:** NestJS. Modül yapısı (her alan kendi klasöründe: `branches`, `vehicles`, `reservations`, `auth`...) şirketlerdeki katmanlı mimariyi öğretir. `@nestjs/swagger` ile OpenAPI belgesi koddan üretilir.
-- **Ödünleşim:** Express'e göre daha çok kalıp kod (decorator, module, provider). Karşılığında düzen hazır gelir. Belge: [docs.nestjs.com](https://docs.nestjs.com/)
-
-## ADR-06 · Veritabanı: PostgreSQL + Prisma
-
-- **Bağlam:** Veri ilişkisel: kullanıcı → rezervasyon → araç → bayi. Tarih aralığı sorguları (araç müsait mi?) var.
-- **Alternatifler:** MongoDB (ilişkisel veri için doğal değil). MySQL (geçerli, ama PostgreSQL'in tarih aralığı ve coğrafi uzantı desteği daha güçlü). TypeORM / Drizzle (Prisma'nın şema dosyası ve migration akışı yeni başlayan için daha okunaklı).
-- **Sonuç:** PostgreSQL, ORM olarak Prisma. Geliştirmede veritabanı Docker Compose ile yerelde çalışır; ikiniz de aynı sürümü kullanırsınız.
-- **Ödünleşim:** Docker kurulumu gerekir. Prisma'da çok karmaşık sorgular için ham SQL'e inmek gerekebilir. Belge: [prisma.io/docs](https://www.prisma.io/docs)
-- **Not:** npm'de Prisma'nın "latest" etiketi şu an bir sürüm adayını (rc) gösteriyor; kurulumda kararlı sürüm seçilmeli.
-
-## ADR-07 · API sözleşmesi önce (contract-first) ve mock
-
-- **Bağlam:** Frontend ve backend asenkron, birbirini beklemeden ilerlemeli.
-- **Alternatifler:** Backend bittikçe frontend bağlanır (frontend sürekli bekler). GraphQL (iki kişilik REST ihtiyacı için fazla).
-- **Sonuç:**
-  1. Her uç nokta önce `docs/api/openapi.yaml` dosyasına yazılır ve PR ile ikiniz onaylarsınız.
-  2. Frontend bu dosyadan `openapi-typescript` ile TypeScript tiplerini üretir.
-  3. Backend henüz hazır değilken frontend **MSW** (Mock Service Worker) ile sahte cevaplarla çalışır.
-  4. Backend hazır olunca mock kapatılır, gerçek API'ye bağlanılır.
-- **Ödünleşim:** Başta sözleşme yazmak yavaş gelir; sonradan "backend şunu döndürmüyormuş" sürprizlerini önler. Belgeler: [openapi-ts.dev](https://openapi-ts.dev/), [mswjs.io](https://mswjs.io/)
-
-## ADR-08 · Kimlik doğrulama: e-posta + şifre, httpOnly çerez
-
-- **Bağlam:** Giriş ödemeden hemen önce istenir. Profil sayfası var. Gerçek ödeme yok.
-- **Alternatifler:** Auth.js / Clerk gibi hazır servisler (hızlı, ama backend'ci arkadaşın öğrenme hedefini elinden alır). Token'ı `localStorage`'da tutmak (XSS'e açık).
-- **Sonuç:** Backend'de e-posta + şifre (şifre `argon2` ile hash'lenir), oturum `httpOnly`, `Secure`, `SameSite` çerezinde.
-- **Ödünleşim:** Şifre sıfırlama, oturum yenileme gibi işler elle yazılır. Öğrenme projesi için bilinçli seçim.
-
-## ADR-09 · Harita: Google Maps JavaScript API
-
-- **Bağlam:** G'nin kararı; arkadaşı daha önce Google Cloud API bağlamış.
-- **Sonuç:** Bayi verisi (koordinat dahil) backend'den gelir; harita frontend'de `@vis.gl/react-google-maps` ile çizilir. Harita kodu sadece İletişim sayfasında yüklenir.
-- **Ödünleşim / dikkat:** Tarayıcıda kullanılan API anahtarı herkes tarafından görülebilir. Google Cloud'da **HTTP referrer kısıtlaması** ve kota sınırı mutlaka konmalı; anahtar repoya yazılmaz, ortam değişkeninde durur. Belge: [developers.google.com/maps/api-security-best-practices](https://developers.google.com/maps/api-security-best-practices)
-
-## ADR-10 · Formlar ve doğrulama: React Hook Form + Zod
-
-- **Bağlam:** Arama, teklif, kayıt, giriş, sahte ödeme formları.
-- **Sonuç:** Frontend'de React Hook Form + Zod şemaları. Backend NestJS'in kendi doğrulamasını (class-validator) kullanır; kurallar aynı tutulur.
-- **Ödünleşim:** Kurallar iki yerde. İleride `packages/` altında ortak Zod şemasına taşınabilir.
-
-## ADR-11 · Kalite: ESLint, Prettier, Vitest, Playwright, GitHub Actions
-
-- **Sonuç:**
-  - Her PR'da GitHub Actions: lint, tip kontrolü, birim testleri, build. Biri kırmızıysa merge yok.
-  - Birim testleri: Vitest (web), Jest (api, NestJS varsayılanı).
-  - Uçtan uca test: Playwright, SPEC §8'deki akışlar.
-  - Commit mesajları: Conventional Commits (`feat:`, `fix:`, `docs:`...).
-- **Ödünleşim:** Kurulum günü biraz zaman alır; sonrasında "bende çalışıyordu" tartışmasını bitirir.
-
-## ADR-12 · Yayın
-
-- **Sonuç (öneri, en son karar verilecek):** Web → Vercel. API + PostgreSQL → Render, Railway veya Fly.io gibi bir servis.
-- **Dikkat:** Bu servislerin ücretsiz plan koşulları sık değişiyor; **doğrulanmadı**. Yayın fazına gelince güncel koşullara bakılacak.
-
-## ADR-13 · Tema tercihi: çerez + `data-theme`
-
-- **Bağlam:** SPEC §2.4: açık/koyu tema, tercih hatırlanır, giriş yapan kullanıcıda hesaba kaydedilir. Yanlış temada bir an görünmek (flash) kabul edilemez.
-- **Alternatifler:** `localStorage` + `<head>`'de küçük bir satır içi script (sayfalar statik kalır, ama sunucu temayı bilmez; ileride CSP sıkılaşırsa nonce gerekir). `next-themes` gibi bir paket (bu iş için gereksiz bağımlılık).
-- **Sonuç:** Tercih `novera-theme` çerezinde (`light` | `dark`; çerez yoksa "sistem"). Sunucu çerezi okuyup `<html data-theme>` ve `color-scheme` meta'sını ilk HTML'e yazar. CSS tarafında `data-theme`, `color-scheme`'i zorlar; tüm semantik token'lar `light-dark()` ile bu değere bağlıdır. Tailwind'in `dark:` varyantı da etkin temayı (zorlanan ya da sistem) izler. Çerezi anahtar istemciden yazar; çerez dışında bir kimlik bilgisi içermez.
-- **Değiştirildi (10 Ekim 2026, G):** Çerez yoksa tema artık sistem değil **açık** (sayfa beyaz). "Sistem" bir seçenek olarak kalır ve çerezde `system` değeriyle tutulur; `<html data-theme>` her zaman `light`, `dark` veya `system` taşır, CSS `system`'de `color-scheme: light dark` kullanır. Değerler ve varsayılan `lib/theme.ts` içinde.
-- **Ödünleşim:** Kök layout `cookies()` okuduğu için **tüm rotalar istek anında üretilir**, derleme zamanında statik üretilmez (ADR-02'ye not düşüldü). Karşılığında flash yok ve giriş yapan kullanıcının tercihini hesaba taşımak (BACKLOG #28) sunucuda çerezi okumaktan ibaret. Çerez işlevsel bir tercih çerezidir; `/cerez-politikasi` metninde (BACKLOG #36) belirtilmeli.
+| ADR | Karar | Bugünkü durum (22 Ekim) |
+|---|---|---|
+| 01 | Monorepo, pnpm workspaces | Geçerli |
+| 02 | Next.js App Router + TypeScript | Geçerli (Next 16.3) |
+| 03 | Tailwind + tasarım token'ları, bileşende ham değer yok | Geçerli; lint kuralında boşluk var (QUALITY M-08) |
+| 04 | next-intl, özellik başına çeviri dosyası | Geçerli; tüm metinler her sayfada istemciye gidiyor (P-01) |
+| 05 | NestJS, alan başına modül, Swagger | Geçerli; Swagger canlıda kapalı |
+| 06 | PostgreSQL + Prisma | Geçerli |
+| 07 | Sözleşme önce, mock | Geçerli; mock modu dağınık (M-06), ADR-29 ile toplanır |
+| 08 | E-posta + şifre, httpOnly çerez | Geçerli; özet `argon2` değil **scrypt**; Google ile giriş eklendi |
+| 09 | Google Maps JS API | Geçerli; v2'de Filom haritaları da bunu kullanır |
+| 10 | Formlar React Hook Form + Zod; API class-validator | **Değişiyor:** API'de doğrulama elle yazılmış, class-validator kullanılmıyor. ADR-26 ile iki tarafta da zod |
+| 11 | ESLint, Prettier, Vitest, Playwright, Actions | Geçerli; v2'de CI'a güvenlik taraması eklenir (V2-18) |
+| 12 | Yayın: Vercel + Render + Neon | Geçerli ([DEPLOY.md](DEPLOY.md)) |
+| 13 | Tema çerezi + `data-theme`, sayfalar istek anında | Geçerli |
+| 14 | API'ye Next üzerinden erişim | **Değişti:** tarayıcı API'yi hiç çağırmıyor, tüm çağrılar sunucudan; `next.config.ts`'teki `/api` yönlendirmesi artık gereksiz ve V2-06'da kalkar |
+| 15 | TRY/EUR/USD, kur backend'de | Geçerli; Filom tutarları yalnızca TRY |
+| 16 | API UTC, ekran `Europe/Istanbul`, 30 dk dilim | Geçerli |
+| 17 | Sözleşme kuralları: hata biçimi, iki dilli alan, alt birim tutar, sayfalama yok | Geçerli; `/admin/*` ve `/fleet/*` için istisnalar ADR-24 |
+| 18 | SEO: meta, robots, sitemap, JSON-LD | Geçerli |
+| 19 | Kendi çerez onayı, çerezsiz analytics | Geçerli; analytics aracı hâlâ açık karar |
+| 20 | Formlar sunucu action'ı ile, tuzak alan, KVKK onayı | Geçerli; action'larda zod eksik (G-10) |
+| 21 | Animasyon kütüphanesi yok | **Değişti (v1 SPEC v0.7):** `framer-motion` 3 dosyada kullanılıyor; navbar'daki kullanım V2-14'te CSS'e döner |
+| 22 | Filo penceresi `<dialog>` + `?arac=` | Geçerli |
+| 23 | Markalı 404 ve 500 | Geçerli |
 
 ---
 
-## ADR-14 · API'ye erişim: Next üzerinden proxy
+## 3. v2 kararları
 
-- **Bağlam:** Giriş çerez tabanlı (ADR-08), web ve API ayrı servisler (ADR-12). Tarayıcı API'ye doğrudan giderse çerezin çalışması farklı alan adlarına bağlı kalır.
-- **Alternatifler:** Tarayıcı API adresini doğrudan çağırır: backend CORS'ta tam origin ve `credentials` izni vermeli, canlıda alan adları farklıysa çerez `SameSite=None; Secure` olmalı ve üçüncü taraf çerez engelleyen tarayıcılarda bozulabilir.
-- **Sonuç:** Tarayıcı `/api/...` çağırır, Next `rewrites` ile `API_URL`'deki NestJS'e `/api` öneki kaldırılarak iletir. Tarayıcıya göre API aynı siteden gelir: çerez birinci taraf olur, **CORS ve `SameSite=None` gerekmez**. Kurallar:
-  - Frontend istekleri `credentials: "include"` ile atar.
-  - Backend çerezi `httpOnly`, `Secure` (canlıda), `SameSite=Lax` koyar; route'lar `/api` öneki olmadan çalışır.
-  - Durum değiştiren uçlar yalnızca `POST/PUT/PATCH/DELETE` olur (CSRF: `SameSite=Lax` yalnızca güvenli yöntemlerin çapraz site isteğine çerez eklemesine izin verir).
-  - Sunucu bileşenleri API'yi çağırırken gelen isteğin çerezini kendisi iletir (tarayıcı olmadığı için çerez otomatik gitmez).
-  - Swagger belgesi (`/docs`) doğrudan API'de açılır, proxy'den geçmez.
-- **Ödünleşim:** Tüm API trafiği bir atlama daha yapar ve Next sunucusundan geçer; canlıdaki süre ve boyut sınırları **doğrulanmadı** (yayın fazında bakılacak). Dosya yükleme gibi büyük gövdeler v1 kapsamında yok.
+### ADR-24 · Yönetim paneli web uygulamasının içinde
 
-## ADR-15 · Para birimi: TRY, EUR, USD (backend kuru tutar)
+- **Bağlam:** Novera çalışanı katalog, operasyon ve kurumsal müşteri verisini koddan bağımsız yönetmeli ([ADMIN.md](ADMIN.md)). Ekip tek geliştiricidir.
+- **Karar:**
+  - Panel `apps/web/app/[locale]/yonetim` altındadır (EN `/en/admin`). Aynı token'ları, çeviri düzenini, oturum çerezini ve sunucu tarafı API çağrısını kullanır. Ayrı uygulama ya da hazır yönetim aracı kullanılmaz.
+  - **Yetki API'dedir:** `User.role` (`CUSTOMER` varsayılan, `ADMIN`) ve `/admin/*` önünde `AdminGuard`. Web'deki rol kontrolü yalnızca yönlendirme içindir; rolü olmayan kullanıcıya sayfa 404 döner.
+  - Yönetici hesabı yalnızca komut satırından açılır (`pnpm admin:create`, `--revoke`). Oturumu 12 saattir, Google ile giremez, parolası en az 12 karakterdir. Rol geri alınınca açık oturumları kapanır.
+  - Değiştiren her istek `AuditLog`'a yazılır: aktör, şirket (Filom'dan geliyorsa), eylem, varlık, kimlik ve değişen alan **adları**. Değerler yazılmaz.
+  - **ADR-17'den farklar** (yalnızca `/admin/*` ve `/fleet/*`):
+    - Listeler sayfalıdır: `?page=&pageSize=` (en çok 100), cevap `{ items, total, page, pageSize }`; sıralama `?sort=alan:asc|desc`.
+    - Süzme sunucuda yapılır.
+    - Düzenleme isteği kaydın `updatedAt` değerini taşır; arada değişmişse cevap `409 STALE_WRITE` olur.
+    - Yeni hata kodları: `FORBIDDEN` (403), `STALE_WRITE`, `IN_USE`, `INVALID_TRANSITION`, `ALREADY_GENERATED`, `VEHICLE_ASSIGNED` (409), `UNSUPPORTED_MEDIA_TYPE` (415).
+  - Önbellek: herkese açık katalog uçlarını (bayiler, modeller, ek hizmetler) web etiketle önbelleğe alır (`branches`, `vehicle-models`, `extras`). Panelde kayıt yapan action `revalidateTag` çağırır.
+- **Sonuçları:** panel kodu sitenin derlemesine girer ama yalnızca `/yonetim` rotalarında yüklenir. Tek oturum, tek yayın, tek tasarım düzeni olur; tek geliştirici için en az iş budur.
 
-- **Bağlam:** Ziyaretçi fiyatları TL, euro veya dolar olarak görmek istiyor. SPEC'te daha önce para birimi seçimi yoktu; kapsam genişledi.
-- **Alternatifler:** Kur frontend'de sabit bir tabloda (backend'e dokunmaz ama rezervasyon tutarı ile ekrandaki tutar tutarsız olabilir). Frontend'in doğrudan dış kur servisi çağırması (anahtar ve hata durumları tarayıcıda, rezervasyonla bağı yok).
-- **Sonuç:** **Kur backend'de** `ExchangeRate` tablosunda durur; günde bir kez zamanlanmış görev bir dış kur servisinden günceller (kuru günde bir değişse yeter). Fiyatlar TRY'de tutulur, çevrilen tutarlar API'den gelir:
-  - Her tutar para birimiyle birlikte gelir: `{ "amount": 125000, "currency": "TRY" }`; `amount` alt birimin (kuruş/cent, üçünde de 100'e bölünür) tam sayısıdır.
-  - Fiyat uçları `?currency=EUR` alır (varsayılan TRY), dönüştürüp en yakın alt birime yuvarlayarak verir.
-  - Rezervasyon seçilen para birimini **ve o anki kuru** kaydeder; sonradan kur değişse de rezervasyon sabit kalır (şemadaki "rezervasyon anındaki fiyatlar" ilkesi). Ödeme sahte olduğu için para alınmaz, ekranda yazar.
-  - `GET /rates` (`updatedAt` ile) kuru gösterir. Dış servis çökerse son bilinen kur kullanılır; hiç kur yoksa seed kur.
-  - Frontend **kur çevirmez**: seçimi `novera-currency` çerezinde tutar (tema gibi), isteklerde `?currency=` olarak iletir, `formatMoney` ile gösterir. Seçim girişli kullanıcıda hesaba kaydedilir (BACKLOG #28).
-- **Ödünleşim:** Hangi dış servisin kullanılacağı ve ücretsiz kullanım koşulları **doğrulanmadı**; seçerken bakılacak. Çevrilen tutarlarda yuvarlama toplamı bozabilir: toplam sunucuda hesaplanır, ekranda hiçbir tutar yuvarlanmaz (tam tutar ondalıksız, kuruşlu/centli tutar iki ondalıkla gösterilir).
+### ADR-25 · Şirket modeli ve Filom
 
-## ADR-16 · Tarih ve saat dilimi
+- **Bağlam:** kurumsal müşteri kendi filosunu görmeli ve yönetmeli; veriyi Novera girer ([FLEET.md](FLEET.md)).
+- **Karar:**
+  - Yer: `apps/web/app/[locale]/filom` (EN `/en/my-fleet`). ADR-24'ün ortak liste ve form bileşenleri kullanılır.
+  - Yeni `Company` modeli eklenir. Kurumsal `User` kaydı `companyId` ile bağlanır. Bugün `User` üzerindeki firma alanları migration'la `Company`'ye taşınır; `GET /me` cevabının biçimi değişmez.
+  - Uzun dönem filo araçları **ayrı tablodadır** (`FleetVehicle`). Kiralık `Vehicle`'dan ayrıdır; müsaitlik ve arama kodu filo araçlarını hiç görmez.
+  - `/fleet/*` uçları `CompanyGuard` arkasındadır (oturum + kurumsal hesap + `companyId`). Her sorgu `companyId` ile süzülür; başka şirketin kaydı `404` döner. Kimlikler uuid'dir.
+  - Türetilen değerler saklanmaz, sorgu anında hesaplanır: faturanın "gecikti" durumu, masrafın personeli (zimmetten), rapor toplamları.
+  - Filom tutarları TRY alt birimdedir; ADR-15'in para birimi çevirisi uygulanmaz.
+- **Sonuçları:** `Company`'ye taşıma mevcut kurumsal hesaplara dokunan bir migration'dır ve testle korunur. Bir araç aynı anda hem kiralık hem filo olamaz; v2'de bu gerekmiyor.
 
-- **Bağlam:** Kiralamalar Türkiye'de; Türkiye tek saat diliminde (UTC+3) ve yaz saati uygulamıyor. next-intl varsayılanı sunucunun kendi saat dilimini kullanıyor, bu da aynı rezervasyonun geliştirmede ve canlıda farklı yazılmasına yol açıyordu.
-- **Sonuç:** API her anı **ISO 8601, UTC** gönderir (`2026-10-12T10:00:00Z`). Frontend göstermek ve girmek için **`Europe/Istanbul`** kullanır (`i18n/request.ts` içinde sabit). Müsaitlik UTC anları üzerinden hesaplanır. Saat seçimi 30 dakikalık dilimlerdir.
-- **Ödünleşim:** Yurt dışı bayi eklenirse `Branch.timeZone` alanı gerekir; v1'de tüm bayiler Türkiye'de.
+### ADR-26 · Girdi doğrulama: iki tarafta da zod
 
-## ADR-17 · API sözleşme kuralları
+- **Bağlam:** API'de doğrulama dört ayrı yerde elle yazılmış (`FormReader`, `parseReservationRequest`, `HoldsService.validate`, catalog). Global `ValidationPipe` gövdeler `unknown` olduğu için hiçbir şey yapmıyor ve kurallar `@ApiBody`'de bir kez daha elle tekrarlanıyor. Web'de server action'ların çoğu girdiyi doğrulamadan kullanıyor (QUALITY G-09, G-10).
+- **Karar:**
+  - **API:** her uç gövde, sorgu ve yol parametresini bir zod şemasıyla bir `ZodValidationPipe` üzerinden alır. Şema hatası ADR-17 biçiminde `422 VALIDATION_FAILED` + `fieldErrors` döner (alan kodları bugünkülerle aynı: `REQUIRED`, `INVALID_FORMAT`...). Şemalar `src/<alan>/<alan>.schemas.ts` dosyalarında durur. `class-validator`, `class-transformer` ve işe yaramayan global `ValidationPipe` kaldırılır. OpenAPI gövde tanımı mümkünse şemadan üretilir; değilse sözleşme testi şemayla `openapi.yaml`'ın uyumunu denetler.
+  - **Web:** her server action ilk satırda `safeParse` yapar ve formun kullandığı şemayı yeniden kullanır (`lib/*-schemas.ts`). Doğrulanmamış girdiyle string metodu çağrılmaz. Geçersiz girdi 500 değil alan hatası döner.
+  - Ortak şema paketi (`packages/`) **açılmaz**: iki taraf HTTP sözleşmesiyle bağlıdır, kural birliği sözleşme testleriyle sağlanır.
+- **Sonuçları:** API'de büyük ama mekanik bir değişikliktir (V2-07). Davranış değişmez; HTTP testleri bunu kanıtlar.
 
-- **Hata biçimi:** `{ "code": "VALIDATION_FAILED", "message": "geliştirici için İngilizce metin", "fieldErrors": { "email": "EMAIL_TAKEN" } }`. `code` ve `fieldErrors` değerleri **sabit makine kodlarıdır** (`INVALID_CREDENTIALS`, `EMAIL_TAKEN`, `VEHICLE_UNAVAILABLE`...); frontend metni kendi çeviri dosyasından gösterir, `message` ekranda gösterilmez. HTTP kodları: 400/422 doğrulama, 401 oturum yok, 404, 409 çakışma.
-- **Dil:** Çevrilen alanlar **iki dille birlikte** döner (`"name": { "tr": "Ekonomik", "en": "Economy" }`). Cevap dile göre değişmez; dil değişince yeniden istek gerekmez, önbellekleme ve mock basit kalır.
-- **Sayfalama:** Yok, düz liste (15 model, 15 bayi; SPEC §4.1). İstisna: yönetim paneli uçları (`/admin/*`) sayfalıdır, bkz. ADR-24. Sunucu yalnızca müsaitliği (tarih + lokasyon) filtreler; sınıf, yakıt, vites gibi filtreleri frontend yapar. İletişim sayfasındaki bayi filtresi (şehir) ve araması da tarayıcıda yapılır.
-- **Ürün ve hizmet içeriği API'den gelir** (SPEC §7): `Product`, `Service` modelleri ve `GET /products`, `GET /products/:slug`, `GET /services` uçları, iki dilli alanlarla. Teklif isteği ürün slug'ını (`akilli-kurumsal-filo`) isteğe bağlı taşır. Sayfalar API gelene kadar çeviri dosyalarındaki metinle (SPEC Ek A) çalışır, sonra API'ye bağlanır (BACKLOG Y5).
+### ADR-27 · Hız sınırı v2: kalıcı depo, tüm uçlar
 
-## ADR-18 · SEO: meta verisi, robots, sitemap, yapılandırılmış veri
+- **Bağlam:** sınırlayıcı bellekte tutuluyor ve yalnızca 8 uçta var. Render yeniden başlayınca sayaçlar sıfırlanıyor. `POST /reservations` ve okuma uçları sınırsız (G-02, G-11).
+- **Karar:**
+  - Sayaçlar Postgres'te tutulur: `RateLimitHit` tablosunda `key`, `windowStart`, `count`; atomik `INSERT … ON CONFLICT … DO UPDATE` ile sayılır, eskileri günlük görevle silinir. Redis gibi yeni bir servis eklenmez. Ölçek büyürse ADR yeniden açılır.
+  - **Varsayılan sınır her uçtadır** (global guard). Uç bazında daha sıkı sınır dekoratörle verilir. Tablo [SECURITY.md](SECURITY.md)'de tutulur ve her yeni uçta güncellenir.
+  - **Anahtar:** girişli istekte `user:<id>`, girişsiz istekte `ip:<adres>`; yönetici istekleri `admin:<id>` (dakikada 120).
+  - Sınır aşılınca `429 RATE_LIMITED` ve `Retry-After` başlığı döner.
+- **Sonuçları:** her istekte bir veritabanı yazması olur; Neon Free'de bu kabul edilebilir. Okuma uçlarındaki sınır, web sunucusunun ziyaretçi adresini doğru iletmesine (`X-Novera-Client-IP`) dayanır.
 
-- **Bağlam:** SPEC §9 "çok iyi SEO" istiyor. Site iki dilli; iki dilin aynı içerik sanılmaması gerekiyor. Giriş, profil ve ödeme gibi sayfalar arama sonuçlarında görünmemeli.
-- **Alternatifler:** `next-sitemap` gibi bir paket (build sonrası script; Next'in Metadata API'si aynı işi bağımlılıksız yapıyor). Özel sayfaları robots.txt ile engellemek (Google engellenen sayfayı taramadığı için `noindex`'ini de göremez; sayfa başka yerden link alırsa adresi yine dizine girebilir).
-- **Sonuç:**
-  - Her sayfa `generateMetadata` ile başlığını ve açıklamasını kendi çeviri dosyasından verir. Canonical ve dil eşlemesi (`alternates.canonical`, `alternates.languages`, `x-default` = TR) tek bir yardımcıdan (`lib/seo.ts`) üretilir; yollar `i18n/routing.ts`'teki `pathnames` tablosundan alınır, ayrı liste tutulmaz. Sorgu parametreleri (`?tip=`, `?arac=`, arama parametreleri) canonical'a girmez.
-  - Mutlak adresler `NEXT_PUBLIC_SITE_URL`'den gelir (`lib/site-url.ts`); boşsa yerel adres.
-  - `app/robots.ts` yalnızca `/api/`'yi engeller ve site haritasını gösterir. Özel sayfalar `robots: { index: false }` ile çıkarılır (liste SPEC §9).
-  - `app/sitemap.ts` herkese açık sayfaların tek listesidir, iki dilde ve dil eşlemesiyle. Araç detay sayfası kalktığı için (SPEC v0.3) sitemap API'ye bağlı değildir. `llms.txt` aynı listeden bir route handler ile üretilir, iki liste ayrışmaz.
-  - Paylaşım görseli `opengraph-image.tsx` ile kodda üretilir. `app/manifest.ts` ve `theme-color` (viewport) favicon işinin parçasıdır.
-  - JSON-LD sunucuda `<script type="application/ld+json">` olarak yazılır: kök layout'ta `Organization`, İletişim'de her bayi için `AutoRental`. `FAQPage` eklenmez: G'nin öneri dosyasına göre Google bu zengin sonucu 2023'ten beri yalnızca resmi kurum ve sağlık sitelerinde gösteriyor.
-- **Ödünleşim:** Canonical, sitemap ve JSON-LD'deki adresler yayın alan adına bağlı; alan adı belli olana kadar yerel adres yazılır. Yerel adres yalnızca geliştirme varsayılanıdır; canlıda `NEXT_PUBLIC_SITE_URL` zorunludur. robots.txt yalnızca `/api/`'yi kapatır, özel sayfalar kendi `noindex`'ini taşır (Y13, 10 Ekim 2026). Üretilen ikon ve paylaşım görseli `proxy.ts` eşleşmesinin dışındadır (aksi halde dil önekiyle yönlendirilip 404 verirler); paylaşım görseli `openGraph.images` ile her sayfada açıkça verilir, çünkü sayfanın `openGraph` nesnesi layout'unkini birleştirmeden değiştirir (`lib/seo.ts`).
+### ADR-28 · Dosya yükleme: araç modeli fotoğrafı
 
-## ADR-19 · Çerez onayı ve analytics
+- **Bağlam:** G, yöneticinin yeni araç modelini fotoğrafıyla panelden eklemesini istedi. Bugün fotoğraflar repoda (`apps/web/public`) duruyor.
+- **Karar:**
+  - Fotoğraf bir nesne deposuna yüklenir. Öneri **Vercel Blob**; seçim SPEC §7'de açık karar, ücretsiz katman koşulları uygulama günü doğrulanır.
+  - **Yükleme web sunucusundan yapılır:** panel formu dosyayı bir server action'a gönderir. Action yönetici oturumunu API'ye sordurarak doğrular, dosyayı denetler ve depoya yazar; API'ye yalnızca dönen adres (`imageUrl`) gider. Depo anahtarı (`BLOB_READ_WRITE_TOKEN`) yalnızca web sunucusundadır.
+  - **Denetim:** yalnızca JPEG, PNG, WebP kabul edilir; tür uzantıya değil dosyanın ilk baytlarına bakılarak anlaşılır. En çok 5 MB, en az 1200 px genişlik. EXIF verisi silinir; dosya adı sunucuda rastgele üretilir.
+  - API, `imageUrl` alanında yalnızca izinli depo alan adını ya da `/images/` ile başlayan site içi yolu kabul eder. `next.config.ts` `images.remotePatterns` ve CSP `img-src` aynı alan adıyla güncellenir.
+  - Mevcut 15 modelin fotoğrafı repoda kalır; seed onları site içi yolla tutar.
+  - Model kaldırılınca fotoğraf silinmez (geçmiş rezervasyon kartları kullanır).
+- **Sonuçları:** yeni bir dış servis ve bir gizli anahtar eklenir ([DEPLOY.md](DEPLOY.md)).
 
-- **Bağlam:** SPEC §9 çerez onayı ve analytics istiyor. Bugünkü çerezler işlevsel tercihler (tema, para birimi; ADR-13, ADR-15) ve ileride oturum çerezi (ADR-08). G'nin öneri dosyasına göre KVKK'nın çerez rehberi zorunlu olmayan çerezler için onay bekliyor (rehber metni doğrulanmadı).
-- **Alternatifler:** Hazır onay servisi (Cookiebot, CookieYes): hızlı kurulur ama harici script ekler, çoğu ücretli ve tasarım token'larına uymaz. GA4: güçlü ve ücretsiz ama çerez kullanır; onay olmadan yüklenemez, Consent Mode kurulumu gerekir.
-- **Sonuç:**
-  - Kendi bileşenimiz: alt bant (Kabul et / Reddet / Ayarlar, üçü eşit görsel ağırlıkta) ve ayar penceresi (Zorunlu: her zaman açık; Analitik: aç/kapa). Footer'daki "Çerez tercihleri" pencereyi yeniden açar.
-  - Seçim `novera-consent` çerezinde tutulur (`{ v, analytics }`, 6 ay). Sunucu çerezi tema çerezi gibi okur (ADR-13): onay yoksa analytics script'i HTML'e hiç yazılmaz, bant ilk HTML'de gelir, yanıp sönme olmaz. `v` artırılırsa bant yeniden sorulur.
-  - Analytics çerez kullanmayan bir araçtır: web Vercel'e giderse Vercel Web Analytics, gitmezse Umami (SPEC §10; ücretsiz plan koşulları doğrulanmadı). Çerezsiz olsa da yalnızca onayla yüklenir: tek kural, sade hukuki duruş.
-  - Analytics ayarı ortam değişkeniyle verilir; boşsa (geliştirme, önizleme) hiç yüklenmez.
-- **Ödünleşim:** Reddeden ziyaretçi ölçülmez. Metin ve davranış hukuki incelemeden geçmedi (kurgusal proje).
+### ADR-29 · Örnek veri modu tek yerde
 
-## ADR-20 · Form gönderimi
+- **Bağlam:** `USE_MOCKS` 23 dosyada yaklaşık 45 kez, dört ayrı `mocksEnabled()` ile okunuyor. Öncelik sırası tutarsız: bir kısım akış `API_URL`'e, bir kısmı `USE_MOCKS`'a önce bakıyor. Kök `.env.example`'da değer `1` ve bu açıkken ödeme öncesi giriş zorunluluğu atlanıyor (G-06, M-06).
+- **Karar:**
+  - Tek modül: `apps/web/lib/mode.ts` → `dataMode(): 'api' | 'mock'`. Kural: `USE_MOCKS=1` ise mock, değilse api. `API_URL` yoksa ve mock da kapalıysa ekranda "servis kullanılamıyor" görünür.
+  - Production'da mock açılamaz: `VERCEL_ENV=production` ya da `NODE_ENV=production` iken `USE_MOCKS` doluysa `next build` ve sunucu açılışı hata verir. CI'daki e2e build'i `NODE_ENV=test` benzeri ayrı bir bayrakla çalışır.
+  - `.env.example`'da `USE_MOCKS=` boştur. Giriş koruması mock modunda da açıktır (mock'ta sahte giriş yapılır, koruma atlanmaz).
+- **Sonuçları:** e2e testleri değişmeden çalışır; mock verisi sunucu paketine yalnızca mock modunda dinamik `import()` ile girer.
 
-- **Bağlam:** İletişim formu ve kurumsal form kişisel veri topluyor ve "gerçekten çalışmalı" (SPEC §9). Backend uçları henüz yok.
-- **Alternatifler:** Formspree / Web3Forms gibi bir servis (bugün çalışır, ama kişisel veri üçüncü tarafa gider ve anahtar gerekir). Next server action ile doğrudan e-posta (SMTP sırrı web uygulamasına girer, backend'in işini web yapar). Cloudflare Turnstile (güçlü bot koruması, ama harici script ve anahtar).
-- **Sonuç:**
-  - Formlar ADR-10'daki gibi React Hook Form + Zod. Gönderim bir sunucu aksiyonu üzerinden yapılır (`lib/<form>-actions.ts`, ör. `lib/quote-actions.ts`); API gelince aksiyon `/quotes` ve `/contact` uçlarını çağırır. Tarayıcı `USE_MOCKS`'u hiç görmez, örnek veri kararı sunucuda kalır. Hata cevabı ADR-17 biçimindedir; `fieldErrors` ilgili alanın yanında gösterilir.
-  - Backend gelene kadar: `USE_MOCKS=1` iken aksiyon başarı ve uydurma bir talep numarası döner, kapalıyken "servis kullanılamıyor" gösterilir. Üretimde örnek başarı gösterilmez.
-  - Spam: görünmeyen bir tuzak alan (ekran okuyucudan ve klavyeden gizli, `autocomplete="off"`). Doluysa istemci göndermeden başarı gösterir; backend de reddeder ve IP başına hız sınırı uygular (BACKLOG #39). Gerekirse Turnstile sonra eklenir.
-  - KVKK onay kutusu zorunludur ve aydınlatma metnine bağlanır; backend onay zamanını kaydeder.
-  - Ortak parçalar (tuzak alan, onay kutusu, başarı durumu) ilk formda `components/form/` altına yazılır, sonraki formlar yeniden kullanır.
-- **Ödünleşim:** Backend uçları gelene kadar formlar canlıda çalışmaz. Site backend'den önce yayına çıkacaksa bu karar yeniden açılır.
+### ADR-30 · Simülasyon verisi
 
-## ADR-21 · Hareketli bileşenler: Framer yok, animasyon kütüphanesi yok
+- **Bağlam:** canlı takip ve şarj istasyonu durumu (SPEC §3.E) gerçek cihaz ve servis olmadan gösterilecek.
+- **Karar:**
+  - Konum, hız, kontak ve istasyon müsaitliği **sunucuda deterministik** üretilir: girdi araç kimliği (ya da istasyon kimliği) ve 5 dakikalık zaman dilimi, çıktı tohumlu sözde rastgele değer. Böylece aynı an için her istek aynı sonucu verir, test edilebilir ve veritabanında büyüyen bir telemetri tablosu oluşmaz.
+  - Rotalar her şehir için seed'de tanımlı birkaç çoklu çizgidir (`TrackingRoute`). Araç, zimmet bayisinin şehrindeki bir rota boyunca ilerler; mesai dışında kontak kapalıdır. Şarj istasyonları seed'de kurgusal kayıtlardır (`ChargingStation`: ad, şehir, konum, soket türleri).
+  - Tüm simülasyon kodu tek modüldedir (`src/fleet/simulation/`). Cevaplarda `simulated: true` alanı bulunur; ekran bu alana göre "Simülasyon" rozetini gösterir.
+- **Sonuçları:** gerçek telematiğe geçilirse yalnızca bu modülün yerine bir veri kaynağı konur; uçların biçimi aynı kalır.
 
-- **Bağlam:** SPEC v0.3 Framer bileşenlerini görsel ve davranış referansı olarak veriyor (logo şeridi, sayaç, eğri zaman çizelgesi, iki SSS, footer). Bu bileşenler `framer` ve `framer-motion` paketlerine bağlı ve Framer düzenleyicisi için yazılmış: satır içi stil, ham renk ve font değerleri.
-- **Alternatifler:** Framer kodunu olduğu gibi almak (token ve erişilebilirlik kurallarını bozar, Framer'a bağımlılık getirir). `motion` paketi (yay animasyonu hazır gelir, ama dört küçük bileşen için yeni bir bağımlılık).
-- **Sonuç:** Bileşenler mevcut yapıyla (Tailwind token'ları, next-intl, erişilebilirlik kuralları) yeniden yazılır; yeni paket eklenmez.
-  - Logo şeridi: CSS `@keyframes`; tekrarlanan kopya `aria-hidden`; durdurma düğmesi animasyonu duraklatır.
-  - Sayaç: küçük bir istemci bileşeni (`IntersectionObserver` + `requestAnimationFrame`). Son değer sunucu HTML'inde yazılıdır; JavaScript yoksa ve ekran okuyucu için doğru değer okunur, sayma yalnızca görsel katmandadır.
-  - SSS: mevcut `<details>` tabanlı Accordion korunur; yaylı açılma CSS ile (yay eğrisi `linear()` ile yaklaşık). Desteklemeyen tarayıcıda anında açılır.
-  - Galeri: CSS scroll-snap, oklar ve noktalar.
-  - Hikayemiz: SVG eğri ve düğmeler; 768 px altında dikey liste.
-  - Hepsi Tailwind'in `motion-safe:` / `motion-reduce:` varyantlarıyla `prefers-reduced-motion`'a uyar.
-- **Ödünleşim:** Yay hissi gerçek fizik değil, yaklaşık bir eğri. Yeni CSS özelliklerinin tarayıcı desteği uygulama sırasında yeniden kontrol edilir.
+### ADR-31 · Talepler: tek model, türe göre ayrıntı
 
-## ADR-22 · Araçlarımız penceresi: `<dialog>` + adres parametresi
+- **Bağlam:** yol yardım, ikame araç, bakım/lastik ve VIP transfer talepleri (SPEC §3.D) aynı yaşam döngüsüne sahip, ama alanları farklı.
+- **Karar:**
+  - Tek tablo: `ServiceRequest` (`id`, `number` (`TLP-2026-00001`), `companyId`, `createdById`, `type`, `status`, `fleetVehicleId?`, `details Json`, `assignee` (yöneticinin girdiği serbest metin), `createdAt`, `updatedAt`). Durum değişiklikleri ayrı tabloya yazılır: `ServiceRequestEvent` (`requestId`, `status`, `note`, `actorId`, `at`).
+  - `details` her tür için ayrı bir zod şemasıyla doğrulanır (ADR-26). Geçerli durum geçişleri tür başına bir tabloda tanımlıdır; geçersiz geçiş `409 INVALID_TRANSITION` döner.
+  - `TRANSFER` türü yalnızca etkin `vip-mobilite` sözleşmesi olan şirkette açılabilir; değilse `403 FORBIDDEN`.
+- **Sonuçları:** yeni talep türü eklemek kod tarafında bir şema ve bir geçiş tablosu demektir; migration gerekmez.
 
-- **Bağlam:** SPEC §2.4: karta tıklanınca yeni sayfa değil pencere açılır; pencere paylaşılabilir olmalı.
-- **Alternatifler:** Next "intercepting routes": her araca gerçek bir adres verir, ama adres doğrudan açılınca ayrı bir sayfa olarak görünür (G "yeni sayfa açılmasın" dedi) ve iki görünümün bakımı gerekir. Hazır modal kütüphanesi: gereksiz bağımlılık; yerel `<dialog>` odak tuzağını, Esc'yi ve arka planın etkisizleşmesini zaten sağlıyor.
-- **Sonuç:** Yerel `<dialog>` ve `showModal()`. Açık model adreste `?arac=<model-slug>` olarak durur; sayfa bu parametreyle sunucuda üretilir, istemci yüklenince pencereyi açar, böylece paylaşılan link aynı pencereyle gelir. Açma ve kapama adresi `history` ile günceller, sunucuya yeni istek gitmez; geri tuşu pencereyi kapatır. Modelin bayileri sayfada zaten yüklü olan araç listesinden türetilir. Canonical `/`. **v0.5:** Araçlarımız ayrı sayfa olmaktan çıktı, bölüm ana sayfadadır; pencere adresi `/?arac=<model-slug>` olur ve açma/kapama adresteki diğer parametreleri (ör. `?tip=kurumsal`) korur.
-- **Ödünleşim:** Model pencereleri arama motorunda ayrı sayfa olarak yer almaz. Bilinçli bir tercih: aynı bilgi zaten kartlarda.
+### ADR-32 · İçerik çeviri dosyalarında kalır
 
-## ADR-23 · Hata sayfaları (404, 500)
-
-- **Sonuç:** 404 `app/[locale]/not-found.tsx`'tedir (var). 500 için `app/[locale]/error.tsx`: header ve footer korunur, "Tekrar dene" sayfayı yeniden dener. Kök layout'un kendisi çökerse `app/global-error.tsx` devreye girer; kendi `<html>`'ini yazar ve metni provider olmadan çeviri dosyasından doğrudan okur. Hata sayfaları `noindex`'tir.
-- **Ödünleşim:** `global-error` layout'u kullanamadığı için tema ve dil çerezini kendisi okur; görünümü sade tutulur.
-
-## ADR-24 · Yönetim paneli (SPEC §2.11, v0.3)
-
-- **Bağlam:** Novera çalışanları ürün ve hizmet metinlerini, kampanya kodlarını, SSS'yi, filoyu, rezervasyonları, teklif taleplerini ve kullanıcıları koddan bağımsız yönetmeli. Ayrıntılı tasarım `docs/ADMIN.md`.
-- **Alternatifler:** (a) ayrı bir uygulama (`apps/admin`) ve ayrı yayın; (b) hazır bir yönetim aracı (ör. veritabanına bağlanan bir panel); (c) mevcut Next uygulamasında ayrı bir bölüm.
-- **Sonuç:** (c). Panel `apps/web` içinde `app/[locale]/yonetim` altındadır (EN `/en/admin`), aynı tasarım token'larını, çeviri düzenini, oturum çerezini ve API vekilini (ADR-14) kullanır. Yetki API'de denetlenir: `User.role` (`CUSTOMER`, `ADMIN`) ve `/admin/*` uçlarının önündeki `AdminGuard`; web'deki rol kontrolü yalnızca yönlendirme içindir. Yönetici hesabı komut satırından açılır (`pnpm admin:create`), Google ile giriş yapamaz, oturumu 12 saattir. Değiştiren her istek `AdminAuditLog`'a yazılır (değerler değil, değişen alanlar).
-- **ADR-17'den farklar** (yalnızca `/admin/*` için): listeler sayfalıdır (`?page=&pageSize=`, cevap `{ items, total, page, pageSize }`, `pageSize` en çok 100) ve sunucuda süzülür; düzenlenen kayıt `updatedAt` taşır, arada değişmişse `409 STALE_WRITE`. Yeni hata kodları: `FORBIDDEN` (403), `STALE_WRITE`, `IN_USE`, `INVALID_TRANSITION` (409). Herkese açık uçların kuralları değişmez.
-- **Önbellek:** herkese açık ürün ve hizmet uçlarını web etiketli önbellekle (`products`, `services`) okur; panelden kayıt yapan sunucu eylemi `revalidateTag` çağırır.
-- **Ödünleşim:** panel hatası sitenin derlemesini etkileyebilir ve panel kodu sitenin paketine girer (yalnızca `/yonetim` rotalarında yüklenir). Ayrı uygulama bunu önlerdi ama iki yayın, iki oturum ve iki tasarım kurulumu demekti; iki kişilik ekip için (c) daha az iş.
-
-## ADR-25 · Filom: kurumsal filo paneli (SPEC §2.12, v0.3)
-
-- **Bağlam:** kurumsal müşteri kendi filosunu (araç, personel, zimmet, sözleşme, fatura, masraf, rapor) görmeli ve yönetmeli; veri Novera'nın Yönetim panelinden girilir. Ayrıntılı tasarım `docs/FLEET.md`.
-- **Sonuç:**
-  - Yer: `apps/web` içinde `app/[locale]/filom` (EN `/en/my-fleet`); ADR-24'ün ortak liste ve form bileşenlerini kullanır.
-  - **Şirket kavramı:** yeni `Company` modeli; kurumsal `User` kayıtları `companyId` ile bağlanır. Bugün `User` üzerindeki firma alanları migration'la taşınır, `GET /me` yanıtının biçimi değişmez.
-  - **Ayrı araç tablosu:** uzun dönem filo araçları `FleetVehicle`'dır, kiralık `Vehicle`'dan ayrıdır; müsaitlik ve arama kodu filo araçlarını hiç görmez.
-  - **Yetki:** `/fleet/*` uçları `CompanyGuard` arkasında (oturum + kurumsal hesap + şirket); her sorgu `companyId` ile süzülür, başka şirketin kaydı `404`. Yönetim tarafı `/admin/companies/*` vb., ADR-24 kuralları.
-  - **Türetilen değerler saklanmaz:** faturanın "gecikti" durumu, masrafın personeli (zimmetten), rapor toplamları sorgu anında hesaplanır; böylece geriye dönük düzeltme tutarsızlık bırakmaz.
-  - Tutarlar TRY alt birimde (ADR-15'in para birimi çevirisi Filom'da uygulanmaz).
-- **Ödünleşim:** `Company`'ye taşıma mevcut kurumsal hesaplara dokunan bir migration'dır; testle korunur. Ayrı araç tablosu bir aracın hem kiralık hem filo olmasını engeller; v1'de bu gerekmiyor.
-
-## Backend ile netleşecekler (BACKLOG #6, `openapi.yaml`)
-
-Frontend örnek veriyi bu cevaplara göre yazar; backend gelince yalnızca adres değişir. Karar verilmiş olanlar ilgili ADR'de, açık olanlar burada.
-
-| Konu | Durum / öneri |
-|---|---|
-| Model ve fiziksel araç ayrımı | **Açık.** Öneri: `VehicleModel` (slug, marka, model, sınıf, koltuk, bagaj, vites, yakıt, tüketim + birim, iki dilli açıklama, görsel) ve `Vehicle` (model, bayi, aktif). Araçlarımız modeli, arama sonuçları fiziksel aracı gösterir |
-| Yakıt tüketimi | **Açık.** Yeni alan: değer + birim (L/100 km, elektrikli için kWh/100 km) |
-| Seed rakamları | SPEC §4.1: 14 şehirde 15 bayi, 15 model, her model 1–4 bayide |
-| Müsaitlik parametreleri | Alış ve iade bayisi, alış ve iade anı (30 dakikalık dilim, ISO 8601 UTC; ADR-16) |
-| Farklı bayiye bırakma | **Karar (G, 10 Ekim): ücretsiz.** Özette ek kalem yok; SSS metni buna göre düzeltilir |
-| Fiyat hesabı | Backend hesaplar, frontend yalnızca gösterir (ADR-15). **Karar (G, 10 Ekim): fiyatlar KDV dahil**; özet ve ödemede "KDV dahil" yazar. Özet için `POST /reservations/price` (giriş gerektirmez; satır toplamları toplama birebir eşit) |
-| Kirala'da geçici tutma | **Karar (G, 10 Ekim): araç 15 dakika tutulur** (backend'in "tutma yok" önerisinden farklı; BACKLOG Y48). Özet ve ödemede geri sayım gösterilir; süre dolunca araç serbest kalır ve ziyaretçi aramaya yönlendirilir. Başkası tutulan aracı rezerve edemez; yine de çakışma olursa `409 VEHICLE_UNAVAILABLE` |
-| Sahte ödeme | **Karar:** ayrı uç yok; ödeme ekranında `POST /reservations` çağrılır (frontend zaten böyle kurulu). Kart bilgileri tarayıcıdan çıkmaz |
-| İletişim formu | `POST /contact`: ad soyad, e-posta, telefon (isteğe bağlı), konu, mesaj, KVKK onay zamanı. **Açık:** gönderilen form yalnızca veritabanına mı, e-postaya da mı düşüyor? |
-| Kurumsal form | `POST /quotes`; alanlar kurumsal tasarım onayından sonra (SPEC §10) |
-| Spam | Tuzak alan doluysa reddet; IP başına hız sınırı (ADR-20, #39) |
-| Hata biçimi, çeviri, tarih | Karar verildi: ADR-17, ADR-16 |
-| Görseller | **Açık.** Araç ve kampanya görselleri nerede duracak? `next/image` için alan adı gerekir |
-| Kampanyalar, iş ortakları | Şimdilik frontend'de sabit; kampanyaların API'ye taşınması açık (SPEC §10) |
-| Harita | Harita frontend'de, bayi koordinatları backend'den, anahtarı backend sahibi yönetir (ADR-09). Teyit edilecek |
-| Yayın adresleri | **Açık.** Çerez, canonical ve sitemap buna bağlı (ADR-12, ADR-14, ADR-18) |
-
-## Klasör yapısı
-
-```
-novera/
-├─ apps/
-│  ├─ web/                  # Next.js
-│  │  ├─ app/[locale]/      # Sayfalar (tr, en)
-│  │  ├─ app/               # robots.ts, sitemap.ts, manifest.ts, llms.txt, global-error.tsx (ADR-18, ADR-23)
-│  │  ├─ components/        # ui/ (temel), layout/, özellik klasörleri (home/, vehicle/, contact/, form/...)
-│  │  ├─ messages/          # tr/<özellik>.json, en/<özellik>.json
-│  │  ├─ i18n/              # next-intl yönlendirme ve istek ayarları
-│  │  ├─ app/globals.css    # Tüm tasarım token'ları (Tailwind temasına bağlı)
-│  │  └─ mocks/             # Örnek veri (USE_MOCKS=1); MSW gelince sahte cevaplar (BACKLOG #12)
-│  └─ api/                  # NestJS
-│     ├─ src/<modül>/       # auth, branches, vehicles, reservations, quotes, faq
-│     └─ prisma/            # schema.prisma, migrations, seed
-├─ docs/
-│  ├─ SPEC.md
-│  ├─ ARCHITECTURE.md
-│  └─ api/openapi.yaml
-├─ docker-compose.yml       # Yerel PostgreSQL
-├─ CLAUDE.md
-└─ .github/
-   ├─ workflows/ci.yml
-   └─ pull_request_template.md
-```
+- **Bağlam:** ürün ve hizmet metinleri hem `messages/*/products.json`, `services.json` dosyalarında hem de API'deki `Product` ve `Service` tablolarında duruyor. Web API'yi hiç çağırmıyor; iki kopya birbirinden kayabilir. G içerik modülünü istemedi (22 Ekim).
+- **Karar:**
+  - Metinlerin tek kaynağı çeviri dosyalarıdır. `GET /products`, `/products/:slug` ve `/services` uçları, `Service` tablosu ve `Product`'ın metin alanları kaldırılır.
+  - `Product` yalnızca `slug` ile kalır. Sebebi: `QuoteRequest.productId` ve `FleetContract.product` bu referansa bağlanır.
+  - v1'deki "ürün içeriği API'den gelir" kararı (ADR-17 ek maddesi, BACKLOG Y5) iptal edilir.
+- **Sonuçları:** metin değişikliği PR ile yapılır; bu, v1'deki çalışma biçimiyle aynıdır.
 
 ---
 
-## Çalışma düzeni
+## 4. Klasör yapısı (v2 eklemeleriyle)
 
-- **Dal stratejisi:** `main` her zaman çalışır durumda. Her iş için `feat/<kısa-ad>`, `fix/<kısa-ad>` dalı. Doğrudan `main`'e push yok.
-- **PR kuralı:** Her PR bir issue'ya bağlı ("Closes #12"), diğer kişi review eder, CI yeşil olmadan merge edilmez.
-- **Görev panosu:** GitHub Projects. Sütunlar: Backlog → Bu hafta → Yapılıyor → Review'da → Bitti.
-- **Asenkron iletişim:** Haftada bir yazılı durum notu (ne yaptım / ne yapacağım / neye takıldım), proje panosunda veya bir issue'da.
-- **Ortam değişkenleri:** `.env` repoya girmez; `.env.example` girer.
+```
+apps/web/
+  app/[locale]/
+    yonetim/            # Yönetim paneli (ADR-24): layout.tsx (rol kontrolü), page.tsx (Özet), <modül>/...
+    filom/              # Filom (ADR-25): layout.tsx (şirket kontrolü), page.tsx (Özet), <ekran>/...
+  components/
+    admin/              # Ortak panel bileşenleri: DataTable, Pagination, FilterChips, BilingualField,
+                        # ConfirmDialog, Toast, StaleWriteBanner, UnsavedChangesGuard
+    fleet/              # Filom'a özgü bileşenler (harita, grafik, zaman çizelgesi)
+  lib/
+    mode.ts             # ADR-29
+    admin-*.ts, fleet-*.ts  # API istemcileri ve action'lar
+  messages/tr|en/admin.json, fleet-panel.json
+apps/api/src/
+  common/               # RateLimit (ADR-27), ZodValidationPipe (ADR-26), client key, hata yardımcıları, zaman sabitleri
+  admin/                # AdminGuard, audit log, /admin/* controller'ları (alan başına alt klasör)
+  companies/            # Company, davet
+  fleet/                # CompanyGuard, /fleet/*, simulation/ (ADR-30), reports
+  requests/             # ServiceRequest (ADR-31)
+  media/                # (gerekirse) imageUrl doğrulaması
+```
+
+## 5. Sonraya: mobil uygulama
+
+G'nin kararıyla v2'de mobil uygulama yok (SPEC §4). İleride yapılırsa (öneri: Expo / React Native; dağıtım için mağaza gerekmez, Expo Go ve Android APK bağlantısı yeterli) API'de şunlar gerekir. 22 Ekim keşfinde bulundu:
+
+1. **Gizli anahtar:** her uç `X-Novera-Key` istiyor. Uygulamaya gömülen anahtar çıkarılabilir; mobil için ya ayrı bir BFF (web'de `/api/mobile/*`) ya da anahtarsız ama token'lı ayrı bir yol gerekir.
+2. **Kimlik:** oturum yalnızca çerezden okunuyor (`session.guard.ts`). Mobil için `Authorization: Bearer` desteği ve yenileme (refresh) token'ı gerekir.
+3. **Google ile giriş:** API yalnızca web client ID'sini kabul ediyor. iOS/Android client ID'leri de `aud` olarak eklenmeli.
+4. **IP bazlı sınırlar ve tutmalar:** mobil operatörler çok kullanıcıyı tek IP'den çıkarır (CGNAT); ağ değişince tutma bırakılamaz. Anahtar cihaz ya da kullanıcı olmalı (ADR-27 kullanıcı anahtarını zaten getirir).
+5. **Sürümleme:** eski uygulama sürümleri kurulu kalacağı için `/v1` öneki gerekir.
+6. **Bağlantılar:** şifre sıfırlama ve davet bağlantıları web adresine gidiyor; derin bağlantı (universal/app link) gerekir.
+
+Ucuz ara adım: site zaten bir web manifest'e sahip; 192/512 px PNG ve maskable ikon eklenirse (V2-16) telefonda "ana ekrana ekle" ile uygulama gibi açılır.
