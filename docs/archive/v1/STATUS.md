@@ -1,3 +1,5 @@
+> **Arşiv (v1, 22 Ekim 2026'da taşındı).** Bu belge artık güncellenmez; yalnızca referanstır. Güncel belgeler için [docs/README.md](../../README.md). Göreli bağlantılar taşınmadan önceki konuma göre yazılmıştır.
+
 # Proje durumu
 
 > **20 Ekim 2026:** Bu belgenin §2–§5'i 11 Ekim anlık görüntüsüdür ve büyük ölçüde eskidi (bekleyen dalların hepsi birleşti, API canlıda, taklitlerin çoğu gerçek uca bağlandı; bkz. [API-GAPS.md](API-GAPS.md)). Kalan işler ve görev dağılımı için güncel kaynak [ROADMAP.md](ROADMAP.md). Bu belge v1 sonunda (BACKLOG Y100) yeniden yazılacak.

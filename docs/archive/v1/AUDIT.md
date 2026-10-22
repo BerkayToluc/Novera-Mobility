@@ -1,3 +1,5 @@
+> **Arşiv (v1, 22 Ekim 2026'da taşındı).** Bu belge artık güncellenmez; yalnızca referanstır. Güncel belgeler için [docs/README.md](../../README.md). Göreli bağlantılar taşınmadan önceki konuma göre yazılmıştır.
+
 # Erişilebilirlik ve performans denetimi (BACKLOG #38)
 
 Tarih: 2026-10-09. Kapsam: `main` üzerindeki sayfalar. **Bu denetim kısmidir:** uygulama bu makinede derlenemediği için (SWC yerel izin hatası) Lighthouse ve axe çalıştırılamadı. Aşağıda yalnızca kodun ve tasarım belirteçlerinin okunmasıyla görülebilenler var. #38 bu belgeyle **kapanmaz**.

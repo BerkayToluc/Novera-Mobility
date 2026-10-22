@@ -42,6 +42,8 @@ Remove-Item Env:DATABASE_URL
 ```
 
 `migrate deploy` "All migrations have been successfully applied" demeli, `db:seed` hata vermeden bitmeli. Seed sahte hesap oluşturmaz, yalnızca bayiler, araçlar, SSS ve kurlar.
+
+> **Dikkat (22 Ekim 2026, QUALITY G-05):** bugünkü seed her çalıştığında `NOVERA10` ve `HOSGELDIN` kampanya kodlarını süresiz olarak yeniden etkinleştirir ve canlı kurların üzerine yazar. V2-05 birleşene kadar seed'i canlıda **ilk kurulum dışında çalıştırma**. V2-05'ten sonra seed yalnızca eksik referans verisini ekler; örnek kodlar yalnızca `SEED_DEMO=1` ile gelir.
 `.env` dosyana dokunulmadı; yerel veritabanın aynı kalır. (Adres PowerShell geçmişine yazılmış olabilir; işin bitince Neon'da parolayı yenileyebilirsin: Connect → Reset password.)
 
 Neon panelinde **Tables** sekmesinde `Branch`, `Vehicle` vb. tabloları ve içlerinde satırları görmelisin.
@@ -124,6 +126,19 @@ docker exec novera-db rm /tmp/novera.dump
 
 Yedek dosyaları kişisel veri içerir: **Git'e koyma**, herkese açık bir yere yükleme.
 - Geri yükleme denemesi yapılmamış yedek, yedek sayılmaz: bir kez boş bir Neon projesine `pg_restore` ile yüklemeyi dene.
+
+## 9a. v2 ile gelecek ayarlar
+
+Bunlar ilgili iş birleşince bu rehbere adım olarak yazılır; burada yalnızca ne geleceği listelenir.
+
+| Ne | İş | Nerede |
+|---|---|---|
+| Fotoğraf deposu anahtarı (öneri Vercel Blob, `BLOB_READ_WRITE_TOKEN`); ücretsiz katman koşulları uygulama günü doğrulanıp tarihle yazılır | V2-28 | Vercel |
+| İlk yönetici hesabı (`pnpm admin:create`) | V2-23, V2-45 | Neon (Berkay'ın bilgisayarından) |
+| Örnek şirket, şarj istasyonu ve rota seed'i | V2-35, V2-40, V2-43 | Neon |
+| Kullanıcı parolası için seed ortam değişkeni (repoya yazılmaz) | V2-35 | Berkay'ın bilgisayarı |
+| `NODE_ENV=production` artık zorunlu güvenlik ayarı; `API_ACCESS_KEY` olmadan API açılmaz | V2-04 | Render |
+| Her migration öncesi yedek | V2-11 ve sonrası | Neon |
 
 ## 10. Kendi alan adın olunca
 
