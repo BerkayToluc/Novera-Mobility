@@ -3,6 +3,7 @@
 > 20 Ekim 2026 · BACKLOG M8, M9 ve M10'un açıklaması. Sahipler: **BE = Berkay**, **FE = G**, **İKİ = birlikte**.
 > İki panelin tasarımı: [ADMIN.md](ADMIN.md) (Yönetim paneli, Novera çalışanı) ve [FLEET.md](FLEET.md) (Filom, kurumsal müşteri). Kapsam kararı SPEC §2.11 ve §2.12'de (v0.11), mimari kararlar ARCHITECTURE ADR-24 ve ADR-25'te.
 > Bu belge sıra ve görev dağılımıdır. Kapsam SPEC'e, iş tanımı BACKLOG'a aittir; çelişki olursa onlar kazanır.
+> **GitHub issue numaraları:** Y81–Y108 için issue numarası = Y numarası + 181 (Y81 → #262, Y85 → #266, Y108 → #289). PR gövdesine `Closes #<issue numarası>` yazılır, Y numarası değil.
 
 ## 1. Neredeyiz
 

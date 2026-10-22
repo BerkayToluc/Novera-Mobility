@@ -4,7 +4,7 @@
 > Her satır GitHub'da bir issue olur. **Sahip:** FE = G (frontend), BE = arkadaş (backend), İKİ = birlikte.
 > Kilometre taşları sırayla ilerler; bir taşın içindeki FE ve BE işleri **paralel** yürür.
 > "Bağımlı" sütunu: o iş başlamadan bitmesi gereken iş.
-> **Issue numarası:** Aşağıdaki `#` sütunu backlog numarasıdır, GitHub issue numarası değil. İlk 40 satırın issue numarası **backlog numarası + 9**'dur (#7 → issue #16, #29 → issue #38). PR gövdesine ve commit mesajına `Closes #<issue numarası>` yazılır, backlog numarası değil (aksi halde yanlış issue ya da bir PR kapanır). Y ile başlayan satırlar sonradan eklendi; issue açılınca numarasını alır.
+> **Issue numarası:** Aşağıdaki `#` sütunu backlog numarasıdır, GitHub issue numarası değil. İlk 40 satırın issue numarası **backlog numarası + 9**'dur (#7 → issue #16, #29 → issue #38). PR gövdesine ve commit mesajına `Closes #<issue numarası>` yazılır, backlog numarası değil (aksi halde yanlış issue ya da bir PR kapanır). **Y81–Y108 için issue numarası = Y numarası + 181** (Y81 → issue #262, Y108 → issue #289). Y79 plan belgeleriydi (PR #261), Y80 Google ile giriş ön yüzüydü (PR #260); ikisi için ayrı issue açılmadı. Diğer Y satırları (Y1–Y78) kendi issue numarasını taşır.
 
 ---
 
