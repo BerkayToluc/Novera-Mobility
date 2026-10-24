@@ -83,7 +83,7 @@ function Get-All([string]$url) {
   $all
 }
 
-$existingLabels = Get-All "$api/labels" | ForEach-Object { $_.name }
+$existingLabels = Get-All "$api/labels" | Where-Object { $_ } | ForEach-Object { $_.name }
 $wantedLabels = $issues | ForEach-Object { $_.Labels } | Sort-Object -Unique
 foreach ($label in $wantedLabels | Where-Object { $existingLabels -notcontains $_ }) {
   Invoke-GitHub POST "$api/labels" @{ name = $label; color = 'ededed' } | Out-Null
@@ -91,7 +91,7 @@ foreach ($label in $wantedLabels | Where-Object { $existingLabels -notcontains $
 }
 
 $milestoneNumbers = @{}
-Get-All "$api/milestones?state=all" | ForEach-Object { $milestoneNumbers[$_.title] = $_.number }
+Get-All "$api/milestones?state=all" | Where-Object { $_ } | ForEach-Object { $milestoneNumbers[$_.title] = $_.number }
 foreach ($title in ($issues | ForEach-Object { $milestones[$_.Phase] } | Where-Object { $_ } | Sort-Object -Unique)) {
   if (-not $milestoneNumbers.ContainsKey($title)) {
     $milestoneNumbers[$title] = (Invoke-GitHub POST "$api/milestones" @{ title = $title }).number
@@ -101,7 +101,7 @@ foreach ($title in ($issues | ForEach-Object { $milestones[$_.Phase] } | Where-O
 
 # Pull requests are issues too in this API; both count as "already exists".
 $existingTitles = @{}
-Get-All "$api/issues?state=all" | ForEach-Object { $existingTitles[$_.title] = $_.number }
+Get-All "$api/issues?state=all" | Where-Object { $_ } | ForEach-Object { $existingTitles[$_.title] = $_.number }
 
 $mapping = @()
 foreach ($issue in $issues) {
