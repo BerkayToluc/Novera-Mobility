@@ -1,6 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { Currency } from '../generated/prisma/client.js';
+import { startWindowError } from '../reservations/booking-window.js';
 
 const VALID_CURRENCIES = new Set<string>(['TRY', 'EUR', 'USD']);
 const UUID_REGEX =
@@ -186,6 +187,8 @@ export class CatalogService {
       } else if (!this.isThirtyMinuteSlot(parsed)) {
         fieldErrors.startAt = 'NOT_IN_SLOT';
       } else {
+        const windowError = startWindowError(parsed, new Date());
+        if (windowError) fieldErrors.startAt = windowError;
         startDate = parsed;
       }
     }

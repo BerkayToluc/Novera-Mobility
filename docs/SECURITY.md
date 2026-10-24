@@ -8,7 +8,23 @@
 
 | QUALITY # | İş | PR | Not |
 |---|---|---|---|
-| — | — | — | Faz 1 başladıkça doldurulur |
+| G-01 | V2-02 ([#292](https://github.com/BerkayToluc/Novera-Mobility/issues/292)) | PR'da | `startAt` şu andan en az 30 dakika sonra ve en çok 365 gün sonra olmalı (`IN_PAST`, `OUT_OF_RANGE`; tutma, fiyat, rezervasyon ve arama uçlarında). Puan bakiyeye yalnızca `createdAt < startAt` olan rezervasyondan geçer |
+
+### Canlıda G-01 kötüye kullanım tespiti (V2-02)
+
+Salt okunur; kişisel veri döndürmez. Önce yalnızca sayıya bakılır, sonuç issue'ya yazılır.
+
+```sql
+-- Başlangıcından sonra oluşturulmuş (geçmiş tarihli) rezervasyonlar ve verdikleri puan.
+SELECT COUNT(*)                          AS reservations,
+       COUNT(DISTINCT r."userId")        AS users,
+       COALESCE(SUM(p.points), 0)        AS points_granted
+FROM "Reservation" r
+LEFT JOIN "PointTransaction" p ON p."reservationId" = r.id
+WHERE r."createdAt" >= r."startAt";
+```
+
+Sonuç 0 ise kötüye kullanım yoktur. Sıfırdan büyükse kayıtlara bakmak ve ne yapılacağını (puanı silmek, hesabı kapatmak) G'nin kararına bırakmak gerekir; V2-02 bu kayıtları artık puan saymaz ama silmez.
 
 ## v2 açık bulgular (özet)
 

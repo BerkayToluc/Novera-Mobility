@@ -9,6 +9,7 @@ import {
   MAX_ACTIVE_HOLDS_PER_CLIENT,
   type CreateHoldInput,
 } from './holds.service.js';
+import { daysAhead, slotAtLeast, slotBefore } from '../reservations/dates.testing.js';
 
 // Entegrasyon testi: POST /holds, gerçek PostgreSQL'e karşı (BACKLOG Y48).
 // Yalnızca adında "test" geçen bir veritabanında çalışır; TEST_DATABASE_URL yoksa atlanır.
@@ -20,7 +21,7 @@ const describeDb = databaseUrl ? describe : describe.skip;
 
 const MINUTE = 60 * 1000;
 const DAY = 24 * 60 * MINUTE;
-const START = new Date('2031-03-10T10:00:00.000Z');
+const START = daysAhead(30);
 const END = new Date(START.getTime() + 3 * DAY);
 const DAILY = 125000;
 
@@ -375,9 +376,31 @@ describeDb('POST /holds araç tutma (gerçek PostgreSQL)', () => {
     it('30 dakikalık dilime oturmayan an reddedilir (NOT_IN_SLOT)', async () => {
       const s = await scenario();
       const error = await catchHttp(
-        holds.create({ ...holdInput(s), startAt: '2031-03-10T10:15:00.000Z' }, 'client-x'),
+        holds.create({ ...holdInput(s), startAt: new Date(START.getTime() + 15 * MINUTE).toISOString() }, 'client-x'),
       );
       expect(bodyOf(error).fieldErrors?.startAt).toBe('NOT_IN_SLOT');
+    });
+
+    it('geçmiş ya da en yakın dilimden önceki başlangıç reddedilir (IN_PAST)', async () => {
+      const s = await scenario();
+      for (const start of [daysAhead(-1), slotBefore(30)]) {
+        const error = await catchHttp(
+          holds.create(holdInput(s, start, new Date(start.getTime() + DAY)), 'client-x'),
+        );
+        expect(error.getStatus()).toBe(422);
+        expect(bodyOf(error).fieldErrors?.startAt).toBe('IN_PAST');
+      }
+      const earliest = slotAtLeast(30);
+      await expect(
+        holds.create(holdInput(s, earliest, new Date(earliest.getTime() + DAY)), 'client-x'),
+      ).resolves.toBeDefined();
+    });
+
+    it('bir yıldan uzak başlangıç reddedilir (OUT_OF_RANGE)', async () => {
+      const s = await scenario();
+      const start = daysAhead(366);
+      const error = await catchHttp(holds.create(holdInput(s, start, new Date(start.getTime() + DAY)), 'client-x'));
+      expect(bodyOf(error).fieldErrors?.startAt).toBe('OUT_OF_RANGE');
     });
 
     it('bitiş başlangıçtan önceyse reddedilir (INVALID_DATE_RANGE)', async () => {

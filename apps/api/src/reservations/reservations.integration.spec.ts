@@ -5,6 +5,7 @@ import type { UserRow } from '../auth/user-view.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { PricingService } from './pricing.service.js';
 import { ReservationsService } from './reservations.service.js';
+import { daysAhead } from './dates.testing.js';
 
 // Entegrasyon testi: GERÇEK PostgreSQL'e karşı. Asıl amaç iki şeyi kanıtlamak:
 //  1) aynı araca aynı anda gelen 8 istekten YALNIZ 1'i rezervasyon alır (FOR UPDATE kilidi),
@@ -17,7 +18,7 @@ if (databaseUrl && !/test/i.test(databaseUrl)) {
 const describeDb = databaseUrl ? describe : describe.skip;
 
 const DAY = 24 * 60 * 60 * 1000;
-const START = new Date('2031-06-10T10:00:00.000Z');
+const START = daysAhead(30);
 const END = new Date(START.getTime() + 3 * DAY);
 
 describeDb('POST /reservations (gerçek PostgreSQL)', () => {
@@ -108,7 +109,7 @@ describeDb('POST /reservations (gerçek PostgreSQL)', () => {
     expect(list[0]!.vehicle.year).toBe(2030);
     expect(list[0]!.price.lines[0]).toMatchObject({ type: 'VEHICLE', slug: `t-model-${run}` });
     expect(list[0]!.price).toMatchObject({ pointsUsed: 0, payable: { amount: 375000, currency: 'TRY' } });
-    const points = await service.points(user.id, new Date('2031-06-14T00:00:00Z'));
+    const points = await service.points(user.id, new Date(START.getTime() + 4 * DAY));
     expect(points.balance).toBe(37);
   });
 

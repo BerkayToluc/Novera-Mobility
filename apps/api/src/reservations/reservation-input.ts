@@ -1,4 +1,5 @@
 import { validationFailed } from '../forms/form-input.js';
+import { startWindowError } from './booking-window.js';
 
 // POST /reservations/price ve POST /reservations gövdesi (openapi.yaml ReservationRequest).
 export type CurrencyCode = 'TRY' | 'EUR' | 'USD';
@@ -48,7 +49,7 @@ export function isThirtyMinuteSlot(date: Date): boolean {
   );
 }
 
-export function parseReservationRequest(input: unknown): ValidReservationRequest {
+export function parseReservationRequest(input: unknown, now: Date = new Date()): ValidReservationRequest {
   const body: Record<string, unknown> =
     input !== null && typeof input === 'object' && !Array.isArray(input)
       ? (input as Record<string, unknown>)
@@ -92,6 +93,11 @@ export function parseReservationRequest(input: unknown): ValidReservationRequest
   const returnBranchId = uuid('returnBranchId', true);
   const startAt = date('startAt');
   const endAt = date('endAt');
+
+  if (startAt) {
+    const windowError = startWindowError(startAt, now);
+    if (windowError) errors.startAt = windowError;
+  }
 
   if (startAt && endAt) {
     if (endAt.getTime() <= startAt.getTime()) {
