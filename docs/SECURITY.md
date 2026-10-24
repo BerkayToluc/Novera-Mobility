@@ -10,6 +10,17 @@
 |---|---|---|---|
 | G-01 | V2-02 ([#292](https://github.com/BerkayToluc/Novera-Mobility/issues/292)) | PR'da | `startAt` şu andan en az 30 dakika sonra ve en çok 365 gün sonra olmalı (`IN_PAST`, `OUT_OF_RANGE`; tutma, fiyat, rezervasyon ve arama uçlarında). Puan bakiyeye yalnızca `createdAt < startAt` olan rezervasyondan geçer |
 
+| G-02, G-16 | V2-03 ([#293](https://github.com/BerkayToluc/Novera-Mobility/issues/293)) | PR'da | `POST /reservations` kullanıcı başına saatte 10 istek; bir hesapta en çok 3 gelecek ya da devam eden rezervasyon (`422 RESERVATION_LIMIT`, sayım ve ekleme kullanıcı satırı kilidiyle aynı işlemde); `POST /reservations/price` istemci başına 10 dakikada 60 istek; `holdId` yalnızca tutmayı açan istemci anahtarıyla kullanılabilir |
+
+### Hız sınırı tablosu (V2-09'dan sonra tek kaynak burasıdır)
+
+Şimdilik yalnızca v2'de eklenen satırlar; mevcut uçların tam listesi [QUALITY.md](QUALITY.md) §3.2'dedir. Sayaçlar bellek içidir (V2-09 kalıcı depoya taşır).
+
+| Uç | Sınır | Anahtar | İş |
+|---|---|---|---|
+| `POST /reservations` | 10 istek/saat | kullanıcı | V2-03 |
+| `POST /reservations/price` | 60 istek/10 dk | istemci adresi | V2-03 |
+
 ### Canlıda G-01 kötüye kullanım tespiti (V2-02)
 
 Salt okunur; kişisel veri döndürmez. Önce yalnızca sayıya bakılır, sonuç issue'ya yazılır.

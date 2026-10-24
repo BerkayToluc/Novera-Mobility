@@ -9,7 +9,7 @@ import { FormError } from "@/components/auth/form-error";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { useRouter } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import { DriverSection } from "./driver-section";
 import { formatCardNumber, formatExpiry, paymentSchema, type PaymentInput } from "@/lib/payment-schema";
 
@@ -28,6 +28,8 @@ export function PaymentForm({
   const [driver, setDriver] = useState<DriverBody | null>(null);
   const router = useRouter();
   const [formError, setFormError] = useState<string | null>(null);
+  // The account is at its cap of upcoming reservations: the message leads to Rezervasyonlarım, where one can be cancelled.
+  const [limitReached, setLimitReached] = useState(false);
 
   const schema = useMemo(
     () =>
@@ -64,6 +66,7 @@ export function PaymentForm({
 
   async function onSubmit() {
     if (!driver) return;
+    setLimitReached(false);
     setFormError(null);
     try {
       const result = await placeReservation(query, driver);
@@ -93,6 +96,11 @@ export function PaymentForm({
         setFormError(t("errors.promo"));
         return;
       }
+      if (result.reason === "limit") {
+        setFormError(null);
+        setLimitReached(true);
+        return;
+      }
       setFormError(t(result.reason === "not_verified" ? "errors.notVerified" : `errors.${result.reason}`));
     } catch {
       setFormError(t("errors.generic"));
@@ -105,6 +113,17 @@ export function PaymentForm({
       <div className="rounded-card border border-border bg-surface p-6 md:p-8">
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-5">
       <FormError message={formError} />
+      {limitReached && (
+        <p role="alert" className="rounded-control border border-error p-3 text-small text-error">
+          {t.rich("errors.limit", {
+            link: (chunks) => (
+              <Link href="/profil/rezervasyonlar" className="text-link underline underline-offset-4">
+                {chunks}
+              </Link>
+            ),
+          })}
+        </p>
+      )}
       <Field label={t("fields.holder")} error={errors.holder?.message}>
         {(props) => <Input autoComplete="cc-name" {...props} {...register("holder")} />}
       </Field>

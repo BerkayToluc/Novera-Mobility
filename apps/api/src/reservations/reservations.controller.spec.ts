@@ -3,9 +3,14 @@ import { HttpException, type INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { configureApp } from '../app.setup.js';
 import { AuthService } from '../auth/auth.service.js';
+import { RateLimiter } from '../forms/rate-limiter.js';
 import { SessionGuard } from '../auth/session.guard.js';
 import { PricingService } from './pricing.service.js';
-import { ReservationsController } from './reservations.controller.js';
+import {
+  CREATE_LIMIT_PER_HOUR,
+  PRICE_LIMIT_PER_10_MIN,
+  ReservationsController,
+} from './reservations.controller.js';
 import { ReservationsService } from './reservations.service.js';
 
 // HTTP-level check of the routes under /me/reservations: the new one-reservation route must not swallow
@@ -18,14 +23,17 @@ describe('/me/reservations routes', () => {
     listMine: jest.fn(async () => [{ id: 'r1' }, { id: 'r2' }]),
     getMine: jest.fn(async (_userId: string, id: string) => ({ id })),
     cancel: jest.fn(async (_userId: string, id: string) => ({ id, status: 'CANCELLED' })),
+    create: jest.fn(async () => ({ id: 'new' })),
   };
+  const pricing = { price: jest.fn(async () => ({ total: { amount: 1, currency: 'TRY' } })) };
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
       controllers: [ReservationsController],
       providers: [
         { provide: ReservationsService, useValue: service },
-        { provide: PricingService, useValue: {} },
+        { provide: PricingService, useValue: pricing },
+        RateLimiter,
         { provide: AuthService, useValue: {} },
       ],
     })
@@ -53,6 +61,7 @@ describe('/me/reservations routes', () => {
   beforeEach(() => {
     signedIn = true;
     Object.values(service).forEach((fn) => fn.mockClear());
+    pricing.price.mockClear();
   });
 
   it('GET /me/reservations is still the list', async () => {
@@ -83,5 +92,31 @@ describe('/me/reservations routes', () => {
     const response = await fetch(`${base}/me/reservations/abc`);
     expect(response.status).toBe(401);
     expect(service.getMine).not.toHaveBeenCalled();
+  });
+
+  // QUALITY G-02: booking takes no payment, so one account may not fire requests without end.
+  const post = (path: string) =>
+    fetch(`${base}${path}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+
+  it('POST /reservations: the 11th request in an hour is 429 RATE_LIMITED and never reaches the service', async () => {
+    for (let i = 0; i < CREATE_LIMIT_PER_HOUR; i += 1) {
+      expect((await post('/reservations')).status).toBe(201);
+    }
+    const refused = await post('/reservations');
+    expect(refused.status).toBe(429);
+    expect(((await refused.json()) as { code: string }).code).toBe('RATE_LIMITED');
+    expect(service.create).toHaveBeenCalledTimes(CREATE_LIMIT_PER_HOUR);
+    // The service is told whose request it is, so it can tell whose hold the hold id names (QUALITY G-16).
+    const [, , clientKey] = service.create.mock.calls[0] as unknown as [unknown, unknown, string];
+    expect(clientKey).toMatch(/^[0-9a-f]{32}$/);
+  });
+
+  it('POST /reservations/price: the 61st request in ten minutes is 429', async () => {
+    for (let i = 0; i < PRICE_LIMIT_PER_10_MIN; i += 1) {
+      expect((await post('/reservations/price')).status).toBe(200);
+    }
+    const refused = await post('/reservations/price');
+    expect(refused.status).toBe(429);
+    expect(pricing.price).toHaveBeenCalledTimes(PRICE_LIMIT_PER_10_MIN);
   });
 });

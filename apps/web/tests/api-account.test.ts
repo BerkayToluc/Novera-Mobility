@@ -5,7 +5,14 @@ import type { components } from "../lib/api-types";
 import type { BookingData } from "../lib/booking-data";
 import { VehicleUnavailableError } from "../lib/hold-client";
 import { resetPassword } from "../lib/password-reset-actions";
-import { createReservation, PastStartError, PromoCodeError, reservationToApi } from "../lib/reservation-client";
+import {
+  createReservation,
+  PastStartError,
+  PromoCodeError,
+  ReservationLimitError,
+  ReservationRateLimitedError,
+  reservationToApi,
+} from "../lib/reservation-client";
 
 vi.mock("next/headers", () => ({
   headers: async () => new Headers({ "x-forwarded-for": "203.0.113.7" }),
@@ -209,6 +216,16 @@ describe("calls to the API", () => {
   it("turns a start that is no longer in the future into its own error", async () => {
     vi.stubGlobal("fetch", respond(422, { code: "VALIDATION_FAILED", fieldErrors: { startAt: "IN_PAST" } }));
     await expect(createReservation(booking)).rejects.toBeInstanceOf(PastStartError);
+  });
+
+  it("turns the cap on upcoming reservations into its own error", async () => {
+    vi.stubGlobal("fetch", respond(422, { code: "RESERVATION_LIMIT", message: "limit" }));
+    await expect(createReservation(booking)).rejects.toBeInstanceOf(ReservationLimitError);
+  });
+
+  it("turns a refused rate into its own error", async () => {
+    vi.stubGlobal("fetch", respond(429, { code: "RATE_LIMITED", message: "slow down" }));
+    await expect(createReservation(booking)).rejects.toBeInstanceOf(ReservationRateLimitedError);
   });
 
   it("sends a booking in the contract's shape, with the times in UTC", () => {

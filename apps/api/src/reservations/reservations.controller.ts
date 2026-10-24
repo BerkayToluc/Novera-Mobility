@@ -2,11 +2,19 @@ import { Body, Controller, Get, HttpCode, Inject, Param, Post, Req, UseGuards } 
 import type { Request } from 'express';
 import { ApiBody, ApiCookieAuth, ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { AuthService } from '../auth/auth.service.js';
+import { rateLimited } from '../forms/form-input.js';
+import { RateLimiter, clientKeyOf } from '../forms/rate-limiter.js';
 import { CurrentUser, SessionGuard } from '../auth/session.guard.js';
 import { SESSION_COOKIE, readCookie } from '../auth/session-token.js';
 import type { UserRow } from '../auth/user-view.js';
 import { PricingService, type PriceBreakdown } from './pricing.service.js';
 import { ReservationsService } from './reservations.service.js';
+
+// POST /reservations/price is open to anyone, POST /reservations takes no payment: both are limited (SECURITY.md).
+export const PRICE_LIMIT_PER_10_MIN = 60;
+export const CREATE_LIMIT_PER_HOUR = 10;
+const TEN_MINUTES_MS = 10 * 60_000;
+const HOUR_MS = 60 * 60_000;
 
 const RESERVATION_BODY = {
   schema: {
@@ -44,6 +52,7 @@ export class ReservationsController {
     @Inject(PricingService) private readonly pricing: PricingService,
     @Inject(ReservationsService) private readonly reservations: ReservationsService,
     @Inject(AuthService) private readonly auth: AuthService,
+    @Inject(RateLimiter) private readonly limiter: RateLimiter,
   ) {}
 
   @Post('reservations/price')
@@ -51,6 +60,9 @@ export class ReservationsController {
   @ApiBody(RESERVATION_BODY)
   @ApiOkResponse({ description: 'Fiyat dökümü (giriş gerekmez)' })
   async price(@Body() body: unknown, @Req() request: Request): Promise<PriceBreakdown> {
+    if (!this.limiter.allow(`price:${clientKeyOf(request)}`, PRICE_LIMIT_PER_10_MIN, TEN_MINUTES_MS)) {
+      throw rateLimited();
+    }
     // Open to visitors; the session is only read when the price is asked with `usePoints`.
     const token = readCookie(request.headers.cookie, SESSION_COOKIE);
     const user = token ? await this.auth.authenticate(token) : null;
@@ -62,8 +74,9 @@ export class ReservationsController {
   @ApiCookieAuth()
   @ApiBody(RESERVATION_BODY)
   @ApiCreatedResponse({ description: 'Rezervasyon oluşturuldu (CONFIRMED)' })
-  create(@CurrentUser() user: UserRow, @Body() body: unknown) {
-    return this.reservations.create(user, body);
+  create(@CurrentUser() user: UserRow, @Body() body: unknown, @Req() request: Request) {
+    if (!this.limiter.allow(`reserve:${user.id}`, CREATE_LIMIT_PER_HOUR, HOUR_MS)) throw rateLimited();
+    return this.reservations.create(user, body, clientKeyOf(request));
   }
 
   @Get('me/reservations')
