@@ -21,6 +21,19 @@ import {
 } from './reservation-view.js';
 
 const NUMBER_ATTEMPTS = 5;
+// One account cannot hold more than this many upcoming or running bookings at once (G, 24 Ekim: 3); no
+// payment is taken, so without a cap one account could lock the whole fleet for months (QUALITY G-02).
+export const MAX_ACTIVE_RESERVATIONS = 3;
+
+function reservationLimitReached(): HttpException {
+  return new HttpException(
+    {
+      code: 'RESERVATION_LIMIT',
+      message: `An account can have at most ${MAX_ACTIVE_RESERVATIONS} upcoming reservations`,
+    },
+    HttpStatus.UNPROCESSABLE_ENTITY,
+  );
+}
 
 function reservationNotFound(): HttpException {
   return new HttpException({ code: 'NOT_FOUND', message: 'Reservation not found' }, HttpStatus.NOT_FOUND);
@@ -52,14 +65,15 @@ export class ReservationsService {
   ) {}
 
   // POST /reservations: her şey TEK işlemde olur (araç kilidi, müsaitlik, fiyat, kayıt, puan, tutmanın silinmesi).
-  async create(user: UserRow, input: unknown) {
+  // `clientKey` is the caller's address key (see clientKeyOf): a hold only counts as theirs when it was made from it.
+  async create(user: UserRow, input: unknown, clientKey: string | null = null) {
     const request = parseReservationRequest(input);
     await this.pricing.assertBranchesExist(request);
 
     // Numara çakışması (P2002) işlemi bozar; bu yüzden yeniden deneme İŞLEMİN DIŞINDADIR.
     for (let attempt = 0; attempt < NUMBER_ATTEMPTS; attempt += 1) {
       try {
-        return await this.createOnce(user, request);
+        return await this.createOnce(user, request, clientKey);
       } catch (error) {
         if (!isUniqueViolation(error)) throw error;
       }
@@ -67,27 +81,33 @@ export class ReservationsService {
     throw new Error('Could not allocate a reservation number');
   }
 
-  private async createOnce(user: UserRow, request: ValidReservationRequest) {
+  private async createOnce(user: UserRow, request: ValidReservationRequest, clientKey: string | null) {
     return this.prisma.$transaction(async (tx) => {
       // Aracın satırını kilitle: aynı araç için gelen diğer istekler bu işlem bitene kadar bekler,
       // sonra çakışmayı görüp 409 alır (kilit yoksa iki kişi aynı aracı alabilir).
       await tx.$queryRaw`SELECT "id" FROM "Vehicle" WHERE "id" = ${request.vehicleId} FOR UPDATE`;
-      // Paying with points: lock the account too (always after the vehicle, so locks never cross), so two
-      // reservations made at the same moment cannot spend the same points twice.
-      if (request.usePoints) {
-        requirePointsAccount(user, request.currency);
-        await tx.$queryRaw`SELECT "id" FROM "User" WHERE "id" = ${user.id} FOR UPDATE`;
-      }
+      // The account is locked too (always after the vehicle, so locks never cross): two bookings made at the
+      // same moment can neither slip past the cap together nor spend the same points twice.
+      if (request.usePoints) requirePointsAccount(user, request.currency);
+      await tx.$queryRaw`SELECT "id" FROM "User" WHERE "id" = ${user.id} FOR UPDATE`;
 
       const now = new Date();
 
-      // Tutma: aynı araç/bayi/saatler için geçerliyse istemcinin kendi tutmasıdır (engel olmaz, işlem sonunda silinir).
-      // Süresi dolmuş ya da uymayan tutma sorun değildir; müsaitlik aşağıda yine kontrol edilir (openapi).
+      const active = await tx.reservation.count({
+        where: { userId: user.id, status: 'CONFIRMED', endAt: { gt: now } },
+      });
+      if (active >= MAX_ACTIVE_RESERVATIONS) throw reservationLimitReached();
+
+      // Tutma: aynı araç/bayi/saatler için geçerliyse ve aynı istemci anahtarıyla açılmışsa istemcinin kendi
+      // tutmasıdır (engel olmaz, işlem sonunda silinir). Başkasının tutması, süresi dolmuş ya da uymayan tutma
+      // yokmuş gibi sayılır; müsaitlik aşağıda yine kontrol edilir (openapi, QUALITY G-16).
       let ownHoldId: string | null = null;
       if (request.holdId) {
         const hold = await tx.hold.findUnique({ where: { id: request.holdId } });
         if (
           hold &&
+          clientKey !== null &&
+          hold.clientKey === clientKey &&
           hold.vehicleId === request.vehicleId &&
           hold.pickupBranchId === request.pickupBranchId &&
           hold.returnBranchId === request.returnBranchId &&

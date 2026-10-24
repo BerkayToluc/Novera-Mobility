@@ -20,6 +20,22 @@ export class PastStartError extends Error {
     this.name = "PastStartError";
   }
 }
+
+// The account already has the most upcoming reservations it may have (openapi 422 `RESERVATION_LIMIT`).
+export class ReservationLimitError extends Error {
+  constructor() {
+    super("The account has reached its limit of upcoming reservations.");
+    this.name = "ReservationLimitError";
+  }
+}
+
+// Too many booking attempts from this account in the last hour (openapi 429 `RATE_LIMITED`).
+export class ReservationRateLimitedError extends Error {
+  constructor() {
+    super("Too many booking attempts.");
+    this.name = "ReservationRateLimitedError";
+  }
+}
 import { holdApiId, VehicleUnavailableError } from "./hold-client";
 import { toUtc } from "./rental-search";
 
@@ -55,6 +71,8 @@ export async function createReservation(data: BookingData): Promise<{ number: st
     // Test hook, mocks only: a hold id ending in ".taken" plays a car someone else got first,
     // so the "just rented" screen can be reached without a second visitor.
     if (data.hold?.id.endsWith(".taken")) throw new VehicleUnavailableError();
+    // Same for an account that already has the most upcoming reservations it may have.
+    if (data.hold?.id.endsWith(".limit")) throw new ReservationLimitError();
     const serial = String(Math.floor(Math.random() * 100000)).padStart(5, "0");
     return { number: `NVR-${new Date().getFullYear()}-${serial}` };
   }
@@ -65,5 +83,7 @@ export async function createReservation(data: BookingData): Promise<{ number: st
   // A code that is unknown, closed or out of date by now: the visitor saw a discount that would not be given.
   if (result.status === "invalid" && result.fieldErrors.promoCode === "UNKNOWN_CODE") throw new PromoCodeError();
   if (result.status === "invalid" && result.fieldErrors.startAt === "IN_PAST") throw new PastStartError();
+  if (result.status === "invalid" && result.code === "RESERVATION_LIMIT") throw new ReservationLimitError();
+  if (result.status === "rate_limited") throw new ReservationRateLimitedError();
   throw new ApiUnavailableError();
 }

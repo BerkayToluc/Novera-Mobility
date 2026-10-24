@@ -21,7 +21,7 @@
 | # | Seviye | Bulgu | Yer | İş | Durum |
 |---|---|---|---|---|---|
 | G-01 | **Kritik** | Rezervasyon ve tutmada başlangıcın gelecekte olduğu denetlenmiyor. Geçmiş tarihli rezervasyonun puanı hemen bakiyeye geçiyor (puan `endAt <= now` olunca sayılıyor). Geçmiş tarihli 365 günlük bir kiralama anında yüzlerce puan verir; puanla ödeme kuralı (toplamın yarısı) sonraki kiralamaları yarı fiyata indirir. Başlamış rezervasyon iptal edilemediği için temizlenmez de | `apps/api/src/reservations/reservation-input.ts:71-102`, `holds/holds.service.ts:217-233`, `catalog/catalog.service.ts:178-204`, `reservations/points-balance.ts:36-40` | V2-02 | Düzeltildi (V2-02, #292; kural `reservations/booking-window.ts`; canlı tespit sorgusu SECURITY.md'de; 24 Ekim 2026'da canlıda çalıştırıldı: 0 rezervasyon, 0 kullanıcı, 0 puan, kötüye kullanım yok) |
-| G-02 | Yüksek | `POST /reservations` için hız sınırı ve kişi başı tavan yok; ödeme olmadan CONFIRMED rezervasyon açılıyor. Tek hesap tüm filoyu 365 güne kadar kilitleyebilir | `reservations/reservations.controller.ts:198-205` | V2-03 | Açık |
+| G-02 | Yüksek | `POST /reservations` için hız sınırı ve kişi başı tavan yok; ödeme olmadan CONFIRMED rezervasyon açılıyor. Tek hesap tüm filoyu 365 güne kadar kilitleyebilir | `reservations/reservations.controller.ts:198-205` | V2-03 | Düzeltildi (V2-03, #293; saatte 10 istek, hesap başına 3 gelecek rezervasyon) |
 | G-03 | Yüksek | `API_ACCESS_KEY` tanımsızsa API açılıyor ve her isteği geçiriyor (SECURITY.md S9 aksini söylüyor). Bugün yalnızca `render.yaml`'ın anahtarı üretmesi koruyor | `config/runtime.ts:27-40`, `common/api-access.ts:25-27` | V2-04 | Açık |
 | G-04 | Yüksek | Kampanya kodu tahmin edilebilir: `POST /reservations/price` girişsiz ve sınırsız, cevabı `promo.applied: true/false` söylüyor. Kodda toplam ya da kişi başı kullanım tavanı ve `createdAt` yok (geçerlilik aralığı alanları var ama seed kodları süresiz açıyor) | `reservations/pricing.service.ts:236-239`, `prisma/schema.prisma:308-315` | V2-05 | Açık |
 | G-05 | Yüksek | Seed canlıda da çalıştırılıyor ([DEPLOY.md](DEPLOY.md) §2). Her çalışmada `NOVERA10` ve `HOSGELDIN` kodlarını süresiz olarak yeniden etkinleştiriyor ve canlı kurların üzerine yazıyor | `prisma/seed.ts:87-101` | V2-05 | Açık |
@@ -35,7 +35,7 @@
 | G-13 | Orta | Oturum sabit 30 gün; boşta kalma süresi, `lastUsedAt` ve yenileme yok. Süresi dolan oturum ve sıfırlama bağlantıları yalnızca o kullanıcı giriş yapınca siliniyor | `auth/session-token.ts:4`, `auth/auth.service.ts:111-114` | V2-10 | Açık |
 | G-14 | Orta | `DELETE /me` yalnızca çereze bakıyor; çalınan oturum hesabı silebilir (SECURITY.md karar bekleyen 1) | `auth/` me controller | V2-10 | Açık |
 | G-15 | Düşük | E-posta başına giriş sınırı, başkasının hesabını 15 dakika kilitlemeye izin veriyor (SECURITY.md karar bekleyen 2) | `auth/auth.controller.ts` | V2-10 | Açık |
-| G-16 | Düşük | Rezervasyon oluştururken tutma (`holdId`) istemci anahtarı denetlenmeden tüketiliyor | `reservations/reservations.service.ts:338-350` | V2-03 | Açık |
+| G-16 | Düşük | Rezervasyon oluştururken tutma (`holdId`) istemci anahtarı denetlenmeden tüketiliyor | `reservations/reservations.service.ts:338-350` | V2-03 | Düzeltildi (V2-03, #293; tutma istemci anahtarıyla eşleşmeli) |
 | G-17 | Düşük | Rezervasyon numarası "en büyük + 1" ile, beş denemeyle üretiliyor; ardışık numara rezervasyon hacmini belli ediyor | `reservations/reservations.service.ts:124-131` | V2-11 | Açık |
 | G-18 | Düşük | CI'da bağımlılık taraması (`pnpm audit`), Dependabot ve gizli anahtar taraması yok. Prisma CLI içindeki bilinen bulgular (SECURITY.md) izlenmiyor | `.github/workflows/ci.yml` | V2-18 | Açık |
 | G-19 | Düşük | `carPhotos/` (167 MB, izlenmeyen) `.gitignore`'da değil; tek bir `git add .` repoya sokar | kök | V2-06 | Açık |
@@ -193,8 +193,8 @@
 | `POST /me/password` | 5/15 dk/kullanıcı | Aynı |
 | `POST /contact`, `POST /quotes` | 10/saat/istemci | Aynı |
 | `POST /holds` | En çok 5 etkin tutma/istemci | Aynı + 30/saat/anahtar |
-| `POST /reservations/price` | Yok | 60/10 dk/anahtar; kampanya kodu içeren istek 10/10 dk/anahtar (G-04) |
-| `POST /reservations` | Yok | 10/saat/kullanıcı + en çok N gelecek rezervasyon (SPEC §7, öneri 3) |
+| `POST /reservations/price` | 60/10 dk/istemci (V2-03) | 60/10 dk/anahtar; kampanya kodu içeren istek 10/10 dk/anahtar (G-04) |
+| `POST /reservations` | 10/saat/kullanıcı + en çok 3 gelecek rezervasyon (V2-03) | Aynı; V2-09 kalıcı depoya taşır |
 | Katalog okumaları, `/faq`, `/rates` | Yok | Varsayılan: 300/5 dk/anahtar |
 | `/me*` (okuma) | Yok | Varsayılan |
 | `PATCH /me`, `DELETE /me`, iptal, oturum kapatma | Yok | 20/15 dk/kullanıcı |

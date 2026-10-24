@@ -3,7 +3,7 @@ import type { UserRow } from '../auth/user-view.js';
 import type { PrismaService } from '../prisma/prisma.service.js';
 import { PricingService } from './pricing.service.js';
 import { pointsForTotal } from './points.rules.js';
-import { ReservationsService } from './reservations.service.js';
+import { MAX_ACTIVE_RESERVATIONS, ReservationsService } from './reservations.service.js';
 import { DAY_MS, daysAhead, slotBefore } from './dates.testing.js';
 
 // Birim testi: veritabanı bellekte taklit edilir. Gerçek kilit (FOR UPDATE) ve benzersizlik
@@ -21,6 +21,7 @@ const IDS = {
 const START_DATE = daysAhead(30);
 const START = START_DATE.toISOString();
 const END = new Date(START_DATE.getTime() + 3 * DAY_MS).toISOString(); // 3 gün
+const CLIENT = 'client-key-1';
 const startPlus = (days: number) => new Date(START_DATE.getTime() + days * DAY_MS);
 const user = { id: IDS.user, accountType: 'INDIVIDUAL' } as unknown as UserRow;
 const corporate = { id: IDS.user, accountType: 'CORPORATE' } as unknown as UserRow;
@@ -107,7 +108,11 @@ class FakeDb {
   };
   reservation = {
     count: async ({ where }: any) =>
-      this.reservations.filter(
+      where.userId
+        ? this.reservations.filter(
+            (r) => r.userId === where.userId && r.status === where.status && r.endAt > where.endAt.gt,
+          ).length
+        : this.reservations.filter(
         (r) =>
           r.vehicleId === where.vehicleId &&
           r.status === where.status &&
@@ -210,7 +215,7 @@ describe('ReservationsService.create', () => {
     expect(result.price.lines[1]!.quantity).toBe(6);
     expect(result.pointsEarned).toBe(49); // 4990,70 TL → 49
     expect(result.pickupBranch.city).toBe('İstanbul');
-    expect(db.locks).toBe(1);
+    expect(db.locks).toBe(2); // vehicle, then account
     expect(db.points).toHaveLength(1);
   });
 
@@ -235,11 +240,12 @@ describe('ReservationsService.create', () => {
     db.holds.push({
       id: IDS.hold, vehicleId: IDS.vehicle, pickupBranchId: IDS.pickup, returnBranchId: IDS.dropoff,
       startAt: new Date(START), endAt: new Date(END), expiresAt: new Date('2999-01-01T00:00:00Z'),
+      clientKey: CLIENT,
     });
-    const blocked = await catchHttp(service.create(user, base));
+    const blocked = await catchHttp(service.create(user, base, CLIENT));
     expect(bodyOf(blocked).code).toBe('VEHICLE_UNAVAILABLE');
 
-    const result = await service.create(user, { ...base, holdId: IDS.hold });
+    const result = await service.create(user, { ...base, holdId: IDS.hold }, CLIENT);
     expect(result.status).toBe('CONFIRMED');
     expect(db.holds).toHaveLength(0);
   });
@@ -249,8 +255,9 @@ describe('ReservationsService.create', () => {
     db.holds.push({
       id: IDS.hold, vehicleId: IDS.vehicle, pickupBranchId: IDS.pickup, returnBranchId: IDS.dropoff,
       startAt: new Date(START), endAt: new Date(END), expiresAt: new Date('2000-01-01T00:00:00Z'),
+      clientKey: CLIENT,
     });
-    const result = await service.create(user, { ...base, holdId: IDS.hold });
+    const result = await service.create(user, { ...base, holdId: IDS.hold }, CLIENT);
     expect(result.status).toBe('CONFIRMED');
   });
 
@@ -259,9 +266,36 @@ describe('ReservationsService.create', () => {
     db.holds.push({
       id: IDS.hold, vehicleId: IDS.other, pickupBranchId: IDS.pickup, returnBranchId: IDS.dropoff,
       startAt: new Date(START), endAt: new Date(END), expiresAt: new Date('2999-01-01T00:00:00Z'),
+      clientKey: CLIENT,
     });
-    await service.create(user, { ...base, holdId: IDS.hold });
+    await service.create(user, { ...base, holdId: IDS.hold }, CLIENT);
     expect(db.holds).toHaveLength(1);
+  });
+
+  // QUALITY G-16: a hold id is not a key to someone else's hold.
+  it('another client\'s hold is no hold: the car stays unavailable and the hold stays', async () => {
+    const { service, db } = build();
+    db.holds.push({
+      id: IDS.hold, vehicleId: IDS.vehicle, pickupBranchId: IDS.pickup, returnBranchId: IDS.dropoff,
+      startAt: new Date(START), endAt: new Date(END), expiresAt: new Date('2999-01-01T00:00:00Z'),
+      clientKey: CLIENT,
+    });
+    const error = await catchHttp(service.create(user, { ...base, holdId: IDS.hold }, 'someone-else'));
+    expect(error.getStatus()).toBe(409);
+    expect(bodyOf(error).code).toBe('VEHICLE_UNAVAILABLE');
+    expect(db.holds).toHaveLength(1);
+    expect(db.reservations).toHaveLength(0);
+  });
+
+  it('a hold without a client key (made before keys were stored) belongs to nobody', async () => {
+    const { service, db } = build();
+    db.holds.push({
+      id: IDS.hold, vehicleId: IDS.vehicle, pickupBranchId: IDS.pickup, returnBranchId: IDS.dropoff,
+      startAt: new Date(START), endAt: new Date(END), expiresAt: new Date('2999-01-01T00:00:00Z'),
+      clientKey: null,
+    });
+    const error = await catchHttp(service.create(user, { ...base, holdId: IDS.hold }, null));
+    expect(bodyOf(error).code).toBe('VEHICLE_UNAVAILABLE');
   });
 
   it('numara çakışırsa (P2002) yeniden dener', async () => {
@@ -294,6 +328,42 @@ describe('ReservationsService.create', () => {
     await service.create(user, base);
     await catchHttp(service.create(user, base));
     expect(db.points).toHaveLength(1);
+  });
+});
+
+// QUALITY G-02: no payment is taken, so the number of upcoming bookings per account is capped.
+describe('upcoming reservation cap', () => {
+  const bookAt = (service: ReservationsService, days: number, vehicleId = IDS.vehicle) =>
+    service.create(user, {
+      ...base, vehicleId, startAt: startPlus(days).toISOString(), endAt: startPlus(days + 1).toISOString(),
+    });
+
+  it('allows MAX_ACTIVE_RESERVATIONS bookings and refuses the next with 422 RESERVATION_LIMIT', async () => {
+    const { service, db } = build();
+    for (let i = 0; i < MAX_ACTIVE_RESERVATIONS; i += 1) await bookAt(service, 10 + 2 * i);
+    const error = await catchHttp(bookAt(service, 40));
+    expect(error.getStatus()).toBe(422);
+    expect(bodyOf(error).code).toBe('RESERVATION_LIMIT');
+    expect(db.reservations).toHaveLength(MAX_ACTIVE_RESERVATIONS);
+    expect(db.points).toHaveLength(MAX_ACTIVE_RESERVATIONS);
+  });
+
+  it('cancelling one frees a place', async () => {
+    const { service, db } = build();
+    for (let i = 0; i < MAX_ACTIVE_RESERVATIONS; i += 1) await bookAt(service, 10 + 2 * i);
+    db.reservations[0]!.status = 'CANCELLED';
+    await expect(bookAt(service, 40)).resolves.toMatchObject({ status: 'CONFIRMED' });
+  });
+
+  it('a finished rental does not count, and another account\'s bookings do not either', async () => {
+    const { service, db } = build();
+    for (let i = 0; i < MAX_ACTIVE_RESERVATIONS; i += 1) await bookAt(service, 10 + 2 * i);
+    db.reservations[0]!.endAt = new Date('2020-01-02T00:00:00Z');
+    await expect(bookAt(service, 40)).resolves.toBeDefined();
+    const other = { id: 'other-user', accountType: 'INDIVIDUAL' } as unknown as UserRow;
+    await expect(
+      service.create(other, { ...base, startAt: startPlus(60).toISOString(), endAt: startPlus(61).toISOString() }),
+    ).resolves.toBeDefined();
   });
 });
 

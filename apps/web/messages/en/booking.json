@@ -65,6 +65,8 @@
       "unavailable": "The booking service is not available right now. Please try again later.",
       "invalid": "The booking details are not valid. Please start the search again.",
       "pastStart": "The rental start time has passed. Please search again with a later start.",
+      "limit": "An account can have at most 3 upcoming reservations at a time. To make a new one, cancel one on the <link>My Bookings</link> page.",
+      "rateLimited": "Too many booking attempts in a short time. Please wait a while and try again.",
       "signin": "You need to sign in to continue.",
       "generic": "The booking could not be completed. Please try again.",
       "ineligible": "The driver does not meet the conditions.",

@@ -80,3 +80,32 @@ test("the summary states the cancellation rule before paying", async ({ page }) 
     "/kiralama-kosullari",
   );
 });
+
+// QUALITY G-02: an account with the most upcoming reservations it may have is told so at payment and
+// pointed to Rezervasyonlarım. The mock plays the API's 422 RESERVATION_LIMIT for a hold id ending in ".limit".
+test("an account at its reservation cap is told so and pointed to its bookings", async ({ page }) => {
+  await page.goto(RESULTS);
+  await page.getByRole("button", { name: /Kirala.*Renault Clio/ }).click();
+  await page.waitForURL(/\/rezervasyon/);
+  await page.getByRole("link", { name: "Ödemeye Geç" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "Ödeme" })).toBeVisible();
+
+  const url = new URL(page.url());
+  url.searchParams.set("tutma", `${url.searchParams.get("tutma")}.limit`);
+  await page.goto(url.toString());
+  // A fresh load: wait for the page to be interactive, or typing into the form races its hydration.
+  await page.waitForLoadState("networkidle");
+
+  await fillDriver(page, EXPERIENCED);
+  await page.getByRole("button", { name: "Ehliyetimi doğrula" }).click();
+  await expect(page.getByText("Ehliyet doğrulandı (deneme).")).toBeVisible();
+  await page.getByLabel("Karttaki isim").fill("Elif Yıldız");
+  await page.getByLabel("Kart numarası").fill("4242 4242 4242 4242");
+  await page.getByLabel(/Son kullanma/).fill("12/30");
+  await page.getByLabel("CVC").fill("123");
+  await page.getByRole("button", { name: /Öde|Tamamla/ }).click();
+
+  const alert = page.getByRole("alert").filter({ hasText: "en çok 3 yaklaşan rezervasyon" });
+  await expect(alert).toBeVisible();
+  await expect(alert.getByRole("link", { name: "Rezervasyonlarım" })).toHaveAttribute("href", "/profil/rezervasyonlar");
+});

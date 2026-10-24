@@ -195,6 +195,7 @@ paths:
         `promoCode` verilirse indirim ayrı bir satır olarak gelir (`type: DISCOUNT`).
         `usePoints: true` ile istenirse giriş gerekir (`401`) ve cevap, hesabın bakiyesiyle harcanabilecek
         puanı (`pointsUsed`) ve parayla ödenecek tutarı (`payable`) içerir.
+        İstemci başına 10 dakikada en çok 60 istek (`429 RATE_LIMITED`).
       requestBody:
         required: true
         content:
@@ -209,6 +210,7 @@ paths:
         "401": { $ref: "#/components/responses/Unauthorized" }
         "409": { $ref: "#/components/responses/Conflict" }
         "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
 
   /reservations:
     post:
@@ -220,6 +222,12 @@ paths:
         araç hâlâ boşsa devam edilir, değilse `409 VEHICLE_UNAVAILABLE`. Puan aynı işlemde yazılır.
         `usePoints: true` ise puan düşümü de aynı işlemde yapılır; cevaptaki `price.pointsUsed` ve
         `price.payable` kesin değerlerdir. Kazanılan puan, parayla ödenen tutar (`payable`) üzerinden hesaplanır.
+
+        **Sınırlar (V2-03):** kullanıcı başına saatte en çok 10 istek (`429 RATE_LIMITED`); bir hesabın aynı anda
+        en çok 3 gelecek ya da devam eden `CONFIRMED` rezervasyonu olabilir, aşılırsa `422 RESERVATION_LIMIT`
+        (biri iptal edilince yenisi açılabilir). `holdId` yalnızca tutmayı açan istemcinin adresiyle (istemci
+        anahtarı) eşleşirse kendi tutması sayılır; başkasının tutması yokmuş gibi davranılır ve araç o tutmayla
+        doluysa `409 VEHICLE_UNAVAILABLE` döner.
       security:
         - cookieAuth: []
       requestBody:
@@ -236,6 +244,7 @@ paths:
         "401": { $ref: "#/components/responses/Unauthorized" }
         "409": { $ref: "#/components/responses/Conflict" }
         "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
 
   /me/reservations:
     get:
@@ -767,6 +776,7 @@ components:
             - NOT_FOUND
             - VEHICLE_UNAVAILABLE
             - INVALID_DATE_RANGE
+            - RESERVATION_LIMIT
             - RESET_TOKEN_INVALID
             - SPAM_DETECTED
             - RATE_LIMITED

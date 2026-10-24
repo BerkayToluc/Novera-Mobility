@@ -360,6 +360,7 @@ export interface paths {
          *     `promoCode` verilirse indirim ayrı bir satır olarak gelir (`type: DISCOUNT`).
          *     `usePoints: true` ile istenirse giriş gerekir (`401`) ve cevap, hesabın bakiyesiyle harcanabilecek
          *     puanı (`pointsUsed`) ve parayla ödenecek tutarı (`payable`) içerir.
+         *     İstemci başına 10 dakikada en çok 60 istek (`429 RATE_LIMITED`).
          */
         post: {
             parameters: {
@@ -386,6 +387,7 @@ export interface paths {
                 401: components["responses"]["Unauthorized"];
                 409: components["responses"]["Conflict"];
                 422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
             };
         };
         delete?: never;
@@ -410,6 +412,12 @@ export interface paths {
          *     araç hâlâ boşsa devam edilir, değilse `409 VEHICLE_UNAVAILABLE`. Puan aynı işlemde yazılır.
          *     `usePoints: true` ise puan düşümü de aynı işlemde yapılır; cevaptaki `price.pointsUsed` ve
          *     `price.payable` kesin değerlerdir. Kazanılan puan, parayla ödenen tutar (`payable`) üzerinden hesaplanır.
+         *
+         *     **Sınırlar (V2-03):** kullanıcı başına saatte en çok 10 istek (`429 RATE_LIMITED`); bir hesabın aynı anda
+         *     en çok 3 gelecek ya da devam eden `CONFIRMED` rezervasyonu olabilir, aşılırsa `422 RESERVATION_LIMIT`
+         *     (biri iptal edilince yenisi açılabilir). `holdId` yalnızca tutmayı açan istemcinin adresiyle (istemci
+         *     anahtarı) eşleşirse kendi tutması sayılır; başkasının tutması yokmuş gibi davranılır ve araç o tutmayla
+         *     doluysa `409 VEHICLE_UNAVAILABLE` döner.
          */
         post: {
             parameters: {
@@ -436,6 +444,7 @@ export interface paths {
                 401: components["responses"]["Unauthorized"];
                 409: components["responses"]["Conflict"];
                 422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
             };
         };
         delete?: never;
@@ -1484,7 +1493,7 @@ export interface components {
              * @description Sabit makine kodu.
              * @enum {string}
              */
-            code: "BAD_REQUEST" | "VALIDATION_FAILED" | "UNAUTHENTICATED" | "INVALID_CREDENTIALS" | "EMAIL_TAKEN" | "NOT_FOUND" | "VEHICLE_UNAVAILABLE" | "INVALID_DATE_RANGE" | "RESET_TOKEN_INVALID" | "SPAM_DETECTED" | "RATE_LIMITED" | "PAYLOAD_TOO_LARGE" | "INTERNAL_ERROR";
+            code: "BAD_REQUEST" | "VALIDATION_FAILED" | "UNAUTHENTICATED" | "INVALID_CREDENTIALS" | "EMAIL_TAKEN" | "NOT_FOUND" | "VEHICLE_UNAVAILABLE" | "INVALID_DATE_RANGE" | "RESERVATION_LIMIT" | "RESET_TOKEN_INVALID" | "SPAM_DETECTED" | "RATE_LIMITED" | "PAYLOAD_TOO_LARGE" | "INTERNAL_ERROR";
             /** @description Geliştirici için İngilizce metin. Ekranda gösterilmez. */
             message: string;
             /**
