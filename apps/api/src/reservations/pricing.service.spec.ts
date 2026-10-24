@@ -2,6 +2,7 @@ import { HttpException } from '@nestjs/common';
 import type { PrismaService } from '../prisma/prisma.service.js';
 import { PricingService, convertMinor, isPromoUsable, rentalDays, withPoints } from './pricing.service.js';
 import { parseReservationRequest } from './reservation-input.js';
+import { DAY_MS, daysAhead, slotAtLeast, slotBefore } from './dates.testing.js';
 
 // Birim testi: veritabanı bellekte taklit edilir (gerçek PostgreSQL gerekmez).
 type Row = Record<string, any>;
@@ -14,8 +15,10 @@ const IDS = {
   other: '44444444-4444-4444-8444-444444444444',
   hold: '55555555-5555-4555-8555-555555555555',
 };
-const START = '2031-03-10T10:00:00.000Z';
-const END = '2031-03-13T10:00:00.000Z'; // 3 gün
+const START_DATE = daysAhead(30);
+const START = START_DATE.toISOString();
+const END = new Date(START_DATE.getTime() + 3 * DAY_MS).toISOString(); // 3 gün
+const startPlus = (days: number) => new Date(START_DATE.getTime() + days * DAY_MS);
 
 class FakeDb {
   vehicles: Row[] = [
@@ -158,7 +161,7 @@ describe('parseReservationRequest', () => {
   };
 
   it('biçim, dilim ve aralık hatalarını sabit kodlarla döner', () => {
-    expect(fieldErrorsOf({ ...base, vehicleId: 'x', currency: 'GBP', startAt: '2031-03-10T10:15:00Z' })).toEqual({
+    expect(fieldErrorsOf({ ...base, vehicleId: 'x', currency: 'GBP', startAt: START.replace('T10:00:00', 'T10:15:00') })).toEqual({
       vehicleId: 'INVALID_FORMAT',
       currency: 'INVALID_FORMAT',
       startAt: 'NOT_IN_SLOT',
@@ -166,6 +169,14 @@ describe('parseReservationRequest', () => {
     expect(fieldErrorsOf({ ...base, endAt: START })).toEqual({ endAt: 'INVALID_DATE_RANGE' });
     expect(fieldErrorsOf({ ...base, endAt: '2033-03-10T10:00:00Z' })).toEqual({ endAt: 'OUT_OF_RANGE' });
     expect(fieldErrorsOf({ ...base, holdId: 'abc' })).toEqual({ holdId: 'INVALID_FORMAT' });
+  });
+
+  it('başlangıç geçmişteyse ya da en yakın dilimden önceyse IN_PAST, bir yıldan uzaksa OUT_OF_RANGE (G-01)', () => {
+    const inDay = (start: Date) => ({ ...base, startAt: start.toISOString(), endAt: new Date(start.getTime() + DAY_MS).toISOString() });
+    expect(fieldErrorsOf(inDay(daysAhead(-1)))).toEqual({ startAt: 'IN_PAST' });
+    expect(fieldErrorsOf(inDay(slotBefore(30)))).toEqual({ startAt: 'IN_PAST' });
+    expect(() => parseReservationRequest(inDay(slotAtLeast(30)))).not.toThrow();
+    expect(fieldErrorsOf(inDay(daysAhead(366)))).toEqual({ startAt: 'OUT_OF_RANGE' });
   });
 
   it('kampanya kodu boşluksuz ve büyük harfe çevrilerek alınır; kod yoksa null', () => {
@@ -288,7 +299,7 @@ describe('PricingService.price', () => {
     const future = new Date(Date.now() + 10 * 60_000);
 
     it('çakışan onaylı rezervasyon varsa reddeder', async () => {
-      db.reservations.push({ vehicleId: IDS.vehicle, status: 'CONFIRMED', startAt: at('2031-03-12T10:00:00Z'), endAt: at('2031-03-15T10:00:00Z') });
+      db.reservations.push({ vehicleId: IDS.vehicle, status: 'CONFIRMED', startAt: startPlus(2), endAt: startPlus(5) });
       const error = await catchHttp(service.price({ ...base }));
       expect(error.getStatus()).toBe(409);
       expect(bodyOf(error).code).toBe('VEHICLE_UNAVAILABLE');
@@ -300,8 +311,8 @@ describe('PricingService.price', () => {
     });
 
     it('yarı açık aralık: biri diğerinin bittiği anda başlayabilir', async () => {
-      db.reservations.push({ vehicleId: IDS.vehicle, status: 'CONFIRMED', startAt: at('2031-03-13T10:00:00Z'), endAt: at('2031-03-15T10:00:00Z') });
-      db.reservations.push({ vehicleId: IDS.vehicle, status: 'CONFIRMED', startAt: at('2031-03-08T10:00:00Z'), endAt: at('2031-03-10T10:00:00Z') });
+      db.reservations.push({ vehicleId: IDS.vehicle, status: 'CONFIRMED', startAt: startPlus(3), endAt: startPlus(5) });
+      db.reservations.push({ vehicleId: IDS.vehicle, status: 'CONFIRMED', startAt: startPlus(-2), endAt: startPlus(0) });
       await expect(service.price({ ...base })).resolves.toBeDefined();
     });
 

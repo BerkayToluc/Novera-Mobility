@@ -20,7 +20,7 @@ export interface PointsLedger {
 export async function loadPointsLedger(db: LedgerDb, userId: string, now: Date): Promise<PointsLedger> {
   const earned = await db.pointTransaction.findMany({
     where: { userId },
-    include: { reservation: { select: { number: true, status: true, endAt: true } } },
+    include: { reservation: { select: { number: true, status: true, startAt: true, endAt: true, createdAt: true } } },
   });
   const spentRows = await db.reservation.findMany({
     where: { userId, status: 'CONFIRMED', pointsUsed: { gt: 0 } },
@@ -33,6 +33,8 @@ export async function loadPointsLedger(db: LedgerDb, userId: string, now: Date):
   for (const row of earned) {
     const reservation = row.reservation;
     if (reservation && reservation.status !== 'CONFIRMED') continue;
+    // Rows booked after their own start (made before the start-time check existed) never pay out.
+    if (reservation && reservation.createdAt.getTime() >= reservation.startAt.getTime()) continue;
     const creditedAt = reservation ? reservation.endAt : row.createdAt;
     if (creditedAt.getTime() > now.getTime()) {
       pending += row.points;

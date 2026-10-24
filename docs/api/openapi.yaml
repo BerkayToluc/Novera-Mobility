@@ -30,6 +30,7 @@ info:
     8. Kurumsal hesabı Novera açar; sitede kurumsal kayıt yoktur (`/auth/register` yalnızca bireysel).
     9. `POST /quotes` alanları geçicidir (BACKLOG Y35, kurumsal kutu tasarımı onaylanınca netleşir).
     10. Varsayılan tema `light` (SPEC v0.4); `system` seçenek olarak vardır.
+    11. **Başlangıç penceresi (V2-02):** `startAt` şu andan en az 30 dakika sonra ve en çok 365 gün sonra olmalıdır; `GET /vehicles`, `POST /holds`, `POST /reservations/price` ve `POST /reservations` aynı kuralı uygular. Erken olan `422 VALIDATION_FAILED` + `fieldErrors.startAt: IN_PAST`, geç olan `OUT_OF_RANGE` döner.
 
     Kesinleşenler (G, 10 Ekim): 1, 2, 4 ve 6 onaylandı; 3 yukarıdaki gibi değişti.
 servers:
@@ -790,6 +791,7 @@ components:
               - CONSENT_REQUIRED
               - INVALID_DATE_RANGE
               - NOT_IN_SLOT
+              - IN_PAST
               - UNKNOWN_REFERENCE
           example: { email: EMAIL_TAKEN }
 

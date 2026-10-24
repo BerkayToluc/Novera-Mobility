@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { HttpException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { CatalogService } from './catalog.service.js';
+import { daysAhead, slotAtLeast, slotBefore } from '../reservations/dates.testing.js';
 
 // Entegrasyon testi: GET /vehicles müsaitlik sorgusunu GERÇEK PostgreSQL'e karşı sınar (BACKLOG #21).
 // Sorgunun doğruluğu veritabanının içinde olduğu için sahte (mock) veriyle sınanamaz.
@@ -18,7 +19,7 @@ const describeDb = databaseUrl ? describe : describe.skip;
 const HOUR = 60 * 60 * 1000;
 const DAY = 24 * HOUR;
 const DAILY = 125000; // TRY, kuruş (₺1.250)
-const START = new Date('2030-06-10T10:00:00.000Z');
+const START = daysAhead(30);
 const END = new Date(START.getTime() + 3 * DAY); // 3 gün
 
 type Money = { amount: number; currency: string };
@@ -323,13 +324,27 @@ describeDb('GET /vehicles müsaitlik sorgusu (gerçek PostgreSQL)', () => {
   });
 
   describe('girdi doğrulaması', () => {
+    it('geçmiş ya da en yakın dilimden önceki başlangıç reddedilir (IN_PAST), bir yıldan uzak olan OUT_OF_RANGE', async () => {
+      const { branchId } = await scenario();
+      const startErrorOf = async (start: Date) => {
+        const error = await catchHttp(search(branchId, start, new Date(start.getTime() + DAY)));
+        expect(error.getStatus()).toBe(422);
+        return (error.getResponse() as { fieldErrors: Record<string, string> }).fieldErrors.startAt;
+      };
+      expect(await startErrorOf(daysAhead(-1))).toBe('IN_PAST');
+      expect(await startErrorOf(slotBefore(30))).toBe('IN_PAST');
+      expect(await startErrorOf(daysAhead(366))).toBe('OUT_OF_RANGE');
+      const earliest = slotAtLeast(30);
+      await expect(search(branchId, earliest, new Date(earliest.getTime() + DAY))).resolves.toBeDefined();
+    });
+
     it('30 dakikalık dilime oturmayan an reddedilir (NOT_IN_SLOT)', async () => {
       const { branchId } = await scenario();
       const error = await catchHttp(
         service.getAvailableVehicles({
           pickupBranchId: branchId,
           returnBranchId: branchId,
-          startAt: '2030-06-10T10:15:00.000Z',
+          startAt: new Date(START.getTime() + 15 * 60 * 1000).toISOString(),
           endAt: END.toISOString(),
         }),
       );

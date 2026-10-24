@@ -1494,7 +1494,7 @@ export interface components {
              *     }
              */
             fieldErrors?: {
-                [key: string]: "REQUIRED" | "INVALID_EMAIL" | "INVALID_FORMAT" | "TOO_SHORT" | "TOO_LONG" | "OUT_OF_RANGE" | "EMAIL_TAKEN" | "CONSENT_REQUIRED" | "INVALID_DATE_RANGE" | "NOT_IN_SLOT" | "UNKNOWN_REFERENCE";
+                [key: string]: "REQUIRED" | "INVALID_EMAIL" | "INVALID_FORMAT" | "TOO_SHORT" | "TOO_LONG" | "OUT_OF_RANGE" | "EMAIL_TAKEN" | "CONSENT_REQUIRED" | "INVALID_DATE_RANGE" | "NOT_IN_SLOT" | "IN_PAST" | "UNKNOWN_REFERENCE";
             };
         };
         LocalizedText: {

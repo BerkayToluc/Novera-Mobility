@@ -11,6 +11,15 @@ export class PromoCodeError extends Error {
     this.name = "PromoCodeError";
   }
 }
+
+// The start moment is in the past or less than one slot away (openapi 422, `fieldErrors.startAt: IN_PAST`):
+// the visitor chose it earlier and the clock moved on while they filled in the form.
+export class PastStartError extends Error {
+  constructor() {
+    super("The rental start is no longer in the future.");
+    this.name = "PastStartError";
+  }
+}
 import { holdApiId, VehicleUnavailableError } from "./hold-client";
 import { toUtc } from "./rental-search";
 
@@ -55,5 +64,6 @@ export async function createReservation(data: BookingData): Promise<{ number: st
   if (result.status === "conflict" && result.code === "VEHICLE_UNAVAILABLE") throw new VehicleUnavailableError();
   // A code that is unknown, closed or out of date by now: the visitor saw a discount that would not be given.
   if (result.status === "invalid" && result.fieldErrors.promoCode === "UNKNOWN_CODE") throw new PromoCodeError();
+  if (result.status === "invalid" && result.fieldErrors.startAt === "IN_PAST") throw new PastStartError();
   throw new ApiUnavailableError();
 }

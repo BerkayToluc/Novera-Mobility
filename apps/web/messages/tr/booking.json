@@ -64,6 +64,7 @@
       "cvc": "3 veya 4 haneli CVC yazın.",
       "unavailable": "Rezervasyon servisi şu an kullanılamıyor. Lütfen daha sonra tekrar deneyin.",
       "invalid": "Rezervasyon bilgileri geçerli değil. Lütfen aramayı baştan yapın.",
+      "pastStart": "Kiralama başlangıcı geçmişte kaldı. Lütfen aramayı güncel bir tarihle baştan yapın.",
       "signin": "Devam etmek için giriş yapmanız gerekiyor.",
       "generic": "Rezervasyon tamamlanamadı. Lütfen tekrar deneyin.",
       "ineligible": "Sürücü koşulları karşılanmıyor.",

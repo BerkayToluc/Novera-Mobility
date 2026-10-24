@@ -4,6 +4,7 @@ import type { PrismaService } from '../prisma/prisma.service.js';
 import { PricingService } from './pricing.service.js';
 import { pointsForTotal } from './points.rules.js';
 import { ReservationsService } from './reservations.service.js';
+import { DAY_MS, daysAhead, slotBefore } from './dates.testing.js';
 
 // Birim testi: veritabanı bellekte taklit edilir. Gerçek kilit (FOR UPDATE) ve benzersizlik
 // kısıtı için gerçek PostgreSQL gerekir; onlar reservations.integration.spec.ts'te.
@@ -17,8 +18,10 @@ const IDS = {
   hold: '55555555-5555-4555-8555-555555555555',
   user: '66666666-6666-4666-8666-666666666666',
 };
-const START = '2031-03-10T10:00:00.000Z';
-const END = '2031-03-13T10:00:00.000Z'; // 3 gün
+const START_DATE = daysAhead(30);
+const START = START_DATE.toISOString();
+const END = new Date(START_DATE.getTime() + 3 * DAY_MS).toISOString(); // 3 gün
+const startPlus = (days: number) => new Date(START_DATE.getTime() + days * DAY_MS);
 const user = { id: IDS.user, accountType: 'INDIVIDUAL' } as unknown as UserRow;
 const corporate = { id: IDS.user, accountType: 'CORPORATE' } as unknown as UserRow;
 
@@ -124,7 +127,7 @@ class FakeDb {
       const { extras, ...rest } = data;
       const row = {
         id: `res-${this.serial}`,
-        createdAt: new Date('2031-01-01T00:00:00Z'),
+        createdAt: new Date(),
         ...rest,
         extraItems: extras.create,
       };
@@ -214,7 +217,7 @@ describe('ReservationsService.create', () => {
   it('numaralar sırayla artar', async () => {
     const { service } = build();
     const first = await service.create(user, base);
-    const second = await service.create(user, { ...base, startAt: '2031-04-10T10:00:00.000Z', endAt: '2031-04-11T10:00:00.000Z' });
+    const second = await service.create(user, { ...base, startAt: startPlus(31).toISOString(), endAt: startPlus(32).toISOString() });
     expect(first.number.endsWith('00001')).toBe(true);
     expect(second.number.endsWith('00002')).toBe(true);
   });
@@ -294,11 +297,34 @@ describe('ReservationsService.create', () => {
   });
 });
 
+describe('start time (G-01)', () => {
+  it('a booking that starts in the past is refused with IN_PAST and writes nothing', async () => {
+    const { service, db } = build();
+    const start = daysAhead(-10);
+    const error = await catchHttp(
+      service.create(user, { ...base, startAt: start.toISOString(), endAt: new Date(start.getTime() + 3 * DAY_MS).toISOString() }),
+    );
+    expect(error.getStatus()).toBe(422);
+    expect(bodyOf(error).fieldErrors).toEqual({ startAt: 'IN_PAST' });
+    expect(db.reservations).toHaveLength(0);
+    expect(db.points).toHaveLength(0);
+  });
+
+  it('a start closer than one slot is refused too', async () => {
+    const { service } = build();
+    const start = slotBefore(30);
+    const error = await catchHttp(
+      service.create(user, { ...base, startAt: start.toISOString(), endAt: new Date(start.getTime() + DAY_MS).toISOString() }),
+    );
+    expect(bodyOf(error).fieldErrors).toEqual({ startAt: 'IN_PAST' });
+  });
+});
+
 describe('listMine ve points', () => {
   it('yalnız kendi rezervasyonlarını yeniden eskiye döndürür', async () => {
     const { service, db } = build();
     await service.create(user, base);
-    await service.create(user, { ...base, startAt: '2031-05-10T10:00:00.000Z', endAt: '2031-05-11T10:00:00.000Z' });
+    await service.create(user, { ...base, startAt: startPlus(61).toISOString(), endAt: startPlus(62).toISOString() });
     db.reservations.push({ ...db.reservations[0], id: 'x', userId: 'someone-else' });
     const list = await service.listMine(IDS.user);
     expect(list).toHaveLength(2);
@@ -307,12 +333,12 @@ describe('listMine ve points', () => {
 
   it('puan: biten kiralama bakiyeye, bitmeyen pending\'e gider; iptal sayılmaz', async () => {
     const { service, db } = build();
-    await service.create(user, base); // 3750 TL → 37 puan, 2031'de biter
-    const before = await service.points(IDS.user, new Date('2031-03-01T00:00:00Z'));
+    await service.create(user, base); // 3750 TL → 37 puan, START'tan 3 gün sonra biter
+    const before = await service.points(IDS.user, startPlus(-9));
     expect(before).toMatchObject({ balance: 0, pending: 37, history: [] });
     expect(before.rules.tr).toContain('₺100');
 
-    const after = await service.points(IDS.user, new Date('2031-03-14T00:00:00Z'));
+    const after = await service.points(IDS.user, startPlus(4));
     expect(after.balance).toBe(37);
     expect(after.pending).toBe(0);
     expect(after.history).toEqual([
@@ -320,8 +346,22 @@ describe('listMine ve points', () => {
     ]);
 
     db.reservations[0]!.status = 'CANCELLED';
-    const cancelled = await service.points(IDS.user, new Date('2031-03-14T00:00:00Z'));
+    const cancelled = await service.points(IDS.user, startPlus(4));
     expect(cancelled).toMatchObject({ balance: 0, pending: 0, history: [] });
+  });
+});
+
+describe('points of a booking made after its own start (G-01)', () => {
+  it('never reach the balance, even once the rental has ended', async () => {
+    const { service, db } = build();
+    db.reservations.push({
+      id: 'late', number: 'LATE-1', status: 'CONFIRMED', userId: IDS.user, vehicleId: IDS.other,
+      startAt: new Date('2020-01-01T10:00:00Z'), endAt: new Date('2021-01-01T10:00:00Z'), pointsUsed: 0,
+      createdAt: new Date('2026-10-01T00:00:00Z'),
+    });
+    db.points.push({ id: 'late-p', userId: IDS.user, reservationId: 'late', points: 365, createdAt: new Date('2026-10-01T00:00:00Z') });
+    const points = await service.points(IDS.user, new Date('2026-10-24T00:00:00Z'));
+    expect(points).toMatchObject({ balance: 0, pending: 0, history: [] });
   });
 });
 
@@ -334,7 +374,7 @@ function seedBalance(db: FakeDb, points: number) {
   });
   db.points.push({ id: 'seed-p', userId: IDS.user, reservationId: 'seed', points, createdAt: new Date('2020-01-04T10:00:00Z') });
 }
-const AFTER = new Date('2031-04-01T00:00:00Z');
+const AFTER = startPlus(22);
 
 describe('paying with points', () => {
   it('spends the balance: ₺3.750 total, 100 points = ₺500 off, earns on the money paid', async () => {
@@ -371,7 +411,7 @@ describe('paying with points', () => {
     seedBalance(db, 100);
     await service.create(user, { ...base, usePoints: true });
     const second = await service.create(user, {
-      ...base, usePoints: true, startAt: '2031-05-10T10:00:00.000Z', endAt: '2031-05-13T10:00:00.000Z',
+      ...base, usePoints: true, startAt: startPlus(61).toISOString(), endAt: startPlus(64).toISOString(),
     });
     expect(second.price.pointsUsed).toBe(0);
     expect(second.price.payable.amount).toBe(second.price.total.amount);

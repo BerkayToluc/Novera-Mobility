@@ -1,5 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { startWindowError } from '../reservations/booking-window.js';
 
 // POST /holds: "Kirala"da aracı 15 dakika tutar (BACKLOG Y48, openapi.yaml /holds).
 export const HOLD_MINUTES = 15;
@@ -237,6 +238,11 @@ export class HoldsService {
     const returnBranchId = uuidField('returnBranchId');
     const startAt = dateField('startAt');
     const endAt = dateField('endAt');
+
+    if (startAt) {
+      const windowError = startWindowError(startAt, new Date());
+      if (windowError) fieldErrors.startAt = windowError;
+    }
 
     if (startAt && endAt && endAt.getTime() <= startAt.getTime()) {
       fieldErrors.endAt = 'INVALID_DATE_RANGE';
