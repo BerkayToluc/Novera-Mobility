@@ -24,7 +24,7 @@ LEFT JOIN "PointTransaction" p ON p."reservationId" = r.id
 WHERE r."createdAt" >= r."startAt";
 ```
 
-Sonuç 0 ise kötüye kullanım yoktur. Sıfırdan büyükse kayıtlara bakmak ve ne yapılacağını (puanı silmek, hesabı kapatmak) G'nin kararına bırakmak gerekir; V2-02 bu kayıtları artık puan saymaz ama silmez.
+Sonuç 0 ise kötüye kullanım yoktur (24 Ekim 2026'da canlıda çalıştırıldı: `0 | 0 | 0`). Sıfırdan büyükse kayıtlara bakmak ve ne yapılacağını (puanı silmek, hesabı kapatmak) G'nin kararına bırakmak gerekir; V2-02 bu kayıtları artık puan saymaz ama silmez.
 
 ## v2 açık bulgular (özet)
 
