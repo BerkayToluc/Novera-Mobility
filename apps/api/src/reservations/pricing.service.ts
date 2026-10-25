@@ -53,7 +53,7 @@ export interface PriceBreakdown {
 }
 
 // Veritabanı erişiminin fiyat için gereken kısmı (hem PrismaService hem işlem içi `tx` uyar).
-export type PricingDb = Pick<PrismaService, 'vehicle' | 'extra' | 'exchangeRate' | 'promoCode'>;
+export type PricingDb = Pick<PrismaService, 'vehicle' | 'extra' | 'exchangeRate' | 'promoCode' | 'reservation'>;
 export type ConflictDb = Pick<PrismaService, 'reservation' | 'hold'>;
 
 // Gün sayısı: ceil((bitiş - başlangıç) / 24 saat), en az 1.
@@ -90,6 +90,25 @@ export function isPromoUsable(
   if (code.validFrom && now.getTime() < code.validFrom.getTime()) return false;
   if (code.validUntil && now.getTime() >= code.validUntil.getTime()) return false;
   return true;
+}
+
+// Why a code that exists and is switched on still cannot be used right now, or null when it can (V2-05, QUALITY G-04).
+// Redemptions are counted from the bookings that were not cancelled, so a cancelled booking gives the code back.
+export type PromoBlock = 'EXHAUSTED' | 'ALREADY_USED';
+export async function promoBlock(
+  db: Pick<PrismaService, 'reservation'>,
+  code: { code: string; maxRedemptions: number | null; oncePerUser: boolean },
+  userId: string | null,
+): Promise<PromoBlock | null> {
+  if (code.maxRedemptions !== null) {
+    const used = await db.reservation.count({ where: { promoCode: code.code, status: 'CONFIRMED' } });
+    if (used >= code.maxRedemptions) return 'EXHAUSTED';
+  }
+  if (code.oncePerUser && userId !== null) {
+    const mine = await db.reservation.count({ where: { promoCode: code.code, userId, status: 'CONFIRMED' } });
+    if (mine > 0) return 'ALREADY_USED';
+  }
+  return null;
 }
 
 export function convertMinor(tryMinor: number, rate: number, currency: CurrencyCode): number {
@@ -144,7 +163,7 @@ export class PricingService {
     const request = parseReservationRequest(input);
     const account = request.usePoints ? requirePointsAccount(user, request.currency) : null;
     await this.assertBranchesExist(request);
-    let breakdown = await this.calculate(this.prisma, request);
+    let breakdown = await this.calculate(this.prisma, request, new Date(), user?.id ?? null);
     if (account) {
       const ledger = await loadPointsLedger(this.prisma, account.id, new Date());
       breakdown = withPoints(breakdown, ledger.balance);
@@ -173,7 +192,12 @@ export class PricingService {
 
   // Fiyatı hesaplar. Müsaitliğe bakmaz (çağıran bakar): rezervasyon, aracı kilitledikten sonra
   // bunu aynı işlem içinde çağırır.
-  async calculate(db: PricingDb, request: ValidReservationRequest, now: Date = new Date()): Promise<PriceBreakdown> {
+  async calculate(
+    db: PricingDb,
+    request: ValidReservationRequest,
+    now: Date = new Date(),
+    userId: string | null = null,
+  ): Promise<PriceBreakdown> {
     const { currency } = request;
     const days = rentalDays(request.startAt, request.endAt);
 
@@ -230,12 +254,14 @@ export class PricingService {
 
     // A campaign code takes a percentage off the car and the extras together (SPEC §2.3). Rounded down to a
     // whole kuruş or cent, so it is never more than the percentage says. A code that does not exist, is
-    // switched off or is outside its dates is simply not applied; the answer says so (`promo.applied`).
+    // switched off, outside its dates, used up or already used by this person is simply not applied; the answer says
+    // so (`promo.applied`) and never says which of these it was, so a visitor cannot tell the codes apart by guessing.
     const subtotal = lines.reduce((sum, line) => sum + line.total.amount, 0);
     let promo: PriceBreakdown['promo'] = null;
     if (request.promoCode) {
       const found = await db.promoCode.findUnique({ where: { code: request.promoCode } });
-      const usable = found && isPromoUsable(found, now) ? found : null;
+      const usable =
+        found && isPromoUsable(found, now) && (await promoBlock(db, found, userId)) === null ? found : null;
       promo = { code: request.promoCode, applied: usable !== null, percent: usable?.percent ?? null };
       const discount = usable ? Math.floor((subtotal * usable.percent) / 100) : 0;
       if (usable && discount > 0) {

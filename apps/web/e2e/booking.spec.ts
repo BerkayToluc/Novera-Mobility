@@ -126,3 +126,37 @@ test("payment without a signed-in visitor leads to the sign-in page, which bring
   await expect(page.getByRole("heading", { level: 1, name: "Giriş Yap" })).toBeVisible();
   await expect(page.getByRole("heading", { level: 1, name: "Ödeme" })).toHaveCount(0);
 });
+
+// QUALITY G-04: a code whose uses are all taken, or that this account already used, is refused at payment; the summary
+// says so under the code box. The mock plays the API's CODE_EXHAUSTED / CODE_ALREADY_USED for a hold id with that ending.
+for (const [ending, text] of [
+  ["codeexhausted", "kullanım hakkı doldu"],
+  ["codeused", "daha önce kullandınız"],
+] as const) {
+  test(`a campaign code that cannot be used (${ending}) sends the visitor back to the summary with the reason`, async ({ page, context }) => {
+    await signInSample(context);
+    await page.goto(RESULTS);
+    await page.getByRole("button", { name: /Kirala.*Renault Clio/ }).click();
+    await page.waitForURL(/\/rezervasyon/);
+    await page.getByRole("link", { name: "Ödemeye Geç" }).click();
+    await expect(page.getByRole("heading", { level: 1, name: "Ödeme" })).toBeVisible();
+
+    const url = new URL(page.url());
+    url.searchParams.set("tutma", `${url.searchParams.get("tutma")}.${ending}`);
+    await page.goto(url.toString());
+    await page.waitForLoadState("networkidle");
+
+    await fillDriver(page, EXPERIENCED);
+    await page.getByRole("button", { name: "Ehliyetimi doğrula" }).click();
+    await expect(page.getByText("Ehliyet doğrulandı (deneme).")).toBeVisible();
+    await page.getByLabel("Karttaki isim").fill("Elif Yıldız");
+    await page.getByLabel("Kart numarası").fill("4242 4242 4242 4242");
+    await page.getByLabel(/Son kullanma/).fill("12/30");
+    await page.getByLabel("CVC").fill("123");
+    await page.getByRole("button", { name: /Öde|Tamamla/ }).click();
+
+    await expect(page).toHaveURL(/\/rezervasyon\?.*kodhata=/);
+    await expect(page.getByRole("heading", { level: 1, name: "Rezervasyon Özeti" })).toBeVisible();
+    await expect(page.getByRole("alert").filter({ hasText: text })).toBeVisible();
+  });
+}

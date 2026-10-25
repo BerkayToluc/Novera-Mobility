@@ -4,9 +4,11 @@ import type { components } from "./api-types";
 import type { BookingData } from "./booking-data";
 import { ApiUnavailableError } from "./fleet-client";
 
-// The campaign code is no longer valid (openapi 422, `fieldErrors.promoCode: UNKNOWN_CODE`).
+// The campaign code cannot be taken any more: it is no longer valid (openapi 422, `fieldErrors.promoCode: UNKNOWN_CODE`), its
+// uses are all taken (`CODE_EXHAUSTED`) or this account already used it (`CODE_ALREADY_USED`).
+export type PromoCodeProblem = "unknown" | "exhausted" | "used";
 export class PromoCodeError extends Error {
-  constructor() {
+  constructor(readonly problem: PromoCodeProblem = "unknown") {
     super("The campaign code is no longer valid.");
     this.name = "PromoCodeError";
   }
@@ -72,6 +74,9 @@ export async function createReservation(data: BookingData): Promise<{ number: st
     // Test hook, mocks only: a hold id ending in ".taken" plays a car someone else got first,
     // so the "just rented" screen can be reached without a second visitor.
     if (data.hold?.id.endsWith(".taken")) throw new VehicleUnavailableError();
+    // Same for a campaign code that is used up or that this account already used.
+    if (data.hold?.id.endsWith(".codeexhausted")) throw new PromoCodeError("exhausted");
+    if (data.hold?.id.endsWith(".codeused")) throw new PromoCodeError("used");
     // Same for an account that already has the most upcoming reservations it may have.
     if (data.hold?.id.endsWith(".limit")) throw new ReservationLimitError();
     const serial = String(Math.floor(Math.random() * 100000)).padStart(5, "0");
@@ -83,6 +88,8 @@ export async function createReservation(data: BookingData): Promise<{ number: st
   if (result.status === "conflict" && result.code === "VEHICLE_UNAVAILABLE") throw new VehicleUnavailableError();
   // A code that is unknown, closed or out of date by now: the visitor saw a discount that would not be given.
   if (result.status === "invalid" && result.fieldErrors.promoCode === "UNKNOWN_CODE") throw new PromoCodeError();
+  if (result.status === "invalid" && result.fieldErrors.promoCode === "CODE_EXHAUSTED") throw new PromoCodeError("exhausted");
+  if (result.status === "invalid" && result.fieldErrors.promoCode === "CODE_ALREADY_USED") throw new PromoCodeError("used");
   if (result.status === "invalid" && result.fieldErrors.startAt === "IN_PAST") throw new PastStartError();
   if (result.status === "invalid" && result.code === "RESERVATION_LIMIT") throw new ReservationLimitError();
   if (result.status === "rate_limited") throw new ReservationRateLimitedError();

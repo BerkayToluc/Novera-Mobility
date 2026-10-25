@@ -86,6 +86,8 @@
       "remove": "Kaldır",
       "applied": "{code} uygulandı: %{percent} indirim.",
       "unknown": "\"{code}\" geçerli bir kampanya kodu değil.",
+      "exhausted": "Bu kampanya kodunun kullanım hakkı doldu. Kodu kaldırdık; başka bir kod deneyebilir ya da kodsuz devam edebilirsiniz.",
+      "used": "Bu kampanya kodunu hesabınızla daha önce kullandınız. Kodu kaldırdık; başka bir kod deneyebilir ya da kodsuz devam edebilirsiniz.",
       "hint": "Deneme kodları: NOVERA10 (%10) ve HOSGELDIN (%5). Kodlar kurguseldir."
     }
   },

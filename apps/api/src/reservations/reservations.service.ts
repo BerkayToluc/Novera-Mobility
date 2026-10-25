@@ -5,6 +5,8 @@ import { PrismaService } from '../prisma/prisma.service.js';
 import {
   PricingService,
   hasConflict,
+  isPromoUsable,
+  promoBlock,
   requirePointsAccount,
   vehicleUnavailable,
   withPoints,
@@ -93,6 +95,12 @@ export class ReservationsService {
 
       const now = new Date();
 
+      // A campaign code is locked after the vehicle and the account (always the same order, so locks never cross):
+      // two bookings made at the same moment cannot both take the last use of a code.
+      if (request.promoCode) {
+        await tx.$queryRaw`SELECT "id" FROM "PromoCode" WHERE "code" = ${request.promoCode} FOR UPDATE`;
+      }
+
       const active = await tx.reservation.count({
         where: { userId: user.id, status: 'CONFIRMED', endAt: { gt: now } },
       });
@@ -123,7 +131,15 @@ export class ReservationsService {
       }
 
       // Toplamı sunucu hesaplar; istemciden fiyat alınmaz.
-      let price = await this.pricing.calculate(tx as unknown as PricingDb, request, now);
+      if (request.promoCode) {
+        const code = await tx.promoCode.findUnique({ where: { code: request.promoCode } });
+        const block = code && isPromoUsable(code, now) ? await promoBlock(tx as unknown as PricingDb, code, user.id) : null;
+        if (block === 'EXHAUSTED') throw validationFailed({ promoCode: 'CODE_EXHAUSTED' }, 'The campaign code has been used up');
+        if (block === 'ALREADY_USED') {
+          throw validationFailed({ promoCode: 'CODE_ALREADY_USED' }, 'This account has already used the campaign code');
+        }
+      }
+      let price = await this.pricing.calculate(tx as unknown as PricingDb, request, now, user.id);
       // The price page shows an unknown code as "not valid" and charges the plain price; a booking must not
       // quietly do that, because the visitor was told a discount would be taken off.
       if (price.promo && !price.promo.applied) {

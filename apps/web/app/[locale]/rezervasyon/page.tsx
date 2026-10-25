@@ -161,6 +161,7 @@ export default async function BookingSummaryPage({ searchParams }: Props) {
             promo={loaded.promo}
             percent={summary.discount?.percent ?? null}
             pathname="/rezervasyon"
+            problem={params.kodhata === "dolu" ? "exhausted" : params.kodhata === "kullanildi" ? "used" : undefined}
           />
           <p className="text-small text-fg-muted">{t("vatNote")}</p>
           <p className="text-small text-fg">

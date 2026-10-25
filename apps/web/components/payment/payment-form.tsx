@@ -96,6 +96,16 @@ export function PaymentForm({
         setFormError(t("errors.promo"));
         return;
       }
+      // The code's uses are taken, or this account used it already: back to the summary, which says so under the code box.
+      if (result.reason === "promoExhausted" || result.reason === "promoUsed") {
+        const { kod: dropped, ...withoutCode } = query;
+        void dropped;
+        router.push({
+          pathname: "/rezervasyon",
+          query: { ...withoutCode, kodhata: result.reason === "promoExhausted" ? "dolu" : "kullanildi" },
+        });
+        return;
+      }
       if (result.reason === "limit") {
         setFormError(null);
         setLimitReached(true);

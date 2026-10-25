@@ -43,7 +43,13 @@ Remove-Item Env:DATABASE_URL
 
 `migrate deploy` "All migrations have been successfully applied" demeli, `db:seed` hata vermeden bitmeli. Seed sahte hesap oluşturmaz, yalnızca bayiler, araçlar, SSS ve kurlar.
 
-> **Dikkat (22 Ekim 2026, QUALITY G-05):** bugünkü seed her çalıştığında `NOVERA10` ve `HOSGELDIN` kampanya kodlarını süresiz olarak yeniden etkinleştirir ve canlı kurların üzerine yazar. V2-05 birleşene kadar seed'i canlıda **ilk kurulum dışında çalıştırma**. V2-05'ten sonra seed yalnızca eksik referans verisini ekler; örnek kodlar yalnızca `SEED_DEMO=1` ile gelir.
+> **Seed canlıda güvenlidir (V2-05, QUALITY G-05):** seed var olan iş verisinin üzerine yazmaz. Kurlar, kampanya kodları, araç modeli günlük fiyatları ve ek hizmet fiyatları yalnızca **eksikse** eklenir; var olan bir kodun durumuna, tarihlerine ve yüzdesine dokunulmaz. Örnek kodlar (`NOVERA10`, `HOSGELDIN`) yalnızca `SEED_DEMO=1` verilirse ve yoksa eklenir, 30 gün geçerlidir:
+>
+> ```powershell
+> $env:SEED_DEMO = "1"; pnpm db:seed; Remove-Item Env:SEED_DEMO   # yalnızca örnek kodları da istiyorsan
+> ```
+>
+> Canlıda `SEED_DEMO` vermeden çalıştırmak yeterlidir. Bayi, araç, SSS ve içerik alanları ise hâlâ seed'deki değerlerle güncellenir (yönetim paneli gelince V2-27, V2-29 ve V2-30'da yeniden bakılacak).
 `.env` dosyana dokunulmadı; yerel veritabanın aynı kalır. (Adres PowerShell geçmişine yazılmış olabilir; işin bitince Neon'da parolayı yenileyebilirsin: Connect → Reset password.)
 
 Neon panelinde **Tables** sekmesinde `Branch`, `Vehicle` vb. tabloları ve içlerinde satırları görmelisin.

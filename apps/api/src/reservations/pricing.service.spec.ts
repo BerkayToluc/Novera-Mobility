@@ -1,4 +1,5 @@
 import { HttpException } from '@nestjs/common';
+import type { UserRow } from '../auth/user-view.js';
 import type { PrismaService } from '../prisma/prisma.service.js';
 import { PricingService, convertMinor, isPromoUsable, rentalDays, withPoints } from './pricing.service.js';
 import { parseReservationRequest } from './reservation-input.js';
@@ -41,8 +42,8 @@ class FakeDb {
   ];
   rates: Row[] = [{ currency: 'EUR', ratePerTry: '0.02300000' }];
   promoCodes: Row[] = [
-    { code: 'NOVERA10', percent: 10, active: true, validFrom: null, validUntil: null },
-    { code: 'HOSGELDIN', percent: 5, active: true, validFrom: null, validUntil: null },
+    { code: 'NOVERA10', percent: 10, active: true, validFrom: null, validUntil: null, maxRedemptions: null, oncePerUser: true },
+    { code: 'HOSGELDIN', percent: 5, active: true, validFrom: null, validUntil: null, maxRedemptions: null, oncePerUser: true },
   ];
   branches = [IDS.pickup, IDS.dropoff];
   reservations: Row[] = [];
@@ -66,7 +67,14 @@ class FakeDb {
   };
   reservation = {
     count: async ({ where }: any) =>
-      this.reservations.filter(
+      where.promoCode !== undefined
+        ? this.reservations.filter(
+            (r) =>
+              r.promoCode === where.promoCode &&
+              r.status === where.status &&
+              (where.userId === undefined || r.userId === where.userId),
+          ).length
+        : this.reservations.filter(
         (r) =>
           r.vehicleId === where.vehicleId &&
           r.status === where.status &&
@@ -401,6 +409,45 @@ describe('kampanya kodu', () => {
     expect(result.promo).toEqual({ code: 'YOKBOYLEKOD', applied: false, percent: null });
     expect(discountOf(result)).toBeUndefined();
     expect(result.total).toEqual(plain.total);
+  });
+
+  // QUALITY G-04: a code that is used up, or that this person already used, is "not applied", and the answer looks
+  // exactly like the one for a code that does not exist, so nobody can tell codes apart by trying them.
+  describe('kullanım tavanları (V2-05)', () => {
+    const used = (code: string, userId: string, status = 'CONFIRMED') => ({ promoCode: code, userId, status });
+    const alice = { id: 'alice', accountType: 'INDIVIDUAL' } as unknown as UserRow;
+
+    it('toplam tavanı dolmuş kod uygulanmaz ve cevap olmayan kodla aynı biçimdedir', async () => {
+      db.promoCodes.push({ code: 'TEKLIK', percent: 20, active: true, validFrom: null, validUntil: null, maxRedemptions: 1, oncePerUser: false });
+      db.reservations.push(used('TEKLIK', 'someone'));
+      const exhausted = await service.price({ ...base, promoCode: 'TEKLIK' });
+      const missing = await service.price({ ...base, promoCode: 'YOKBOYLEKOD' });
+      expect(exhausted.promo).toEqual({ code: 'TEKLIK', applied: false, percent: null });
+      expect(Object.keys(exhausted.promo!).sort()).toEqual(Object.keys(missing.promo!).sort());
+      expect(discountOf(exhausted)).toBeUndefined();
+    });
+
+    it('iptal edilen rezervasyon kodu geri verir', async () => {
+      db.promoCodes.push({ code: 'TEKLIK', percent: 20, active: true, validFrom: null, validUntil: null, maxRedemptions: 1, oncePerUser: false });
+      db.reservations.push(used('TEKLIK', 'someone', 'CANCELLED'));
+      const result = await service.price({ ...base, promoCode: 'TEKLIK' });
+      expect(result.promo).toEqual({ code: 'TEKLIK', applied: true, percent: 20 });
+    });
+
+    it('kişi başı tek kullanım: kullanmış kişide uygulanmaz, başkasında ve girişsizde uygulanır', async () => {
+      db.promoCodes.push({ code: 'BIRKEZ', percent: 20, active: true, validFrom: null, validUntil: null, maxRedemptions: null, oncePerUser: true });
+      db.reservations.push(used('BIRKEZ', 'alice'));
+      expect((await service.price({ ...base, promoCode: 'BIRKEZ' }, alice)).promo?.applied).toBe(false);
+      const bob = { id: 'bob', accountType: 'INDIVIDUAL' } as unknown as UserRow;
+      expect((await service.price({ ...base, promoCode: 'BIRKEZ' }, bob)).promo?.applied).toBe(true);
+      expect((await service.price({ ...base, promoCode: 'BIRKEZ' })).promo?.applied).toBe(true);
+    });
+
+    it('oncePerUser kapalıysa aynı kişi tekrar kullanabilir', async () => {
+      db.promoCodes.push({ code: 'HERKEZ', percent: 20, active: true, validFrom: null, validUntil: null, maxRedemptions: null, oncePerUser: false });
+      db.reservations.push(used('HERKEZ', 'alice'));
+      expect((await service.price({ ...base, promoCode: 'HERKEZ' }, alice)).promo?.applied).toBe(true);
+    });
   });
 
   it('kapalı, henüz başlamamış ve süresi geçmiş kod uygulanmaz', async () => {

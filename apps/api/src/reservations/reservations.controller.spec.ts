@@ -9,6 +9,7 @@ import { PricingService } from './pricing.service.js';
 import {
   CREATE_LIMIT_PER_HOUR,
   PRICE_LIMIT_PER_10_MIN,
+  PROMO_PRICE_LIMIT_PER_10_MIN,
   ReservationsController,
 } from './reservations.controller.js';
 import { ReservationsService } from './reservations.service.js';
@@ -118,5 +119,26 @@ describe('/me/reservations routes', () => {
     const refused = await post('/reservations/price');
     expect(refused.status).toBe(429);
     expect(pricing.price).toHaveBeenCalledTimes(PRICE_LIMIT_PER_10_MIN);
+  });
+
+  // QUALITY G-04: guessing campaign codes goes through the price call, so a request that carries a code is limited much harder.
+  it('POST /reservations/price with a campaign code: the 11th request in ten minutes is 429; one without a code is not counted', async () => {
+    // The limits of the shared test address are spent by the tests above, so each group uses its own client address.
+    const as = (ip: string) => (body: unknown) =>
+      fetch(`${base}/reservations/price`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Forwarded-For': ip },
+        body: JSON.stringify(body),
+      });
+    const client = as('203.0.113.7');
+    for (let i = 0; i < PROMO_PRICE_LIMIT_PER_10_MIN; i += 1) {
+      expect((await client({ promoCode: `CODE${i}` })).status).toBe(200);
+    }
+    const refused = await client({ promoCode: 'ONE-TOO-MANY' });
+    expect(refused.status).toBe(429);
+    expect(((await refused.json()) as { code: string }).code).toBe('RATE_LIMITED');
+    // A price request without a code is still fine for this client, and another client is not affected.
+    expect((await client({})).status).toBe(200);
+    expect((await as('203.0.113.8')({ promoCode: 'FIRST' })).status).toBe(200);
   });
 });

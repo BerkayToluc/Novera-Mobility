@@ -86,6 +86,8 @@
       "remove": "Remove",
       "applied": "{code} applied: {percent}% off.",
       "unknown": "\"{code}\" is not a valid campaign code.",
+      "exhausted": "This campaign code has been used up. We removed it; you can try another code or carry on without one.",
+      "used": "Your account has already used this campaign code. We removed it; you can try another code or carry on without one.",
       "hint": "Trial codes: NOVERA10 (10%) and HOSGELDIN (5%). The codes are made up."
     }
   },

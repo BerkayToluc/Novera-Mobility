@@ -301,17 +301,25 @@ model Reservation {
 
   @@index([vehicleId, startAt, endAt])
   @@index([userId])
+  // Kampanya kodu kullanım sayımı (V2-05): kod başına ve kişi başına.
+  @@index([promoCode, status])
 }
 
 // Kampanya kodları (SPEC §2.3): araç ve ek hizmetlerin toplamından yüzde olarak düşer.
 // Kod büyük harfle saklanır; aranırken de büyük harfe çevrilir.
+// Kullanım sayısı ayrı bir sütunda tutulmaz: iptal edilmemiş (CONFIRMED) rezervasyonlardan sayılır, böylece
+// iptal edilen rezervasyonun kodu kendiliğinden geri döner (V2-05).
 model PromoCode {
-  id         String    @id @default(uuid())
-  code       String    @unique
-  percent    Int // 1-90 arası tam sayı (tohum ve test bunu korur)
-  active     Boolean   @default(true)
-  validFrom  DateTime? // boşsa hemen geçerli
-  validUntil DateTime? // boşsa süresiz
+  id             String    @id @default(uuid())
+  code           String    @unique
+  percent        Int // 1-90 arası tam sayı; veritabanında CHECK ile de korunur (migration 20261025120000)
+  active         Boolean   @default(true)
+  validFrom      DateTime? // boşsa hemen geçerli
+  validUntil     DateTime? // boşsa süresiz
+  maxRedemptions Int? // toplam kullanım tavanı (en az 1; CHECK); boşsa sınırsız
+  oncePerUser    Boolean   @default(true) // aynı kişi kodu bir kez kullanabilir
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 }
 
 model ReservationExtra {
