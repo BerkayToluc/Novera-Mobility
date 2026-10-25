@@ -56,6 +56,33 @@ describe('auth HTTP akışı (çerez + korumalı uçlar)', () => {
     expect(JSON.stringify(body)).not.toMatch(/passwordHash|scrypt/);
   });
 
+  // QUALITY G-07: the cookie is Secure unless the API was told outright that it runs in development.
+  describe('session cookie Secure flag', () => {
+    const saved = process.env.NODE_ENV;
+    afterEach(() => {
+      if (saved === undefined) delete process.env.NODE_ENV;
+      else process.env.NODE_ENV = saved;
+    });
+    const secureFor = async (mode: string | undefined) => {
+      if (mode === undefined) delete process.env.NODE_ENV;
+      else process.env.NODE_ENV = mode;
+      fake.users = [];
+      fake.sessions = [];
+      const response = await send('/auth/register', { method: 'POST', body: JSON.stringify(VALID) });
+      expect(response.status).toBe(201);
+      return /;\s*Secure/i.test(response.headers.get('set-cookie') ?? '');
+    };
+
+    it('is Secure in production and when NODE_ENV is missing', async () => {
+      expect(await secureFor('production')).toBe(true);
+      expect(await secureFor(undefined)).toBe(true);
+    });
+
+    it('is not Secure in development, so plain http on localhost still works', async () => {
+      expect(await secureFor('development')).toBe(false);
+    });
+  });
+
   it('GET /me çerezle 200, çerezsiz ve uydurma çerezle 401 UNAUTHENTICATED', async () => {
     const registered = await send('/auth/register', { method: 'POST', body: JSON.stringify(VALID) });
     const cookie = cookieOf(registered);

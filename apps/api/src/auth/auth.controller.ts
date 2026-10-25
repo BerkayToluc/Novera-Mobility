@@ -1,6 +1,7 @@
 import { Body, Controller, HttpCode, Inject, Post, Req, Res } from '@nestjs/common';
 import { ApiBody, ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import type { Request, Response } from 'express';
+import { isProduction } from '../config/runtime.js';
 import { asFormInput } from '../forms/form-input.js';
 import { clientKeyOf } from '../forms/rate-limiter.js';
 import { GoogleAuthService } from './google-auth.service.js';
@@ -8,20 +9,21 @@ import { AuthService, type SessionStart } from './auth.service.js';
 import { SESSION_COOKIE, readCookie } from './session-token.js';
 import { toUserResponse, type UserResponse } from './user-view.js';
 
-const COOKIE_BASE = {
+// Read per call, not once at import: .env is loaded after this file, so a constant would miss NODE_ENV=development.
+const cookieBase = () => ({
   httpOnly: true,
-  // Canlıda yalnızca HTTPS üzerinden gider; yerelde (http) çalışabilsin diye üretimde açılır.
-  secure: process.env.NODE_ENV === 'production',
+  // Only sent over HTTPS, except when the API is explicitly in development (plain http on localhost).
+  secure: isProduction(),
   sameSite: 'lax' as const,
   path: '/',
-};
+});
 
 export function setSessionCookie(response: Response, session: SessionStart): void {
-  response.cookie(SESSION_COOKIE, session.token, { ...COOKIE_BASE, expires: session.expiresAt });
+  response.cookie(SESSION_COOKIE, session.token, { ...cookieBase(), expires: session.expiresAt });
 }
 
 export function clearSessionCookie(response: Response): void {
-  response.clearCookie(SESSION_COOKIE, COOKIE_BASE);
+  response.clearCookie(SESSION_COOKIE, cookieBase());
 }
 
 @ApiTags('auth')

@@ -2,7 +2,7 @@
 
 > **v2 (22 Ekim 2026):** bu belge güvenlik kararlarının kaydı olarak sürer. 22 Ekim keşfinde bulunan açıklar (bir kritik, beş yüksek) [QUALITY.md](QUALITY.md) §1.1'de `G-xx` kimlikleriyle duruyor ve Faz 1–2'de kapanır. Her iş kapandıkça ilgili satır aşağıdaki "v2'de düzeltilenler" tablosuna, hız sınırı değişiklikleri "Hız sınırı tablosu"na yazılır (V2-09'dan sonra tek kaynak burasıdır). Son tur ve bu belgenin v2 sürümü V2-22'dir.
 >
-> **Düzeltme (22 Ekim):** S9'daki "canlıda anahtar yoksa API açılmaz" ifadesi kodda karşılanmıyor: `assertRuntimeEnv` `API_ACCESS_KEY`'e bakmıyor, anahtar yoksa `apiAccess` her isteği geçiriyor. Bugün yalnızca `render.yaml`'ın anahtarı üretmesi koruyor. QUALITY G-03, düzeltmesi V2-04.
+> **Düzeltme (22 Ekim):** S9'daki "canlıda anahtar yoksa API açılmaz" ifadesi kodda karşılanmıyor: `assertRuntimeEnv` `API_ACCESS_KEY`'e bakmıyor, anahtar yoksa `apiAccess` her isteği geçiriyor. Bugün yalnızca `render.yaml`'ın anahtarı üretmesi koruyor. QUALITY G-03, düzeltmesi V2-04. **V2-04 ile açılış kontrolü eklendi:** S9'daki ifade artık kodda doğru (aşağıdaki "v2'de düzeltilenler" tablosu).
 
 ## v2'de düzeltilenler
 
@@ -10,6 +10,7 @@
 |---|---|---|---|
 | G-01 | V2-02 ([#292](https://github.com/BerkayToluc/Novera-Mobility/issues/292)) | PR'da | `startAt` şu andan en az 30 dakika sonra ve en çok 365 gün sonra olmalı (`IN_PAST`, `OUT_OF_RANGE`; tutma, fiyat, rezervasyon ve arama uçlarında). Puan bakiyeye yalnızca `createdAt < startAt` olan rezervasyondan geçer |
 
+| G-03, G-07 | V2-04 ([#294](https://github.com/BerkayToluc/Novera-Mobility/issues/294)) | PR'da | API production'da açılırken `API_ACCESS_KEY` (en az 32 karakter), `DATABASE_URL` ve https `WEB_URL` yoksa hatayla durur (hata değeri yazmaz). "Production mı?" kararı tek yerde (`isProduction`): geliştirme yalnızca açıkça `NODE_ENV=development` (ya da `test`) ile geçerli; `NODE_ENV` yoksa ya da başka bir şeyse, ya da `RENDER` / `K_SERVICE` (Cloud Run) tanımlıysa production sayılır. Oturum çerezi `Secure`, sıfırlama bağlantısı günlüğe yazılmaz, `/docs` kapalı |
 | G-02, G-16 | V2-03 ([#293](https://github.com/BerkayToluc/Novera-Mobility/issues/293)) | PR'da | `POST /reservations` kullanıcı başına saatte 10 istek; bir hesapta en çok 3 gelecek ya da devam eden rezervasyon (`422 RESERVATION_LIMIT`, sayım ve ekleme kullanıcı satırı kilidiyle aynı işlemde); `POST /reservations/price` istemci başına 10 dakikada 60 istek; `holdId` yalnızca tutmayı açan istemci anahtarıyla kullanılabilir |
 
 ### Hız sınırı tablosu (V2-09'dan sonra tek kaynak burasıdır)

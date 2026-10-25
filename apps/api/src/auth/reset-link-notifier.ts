@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { isProduction } from '../config/runtime.js';
 
 // The one place that delivers a password reset link (BACKLOG #27, #49).
 //
@@ -59,8 +60,8 @@ export class ResetLinkNotifier {
       await this.deliver(apiKey, from, email, link, locale);
       return;
     }
-    // The link is a credential: in production it is never written to the log.
-    if (process.env.NODE_ENV === 'production') {
+    // The link is a credential: it is written to the log only when the API is explicitly in development.
+    if (isProduction()) {
       this.logger.warn('A reset link was requested but no mail provider is configured (RESEND_API_KEY, MAIL_FROM)');
       return;
     }
