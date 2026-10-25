@@ -26,3 +26,6 @@ test-results/
 playwright-report/
 
 apps/api/src/generated/
+
+# Original photo shoot (167 MB), not part of the repo
+carPhotos/

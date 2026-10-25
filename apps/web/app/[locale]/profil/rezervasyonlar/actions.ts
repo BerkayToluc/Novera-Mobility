@@ -5,6 +5,7 @@ import { cancelMyReservation } from "@/lib/api-account";
 import { currentTime } from "@/lib/clock";
 import { CANCELLED_COOKIE, reservationPhase } from "@/lib/reservation";
 import { getSession } from "@/lib/session";
+import { isMockMode } from "@/lib/mode";
 
 export type CancelResult = { ok: true } | { ok: false; reason: "unavailable" | "not_cancellable" };
 
@@ -13,7 +14,7 @@ export type CancelResult = { ok: true } | { ok: false; reason: "unavailable" | "
 // `POST /me/reservations/{id}/cancel`, which frees the car again and takes the points back; the API
 // decides whether the booking can still be cancelled.
 export async function cancelReservation(id: string): Promise<CancelResult> {
-  if (process.env.USE_MOCKS !== "1") {
+  if (!isMockMode()) {
     const outcome = await cancelMyReservation(id);
     if (outcome === "cancelled") return { ok: true };
     return { ok: false, reason: outcome };

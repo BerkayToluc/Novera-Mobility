@@ -3,6 +3,7 @@
 import { apiPost } from "./api-post";
 import { quoteToApi } from "./api-forms";
 import { QUOTE_NEEDS, type QuoteInput } from "./quote";
+import { isMockMode } from "./mode";
 
 export type SubmitQuoteResult =
   | { ok: true; reference: string }
@@ -37,7 +38,7 @@ export async function submitQuote(input: QuoteInput): Promise<SubmitQuoteResult>
     return { ok: false, reason: "unavailable" };
   }
 
-  if (process.env.USE_MOCKS === "1") return { ok: true, reference: makeReference() };
+  if (isMockMode()) return { ok: true, reference: makeReference() };
   return { ok: false, reason: "unavailable" };
 }
 

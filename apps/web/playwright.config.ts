@@ -33,6 +33,6 @@ export default defineConfig({
     url: `${baseURL}/sitemap.xml`,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
-    env: { USE_MOCKS: "1", NEXT_PUBLIC_SITE_URL: baseURL, ANALYTICS_SCRIPT_URL: "https://analytics.example/script.js", ANALYTICS_WEBSITE_ID: "e2e" },
+    env: { USE_MOCKS: "1", NOVERA_E2E: "1", NEXT_PUBLIC_SITE_URL: baseURL, ANALYTICS_SCRIPT_URL: "https://analytics.example/script.js", ANALYTICS_WEBSITE_ID: "e2e" },
   },
 });

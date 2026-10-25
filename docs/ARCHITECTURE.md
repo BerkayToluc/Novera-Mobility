@@ -129,7 +129,7 @@
   - Tek modül: `apps/web/lib/mode.ts` → `dataMode(): 'api' | 'mock'`. Kural: `USE_MOCKS=1` ise mock, değilse api. `API_URL` yoksa ve mock da kapalıysa ekranda "servis kullanılamıyor" görünür.
   - Production'da mock açılamaz: `VERCEL_ENV=production` ya da `NODE_ENV=production` iken `USE_MOCKS` doluysa `next build` ve sunucu açılışı hata verir. CI'daki e2e build'i `NODE_ENV=test` benzeri ayrı bir bayrakla çalışır.
   - `.env.example`'da `USE_MOCKS=` boştur. Giriş koruması mock modunda da açıktır (mock'ta sahte giriş yapılır, koruma atlanmaz).
-- **Sonuçları:** e2e testleri değişmeden çalışır; mock verisi sunucu paketine yalnızca mock modunda dinamik `import()` ile girer.
+- **Sonuçları:** mock verisi sunucu paketine yalnızca mock modunda dinamik `import()` ile girer. **Uygulama (V2-06):** test bayrağı `NOVERA_E2E=1` (CI ve Playwright ayarlarında); Vercel production'da bu bayrak da mock'u açmaz. Giriş koruması mock'ta da açık olduğu için ödemeye giren e2e testleri örnek oturum çerezini taşır (`apps/web/e2e/mock-session.ts`); girişsiz ödemenin giriş sayfasına yönlendiği ayrı bir testle denir.
 
 ### ADR-30 · Simülasyon verisi
 

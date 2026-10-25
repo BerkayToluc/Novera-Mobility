@@ -13,6 +13,7 @@ import { loadBooking } from "@/lib/booking-data";
 import { getCurrency } from "@/lib/get-currency";
 import { pointsForTotal } from "@/lib/points";
 import { getSession } from "@/lib/session";
+import { isMockMode } from "@/lib/mode";
 
 type Props = { searchParams: Promise<Record<string, string | string[] | undefined>> };
 
@@ -31,7 +32,7 @@ export default async function ConfirmationPage({ searchParams }: Props) {
   const t = await getTranslations("Confirmation");
   const params = await searchParams;
   const number = typeof params.no === "string" && NUMBER.test(params.no) ? params.no : null;
-  const mocks = process.env.USE_MOCKS === "1";
+  const mocks = isMockMode();
 
   let receipt: Receipt | null = null;
   let failed = false;

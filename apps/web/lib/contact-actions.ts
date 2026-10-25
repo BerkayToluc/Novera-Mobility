@@ -3,6 +3,7 @@
 import { apiPost } from "./api-post";
 import { contactToApi } from "./api-forms";
 import { CONTACT_TOPICS, type ContactInput } from "./contact";
+import { isMockMode } from "./mode";
 
 // `reference` is null when the API gives no number: `POST /contact` answers only `{ received: true }`
 // (the backend's proposal, option A, 16 October), and the confirmation then leaves the line out.
@@ -36,7 +37,7 @@ export async function sendContact(input: ContactInput): Promise<SendContactResul
     return { ok: false, reason: "unavailable" };
   }
 
-  if (process.env.USE_MOCKS === "1") return { ok: true, reference: makeReference() };
+  if (isMockMode()) return { ok: true, reference: makeReference() };
   return { ok: false, reason: "unavailable" };
 }
 

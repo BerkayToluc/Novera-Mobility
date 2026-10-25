@@ -67,6 +67,8 @@ jobs:
       - name: Check links
         env:
           USE_MOCKS: "1"
+          # Marks a test run: without it the production bundle refuses to start with sample data (ADR-29).
+          NOVERA_E2E: "1"
           NEXT_PUBLIC_SITE_URL: http://localhost:3000
         run: |
           pnpm --filter @novera/web start &

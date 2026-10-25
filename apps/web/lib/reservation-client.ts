@@ -38,6 +38,7 @@ export class ReservationRateLimitedError extends Error {
 }
 import { holdApiId, VehicleUnavailableError } from "./hold-client";
 import { toUtc } from "./rental-search";
+import { isMockMode } from "./mode";
 
 type Schemas = components["schemas"];
 
@@ -67,7 +68,7 @@ export function reservationToApi(data: BookingData): Schemas["ReservationRequest
 // means someone else got the car first. With USE_MOCKS=1 a booking number is invented so the flow
 // can be walked through and nothing is stored.
 export async function createReservation(data: BookingData): Promise<{ number: string }> {
-  if (process.env.USE_MOCKS === "1") {
+  if (isMockMode()) {
     // Test hook, mocks only: a hold id ending in ".taken" plays a car someone else got first,
     // so the "just rented" screen can be reached without a second visitor.
     if (data.hold?.id.endsWith(".taken")) throw new VehicleUnavailableError();

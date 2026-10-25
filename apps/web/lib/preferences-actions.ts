@@ -6,6 +6,7 @@ import { CURRENCIES, CURRENCY_COOKIE, CURRENCY_COOKIE_MAX_AGE } from "./currency
 import { MOCK_PREFERENCES_COOKIE, type Preferences } from "./preferences";
 import { getSession } from "./session";
 import { THEME_COOKIE, THEME_COOKIE_MAX_AGE, THEMES } from "./theme";
+import { isMockMode } from "./mode";
 
 export type SavePreferencesResult = { ok: true } | { ok: false; reason: "unavailable" | "invalid" | "signin" };
 
@@ -21,7 +22,7 @@ export async function savePreferences(input: Preferences): Promise<SavePreferenc
   if (!valid) return { ok: false, reason: "invalid" };
 
   const jar = await cookies();
-  if (process.env.USE_MOCKS === "1") {
+  if (isMockMode()) {
     jar.set(MOCK_PREFERENCES_COOKIE, JSON.stringify(input), { httpOnly: true, sameSite: "lax", path: "/", maxAge: THEME_COOKIE_MAX_AGE });
   } else {
     const result = await apiRequest("PATCH", "/me", { locale: input.locale, theme: input.theme, currency: input.currency });

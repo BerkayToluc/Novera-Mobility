@@ -7,6 +7,7 @@ import { LoginForm } from "@/components/auth/login-form";
 import { LoginTabs } from "@/components/auth/login-tabs";
 import { Link } from "@/i18n/navigation";
 import { parseBooking, toBookingQuery } from "@/lib/booking";
+import { isMockMode } from "@/lib/mode";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("Auth.login");
@@ -59,7 +60,7 @@ export default async function LoginPage({ searchParams }: Props) {
       <div className="flex flex-col gap-6">
         <LoginForm key={corporate ? "corporate" : "individual"} kind={corporate ? "corporate" : "individual"} next={next} />
         {/* Corporate accounts are opened by Novera and cannot use Google. */}
-        {!corporate && <GoogleSignIn clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || null} sample={process.env.USE_MOCKS === "1"} nonce={nonce} next={next} />}
+        {!corporate && <GoogleSignIn clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || null} sample={isMockMode()} nonce={nonce} next={next} />}
       </div>
     </AuthShell>
   );

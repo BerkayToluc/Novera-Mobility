@@ -4,6 +4,7 @@ import { parseVehicleSlug } from "./api-mappers";
 import type { components } from "./api-types";
 import { ApiUnavailableError } from "./fleet-client";
 import { toUtc, type RentalSearch } from "./rental-search";
+import { isMockMode } from "./mode";
 
 // The 15-minute hold on a car (SPEC §2.3, openapi `/holds`): "Kirala" holds the car, the summary
 // and payment pages count down to `expiresAt`, and the booking is made against the hold.
@@ -31,7 +32,7 @@ export const holdApiId = (holdId: string): string => HOLD_ID.exec(holdId)?.[1] ?
 // (`<expiresAtMs>.<vehicleSlug>`), so nothing has to be stored and the flow can be walked through,
 // including an expired hold by editing the address.
 export async function createHold(vehicleSlug: string, search: RentalSearch): Promise<Hold> {
-  if (process.env.USE_MOCKS === "1") {
+  if (isMockMode()) {
     const expires = Date.now() + HOLD_MINUTES * 60_000;
     return { id: `${expires}.${vehicleSlug}`, expiresAt: new Date(expires).toISOString() };
   }
@@ -53,7 +54,7 @@ export async function createHold(vehicleSlug: string, search: RentalSearch): Pro
 // The hold with this id for this car, or null when it is unknown, belongs to another car or has
 // run out. `null` is the "time is up" screen, whichever of those it was.
 export async function getHold(holdId: string, vehicleSlug: string): Promise<Hold | null> {
-  if (process.env.USE_MOCKS === "1") {
+  if (isMockMode()) {
     const [expires, ...rest] = holdId.split(".");
     const expiresAt = Number(expires);
     if (!Number.isFinite(expiresAt) || rest[0] !== vehicleSlug) return null;
