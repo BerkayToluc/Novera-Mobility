@@ -27,6 +27,8 @@ describe('ResetLinkNotifier', () => {
       saved[key] = process.env[key];
       delete process.env[key];
     }
+    // Development has to be said outright; with NODE_ENV unset the notifier counts as production.
+    process.env.NODE_ENV = 'development';
     calls = [];
     log = jest.spyOn(Logger.prototype, 'log').mockImplementation(() => undefined);
     warn = jest.spyOn(Logger.prototype, 'warn').mockImplementation(() => undefined);
@@ -49,6 +51,15 @@ describe('ResetLinkNotifier', () => {
 
     it('never writes the link in production, only a warning', async () => {
       process.env.NODE_ENV = 'production';
+      await notifier(ok).send('ayse@example.com', LINK);
+      const written = JSON.stringify([...log.mock.calls, ...warn.mock.calls, ...error.mock.calls]);
+      expect(written).not.toContain('abc_DEF');
+      expect(written).not.toContain('ayse@example.com');
+      expect(warn).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not write the link when NODE_ENV is missing either (fails closed)', async () => {
+      delete process.env.NODE_ENV;
       await notifier(ok).send('ayse@example.com', LINK);
       const written = JSON.stringify([...log.mock.calls, ...warn.mock.calls, ...error.mock.calls]);
       expect(written).not.toContain('abc_DEF');
