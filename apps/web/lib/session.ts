@@ -1,7 +1,6 @@
 import "server-only";
 import { cache } from "react";
 import { cookies } from "next/headers";
-import { MOCK_CORPORATE, MOCK_GOOGLE, MOCK_INDIVIDUAL } from "@/mocks/accounts";
 import { apiRequest } from "./api-request";
 import { sessionFromApi } from "./api-mappers";
 import type { components } from "./api-types";
@@ -9,6 +8,7 @@ import { SESSION_COOKIE } from "./session-cookie";
 import type { Notifications } from "./notifications";
 import type { Preferences } from "./preferences";
 import type { LocalizedText } from "./vehicle";
+import { isMockMode } from "./mode";
 
 export type SessionUser = {
   id: string;
@@ -63,12 +63,11 @@ export const MOCK_GOOGLE_COOKIE = "novera-mock-google";
 // `cache` makes the layout and the page share one lookup per request.
 export const getSession = cache(async (): Promise<Session | null> => {
   const jar = await cookies();
-  if (process.env.USE_MOCKS === "1") {
+  if (isMockMode()) {
     const value = jar.get(MOCK_SESSION_COOKIE)?.value;
-    if (value === "corporate") return MOCK_CORPORATE;
-    if (value === "individual") return MOCK_INDIVIDUAL;
-    if (value === "google") return MOCK_GOOGLE;
-    return null;
+    if (value !== "corporate" && value !== "individual" && value !== "google") return null;
+    const { MOCK_CORPORATE, MOCK_GOOGLE, MOCK_INDIVIDUAL } = await import("@/mocks/accounts");
+    return { corporate: MOCK_CORPORATE, individual: MOCK_INDIVIDUAL, google: MOCK_GOOGLE }[value];
   }
   if (!jar.get(SESSION_COOKIE)?.value) return null;
   const result = await apiRequest<components["schemas"]["User"]>("GET", "/me");

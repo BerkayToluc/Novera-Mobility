@@ -60,8 +60,8 @@ export async function placeReservation(
   params: Record<string, string>,
   driver: DriverBody,
 ): Promise<PlaceReservationResult> {
-  // Same rule as the payment page: with mocks on there is no auth API to sign in with.
-  if (process.env.USE_MOCKS !== "1" && !(await getSession())) return { ok: false, reason: "signin" };
+  // Same rule as the payment page: nobody pays without being signed in, sample mode included.
+  if (!(await getSession())) return { ok: false, reason: "signin" };
 
   const loaded = await loadBooking(params, await getCurrency());
   if (loaded.status === "missing") return { ok: false, reason: "invalid" };

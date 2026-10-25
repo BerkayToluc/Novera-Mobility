@@ -33,9 +33,9 @@ export default async function PaymentPage({ searchParams }: Props) {
   const loaded = await loadBooking(params, await getCurrency());
 
   // Signing in is asked for right before paying, and the booking comes back with the visitor
-  // (SPEC §2.3). With mocks on there is no auth API to sign in with, so the page opens
-  // for walking through the flow; a build without mocks always enforces it.
-  if (loaded.status === "ok" && process.env.USE_MOCKS !== "1" && !(await getSession())) {
+  // (SPEC §2.3). The sample mode asks too (it signs in a sample account): the rule is never skipped,
+  // so a build that ends up in the wrong mode cannot take bookings without it (QUALITY G-06).
+  if (loaded.status === "ok" && !(await getSession())) {
     redirect({ href: { pathname: "/giris", query: { sonra: "odeme", ...loaded.query } }, locale: await getLocale() });
   }
 

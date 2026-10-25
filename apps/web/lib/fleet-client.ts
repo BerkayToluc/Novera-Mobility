@@ -1,7 +1,4 @@
 import "server-only";
-import { mockBranchDetails } from "@/mocks/branch-details";
-import { mockExtras } from "@/mocks/extras";
-import { mockAvailable, mockBranches, mockVehicles } from "@/mocks/fleet";
 import { apiRequest, type ApiResult } from "./api-request";
 import {
   bookedVehicle,
@@ -17,6 +14,7 @@ import type { Currency } from "./currency";
 import type { Extra } from "./extra";
 import { toUtc, type RentalSearch } from "./rental-search";
 import type { Branch, Vehicle, VehicleOffer } from "./vehicle";
+import { isMockMode } from "./mode";
 
 type Schemas = components["schemas"];
 
@@ -31,26 +29,24 @@ export class ApiUnavailableError extends Error {
   }
 }
 
-const mocksEnabled = () => process.env.USE_MOCKS === "1";
-
 function dataOf<T>(result: ApiResult<T>): T {
   if (result.status !== "ok") throw new ApiUnavailableError();
   return result.data;
 }
 
 export async function getBranches(): Promise<Branch[]> {
-  if (mocksEnabled()) return mockBranches();
+  if (isMockMode()) return (await import("@/mocks/fleet")).mockBranches();
   return (await getBranchDetails()).map(({ id, name, city }) => ({ id, name, city }));
 }
 
 export async function getBranchDetails(): Promise<BranchDetail[]> {
-  if (mocksEnabled()) return mockBranchDetails();
+  if (isMockMode()) return (await import("@/mocks/branch-details")).mockBranchDetails();
   return dataOf(await apiRequest<Schemas["Branch"][]>("GET", "/branches")).map(branchDetailFromApi);
 }
 
 // Every model at every branch that stocks it, for the fleet page (the models are folded again there).
 export async function getVehicles(currency: Currency): Promise<Vehicle[]> {
-  if (mocksEnabled()) return mockVehicles(currency);
+  if (isMockMode()) return (await import("@/mocks/fleet")).mockVehicles(currency);
   return vehiclesFromModels(
     dataOf(await apiRequest<Schemas["VehicleModel"][]>("GET", `/vehicle-models?currency=${currency}`)),
   );
@@ -58,7 +54,7 @@ export async function getVehicles(currency: Currency): Promise<Vehicle[]> {
 
 // The cars free at the pick-up branch for these dates. The times go as UTC, the way the API wants them.
 export async function getAvailableVehicles(search: RentalSearch, currency: Currency): Promise<VehicleOffer[]> {
-  if (mocksEnabled()) return mockAvailable(search, currency);
+  if (isMockMode()) return (await import("@/mocks/fleet")).mockAvailable(search, currency);
   const query = new URLSearchParams({
     pickupBranchId: search.pickupBranchId,
     returnBranchId: search.returnBranchId,
@@ -76,7 +72,7 @@ export async function getAvailableVehicles(search: RentalSearch, currency: Curre
 // car's id; the model gives what to show, `pickupBranchId` is where the booking says the car is (the
 // price and hold calls refuse a car that is not there).
 export async function getVehicle(slug: string, currency: Currency, pickupBranchId: string): Promise<Vehicle | null> {
-  if (mocksEnabled()) return mockVehicles(currency).find((vehicle) => vehicle.slug === slug) ?? null;
+  if (isMockMode()) return (await import("@/mocks/fleet")).mockVehicles(currency).find((vehicle) => vehicle.slug === slug) ?? null;
   const parsed = parseVehicleSlug(slug);
   if (!parsed) return null;
   const models = dataOf(await apiRequest<Schemas["VehicleModel"][]>("GET", `/vehicle-models?currency=${currency}`));
@@ -85,6 +81,6 @@ export async function getVehicle(slug: string, currency: Currency, pickupBranchI
 }
 
 export async function getExtras(currency: Currency): Promise<Extra[]> {
-  if (mocksEnabled()) return mockExtras(currency);
+  if (isMockMode()) return (await import("@/mocks/extras")).mockExtras(currency);
   return dataOf(await apiRequest<Schemas["Extra"][]>("GET", `/extras?currency=${currency}`)).map(extraFromApi);
 }

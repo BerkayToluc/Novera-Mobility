@@ -6,6 +6,7 @@ import { GoogleSignIn } from "@/components/auth/google-sign-in";
 import { RegisterForm } from "@/components/auth/register-form";
 import { Link } from "@/i18n/navigation";
 import { parseBooking, toBookingQuery } from "@/lib/booking";
+import { isMockMode } from "@/lib/mode";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("Auth.register");
@@ -40,7 +41,7 @@ export default async function RegisterPage({ searchParams }: Props) {
     >
       <div className="flex flex-col gap-6">
         <RegisterForm next={next} />
-        <GoogleSignIn clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || null} sample={process.env.USE_MOCKS === "1"} nonce={nonce} next={next} />
+        <GoogleSignIn clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || null} sample={isMockMode()} nonce={nonce} next={next} />
       </div>
     </AuthShell>
   );

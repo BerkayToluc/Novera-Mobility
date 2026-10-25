@@ -2,6 +2,7 @@
 
 import { apiRequest } from "./api-request";
 import { PASSWORD_MIN_LENGTH } from "./auth-schemas";
+import { isMockMode } from "./mode";
 
 export type ForgotPasswordResult = { ok: true } | { ok: false; reason: "unavailable" | "invalid" | "rate_limited" };
 
@@ -18,7 +19,7 @@ export async function forgotPassword(email: string): Promise<ForgotPasswordResul
     if (result.status === "rate_limited") return { ok: false, reason: "rate_limited" };
     return { ok: false, reason: "unavailable" };
   }
-  return process.env.USE_MOCKS === "1" ? { ok: true } : { ok: false, reason: "unavailable" };
+  return isMockMode() ? { ok: true } : { ok: false, reason: "unavailable" };
 }
 
 // `invalid_link`: the link is wrong, used or older than an hour (the API does not tell these apart).
@@ -44,6 +45,6 @@ export async function resetPassword(token: string, password: string): Promise<Re
     }
     return { ok: false, reason: "unavailable" };
   }
-  if (process.env.USE_MOCKS !== "1") return { ok: false, reason: "unavailable" };
+  if (!isMockMode()) return { ok: false, reason: "unavailable" };
   return token === "expired" ? { ok: false, reason: "invalid_link" } : { ok: true };
 }

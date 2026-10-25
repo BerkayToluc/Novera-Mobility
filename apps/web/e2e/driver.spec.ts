@@ -1,10 +1,12 @@
 import { expect, test, type Page } from "@playwright/test";
 import { EXPERIENCED, RESULTS, fillCard, fillDriver, goToPayment } from "./driver-helpers";
+import { signInSample } from "./mock-session";
 
 // SPEC §2.10: the driver's details and the simulated licence check come before the card; anyone
 // over 18 with a valid licence may rent, a US licence also needs the international permit, and
 // nothing is kept.
 test.beforeEach(async ({ context }) => {
+  await signInSample(context);
   await context.addCookies([
     { name: "novera-consent", value: encodeURIComponent('{"v":1,"analytics":false}'), url: "http://localhost:3200" },
   ]);

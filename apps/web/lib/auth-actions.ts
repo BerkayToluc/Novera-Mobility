@@ -8,6 +8,7 @@ import { MOCK_PREFERENCES_COOKIE, parsePreferences } from "./preferences";
 import { MOCK_GOOGLE_COOKIE, MOCK_SESSION_COOKIE, type AccountType } from "./session";
 import { SESSION_COOKIE, type SessionCookieChange } from "./session-cookie";
 import { THEME_COOKIE, THEME_COOKIE_MAX_AGE } from "./theme";
+import { isMockMode } from "./mode";
 
 // `locale` is the language the account asked for, so the form can open the page in it.
 // `invalid`: the input is malformed or, on sign-in, the e-mail or password is wrong (the API does
@@ -21,8 +22,6 @@ type User = components["schemas"]["User"];
 // With USE_MOCKS=1 the sample accounts stand in for the API (any well-formed credentials sign in
 // the sample account of that tab); otherwise the calls below go to the API, and a visitor is never
 // given a fake "signed in".
-const mocksEnabled = () => process.env.USE_MOCKS === "1";
-
 // Puts the session the API started on this browser. The cookie is httpOnly, so no script can read
 // it, and `secure` in production like the API's own.
 async function keepSession(change: SessionCookieChange | undefined): Promise<boolean> {
@@ -61,7 +60,7 @@ export type GoogleSignInResult =
 export async function signInWithGoogle(credential: string, consent?: boolean): Promise<GoogleSignInResult> {
   if (typeof credential !== "string" || credential === "") return { ok: false, reason: "invalid_token" };
 
-  if (!mocksEnabled()) {
+  if (!isMockMode()) {
     const result = await apiRequest<User>("POST", "/auth/google", { credential, ...(consent ? { consent: true } : {}) });
     if (result.status === "ok") {
       if (!(await keepSession(result.sessionCookie))) return { ok: false, reason: "unavailable" };
@@ -97,7 +96,7 @@ export async function signIn(kind: AccountType, email: string, password: string)
   if (kind !== "individual" && kind !== "corporate") return { ok: false, reason: "invalid" };
   if (!email.includes("@") || password === "") return { ok: false, reason: "invalid" };
 
-  if (!mocksEnabled()) {
+  if (!isMockMode()) {
     const result = await apiRequest<User>("POST", "/auth/login", { email: email.trim(), password });
     if (result.status === "ok") {
       if (!(await keepSession(result.sessionCookie))) return { ok: false, reason: "unavailable" };
@@ -135,7 +134,7 @@ export async function signUp(input: {
     input.password.length >= 8 &&
     input.consent === true;
   if (!valid) return { ok: false, reason: "invalid" };
-  if (mocksEnabled()) return signIn("individual", input.email, input.password);
+  if (isMockMode()) return signIn("individual", input.email, input.password);
 
   const result = await apiRequest<User>("POST", "/auth/register", {
     email: input.email.trim(),
@@ -159,7 +158,7 @@ export async function signUp(input: {
 // `POST /auth/logout` ends the session on the API; the cookies are dropped here whatever it answers,
 // so this browser is signed out even when the API cannot be reached.
 export async function signOut(): Promise<void> {
-  if (!mocksEnabled()) await apiRequest("POST", "/auth/logout");
+  if (!isMockMode()) await apiRequest("POST", "/auth/logout");
   const jar = await cookies();
   jar.delete(SESSION_COOKIE);
   jar.delete(MOCK_SESSION_COOKIE);

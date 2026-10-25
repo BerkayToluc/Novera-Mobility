@@ -10,6 +10,7 @@ import { promoPercent } from "./promo-codes";
 import { summarize, type PriceSummary } from "./price-summary";
 import { toUtc, type RentalSearch } from "./rental-search";
 import type { Vehicle } from "./vehicle";
+import { isMockMode } from "./mode";
 
 export type PriceRequest = {
   vehicle: Vehicle;
@@ -29,7 +30,7 @@ export type PriceRequest = {
 // the backend does, with the sample campaign codes. The API takes the code off the car and the extras and says in `promo.applied` whether it did.
 export async function quotePrice(request: PriceRequest): Promise<PriceSummary> {
   const { vehicle, days, extras, currency, promoCode, pointsBalance } = request;
-  if (process.env.USE_MOCKS === "1") {
+  if (isMockMode()) {
     // An unknown code is simply not applied: the page says so (BookingData.promo), the price is the plain one.
     const percent = promoCode ? promoPercent(promoCode) : null;
     return summarize(

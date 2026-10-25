@@ -1,5 +1,9 @@
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
+import { assertMockModeAllowed } from "./lib/mode";
+
+// Runs on `next build` and on `next start`: stops here if the sample data mode is on where it must not be (ADR-29).
+assertMockModeAllowed();
 
 // The headers every response carries (BACKLOG Y30). The Content-Security-Policy is not here: it
 // needs a new nonce per request, so proxy.ts sets it.
@@ -21,16 +25,8 @@ const nextConfig: NextConfig = {
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },
-  // The browser calls /api/..., and Next forwards it to the NestJS API (ARCHITECTURE
-  // ADR-14). To the browser the API is the same site, so the httpOnly session cookie is a
-  // first-party cookie: no CORS and no `SameSite=None`. `/api` is dropped before the
-  // request reaches the API, so its routes need no prefix.
-  async rewrites() {
-    const apiUrl = process.env.API_URL;
-    // Unset in a checkout that only works on the frontend: /api then simply 404s.
-    if (!apiUrl) return [];
-    return [{ source: "/api/:path*", destination: `${apiUrl}/:path*` }];
-  },
+  // No `/api` rewrite: the browser never calls the API (ARCHITECTURE ADR-14); every call goes from the server.
+  // A rewrite would only have made the API reachable through the site's own address (QUALITY G-08).
 };
 
 const withNextIntl = createNextIntlPlugin();

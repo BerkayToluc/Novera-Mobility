@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { EXPERIENCED, fillDriver } from "./driver-helpers";
+import { signInSample } from "./mock-session";
 
 // SPEC §8 steps 2 and 3: from the results, hold a car, add an extra, pay with the test card and
 // reach the confirmation. The search itself is opened by address; the form is covered separately.
@@ -38,7 +39,8 @@ test("an extra changes the total the server reports", async ({ page }) => {
   await expect(page.getByText("₺2.850")).toHaveCount(0);
 });
 
-test("pay with the test card and reach the confirmation", async ({ page }) => {
+test("pay with the test card and reach the confirmation", async ({ page, context }) => {
+  await signInSample(context);
   await page.goto(RESULTS);
   await page.getByRole("button", { name: /Kirala.*Renault Clio/ }).click();
   await page.waitForURL(/\/rezervasyon/);
@@ -83,7 +85,8 @@ test("the summary states the cancellation rule before paying", async ({ page }) 
 
 // QUALITY G-02: an account with the most upcoming reservations it may have is told so at payment and
 // pointed to Rezervasyonlarım. The mock plays the API's 422 RESERVATION_LIMIT for a hold id ending in ".limit".
-test("an account at its reservation cap is told so and pointed to its bookings", async ({ page }) => {
+test("an account at its reservation cap is told so and pointed to its bookings", async ({ page, context }) => {
+  await signInSample(context);
   await page.goto(RESULTS);
   await page.getByRole("button", { name: /Kirala.*Renault Clio/ }).click();
   await page.waitForURL(/\/rezervasyon/);
@@ -108,4 +111,18 @@ test("an account at its reservation cap is told so and pointed to its bookings",
   const alert = page.getByRole("alert").filter({ hasText: "en çok 3 yaklaşan rezervasyon" });
   await expect(alert).toBeVisible();
   await expect(alert.getByRole("link", { name: "Rezervasyonlarım" })).toHaveAttribute("href", "/profil/rezervasyonlar");
+});
+
+// QUALITY G-06: payment asks for a signed-in visitor in the sample mode too, so a site that ends up in that mode by
+// mistake still does not take a booking from a stranger.
+test("payment without a signed-in visitor leads to the sign-in page, which brings the booking back", async ({ page }) => {
+  await page.goto(RESULTS);
+  await page.getByRole("button", { name: /Kirala.*Renault Clio/ }).click();
+  await page.waitForURL(/\/rezervasyon/);
+  await page.getByRole("link", { name: "Ödemeye Geç" }).click();
+
+  await expect(page).toHaveURL(/\/giris\?.*sonra=odeme/);
+  await expect(page).toHaveURL(/tutma=/);
+  await expect(page.getByRole("heading", { level: 1, name: "Giriş Yap" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Ödeme" })).toHaveCount(0);
 });

@@ -1,5 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { RESULTS } from "./driver-helpers";
+import { signInSample } from "./mock-session";
 
 // SPEC §2.3: a campaign code on the booking summary, kept in the address, priced by the server
 // (it moved here from the payment page, G's decision).
@@ -54,7 +55,8 @@ test("pressing Enter in the code box applies the code and does not pay", async (
   await expect(page.getByRole("heading", { level: 1, name: "Rezervasyon Özeti" })).toBeVisible();
 });
 
-test("the discount travels on to the payment page, which no longer has the code box", async ({ page }) => {
+test("the discount travels on to the payment page, which no longer has the code box", async ({ page, context }) => {
+  await signInSample(context);
   await goToSummary(page);
   const box = page.getByRole("region", { name: "Kampanya kodu" });
   await box.getByLabel("Kampanya kodunuz").fill("NOVERA10");
