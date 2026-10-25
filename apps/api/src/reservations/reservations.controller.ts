@@ -13,8 +13,16 @@ import { ReservationsService } from './reservations.service.js';
 // POST /reservations/price is open to anyone, POST /reservations takes no payment: both are limited (SECURITY.md).
 export const PRICE_LIMIT_PER_10_MIN = 60;
 export const CREATE_LIMIT_PER_HOUR = 10;
+// A request that carries a campaign code is how codes are guessed, so those get a much tighter limit (QUALITY G-04).
+export const PROMO_PRICE_LIMIT_PER_10_MIN = 10;
 const TEN_MINUTES_MS = 10 * 60_000;
 const HOUR_MS = 60 * 60_000;
+
+function carriesPromoCode(body: unknown): boolean {
+  if (body === null || typeof body !== 'object' || Array.isArray(body)) return false;
+  const code = (body as { promoCode?: unknown }).promoCode;
+  return typeof code === 'string' && code.trim() !== '';
+}
 
 const RESERVATION_BODY = {
   schema: {
@@ -61,6 +69,9 @@ export class ReservationsController {
   @ApiOkResponse({ description: 'Fiyat dökümü (giriş gerekmez)' })
   async price(@Body() body: unknown, @Req() request: Request): Promise<PriceBreakdown> {
     if (!this.limiter.allow(`price:${clientKeyOf(request)}`, PRICE_LIMIT_PER_10_MIN, TEN_MINUTES_MS)) {
+      throw rateLimited();
+    }
+    if (carriesPromoCode(body) && !this.limiter.allow(`promo:${clientKeyOf(request)}`, PROMO_PRICE_LIMIT_PER_10_MIN, TEN_MINUTES_MS)) {
       throw rateLimited();
     }
     // Open to visitors; the session is only read when the price is asked with `usePoints`.

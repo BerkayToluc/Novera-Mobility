@@ -1,4 +1,6 @@
-// Veritabanını örnek verilerle doldurur. Tekrar çalıştırmak güvenlidir (upsert).
+// Veritabanını örnek verilerle doldurur. Tekrar çalıştırmak güvenlidir.
+// Canlıda var olan iş verisinin üzerine yazmaz: kurlar, kampanya kodları ve fiyatlar yalnızca eksikse eklenir
+// (seed-reference.ts). Örnek kampanya kodları yalnızca SEED_DEMO=1 ile gelir.
 // Çalıştırma: pnpm --filter @novera/api db:seed
 import "dotenv/config";
 import { PrismaPg } from "@prisma/adapter-pg";
@@ -12,10 +14,10 @@ import {
   modelImages,
   models,
   products,
-  promoCodes,
   rates,
   services,
 } from "./seed-data";
+import { seedDemoPromoCodes, seedExchangeRates } from "./seed-reference";
 
 const connectionString = process.env.DATABASE_URL;
 if (!connectionString) {
@@ -60,12 +62,16 @@ async function main() {
       fuelType: m.fuelType,
       consumption: m.consumption,
       consumptionUnit: m.consumptionUnit,
-      dailyPrice: m.dailyPrice,
       description: m.description,
       imageUrl: modelImages[m.slug] ?? null,
       classId,
     };
-    await prisma.vehicleModel.upsert({ where: { slug: m.slug }, update: data, create: { id: m.id, slug: m.slug, ...data } });
+    // The daily price is business data: it is set when the model is created and never overwritten by a later seed.
+    await prisma.vehicleModel.upsert({
+      where: { slug: m.slug },
+      update: data,
+      create: { id: m.id, slug: m.slug, dailyPrice: m.dailyPrice, ...data },
+    });
   }
 
   const branchIdByKey = new Map(branches.map((b) => [b.key, b.id]));
@@ -80,25 +86,16 @@ async function main() {
   }
 
   for (const e of extras) {
-    const data = { nameTr: e.nameTr, nameEn: e.nameEn, price: e.price, pricing: e.pricing };
-    await prisma.extra.upsert({ where: { slug: e.slug }, update: data, create: { slug: e.slug, ...data } });
+    // Same for an extra's price: set on creation, not overwritten.
+    const data = { nameTr: e.nameTr, nameEn: e.nameEn, pricing: e.pricing };
+    await prisma.extra.upsert({ where: { slug: e.slug }, update: data, create: { slug: e.slug, price: e.price, ...data } });
   }
 
-  for (const r of rates) {
-    await prisma.exchangeRate.upsert({
-      where: { currency: r.currency },
-      update: { ratePerTry: r.ratePerTry },
-      create: r,
-    });
-  }
+  await seedExchangeRates(prisma);
 
-  for (const c of promoCodes) {
-    await prisma.promoCode.upsert({
-      where: { code: c.code },
-      update: { percent: c.percent, active: true },
-      create: c,
-    });
-  }
+  let demoCodes = 0;
+  if (process.env.SEED_DEMO === "1") demoCodes = await seedDemoPromoCodes(prisma);
+  else console.log("  Örnek kampanya kodları atlandı (SEED_DEMO=1 ile gelir).");
 
   for (const f of faq) {
     const data = { audience: f.audience, topic: f.topic, question: f.question, answer: f.answer, sortOrder: f.sortOrder };
@@ -125,7 +122,7 @@ async function main() {
   console.log("Seed tamam:");
   console.log(`  ${classes.length} sınıf, ${branches.length} bayi, ${models.length} model, ${vehicles.length} araç`);
   console.log(`  ${extras.length} ek hizmet, ${rates.length} kur, ${faq.length} SSS`);
-  console.log(`  ${products.length} ürün, ${services.length} hizmet, ${promoCodes.length} kampanya kodu`);
+  console.log(`  ${products.length} ürün, ${services.length} hizmet, ${demoCodes} örnek kampanya kodu`);
 }
 
 main()

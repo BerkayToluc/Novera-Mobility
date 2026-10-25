@@ -18,12 +18,15 @@ export function PromoCode({
   promo,
   percent,
   pathname = "/rezervasyon",
+  problem,
 }: {
   query: Record<string, string>;
   pathname?: "/rezervasyon" | "/odeme";
   // What the server made of the code in the address: not entered, entered and taken, or not a code.
   promo: { code: string; applied: boolean } | null;
   percent: number | null;
+  // The payment step found the code used up or already used by this account (the API's CODE_EXHAUSTED, CODE_ALREADY_USED).
+  problem?: "exhausted" | "used";
 }) {
   const t = useTranslations("Payment.promo");
   const router = useRouter();
@@ -94,6 +97,11 @@ export function PromoCode({
           {promo && !promo.applied && (
             <p role="alert" className="text-small text-error">
               {t("unknown", { code: promo.code })}
+            </p>
+          )}
+          {problem && !promo && (
+            <p role="alert" className="text-small text-error">
+              {t(problem === "exhausted" ? "exhausted" : "used")}
             </p>
           )}
           <p className="text-small text-fg-muted">{t("hint")}</p>

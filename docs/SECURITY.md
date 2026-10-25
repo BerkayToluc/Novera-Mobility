@@ -10,6 +10,7 @@
 |---|---|---|---|
 | G-01 | V2-02 ([#292](https://github.com/BerkayToluc/Novera-Mobility/issues/292)) | PR'da | `startAt` şu andan en az 30 dakika sonra ve en çok 365 gün sonra olmalı (`IN_PAST`, `OUT_OF_RANGE`; tutma, fiyat, rezervasyon ve arama uçlarında). Puan bakiyeye yalnızca `createdAt < startAt` olan rezervasyondan geçer |
 
+| G-04, G-05 | V2-05 ([#295](https://github.com/BerkayToluc/Novera-Mobility/issues/295)) | PR'da | Kod içeren `POST /reservations/price` istemci başına 10 dakikada 10 istek; `PromoCode.maxRedemptions` ve `oncePerUser`; kod satırı kilitlenerek (araç ve hesaptan sonra) sayım ve ekleme aynı işlemde; `CODE_EXHAUSTED` / `CODE_ALREADY_USED`; fiyat cevabı kodu ayırt ettirmez; `percent` 1–90 CHECK ile. Seed canlıda var olan kod, kur ve fiyatı ezmez, örnek kodlar `SEED_DEMO=1` ile |
 | G-06, G-08, G-19, M-06 | V2-06 ([#296](https://github.com/BerkayToluc/Novera-Mobility/issues/296)) | PR'da | `USE_MOCKS` yalnızca `apps/web/lib/mode.ts`'te okunur. Üretimde (`VERCEL_ENV=production`, ya da `NODE_ENV=production` ve test bayrağı `NOVERA_E2E` yok) `USE_MOCKS` doluysa `next build` ve `next start` hata verip durur; Vercel üretiminde `NOVERA_E2E` de işe yaramaz. Ödeme öncesi giriş zorunluluğu mock modunda da açık. `/api` yönlendirmesi kaldırıldı: API web adresi üzerinden de erişilemez. `carPhotos/` `.gitignore`'da |
 | G-03, G-07 | V2-04 ([#294](https://github.com/BerkayToluc/Novera-Mobility/issues/294)) | PR'da | API production'da açılırken `API_ACCESS_KEY` (en az 32 karakter), `DATABASE_URL` ve https `WEB_URL` yoksa hatayla durur (hata değeri yazmaz). "Production mı?" kararı tek yerde (`isProduction`): geliştirme yalnızca açıkça `NODE_ENV=development` (ya da `test`) ile geçerli; `NODE_ENV` yoksa ya da başka bir şeyse, ya da `RENDER` / `K_SERVICE` (Cloud Run) tanımlıysa production sayılır. Oturum çerezi `Secure`, sıfırlama bağlantısı günlüğe yazılmaz, `/docs` kapalı |
 | G-02, G-16 | V2-03 ([#293](https://github.com/BerkayToluc/Novera-Mobility/issues/293)) | PR'da | `POST /reservations` kullanıcı başına saatte 10 istek; bir hesapta en çok 3 gelecek ya da devam eden rezervasyon (`422 RESERVATION_LIMIT`, sayım ve ekleme kullanıcı satırı kilidiyle aynı işlemde); `POST /reservations/price` istemci başına 10 dakikada 60 istek; `holdId` yalnızca tutmayı açan istemci anahtarıyla kullanılabilir |
@@ -22,6 +23,7 @@
 |---|---|---|---|
 | `POST /reservations` | 10 istek/saat | kullanıcı | V2-03 |
 | `POST /reservations/price` | 60 istek/10 dk | istemci adresi | V2-03 |
+| `POST /reservations/price` (gövdede `promoCode` varsa) | 10 istek/10 dk | istemci adresi | V2-05 |
 
 ### Canlıda G-01 kötüye kullanım tespiti (V2-02)
 

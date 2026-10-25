@@ -218,6 +218,15 @@ describe("calls to the API", () => {
     await expect(createReservation(booking)).rejects.toBeInstanceOf(PastStartError);
   });
 
+  it("tells apart a code that is used up and a code this account already used", async () => {
+    vi.stubGlobal("fetch", respond(422, { code: "VALIDATION_FAILED", fieldErrors: { promoCode: "CODE_EXHAUSTED" } }));
+    await expect(createReservation(booking)).rejects.toMatchObject({ name: "PromoCodeError", problem: "exhausted" });
+    vi.stubGlobal("fetch", respond(422, { code: "VALIDATION_FAILED", fieldErrors: { promoCode: "CODE_ALREADY_USED" } }));
+    await expect(createReservation(booking)).rejects.toMatchObject({ name: "PromoCodeError", problem: "used" });
+    vi.stubGlobal("fetch", respond(422, { code: "VALIDATION_FAILED", fieldErrors: { promoCode: "UNKNOWN_CODE" } }));
+    await expect(createReservation(booking)).rejects.toMatchObject({ name: "PromoCodeError", problem: "unknown" });
+  });
+
   it("turns the cap on upcoming reservations into its own error", async () => {
     vi.stubGlobal("fetch", respond(422, { code: "RESERVATION_LIMIT", message: "limit" }));
     await expect(createReservation(booking)).rejects.toBeInstanceOf(ReservationLimitError);

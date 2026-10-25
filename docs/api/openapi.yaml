@@ -803,6 +803,9 @@ components:
               - NOT_IN_SLOT
               - IN_PAST
               - UNKNOWN_REFERENCE
+              - UNKNOWN_CODE
+              - CODE_EXHAUSTED
+              - CODE_ALREADY_USED
           example: { email: EMAIL_TAKEN }
 
     LocalizedText:
@@ -1002,10 +1005,16 @@ components:
             Kampanya kodu. Büyük/küçük harf ve boşluk fark etmez; sunucu büyük harfe çevirir. Kod, araç ve
             ek hizmetlerin toplamından yüzde olarak düşer (aşağı yuvarlanır), sonra puan uygulanır.
             Biçime uymayan değer `422` (`fieldErrors.promoCode: INVALID_FORMAT`).
-            **`POST /reservations/price`**: olmayan, kapalı ya da tarihi geçmiş kod hata değildir; fiyat
-            düz kalır ve cevaptaki `promo.applied` `false` olur ("kod geçerli değil" denir).
-            **`POST /reservations`**: böyle bir kodla rezervasyon yapılmaz (`422`, `fieldErrors.promoCode:
-            UNKNOWN_CODE`), çünkü ziyaretçi indirim göreceğini sanmıştır.
+            **`POST /reservations/price`**: olmayan, kapalı, tarihi geçmiş, kullanım tavanı dolmuş ya da (girişli
+            istekte) bu hesabın zaten kullandığı kod hata değildir; fiyat düz kalır ve cevaptaki `promo.applied`
+            `false` olur ("kod geçerli değil" denir). Cevap bunların hangisi olduğunu **söylemez** (`promo.reason`
+            yoktur), böylece kodlar deneyerek ayırt edilemez. Kod içeren istek istemci başına 10 dakikada en çok
+            10 kez gönderilebilir (`429 RATE_LIMITED`).
+            **`POST /reservations`**: böyle bir kodla rezervasyon yapılmaz, çünkü ziyaretçi indirim göreceğini
+            sanmıştır: olmayan, kapalı ya da tarihi geçmiş kod `422` `fieldErrors.promoCode: UNKNOWN_CODE`;
+            toplam kullanım tavanı dolmuşsa `CODE_EXHAUSTED`; kod kişi başına tek kullanımlıksa ve bu hesap
+            kullanmışsa `CODE_ALREADY_USED`. Kullanım sayısı iptal edilmemiş rezervasyonlardan sayılır; iptal edilen
+            rezervasyonun kodu geri döner. Sayım ve ekleme aynı işlemde, kod satırı kilitlenerek yapılır.
         usePoints:
           type: boolean
           description: |
