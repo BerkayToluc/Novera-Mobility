@@ -37,7 +37,7 @@
 | G-15 | Düşük | E-posta başına giriş sınırı, başkasının hesabını 15 dakika kilitlemeye izin veriyor (SECURITY.md karar bekleyen 2) | `auth/auth.controller.ts` | V2-10 | Açık |
 | G-16 | Düşük | Rezervasyon oluştururken tutma (`holdId`) istemci anahtarı denetlenmeden tüketiliyor | `reservations/reservations.service.ts:338-350` | V2-03 | Düzeltildi (V2-03, #293; tutma istemci anahtarıyla eşleşmeli) |
 | G-17 | Düşük | Rezervasyon numarası "en büyük + 1" ile, beş denemeyle üretiliyor; ardışık numara rezervasyon hacmini belli ediyor | `reservations/reservations.service.ts:124-131` | V2-11 | Açık |
-| G-18 | Düşük | CI'da bağımlılık taraması (`pnpm audit`), Dependabot ve gizli anahtar taraması yok. Prisma CLI içindeki bilinen bulgular (SECURITY.md) izlenmiyor | `.github/workflows/ci.yml` | V2-18 | Açık |
+| G-18 | Düşük | CI'da bağımlılık taraması (`pnpm audit`), Dependabot ve gizli anahtar taraması yok. Prisma CLI içindeki bilinen bulgular (SECURITY.md) izlenmiyor | `.github/workflows/ci.yml` | V2-18 | Düzeltildi (V2-18, #308; `pnpm audit:prod` CI'da, Dependabot, CodeQL; secret scanning ayarı G'de, doğrulanmadı) |
 | G-19 | Düşük | `carPhotos/` (167 MB, izlenmeyen) `.gitignore`'da değil; tek bir `git add .` repoya sokar | kök | V2-06 | Düzeltildi (V2-06, #296; `.gitignore`'a `carPhotos/` eklendi) |
 
 ### 1.2 Veritabanı (V)
@@ -97,7 +97,7 @@
 | T-01 | Orta | Playwright her zaman `USE_MOCKS=1` ile çalışıyor; gerçek API kod yolunun uçtan uca testi yok | `apps/web/playwright.config.ts:43` | V2-19 | Açık |
 | T-02 | Orta | Uçtan uca testlerde axe yok (v1'de ayrı bir betikle ölçüldü) | `apps/web/e2e/` | V2-19 | Açık |
 | T-03 | Orta | API test boşlukları: katalog (bayiler, modeller, ek hizmetler, kurlar), `device.ts`, `user-view.ts`, doğrulama pipe'ının HTTP davranışı, geçmiş tarihli rezervasyon, rezervasyon hacmi | `apps/api/src/` | V2-19 | Açık |
-| T-04 | Düşük | CI'da migration kayma kontrolü, `pnpm audit` ve bağımlılık güncelleme botu yok | `.github/workflows/ci.yml` | V2-11, V2-18 | Açık |
+| T-04 | Düşük | CI'da migration kayma kontrolü, `pnpm audit` ve bağımlılık güncelleme botu yok | `.github/workflows/ci.yml` | V2-11, V2-18 | Kısmen düzeltildi (audit ve güncelleme botu: V2-18, #308; migration kayma kontrolü V2-11'de) |
 | T-05 | Orta | e2e: sayfa React tarafından hidrate edilmeden tıklayan ya da üzerine gelen testler tam paket koşusunda (özellikle CI'da) arada düşüyor: işleyici henüz bağlı olmadığı için menü ya da balon hiç açılmıyor. 24-25 Ekim'de `main`'de ve iki PR'da CI'ı kırdı (`contact-link`, `branches`, `header`). Gerçek ürün hatası değil, testin yarışı | `apps/web/e2e/` | V2-19 | Düzeltildi (kararsız çıkan testler için; `e2e/hydration.ts` yardımcısı `hydrated()`, kanıtı `e2e/hydration.spec.ts`). Diğer e2e testleri aynı deseni taşıyabilir: V2-19'da yeni test yazarken ve axe turunda `hydrated()` kullanılır |
 
 ### 1.7 Sağlam bulunanlar (korunacak)

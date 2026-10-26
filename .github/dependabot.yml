@@ -1,0 +1,21 @@
+# Weekly dependency updates (V2-18, QUALITY G-18, T-04). Small and patch updates arrive together in one pull request,
+# a bigger (major) update arrives alone so it can be read and tried on its own. At most 5 open at a time.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]
+
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      actions:
+        update-types: [minor, patch]

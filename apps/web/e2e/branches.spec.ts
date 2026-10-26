@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { hydrated } from "./hydration";
 
 // The branches page (SPEC §2.6.1): open or closed on each card, rent from here, nearest first, kinds.
 test.beforeEach(async ({ context }) => {
@@ -38,18 +39,18 @@ test("the kind chips narrow the list to airports or city offices", async ({ page
   const kinds = page.getByRole("group", { name: "Bayi türü" });
   await expect(kinds.getByRole("button", { name: /^Tümü/ })).toHaveAttribute("aria-pressed", "true");
 
-  await kinds.getByRole("button", { name: /^Havalimanı/ }).click();
+  await (await hydrated(kinds.getByRole("button", { name: /^Havalimanı/ }))).click();
   await expect(kinds.getByRole("button", { name: /^Havalimanı/ })).toHaveAttribute("aria-pressed", "true");
   const airports = await cards(page).count();
   expect(airports).toBeGreaterThan(0);
   expect(airports).toBeLessThan(15);
   await expect(cards(page).filter({ hasNotText: "Havalimanı" })).toHaveCount(0);
 
-  await kinds.getByRole("button", { name: /^Şehir merkezi/ }).click();
+  await (await hydrated(kinds.getByRole("button", { name: /^Şehir merkezi/ }))).click();
   await expect(cards(page).filter({ hasText: "Havalimanı" })).toHaveCount(0);
   expect((await cards(page).count()) + airports).toBe(15);
 
-  await kinds.getByRole("button", { name: /^Tümü/ }).click();
+  await (await hydrated(kinds.getByRole("button", { name: /^Tümü/ }))).click();
   await expect(cards(page)).toHaveCount(15);
 });
 
@@ -58,7 +59,7 @@ test("nearest first: the cards are ordered by distance and say how far each is",
   await context.grantPermissions(["geolocation"]);
   await context.setGeolocation({ latitude: 38.42, longitude: 27.14 });
   await page.goto("/bayilerimiz");
-  await page.getByRole("button", { name: "Bana en yakın bayiler" }).click();
+  await (await hydrated(page.getByRole("button", { name: "Bana en yakın bayiler" }))).click();
 
   await expect(page.getByText("Bayiler size en yakından başlayarak sıralandı.")).toBeVisible();
   // Izmir's own branch comes first and the km grow down the list.
@@ -69,14 +70,14 @@ test("nearest first: the cards are ordered by distance and say how far each is",
   expect(kms.length).toBe(15);
   expect(kms.every((value, index) => index === 0 || value >= kms[index - 1])).toBe(true);
 
-  await page.getByRole("button", { name: "Sıralamayı kaldır" }).click();
+  await (await hydrated(page.getByRole("button", { name: "Sıralamayı kaldır" }))).click();
   await expect(page.getByText(/yaklaşık \d+ km/)).toHaveCount(0);
 });
 
 test("nearest first says so when the position is refused, and the list stays as it was", async ({ page, context }) => {
   await context.clearPermissions();
   await page.goto("/bayilerimiz");
-  await page.getByRole("button", { name: "Bana en yakın bayiler" }).click();
+  await (await hydrated(page.getByRole("button", { name: "Bana en yakın bayiler" }))).click();
   await expect(page.getByText(/Konum izni verilmedi|Konumunuz alınamadı/)).toBeVisible();
   await expect(cards(page)).toHaveCount(15);
 });
@@ -84,7 +85,7 @@ test("nearest first says so when the position is refused, and the list stays as 
 test("Buradan kirala opens the rental box with that branch chosen as pick-up and return", async ({ page }) => {
   await page.goto("/bayilerimiz");
   const card = cards(page).filter({ hasText: "Esenboğa" });
-  await card.getByRole("link", { name: /Buradan kirala/ }).click();
+  await (await hydrated(card.getByRole("link", { name: /Buradan kirala/ }))).click();
   await expect(page).toHaveURL(/\/\?alis=ankara-esenboga#kiralama/);
   await expect(page.getByRole("combobox", { name: "Alış bayisi" })).toContainText("Ankara · Esenboğa");
   await expect(page.getByRole("combobox", { name: "Bırakacağınız bayi" })).toContainText("Ankara · Esenboğa");
