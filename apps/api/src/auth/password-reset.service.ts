@@ -1,7 +1,9 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { FormReader, rateLimited, type FormInput } from '../forms/form-input.js';
+import { parseInput } from '../common/zod-validation.js';
+import { rateLimited } from '../forms/form-input.js';
 import { RateLimiter } from '../forms/rate-limiter.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { forgotPasswordSchema, resetPasswordSchema } from './auth.schemas.js';
 import { hashPassword } from './password.js';
 import { ResetLinkNotifier } from './reset-link-notifier.js';
 import { hashSessionToken, newSessionToken } from './session-token.js';
@@ -13,8 +15,6 @@ export const FORGOT_LIMIT_PER_EMAIL_PER_HOUR = 3;
 export const RESET_LIMIT_PER_15_MIN = 10;
 const HOUR_MS = 60 * 60 * 1000;
 const QUARTER_HOUR_MS = 15 * 60 * 1000;
-const PASSWORD_MIN = 8;
-const PASSWORD_MAX = 128;
 
 export function resetTokenInvalid(): HttpException {
   return new HttpException(
@@ -34,10 +34,8 @@ export class PasswordResetService {
   // Always resolves the same way whether or not the account exists, so the endpoint cannot be used
   // to find out who has an account. The per-e-mail limit counts every request, not just real accounts,
   // for the same reason.
-  async requestReset(input: FormInput, clientKey: string): Promise<void> {
-    const form = new FormReader(input);
-    const email = form.email('email').toLowerCase();
-    form.assertValid('Reset request is invalid');
+  async requestReset(input: unknown, clientKey: string): Promise<void> {
+    const { email } = parseInput(forgotPasswordSchema, input, 'Reset request is invalid');
 
     if (
       !this.limiter.allow(`forgot:${clientKey}`, FORGOT_LIMIT_PER_CLIENT_PER_HOUR, HOUR_MS) ||
@@ -67,15 +65,12 @@ export class PasswordResetService {
     void this.notifier.send(email, this.linkFor(user.locale, token), user.locale).catch(() => undefined);
   }
 
-  async resetPassword(input: FormInput, clientKey: string): Promise<void> {
+  async resetPassword(input: unknown, clientKey: string): Promise<void> {
     if (!this.limiter.allow(`reset:${clientKey}`, RESET_LIMIT_PER_15_MIN, QUARTER_HOUR_MS)) {
       throw rateLimited();
     }
 
-    const form = new FormReader(input);
-    const token = form.required('token', 200);
-    const password = this.readPassword(input.password, form);
-    form.assertValid('Reset data is invalid');
+    const { token, password } = parseInput(resetPasswordSchema, input, 'Reset data is invalid');
 
     // Only the hash is stored, so a leaked database cannot be used to reset anyone's password.
     const row = await this.prisma.passwordResetToken.findUnique({
@@ -105,19 +100,5 @@ export class PasswordResetService {
   private linkFor(locale: 'TR' | 'EN', token: string): string {
     const base = (process.env.WEB_URL ?? 'http://localhost:3000').replace(/\/+$/, '');
     return `${base}/${locale.toLowerCase()}/sifre-sifirla/yeni?token=${encodeURIComponent(token)}`;
-  }
-
-  private readPassword(raw: unknown, form: FormReader): string {
-    if (raw === undefined || raw === null || raw === '') {
-      form.errors.password = 'REQUIRED';
-      return '';
-    }
-    if (typeof raw !== 'string') {
-      form.errors.password = 'INVALID_FORMAT';
-      return '';
-    }
-    if (raw.length < PASSWORD_MIN) form.errors.password = 'TOO_SHORT';
-    else if (raw.length > PASSWORD_MAX) form.errors.password = 'TOO_LONG';
-    return raw;
   }
 }

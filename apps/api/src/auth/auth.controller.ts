@@ -2,7 +2,6 @@ import { Body, Controller, HttpCode, Inject, Post, Req, Res } from '@nestjs/comm
 import { ApiBody, ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import type { Request, Response } from 'express';
 import { isProduction } from '../config/runtime.js';
-import { asFormInput } from '../forms/form-input.js';
 import { clientKeyOf } from '../forms/rate-limiter.js';
 import { GoogleAuthService } from './google-auth.service.js';
 import { AuthService, type SessionStart } from './auth.service.js';
@@ -54,7 +53,7 @@ export class AuthController {
     @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
   ): Promise<UserResponse> {
-    const session = await this.authService.register(asFormInput(body), clientKeyOf(request), request.headers['user-agent']);
+    const session = await this.authService.register(body, clientKeyOf(request), request.headers['user-agent']);
     setSessionCookie(response, session);
     return toUserResponse(session.user);
   }
@@ -77,7 +76,7 @@ export class AuthController {
     @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
   ): Promise<UserResponse> {
-    const session = await this.authService.login(asFormInput(body), clientKeyOf(request), request.headers['user-agent']);
+    const session = await this.authService.login(body, clientKeyOf(request), request.headers['user-agent']);
     setSessionCookie(response, session);
     return toUserResponse(session.user);
   }
@@ -109,7 +108,7 @@ export class AuthController {
     @Res({ passthrough: true }) response: Response,
   ): Promise<UserResponse> {
     const { session, created } = await this.googleAuth.signIn(
-      asFormInput(body),
+      body,
       clientKeyOf(request),
       request.headers['user-agent'],
     );

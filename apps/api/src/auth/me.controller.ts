@@ -1,7 +1,6 @@
 import { Body, Controller, Delete, Get, HttpCode, Inject, Param, Patch, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { ApiBody, ApiCookieAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import type { Request, Response } from 'express';
-import { asFormInput } from '../forms/form-input.js';
 import { AccountSecurityService, type SessionView } from './account-security.service.js';
 import { clearSessionCookie } from './auth.controller.js';
 import { AuthService } from './auth.service.js';
@@ -32,7 +31,7 @@ export class MeController {
 
   @Patch()
   async update(@CurrentUser() user: UserRow, @Body() body: unknown): Promise<UserResponse> {
-    return toUserResponse(await this.authService.updateProfile(user.id, asFormInput(body)));
+    return toUserResponse(await this.authService.updateProfile(user.id, body));
   }
 
   @Post('password')
@@ -48,7 +47,7 @@ export class MeController {
     },
   })
   async changePassword(@CurrentUser() user: UserRow, @Req() request: Request, @Body() body: unknown): Promise<void> {
-    await this.security.changePassword(user, this.currentTokenHash(request), asFormInput(body));
+    await this.security.changePassword(user, this.currentTokenHash(request), body);
   }
 
   @Get('sessions')

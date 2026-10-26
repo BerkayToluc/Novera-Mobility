@@ -1,7 +1,6 @@
 import { Body, Controller, HttpCode, Inject, Post, Req } from '@nestjs/common';
 import { ApiAcceptedResponse, ApiBody, ApiNoContentResponse, ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
-import { asFormInput } from '../forms/form-input.js';
 import { clientKeyOf } from '../forms/rate-limiter.js';
 import { PasswordResetService } from './password-reset.service.js';
 
@@ -17,7 +16,7 @@ export class PasswordResetController {
   })
   @ApiAcceptedResponse({ description: 'Request accepted, whether or not the e-mail has an account' })
   async forgot(@Body() body: unknown, @Req() request: Request): Promise<void> {
-    await this.reset.requestReset(asFormInput(body), clientKeyOf(request));
+    await this.reset.requestReset(body, clientKeyOf(request));
   }
 
   @Post('reset-password')
@@ -31,6 +30,6 @@ export class PasswordResetController {
   })
   @ApiNoContentResponse({ description: 'Password changed; every session is closed' })
   async resetPassword(@Body() body: unknown, @Req() request: Request): Promise<void> {
-    await this.reset.resetPassword(asFormInput(body), clientKeyOf(request));
+    await this.reset.resetPassword(body, clientKeyOf(request));
   }
 }

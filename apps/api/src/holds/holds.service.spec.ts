@@ -7,7 +7,6 @@ import {
   HOLD_MINUTES,
   HoldsService,
   MAX_ACTIVE_HOLDS_PER_CLIENT,
-  type CreateHoldInput,
 } from './holds.service.js';
 import { daysAhead, slotAtLeast, slotBefore } from '../reservations/dates.testing.js';
 
@@ -119,7 +118,7 @@ describeDb('POST /holds araç tutma (gerçek PostgreSQL)', () => {
     s: { branchId: string; vehicleId: string },
     startAt: Date = START,
     endAt: Date = END,
-  ): CreateHoldInput {
+  ): Record<string, unknown> {
     return {
       vehicleId: s.vehicleId,
       pickupBranchId: s.branchId,

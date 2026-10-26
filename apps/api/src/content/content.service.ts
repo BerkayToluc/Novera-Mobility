@@ -1,5 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { parseInput } from '../common/zod-validation.js';
+import { faqQuerySchema } from '../catalog/catalog.schemas.js';
 import type { FaqAudience } from '../generated/prisma/client.js';
 
 // GET /faq, /products, /products/:slug, /services (BACKLOG #33, openapi.yaml).
@@ -8,29 +10,16 @@ import type { FaqAudience } from '../generated/prisma/client.js';
 export type LocalizedText = { tr: string; en: string };
 export type LocalizedList = { tr: string[]; en: string[] };
 
-const AUDIENCES = new Set<string>(['INDIVIDUAL', 'CORPORATE']);
-
 @Injectable()
 export class ContentService {
   constructor(private readonly prisma: PrismaService) {}
 
   // audience verilmezse tüm sorular döner (Yardım merkezi); verilirse yalnızca o kitle.
   async getFaq(audience?: unknown) {
-    if (audience !== undefined) {
-      if (typeof audience !== 'string' || !AUDIENCES.has(audience)) {
-        throw new HttpException(
-          {
-            code: 'VALIDATION_FAILED',
-            message: 'Invalid audience parameter',
-            fieldErrors: { audience: 'INVALID_FORMAT' },
-          },
-          HttpStatus.UNPROCESSABLE_ENTITY,
-        );
-      }
-    }
+    const { audience: chosen } = parseInput(faqQuerySchema, { audience }, 'Invalid audience parameter');
 
     const items = await this.prisma.faqItem.findMany({
-      where: audience ? { audience: audience as FaqAudience } : undefined,
+      where: chosen ? { audience: chosen as FaqAudience } : undefined,
       // Enum sırası tanım sırasıdır: önce INDIVIDUAL, sonra CORPORATE.
       orderBy: [{ audience: 'asc' }, { sortOrder: 'asc' }],
     });
