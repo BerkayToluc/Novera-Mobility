@@ -98,6 +98,7 @@
 | T-02 | Orta | Uçtan uca testlerde axe yok (v1'de ayrı bir betikle ölçüldü) | `apps/web/e2e/` | V2-19 | Açık |
 | T-03 | Orta | API test boşlukları: katalog (bayiler, modeller, ek hizmetler, kurlar), `device.ts`, `user-view.ts`, doğrulama pipe'ının HTTP davranışı, geçmiş tarihli rezervasyon, rezervasyon hacmi | `apps/api/src/` | V2-19 | Açık |
 | T-04 | Düşük | CI'da migration kayma kontrolü, `pnpm audit` ve bağımlılık güncelleme botu yok | `.github/workflows/ci.yml` | V2-11, V2-18 | Açık |
+| T-05 | Orta | e2e: sayfa React tarafından hidrate edilmeden tıklayan ya da üzerine gelen testler tam paket koşusunda (özellikle CI'da) arada düşüyor: işleyici henüz bağlı olmadığı için menü ya da balon hiç açılmıyor. 24-25 Ekim'de `main`'de ve iki PR'da CI'ı kırdı (`contact-link`, `branches`, `header`). Gerçek ürün hatası değil, testin yarışı | `apps/web/e2e/` | V2-19 | Düzeltildi (kararsız çıkan testler için; `e2e/hydration.ts` yardımcısı `hydrated()`, kanıtı `e2e/hydration.spec.ts`). Diğer e2e testleri aynı deseni taşıyabilir: V2-19'da yeni test yazarken ve axe turunda `hydrated()` kullanılır |
 
 ### 1.7 Sağlam bulunanlar (korunacak)
 

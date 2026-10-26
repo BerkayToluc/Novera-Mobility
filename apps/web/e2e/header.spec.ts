@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { hydrated } from "./hydration";
 
 // The header (SPEC §2.8): the floating pill, links that sit together, only Products opening a list,
 // a language menu with flags, no theme control, an icon for a signed-in account.
@@ -13,7 +14,9 @@ test("desktop: Products opens a list, Services is a plain link", async ({ page }
   await page.goto("/");
   const header = page.getByRole("banner");
 
-  await header.getByRole("button", { name: "Ürünler" }).click();
+  const products = header.getByRole("button", { name: "Ürünler" });
+  await hydrated(products);
+  await products.click();
   await expect(page.getByRole("link", { name: "Tüm ürünler" })).toBeVisible();
   await page.keyboard.press("Escape");
   await expect(page.getByRole("link", { name: "Tüm ürünler" })).toHaveCount(0);
@@ -28,7 +31,9 @@ test("desktop: the language menu lists both languages and switches", async ({ pa
   await page.goto("/");
   const header = page.getByRole("banner");
 
-  await header.getByRole("button", { name: "Dil: Türkçe" }).click();
+  const language = header.getByRole("button", { name: "Dil: Türkçe" });
+  await hydrated(language);
+  await language.click();
   await expect(page.getByRole("link", { name: "Türkçe" })).toHaveAttribute("aria-current", "true");
   // Each language has its flag beside the name.
   await expect(page.getByRole("link", { name: "English" }).locator("svg")).toHaveCount(1);
@@ -62,7 +67,9 @@ test("a visitor sees Giriş Yap and a signed-in account sees an icon named Hesab
 test("phone: the menu panel has Services as a link and no theme", async ({ page }) => {
   test.skip((page.viewportSize()?.width ?? 0) >= 1280, "the panel is the phone and tablet layout");
   await page.goto("/");
-  await page.getByRole("button", { name: "Menüyü aç" }).click();
+  const open = page.getByRole("button", { name: "Menüyü aç" });
+  await hydrated(open);
+  await open.click();
   const panel = page.getByRole("dialog", { name: "Menü" });
   await expect(panel.getByRole("link", { name: "Hizmetler" })).toBeVisible();
   await expect(panel.getByText(/^Tema$/)).toHaveCount(0);
@@ -74,6 +81,7 @@ test("desktop: Products opens when the pointer rests on it, and a highlight foll
   test.skip((page.viewportSize()?.width ?? 0) < 1280, "the inline menu is the desktop layout");
   await page.goto("/");
   const trigger = page.getByRole("banner").getByRole("button", { name: "Ürünler" });
+  await hydrated(trigger);
   await trigger.hover();
   const all = page.getByRole("link", { name: "Tüm ürünler" });
   await expect(all).toBeVisible();

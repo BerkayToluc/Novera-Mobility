@@ -20,8 +20,13 @@ test("every card says whether the branch is open now", async ({ page }) => {
 
 test("the heading is centred over the fields", async ({ page }) => {
   await page.goto("/bayilerimiz");
-  const heading = await page.getByRole("heading", { level: 1, name: "Bayilerimiz" }).boundingBox();
-  const field = await page.getByRole("button", { name: "Şehir", exact: true }).boundingBox();
+  // The boxes are read once the elements are on screen: the box of one that is not there yet is `null`.
+  const title = page.getByRole("heading", { level: 1, name: "Bayilerimiz" });
+  const city = page.getByRole("button", { name: "Şehir", exact: true });
+  await expect(title).toBeVisible();
+  await expect(city).toBeVisible();
+  const heading = await title.boundingBox();
+  const field = await city.boundingBox();
   const viewport = page.viewportSize()!;
   expect(heading && field).toBeTruthy();
   // The heading's middle is the middle of the page.
