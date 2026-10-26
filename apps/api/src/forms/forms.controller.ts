@@ -6,7 +6,6 @@ import { CurrentUser, SessionGuard } from '../auth/session.guard.js';
 import { SESSION_COOKIE, readCookie } from '../auth/session-token.js';
 import type { UserRow } from '../auth/user-view.js';
 import { ContactService } from './contact.service.js';
-import { asFormInput } from './form-input.js';
 import { QuotesService, type QuoteReceived, type QuoteSummaryView } from './quotes.service.js';
 import { clientKeyOf } from './rate-limiter.js';
 
@@ -37,7 +36,7 @@ export class FormsController {
   })
   @ApiCreatedResponse({ description: 'Mesaj alındı' })
   contact(@Body() body: unknown, @Req() request: Request): Promise<{ received: true }> {
-    return this.contactService.create(asFormInput(body), clientKeyOf(request));
+    return this.contactService.create(body, clientKeyOf(request));
   }
 
   @Post('quotes')
@@ -66,7 +65,7 @@ export class FormsController {
     // Visitors may send a request; when a session is present the request is linked to the account.
     const token = readCookie(request.headers.cookie, SESSION_COOKIE);
     const user = token ? await this.auth.authenticate(token) : null;
-    return this.quotesService.create(asFormInput(body), clientKeyOf(request), user?.id ?? null);
+    return this.quotesService.create(body, clientKeyOf(request), user?.id ?? null);
   }
 
   @Get('me/quotes')

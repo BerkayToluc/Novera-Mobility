@@ -4,7 +4,6 @@ import type { Request } from 'express';
 import { clientKeyOf } from '../forms/rate-limiter.js';
 import {
   HoldsService,
-  type CreateHoldInput,
   type HoldResponse,
 } from './holds.service.js';
 
@@ -45,10 +44,10 @@ export class HoldsController {
     },
   })
   create(
-    @Body() body: CreateHoldInput,
+    @Body() body: unknown,
     @Req() request: Request,
   ): Promise<HoldResponse> {
-    return this.holdsService.create(body ?? {}, clientKeyOf(request));
+    return this.holdsService.create(body, clientKeyOf(request));
   }
 
   @Delete('holds/:id')

@@ -1,11 +1,9 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { Currency } from '../generated/prisma/client.js';
-import { startWindowError } from '../reservations/booking-window.js';
+import { parseInput } from '../common/zod-validation.js';
+import { currencyQuerySchema, vehicleSearchSchema } from './catalog.schemas.js';
 
-const VALID_CURRENCIES = new Set<string>(['TRY', 'EUR', 'USD']);
-const UUID_REGEX =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const FALLBACK_RATES: Record<Currency, number> = {
   TRY: 1,
@@ -25,26 +23,9 @@ export interface SearchVehiclesQuery {
 export class CatalogService {
   constructor(private readonly prisma: PrismaService) {}
 
+  // `?currency=` left out or empty means TRY; anything outside the list is 422 (ADR-26).
   parseCurrency(raw?: string): Currency {
-    if (!raw) return 'TRY';
-    if (!VALID_CURRENCIES.has(raw)) {
-      throw new HttpException(
-        {
-          code: 'VALIDATION_FAILED',
-          message: 'Invalid currency parameter',
-          fieldErrors: { currency: 'INVALID_FORMAT' },
-        },
-        HttpStatus.UNPROCESSABLE_ENTITY,
-      );
-    }
-    return raw as Currency;
-  }
-
-  private isThirtyMinuteSlot(date: Date): boolean {
-    const minutes = date.getUTCMinutes();
-    const seconds = date.getUTCSeconds();
-    const ms = date.getUTCMilliseconds();
-    return (minutes === 0 || minutes === 30) && seconds === 0 && ms === 0;
+    return parseInput(currencyQuerySchema, { currency: raw }, 'Invalid currency parameter').currency ?? 'TRY';
   }
 
   private async getRate(currency: Currency): Promise<number> {
@@ -161,75 +142,10 @@ export class CatalogService {
   }
 
   async getAvailableVehicles(query: SearchVehiclesQuery) {
+    const search = parseInput(vehicleSearchSchema(new Date()), query, 'Vehicle search query validation failed');
     const fieldErrors: Record<string, string> = {};
-
-    if (!query.pickupBranchId) {
-      fieldErrors.pickupBranchId = 'REQUIRED';
-    } else if (!UUID_REGEX.test(query.pickupBranchId)) {
-      fieldErrors.pickupBranchId = 'INVALID_FORMAT';
-    }
-
-    if (!query.returnBranchId) {
-      fieldErrors.returnBranchId = 'REQUIRED';
-    } else if (!UUID_REGEX.test(query.returnBranchId)) {
-      fieldErrors.returnBranchId = 'INVALID_FORMAT';
-    }
-
-    let startDate: Date | null = null;
-    let endDate: Date | null = null;
-
-    if (!query.startAt) {
-      fieldErrors.startAt = 'REQUIRED';
-    } else {
-      const parsed = new Date(query.startAt);
-      if (Number.isNaN(parsed.getTime())) {
-        fieldErrors.startAt = 'INVALID_FORMAT';
-      } else if (!this.isThirtyMinuteSlot(parsed)) {
-        fieldErrors.startAt = 'NOT_IN_SLOT';
-      } else {
-        const windowError = startWindowError(parsed, new Date());
-        if (windowError) fieldErrors.startAt = windowError;
-        startDate = parsed;
-      }
-    }
-
-    if (!query.endAt) {
-      fieldErrors.endAt = 'REQUIRED';
-    } else {
-      const parsed = new Date(query.endAt);
-      if (Number.isNaN(parsed.getTime())) {
-        fieldErrors.endAt = 'INVALID_FORMAT';
-      } else if (!this.isThirtyMinuteSlot(parsed)) {
-        fieldErrors.endAt = 'NOT_IN_SLOT';
-      } else {
-        endDate = parsed;
-      }
-    }
-
-    if (query.currency && !VALID_CURRENCIES.has(query.currency)) {
-      fieldErrors.currency = 'INVALID_FORMAT';
-    }
-
-    if (startDate && endDate && endDate.getTime() <= startDate.getTime()) {
-      fieldErrors.endAt = 'INVALID_DATE_RANGE';
-    }
-
-    if (Object.keys(fieldErrors).length > 0) {
-      throw new HttpException(
-        {
-          code: 'VALIDATION_FAILED',
-          message: 'Vehicle search query validation failed',
-          fieldErrors,
-        },
-        HttpStatus.UNPROCESSABLE_ENTITY,
-      );
-    }
-
-    const pickupBranchId = query.pickupBranchId!;
-    const returnBranchId = query.returnBranchId!;
-    const startAt = startDate!;
-    const endAt = endDate!;
-    const currency = (query.currency as Currency | undefined) ?? 'TRY';
+    const { pickupBranchId, returnBranchId, startAt, endAt } = search;
+    const currency = search.currency ?? 'TRY';
 
     // Bayilerin veritabanında var olduğunu kontrol et
     const [pickupBranch, returnBranch] = await Promise.all([

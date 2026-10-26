@@ -1,5 +1,4 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { configureApp } from './app.setup.js';
@@ -11,14 +10,6 @@ async function bootstrap() {
 
   const app = await NestFactory.create(AppModule);
   configureApp(app);
-
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      forbidNonWhitelisted: true,
-      transform: true,
-    }),
-  );
 
   // The endpoint list is for development; in production it is off unless ENABLE_DOCS=1.
   if (docsEnabled(process.env)) {

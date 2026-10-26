@@ -1,6 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
-import { startWindowError } from '../reservations/booking-window.js';
+import { parseInput, validationFailed } from '../common/zod-validation.js';
+import { holdSchema } from './holds.schemas.js';
 
 // POST /holds: "Kirala"da aracı 15 dakika tutar (BACKLOG Y48, openapi.yaml /holds).
 export const HOLD_MINUTES = 15;
@@ -12,45 +13,10 @@ const STALE_HOLD_AGE_MS = 60 * 60 * 1000;
 const UUID_REGEX =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-export interface CreateHoldInput {
-  vehicleId?: unknown;
-  pickupBranchId?: unknown;
-  returnBranchId?: unknown;
-  startAt?: unknown;
-  endAt?: unknown;
-}
-
 export interface HoldResponse {
   id: string;
   vehicleId: string;
   expiresAt: string;
-}
-
-interface ValidHoldInput {
-  vehicleId: string;
-  pickupBranchId: string;
-  returnBranchId: string;
-  startAt: Date;
-  endAt: Date;
-}
-
-function validationFailed(
-  fieldErrors: Record<string, string>,
-  message: string,
-): HttpException {
-  return new HttpException(
-    { code: 'VALIDATION_FAILED', message, fieldErrors },
-    HttpStatus.UNPROCESSABLE_ENTITY,
-  );
-}
-
-function isThirtyMinuteSlot(date: Date): boolean {
-  const minutes = date.getUTCMinutes();
-  return (
-    (minutes === 0 || minutes === 30) &&
-    date.getUTCSeconds() === 0 &&
-    date.getUTCMilliseconds() === 0
-  );
 }
 
 @Injectable()
@@ -58,10 +24,10 @@ export class HoldsService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(
-    input: CreateHoldInput,
+    input: unknown,
     clientKey: string,
   ): Promise<HoldResponse> {
-    const valid = this.validate(input);
+    const valid = parseInput(holdSchema(new Date()), input, 'Hold request validation failed');
 
     // Bayiler var mı? (işlem dışında, kilit tutmadan)
     const branches = await this.prisma.branch.findMany({
@@ -195,63 +161,5 @@ export class HoldsService {
       vehicleId: hold.vehicleId,
       expiresAt: hold.expiresAt.toISOString(),
     };
-  }
-
-  private validate(input: CreateHoldInput): ValidHoldInput {
-    const fieldErrors: Record<string, string> = {};
-
-    const uuidField = (
-      name: 'vehicleId' | 'pickupBranchId' | 'returnBranchId',
-    ): string => {
-      const value = input[name];
-      if (value === undefined || value === null || value === '') {
-        fieldErrors[name] = 'REQUIRED';
-        return '';
-      }
-      if (typeof value !== 'string' || !UUID_REGEX.test(value)) {
-        fieldErrors[name] = 'INVALID_FORMAT';
-        return '';
-      }
-      return value;
-    };
-
-    const dateField = (name: 'startAt' | 'endAt'): Date | null => {
-      const value = input[name];
-      if (value === undefined || value === null || value === '') {
-        fieldErrors[name] = 'REQUIRED';
-        return null;
-      }
-      const parsed = typeof value === 'string' ? new Date(value) : null;
-      if (!parsed || Number.isNaN(parsed.getTime())) {
-        fieldErrors[name] = 'INVALID_FORMAT';
-        return null;
-      }
-      if (!isThirtyMinuteSlot(parsed)) {
-        fieldErrors[name] = 'NOT_IN_SLOT';
-        return null;
-      }
-      return parsed;
-    };
-
-    const vehicleId = uuidField('vehicleId');
-    const pickupBranchId = uuidField('pickupBranchId');
-    const returnBranchId = uuidField('returnBranchId');
-    const startAt = dateField('startAt');
-    const endAt = dateField('endAt');
-
-    if (startAt) {
-      const windowError = startWindowError(startAt, new Date());
-      if (windowError) fieldErrors.startAt = windowError;
-    }
-
-    if (startAt && endAt && endAt.getTime() <= startAt.getTime()) {
-      fieldErrors.endAt = 'INVALID_DATE_RANGE';
-    }
-
-    if (Object.keys(fieldErrors).length > 0 || !startAt || !endAt) {
-      throw validationFailed(fieldErrors, 'Hold request validation failed');
-    }
-
-    return { vehicleId, pickupBranchId, returnBranchId, startAt, endAt };
   }
 }

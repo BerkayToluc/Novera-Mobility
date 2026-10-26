@@ -1,8 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { FormReader, rateLimited, validationFailed, type FormInput } from '../forms/form-input.js';
+import { parseInput, validationFailed } from '../common/zod-validation.js';
+import { rateLimited } from '../forms/form-input.js';
 import { RateLimiter } from '../forms/rate-limiter.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { emailTaken, googleNotAllowed, googleTokenInvalid, googleUnavailable } from './auth.errors.js';
+import { googleSchema } from './auth.schemas.js';
 import type { SessionStart } from './auth.service.js';
 import { cleanUserAgent } from './device.js';
 import { GoogleTokenError, GoogleTokenVerifier, type GoogleProfile } from './google-verifier.js';
@@ -41,18 +43,13 @@ export class GoogleAuthService {
     @Inject(GoogleTokenVerifier) private readonly verifier: GoogleTokenVerifier,
   ) {}
 
-  async signIn(input: FormInput, clientKey: string, userAgent: unknown = null): Promise<GoogleSignInResult> {
+  async signIn(input: unknown, clientKey: string, userAgent: unknown = null): Promise<GoogleSignInResult> {
     if (!this.verifier.isConfigured()) throw googleUnavailable();
     if (!this.limiter.allow(`google:${clientKey}`, GOOGLE_LIMIT_PER_15_MIN, QUARTER_HOUR_MS)) {
       throw rateLimited();
     }
 
-    const form = new FormReader(input);
-    const credential = form.required('credential', 4096);
-    if (input.consent !== undefined && input.consent !== null && typeof input.consent !== 'boolean') {
-      form.errors.consent = 'INVALID_FORMAT';
-    }
-    form.assertValid('Google sign-in data is invalid');
+    const { credential, consent } = parseInput(googleSchema, input, 'Google sign-in data is invalid');
 
     let profile: GoogleProfile;
     try {
@@ -98,7 +95,7 @@ export class GoogleAuthService {
 
     // A new account needs the KVKK consent, like the password sign-up. The web shows the checkbox
     // and sends the same credential again with consent: true.
-    if (input.consent !== true) {
+    if (consent !== true) {
       throw validationFailed({ consent: 'CONSENT_REQUIRED' }, 'Consent is required to create an account');
     }
     const { firstName, lastName } = namesFrom(profile);

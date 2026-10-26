@@ -1,13 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
-import {
-  FormReader,
-  isSpam,
-  rateLimited,
-  spamDetected,
-  validationFailed,
-  type FormInput,
-} from './form-input.js';
+import { parseInput } from '../common/zod-validation.js';
+import { isSpam, rateLimited, spamDetected, validationFailed } from './form-input.js';
+import { quoteSchema } from './forms.schemas.js';
 import { RateLimiter } from './rate-limiter.js';
 
 // POST /quotes (BACKLOG #33, Y35, ADR-20): kurumsal teklif / görüşme talebi.
@@ -54,25 +49,25 @@ export class QuotesService {
     private readonly limiter: RateLimiter,
   ) {}
 
-  async create(input: FormInput, clientKey: string, userId: string | null = null): Promise<QuoteReceived> {
+  async create(input: unknown, clientKey: string, userId: string | null = null): Promise<QuoteReceived> {
     if (!this.limiter.allow(`quotes:${clientKey}`, QUOTE_LIMIT_PER_HOUR, HOUR_MS)) {
       throw rateLimited();
     }
     if (isSpam(input)) throw spamDetected();
 
-    const form = new FormReader(input);
-    const companyName = form.required('companyName', 160);
-    const contactName = form.optional('contactName', 120);
-    const phone = form.phone('phone');
-    const email = form.email('email');
-    const vehicleCount = form.integer('vehicleCount', 1, 10000);
-    const durationMonths = form.integer('durationMonths', 1, 120);
-    const vehicleType = form.required('vehicleType', 200);
-    const deliveryCities = form.optional('deliveryCities', 240);
-    const notes = form.optional('notes', 2000);
-    const productSlug = form.optional('productSlug', 80);
-    form.consent();
-    form.assertValid('Quote request validation failed');
+    // After the limit and the trap, as before: the limit counts invalid requests too.
+    const {
+      companyName,
+      contactName,
+      phone,
+      email,
+      vehicleCount,
+      durationMonths,
+      vehicleType,
+      deliveryCities,
+      notes,
+      productSlug,
+    } = parseInput(quoteSchema, input, 'Quote request validation failed');
 
     // Ürün seçildiyse var olmalı; yanlış slug erken ve açık biçimde yakalanır.
     let productId: string | null = null;
