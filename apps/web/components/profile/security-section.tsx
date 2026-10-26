@@ -9,6 +9,7 @@ import { Field } from "@/components/ui/field";
 import { PasswordInput } from "@/components/ui/password-input";
 import { changePassword, revokeOtherSessions } from "@/lib/account-actions";
 import { AuthRateLimitedError, requestPasswordReset } from "@/lib/auth-client";
+import { PASSWORD_MIN_LENGTH } from "@/lib/auth-schemas";
 import type { AccountSession } from "@/lib/account-sessions";
 
 // Security (SPEC §2.9, v0.8): change the password, and see where the account is signed in
@@ -41,7 +42,7 @@ export function SecuritySection({
     event.preventDefault();
     setSaved(false);
     setFormError(null);
-    const problem = current === "" ? "current" : next.length < 8 ? "short" : next === current ? "same" : next !== repeat ? "mismatch" : null;
+    const problem = current === "" ? "current" : next.length < PASSWORD_MIN_LENGTH ? "short" : next === current ? "same" : next !== repeat ? "mismatch" : null;
     setFieldError(problem);
     if (problem) return;
     startTransition(async () => {

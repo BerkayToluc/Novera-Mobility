@@ -4,7 +4,9 @@ import { cookies } from "next/headers";
 import { apiRequest } from "./api-request";
 import type { components } from "./api-types";
 import { NOTIFY_COOKIE, parseNotifications, SESSIONS_REVOKED_COOKIE, type Notifications } from "./notifications";
-import type { ProfileInput } from "./profile-schemas";
+import { changePasswordSchema, type AuthErrorMessages } from "./auth-schemas";
+import { profileSchema, type ProfileInput } from "./profile-schemas";
+import { codeMessages } from "./validation";
 import { getSession, MOCK_SESSION_COOKIE } from "./session";
 import { SESSION_COOKIE } from "./session-cookie";
 import { isMockMode } from "./mode";
@@ -18,6 +20,9 @@ export type ActionResult =
   | { ok: false; reason: "unavailable" | "invalid" | "incorrect" | "no_password" | "rate_limited" | "signin" };
 
 type User = components["schemas"]["User"];
+
+// Input is checked with the schemas the forms use (ADR-26); only the field names matter here.
+const messages = codeMessages<AuthErrorMessages & { same: string }>();
 
 async function signedIn(): Promise<boolean> {
   return (await getSession()) !== null;
@@ -34,9 +39,9 @@ function outcome(result: Awaited<ReturnType<typeof apiRequest>>): ActionResult {
 
 export async function updateProfile(input: ProfileInput): Promise<ActionResult> {
   if (!(await signedIn())) return { ok: false, reason: "signin" };
-  const firstName = input.firstName.trim();
-  const lastName = input.lastName.trim();
-  if (firstName === "" || lastName === "") return { ok: false, reason: "invalid" };
+  const parsed = profileSchema(messages).safeParse(input);
+  if (!parsed.success) return { ok: false, reason: "invalid" };
+  const { firstName, lastName } = parsed.data;
   if (isMockMode()) return { ok: false, reason: "unavailable" };
   return outcome(await apiRequest<User>("PATCH", "/me", { firstName, lastName }));
 }
@@ -52,11 +57,12 @@ export async function saveNotifications(input: Notifications): Promise<ActionRes
 
 export async function changePassword(current: string, next: string): Promise<ActionResult> {
   if (!(await signedIn())) return { ok: false, reason: "signin" };
-  // The same rule as sign-up (lib/auth-schemas.ts): at least eight characters, and not the old one.
-  if (current === "" || next.length < 8 || next === current) return { ok: false, reason: "invalid" };
+  // The same password rule as sign-up (lib/auth-schemas.ts), and not the old one.
+  const parsed = changePasswordSchema(messages).safeParse({ current, next });
+  if (!parsed.success) return { ok: false, reason: "invalid" };
   if (isMockMode()) return { ok: true };
 
-  const result = await apiRequest("POST", "/me/password", { currentPassword: current, newPassword: next });
+  const result = await apiRequest("POST", "/me/password", { currentPassword: parsed.data.current, newPassword: parsed.data.next });
   if (result.status === "invalid" && result.fieldErrors.currentPassword === "INCORRECT") {
     return { ok: false, reason: "incorrect" };
   }

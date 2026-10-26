@@ -19,6 +19,8 @@ import { getSession } from "@/lib/session";
 // What the driver section sends along with the booking. It is checked again here, in its plainest
 // form: the browser's check is for the visitor's comfort, this one is the one that counts. None of
 // it is stored, logged or put in an address (SPEC §2.10).
+const bookingParams = z.record(z.string(), z.string());
+
 const driverBody = z.object({
   birthDate: z.string().refine(isIsoDate),
   country: z.enum(LICENCE_COUNTRIES),
@@ -63,7 +65,10 @@ export async function placeReservation(
   // Same rule as the payment page: nobody pays without being signed in, sample mode included.
   if (!(await getSession())) return { ok: false, reason: "signin" };
 
-  const loaded = await loadBooking(params, await getCurrency());
+  const booking = bookingParams.safeParse(params);
+  if (!booking.success) return { ok: false, reason: "invalid" };
+
+  const loaded = await loadBooking(booking.data, await getCurrency());
   if (loaded.status === "missing") return { ok: false, reason: "invalid" };
   if (loaded.status === "expired") return { ok: false, reason: "expired" };
   if (loaded.status === "error") return { ok: false, reason: "unavailable" };

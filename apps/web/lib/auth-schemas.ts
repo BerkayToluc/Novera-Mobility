@@ -19,6 +19,10 @@ const emailField = (m: AuthErrorMessages) =>
     .min(1, m.required)
     .refine((value) => z.email().safeParse(value).success, m.email);
 
+// The one place the password rule lives: sign-up, reset and change all use it.
+export const passwordField = (m: Pick<AuthErrorMessages, "required" | "passwordMin">) =>
+  z.string().min(1, m.required).min(PASSWORD_MIN_LENGTH, m.passwordMin);
+
 export const loginSchema = (m: AuthErrorMessages) =>
   z.object({
     email: emailField(m),
@@ -31,7 +35,7 @@ export const registerSchema = (m: AuthErrorMessages) =>
     firstName: z.string().trim().min(1, m.required),
     lastName: z.string().trim().min(1, m.required),
     email: emailField(m),
-    password: z.string().min(1, m.required).min(PASSWORD_MIN_LENGTH, m.passwordMin),
+    password: passwordField(m),
     consent: z.boolean().refine((value) => value, m.consent),
   });
 
@@ -39,7 +43,13 @@ export const forgotPasswordSchema = (m: AuthErrorMessages) =>
   z.object({ email: emailField(m) });
 
 export const resetPasswordSchema = (m: AuthErrorMessages) =>
-  z.object({ password: z.string().min(1, m.required).min(PASSWORD_MIN_LENGTH, m.passwordMin) });
+  z.object({ password: passwordField(m) });
+
+// `current` is only "not empty": the old password was chosen under whatever rule applied then.
+export const changePasswordSchema = (m: Pick<AuthErrorMessages, "required" | "passwordMin"> & { same: string }) =>
+  z
+    .object({ current: z.string().min(1, m.required), next: passwordField(m) })
+    .refine((value) => value.next !== value.current, { path: ["next"], message: m.same });
 
 export type LoginInput = z.infer<ReturnType<typeof loginSchema>>;
 export type RegisterInput = z.infer<ReturnType<typeof registerSchema>>;

@@ -9,6 +9,15 @@ import { MOCK_GOOGLE_COOKIE, MOCK_SESSION_COOKIE, type AccountType } from "./ses
 import { SESSION_COOKIE, type SessionCookieChange } from "./session-cookie";
 import { THEME_COOKIE, THEME_COOKIE_MAX_AGE } from "./theme";
 import { isMockMode } from "./mode";
+import { loginSchema, registerSchema, type AuthErrorMessages } from "./auth-schemas";
+import { codeMessages } from "./validation";
+import { z } from "zod";
+
+// Server actions take whatever the network gives them, whatever the form's types promised (ADR-26): every
+// input goes through a schema first, and a wrong shape is an `invalid` answer, never an exception.
+const messages = codeMessages<AuthErrorMessages>();
+const accountKind = z.enum(["individual", "corporate"]);
+const googleBody = z.object({ credential: z.string().min(1), consent: z.boolean().optional() });
 
 // `locale` is the language the account asked for, so the form can open the page in it.
 // `invalid`: the input is malformed or, on sign-in, the e-mail or password is wrong (the API does
@@ -58,7 +67,9 @@ export type GoogleSignInResult =
 // the form asks and sends the same credential again. With USE_MOCKS=1 the sample account signs in, and the
 // MOCK_GOOGLE_COOKIE hook plays the other answers.
 export async function signInWithGoogle(credential: string, consent?: boolean): Promise<GoogleSignInResult> {
-  if (typeof credential !== "string" || credential === "") return { ok: false, reason: "invalid_token" };
+  const body = googleBody.safeParse({ credential, consent });
+  if (!body.success) return { ok: false, reason: "invalid_token" };
+  ({ credential, consent } = body.data);
 
   if (!isMockMode()) {
     const result = await apiRequest<User>("POST", "/auth/google", { credential, ...(consent ? { consent: true } : {}) });
@@ -93,11 +104,13 @@ export async function signInWithGoogle(credential: string, consent?: boolean): P
 // `POST /auth/login`: one endpoint for both tabs; a corporate account is told by `accountType` in the
 // answer, not by the tab.
 export async function signIn(kind: AccountType, email: string, password: string): Promise<SignInResult> {
-  if (kind !== "individual" && kind !== "corporate") return { ok: false, reason: "invalid" };
-  if (!email.includes("@") || password === "") return { ok: false, reason: "invalid" };
+  const account = accountKind.safeParse(kind);
+  const credentials = loginSchema(messages).safeParse({ email, password });
+  if (!account.success || !credentials.success) return { ok: false, reason: "invalid" };
+  ({ email, password } = credentials.data);
 
   if (!isMockMode()) {
-    const result = await apiRequest<User>("POST", "/auth/login", { email: email.trim(), password });
+    const result = await apiRequest<User>("POST", "/auth/login", { email, password });
     if (result.status === "ok") {
       if (!(await keepSession(result.sessionCookie))) return { ok: false, reason: "unavailable" };
       return { ok: true, locale: await applyPreferences(result.data) };
@@ -127,22 +140,12 @@ export async function signUp(input: {
   password: string;
   consent: boolean;
 }): Promise<SignInResult> {
-  const valid =
-    input.firstName.trim() !== "" &&
-    input.lastName.trim() !== "" &&
-    input.email.includes("@") &&
-    input.password.length >= 8 &&
-    input.consent === true;
-  if (!valid) return { ok: false, reason: "invalid" };
-  if (isMockMode()) return signIn("individual", input.email, input.password);
+  const parsed = registerSchema(messages).safeParse(input);
+  if (!parsed.success) return { ok: false, reason: "invalid" };
+  const body = parsed.data;
+  if (isMockMode()) return signIn("individual", body.email, body.password);
 
-  const result = await apiRequest<User>("POST", "/auth/register", {
-    email: input.email.trim(),
-    password: input.password,
-    firstName: input.firstName.trim(),
-    lastName: input.lastName.trim(),
-    consent: input.consent,
-  });
+  const result = await apiRequest<User>("POST", "/auth/register", body);
   if (result.status === "ok") {
     if (!(await keepSession(result.sessionCookie))) return { ok: false, reason: "unavailable" };
     return { ok: true, locale: await applyPreferences(result.data) };

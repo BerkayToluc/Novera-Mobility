@@ -13,6 +13,10 @@ import { QuoteFields } from "./quote-fields";
 
 type Sent = { email: string; reference: string };
 
+// The fields with a message of their own in the message files.
+const MESSAGED_FIELDS = ["company", "contactName", "email", "phone", "needs", "cities", "consent"] as const;
+type MessagedField = (typeof MESSAGED_FIELDS)[number];
+
 // The corporate request (SPEC §2.2.3, BACKLOG Y16): one form for the home page's corporate box
 // and the /kurumsal-teklif page. Once sent it turns into the confirmation in place.
 export function QuoteForm({ initialProduct = "", withProduct = false }: { initialProduct?: string; withProduct?: boolean }) {
@@ -38,6 +42,7 @@ export function QuoteForm({ initialProduct = "", withProduct = false }: { initia
     register,
     control,
     handleSubmit,
+    setError,
     reset,
     formState: { errors, isSubmitting },
   } = useForm<QuoteInput>({
@@ -54,11 +59,20 @@ export function QuoteForm({ initialProduct = "", withProduct = false }: { initia
     setTimeout(() => form.querySelector<HTMLElement>("[aria-invalid=\"true\"]")?.focus(), 0);
   }
 
+  // The fields the server rejected get the same message the browser's check would have given, beside the
+  // field. False when none of them has a message (a hidden or select field), so the form says it as a whole.
+  function markRejected(fields: string[]): boolean {
+    const known = fields.filter((field): field is MessagedField => (MESSAGED_FIELDS as readonly string[]).includes(field));
+    for (const field of known) setError(field, { type: "server", message: t(`errors.${field}`) });
+    return known.length > 0;
+  }
+
   async function onSubmit(values: QuoteInput) {
     setFormError(null);
     try {
       const result = await submitQuote(values);
       if (result.ok) setSent({ email: values.email, reference: result.reference });
+      else if (result.reason === "invalid" && markRejected(result.fields)) setFormError(null);
       else setFormError(t(result.reason === "invalid" ? "errors.invalid" : result.reason === "rate_limited" ? "errors.rateLimited" : "errors.unavailable"));
     } catch {
       setFormError(t("errors.generic"));
