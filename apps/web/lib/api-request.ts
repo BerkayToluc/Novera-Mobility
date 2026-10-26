@@ -1,4 +1,5 @@
 import "server-only";
+import { parseRetryAfter } from "./rate-limit";
 import { cookies } from "next/headers";
 import { apiHeaders } from "./api-headers";
 import { parseSessionCookie, SESSION_COOKIE, type SessionCookieChange } from "./session-cookie";
@@ -14,7 +15,7 @@ export type ApiResult<T> =
   | { status: "not_found" }
   | { status: "forbidden"; code?: string }
   | { status: "conflict"; code?: string }
-  | { status: "rate_limited" }
+  | { status: "rate_limited"; retryAfter: number | null }
   // `code` is set when the API itself answered (a 5xx with its own code); not when it could not be reached.
   | { status: "unavailable"; code?: string };
 
@@ -52,7 +53,7 @@ export async function apiRequest<T = null>(
     }
     if (response.status === 401) return { status: "unauthorized" };
     if (response.status === 404) return { status: "not_found" };
-    if (response.status === 429) return { status: "rate_limited" };
+    if (response.status === 429) return { status: "rate_limited", retryAfter: parseRetryAfter(response.headers.get("retry-after")) };
     const error = (await response.json().catch(() => null)) as ErrorBody | null;
     if (response.status === 403) return { status: "forbidden", code: error?.code };
     if (response.status === 409) return { status: "conflict", code: error?.code };

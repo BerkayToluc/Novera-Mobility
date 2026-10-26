@@ -17,7 +17,7 @@ import { isMockMode } from "./mode";
 // `incorrect`: the current password is wrong; `rate_limited`: too many tries.
 export type ActionResult =
   | { ok: true }
-  | { ok: false; reason: "unavailable" | "invalid" | "incorrect" | "no_password" | "rate_limited" | "signin" };
+  | { ok: false; reason: "unavailable" | "invalid" | "incorrect" | "no_password" | "rate_limited" | "signin"; retryAfter?: number | null };
 
 type User = components["schemas"]["User"];
 
@@ -33,7 +33,7 @@ function outcome(result: Awaited<ReturnType<typeof apiRequest>>): ActionResult {
   if (result.status === "ok") return { ok: true };
   if (result.status === "unauthorized") return { ok: false, reason: "signin" };
   if (result.status === "invalid") return { ok: false, reason: "invalid" };
-  if (result.status === "rate_limited") return { ok: false, reason: "rate_limited" };
+  if (result.status === "rate_limited") return { ok: false, reason: "rate_limited", retryAfter: result.retryAfter };
   return { ok: false, reason: "unavailable" };
 }
 

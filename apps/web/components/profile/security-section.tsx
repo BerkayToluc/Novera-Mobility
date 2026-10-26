@@ -11,6 +11,7 @@ import { changePassword, revokeOtherSessions } from "@/lib/account-actions";
 import { AuthRateLimitedError, requestPasswordReset } from "@/lib/auth-client";
 import { PASSWORD_MIN_LENGTH } from "@/lib/auth-schemas";
 import type { AccountSession } from "@/lib/account-sessions";
+import { rateLimitMessage } from "@/lib/rate-limit";
 
 // Security (SPEC §2.9, v0.8): change the password, and see where the account is signed in
 // (`POST /me/password`, `GET /me/sessions`). `sessions` is null when the list could not be loaded.
@@ -27,6 +28,7 @@ export function SecuritySection({
   const t = useTranslations("Profile.settings.security");
   const authT = useTranslations("Auth");
   const errorT = useTranslations("Auth.errors");
+  const limitT = useTranslations("RateLimit");
   const [current, setCurrent] = useState("");
   const [next, setNext] = useState("");
   const [repeat, setRepeat] = useState("");
@@ -49,7 +51,7 @@ export function SecuritySection({
       const result = await changePassword(current, next);
       if (!result.ok) {
         if (result.reason === "incorrect") setFieldError("incorrect");
-        else if (result.reason === "rate_limited") setFormError(errorT("rateLimited"));
+        else if (result.reason === "rate_limited") setFormError(rateLimitMessage(limitT, result.retryAfter));
         else setFormError(result.reason === "unavailable" ? errorT("unavailable") : errorT("generic"));
         return;
       }
@@ -70,7 +72,7 @@ export function SecuritySection({
         await requestPasswordReset({ email });
         setLinkSent(true);
       } catch (failure) {
-        setFormError(failure instanceof AuthRateLimitedError ? errorT("rateLimited") : errorT("unavailable"));
+        setFormError(failure instanceof AuthRateLimitedError ? rateLimitMessage(limitT, failure.retryAfter) : errorT("unavailable"));
       }
     });
   }

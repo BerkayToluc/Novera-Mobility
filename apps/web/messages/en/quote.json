@@ -47,8 +47,7 @@
       "consent": "Accept the privacy notice to continue.",
       "invalid": "Your request looks incomplete. Check the fields and send it again.",
       "unavailable": "The quote service is not available right now. Please try again later.",
-      "generic": "Your request could not be sent. Please try again.",
-      "rateLimited": "Too many attempts. Please try again in a while."
+      "generic": "Your request could not be sent. Please try again."
     },
     "sent": {
       "title": "We have your request",

@@ -12,11 +12,13 @@ import { AuthRateLimitedError, AuthUnavailableError, ResetLinkInvalidError, rese
 import { PASSWORD_MIN_LENGTH, resetPasswordSchema, type ResetPasswordInput } from "@/lib/auth-schemas";
 import { FormError } from "./form-error";
 import { useAuthErrorMessages } from "./use-auth-messages";
+import { rateLimitMessage } from "@/lib/rate-limit";
 
 // The token comes from the link in the e-mail. A link that is wrong, used or too old is told apart
 // from a failure of the service, because only the first needs a new link.
 export function ResetPasswordForm({ token }: { token: string }) {
   const t = useTranslations("Auth");
+  const limitT = useTranslations("RateLimit");
   const messages = useAuthErrorMessages();
   const schema = useMemo(() => resetPasswordSchema(messages), [messages]);
   const [formError, setFormError] = useState<string | null>(null);
@@ -40,7 +42,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
       setDone(true);
     } catch (error) {
       if (error instanceof ResetLinkInvalidError) setLinkInvalid(true);
-      else if (error instanceof AuthRateLimitedError) setFormError(t("errors.rateLimited"));
+      else if (error instanceof AuthRateLimitedError) setFormError(rateLimitMessage(limitT, error.retryAfter));
       else if (error instanceof AuthUnavailableError) setFormError(t("errors.unavailable"));
       else setFormError(t("errors.generic"));
     }

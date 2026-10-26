@@ -66,7 +66,6 @@
       "invalid": "Rezervasyon bilgileri geçerli değil. Lütfen aramayı baştan yapın.",
       "pastStart": "Kiralama başlangıcı geçmişte kaldı. Lütfen aramayı güncel bir tarihle baştan yapın.",
       "limit": "Hesabınızda aynı anda en çok 3 yaklaşan rezervasyon olabilir. Yenisini yapmak için <link>Rezervasyonlarım</link> sayfasından birini iptal edin.",
-      "rateLimited": "Kısa sürede çok fazla rezervasyon denemesi yapıldı. Lütfen biraz bekleyip tekrar deneyin.",
       "signin": "Devam etmek için giriş yapmanız gerekiyor.",
       "generic": "Rezervasyon tamamlanamadı. Lütfen tekrar deneyin.",
       "ineligible": "Sürücü koşulları karşılanmıyor.",

@@ -14,10 +14,12 @@ import { AuthRateLimitedError, AuthUnavailableError, EmailTakenError, register a
 import { PASSWORD_MIN_LENGTH, registerSchema, type RegisterInput } from "@/lib/auth-schemas";
 import { FormError } from "./form-error";
 import { useAuthErrorMessages } from "./use-auth-messages";
+import { rateLimitMessage } from "@/lib/rate-limit";
 
 // `next`: the booking to go back to after signing up (the payment page asked for it), as on login.
 export function RegisterForm({ next }: { next?: Record<string, string> }) {
   const t = useTranslations("Auth");
+  const limitT = useTranslations("RateLimit");
   const router = useRouter();
   const messages = useAuthErrorMessages();
   const schema = useMemo(() => registerSchema(messages), [messages]);
@@ -56,7 +58,7 @@ export function RegisterForm({ next }: { next?: Record<string, string> }) {
       router.refresh();
     } catch (error) {
       if (error instanceof EmailTakenError) setFormError(t("errors.emailTaken"));
-      else if (error instanceof AuthRateLimitedError) setFormError(t("errors.rateLimited"));
+      else if (error instanceof AuthRateLimitedError) setFormError(rateLimitMessage(limitT, error.retryAfter));
       else if (error instanceof AuthUnavailableError) setFormError(t("errors.unavailable"));
       else setFormError(t("errors.generic"));
     }

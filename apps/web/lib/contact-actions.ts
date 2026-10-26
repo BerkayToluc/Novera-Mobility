@@ -14,7 +14,7 @@ export type SendContactResult =
   | { ok: true; reference: string | null }
   // `fields`: the form fields the server rejected, for the form to mark; empty when the body had no fields.
   | { ok: false; reason: "invalid"; fields: string[] }
-  | { ok: false; reason: "unavailable" | "rate_limited" };
+  | { ok: false; reason: "unavailable" | "rate_limited"; retryAfter?: number | null };
 
 // Sends a contact message (ARCHITECTURE ADR-20, BACKLOG Y34). With API_URL set it is
 // `POST /contact`. Without it, and with USE_MOCKS=1, the message is accepted with a made-up
@@ -35,7 +35,7 @@ export async function sendContact(input: ContactInput): Promise<SendContactResul
     // "spam" is the API's trap: the visitor sees the same success (ADR-20).
     if (result.status === "ok" || result.status === "spam") return { ok: true, reference: null };
     if (result.status === "invalid") return { ok: false, reason: "invalid", fields: [] };
-    if (result.status === "rate_limited") return { ok: false, reason: "rate_limited" };
+    if (result.status === "rate_limited") return { ok: false, reason: "rate_limited", retryAfter: result.retryAfter };
     return { ok: false, reason: "unavailable" };
   }
 

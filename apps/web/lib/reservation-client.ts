@@ -31,9 +31,9 @@ export class ReservationLimitError extends Error {
   }
 }
 
-// Too many booking attempts from this account in the last hour (openapi 429 `RATE_LIMITED`).
+// Too many booking attempts from this account in the last hour (openapi 429 `RATE_LIMITED`); `retryAfter` is the seconds to wait.
 export class ReservationRateLimitedError extends Error {
-  constructor() {
+  constructor(readonly retryAfter: number | null = null) {
     super("Too many booking attempts.");
     this.name = "ReservationRateLimitedError";
   }
@@ -92,6 +92,6 @@ export async function createReservation(data: BookingData): Promise<{ number: st
   if (result.status === "invalid" && result.fieldErrors.promoCode === "CODE_ALREADY_USED") throw new PromoCodeError("used");
   if (result.status === "invalid" && result.fieldErrors.startAt === "IN_PAST") throw new PastStartError();
   if (result.status === "invalid" && result.code === "RESERVATION_LIMIT") throw new ReservationLimitError();
-  if (result.status === "rate_limited") throw new ReservationRateLimitedError();
+  if (result.status === "rate_limited") throw new ReservationRateLimitedError(result.retryAfter);
   throw new ApiUnavailableError();
 }

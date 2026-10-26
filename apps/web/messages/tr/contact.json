@@ -63,8 +63,7 @@
       "consent": "Devam etmek için aydınlatma metnini onaylayın.",
       "invalid": "Mesajınız eksik görünüyor. Alanları kontrol edip tekrar gönderin.",
       "unavailable": "Mesaj servisi şu an kullanılamıyor. Lütfen daha sonra tekrar deneyin.",
-      "generic": "Mesajınız gönderilemedi. Lütfen tekrar deneyin.",
-      "rateLimited": "Çok fazla deneme yaptınız. Lütfen bir süre sonra tekrar deneyin."
+      "generic": "Mesajınız gönderilemedi. Lütfen tekrar deneyin."
     },
     "sent": {
       "title": "Mesajınız alındı",

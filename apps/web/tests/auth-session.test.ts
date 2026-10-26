@@ -81,7 +81,7 @@ describe("signing in against the API", () => {
     vi.stubGlobal("fetch", answer(401, { code: "INVALID_CREDENTIALS" }));
     expect(await signIn("individual", "elif@example.com", "yanlis")).toEqual({ ok: false, reason: "invalid" });
     vi.stubGlobal("fetch", answer(429, { code: "RATE_LIMITED" }));
-    expect(await signIn("individual", "elif@example.com", "x")).toEqual({ ok: false, reason: "rate_limited" });
+    expect(await signIn("individual", "elif@example.com", "x")).toEqual({ ok: false, reason: "rate_limited", retryAfter: null });
     vi.stubGlobal("fetch", answer(503));
     expect(await signIn("individual", "elif@example.com", "x")).toEqual({ ok: false, reason: "unavailable" });
     expect(written.has("novera_session")).toBe(false);

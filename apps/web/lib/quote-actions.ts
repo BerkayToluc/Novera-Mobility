@@ -12,7 +12,7 @@ export type SubmitQuoteResult =
   | { ok: true; reference: string }
   // `fields`: the form fields the server rejected, for the form to mark; empty when the body had no fields.
   | { ok: false; reason: "invalid"; fields: string[] }
-  | { ok: false; reason: "unavailable" | "rate_limited" };
+  | { ok: false; reason: "unavailable" | "rate_limited"; retryAfter?: number | null };
 
 // Sends the corporate request (ARCHITECTURE ADR-20, BACKLOG Y35). With API_URL set it is
 // `POST /quotes`: the answer carries the reference (TKL-2026-00042). Without it, and with
@@ -35,7 +35,7 @@ export async function submitQuote(input: QuoteInput): Promise<SubmitQuoteResult>
     // The API's own trap caught it: look the same as success (ADR-20).
     if (result.status === "spam") return { ok: true, reference: makeReference() };
     if (result.status === "invalid") return { ok: false, reason: "invalid", fields: [] };
-    if (result.status === "rate_limited") return { ok: false, reason: "rate_limited" };
+    if (result.status === "rate_limited") return { ok: false, reason: "rate_limited", retryAfter: result.retryAfter };
     return { ok: false, reason: "unavailable" };
   }
 

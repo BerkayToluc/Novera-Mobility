@@ -89,7 +89,7 @@ describe("Google sign-in against the API", () => {
     [500, { code: "INTERNAL" }, "unavailable"],
   ])("tells a %i answer apart (%j)", async (status, body, reason) => {
     vi.stubGlobal("fetch", answer(status as number, body));
-    expect(await signInWithGoogle("id-token")).toEqual({ ok: false, reason });
+    expect(await signInWithGoogle("id-token")).toMatchObject({ ok: false, reason });
     expect(written.has("novera_session")).toBe(false);
   });
 
@@ -129,7 +129,7 @@ describe("Google sign-in with the sample data", () => {
     ["down", "not_configured"],
   ])("plays the %s refusal", async (hook, reason) => {
     sent.set(MOCK_GOOGLE_COOKIE, hook);
-    expect(await signInWithGoogle("sample-credential")).toEqual({ ok: false, reason });
+    expect(await signInWithGoogle("sample-credential")).toMatchObject({ ok: false, reason });
   });
 });
 

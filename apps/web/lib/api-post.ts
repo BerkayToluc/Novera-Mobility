@@ -1,4 +1,5 @@
 import "server-only";
+import { parseRetryAfter } from "./rate-limit";
 import { cookies } from "next/headers";
 import { apiHeaders } from "./api-headers";
 
@@ -9,7 +10,7 @@ export type ApiPostResult<T> =
   | { status: "ok"; data: T }
   | { status: "invalid"; fieldErrors: Record<string, string> }
   | { status: "spam" }
-  | { status: "rate_limited" }
+  | { status: "rate_limited"; retryAfter: number | null }
   | { status: "unavailable" };
 
 // The name of the session cookie the API sets (openapi `cookieAuth`).
@@ -38,7 +39,7 @@ export async function apiPost<T>(path: string, body: unknown): Promise<ApiPostRe
       cache: "no-store",
     });
     if (response.ok) return { status: "ok", data: (await response.json()) as T };
-    if (response.status === 429) return { status: "rate_limited" };
+    if (response.status === 429) return { status: "rate_limited", retryAfter: parseRetryAfter(response.headers.get("retry-after")) };
     if (response.status === 422) {
       const error = (await response.json().catch(() => null)) as {
         code?: string;

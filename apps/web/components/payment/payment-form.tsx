@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Link, useRouter } from "@/i18n/navigation";
 import { DriverSection } from "./driver-section";
 import { formatCardNumber, formatExpiry, paymentSchema, type PaymentInput } from "@/lib/payment-schema";
+import { rateLimitMessage } from "@/lib/rate-limit";
 
 // The card fields are only checked here, in the browser: what goes to the server is the
 // booking from the URL and the driver's details (SPEC §2.10), never the card. The demo notice
@@ -25,6 +26,7 @@ export function PaymentForm({
 }) {
   const t = useTranslations("Payment");
   const d = useTranslations("Driver");
+  const limitT = useTranslations("RateLimit");
   const [driver, setDriver] = useState<DriverBody | null>(null);
   const router = useRouter();
   const [formError, setFormError] = useState<string | null>(null);
@@ -109,6 +111,10 @@ export function PaymentForm({
       if (result.reason === "limit") {
         setFormError(null);
         setLimitReached(true);
+        return;
+      }
+      if (result.reason === "rateLimited") {
+        setFormError(rateLimitMessage(limitT, result.retryAfter));
         return;
       }
       setFormError(t(result.reason === "not_verified" ? "errors.notVerified" : `errors.${result.reason}`));
