@@ -1,5 +1,6 @@
 import { type ArgumentsHost, Catch, type ExceptionFilter, HttpException, Logger } from '@nestjs/common';
 import type { Request, Response } from 'express';
+import { RateLimitedException } from './rate-limit.js';
 
 // Every error leaves the API in the contract's shape `{ code, message, fieldErrors? }` (openapi.yaml),
 // and never carries more than that: no stack, no database text, no parser internals.
@@ -80,6 +81,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
       this.logger.error(`${request.method} ${request.path} answered ${status}`, detail);
     }
     if (response.headersSent) return;
+    if (exception instanceof RateLimitedException) response.setHeader('Retry-After', String(exception.retryAfterSeconds));
     response.status(status).json(body);
   }
 }

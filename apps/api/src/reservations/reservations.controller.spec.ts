@@ -3,16 +3,20 @@ import { HttpException, type INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { configureApp } from '../app.setup.js';
 import { AuthService } from '../auth/auth.service.js';
-import { RateLimiter } from '../forms/rate-limiter.js';
+import { APP_GUARD } from '@nestjs/core';
+import { RateLimitGuard } from '../common/rate-limit.guard.js';
+import { RateLimitService } from '../common/rate-limit.service.js';
+import { RateLimitStore } from '../common/rate-limit.store.js';
+import { MemoryRateLimitStore } from '../common/rate-limit.testing.js';
+import { LIMITS } from '../common/rate-limits.js';
 import { SessionGuard } from '../auth/session.guard.js';
 import { PricingService } from './pricing.service.js';
-import {
-  CREATE_LIMIT_PER_HOUR,
-  PRICE_LIMIT_PER_10_MIN,
-  PROMO_PRICE_LIMIT_PER_10_MIN,
-  ReservationsController,
-} from './reservations.controller.js';
+import { ReservationsController } from './reservations.controller.js';
 import { ReservationsService } from './reservations.service.js';
+
+const CREATE_LIMIT_PER_HOUR = LIMITS.reserve.limit;
+const PRICE_LIMIT_PER_10_MIN = LIMITS.price.limit;
+const PROMO_PRICE_LIMIT_PER_10_MIN = LIMITS.promo.limit;
 
 // HTTP-level check of the routes under /me/reservations: the new one-reservation route must not swallow
 // the list or the cancel route, and an unauthenticated call must be refused before the service is reached.
@@ -34,7 +38,9 @@ describe('/me/reservations routes', () => {
       providers: [
         { provide: ReservationsService, useValue: service },
         { provide: PricingService, useValue: pricing },
-        RateLimiter,
+        RateLimitService,
+        { provide: RateLimitStore, useClass: MemoryRateLimitStore },
+        { provide: APP_GUARD, useClass: RateLimitGuard },
         { provide: AuthService, useValue: {} },
       ],
     })

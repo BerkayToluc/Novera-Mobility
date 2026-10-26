@@ -1,7 +1,9 @@
 import { Body, Controller, Delete, HttpCode, Param, Post, Req } from '@nestjs/common';
 import { ApiBody, ApiCreatedResponse, ApiNoContentResponse, ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
-import { clientKeyOf } from '../forms/rate-limiter.js';
+import { clientKeyOf } from '../common/client-key.js';
+import { RateLimit } from '../common/rate-limit.js';
+import { LIMITS } from '../common/rate-limits.js';
 import {
   HoldsService,
   type HoldResponse,
@@ -13,6 +15,7 @@ export class HoldsController {
   constructor(private readonly holdsService: HoldsService) {}
 
   @Post('holds')
+  @RateLimit(LIMITS.holds)
   @ApiBody({
     schema: {
       type: 'object',

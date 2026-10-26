@@ -3,7 +3,7 @@ import { Body, Controller, Get, HttpException, HttpStatus, Post, Req, type INest
 import { Test } from '@nestjs/testing';
 import type { Request } from 'express';
 import { configureApp } from './app.setup.js';
-import { clientKeyOf } from './forms/rate-limiter.js';
+import { clientKeyOf } from './common/client-key.js';
 
 // The behaviour every response of the real server has: error shape, headers and who the client is.
 @Controller()

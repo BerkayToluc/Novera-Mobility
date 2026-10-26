@@ -3,7 +3,7 @@ import { Controller, Get, Req, type INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import type { Request } from 'express';
 import { configureApp } from '../app.setup.js';
-import { clientKeyOf } from '../forms/rate-limiter.js';
+import { clientKeyOf } from './client-key.js';
 import { ACCESS_KEY_HEADER, CLIENT_IP_HEADER, keyMatches } from './api-access.js';
 
 @Controller()

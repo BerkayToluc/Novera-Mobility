@@ -20,8 +20,9 @@ export class SessionGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<AuthedRequest>();
+    // The rate limit guard may have found the person already.
     const token = readCookie(request.headers.cookie, SESSION_COOKIE);
-    const user = token ? await this.auth.authenticate(token) : null;
+    const user = request.user ?? (token ? await this.auth.authenticate(token) : null);
     if (!user) throw unauthenticated();
     request.user = user;
     return true;

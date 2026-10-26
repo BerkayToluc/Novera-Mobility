@@ -1,10 +1,9 @@
 import { HttpException } from '@nestjs/common';
-import { RateLimiter } from '../forms/rate-limiter.js';
 import type { PrismaService } from '../prisma/prisma.service.js';
 import { AccountSecurityService } from './account-security.service.js';
 import { AuthService } from './auth.service.js';
 import { FakePrisma } from './auth.testing.js';
-import { GOOGLE_LIMIT_PER_15_MIN, GoogleAuthService, namesFrom } from './google-auth.service.js';
+import { GoogleAuthService, namesFrom } from './google-auth.service.js';
 import { GoogleTokenError, GoogleTokenVerifier, type GoogleProfile } from './google-verifier.js';
 import { hashPassword } from './password.js';
 import { toUserResponse } from './user-view.js';
@@ -40,11 +39,11 @@ describe('GoogleAuthService', () => {
   beforeEach(() => {
     db = new FakePrisma();
     verifier = new FakeVerifier();
-    service = new GoogleAuthService(db as unknown as PrismaService, new RateLimiter(), verifier);
+    service = new GoogleAuthService(db as unknown as PrismaService, verifier);
   });
 
   it('yeni hesap: onayla açılır, parolasız, oturum başlar', async () => {
-    const { session, created } = await service.signIn({ credential: 'good', consent: true }, 'c1');
+    const { session, created } = await service.signIn({ credential: 'good', consent: true });
     expect(created).toBe(true);
     expect(session.user).toMatchObject({ email: 'ayse@example.com', googleSub: 'g-1', passwordHash: null, firstName: 'Ayşe', lastName: 'Yılmaz' });
     expect(db.sessions).toHaveLength(1);
@@ -52,15 +51,15 @@ describe('GoogleAuthService', () => {
   });
 
   it('yeni hesap onaysız 422 consent CONSENT_REQUIRED ve hesap açılmaz', async () => {
-    const error = await failure(service.signIn({ credential: 'good' }, 'c1'));
+    const error = await failure(service.signIn({ credential: 'good' }));
     expect(error.getStatus()).toBe(422);
     expect(body(error).fieldErrors).toEqual({ consent: 'CONSENT_REQUIRED' });
     expect(db.users).toHaveLength(0);
   });
 
   it('bilinen Google hesabı onay istemeden giriş yapar (200)', async () => {
-    await service.signIn({ credential: 'good', consent: true }, 'c1');
-    const { session, created } = await service.signIn({ credential: 'good' }, 'c1');
+    await service.signIn({ credential: 'good', consent: true });
+    const { session, created } = await service.signIn({ credential: 'good' });
     expect(created).toBe(false);
     expect(db.users).toHaveLength(1);
     expect(db.sessions).toHaveLength(2);
@@ -68,12 +67,12 @@ describe('GoogleAuthService', () => {
   });
 
   it('parolalı bireysel hesap bağlanır: parola silinir, eski oturumlar kapanır', async () => {
-    const auth = new AuthService(db as unknown as PrismaService, new RateLimiter());
-    await auth.register({ email: 'ayse@example.com', password: 'guclu-parola-1', firstName: 'A', lastName: 'B', consent: true }, 'x');
-    await auth.register({ email: 'baska@example.com', password: 'guclu-parola-1', firstName: 'A', lastName: 'B', consent: true }, 'x');
+    const auth = new AuthService(db as unknown as PrismaService);
+    await auth.register({ email: 'ayse@example.com', password: 'guclu-parola-1', firstName: 'A', lastName: 'B', consent: true });
+    await auth.register({ email: 'baska@example.com', password: 'guclu-parola-1', firstName: 'A', lastName: 'B', consent: true });
     expect(db.sessions).toHaveLength(2);
 
-    const { session, created } = await service.signIn({ credential: 'good' }, 'c1');
+    const { session, created } = await service.signIn({ credential: 'good' });
     expect(created).toBe(false);
     expect(session.user).toMatchObject({ googleSub: 'g-1', passwordHash: null });
     // ayse's old session is gone, only the new one remains for her; the other account keeps its own
@@ -81,13 +80,13 @@ describe('GoogleAuthService', () => {
     expect(db.sessions.filter((s) => s.userId === ayse.id)).toHaveLength(1);
     expect(db.sessions).toHaveLength(2);
     // password sign-in no longer works
-    const error = await failure(auth.login({ email: 'ayse@example.com', password: 'guclu-parola-1' }, 'x'));
+    const error = await failure(auth.login({ email: 'ayse@example.com', password: 'guclu-parola-1' }));
     expect(error.getStatus()).toBe(401);
   });
 
   it('kurumsal hesap reddedilir (403 GOOGLE_NOT_ALLOWED), hiçbir şey değişmez', async () => {
     db.users.push({ id: 'u1', email: 'ayse@example.com', passwordHash: await hashPassword('x'.repeat(10)), googleSub: null, accountType: 'CORPORATE' });
-    const error = await failure(service.signIn({ credential: 'good', consent: true }, 'c1'));
+    const error = await failure(service.signIn({ credential: 'good', consent: true }));
     expect(error.getStatus()).toBe(403);
     expect(body(error).code).toBe('GOOGLE_NOT_ALLOWED');
     expect(db.users[0]).toMatchObject({ googleSub: null });
@@ -95,47 +94,42 @@ describe('GoogleAuthService', () => {
   });
 
   it('aynı e-postaya başka bir Google hesabı bağlıysa reddedilir', async () => {
-    await service.signIn({ credential: 'good', consent: true }, 'c1');
+    await service.signIn({ credential: 'good', consent: true });
     verifier.profile = { ...verifier.profile, sub: 'g-2' };
-    const error = await failure(service.signIn({ credential: 'good', consent: true }, 'c1'));
+    const error = await failure(service.signIn({ credential: 'good', consent: true }));
     expect(body(error).code).toBe('GOOGLE_NOT_ALLOWED');
   });
 
   it('geçersiz token 401 GOOGLE_TOKEN_INVALID', async () => {
-    const error = await failure(service.signIn({ credential: 'bad', consent: true }, 'c1'));
+    const error = await failure(service.signIn({ credential: 'bad', consent: true }));
     expect(error.getStatus()).toBe(401);
     expect(body(error).code).toBe('GOOGLE_TOKEN_INVALID');
   });
 
   it('credential eksikse 422, consent bool değilse 422', async () => {
-    expect(body(await failure(service.signIn({}, 'c1'))).fieldErrors).toEqual({ credential: 'REQUIRED' });
-    expect(body(await failure(service.signIn({ credential: 'good', consent: 'yes' }, 'c1'))).fieldErrors).toEqual({ consent: 'INVALID_FORMAT' });
+    expect(body(await failure(service.signIn({}))).fieldErrors).toEqual({ credential: 'REQUIRED' });
+    expect(body(await failure(service.signIn({ credential: 'good', consent: 'yes' }))).fieldErrors).toEqual({ consent: 'INVALID_FORMAT' });
   });
 
   it('ayarlı değilse 503 GOOGLE_SIGNIN_UNAVAILABLE', async () => {
     verifier.configured = false;
-    const error = await failure(service.signIn({ credential: 'good', consent: true }, 'c1'));
+    const error = await failure(service.signIn({ credential: 'good', consent: true }));
     expect(error.getStatus()).toBe(503);
     expect(body(error).code).toBe('GOOGLE_SIGNIN_UNAVAILABLE');
   });
 
-  it('istemci başına sınır aşılınca 429', async () => {
-    for (let i = 0; i < GOOGLE_LIMIT_PER_15_MIN; i += 1) await failure(service.signIn({ credential: 'bad' }, 'c1'));
-    expect((await failure(service.signIn({ credential: 'good', consent: true }, 'c1'))).getStatus()).toBe(429);
-  });
-
   describe('parolasız hesap', () => {
     it('parolayla girişte 401 INVALID_CREDENTIALS (çökmez)', async () => {
-      await service.signIn({ credential: 'good', consent: true }, 'c1');
-      const auth = new AuthService(db as unknown as PrismaService, new RateLimiter());
-      const error = await failure(auth.login({ email: 'ayse@example.com', password: 'herhangi-parola' }, 'c1'));
+      await service.signIn({ credential: 'good', consent: true });
+      const auth = new AuthService(db as unknown as PrismaService);
+      const error = await failure(auth.login({ email: 'ayse@example.com', password: 'herhangi-parola' }));
       expect(error.getStatus()).toBe(401);
       expect(body(error).code).toBe('INVALID_CREDENTIALS');
     });
 
     it('parola değiştirme 409 PASSWORD_NOT_SET', async () => {
-      const { session } = await service.signIn({ credential: 'good', consent: true }, 'c1');
-      const security = new AccountSecurityService(db as unknown as PrismaService, new RateLimiter());
+      const { session } = await service.signIn({ credential: 'good', consent: true });
+      const security = new AccountSecurityService(db as unknown as PrismaService);
       const error = await failure(security.changePassword(session.user, null, { currentPassword: 'a', newPassword: 'yeni-parola-1' }));
       expect(error.getStatus()).toBe(409);
       expect(body(error).code).toBe('PASSWORD_NOT_SET');

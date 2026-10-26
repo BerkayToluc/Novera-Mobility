@@ -1,7 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { parseInput, validationFailed } from '../common/zod-validation.js';
-import { rateLimited } from '../forms/form-input.js';
-import { RateLimiter } from '../forms/rate-limiter.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { emailTaken, googleNotAllowed, googleTokenInvalid, googleUnavailable } from './auth.errors.js';
 import { googleSchema } from './auth.schemas.js';
@@ -11,8 +9,6 @@ import { GoogleTokenError, GoogleTokenVerifier, type GoogleProfile } from './goo
 import { SESSION_DAYS, hashSessionToken, newSessionToken } from './session-token.js';
 
 // POST /auth/google: sign in or sign up with a Google ID token (individual accounts only).
-export const GOOGLE_LIMIT_PER_15_MIN = 10;
-const QUARTER_HOUR_MS = 15 * 60 * 1000;
 const DAY_MS = 24 * 60 * 60 * 1000;
 const NAME_MAX = 80;
 
@@ -39,15 +35,11 @@ export function namesFrom(profile: GoogleProfile): { firstName: string; lastName
 export class GoogleAuthService {
   constructor(
     @Inject(PrismaService) private readonly prisma: PrismaService,
-    @Inject(RateLimiter) private readonly limiter: RateLimiter,
     @Inject(GoogleTokenVerifier) private readonly verifier: GoogleTokenVerifier,
   ) {}
 
-  async signIn(input: unknown, clientKey: string, userAgent: unknown = null): Promise<GoogleSignInResult> {
+  async signIn(input: unknown, userAgent: unknown = null): Promise<GoogleSignInResult> {
     if (!this.verifier.isConfigured()) throw googleUnavailable();
-    if (!this.limiter.allow(`google:${clientKey}`, GOOGLE_LIMIT_PER_15_MIN, QUARTER_HOUR_MS)) {
-      throw rateLimited();
-    }
 
     const { credential, consent } = parseInput(googleSchema, input, 'Google sign-in data is invalid');
 

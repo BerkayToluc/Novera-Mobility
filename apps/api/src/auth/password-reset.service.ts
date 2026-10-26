@@ -1,7 +1,5 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { parseInput } from '../common/zod-validation.js';
-import { rateLimited } from '../forms/form-input.js';
-import { RateLimiter } from '../forms/rate-limiter.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { forgotPasswordSchema, resetPasswordSchema } from './auth.schemas.js';
 import { hashPassword } from './password.js';
@@ -10,11 +8,6 @@ import { hashSessionToken, newSessionToken } from './session-token.js';
 
 // BACKLOG #27 (issue #36): POST /auth/forgot-password and POST /auth/reset-password.
 export const RESET_TOKEN_TTL_MS = 60 * 60 * 1000; // one hour
-export const FORGOT_LIMIT_PER_CLIENT_PER_HOUR = 5;
-export const FORGOT_LIMIT_PER_EMAIL_PER_HOUR = 3;
-export const RESET_LIMIT_PER_15_MIN = 10;
-const HOUR_MS = 60 * 60 * 1000;
-const QUARTER_HOUR_MS = 15 * 60 * 1000;
 
 export function resetTokenInvalid(): HttpException {
   return new HttpException(
@@ -27,22 +20,14 @@ export function resetTokenInvalid(): HttpException {
 export class PasswordResetService {
   constructor(
     @Inject(PrismaService) private readonly prisma: PrismaService,
-    @Inject(RateLimiter) private readonly limiter: RateLimiter,
     @Inject(ResetLinkNotifier) private readonly notifier: ResetLinkNotifier,
   ) {}
 
   // Always resolves the same way whether or not the account exists, so the endpoint cannot be used
   // to find out who has an account. The per-e-mail limit counts every request, not just real accounts,
   // for the same reason.
-  async requestReset(input: unknown, clientKey: string): Promise<void> {
+  async requestReset(input: unknown): Promise<void> {
     const { email } = parseInput(forgotPasswordSchema, input, 'Reset request is invalid');
-
-    if (
-      !this.limiter.allow(`forgot:${clientKey}`, FORGOT_LIMIT_PER_CLIENT_PER_HOUR, HOUR_MS) ||
-      !this.limiter.allow(`forgot-email:${email}`, FORGOT_LIMIT_PER_EMAIL_PER_HOUR, HOUR_MS)
-    ) {
-      throw rateLimited();
-    }
 
     const user = await this.prisma.user.findUnique({ where: { email } });
     if (!user) return;
@@ -65,11 +50,7 @@ export class PasswordResetService {
     void this.notifier.send(email, this.linkFor(user.locale, token), user.locale).catch(() => undefined);
   }
 
-  async resetPassword(input: unknown, clientKey: string): Promise<void> {
-    if (!this.limiter.allow(`reset:${clientKey}`, RESET_LIMIT_PER_15_MIN, QUARTER_HOUR_MS)) {
-      throw rateLimited();
-    }
-
+  async resetPassword(input: unknown): Promise<void> {
     const { token, password } = parseInput(resetPasswordSchema, input, 'Reset data is invalid');
 
     // Only the hash is stored, so a leaked database cannot be used to reset anyone's password.

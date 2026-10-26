@@ -2,7 +2,8 @@ import { Body, Controller, HttpCode, Inject, Post, Req, Res } from '@nestjs/comm
 import { ApiBody, ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import type { Request, Response } from 'express';
 import { isProduction } from '../config/runtime.js';
-import { clientKeyOf } from '../forms/rate-limiter.js';
+import { RateLimit } from '../common/rate-limit.js';
+import { LIMITS } from '../common/rate-limits.js';
 import { GoogleAuthService } from './google-auth.service.js';
 import { AuthService, type SessionStart } from './auth.service.js';
 import { SESSION_COOKIE, readCookie } from './session-token.js';
@@ -34,6 +35,7 @@ export class AuthController {
   ) {}
 
   @Post('register')
+  @RateLimit(LIMITS.register)
   @ApiBody({
     schema: {
       type: 'object',
@@ -53,12 +55,13 @@ export class AuthController {
     @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
   ): Promise<UserResponse> {
-    const session = await this.authService.register(body, clientKeyOf(request), request.headers['user-agent']);
+    const session = await this.authService.register(body, request.headers['user-agent']);
     setSessionCookie(response, session);
     return toUserResponse(session.user);
   }
 
   @Post('login')
+  @RateLimit(LIMITS.login, LIMITS.loginEmail)
   @HttpCode(200)
   @ApiBody({
     schema: {
@@ -76,7 +79,7 @@ export class AuthController {
     @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
   ): Promise<UserResponse> {
-    const session = await this.authService.login(body, clientKeyOf(request), request.headers['user-agent']);
+    const session = await this.authService.login(body, request.headers['user-agent']);
     setSessionCookie(response, session);
     return toUserResponse(session.user);
   }
@@ -93,6 +96,7 @@ export class AuthController {
 
   // 200 for an existing account, 201 when this call opened a new one.
   @Post('google')
+  @RateLimit(LIMITS.google)
   @ApiBody({
     schema: {
       type: 'object',
@@ -107,11 +111,7 @@ export class AuthController {
     @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
   ): Promise<UserResponse> {
-    const { session, created } = await this.googleAuth.signIn(
-      body,
-      clientKeyOf(request),
-      request.headers['user-agent'],
-    );
+    const { session, created } = await this.googleAuth.signIn(body, request.headers['user-agent']);
     setSessionCookie(response, session);
     response.status(created ? 201 : 200);
     return toUserResponse(session.user);

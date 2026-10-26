@@ -15,13 +15,6 @@ export function spamDetected(): HttpException {
   );
 }
 
-export function rateLimited(): HttpException {
-  return new HttpException(
-    { code: 'RATE_LIMITED', message: 'Too many requests, try again later' },
-    HttpStatus.TOO_MANY_REQUESTS,
-  );
-}
-
 // `website` görünmeyen tuzak alandır; insanlar doldurmaz, botlar doldurur (ADR-20). Gövde nesne değilse
 // (dizi, null, metin) tuzak dolu sayılmaz; doğrulama onu zaten REQUIRED alanlarla reddeder.
 export function isSpam(input: unknown): boolean {

@@ -1,13 +1,14 @@
 import { Body, Controller, Get, Inject, Post, Req, UseGuards } from '@nestjs/common';
-import { ApiBody, ApiCookieAuth, ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
+import { ApiBody, ApiCookieAuth, ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { AuthService } from '../auth/auth.service.js';
 import { CurrentUser, SessionGuard } from '../auth/session.guard.js';
 import { SESSION_COOKIE, readCookie } from '../auth/session-token.js';
 import type { UserRow } from '../auth/user-view.js';
 import { ContactService } from './contact.service.js';
 import { QuotesService, type QuoteReceived, type QuoteSummaryView } from './quotes.service.js';
-import { clientKeyOf } from './rate-limiter.js';
+import { RateLimit } from '../common/rate-limit.js';
+import { LIMITS } from '../common/rate-limits.js';
 
 @ApiTags('forms')
 @Controller()
@@ -19,6 +20,7 @@ export class FormsController {
   ) {}
 
   @Post('contact')
+  @RateLimit(LIMITS.contact)
   @ApiBody({
     schema: {
       type: 'object',
@@ -35,11 +37,12 @@ export class FormsController {
     },
   })
   @ApiCreatedResponse({ description: 'Mesaj alındı' })
-  contact(@Body() body: unknown, @Req() request: Request): Promise<{ received: true }> {
-    return this.contactService.create(body, clientKeyOf(request));
+  contact(@Body() body: unknown): Promise<{ received: true }> {
+    return this.contactService.create(body);
   }
 
   @Post('quotes')
+  @RateLimit(LIMITS.quotes)
   @ApiBody({
     schema: {
       type: 'object',
@@ -65,7 +68,7 @@ export class FormsController {
     // Visitors may send a request; when a session is present the request is linked to the account.
     const token = readCookie(request.headers.cookie, SESSION_COOKIE);
     const user = token ? await this.auth.authenticate(token) : null;
-    return this.quotesService.create(body, clientKeyOf(request), user?.id ?? null);
+    return this.quotesService.create(body, user?.id ?? null);
   }
 
   @Get('me/quotes')

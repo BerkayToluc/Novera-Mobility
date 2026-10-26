@@ -145,6 +145,19 @@ model PasswordResetToken {
   @@index([expiresAt])
 }
 
+// Counters of the rate limit (ARCHITECTURE ADR-27). One row per key, bucket (a group of endpoints) and fixed
+// time window; a request adds one with a single `INSERT … ON CONFLICT … DO UPDATE`, so concurrent requests are
+// counted exactly. A daily task deletes the old windows. `key` is `user:<id>` or `ip:<hash of the address>`
+// (never the address itself), or an `email:<address>` for the sign-in and reset limits.
+model RateLimitHit {
+  key         String
+  bucket      String
+  windowStart DateTime
+  count       Int
+
+  @@id([key, bucket, windowStart])
+}
+
 // Puan kazanımı. Bakiye = bu kayıtların toplamı. Puanla ödeme v1'de yok.
 model PointTransaction {
   id        String   @id @default(uuid())

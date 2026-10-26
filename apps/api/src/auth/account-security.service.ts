@@ -1,7 +1,5 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { parseInput, validationFailed } from '../common/zod-validation.js';
-import { rateLimited } from '../forms/form-input.js';
-import { RateLimiter } from '../forms/rate-limiter.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { passwordNotSet } from './auth.errors.js';
 import { changePasswordSchema } from './auth.schemas.js';
@@ -10,8 +8,6 @@ import { hashPassword, verifyPassword } from './password.js';
 import type { UserRow } from './user-view.js';
 
 // BACKLOG Y71: password change and open sessions for the signed-in account (SPEC §2.9, Ayarlar > Güvenlik).
-export const CHANGE_PASSWORD_LIMIT_PER_15_MIN = 5;
-const QUARTER_HOUR_MS = 15 * 60 * 1000;
 
 export interface SessionView {
   id: string;
@@ -29,16 +25,11 @@ function sessionNotFound(): HttpException {
 export class AccountSecurityService {
   constructor(
     @Inject(PrismaService) private readonly prisma: PrismaService,
-    @Inject(RateLimiter) private readonly limiter: RateLimiter,
   ) {}
 
   // POST /me/password. A wrong current password is a 422 on that field (not 401: the person is still
   // signed in). On success every OTHER session ends, so a stolen cookie stops working; this one stays.
   async changePassword(user: UserRow, currentTokenHash: string | null, input: unknown): Promise<void> {
-    if (!this.limiter.allow(`change-password:${user.id}`, CHANGE_PASSWORD_LIMIT_PER_15_MIN, QUARTER_HOUR_MS)) {
-      throw rateLimited();
-    }
-
     if (user.passwordHash === null) throw passwordNotSet();
 
     const { currentPassword, newPassword } = parseInput(changePasswordSchema, input, 'Password change data is invalid');

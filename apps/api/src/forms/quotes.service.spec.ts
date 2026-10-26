@@ -2,8 +2,7 @@ import 'dotenv/config';
 import { randomUUID } from 'node:crypto';
 import { HttpException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
-import { QUOTE_LIMIT_PER_HOUR, QuotesService } from './quotes.service.js';
-import { RateLimiter } from './rate-limiter.js';
+import { QuotesService } from './quotes.service.js';
 
 // Entegrasyon testi: POST /quotes, gerçek PostgreSQL'e karşı (BACKLOG #33, Y35).
 // Yalnızca adında "test" geçen veritabanında çalışır; TEST_DATABASE_URL yoksa atlanır.
@@ -33,14 +32,13 @@ describeDb('POST /quotes kurumsal teklif (gerçek PostgreSQL)', () => {
   let service: QuotesService;
   const run = randomUUID().slice(0, 8);
   const company = (label: string) => `Test ${run} ${label}`;
-  const client = () => `client-${randomUUID()}`;
   const created = { products: [] as string[] };
 
   beforeAll(async () => {
     process.env.DATABASE_URL = databaseUrl;
     prisma = new PrismaService();
     await prisma.$connect();
-    service = new QuotesService(prisma, new RateLimiter());
+    service = new QuotesService(prisma);
   });
 
   afterAll(async () => {
@@ -64,7 +62,7 @@ describeDb('POST /quotes kurumsal teklif (gerçek PostgreSQL)', () => {
 
   it('geçerli talep kaydedilir; TKL-YYYY-NNNNN numarası döner', async () => {
     const before = Date.now();
-    const result = await service.create(valid('ok'), client());
+    const result = await service.create(valid('ok'));
     expect(result.received).toBe(true);
     expect(result.referenceNumber).toMatch(NUMBER_FORMAT);
 
@@ -85,15 +83,15 @@ describeDb('POST /quotes kurumsal teklif (gerçek PostgreSQL)', () => {
   });
 
   it('numara yılın son numarasının bir fazlasıdır', async () => {
-    const first = await service.create(valid('seq1'), client());
-    const second = await service.create(valid('seq2'), client());
+    const first = await service.create(valid('seq1'));
+    const second = await service.create(valid('seq2'));
     expect(second.referenceNumber.slice(0, 9)).toBe(first.referenceNumber.slice(0, 9));
     expect(serialOf(second.referenceNumber)).toBe(serialOf(first.referenceNumber) + 1);
   });
 
   it('5 talep aynı anda gelirse hepsi kaydedilir ve numaralar birbirinden farklıdır', async () => {
     const results = await Promise.all(
-      Array.from({ length: 5 }, (_, i) => service.create(valid(`par${i}`), client())),
+      Array.from({ length: 5 }, (_, i) => service.create(valid(`par${i}`))),
     );
     const numbers = results.map((r) => r.referenceNumber);
     expect(new Set(numbers).size).toBe(5);
@@ -110,10 +108,10 @@ describeDb('POST /quotes kurumsal teklif (gerçek PostgreSQL)', () => {
       data: { email: `quote-${run}-other@sirket.example`, passwordHash: 'x', firstName: 'C', lastName: 'D' },
     });
     try {
-      const first = await service.create(valid('mine1'), client(), owner.id);
-      const second = await service.create(valid('mine2'), client(), owner.id);
-      await service.create(valid('theirs'), client(), other.id);
-      await service.create(valid('anon'), client());
+      const first = await service.create(valid('mine1'), owner.id);
+      const second = await service.create(valid('mine2'), owner.id);
+      await service.create(valid('theirs'), other.id);
+      await service.create(valid('anon'));
 
       const list = await service.listMine(owner.id);
       expect(list.map((q) => q.number)).toEqual([second.referenceNumber, first.referenceNumber]);
@@ -129,7 +127,6 @@ describeDb('POST /quotes kurumsal teklif (gerçek PostgreSQL)', () => {
   it('isteğe bağlı alanlar boş bırakılabilir', async () => {
     const result = await service.create(
       { companyName: company('min'), email: `quote-${run}-min@sirket.example`, vehicleCount: 1, durationMonths: 1, vehicleType: 'suv', consent: true },
-      client(),
     );
     const row = await prisma.quoteRequest.findUnique({ where: { number: result.referenceNumber } });
     expect(row?.contactName).toBeNull();
@@ -152,13 +149,13 @@ describeDb('POST /quotes kurumsal teklif (gerçek PostgreSQL)', () => {
       });
       created.products.push(product.id);
 
-      const result = await service.create({ ...valid('prod'), productSlug: slug }, client());
+      const result = await service.create({ ...valid('prod'), productSlug: slug });
       const row = await prisma.quoteRequest.findUnique({ where: { number: result.referenceNumber } });
       expect(row?.productId).toBe(product.id);
     });
 
     it('olmayan productSlug 422 UNKNOWN_REFERENCE döner ve kayıt oluşmaz', async () => {
-      const error = await catchHttp(service.create({ ...valid('noprod'), productSlug: `yok-${run}` }, client()));
+      const error = await catchHttp(service.create({ ...valid('noprod'), productSlug: `yok-${run}` }));
       expect(error.getStatus()).toBe(422);
       expect(bodyOf(error).fieldErrors).toEqual({ productSlug: 'UNKNOWN_REFERENCE' });
       expect(await prisma.quoteRequest.count({ where: { companyName: company('noprod') } })).toBe(0);
@@ -167,7 +164,7 @@ describeDb('POST /quotes kurumsal teklif (gerçek PostgreSQL)', () => {
 
   describe('doğrulama (422 VALIDATION_FAILED)', () => {
     it('eksik zorunlu alanlar REQUIRED, onay yoksa CONSENT_REQUIRED döner', async () => {
-      const error = await catchHttp(service.create({}, client()));
+      const error = await catchHttp(service.create({}));
       expect(error.getStatus()).toBe(422);
       expect(bodyOf(error).fieldErrors).toEqual({
         companyName: 'REQUIRED',
@@ -180,56 +177,43 @@ describeDb('POST /quotes kurumsal teklif (gerçek PostgreSQL)', () => {
     });
 
     it.each([[0], [10001], [-1]])('araç sayısı aralık dışı OUT_OF_RANGE: %p', async (count) => {
-      const error = await catchHttp(service.create({ ...valid('cnt'), vehicleCount: count }, client()));
+      const error = await catchHttp(service.create({ ...valid('cnt'), vehicleCount: count }));
       expect(bodyOf(error).fieldErrors).toEqual({ vehicleCount: 'OUT_OF_RANGE' });
     });
 
     it.each([[0], [121]])('süre aralık dışı OUT_OF_RANGE: %p', async (months) => {
-      const error = await catchHttp(service.create({ ...valid('dur'), durationMonths: months }, client()));
+      const error = await catchHttp(service.create({ ...valid('dur'), durationMonths: months }));
       expect(bodyOf(error).fieldErrors).toEqual({ durationMonths: 'OUT_OF_RANGE' });
     });
 
     it('sayı yerine metin gönderilirse INVALID_FORMAT döner', async () => {
-      const error = await catchHttp(service.create({ ...valid('str'), vehicleCount: '10' }, client()));
+      const error = await catchHttp(service.create({ ...valid('str'), vehicleCount: '10' }));
       expect(bodyOf(error).fieldErrors).toEqual({ vehicleCount: 'INVALID_FORMAT' });
     });
 
     it('geçersiz e-posta ve telefon ayrı ayrı bildirilir', async () => {
-      const error = await catchHttp(service.create({ ...valid('fmt'), email: 'x', phone: 'abc' }, client()));
+      const error = await catchHttp(service.create({ ...valid('fmt'), email: 'x', phone: 'abc' }));
       expect(bodyOf(error).fieldErrors).toEqual({ email: 'INVALID_EMAIL', phone: 'INVALID_FORMAT' });
     });
 
     it('çok uzun not TOO_LONG döner', async () => {
-      const error = await catchHttp(service.create({ ...valid('long'), notes: 'n'.repeat(2001) }, client()));
+      const error = await catchHttp(service.create({ ...valid('long'), notes: 'n'.repeat(2001) }));
       expect(bodyOf(error).fieldErrors).toEqual({ notes: 'TOO_LONG' });
     });
 
     it('geçersiz taleplerden hiçbiri kaydedilmez', async () => {
-      await catchHttp(service.create({ ...valid('inv'), vehicleCount: 0 }, client()));
+      await catchHttp(service.create({ ...valid('inv'), vehicleCount: 0 }));
       expect(await prisma.quoteRequest.count({ where: { companyName: company('inv') } })).toBe(0);
     });
   });
 
-  describe('spam ve hız sınırı', () => {
+  describe('spam', () => {
     it('tuzak alan doluysa 422 SPAM_DETECTED döner ve kayıt oluşmaz', async () => {
-      const error = await catchHttp(service.create({ ...valid('spam'), website: 'http://spam.example' }, client()));
+      const error = await catchHttp(service.create({ ...valid('spam'), website: 'http://spam.example' }));
       expect(error.getStatus()).toBe(422);
       expect(bodyOf(error).code).toBe('SPAM_DETECTED');
       expect(await prisma.quoteRequest.count({ where: { companyName: company('spam') } })).toBe(0);
     });
 
-    it('aynı istemci saatte sınırdan fazla gönderirse 429; başka istemci etkilenmez', async () => {
-      const heavy = client();
-      for (let i = 0; i < QUOTE_LIMIT_PER_HOUR; i += 1) {
-        await service.create(valid(`rl${i}`), heavy);
-      }
-      const error = await catchHttp(service.create(valid('rl-extra'), heavy));
-      expect(error.getStatus()).toBe(429);
-      expect(bodyOf(error).code).toBe('RATE_LIMITED');
-      expect(await prisma.quoteRequest.count({ where: { companyName: company('rl-extra') } })).toBe(0);
-
-      const other = await service.create(valid('rl-other'), client());
-      expect(other.referenceNumber).toMatch(NUMBER_FORMAT);
-    });
   });
 });
