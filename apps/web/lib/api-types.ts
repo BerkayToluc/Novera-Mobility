@@ -1944,10 +1944,14 @@ export interface components {
         /** @description Geçici alanlar (BACKLOG Y35). */
         QuoteRequest: {
             companyName: string;
+            contactName?: string | null;
+            phone?: string | null;
             vehicleCount: number;
             durationMonths: number;
             /** @description Araç sınıfı slug'ı veya serbest metin. */
             vehicleType: string;
+            deliveryCities?: string | null;
+            notes?: string | null;
             /** Format: email */
             email: string;
             productSlug?: string | null;

@@ -44,7 +44,7 @@
 | 07 | Sözleşme önce, mock | Geçerli; mock modu dağınık (M-06), ADR-29 ile toplanır |
 | 08 | E-posta + şifre, httpOnly çerez | Geçerli; özet `argon2` değil **scrypt**; Google ile giriş eklendi |
 | 09 | Google Maps JS API | Geçerli; v2'de Filom haritaları da bunu kullanır |
-| 10 | Formlar React Hook Form + Zod; API class-validator | **Değişiyor:** API'de doğrulama elle yazılmış, class-validator kullanılmıyor. ADR-26 ile iki tarafta da zod |
+| 10 | Formlar React Hook Form + Zod; API class-validator | **Değişti (V2-07):** API'de de zod; `class-validator` ve `class-transformer` kaldırıldı. Bkz. ADR-26 |
 | 11 | ESLint, Prettier, Vitest, Playwright, Actions | Geçerli; v2'de CI'a güvenlik taraması eklenir (V2-18) |
 | 12 | Yayın: Vercel + Render + Neon | Geçerli ([DEPLOY.md](DEPLOY.md)) |
 | 13 | Tema çerezi + `data-theme`, sayfalar istek anında | Geçerli |
@@ -95,7 +95,7 @@
 
 - **Bağlam:** API'de doğrulama dört ayrı yerde elle yazılmış (`FormReader`, `parseReservationRequest`, `HoldsService.validate`, catalog). Global `ValidationPipe` gövdeler `unknown` olduğu için hiçbir şey yapmıyor ve kurallar `@ApiBody`'de bir kez daha elle tekrarlanıyor. Web'de server action'ların çoğu girdiyi doğrulamadan kullanıyor (QUALITY G-09, G-10).
 - **Karar:**
-  - **API:** her uç gövde, sorgu ve yol parametresini bir zod şemasıyla bir `ZodValidationPipe` üzerinden alır. Şema hatası ADR-17 biçiminde `422 VALIDATION_FAILED` + `fieldErrors` döner (alan kodları bugünkülerle aynı: `REQUIRED`, `INVALID_FORMAT`...). Şemalar `src/<alan>/<alan>.schemas.ts` dosyalarında durur. `class-validator`, `class-transformer` ve işe yaramayan global `ValidationPipe` kaldırılır. OpenAPI gövde tanımı mümkünse şemadan üretilir; değilse sözleşme testi şemayla `openapi.yaml`'ın uyumunu denetler.
+  - **API:** her uç gövde, sorgu ve yol parametresini bir zod şemasıyla bir `ZodValidationPipe` üzerinden alır. Şema hatası ADR-17 biçiminde `422 VALIDATION_FAILED` + `fieldErrors` döner (alan kodları bugünkülerle aynı: `REQUIRED`, `INVALID_FORMAT`...). Şemalar `src/<alan>/<alan>.schemas.ts` dosyalarında durur, alan kuralları `common/zod-fields.ts`'te ortaktır. **Uygulama notu (V2-07):** hız sınırı doğrulamadan önce sayılan uçlarda (`/contact`, `/quotes`, `/auth/register`, `/auth/google`, `/auth/reset-password`, `/me/password`, `/reservations*`) geçersiz istekler de sınıra sayılır ve tuzak alan doğrulamadan önce okunur; bu sırayı korumak için o uçlarda şema `ZodValidationPipe` ile değil, aynı `parseInput` fonksiyonuyla servis içinde, sınırdan sonra çalışır. Pipe, doğrulamanın en başta yapıldığı yeni uçlar içindir. `class-validator`, `class-transformer` ve işe yaramayan global `ValidationPipe` kaldırılır. OpenAPI gövde tanımı mümkünse şemadan üretilir; değilse sözleşme testi şemayla `openapi.yaml`'ın uyumunu denetler.
   - **Web:** her server action ilk satırda `safeParse` yapar ve formun kullandığı şemayı yeniden kullanır (`lib/*-schemas.ts`). Doğrulanmamış girdiyle string metodu çağrılmaz. Geçersiz girdi 500 değil alan hatası döner.
   - Ortak şema paketi (`packages/`) **açılmaz**: iki taraf HTTP sözleşmesiyle bağlıdır, kural birliği sözleşme testleriyle sağlanır.
 - **Sonuçları:** API'de büyük ama mekanik bir değişikliktir (V2-07). Davranış değişmez; HTTP testleri bunu kanıtlar.
