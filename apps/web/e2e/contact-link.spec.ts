@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { hydrated } from "./hydration";
 
 // The e-mail addresses (SPEC §2.6, after the Framer Smart Contact Link): pressed, a bubble offers
 // sending a mail or copying the address.
@@ -13,6 +14,7 @@ test("the head office address opens a bubble to send or copy, and Escape closes 
   await page.goto("/iletisim");
   const trigger = page.getByRole("button", { name: "iletisim@novera.example" });
   await expect(trigger).toHaveAttribute("aria-expanded", "false");
+  await hydrated(trigger);
   await trigger.click();
   await expect(trigger).toHaveAttribute("aria-expanded", "true");
 
@@ -33,6 +35,7 @@ test("the head office address opens a bubble to send or copy, and Escape closes 
 test("a branch's e-mail is a choice too, and a click outside closes it", async ({ page }) => {
   await page.goto("/bayilerimiz");
   const first = page.getByRole("button", { name: "E-posta" }).first();
+  await hydrated(first);
   await first.click();
   await expect(page.getByRole("group", { name: "E-posta adresi" })).toBeVisible();
   await page.mouse.click(5, 5);
@@ -42,7 +45,9 @@ test("a branch's e-mail is a choice too, and a click outside closes it", async (
 test("a phone number offers to call or copy, like an e-mail address", async ({ page, context, browserName }) => {
   if (browserName === "chromium") await context.grantPermissions(["clipboard-read", "clipboard-write"]);
   await page.goto("/iletisim");
-  await page.getByRole("button", { name: "+90 212 555 00 00" }).click();
+  const phone = page.getByRole("button", { name: "+90 212 555 00 00" });
+  await hydrated(phone);
+  await phone.click();
   const bubble = page.getByRole("group", { name: "Telefon numarası" });
   await expect(bubble.getByRole("link", { name: "Ara" })).toHaveAttribute("href", "tel:+902125550000");
   await bubble.getByRole("button", { name: "Numarayı kopyala" }).click();
@@ -53,7 +58,9 @@ test("a phone number offers to call or copy, like an e-mail address", async ({ p
 
 test("a branch card's phone is a choice too", async ({ page }) => {
   await page.goto("/bayilerimiz");
-  await page.getByRole("button", { name: /^Ara: / }).first().click();
+  const call = page.getByRole("button", { name: /^Ara: / }).first();
+  await hydrated(call);
+  await call.click();
   await expect(page.getByRole("group", { name: "Telefon numarası" })).toBeVisible();
   await expect(page.getByRole("group", { name: "Telefon numarası" }).getByRole("link", { name: "Ara" })).toHaveAttribute("href", /^tel:\+90/);
 });
