@@ -18,6 +18,10 @@ import { sendContact } from "@/lib/contact-actions";
 
 // The API gives no number for a message, so the reference may be missing (null).
 
+// The fields with a message of their own in the message files.
+const MESSAGED_FIELDS = ["name", "email", "phone", "message", "consent"] as const;
+type MessagedField = (typeof MESSAGED_FIELDS)[number];
+
 // The contact form (SPEC §2.6). Once sent it turns into the confirmation in place, with a
 // reference the visitor can quote; see the quote form for the same pattern.
 export function ContactForm() {
@@ -40,6 +44,7 @@ export function ContactForm() {
   const {
     register,
     handleSubmit,
+    setError,
     reset,
     formState: { errors, isSubmitting },
   } = useForm<ContactInput>({
@@ -50,11 +55,20 @@ export function ContactForm() {
     shouldFocusError: false,
   });
 
+  // The fields the server rejected get the same message the browser's check would have given, beside the
+  // field. False when none of them has a message (a hidden or select field), so the form says it as a whole.
+  function markRejected(fields: string[]): boolean {
+    const known = fields.filter((field): field is MessagedField => (MESSAGED_FIELDS as readonly string[]).includes(field));
+    for (const field of known) setError(field, { type: "server", message: t(`errors.${field}`) });
+    return known.length > 0;
+  }
+
   async function onSubmit(values: ContactInput) {
     setFormError(null);
     try {
       const result = await sendContact(values);
       if (result.ok) setSent({ email: values.email, reference: result.reference });
+      else if (result.reason === "invalid" && markRejected(result.fields)) setFormError(null);
       else setFormError(t(result.reason === "invalid" ? "errors.invalid" : result.reason === "rate_limited" ? "errors.rateLimited" : "errors.unavailable"));
     } catch {
       setFormError(t("errors.generic"));

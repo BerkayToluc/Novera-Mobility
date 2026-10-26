@@ -82,10 +82,10 @@ export class GoogleNotConfiguredError extends Error {
   }
 }
 
-// Too many requests from this address or for this e-mail (the API allows a few an hour).
+// Too many requests from this address or for this e-mail (sign-in, sign-up, Google, password reset).
 export class AuthRateLimitedError extends Error {
   constructor() {
-    super("Too many password reset requests.");
+    super("Too many attempts; try again later.");
     this.name = "AuthRateLimitedError";
   }
 }

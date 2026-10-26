@@ -1,8 +1,11 @@
 "use server";
 
 import { apiRequest } from "./api-request";
-import { PASSWORD_MIN_LENGTH } from "./auth-schemas";
+import { forgotPasswordSchema, resetPasswordSchema, type AuthErrorMessages } from "./auth-schemas";
 import { isMockMode } from "./mode";
+import { codeMessages } from "./validation";
+
+const messages = codeMessages<AuthErrorMessages>();
 
 export type ForgotPasswordResult = { ok: true } | { ok: false; reason: "unavailable" | "invalid" | "rate_limited" };
 
@@ -10,7 +13,9 @@ export type ForgotPasswordResult = { ok: true } | { ok: false; reason: "unavaila
 // the form cannot be used to find out who is registered. With USE_MOCKS=1 and no API_URL the request
 // is accepted and nothing is sent; with neither, the visitor is told the service is unavailable.
 export async function forgotPassword(email: string): Promise<ForgotPasswordResult> {
-  if (!email.includes("@")) return { ok: false, reason: "invalid" };
+  const parsed = forgotPasswordSchema(messages).safeParse({ email });
+  if (!parsed.success) return { ok: false, reason: "invalid" };
+  email = parsed.data.email;
 
   if (process.env.API_URL) {
     const result = await apiRequest("POST", "/auth/forgot-password", { email });
@@ -32,8 +37,8 @@ export type ResetPasswordResult =
 // again. With USE_MOCKS=1 and no API_URL any token is accepted, except `expired`, which plays a link
 // that no longer works so that screen can be reached without a real e-mail.
 export async function resetPassword(token: string, password: string): Promise<ResetPasswordResult> {
-  if (token.trim() === "") return { ok: false, reason: "invalid_link" };
-  if (password.length < PASSWORD_MIN_LENGTH) return { ok: false, reason: "too_short" };
+  if (typeof token !== "string" || token.trim() === "") return { ok: false, reason: "invalid_link" };
+  if (!resetPasswordSchema(messages).safeParse({ password }).success) return { ok: false, reason: "too_short" };
 
   if (process.env.API_URL) {
     const result = await apiRequest("POST", "/auth/reset-password", { token, password });
