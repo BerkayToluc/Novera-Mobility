@@ -1,0 +1,25 @@
+name: CodeQL
+
+# Static analysis of the JavaScript and TypeScript code for security problems (V2-18). The repository is public,
+# so this is free. It runs on every pull request, on main, and once a week (new rules find old code).
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "17 3 * * 1"
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: github/codeql-action/init@v3
+        with:
+          languages: javascript-typescript
+      - uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:javascript-typescript"

@@ -35,6 +35,14 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      # A high or critical advisory in what the app ships fails the build (V2-18). The few that never run in the
+      # app (the Prisma command-line tool) are on a written, dated allowlist: scripts/audit-allowlist.json.
+      - name: Dependency audit
+        run: pnpm audit:prod
+
+      - name: Audit rule tests
+        run: pnpm test:scripts
+
       # The generated Prisma client is not in Git (apps/api/src/generated is ignored), so CI has to
       # produce it before anything that type-checks the API: lint is type-aware, build compiles it.
       # generate never connects to a database; the address only has to exist for the config file.

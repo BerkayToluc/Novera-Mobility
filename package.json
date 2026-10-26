@@ -10,6 +10,8 @@
     "build": "pnpm -r build",
     "lint": "pnpm -r lint",
     "typecheck": "pnpm -r typecheck",
-    "test": "pnpm -r --if-present test"
+    "test": "pnpm -r --if-present test",
+    "audit:prod": "node scripts/audit-prod.mjs",
+    "test:scripts": "node --test \"scripts/**/*.test.mjs\""
   }
 }

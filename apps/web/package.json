@@ -26,13 +26,13 @@
     "date-fns": "^4.4.0",
     "framer-motion": "^14.1.0",
     "lucide-react": "^1.52.0",
-    "next": "16.3.8",
+    "next": "16.4.3",
     "next-intl": "^4.14.9",
     "react": "19.2.8",
     "react-day-picker": "^10.0.2",
     "react-dom": "19.2.8",
     "react-hook-form": "^7.89.0",
-    "zod": "^4.6.5"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@playwright/test": "^1.64.0",
@@ -41,7 +41,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.3.8",
+    "eslint-config-next": "16.4.3",
     "openapi-typescript": "^7.13.0",
     "tailwindcss": "^4",
     "typescript": "^5",

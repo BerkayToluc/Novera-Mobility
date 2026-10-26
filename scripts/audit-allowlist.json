@@ -1,0 +1,16 @@
+[
+  {
+    "id": "GHSA-ggr8-5vv4-36mx",
+    "package": "deepmerge-ts",
+    "pathPrefix": "apps__api>@prisma/client>prisma>",
+    "reason": "Reached only through the Prisma command-line tool (prisma migrate, generate), which the running API never loads: the API talks to the database through @prisma/client and the pg driver. Fix is in a Prisma release; update with Prisma.",
+    "reviewed": "2026-10-26"
+  },
+  {
+    "id": "GHSA-3f6p-5ww8-9rcr",
+    "package": "mysql2",
+    "pathPrefix": "apps__api>@prisma/client>prisma>",
+    "reason": "Reached only through the Prisma command-line tool. The database is PostgreSQL (driver pg); nothing in the app opens a MySQL connection. Fix is in a Prisma release; update with Prisma.",
+    "reviewed": "2026-10-26"
+  }
+]
