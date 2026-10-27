@@ -15,6 +15,7 @@ import {
   loginWithGoogle,
 } from "@/lib/auth-client";
 import { FormError } from "./form-error";
+import { rateLimitMessage } from "@/lib/rate-limit";
 
 // The part of Google Identity Services this page uses.
 type GoogleId = {
@@ -46,6 +47,7 @@ export function GoogleSignIn({
   next?: Record<string, string>;
 }) {
   const t = useTranslations("Auth");
+  const limitT = useTranslations("RateLimit");
   const router = useRouter();
   const locale = useLocale();
   const buttonRef = useRef<HTMLDivElement>(null);
@@ -72,14 +74,14 @@ export function GoogleSignIn({
         } else if (failure instanceof GoogleNotAllowedError) setError(t("google.errors.notAllowed"));
         else if (failure instanceof GoogleTokenInvalidError) setError(t("google.errors.invalidToken"));
         else if (failure instanceof GoogleNotConfiguredError) setError(t("google.errors.notConfigured"));
-        else if (failure instanceof AuthRateLimitedError) setError(t("errors.rateLimited"));
+        else if (failure instanceof AuthRateLimitedError) setError(rateLimitMessage(limitT, failure.retryAfter));
         else if (failure instanceof AuthUnavailableError) setError(t("errors.unavailable"));
         else setError(t("errors.generic"));
       } finally {
         setPending(false);
       }
     },
-    [next, router, t],
+    [limitT, next, router, t],
   );
 
   // Loads Google's script once and draws its button. Created here (not in the markup) so the page's

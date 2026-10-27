@@ -15,6 +15,7 @@ import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { CONTACT_TOPICS, EMPTY_CONTACT, contactSchema, type ContactInput } from "@/lib/contact";
 import { sendContact } from "@/lib/contact-actions";
+import { rateLimitMessage } from "@/lib/rate-limit";
 
 // The API gives no number for a message, so the reference may be missing (null).
 
@@ -26,6 +27,7 @@ type MessagedField = (typeof MESSAGED_FIELDS)[number];
 // reference the visitor can quote; see the quote form for the same pattern.
 export function ContactForm() {
   const t = useTranslations("ContactForm");
+  const limitT = useTranslations("RateLimit");
   const [formError, setFormError] = useState<string | null>(null);
   const [sent, setSent] = useState<{ email: string; reference: string | null } | null>(null);
 
@@ -69,7 +71,8 @@ export function ContactForm() {
       const result = await sendContact(values);
       if (result.ok) setSent({ email: values.email, reference: result.reference });
       else if (result.reason === "invalid" && markRejected(result.fields)) setFormError(null);
-      else setFormError(t(result.reason === "invalid" ? "errors.invalid" : result.reason === "rate_limited" ? "errors.rateLimited" : "errors.unavailable"));
+      else if (result.reason === "rate_limited") setFormError(rateLimitMessage(limitT, result.retryAfter));
+      else setFormError(t(result.reason === "invalid" ? "errors.invalid" : "errors.unavailable"));
     } catch {
       setFormError(t("errors.generic"));
     }

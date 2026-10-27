@@ -1,13 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { parseInput } from '../common/zod-validation.js';
-import { isSpam, rateLimited, spamDetected, validationFailed } from './form-input.js';
+import { isSpam, spamDetected, validationFailed } from './form-input.js';
 import { quoteSchema } from './forms.schemas.js';
-import { RateLimiter } from './rate-limiter.js';
 
 // POST /quotes (BACKLOG #33, Y35, ADR-20): kurumsal teklif / görüşme talebi.
-export const QUOTE_LIMIT_PER_HOUR = 10;
-const HOUR_MS = 60 * 60 * 1000;
 const NUMBER_ATTEMPTS = 10;
 
 export interface QuoteReceived {
@@ -44,18 +41,11 @@ function istanbulYear(date: Date): number {
 
 @Injectable()
 export class QuotesService {
-  constructor(
-    private readonly prisma: PrismaService,
-    private readonly limiter: RateLimiter,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
-  async create(input: unknown, clientKey: string, userId: string | null = null): Promise<QuoteReceived> {
-    if (!this.limiter.allow(`quotes:${clientKey}`, QUOTE_LIMIT_PER_HOUR, HOUR_MS)) {
-      throw rateLimited();
-    }
+  async create(input: unknown, userId: string | null = null): Promise<QuoteReceived> {
     if (isSpam(input)) throw spamDetected();
 
-    // After the limit and the trap, as before: the limit counts invalid requests too.
     const {
       companyName,
       contactName,

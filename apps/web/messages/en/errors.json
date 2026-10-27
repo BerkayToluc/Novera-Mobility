@@ -6,5 +6,9 @@
     "retry": "Try again",
     "home": "Back to Home",
     "reference": "Error code"
+  },
+  "RateLimit": {
+    "wait": "Too many attempts. Please try again in {minutes, plural, one {# minute} other {# minutes}}.",
+    "later": "Too many attempts. Please try again in a while."
   }
 }

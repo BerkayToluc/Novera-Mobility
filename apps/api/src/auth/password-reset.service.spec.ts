@@ -1,13 +1,9 @@
 import { HttpException } from '@nestjs/common';
 import type { PrismaService } from '../prisma/prisma.service.js';
-import { RateLimiter } from '../forms/rate-limiter.js';
 import { hashPassword, verifyPassword } from './password.js';
 import { PasswordResetFake } from './password-reset.testing.js';
 import {
-  FORGOT_LIMIT_PER_CLIENT_PER_HOUR,
-  FORGOT_LIMIT_PER_EMAIL_PER_HOUR,
   PasswordResetService,
-  RESET_LIMIT_PER_15_MIN,
   RESET_TOKEN_TTL_MS,
 } from './password-reset.service.js';
 import type { ResetLinkNotifier } from './reset-link-notifier.js';
@@ -39,8 +35,8 @@ describe('PasswordResetService', () => {
   }
 
   // Asks for a link and returns the plain token that went to the notifier.
-  async function requestToken(email = 'ayse@example.com', client = 'c1'): Promise<string> {
-    await service.requestReset({ email }, client);
+  async function requestToken(email = 'ayse@example.com'): Promise<string> {
+    await service.requestReset({ email });
     const link = sent[sent.length - 1]!.link;
     return new URL(link).searchParams.get('token')!;
   }
@@ -51,7 +47,6 @@ describe('PasswordResetService', () => {
     const notifier = { send: async (email: string, link: string) => void sent.push({ email, link }) };
     service = new PasswordResetService(
       db as unknown as PrismaService,
-      new RateLimiter(),
       notifier as unknown as ResetLinkNotifier,
     );
   });
@@ -73,12 +68,12 @@ describe('PasswordResetService', () => {
 
     it('builds the link in the account language and finds the account whatever the letter case', async () => {
       await addUser('ayse@example.com', 'u1', 'EN');
-      await service.requestReset({ email: 'AYSE@Example.com' }, 'c1');
+      await service.requestReset({ email: 'AYSE@Example.com' });
       expect(sent[0]?.link).toMatch(/^http:\/\/localhost:3000\/en\/sifre-sifirla\/yeni\?token=/);
     });
 
     it('does nothing visible for an e-mail without an account', async () => {
-      await expect(service.requestReset({ email: 'nobody@example.com' }, 'c1')).resolves.toBeUndefined();
+      await expect(service.requestReset({ email: 'nobody@example.com' })).resolves.toBeUndefined();
       expect(db.resetTokens).toHaveLength(0);
       expect(sent).toHaveLength(0);
     });
@@ -88,34 +83,16 @@ describe('PasswordResetService', () => {
       const first = await requestToken();
       const second = await requestToken();
       expect(db.resetTokens).toHaveLength(1);
-      expect((await catchHttp(service.resetPassword({ token: first, password: NEW_PASSWORD }, 'c1'))).getStatus()).toBe(422);
-      await expect(service.resetPassword({ token: second, password: NEW_PASSWORD }, 'c1')).resolves.toBeUndefined();
+      expect((await catchHttp(service.resetPassword({ token: first, password: NEW_PASSWORD }))).getStatus()).toBe(422);
+      await expect(service.resetPassword({ token: second, password: NEW_PASSWORD })).resolves.toBeUndefined();
     });
 
     it('rejects a malformed e-mail with 422', async () => {
-      const error = await catchHttp(service.requestReset({ email: 'not-an-email' }, 'c1'));
+      const error = await catchHttp(service.requestReset({ email: 'not-an-email' }));
       expect(error.getStatus()).toBe(422);
       expect(bodyOf(error).fieldErrors).toEqual({ email: 'INVALID_EMAIL' });
     });
 
-    it('limits one client, and one address, without telling whether the account exists', async () => {
-      await addUser();
-      for (let i = 0; i < FORGOT_LIMIT_PER_EMAIL_PER_HOUR; i += 1) {
-        await service.requestReset({ email: 'ayse@example.com' }, `c${i}`);
-      }
-      expect((await catchHttp(service.requestReset({ email: 'ayse@example.com' }, 'other'))).getStatus()).toBe(429);
-      // The same limit applies to an address with no account.
-      for (let i = 0; i < FORGOT_LIMIT_PER_EMAIL_PER_HOUR; i += 1) {
-        await service.requestReset({ email: 'ghost@example.com' }, `g${i}`);
-      }
-      expect((await catchHttp(service.requestReset({ email: 'ghost@example.com' }, 'g-other'))).getStatus()).toBe(429);
-
-      for (let i = 0; i < FORGOT_LIMIT_PER_CLIENT_PER_HOUR; i += 1) {
-        await service.requestReset({ email: `u${i}@example.com` }, 'same-client');
-      }
-      const error = await catchHttp(service.requestReset({ email: 'more@example.com' }, 'same-client'));
-      expect(bodyOf(error).code).toBe('RATE_LIMITED');
-    });
   });
 
   describe('resetPassword', () => {
@@ -123,7 +100,7 @@ describe('PasswordResetService', () => {
       await addUser();
       await addUser('bora@example.com', 'u2');
       const token = await requestToken();
-      await service.resetPassword({ token, password: NEW_PASSWORD }, 'c1');
+      await service.resetPassword({ token, password: NEW_PASSWORD });
 
       const user = db.users.find((u) => u.id === 'u1')!;
       expect(await verifyPassword(NEW_PASSWORD, user.passwordHash)).toBe(true);
@@ -137,8 +114,8 @@ describe('PasswordResetService', () => {
     it('a link works once', async () => {
       await addUser();
       const token = await requestToken();
-      await service.resetPassword({ token, password: NEW_PASSWORD }, 'c1');
-      const error = await catchHttp(service.resetPassword({ token, password: 'third-password-3' }, 'c1'));
+      await service.resetPassword({ token, password: NEW_PASSWORD });
+      const error = await catchHttp(service.resetPassword({ token, password: 'third-password-3' }));
       expect(error.getStatus()).toBe(422);
       expect(bodyOf(error).code).toBe('RESET_TOKEN_INVALID');
       const user = db.users[0]!;
@@ -149,8 +126,8 @@ describe('PasswordResetService', () => {
       await addUser();
       const token = await requestToken();
       const results = await Promise.allSettled([
-        service.resetPassword({ token, password: 'first-password-1' }, 'c1'),
-        service.resetPassword({ token, password: 'second-password-2' }, 'c2'),
+        service.resetPassword({ token, password: 'first-password-1' }),
+        service.resetPassword({ token, password: 'second-password-2' }),
       ]);
       expect(results.filter((r) => r.status === 'fulfilled')).toHaveLength(1);
       expect(results.filter((r) => r.status === 'rejected')).toHaveLength(1);
@@ -160,13 +137,13 @@ describe('PasswordResetService', () => {
       await addUser();
       const token = await requestToken();
       db.resetTokens[0]!.expiresAt = new Date(Date.now() - 1000);
-      const error = await catchHttp(service.resetPassword({ token, password: NEW_PASSWORD }, 'c1'));
+      const error = await catchHttp(service.resetPassword({ token, password: NEW_PASSWORD }));
       expect(bodyOf(error).code).toBe('RESET_TOKEN_INVALID');
       expect(await verifyPassword(OLD_PASSWORD, db.users[0]!.passwordHash)).toBe(true);
     });
 
     it('an unknown token is refused with the same answer as a used one', async () => {
-      const error = await catchHttp(service.resetPassword({ token: 'made-up-token', password: NEW_PASSWORD }, 'c1'));
+      const error = await catchHttp(service.resetPassword({ token: 'made-up-token', password: NEW_PASSWORD }));
       expect(error.getStatus()).toBe(422);
       expect(bodyOf(error).code).toBe('RESET_TOKEN_INVALID');
     });
@@ -174,23 +151,16 @@ describe('PasswordResetService', () => {
     it('a weak password is a 422 and does NOT use the token up', async () => {
       await addUser();
       const token = await requestToken();
-      const error = await catchHttp(service.resetPassword({ token, password: 'short' }, 'c1'));
+      const error = await catchHttp(service.resetPassword({ token, password: 'short' }));
       expect(error.getStatus()).toBe(422);
       expect(bodyOf(error)).toMatchObject({ code: 'VALIDATION_FAILED', fieldErrors: { password: 'TOO_SHORT' } });
-      await expect(service.resetPassword({ token, password: NEW_PASSWORD }, 'c1')).resolves.toBeUndefined();
+      await expect(service.resetPassword({ token, password: NEW_PASSWORD })).resolves.toBeUndefined();
     });
 
     it('names a missing token and a missing password', async () => {
-      const error = await catchHttp(service.resetPassword({}, 'c1'));
+      const error = await catchHttp(service.resetPassword({}));
       expect(bodyOf(error).fieldErrors).toEqual({ token: 'REQUIRED', password: 'REQUIRED' });
     });
 
-    it('limits guessing: too many tries from one client get 429', async () => {
-      for (let i = 0; i < RESET_LIMIT_PER_15_MIN; i += 1) {
-        await catchHttp(service.resetPassword({ token: `guess-${i}`, password: NEW_PASSWORD }, 'c1'));
-      }
-      const error = await catchHttp(service.resetPassword({ token: 'guess-last', password: NEW_PASSWORD }, 'c1'));
-      expect(error.getStatus()).toBe(429);
-    });
   });
 });

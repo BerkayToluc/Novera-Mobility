@@ -14,10 +14,12 @@ import { loginSchema, type LoginInput } from "@/lib/auth-schemas";
 import type { AccountType } from "@/lib/session";
 import { FormError } from "./form-error";
 import { useAuthErrorMessages } from "./use-auth-messages";
+import { rateLimitMessage } from "@/lib/rate-limit";
 
 // `next`: the booking to go back to after signing in (the payment page asked for it).
 export function LoginForm({ next, kind = "individual" }: { next?: Record<string, string>; kind?: AccountType }) {
   const t = useTranslations("Auth");
+  const limitT = useTranslations("RateLimit");
   const router = useRouter();
   const messages = useAuthErrorMessages();
   const schema = useMemo(() => loginSchema(messages), [messages]);
@@ -45,7 +47,7 @@ export function LoginForm({ next, kind = "individual" }: { next?: Record<string,
       router.refresh();
     } catch (error) {
       if (error instanceof InvalidCredentialsError) setFormError(t("errors.invalidCredentials"));
-      else if (error instanceof AuthRateLimitedError) setFormError(t("errors.rateLimited"));
+      else if (error instanceof AuthRateLimitedError) setFormError(rateLimitMessage(limitT, error.retryAfter));
       else if (error instanceof AuthUnavailableError) setFormError(t("errors.unavailable"));
       else setFormError(t("errors.generic"));
     }

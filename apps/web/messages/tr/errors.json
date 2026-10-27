@@ -6,5 +6,9 @@
     "retry": "Tekrar dene",
     "home": "Ana Sayfaya Dön",
     "reference": "Hata kodu"
+  },
+  "RateLimit": {
+    "wait": "Çok fazla deneme yaptınız. {minutes} dakika sonra tekrar deneyin.",
+    "later": "Çok fazla deneme yaptınız. Lütfen bir süre sonra tekrar deneyin."
   }
 }

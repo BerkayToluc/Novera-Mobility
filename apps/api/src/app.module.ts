@@ -10,6 +10,7 @@ import { ContentModule } from './content/content.module.js';
 import { FormsModule } from './forms/forms.module.js';
 import { AuthModule } from './auth/auth.module.js';
 import { ReservationsModule } from './reservations/reservations.module.js';
+import { RateLimitModule } from './common/rate-limit.module.js';
 
 
 @Module({
@@ -23,6 +24,7 @@ import { ReservationsModule } from './reservations/reservations.module.js';
     FormsModule,
     AuthModule,
     ReservationsModule,
+    RateLimitModule,
   ],
   controllers: [AppController],
   providers: [AppService],

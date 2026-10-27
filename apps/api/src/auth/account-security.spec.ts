@@ -1,10 +1,9 @@
 import 'reflect-metadata';
 import { HttpException, Global, Module, type INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
-import { RateLimiter } from '../forms/rate-limiter.js';
 import { configureApp } from '../app.setup.js';
 import { PrismaService } from '../prisma/prisma.service.js';
-import { AccountSecurityService, CHANGE_PASSWORD_LIMIT_PER_15_MIN } from './account-security.service.js';
+import { AccountSecurityService } from './account-security.service.js';
 import { AuthModule } from './auth.module.js';
 import { AuthService } from './auth.service.js';
 import { FakePrisma } from './auth.testing.js';
@@ -56,11 +55,10 @@ describe('AccountSecurityService', () => {
 
   beforeEach(async () => {
     db = new FakePrisma();
-    const limiter = new RateLimiter();
-    auth = new AuthService(db as unknown as PrismaService, limiter);
-    security = new AccountSecurityService(db as unknown as PrismaService, limiter);
-    const first = await auth.register(REGISTER, 'c1', SAFARI_IPHONE);
-    const second = await auth.login(REGISTER, 'c1', CHROME_WINDOWS);
+    auth = new AuthService(db as unknown as PrismaService);
+    security = new AccountSecurityService(db as unknown as PrismaService);
+    const first = await auth.register(REGISTER, SAFARI_IPHONE);
+    const second = await auth.login(REGISTER, CHROME_WINDOWS);
     user = second.user;
     otherHash = hashSessionToken(first.token);
     currentHash = hashSessionToken(second.token);
@@ -95,13 +93,6 @@ describe('AccountSecurityService', () => {
       expect(bodyOf(empty).fieldErrors).toEqual({ currentPassword: 'REQUIRED', newPassword: 'REQUIRED' });
     });
 
-    it('is rate limited per account', async () => {
-      for (let i = 0; i < CHANGE_PASSWORD_LIMIT_PER_15_MIN; i += 1) {
-        await catchHttp(security.changePassword(user, currentHash, { currentPassword: 'yanlis', newPassword: 'yepyeni-parola-2' }));
-      }
-      const blocked = await catchHttp(security.changePassword(user, currentHash, { currentPassword: REGISTER.password, newPassword: 'yepyeni-parola-2' }));
-      expect(blocked.getStatus()).toBe(429);
-    });
   });
 
   describe('sessions', () => {
@@ -134,7 +125,7 @@ describe('AccountSecurityService', () => {
     });
 
     it("someone else's or unknown session is 404", async () => {
-      const stranger = await auth.register({ ...REGISTER, email: 'baska@example.com' }, 'c9', CHROME_WINDOWS);
+      const stranger = await auth.register({ ...REGISTER, email: 'baska@example.com' }, CHROME_WINDOWS);
       const theirs = db.sessions.find((s) => s.tokenHash === hashSessionToken(stranger.token))!;
       const error = await catchHttp(security.revokeSession(user.id, theirs.id, currentHash));
       expect(error.getStatus()).toBe(404);

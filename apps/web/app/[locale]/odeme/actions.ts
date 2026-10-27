@@ -34,7 +34,7 @@ export type DriverBody = z.input<typeof driverBody>;
 export type PlaceReservationResult =
   | { ok: true; number: string }
   // `expired`: the 15-minute hold ran out; `taken`: someone else got the car (SPEC §2.3).
-  | { ok: false; reason: "invalid" | "signin" | "unavailable" | "expired" | "taken" | "promo" | "promoExhausted" | "promoUsed" | "pastStart" | "limit" | "rateLimited" }
+  | { ok: false; reason: "invalid" | "signin" | "unavailable" | "expired" | "taken" | "promo" | "promoExhausted" | "promoUsed" | "pastStart" | "limit" | "rateLimited"; retryAfter?: number | null }
   // The driver does not meet the class's conditions for the licence's country, or the check of the
   // licence did not come back valid (SPEC §2.10).
   | { ok: false; reason: "ineligible"; reasons: EligibilityReason[] }
@@ -97,7 +97,7 @@ export async function placeReservation(
     }
     if (error instanceof PastStartError) return { ok: false, reason: "pastStart" };
     if (error instanceof ReservationLimitError) return { ok: false, reason: "limit" };
-    if (error instanceof ReservationRateLimitedError) return { ok: false, reason: "rateLimited" };
+    if (error instanceof ReservationRateLimitedError) return { ok: false, reason: "rateLimited", retryAfter: error.retryAfter };
     return { ok: false, reason: "unavailable" };
   }
 }

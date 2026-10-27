@@ -2017,9 +2017,14 @@ export interface components {
                 "application/json": components["schemas"]["Error"];
             };
         };
-        /** @description Hız sınırı aşıldı (`RATE_LIMITED`) */
+        /**
+         * @description Hız sınırı aşıldı (`RATE_LIMITED`). Her uçta bir sınır vardır (hiçbiri açıkça verilmemişse 5 dakikada 300 istek;
+         *     `GET /health` hariç), yani her uç `429` verebilir. Sınırlar ve anahtarlar docs/SECURITY.md'deki tablodadır.
+         */
         TooManyRequests: {
             headers: {
+                /** @description Yeniden denemeden önce beklenecek saniye (sayacın içinde bulunduğu pencerenin kalan süresi). */
+                "Retry-After"?: number;
                 [name: string]: unknown;
             };
             content: {

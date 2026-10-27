@@ -16,15 +16,29 @@
 | G-03, G-07 | V2-04 ([#294](https://github.com/BerkayToluc/Novera-Mobility/issues/294)) | PR'da | API production'da açılırken `API_ACCESS_KEY` (en az 32 karakter), `DATABASE_URL` ve https `WEB_URL` yoksa hatayla durur (hata değeri yazmaz). "Production mı?" kararı tek yerde (`isProduction`): geliştirme yalnızca açıkça `NODE_ENV=development` (ya da `test`) ile geçerli; `NODE_ENV` yoksa ya da başka bir şeyse, ya da `RENDER` / `K_SERVICE` (Cloud Run) tanımlıysa production sayılır. Oturum çerezi `Secure`, sıfırlama bağlantısı günlüğe yazılmaz, `/docs` kapalı |
 | G-02, G-16 | V2-03 ([#293](https://github.com/BerkayToluc/Novera-Mobility/issues/293)) | PR'da | `POST /reservations` kullanıcı başına saatte 10 istek; bir hesapta en çok 3 gelecek ya da devam eden rezervasyon (`422 RESERVATION_LIMIT`, sayım ve ekleme kullanıcı satırı kilidiyle aynı işlemde); `POST /reservations/price` istemci başına 10 dakikada 60 istek; `holdId` yalnızca tutmayı açan istemci anahtarıyla kullanılabilir |
 
-### Hız sınırı tablosu (V2-09'dan sonra tek kaynak burasıdır)
+### Hız sınırı tablosu (V2-09; tek kaynak burasıdır)
 
-Şimdilik yalnızca v2'de eklenen satırlar; mevcut uçların tam listesi [QUALITY.md](QUALITY.md) §3.2'dedir. Sayaçlar bellek içidir (V2-09 kalıcı depoya taşır).
+Her uçta bir sınır vardır (ADR-27). Sayaçlar Postgres'te (`RateLimitHit`) tutulur; API yeniden başlayınca ya da ikinci bir örnek açılınca kaybolmaz. Pencere sabittir: sayaç pencerenin başında sıfırlanır, bu yüzden pencere sınırında en çok iki katı istek geçebilir. Sınırı aşan istek `429 RATE_LIMITED` ve saniye cinsinden `Retry-After` alır. Sınır doğrulamadan önce sayılır: geçersiz istek de sayılır. Eski pencereler her gün silinir.
 
-| Uç | Sınır | Anahtar | İş |
+**Anahtar:** *adres* istemci adresinin özetidir (`ip:<özet>`, adresin kendisi saklanmaz); *hesap* girişli istekte `user:<id>`, girişsiz istekte adrestir; *e-posta* gövdedeki adrestir (`email:<adres>`, küçük harfe çevrilir). Yönetici sınırı (`admin:<id>`, dakikada 120) V2-23'te gelir.
+
+| Uç | Sınır | Anahtar | Kova |
 |---|---|---|---|
-| `POST /reservations` | 10 istek/saat | kullanıcı | V2-03 |
-| `POST /reservations/price` | 60 istek/10 dk | istemci adresi | V2-03 |
-| `POST /reservations/price` (gövdede `promoCode` varsa) | 10 istek/10 dk | istemci adresi | V2-05 |
+| `POST /auth/register` | 10 istek/saat | adres | `register` |
+| `POST /auth/login` | 10 istek/15 dk ve ayrıca 10 istek/15 dk | adres; e-posta | `login`, `login-email` |
+| `POST /auth/google` | 10 istek/15 dk | adres | `google` |
+| `POST /auth/forgot-password` | 5 istek/saat ve ayrıca 3 istek/saat | adres; e-posta | `forgot`, `forgot-email` |
+| `POST /auth/reset-password` | 10 istek/15 dk | adres | `reset` |
+| `POST /me/password` | 5 istek/15 dk | hesap | `change-password` |
+| `PATCH /me`, `DELETE /me`, `DELETE /me/sessions`, `DELETE /me/sessions/{id}`, `POST /me/reservations/{id}/cancel` | 20 istek/15 dk | hesap | `account-write` |
+| `POST /contact` | 10 istek/saat | adres | `contact` |
+| `POST /quotes` | 10 istek/saat | adres | `quotes` |
+| `POST /holds` | 30 istek/saat (ayrıca bir istemci en çok 5 etkin tutma açabilir; bu kural serviste) | hesap | `holds` |
+| `POST /reservations/price` | 60 istek/10 dk | hesap | `price` |
+| `POST /reservations/price` (gövdede `promoCode` varsa, yukarıdakine ek olarak) | 10 istek/10 dk | hesap | `promo` |
+| `POST /reservations` | 10 istek/saat (ayrıca bir hesapta en çok 3 gelecek rezervasyon; bu kural serviste) | hesap | `reserve` |
+| `GET /health` | sınır yok (barındırıcının sağlık denetimi) | — | — |
+| Yukarıda olmayan her uç: katalog okumaları, `/faq`, `/rates`, `/products*`, `/services`, `GET /me*`, `DELETE /holds/{id}`, `GET /me/quotes` | 300 istek/5 dk | hesap | `default` |
 
 ### Canlıda G-01 kötüye kullanım tespiti (V2-02)
 
@@ -69,7 +83,7 @@ yeni testler ve `pnpm audit`.
 | # | Seviye | Bulgu | Düzeltme |
 |---|--------|-------|----------|
 | S1 | Yüksek | İstemci kimliği `X-Forwarded-For` başlığının **ilk** girdisinden alınıyordu. Bu girdiyi ziyaretçi yazar; her istekte değiştirerek giriş (10/15 dk), kayıt, parola sıfırlama, form ve **araç tutma (istemci başına 5)** sınırları aşılabiliyordu. Aynı işlev `holds.controller.ts` içinde ikinci kez kopyalanmıştı. | Kimlik artık `request.ip`. Express, başlığı yalnızca `TRUST_PROXY_HOPS` kadar proxy'ye güvenerek çözer (varsayılan 1: Next). Tek ortak `clientKeyOf` kullanılır. |
-| S2 | Orta | Bellek içi hız sınırlayıcı yalnızca 24 saatten eski kayıtları siliyordu; uydurma anahtarlarla sınırsız büyüyebilirdi (bellek tükenmesi). | Tablo 10.000 anahtarla sınırlı; dolunca en az kullanılan anahtarlar silinir. |
+| S2 | Orta | Bellek içi hız sınırlayıcı yalnızca 24 saatten eski kayıtları siliyordu; uydurma anahtarlarla sınırsız büyüyebilirdi (bellek tükenmesi). | v1'de tablo 10.000 anahtarla sınırlandı. V2-09'dan beri sayaçlar veritabanında; eski pencereler günlük görevle siliniyor ve bellek içi sınırlayıcı kodda yok. |
 | S3 | Orta | Hata yanıtı biçimi tutarsızdı: bilinmeyen yol, bozuk JSON, büyük gövde sözleşme dışı (`statusCode`, ayrıştırıcı metni) dönüyordu. Beklenmeyen hatalarda ayrıntı sızma riski. | Genel hata filtresi: her hata `{code, message, fieldErrors?}`. Beklenmeyen hata `500 INTERNAL_ERROR` ve sabit metin; ayrıntı yalnızca sunucu günlüğüne (yol ve yöntem, sorgu ve gövde yazılmaz). Yeni kodlar: `PAYLOAD_TOO_LARGE`, `INTERNAL_ERROR`. |
 | S4 | Düşük | Swagger sayfası (`/docs`) canlıda da açıktı ve tüm uçları listeliyordu. | Canlıda kapalı; `ENABLE_DOCS=1` ile açılır. |
 | S5 | Düşük | Güvenlik başlıkları yoktu; `X-Powered-By` çerçeveyi bildiriyordu; kişiye ait yanıtlar (`/me`, `/auth`, `/reservations`, `/holds`) önbelleğe alınabilirdi. | `nosniff`, `Referrer-Policy: no-referrer`, `Cross-Origin-Resource-Policy: same-origin`, kişisel yollarda `Cache-Control: no-store`, `X-Powered-By` kapalı. |
@@ -110,7 +124,7 @@ yeni testler ve `pnpm audit`.
 3. **Parola sıfırlama isteği süre farkı:** e-posta gönderimi artık beklenmiyor (S10); geriye yalnızca hesap varken yapılan iki küçük veritabanı yazması kaldı. Fark çok küçük ve ağ gürültüsünün içinde kalır; ek önlem gerekmez.
 4. **Kayıtta `EMAIL_TAKEN`:** hesap varlığını açık eder; sözleşmeye göre bilinçli (kullanıcıya doğru mesaj). Sınır: saatte 10 kayıt/istemci.
 5. **Açık okuma uçlarına sınır yok** (`/vehicles`, `/reservations/price`, ...). Yayında CDN/yük dengeleyici düzeyinde istek sınırı eklenmesi önerilir.
-6. **Bellek içi sınırlayıcı** tek sunucuda çalışır ve yeniden başlayınca sıfırlanır. Birden fazla API sunucusu çalıştırılırsa ortak bir depo (ör. Redis) gerekir.
+6. **Hız sınırı sayaçları** veritabanındadır (V2-09): birden fazla API sunucusu aynı sayacı görür ve yeniden başlatma onları sıfırlamaz. Her istek bir veritabanı yazması demektir; ölçek çok büyürse depo ADR-27'de yeniden ele alınır.
 
 ## Yayın (BACKLOG 40, issue #49) kontrol listesi
 
@@ -129,6 +143,5 @@ Adım adım uygulama: `docs/DEPLOY.md`. Burada yalnızca güvenlik açısından 
 
 ## Bilinen sınırlar (canlıda)
 
-- Render Free uyur; UptimeRobot ile uyanık tutulur ama Render istediği zaman yeniden başlatabilir. Başlama sırasında hız sınırı sayaçları sıfırlanır.
-- Hız sınırlayıcı tek sunucuda çalışır; Render Free zaten tek örnek (instance) ile sınırlı.
+- Render Free uyur; UptimeRobot ile uyanık tutulur ama Render istediği zaman yeniden başlatabilir. Hız sınırı sayaçları veritabanında olduğu için yeniden başlatma onları sıfırlamaz (V2-09).
 - Neon Free'nin geri dönüş penceresi 6 saattir; uzun süreli yedek haftalık elle alınır.

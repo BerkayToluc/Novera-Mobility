@@ -1,6 +1,8 @@
 import { Body, Controller, Delete, Get, HttpCode, Inject, Param, Patch, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { ApiBody, ApiCookieAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import type { Request, Response } from 'express';
+import { RateLimit } from '../common/rate-limit.js';
+import { LIMITS } from '../common/rate-limits.js';
 import { AccountSecurityService, type SessionView } from './account-security.service.js';
 import { clearSessionCookie } from './auth.controller.js';
 import { AuthService } from './auth.service.js';
@@ -30,11 +32,13 @@ export class MeController {
   }
 
   @Patch()
+  @RateLimit(LIMITS.accountWrite)
   async update(@CurrentUser() user: UserRow, @Body() body: unknown): Promise<UserResponse> {
     return toUserResponse(await this.authService.updateProfile(user.id, body));
   }
 
   @Post('password')
+  @RateLimit(LIMITS.changePassword)
   @HttpCode(204)
   @ApiBody({
     schema: {
@@ -57,12 +61,14 @@ export class MeController {
   }
 
   @Delete('sessions')
+  @RateLimit(LIMITS.accountWrite)
   @HttpCode(204)
   async revokeOthers(@CurrentUser() user: UserRow, @Req() request: Request): Promise<void> {
     await this.security.revokeOthers(user.id, this.currentTokenHash(request));
   }
 
   @Delete('sessions/:id')
+  @RateLimit(LIMITS.accountWrite)
   @HttpCode(204)
   async revokeSession(
     @CurrentUser() user: UserRow,
@@ -75,6 +81,7 @@ export class MeController {
   }
 
   @Delete()
+  @RateLimit(LIMITS.accountWrite)
   @HttpCode(204)
   async remove(
     @CurrentUser() user: UserRow,

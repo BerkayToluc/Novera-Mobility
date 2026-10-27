@@ -108,6 +108,7 @@
   - **Varsayılan sınır her uçtadır** (global guard). Uç bazında daha sıkı sınır dekoratörle verilir. Tablo [SECURITY.md](SECURITY.md)'de tutulur ve her yeni uçta güncellenir.
   - **Anahtar:** girişli istekte `user:<id>`, girişsiz istekte `ip:<adres>`; yönetici istekleri `admin:<id>` (dakikada 120).
   - Sınır aşılınca `429 RATE_LIMITED` ve `Retry-After` başlığı döner.
+- **Uygulama notu (V2-09):** pencere sabittir (`windowSec`, kendi katına hizalı); sayaç tek `INSERT … ON CONFLICT DO UPDATE … RETURNING` ile artar. Global guard (`common/rate-limit.guard.ts`) doğrulamadan ve oturum guard'ından önce çalışır, oturumu bir kez okuyup `request.user`'a koyar (oturum guard'ı yeniden sorgulamaz). Uç, `@RateLimit(...)` ile bir ya da birkaç sınır verir (adres, hesap ya da gövdedeki e-posta anahtarıyla); vermezse varsayılan 300/5 dk uygulanır. `/health` muaftır. Sınırlar `common/rate-limits.ts`'te tek yerdedir ve `rate-limits.spec.ts` her birinin SECURITY.md tablosunda olduğunu denetler. Pencere sınırında en çok iki katı istek geçebilir; sınırlar bunu hesaba katarak konmuştur.
 - **Sonuçları:** her istekte bir veritabanı yazması olur; Neon Free'de bu kabul edilebilir. Okuma uçlarındaki sınır, web sunucusunun ziyaretçi adresini doğru iletmesine (`X-Novera-Client-IP`) dayanır.
 
 ### ADR-28 · Dosya yükleme: araç modeli fotoğrafı

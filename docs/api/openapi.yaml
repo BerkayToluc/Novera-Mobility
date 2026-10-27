@@ -14,7 +14,7 @@ info:
     - **Dil:** çevrilen alanlar iki dille birlikte döner (`{ "tr": "...", "en": "..." }`). `?lang` yoktur.
     - **Sayfalama yok.** Düz liste. Sınıf, yakıt, vites filtrelerini ve bayi arama/şehir filtresini frontend yapar; sunucu yalnızca müsaitliği süzer.
     - **Enum yazımı:** `locale` ve `theme` küçük harf (`tr`, `light`), diğer tüm enum'lar büyük harf (`CONFIRMED`, `TRY`).
-    - **Hata biçimi:** `{ code, message, fieldErrors }`. `code` ve `fieldErrors` değerleri sabit makine kodlarıdır; frontend metni kendi çevirisinden gösterir, `message` ekranda gösterilmez. HTTP: 400 bozuk istek, 422 doğrulama, 401 oturum yok, 404, 409 çakışma, 429 hız sınırı.
+    - **Hata biçimi:** `{ code, message, fieldErrors }`. `code` ve `fieldErrors` değerleri sabit makine kodlarıdır; frontend metni kendi çevirisinden gösterir, `message` ekranda gösterilmez. HTTP: 400 bozuk istek, 422 doğrulama, 401 oturum yok, 404, 409 çakışma, 429 hız sınırı (`Retry-After` başlığıyla; her uç verebilir).
 
     ## Onaylanacak öneriler (G ile)
 
@@ -753,7 +753,13 @@ components:
         application/json:
           schema: { $ref: "#/components/schemas/Error" }
     TooManyRequests:
-      description: Hız sınırı aşıldı (`RATE_LIMITED`)
+      description: |
+        Hız sınırı aşıldı (`RATE_LIMITED`). Her uçta bir sınır vardır (hiçbiri açıkça verilmemişse 5 dakikada 300 istek;
+        `GET /health` hariç), yani her uç `429` verebilir. Sınırlar ve anahtarlar docs/SECURITY.md'deki tablodadır.
+      headers:
+        Retry-After:
+          description: Yeniden denemeden önce beklenecek saniye (sayacın içinde bulunduğu pencerenin kalan süresi).
+          schema: { type: integer, minimum: 1 }
       content:
         application/json:
           schema: { $ref: "#/components/schemas/Error" }

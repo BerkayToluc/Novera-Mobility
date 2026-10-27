@@ -16,14 +16,14 @@ export class AuthUnavailableError extends Error {
 // Resolves to the language the account saved, or undefined to stay in the current one.
 export async function login(input: LoginInput, kind: AccountType = "individual"): Promise<"tr" | "en" | undefined> {
   const result = await signIn(kind, input.email, input.password);
-  if (!result.ok) throw failure(result.reason);
+  if (!result.ok) throw failure(result.reason, result.retryAfter ?? null);
   return result.locale ?? undefined;
 }
 
 // Resolves to the language the new account starts with, as login does.
 export async function register(input: RegisterInput): Promise<"tr" | "en" | undefined> {
   const result = await signUp(input);
-  if (!result.ok) throw failure(result.reason);
+  if (!result.ok) throw failure(result.reason, result.retryAfter ?? null);
   return result.locale ?? undefined;
 }
 
@@ -43,10 +43,10 @@ export class EmailTakenError extends Error {
   }
 }
 
-function failure(reason: "unavailable" | "invalid" | "email_taken" | "rate_limited"): Error {
+function failure(reason: "unavailable" | "invalid" | "email_taken" | "rate_limited", retryAfter: number | null = null): Error {
   if (reason === "invalid") return new InvalidCredentialsError();
   if (reason === "email_taken") return new EmailTakenError();
-  if (reason === "rate_limited") return new AuthRateLimitedError();
+  if (reason === "rate_limited") return new AuthRateLimitedError(retryAfter);
   return new AuthUnavailableError();
 }
 
@@ -84,7 +84,8 @@ export class GoogleNotConfiguredError extends Error {
 
 // Too many requests from this address or for this e-mail (sign-in, sign-up, Google, password reset).
 export class AuthRateLimitedError extends Error {
-  constructor() {
+  // Seconds to wait, when the API said (`Retry-After`).
+  constructor(readonly retryAfter: number | null = null) {
     super("Too many attempts; try again later.");
     this.name = "AuthRateLimitedError";
   }
@@ -106,14 +107,14 @@ export async function loginWithGoogle(credential: string, consent?: boolean): Pr
   if (result.reason === "not_allowed") throw new GoogleNotAllowedError();
   if (result.reason === "invalid_token") throw new GoogleTokenInvalidError();
   if (result.reason === "not_configured") throw new GoogleNotConfiguredError();
-  if (result.reason === "rate_limited") throw new AuthRateLimitedError();
+  if (result.reason === "rate_limited") throw new AuthRateLimitedError(result.retryAfter ?? null);
   throw new AuthUnavailableError();
 }
 
 export async function requestPasswordReset(input: ForgotPasswordInput): Promise<void> {
   const result = await forgotPassword(input.email);
   if (result.ok) return;
-  if (result.reason === "rate_limited") throw new AuthRateLimitedError();
+  if (result.reason === "rate_limited") throw new AuthRateLimitedError(result.retryAfter ?? null);
   throw new AuthUnavailableError();
 }
 
@@ -121,6 +122,6 @@ export async function resetPassword(token: string, password: string): Promise<vo
   const result = await resetPasswordAction(token, password);
   if (result.ok) return;
   if (result.reason === "invalid_link") throw new ResetLinkInvalidError();
-  if (result.reason === "rate_limited") throw new AuthRateLimitedError();
+  if (result.reason === "rate_limited") throw new AuthRateLimitedError(result.retryAfter ?? null);
   throw new AuthUnavailableError();
 }

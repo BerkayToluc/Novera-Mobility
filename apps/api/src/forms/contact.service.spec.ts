@@ -2,8 +2,7 @@ import 'dotenv/config';
 import { randomUUID } from 'node:crypto';
 import { HttpException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
-import { CONTACT_LIMIT_PER_HOUR, ContactService } from './contact.service.js';
-import { RateLimiter } from './rate-limiter.js';
+import { ContactService } from './contact.service.js';
 
 // Entegrasyon testi: POST /contact, gerçek PostgreSQL'e karşı (BACKLOG Y34).
 // Yalnızca adında "test" geçen veritabanında çalışır; TEST_DATABASE_URL yoksa atlanır.
@@ -31,13 +30,12 @@ describeDb('POST /contact iletişim formu (gerçek PostgreSQL)', () => {
   let service: ContactService;
   const run = randomUUID().slice(0, 8);
   const email = (label: string) => `contact-${run}-${label}@novera.example`;
-  const client = () => `client-${randomUUID()}`;
 
   beforeAll(async () => {
     process.env.DATABASE_URL = databaseUrl;
     prisma = new PrismaService();
     await prisma.$connect();
-    service = new ContactService(prisma, new RateLimiter());
+    service = new ContactService(prisma);
   });
 
   afterAll(async () => {
@@ -56,7 +54,7 @@ describeDb('POST /contact iletişim formu (gerçek PostgreSQL)', () => {
 
   it('geçerli form kaydedilir ve { received: true } döner', async () => {
     const before = Date.now();
-    const result = await service.create(valid('ok'), client());
+    const result = await service.create(valid('ok'));
     expect(result).toEqual({ received: true });
 
     const row = await prisma.contactMessage.findFirst({ where: { email: email('ok') } });
@@ -71,27 +69,27 @@ describeDb('POST /contact iletişim formu (gerçek PostgreSQL)', () => {
   });
 
   it('telefon isteğe bağlıdır: boş telefon null olarak kaydedilir', async () => {
-    await service.create({ ...valid('nophone'), phone: '' }, client());
+    await service.create({ ...valid('nophone'), phone: '' });
     const row = await prisma.contactMessage.findFirst({ where: { email: email('nophone') } });
     expect(row?.phone).toBeNull();
   });
 
   it('metin alanları kırpılır', async () => {
-    await service.create({ ...valid('trim'), name: '  Ali  ', subject: '  Konu  ' }, client());
+    await service.create({ ...valid('trim'), name: '  Ali  ', subject: '  Konu  ' });
     const row = await prisma.contactMessage.findFirst({ where: { email: email('trim') } });
     expect(row?.name).toBe('Ali');
     expect(row?.subject).toBe('Konu');
   });
 
   it('tuzak alan doluysa 422 SPAM_DETECTED döner ve hiçbir şey kaydedilmez', async () => {
-    const error = await catchHttp(service.create({ ...valid('spam'), website: 'http://spam.example' }, client()));
+    const error = await catchHttp(service.create({ ...valid('spam'), website: 'http://spam.example' }));
     expect(error.getStatus()).toBe(422);
     expect(bodyOf(error).code).toBe('SPAM_DETECTED');
     expect(await prisma.contactMessage.count({ where: { email: email('spam') } })).toBe(0);
   });
 
   it('eksik alanlar REQUIRED, onay yoksa CONSENT_REQUIRED döner; kayıt oluşmaz', async () => {
-    const error = await catchHttp(service.create({}, client()));
+    const error = await catchHttp(service.create({}));
     expect(error.getStatus()).toBe(422);
     expect(bodyOf(error).code).toBe('VALIDATION_FAILED');
     expect(bodyOf(error).fieldErrors).toEqual({
@@ -105,29 +103,16 @@ describeDb('POST /contact iletişim formu (gerçek PostgreSQL)', () => {
 
   it('geçersiz e-posta ve çok uzun mesaj ayrı ayrı bildirilir', async () => {
     const error = await catchHttp(
-      service.create({ ...valid('bad'), email: 'bu-bir-adres-degil', message: 'x'.repeat(4001) }, client()),
+      service.create({ ...valid('bad'), email: 'bu-bir-adres-degil', message: 'x'.repeat(4001) }),
     );
     expect(error.getStatus()).toBe(422);
     expect(bodyOf(error).fieldErrors).toEqual({ email: 'INVALID_EMAIL', message: 'TOO_LONG' });
   });
 
   it('onay false ise reddedilir ve kaydedilmez', async () => {
-    const error = await catchHttp(service.create({ ...valid('noconsent'), consent: false }, client()));
+    const error = await catchHttp(service.create({ ...valid('noconsent'), consent: false }));
     expect(bodyOf(error).fieldErrors?.consent).toBe('CONSENT_REQUIRED');
     expect(await prisma.contactMessage.count({ where: { email: email('noconsent') } })).toBe(0);
   });
 
-  it('aynı istemci saatte sınırdan fazla gönderirse 429 RATE_LIMITED; başka istemci etkilenmez', async () => {
-    const heavy = client();
-    for (let i = 0; i < CONTACT_LIMIT_PER_HOUR; i += 1) {
-      await service.create(valid(`rate-${i}`), heavy);
-    }
-    const error = await catchHttp(service.create(valid('rate-extra'), heavy));
-    expect(error.getStatus()).toBe(429);
-    expect(bodyOf(error).code).toBe('RATE_LIMITED');
-    expect(await prisma.contactMessage.count({ where: { email: email('rate-extra') } })).toBe(0);
-
-    const other = await service.create(valid('rate-other'), client());
-    expect(other).toEqual({ received: true });
-  });
 });

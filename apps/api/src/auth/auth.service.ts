@@ -1,8 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { parseInput } from '../common/zod-validation.js';
-import { rateLimited } from '../forms/form-input.js';
-import { RateLimiter } from '../forms/rate-limiter.js';
 import { emailTaken, invalidCredentials } from './auth.errors.js';
 import { LOCALES, THEMES, loginSchema, registerSchema, updateProfileSchema } from './auth.schemas.js';
 import { cleanUserAgent } from './device.js';
@@ -11,10 +9,6 @@ import { SESSION_DAYS, hashSessionToken, newSessionToken } from './session-token
 import type { UserRow } from './user-view.js';
 
 // BACKLOG #34 (kayıt, giriş, çıkış) ve #36/#37 (/me): openapi.yaml auth ve me uçları.
-export const REGISTER_LIMIT_PER_HOUR = 10;
-export const LOGIN_LIMIT_PER_15_MIN = 10;
-const HOUR_MS = 60 * 60 * 1000;
-const QUARTER_HOUR_MS = 15 * 60 * 1000;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 export interface SessionStart {
@@ -34,16 +28,9 @@ function isUniqueViolation(error: unknown): boolean {
 
 @Injectable()
 export class AuthService {
-  constructor(
-    @Inject(PrismaService) private readonly prisma: PrismaService,
-    @Inject(RateLimiter) private readonly limiter: RateLimiter,
-  ) {}
+  constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
 
-  async register(input: unknown, clientKey: string, userAgent: unknown = null): Promise<SessionStart> {
-    if (!this.limiter.allow(`register:${clientKey}`, REGISTER_LIMIT_PER_HOUR, HOUR_MS)) {
-      throw rateLimited();
-    }
-
+  async register(input: unknown, userAgent: unknown = null): Promise<SessionStart> {
     const { email, firstName, lastName, password } = parseInput(registerSchema, input, 'Registration data is invalid');
 
     const existing = await this.prisma.user.findUnique({ where: { email } });
@@ -70,16 +57,8 @@ export class AuthService {
     }
   }
 
-  async login(input: unknown, clientKey: string, userAgent: unknown = null): Promise<SessionStart> {
+  async login(input: unknown, userAgent: unknown = null): Promise<SessionStart> {
     const { email, password } = parseInput(loginSchema, input, 'Login data is invalid');
-
-    // Hem istemci hem hesap başına sınır: biri tek adresten çok hesabı, çok adresten tek hesabı denemesin.
-    if (
-      !this.limiter.allow(`login:${clientKey}`, LOGIN_LIMIT_PER_15_MIN, QUARTER_HOUR_MS) ||
-      !this.limiter.allow(`login-email:${email}`, LOGIN_LIMIT_PER_15_MIN, QUARTER_HOUR_MS)
-    ) {
-      throw rateLimited();
-    }
 
     const user = await this.prisma.user.findUnique({ where: { email } });
     if (!user) {

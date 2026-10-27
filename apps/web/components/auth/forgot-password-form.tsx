@@ -11,9 +11,11 @@ import { AuthRateLimitedError, AuthUnavailableError, requestPasswordReset } from
 import { forgotPasswordSchema, type ForgotPasswordInput } from "@/lib/auth-schemas";
 import { FormError } from "./form-error";
 import { useAuthErrorMessages } from "./use-auth-messages";
+import { rateLimitMessage } from "@/lib/rate-limit";
 
 export function ForgotPasswordForm() {
   const t = useTranslations("Auth");
+  const limitT = useTranslations("RateLimit");
   const messages = useAuthErrorMessages();
   const schema = useMemo(() => forgotPasswordSchema(messages), [messages]);
   const [formError, setFormError] = useState<string | null>(null);
@@ -35,7 +37,7 @@ export function ForgotPasswordForm() {
       await requestPasswordReset(values);
       setSentTo(values.email);
     } catch (error) {
-      if (error instanceof AuthRateLimitedError) setFormError(t("errors.rateLimited"));
+      if (error instanceof AuthRateLimitedError) setFormError(rateLimitMessage(limitT, error.retryAfter));
       else if (error instanceof AuthUnavailableError) setFormError(t("errors.unavailable"));
       else setFormError(t("errors.generic"));
     }

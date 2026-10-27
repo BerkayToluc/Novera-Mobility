@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { emptyQuote, quoteSchema, type QuoteInput } from "@/lib/quote";
 import { submitQuote } from "@/lib/quote-actions";
 import { QuoteFields } from "./quote-fields";
+import { rateLimitMessage } from "@/lib/rate-limit";
 
 type Sent = { email: string; reference: string };
 
@@ -21,6 +22,7 @@ type MessagedField = (typeof MESSAGED_FIELDS)[number];
 // and the /kurumsal-teklif page. Once sent it turns into the confirmation in place.
 export function QuoteForm({ initialProduct = "", withProduct = false }: { initialProduct?: string; withProduct?: boolean }) {
   const t = useTranslations("QuoteForm");
+  const limitT = useTranslations("RateLimit");
   const [formError, setFormError] = useState<string | null>(null);
   const [sent, setSent] = useState<Sent | null>(null);
 
@@ -73,7 +75,8 @@ export function QuoteForm({ initialProduct = "", withProduct = false }: { initia
       const result = await submitQuote(values);
       if (result.ok) setSent({ email: values.email, reference: result.reference });
       else if (result.reason === "invalid" && markRejected(result.fields)) setFormError(null);
-      else setFormError(t(result.reason === "invalid" ? "errors.invalid" : result.reason === "rate_limited" ? "errors.rateLimited" : "errors.unavailable"));
+      else if (result.reason === "rate_limited") setFormError(rateLimitMessage(limitT, result.retryAfter));
+      else setFormError(t(result.reason === "invalid" ? "errors.invalid" : "errors.unavailable"));
     } catch {
       setFormError(t("errors.generic"));
     }

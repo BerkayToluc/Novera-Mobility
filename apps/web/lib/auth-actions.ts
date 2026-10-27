@@ -24,7 +24,7 @@ const googleBody = z.object({ credential: z.string().min(1), consent: z.boolean(
 // not say which). `email_taken`: sign-up with an address that already has an account.
 export type SignInResult =
   | { ok: true; locale: "tr" | "en" | null }
-  | { ok: false; reason: "unavailable" | "invalid" | "email_taken" | "rate_limited" };
+  | { ok: false; reason: "unavailable" | "invalid" | "email_taken" | "rate_limited"; retryAfter?: number | null };
 
 type User = components["schemas"]["User"];
 
@@ -59,7 +59,7 @@ async function applyPreferences(user: User): Promise<"tr" | "en"> {
 // `invalid_token`: Google's token was not accepted; `not_configured`: the API has no Google client set.
 export type GoogleSignInResult =
   | { ok: true; locale: "tr" | "en" | null }
-  | { ok: false; reason: "consent_required" | "not_allowed" | "invalid_token" | "rate_limited" | "not_configured" | "unavailable" };
+  | { ok: false; reason: "consent_required" | "not_allowed" | "invalid_token" | "rate_limited" | "not_configured" | "unavailable"; retryAfter?: number | null };
 
 // `POST /auth/google`: the ID token (`credential`) Google's button gave the browser. 200 is an account that
 // exists (a password account with the same e-mail is tied to Google, and its password is dropped), 201 a new
@@ -80,7 +80,7 @@ export async function signInWithGoogle(credential: string, consent?: boolean): P
     if (result.status === "invalid" && result.fieldErrors.consent === "CONSENT_REQUIRED") return { ok: false, reason: "consent_required" };
     if (result.status === "forbidden") return { ok: false, reason: "not_allowed" };
     if (result.status === "unauthorized") return { ok: false, reason: "invalid_token" };
-    if (result.status === "rate_limited") return { ok: false, reason: "rate_limited" };
+    if (result.status === "rate_limited") return { ok: false, reason: "rate_limited", retryAfter: result.retryAfter };
     if (result.status === "unavailable" && result.code === "GOOGLE_SIGNIN_UNAVAILABLE") return { ok: false, reason: "not_configured" };
     return { ok: false, reason: "unavailable" };
   }
@@ -89,7 +89,7 @@ export async function signInWithGoogle(credential: string, consent?: boolean): P
   const hook = jar.get(MOCK_GOOGLE_COOKIE)?.value;
   if (hook === "corporate") return { ok: false, reason: "not_allowed" };
   if (hook === "invalid") return { ok: false, reason: "invalid_token" };
-  if (hook === "limit") return { ok: false, reason: "rate_limited" };
+  if (hook === "limit") return { ok: false, reason: "rate_limited", retryAfter: null };
   if (hook === "down") return { ok: false, reason: "not_configured" };
   if (hook === "new") {
     if (!consent) return { ok: false, reason: "consent_required" };
@@ -116,7 +116,7 @@ export async function signIn(kind: AccountType, email: string, password: string)
       return { ok: true, locale: await applyPreferences(result.data) };
     }
     if (result.status === "unauthorized" || result.status === "invalid") return { ok: false, reason: "invalid" };
-    if (result.status === "rate_limited") return { ok: false, reason: "rate_limited" };
+    if (result.status === "rate_limited") return { ok: false, reason: "rate_limited", retryAfter: result.retryAfter };
     return { ok: false, reason: "unavailable" };
   }
 
@@ -154,7 +154,7 @@ export async function signUp(input: {
     return { ok: false, reason: "email_taken" };
   }
   if (result.status === "invalid") return { ok: false, reason: "invalid" };
-  if (result.status === "rate_limited") return { ok: false, reason: "rate_limited" };
+  if (result.status === "rate_limited") return { ok: false, reason: "rate_limited", retryAfter: result.retryAfter };
   return { ok: false, reason: "unavailable" };
 }
 

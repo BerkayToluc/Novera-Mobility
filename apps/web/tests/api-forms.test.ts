@@ -86,7 +86,7 @@ describe("apiPost", () => {
   it("maps the error statuses", async () => {
     const { apiPost } = await import("../lib/api-post");
     reply(429);
-    expect(await apiPost("/x", {})).toEqual({ status: "rate_limited" });
+    expect(await apiPost("/x", {})).toEqual({ status: "rate_limited", retryAfter: null });
     reply(422, { code: "SPAM_DETECTED" });
     expect(await apiPost("/x", {})).toEqual({ status: "spam" });
     reply(422, { code: "VALIDATION_FAILED", fieldErrors: { email: "bad" } });

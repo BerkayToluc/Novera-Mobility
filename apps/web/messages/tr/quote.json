@@ -47,8 +47,7 @@
       "consent": "Devam etmek için aydınlatma metnini onaylayın.",
       "invalid": "Talebiniz eksik görünüyor. Alanları kontrol edip tekrar gönderin.",
       "unavailable": "Teklif servisi şu an kullanılamıyor. Lütfen daha sonra tekrar deneyin.",
-      "generic": "Talebiniz gönderilemedi. Lütfen tekrar deneyin.",
-      "rateLimited": "Çok fazla deneme yaptınız. Lütfen bir süre sonra tekrar deneyin."
+      "generic": "Talebiniz gönderilemedi. Lütfen tekrar deneyin."
     },
     "sent": {
       "title": "Talebiniz alındı",

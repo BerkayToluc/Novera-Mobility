@@ -7,7 +7,9 @@ import { codeMessages } from "./validation";
 
 const messages = codeMessages<AuthErrorMessages>();
 
-export type ForgotPasswordResult = { ok: true } | { ok: false; reason: "unavailable" | "invalid" | "rate_limited" };
+export type ForgotPasswordResult =
+  | { ok: true }
+  | { ok: false; reason: "unavailable" | "invalid" | "rate_limited"; retryAfter?: number | null };
 
 // `POST /auth/forgot-password`. The API answers 202 whether or not the address has an account, so
 // the form cannot be used to find out who is registered. With USE_MOCKS=1 and no API_URL the request
@@ -21,7 +23,7 @@ export async function forgotPassword(email: string): Promise<ForgotPasswordResul
     const result = await apiRequest("POST", "/auth/forgot-password", { email });
     if (result.status === "ok") return { ok: true };
     if (result.status === "invalid") return { ok: false, reason: "invalid" };
-    if (result.status === "rate_limited") return { ok: false, reason: "rate_limited" };
+    if (result.status === "rate_limited") return { ok: false, reason: "rate_limited", retryAfter: result.retryAfter };
     return { ok: false, reason: "unavailable" };
   }
   return isMockMode() ? { ok: true } : { ok: false, reason: "unavailable" };
@@ -31,7 +33,7 @@ export async function forgotPassword(email: string): Promise<ForgotPasswordResul
 // `too_short`: the password broke the length rule; the link is not spent in that case.
 export type ResetPasswordResult =
   | { ok: true }
-  | { ok: false; reason: "invalid_link" | "too_short" | "rate_limited" | "unavailable" };
+  | { ok: false; reason: "invalid_link" | "too_short" | "rate_limited" | "unavailable"; retryAfter?: number | null };
 
 // `POST /auth/reset-password`. Success ends every session of the account, so the visitor signs in
 // again. With USE_MOCKS=1 and no API_URL any token is accepted, except `expired`, which plays a link
@@ -43,7 +45,7 @@ export async function resetPassword(token: string, password: string): Promise<Re
   if (process.env.API_URL) {
     const result = await apiRequest("POST", "/auth/reset-password", { token, password });
     if (result.status === "ok") return { ok: true };
-    if (result.status === "rate_limited") return { ok: false, reason: "rate_limited" };
+    if (result.status === "rate_limited") return { ok: false, reason: "rate_limited", retryAfter: result.retryAfter };
     if (result.status === "invalid") {
       if (result.code === "RESET_TOKEN_INVALID") return { ok: false, reason: "invalid_link" };
       if (result.fieldErrors.password === "TOO_SHORT") return { ok: false, reason: "too_short" };

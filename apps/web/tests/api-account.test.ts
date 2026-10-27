@@ -267,7 +267,7 @@ describe("calls to the API", () => {
     vi.stubGlobal("fetch", respond(422, { code: "VALIDATION_FAILED", fieldErrors: { password: "TOO_SHORT" } }));
     expect(await resetPassword("tok", "yeni-sifre-1")).toEqual({ ok: false, reason: "too_short" });
     vi.stubGlobal("fetch", respond(429, { code: "RATE_LIMITED" }));
-    expect(await resetPassword("tok", "yeni-sifre-1")).toEqual({ ok: false, reason: "rate_limited" });
+    expect(await resetPassword("tok", "yeni-sifre-1")).toEqual({ ok: false, reason: "rate_limited", retryAfter: null });
   });
 
   it("does not call the API for a password that is too short or a missing token", async () => {

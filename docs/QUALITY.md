@@ -30,7 +30,7 @@
 | G-08 | Orta | Tarayıcı `/api`'yi hiç çağırmadığı hâlde `next.config.ts`'teki `/api/*` yönlendirmesi duruyor; API web alan adı üzerinden de erişilebilir hâlde (anahtarsız 404 dönse de gereksiz yüzey) | `apps/web/next.config.ts:30-35` | V2-06 | Düzeltildi (V2-06, #296; `next.config.ts`'ten `/api` yönlendirmesi kaldırıldı) |
 | G-09 | Orta | API'de doğrulama dört yerde elle yazılmış. Global `ValidationPipe` gövdeler `unknown` olduğu için etkisiz, testlerde hiç kurulmuyor. Kurallar `@ApiBody`'de elle tekrar ediliyor | `src/main.ts:15-21`, `forms/`, `reservations/reservation-input.ts`, `holds/holds.service.ts`, `catalog/` | V2-07 | Düzeltildi (V2-07; şemalar `src/<alan>/*.schemas.ts`, ortak kurallar `common/zod-fields.ts`; `class-validator` kaldırıldı; sözleşme testi `openapi.contract.spec.ts` QuoteRequest'te eksik 4 alanı da yakaladı) |
 | G-10 | Yüksek | Web server action'larının çoğu girdiyi doğrulamadan string metodu çağırıyor. Sahte bir istek 500'e yol açıyor; kurallar tarayıcı şemalarından kayabiliyor (ör. parola uzunluğu iki yerde) | `apps/web/lib/auth-actions.ts:96,128-134`, `contact-actions.ts:22-28`, `quote-actions.ts:21-27`, `password-reset-actions.ts:12,34`, `account-actions.ts:56` | V2-08 | Düzeltildi (V2-08, #298; her action girdiyi formun şemasından geçirir, `lib/validation.ts`; parola kuralı tek yerde `passwordField`) |
-| G-11 | Orta | Hız sınırı yalnızca 8 uçta ve bellekte; yeniden başlamada sıfırlanıyor. Sınırsız uçlar: katalog okumaları, `/reservations/price`, `/reservations`, `DELETE /holds/:id`, tüm `/me*` (liste §3.2) | `forms/rate-limiter.ts` ve kullananlar | V2-09 | Açık |
+| G-11 | Orta | Hız sınırı yalnızca 8 uçta ve bellekte; yeniden başlamada sıfırlanıyor. Sınırsız uçlar: katalog okumaları, `/reservations/price`, `/reservations`, `DELETE /holds/:id`, tüm `/me*` (liste §3.2) | `forms/rate-limiter.ts` ve kullananlar | V2-09 | Düzeltildi (V2-09; sayaçlar Postgres'te `RateLimitHit`, global guard her uca sınır koyar, tablo SECURITY.md'de; bellek içi `RateLimiter` kaldırıldı) |
 | G-12 | Orta | scrypt N=16384 (OWASP en az 2^17 öneriyor); girişte özet yükseltilmiyor; parola kuralı yalnızca uzunluk (8–128), yaygın parola listesi yok | `auth/password.ts:8` | V2-10 | Açık |
 | G-13 | Orta | Oturum sabit 30 gün; boşta kalma süresi, `lastUsedAt` ve yenileme yok. Süresi dolan oturum ve sıfırlama bağlantıları yalnızca o kullanıcı giriş yapınca siliniyor | `auth/session-token.ts:4`, `auth/auth.service.ts:111-114` | V2-10 | Açık |
 | G-14 | Orta | `DELETE /me` yalnızca çereze bakıyor; çalınan oturum hesabı silebilir (SECURITY.md karar bekleyen 1) | `auth/` me controller | V2-10 | Açık |
@@ -59,7 +59,7 @@
 
 | # | Seviye | Bulgu | Yer | İş | Durum |
 |---|---|---|---|---|---|
-| M-01 | Orta | API'de ortak yardımcılar yanlış yerde ve kopya. `RateLimiter`, `clientKeyOf` ve `FormReader` `forms/` içinde ama auth ve holds kullanıyor. Kopyalar: UUID regex ×3, 30 dk dilim kontrolü ×3, `isUniqueViolation` ×4, `validationFailed` ×2, `PASSWORD_MIN/MAX` ×3, `HOUR_MS/DAY_MS` ×6, çakışma kuralı ×3, `getRate/toMoney` ×2, isteğe bağlı oturum okuma ×2 | `src/holds`, `src/reservations`, `src/catalog`, `src/forms` | V2-13 | Açık |
+| M-01 | Orta | API'de ortak yardımcılar yanlış yerde ve kopya. `RateLimiter`, `clientKeyOf` ve `FormReader` `forms/` içinde ama auth ve holds kullanıyor (V2-07 ve V2-09 sonrası `FormReader` ve `RateLimiter` kalktı, `clientKeyOf` `common/client-key.ts`'te). Kopyalar: UUID regex ×3, 30 dk dilim kontrolü ×3, `isUniqueViolation` ×4, `validationFailed` ×2, `PASSWORD_MIN/MAX` ×3, `HOUR_MS/DAY_MS` ×6, çakışma kuralı ×3, `getRate/toMoney` ×2, isteğe bağlı oturum okuma ×2 | `src/holds`, `src/reservations`, `src/catalog`, `src/forms` | V2-13 | Açık |
 | M-02 | Düşük | `ConfigModule` içe aktarılmış ama kullanılmıyor; `process.env` yaklaşık 8 dosyada doğrudan okunuyor | `src/` | V2-13 | Açık |
 | M-03 | Düşük | İskelet artıkları ve tip açıkları: canlıda `GET /` "Hello World", CI'da çalışmayan eski `test/app.e2e-spec.ts`, `catalog.service.ts:135,299`'da `any` (biri yanlış tipte), `tx as unknown as …` dönüşümleri, kullanılmayan `@nestjs/mau`, `.js` uzantısız importlar, karışık satır genişliği | `src/app.controller.ts`, `test/`, `catalog.service.ts`, `reservations.service.ts:102-114` | V2-13 | Açık |
 | M-04 | Düşük | Uzun dosyalar: `catalog.service.ts` 369 satır; dört spec 375–434 satır | `src/catalog`, `src/reservations`, `src/holds` | V2-13 | Açık |
@@ -182,7 +182,7 @@
 
 ### 3.2 Hız sınırı tablosu (ADR-27)
 
-22 Ekim durumu ve hedef. V2-09'dan sonra tek kaynak [SECURITY.md](SECURITY.md)'dir.
+22 Ekim durumu ve hedef. V2-09'dan sonra tek kaynak [SECURITY.md](SECURITY.md)'dir; bu tablo tarihsel kayıt olarak kalır.
 
 | Uç | Bugün | Hedef |
 |---|---|---|
