@@ -18,7 +18,7 @@ Güncel koşullara 17 Ekim 2026'da bakıldı (Render ve Neon'un kendi sayfaları
 ## Başlamadan önce
 
 - [ ] G'nin web değişikliği main'de (`web-patch.md`): web, API'ye gizli anahtarı ve ziyaretçi adresini gönderiyor. Bu olmadan canlı API tüm istekleri 404'ler.
-- [ ] API'nin `Dockerfile`'ı (`apps/api/Dockerfile`) main'de.
+- [ ] API'nin `Dockerfile`'ı (depo kökünde) main'de.
 - [ ] Hesapların: GitHub (var), Neon, Google Cloud (faturalaması **ücretli hesaba yükseltilmiş**, bütçe uyarısı kurulu), Vercel (hepsi GitHub ile giriş yapılabilir), isteğe bağlı Resend.
 
 ## 1. Neon: veritabanı
@@ -64,7 +64,7 @@ E-posta ayarı olmadan site çalışır; "Şifremi unuttum" bağlantısı gönde
 
 ## 4. Google Cloud Run: API
 
-API, `apps/api/Dockerfile` ile bir kapsayıcı olarak çalışır. Google, GitHub'daki kodu kendisi derler (Cloud Build) ve `main`'e her birleşmede yeniden yayınlar. Hiçbir şeyi bilgisayarında derlemen gerekmez.
+API, kökteki `Dockerfile` ile bir kapsayıcı olarak çalışır. Google, GitHub'daki kodu kendisi derler (Cloud Build) ve `main`'e her birleşmede yeniden yayınlar. Hiçbir şeyi bilgisayarında derlemen gerekmez.
 
 **Önce (bir kere): ücret koruması.** Faturalama hesabı ücretli olmalı (deneme bitince servisler durur) ve şunlar kurulu olmalı: **Billing → Budgets & alerts** altında bir bütçe (öneri: ayda 250 ₺, %50 / %90 / %100'de e-posta). İsteğe bağlı: aynı bütçede **Spend cap enforcement** ile yalnızca *Cloud Run* seçilir; tutar dolunca Cloud Run durur (API kapanır), bu bir hata ya da saldırıda masrafı keser. Harcama verisi gecikmeli geldiği için kesin bir sınır değildir.
 
@@ -75,7 +75,7 @@ API, `apps/api/Dockerfile` ile bir kapsayıcı olarak çalışır. Google, GitHu
 3. **Gizli değerleri Secret Manager'a koy:** arama kutusuna `Secret Manager` → **Create secret**: ad `api-access-key`, değer anahtar; sonra ad `database-url`, değer Neon adresi. Diğer ayarlar varsayılan.
 4. **Servisi oluştur:** `Cloud Run` → **Create service** → **Continuously deploy from a repository** → **Set up with Cloud Build**:
    - Repository: GitHub ile bağlan (Google Cloud Build uygulamasını yalnızca `Novera-Mobility` deposuna yetkilendir), depoyu seç.
-   - Branch: `^main$`. Build type: **Dockerfile**, Source location: `/apps/api/Dockerfile`. **Save**.
+   - Branch: `^main$`. Build type: **Dockerfile**, Source location: `/Dockerfile` (kökteki dosya; Google derleme bağlamı olarak Dockerfile'ın klasörünü kullanır, bu yüzden `apps/api` içinde olamaz). **Save**.
    - Service name: `novera-api`. Region: **europe-west3 (Frankfurt)**.
    - **Authentication: Allow unauthenticated invocations.** Adres herkese açık görünür ama API, `X-Novera-Key` başlığı olmayan her isteğe 404 verir; Vercel'in sunucusu bu başlığı gönderir.
    - **Billing: Request-based.** **Autoscaling: Minimum instances 0, Maximum instances 2** (masrafı sınırlar).
