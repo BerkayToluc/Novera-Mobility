@@ -20,10 +20,6 @@
         "title": "No questions yet",
         "text": "There are no published questions in this section."
       },
-      "error": {
-        "title": "Questions could not be loaded",
-        "text": "We cannot show the frequently asked questions right now."
-      },
       "intro": "What people most often ask about renting, pick-up and payment.",
       "tabsLabel": "Topics",
       "cta": {

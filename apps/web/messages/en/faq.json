@@ -1,0 +1,58 @@
+{
+  "Faq": {
+    "items": {
+      "cancel": {
+        "question": "Can I cancel my reservation?",
+        "answer": "You can cancel free of charge up to 24 hours before pick-up."
+      },
+      "documents": {
+        "question": "Which documents do I need?",
+        "answer": "A valid driving licence and an ID document are enough."
+      },
+      "returnOtherCity": {
+        "question": "Can I return the car in another city?",
+        "answer": "Yes. Just choose the drop-off branch while booking; there is no extra charge for returning to a different branch."
+      },
+      "priceIncludes": {
+        "question": "What is included in the price shown?",
+        "answer": "Prices include VAT and are itemised in the booking summary. There are no hidden fees."
+      },
+      "breakdown": {
+        "question": "What happens if I break down?",
+        "answer": "With Road Assurance you can reach the 24/7 operations desk and get a tow truck dispatched. If a breakdown lasts over 24 hours, a replacement car is provided."
+      },
+      "realPayment": {
+        "question": "Is the payment real?",
+        "answer": "No. This site is a fictional learning project; no money is taken at the payment step."
+      },
+      "forgotPassword": {
+        "question": "I forgot my password. What should I do?",
+        "answer": "Use the \"Forgot my password\" link on the log-in page and enter your email address to set a new password."
+      },
+      "deleteAccount": {
+        "question": "Can I delete my account?",
+        "answer": "Yes. You can delete your account permanently from Settings on your profile page. Past booking records are kept anonymously."
+      },
+      "corporateHow": {
+        "question": "How does corporate rental work?",
+        "answer": "You fill in the form and our sales team calls you. Cars are delivered to and collected from wherever you choose, and the price is set accordingly."
+      },
+      "corporateMultiple": {
+        "question": "Can I rent more than one car?",
+        "answer": "Yes. Just state the number of cars and the period in the form."
+      },
+      "corporatePeriods": {
+        "question": "Which rental periods are available?",
+        "answer": "From daily, weekly and monthly short-term rental to long-term fleet contracts."
+      },
+      "corporatePanel": {
+        "question": "Is there a fleet management panel?",
+        "answer": "The Smart Corporate Fleet Rental product includes the Novera Admin Panel, where you follow cars, contracts and costs in one place."
+      },
+      "corporateElectric": {
+        "question": "Are electric and hybrid cars available?",
+        "answer": "Yes. Our Green Fleet product offers the latest electric and hybrid cars."
+      }
+    }
+  }
+}

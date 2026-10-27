@@ -145,31 +145,31 @@ test("the FAQ has a tab for each topic, rows that open and close, and follows th
   const first = faq.getByRole("button", { name: /Rezervasyonu iptal edebilir miyim/ });
   await expect(first).toHaveAttribute("aria-expanded", "true");
 
-  // Opening another row closes the first: one answer at a time.
-  const second = faq.getByRole("button", { name: /Rezervasyonu iptal edebilir miyim/ }).locator("xpath=ancestor::li/following-sibling::li[1]//button");
-  await second.click();
-  await expect(second).toHaveAttribute("aria-expanded", "true");
-  await expect(first).toHaveAttribute("aria-expanded", "false");
-  await second.click();
-
   // A row closes and opens on its own button, and a closed answer is out of the page.
-  await first.click();
   await first.click();
   await expect(first).toHaveAttribute("aria-expanded", "false");
   await expect(faq.getByText(/24 saat öncesine kadar ücretsiz iptal/)).toHaveCount(0);
   await first.click();
   await expect(faq.getByText(/24 saat öncesine kadar ücretsiz iptal/)).toBeVisible();
 
-  // Another topic shows its own questions.
-  await topics.getByRole("button", { name: "Ödeme" }).click();
-  await expect(topics.getByRole("button", { name: "Ödeme" })).toHaveAttribute("aria-pressed", "true");
-  await expect(faq.getByRole("button", { name: /Gösterilen fiyatlara KDV dahil mi/ })).toBeVisible();
+  // Another topic shows its own questions; opening a second row closes the first: one answer at a time.
+  await topics.getByRole("button", { name: "Teslim" }).click();
+  await expect(topics.getByRole("button", { name: "Teslim" })).toHaveAttribute("aria-pressed", "true");
   await expect(first).toHaveCount(0);
+  const documents = faq.getByRole("button", { name: /Hangi belgeler gerekli/ });
+  const otherCity = faq.getByRole("button", { name: /Aracı farklı bir şehre iade edebilir miyim/ });
+  await expect(documents).toHaveAttribute("aria-expanded", "true");
+  await otherCity.click();
+  await expect(otherCity).toHaveAttribute("aria-expanded", "true");
+  await expect(documents).toHaveAttribute("aria-expanded", "false");
+
+  await topics.getByRole("button", { name: "Ödeme" }).click();
+  await expect(faq.getByRole("button", { name: /Gösterilen fiyata neler dahil/ })).toBeVisible();
 
   // The corporate tab of the rental box brings the corporate questions.
   await page.goto("/?tip=kurumsal");
   const corporate = page.locator("section[aria-labelledby=faq-title]");
-  await expect(corporate.getByRole("button", { name: /En az kaç araç için teklif alabilirim/ })).toBeVisible();
+  await expect(corporate.getByRole("button", { name: /Kurumsal kiralama nasıl işliyor/ })).toBeVisible();
   await expect(corporate.getByRole("button", { name: /Rezervasyonu iptal edebilir miyim/ })).toHaveCount(0);
 });
 

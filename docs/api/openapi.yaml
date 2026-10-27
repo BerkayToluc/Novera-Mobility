@@ -606,29 +606,6 @@ paths:
               schema: { $ref: "#/components/schemas/Error" }
         "429": { $ref: "#/components/responses/TooManyRequests" }
 
-  /faq:
-    get:
-      tags: [content]
-      summary: Sık sorulan sorular
-      description: |
-        `audience` verilirse yalnızca o kitlenin soruları döner (ana sayfa, kitle sekmesine göre).
-        Verilmezse tüm sorular döner (Yardım merkezi); her kayıt kendi `audience` ve `topic` değerini taşır.
-        Sıra: önce bireysel, sonra kurumsal; her kitle kendi içinde `sortOrder` sırasıyla.
-      parameters:
-        - name: audience
-          in: query
-          required: false
-          schema: { $ref: "#/components/schemas/FaqAudience" }
-      responses:
-        "200":
-          description: Sıralı soru listesi
-          content:
-            application/json:
-              schema:
-                type: array
-                items: { $ref: "#/components/schemas/FaqItem" }
-        "422": { $ref: "#/components/responses/ValidationFailed" }
-
   /products:
     get:
       tags: [content]
@@ -1257,25 +1234,6 @@ components:
         password: { type: string }
 
     # ---------- İçerik ----------
-    FaqAudience:
-      type: string
-      enum: [INDIVIDUAL, CORPORATE]
-
-    FaqTopic:
-      type: string
-      description: Sorunun konusu (Yardım merkezi bu değere göre gruplar).
-      enum: [rezervasyon, odeme, teslim, hasar, hesap, kurumsal]
-
-    FaqItem:
-      type: object
-      required: [id, audience, topic, question, answer]
-      properties:
-        id: { type: string, format: uuid }
-        audience: { $ref: "#/components/schemas/FaqAudience" }
-        topic: { $ref: "#/components/schemas/FaqTopic" }
-        question: { $ref: "#/components/schemas/LocalizedText" }
-        answer: { $ref: "#/components/schemas/LocalizedText" }
-
     Product:
       type: object
       required: [slug, title, concept, whatYouGet, techBenefits, featured]

@@ -1,8 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
-import { parseInput } from '../common/zod-validation.js';
-import { faqQuerySchema } from '../catalog/catalog.schemas.js';
-import type { FaqAudience } from '../generated/prisma/client.js';
 
 // GET /faq, /products, /products/:slug, /services (BACKLOG #33, openapi.yaml).
 // Cevaplar iki dili birlikte taşır (ADR-17); dil seçimi ön yüzde yapılır.
@@ -13,25 +10,6 @@ export type LocalizedList = { tr: string[]; en: string[] };
 @Injectable()
 export class ContentService {
   constructor(private readonly prisma: PrismaService) {}
-
-  // audience verilmezse tüm sorular döner (Yardım merkezi); verilirse yalnızca o kitle.
-  async getFaq(audience?: unknown) {
-    const { audience: chosen } = parseInput(faqQuerySchema, { audience }, 'Invalid audience parameter');
-
-    const items = await this.prisma.faqItem.findMany({
-      where: chosen ? { audience: chosen as FaqAudience } : undefined,
-      // Enum sırası tanım sırasıdır: önce INDIVIDUAL, sonra CORPORATE.
-      orderBy: [{ audience: 'asc' }, { sortOrder: 'asc' }],
-    });
-
-    return items.map((item) => ({
-      id: item.id,
-      audience: item.audience,
-      topic: item.topic,
-      question: item.question as LocalizedText,
-      answer: item.answer as LocalizedText,
-    }));
-  }
 
   async getProducts() {
     const products = await this.prisma.product.findMany({

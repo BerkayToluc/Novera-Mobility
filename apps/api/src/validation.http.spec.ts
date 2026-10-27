@@ -145,8 +145,6 @@ describe('wrong-typed input is 422 on every endpoint (HTTP)', () => {
       ['/vehicle-models?currency=TRY&currency=EUR', 'currency'],
       ['/vehicle-models?currency=GBP', 'currency'],
       ['/extras?currency=TRY&currency=EUR', 'currency'],
-      ['/faq?audience=INDIVIDUAL&audience=CORPORATE', 'audience'],
-      ['/faq?audience=', 'audience'],
     ])('%s is 422 on %s', async (path, field) => {
       const response = await send('GET', path);
       expect(response.status).toBe(422);

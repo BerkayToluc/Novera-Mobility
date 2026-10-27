@@ -1,22 +1,11 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
-import { ApiOkResponse, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { Controller, Get, Param } from '@nestjs/common';
+import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { ContentService } from './content.service.js';
 
 @ApiTags('content')
 @Controller()
 export class ContentController {
   constructor(private readonly contentService: ContentService) {}
-
-  @Get('faq')
-  @ApiQuery({
-    name: 'audience',
-    required: false,
-    enum: ['INDIVIDUAL', 'CORPORATE'],
-  })
-  @ApiOkResponse({ description: 'Sık sorulan sorular (iki dilli)' })
-  getFaq(@Query('audience') audience?: string) {
-    return this.contentService.getFaq(audience);
-  }
 
   @Get('products')
   @ApiOkResponse({ description: 'Ürün listesi (iki dilli)' })

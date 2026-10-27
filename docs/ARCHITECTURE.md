@@ -157,6 +157,7 @@
   - Metinlerin tek kaynağı çeviri dosyalarıdır. `GET /products`, `/products/:slug` ve `/services` uçları, `Service` tablosu ve `Product`'ın metin alanları kaldırılır.
   - `Product` yalnızca `slug` ile kalır. Sebebi: `QuoteRequest.productId` ve `FleetContract.product` bu referansa bağlanır.
   - v1'deki "ürün içeriği API'den gelir" kararı (ADR-17 ek maddesi, BACKLOG Y5) iptal edilir.
+  - **SSS de taşındı (G, 27 Ekim 2026):** `GET /faq`, `FaqItem` tablosu ve iki enum'u kalktı; sorular `apps/web/messages/<dil>/faq.json` içinde, hangi sorunun hangi kitle ve konuda olduğu `lib/faq.ts`'te. Sebep: SSS için bile API'nin ayakta olması gerekiyordu (Render bağımlılığını azaltma kararı).
 - **Sonuçları:** metin değişikliği PR ile yapılır; bu, v1'deki çalışma biçimiyle aynıdır.
 
 ---

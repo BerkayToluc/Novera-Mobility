@@ -29,10 +29,6 @@
       "title": "No questions yet",
       "text": "There are no published questions in the help centre."
     },
-    "error": {
-      "title": "Questions could not be loaded",
-      "text": "We cannot show the help questions right now. Please try again shortly."
-    },
     "guidesTitle": "Browse our guides",
     "guidesAll": "All guides",
     "cta": {
