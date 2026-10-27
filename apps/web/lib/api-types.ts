@@ -1237,50 +1237,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/faq": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Sık sorulan sorular
-         * @description `audience` verilirse yalnızca o kitlenin soruları döner (ana sayfa, kitle sekmesine göre).
-         *     Verilmezse tüm sorular döner (Yardım merkezi); her kayıt kendi `audience` ve `topic` değerini taşır.
-         *     Sıra: önce bireysel, sonra kurumsal; her kitle kendi içinde `sortOrder` sırasıyla.
-         */
-        get: {
-            parameters: {
-                query?: {
-                    audience?: components["schemas"]["FaqAudience"];
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Sıralı soru listesi */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["FaqItem"][];
-                    };
-                };
-                422: components["responses"]["ValidationFailed"];
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/products": {
         parameters: {
             query?: never;
@@ -1908,21 +1864,6 @@ export interface components {
             /** Format: email */
             email: string;
             password: string;
-        };
-        /** @enum {string} */
-        FaqAudience: "INDIVIDUAL" | "CORPORATE";
-        /**
-         * @description Sorunun konusu (Yardım merkezi bu değere göre gruplar).
-         * @enum {string}
-         */
-        FaqTopic: "rezervasyon" | "odeme" | "teslim" | "hasar" | "hesap" | "kurumsal";
-        FaqItem: {
-            /** Format: uuid */
-            id: string;
-            audience: components["schemas"]["FaqAudience"];
-            topic: components["schemas"]["FaqTopic"];
-            question: components["schemas"]["LocalizedText"];
-            answer: components["schemas"]["LocalizedText"];
         };
         Product: {
             /** @example akilli-kurumsal-filo */

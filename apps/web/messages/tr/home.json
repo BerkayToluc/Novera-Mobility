@@ -20,10 +20,6 @@
         "title": "Henüz soru yok",
         "text": "Bu başlıkta yayımlanmış bir soru bulunmuyor."
       },
-      "error": {
-        "title": "Sorular yüklenemedi",
-        "text": "Sık sorulan soruları şu an gösteremiyoruz."
-      },
       "intro": "Kiralama, teslim ve ödeme hakkında en çok merak edilenler.",
       "tabsLabel": "Konular",
       "cta": {

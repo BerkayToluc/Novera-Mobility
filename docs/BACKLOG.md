@@ -45,7 +45,7 @@
 | V2-14 | Web clean code: API altyapısı tek, kopyalar, token lint kuralı hata seviyesinde, navbar'da framer-motion yerine CSS, bağımlılık sürümleri (M-05, M-07–M-09, P-02) | P1 | L | V2-08 | Lint kuralı rastgele değeri hata sayıyor; ekranlar görsel olarak aynı (önce/sonra) |
 | V2-15 | Sayfa başına çeviri yükü (P-01) | P1 | M | V2-14 | İstemciye giden metin yalnızca gereken namespace'ler; önce/sonra boyut PR'da |
 | V2-16 | Bilgi mimarisi ve küçük UX hataları: Kurumsal teklif menüde, KVKK/gizlilik ayrımı, rezervasyon kartı fotoğrafı, manifest ikonları (U-01–U-04, U-06) | P1 | S | V2-14 | Menü ve footer'da bağlantı; kartlarda fotoğraf; manifest 192/512/maskable |
-| V2-17 | API'deki kullanılmayan ürün/hizmet içerik kopyasının silinmesi (ADR-32) (V-09) | P1 | M | V2-11 | `/products*`, `/services` ve `Service` tablosu yok; teklif ürün referansı çalışıyor |
+| V2-17 | API'deki kullanılmayan ürün/hizmet içerik kopyasının ve SSS'nin silinmesi (ADR-32) (V-09) | P1 | M | V2-11 | `/products*`, `/services`, `/faq`; `Service` ve `FaqItem` tabloları yok; teklif ürün referansı çalışıyor |
 | V2-18 | CI güvenliği: `pnpm audit`, Dependabot, gizli anahtar taraması (G-18, T-04) | P1 | S | V2-01 | Yüksek bulguda CI kırmızı; bot PR'ları açılıyor |
 | V2-19 | Test boşlukları: gerçek API'ye karşı e2e smoke, e2e'de axe, eksik API testleri (T-01–T-03) | P1 | L | V2-11 | CI'da API + DB ile smoke yeşil; axe ihlalinde kırmızı |
 | V2-20 | UI/UX, responsive ve erişilebilirlik turu; ekran okuyucu (U-05) | P1 | M | V2-15, V2-16 | Her sayfa tur listesinde; bulunanlar düzeltildi ya da QUALITY'de kayıtlı |

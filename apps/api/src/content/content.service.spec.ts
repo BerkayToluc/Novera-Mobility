@@ -4,7 +4,7 @@ import { HttpException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { ContentService } from './content.service.js';
 
-// Entegrasyon testi: GET /faq, /products, /products/:slug, /services (BACKLOG #33),
+// Entegrasyon testi: GET /products, /products/:slug, /services (BACKLOG #33),
 // gerçek PostgreSQL'e karşı. Yalnızca adında "test" geçen veritabanında çalışır;
 // TEST_DATABASE_URL yoksa atlanır. Testler kendi satırlarını oluşturur ve siler,
 // veritabanında başka satır olsa da yalnızca kendi kayıtlarına bakar.
@@ -34,7 +34,7 @@ describeDb('içerik uçları: SSS, ürünler, hizmetler (gerçek PostgreSQL)', (
   let prisma: PrismaService;
   let service: ContentService;
   const run = randomUUID().slice(0, 8);
-  const created = { faq: [] as string[], products: [] as string[], services: [] as string[] };
+  const created = { products: [] as string[], services: [] as string[] };
 
   beforeAll(async () => {
     process.env.DATABASE_URL = databaseUrl;
@@ -44,29 +44,10 @@ describeDb('içerik uçları: SSS, ürünler, hizmetler (gerçek PostgreSQL)', (
   });
 
   afterAll(async () => {
-    await prisma.faqItem.deleteMany({ where: { id: { in: created.faq } } });
     await prisma.product.deleteMany({ where: { id: { in: created.products } } });
     await prisma.service.deleteMany({ where: { id: { in: created.services } } });
     await prisma.$disconnect();
   });
-
-  async function addFaq(
-    audience: 'INDIVIDUAL' | 'CORPORATE',
-    sortOrder: number,
-    topic: 'rezervasyon' | 'odeme' | 'teslim' | 'hasar' | 'hesap' | 'kurumsal' = 'rezervasyon',
-  ): Promise<string> {
-    const row = await prisma.faqItem.create({
-      data: {
-        audience,
-        topic,
-        sortOrder,
-        question: text(`Soru ${run} ${sortOrder}`, `Question ${run} ${sortOrder}`),
-        answer: text(`Cevap ${sortOrder}`, `Answer ${sortOrder}`),
-      },
-    });
-    created.faq.push(row.id);
-    return row.id;
-  }
 
   async function addProduct(label: string, sortOrder: number, featured = false): Promise<string> {
     const slug = `test-urun-${run}-${label}`;
@@ -99,77 +80,6 @@ describeDb('içerik uçları: SSS, ürünler, hizmetler (gerçek PostgreSQL)', (
     created.services.push(row.id);
     return slug;
   }
-
-  describe('GET /faq', () => {
-    it('her öğe yalnızca sözleşmedeki alanları taşır', async () => {
-      const id = await addFaq('INDIVIDUAL', 1, 'odeme');
-      const items = await service.getFaq();
-      const item = items.find((i) => i.id === id);
-      expect(item).toBeDefined();
-      expect(Object.keys(item ?? {}).sort()).toEqual(['answer', 'audience', 'id', 'question', 'topic']);
-      expect(item?.audience).toBe('INDIVIDUAL');
-      expect(item?.topic).toBe('odeme');
-      expect(item?.question.tr).toContain('Soru');
-      expect(item?.question.en).toContain('Question');
-    });
-
-    it('audience=INDIVIDUAL kurumsal soruları içermez', async () => {
-      const individual = await addFaq('INDIVIDUAL', 1);
-      const corporate = await addFaq('CORPORATE', 1, 'kurumsal');
-      const ids = (await service.getFaq('INDIVIDUAL')).map((i) => i.id);
-      expect(ids).toContain(individual);
-      expect(ids).not.toContain(corporate);
-    });
-
-    it('audience=CORPORATE bireysel soruları içermez', async () => {
-      const individual = await addFaq('INDIVIDUAL', 2);
-      const corporate = await addFaq('CORPORATE', 2, 'kurumsal');
-      const ids = (await service.getFaq('CORPORATE')).map((i) => i.id);
-      expect(ids).toContain(corporate);
-      expect(ids).not.toContain(individual);
-    });
-
-    it('audience verilmezse iki kitle de döner (Yardım merkezi)', async () => {
-      const individual = await addFaq('INDIVIDUAL', 3);
-      const corporate = await addFaq('CORPORATE', 3, 'kurumsal');
-      const ids = (await service.getFaq()).map((i) => i.id);
-      expect(ids).toContain(individual);
-      expect(ids).toContain(corporate);
-    });
-
-    it('aynı kitlede sortOrder sırasına göre döner', async () => {
-      const third = await addFaq('INDIVIDUAL', 903);
-      const first = await addFaq('INDIVIDUAL', 901);
-      const second = await addFaq('INDIVIDUAL', 902);
-      const mine = new Set([first, second, third]);
-      const ordered = (await service.getFaq('INDIVIDUAL')).map((i) => i.id).filter((id) => mine.has(id));
-      expect(ordered).toEqual([first, second, third]);
-    });
-
-    it('bireysel sorular kurumsal sorulardan önce gelir', async () => {
-      const corporate = await addFaq('CORPORATE', 1, 'kurumsal');
-      const individual = await addFaq('INDIVIDUAL', 999);
-      const mine = new Set([corporate, individual]);
-      const ordered = (await service.getFaq()).map((i) => i.id).filter((id) => mine.has(id));
-      expect(ordered).toEqual([individual, corporate]);
-    });
-
-    it.each([['individual'], ['KURUMSAL'], [''], ['INDIVIDUAL,CORPORATE']])(
-      'geçersiz audience reddedilir: "%s"',
-      async (value) => {
-        const error = await catchHttp(service.getFaq(value));
-        expect(error.getStatus()).toBe(422);
-        const body = error.getResponse() as { code: string; fieldErrors: Record<string, string> };
-        expect(body.code).toBe('VALIDATION_FAILED');
-        expect(body.fieldErrors.audience).toBe('INVALID_FORMAT');
-      },
-    );
-
-    it('audience birden fazla kez verilirse (dizi) reddedilir', async () => {
-      const error = await catchHttp(service.getFaq(['INDIVIDUAL', 'CORPORATE']));
-      expect(error.getStatus()).toBe(422);
-    });
-  });
 
   describe('GET /products', () => {
     it('ürün yalnızca sözleşmedeki alanları taşır (sortOrder sızmaz)', async () => {

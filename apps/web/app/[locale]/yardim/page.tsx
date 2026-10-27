@@ -1,14 +1,13 @@
 import type { Metadata } from "next";
 import { BookOpen, MessageCircleQuestion } from "lucide-react";
-import { getLocale, getTranslations } from "next-intl/server";
+import { getTranslations } from "next-intl/server";
 import { GuideCard } from "@/components/guides/guide-card";
 import { HelpCentre, type HelpEntry } from "@/components/help/help-centre";
 import { Button } from "@/components/ui/button";
 import { StateMessage } from "@/components/ui/state-message";
 import { Link } from "@/i18n/navigation";
 import { AUDIENCES } from "@/lib/audience";
-import { FAQ_TOPICS } from "@/lib/faq";
-import { getFaq } from "@/lib/faq-client";
+import { FAQ_TOPICS, getFaq } from "@/lib/faq";
 import { GUIDES } from "@/lib/guides";
 import { pageMetadata } from "@/lib/seo";
 
@@ -21,21 +20,13 @@ export async function generateMetadata(): Promise<Metadata> {
 // together, grouped by topic.
 export default async function HelpPage() {
   const t = await getTranslations("HelpPage");
-  const locale = (await getLocale()) as "tr" | "en";
-
-  // Only the fetch sits in the try, so a rendering bug still reaches the error boundary.
-  let entries: HelpEntry[] | null = null;
-  try {
-    const sets = await Promise.all(AUDIENCES.map((audience) => getFaq(audience)));
-    entries = sets.flat().map((item) => ({
-      id: item.id,
-      topic: item.topic,
-      question: item.question[locale],
-      answer: item.answer[locale],
-    }));
-  } catch {
-    entries = null;
-  }
+  const sets = await Promise.all(AUDIENCES.map((audience) => getFaq(audience)));
+  const entries: HelpEntry[] = sets.flat().map((item) => ({
+    id: item.id,
+    topic: item.topic,
+    question: item.question,
+    answer: item.answer,
+  }));
 
   return (
     <div className="mx-auto flex max-w-content flex-col gap-16 px-4 py-12 md:px-8 xl:py-20">
@@ -44,9 +35,7 @@ export default async function HelpPage() {
         <p className="max-w-prose text-body text-fg-muted">{t("intro")}</p>
       </header>
 
-      {entries === null ? (
-        <StateMessage tone="error" title={t("error.title")} text={t("error.text")} />
-      ) : entries.length === 0 ? (
+      {entries.length === 0 ? (
         <StateMessage title={t("empty.title")} text={t("empty.text")} />
       ) : (
         <HelpCentre entries={entries} topics={[...FAQ_TOPICS]} />

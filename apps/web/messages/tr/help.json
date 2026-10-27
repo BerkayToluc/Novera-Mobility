@@ -29,10 +29,6 @@
       "title": "Henüz soru yok",
       "text": "Yardım merkezinde yayımlanmış bir soru bulunmuyor."
     },
-    "error": {
-      "title": "Sorular yüklenemedi",
-      "text": "Yardım sorularını şu an gösteremiyoruz. Lütfen biraz sonra tekrar deneyin."
-    },
     "guidesTitle": "Rehberlerimize göz atın",
     "guidesAll": "Tüm rehberler",
     "cta": {

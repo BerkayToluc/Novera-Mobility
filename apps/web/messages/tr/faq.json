@@ -1,0 +1,58 @@
+{
+  "Faq": {
+    "items": {
+      "cancel": {
+        "question": "Rezervasyonu iptal edebilir miyim?",
+        "answer": "Alış saatinden 24 saat öncesine kadar ücretsiz iptal edebilirsiniz."
+      },
+      "documents": {
+        "question": "Hangi belgeler gerekli?",
+        "answer": "Geçerli ehliyet ve kimlik belgesi yeterlidir."
+      },
+      "returnOtherCity": {
+        "question": "Aracı farklı bir şehre iade edebilir miyim?",
+        "answer": "Evet. Rezervasyon sırasında bırakılacak bayiyi seçmeniz yeterli; farklı bayiye bırakmak için ek ücret alınmaz."
+      },
+      "priceIncludes": {
+        "question": "Gösterilen fiyata neler dahil?",
+        "answer": "Gösterilen tutarlar KDV dahildir ve rezervasyon özetinde kalem kalem yazılır. Gizli ücret yoktur."
+      },
+      "breakdown": {
+        "question": "Yolda kalırsam ne olur?",
+        "answer": "Yol Boyu Güvence kapsamında 7/24 operasyon masasına ulaşabilir, çekici yönlendirme alabilirsiniz. Arıza 24 saati aşarsa yedek araç sağlanır."
+      },
+      "realPayment": {
+        "question": "Ödeme gerçekten alınıyor mu?",
+        "answer": "Hayır. Bu site kurgusal bir öğrenme projesidir; ödeme adımında para alınmaz."
+      },
+      "forgotPassword": {
+        "question": "Şifremi unuttum, ne yapmalıyım?",
+        "answer": "Giriş sayfasındaki \"Şifremi unuttum\" bağlantısından e-posta adresinizi girerek yeni şifre belirleyebilirsiniz."
+      },
+      "deleteAccount": {
+        "question": "Hesabımı silebilir miyim?",
+        "answer": "Evet. Profil sayfasındaki Ayarlar bölümünden hesabınızı kalıcı olarak silebilirsiniz. Geçmiş rezervasyon kayıtları anonim olarak saklanır."
+      },
+      "corporateHow": {
+        "question": "Kurumsal kiralama nasıl işliyor?",
+        "answer": "Formu doldurursunuz, satış ekibimiz sizi arar. Araçlar istediğiniz yere teslim edilir ve istediğiniz yerden alınır; fiyat buna göre belirlenir."
+      },
+      "corporateMultiple": {
+        "question": "Birden fazla araç kiralayabilir miyim?",
+        "answer": "Evet. Araç sayısını ve süreyi formda belirtmeniz yeterli."
+      },
+      "corporatePeriods": {
+        "question": "Hangi kiralama süreleri var?",
+        "answer": "Günlük, haftalık ve aylık kısa dönemden uzun dönem filo sözleşmelerine kadar seçenek sunuyoruz."
+      },
+      "corporatePanel": {
+        "question": "Filo yönetim paneli var mı?",
+        "answer": "Akıllı Kurumsal Filo Kiralama ürününde Novera Admin Paneli dahildir; araçları, sözleşmeleri ve masrafları tek yerden takip edersiniz."
+      },
+      "corporateElectric": {
+        "question": "Elektrikli ve hibrit araç seçeneği var mı?",
+        "answer": "Evet. Yeşil Filo ürünümüzde en güncel elektrikli ve hibrit araçlar bulunur."
+      }
+    }
+  }
+}

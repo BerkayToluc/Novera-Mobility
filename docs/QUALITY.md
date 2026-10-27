@@ -51,7 +51,7 @@
 | V-05 | Orta | Migration kayması: `20261017102847` hâlâ `pointsUsed` silme uyarısı taşıyor ama DROP elle çıkarılmış (geliştirme veritabanı şemadan kaymış). İki migration elle yazılmış. CI'da `prisma migrate diff` kontrolü yok | `prisma/migrations/` | V2-11 | Açık |
 | V-06 | Orta | Süresi dolan oturumlar ve sıfırlama bağlantıları için genel temizlik yok; `@@index([expiresAt])` hiç kullanılmıyor | `schema.prisma`, `auth/` | V2-10 | Açık |
 | V-07 | Orta | KVKK saklama süresi yok: iletişim ve teklif kişisel verisi süresiz duruyor. Hesap silinince `QuoteRequest`'te e-posta ve telefon kalıyor (yalnızca `userId` boşalıyor) | `schema.prisma:369-391` | V2-12 | Açık |
-| V-08 | Düşük | Puan harcaması defter tablosunda değil `Reservation.pointsUsed`'da; yorum (`:148`, "v1'de puanla ödeme yok") eskimiş. `FaqTopic` değerleri diğer enum'lardan farklı olarak küçük harf Türkçe | `schema.prisma` | V2-11 | Açık |
+| V-08 | Düşük | Puan harcaması defter tablosunda değil `Reservation.pointsUsed`'da; yorum (`:148`, "v1'de puanla ödeme yok") eskimiş. `FaqTopic` değerleri diğer enum'lardan farklı olarak küçük harf Türkçe (enum 27 Ekim'de SSS web'e taşınınca kalktı, V2-17) | `schema.prisma` | V2-11 | Açık |
 | V-09 | Orta | Ürün/hizmet içeriği iki kopya: çeviri dosyaları ve API tabloları (`Product`, `Service`). Web API'yi hiç çağırmıyor, kopyalar kayabilir | `schema.prisma:334-354`, `content/content.controller.ts:21-37`, `seed.ts:108-122` | V2-17 | Açık |
 | V-10 | Orta | Kur güncellemesindeki ±%50 sıçrama koruması, büyük ve gerçek bir harekette kurları kalıcı olarak kilitleyebilir. `FALLBACK_RATES` iki yerde kopya | `catalog/rates-updater.service.ts:119-121`, `catalog.service.ts:9`, `pricing.service.ts:19` | V2-13 | Açık |
 
@@ -196,7 +196,7 @@
 | `POST /holds` | En çok 5 etkin tutma/istemci | Aynı + 30/saat/anahtar |
 | `POST /reservations/price` | 60/10 dk/istemci (V2-03) | 60/10 dk/anahtar; kampanya kodu içeren istek 10/10 dk/anahtar (G-04) |
 | `POST /reservations` | 10/saat/kullanıcı + en çok 3 gelecek rezervasyon (V2-03) | Aynı; V2-09 kalıcı depoya taşır |
-| Katalog okumaları, `/faq`, `/rates` | Yok | Varsayılan: 300/5 dk/anahtar |
+| Katalog okumaları, `/rates` (`/faq` 27 Ekim'de kalktı) | Yok | Varsayılan: 300/5 dk/anahtar |
 | `/me*` (okuma) | Yok | Varsayılan |
 | `PATCH /me`, `DELETE /me`, iptal, oturum kapatma | Yok | 20/15 dk/kullanıcı |
 | `/admin/*` | — | 120/dk/yönetici |

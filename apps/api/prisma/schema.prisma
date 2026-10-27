@@ -58,20 +58,6 @@ enum ReservationStatus {
   CANCELLED
 }
 
-enum FaqAudience {
-  INDIVIDUAL
-  CORPORATE
-}
-
-enum FaqTopic {
-  rezervasyon
-  odeme
-  teslim
-  hasar
-  hesap
-  kurumsal
-}
-
 enum QuoteStatus {
   RECEIVED
   IN_REVIEW
@@ -372,18 +358,6 @@ model Service {
   summary   Json // tek cümlelik açıklama
   points    Json // { "tr": ["...", "...", "..."], "en": [...] }
   sortOrder Int    @default(0)
-}
-
-model FaqItem {
-  id        String      @id @default(uuid())
-  audience  FaqAudience
-  topic     FaqTopic    @default(rezervasyon)
-  question  Json // { "tr": "...", "en": "..." }
-  answer    Json
-  sortOrder Int         @default(0)
-
-  @@index([audience])
-  @@index([topic])
 }
 
 // Kurumsal teklif talepleri (GET /me/quotes ve POST /quotes)

@@ -15,6 +15,7 @@ import trContact from "../messages/tr/contact.json";
 import trConsent from "../messages/tr/consent.json";
 import trDriver from "../messages/tr/driver.json";
 import trErrors from "../messages/tr/errors.json";
+import trFaq from "../messages/tr/faq.json";
 import trFleet from "../messages/tr/fleet.json";
 import trGuides from "../messages/tr/guides.json";
 import trHelp from "../messages/tr/help.json";
@@ -36,6 +37,7 @@ import enBooking from "../messages/en/booking.json";
 import enContact from "../messages/en/contact.json";
 import enConsent from "../messages/en/consent.json";
 import enErrors from "../messages/en/errors.json";
+import enFaq from "../messages/en/faq.json";
 import enDriver from "../messages/en/driver.json";
 import enFleet from "../messages/en/fleet.json";
 import enGuides from "../messages/en/guides.json";
@@ -62,6 +64,7 @@ export const tr = {
   ...trConsent,
   ...trDriver,
   ...trErrors,
+  ...trFaq,
   ...trFleet,
   ...trGuides,
   ...trHelp,
@@ -87,6 +90,7 @@ export const en: typeof tr = {
   ...enConsent,
   ...enDriver,
   ...enErrors,
+  ...enFaq,
   ...enFleet,
   ...enGuides,
   ...enHelp,

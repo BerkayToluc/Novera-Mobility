@@ -1,11 +1,10 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
-import { FAQ_TOPICS } from "@/lib/faq";
+import { FAQ_ITEMS, FAQ_TOPICS } from "@/lib/faq";
 import { GUIDES, isGuideSlug } from "@/lib/guides";
 import { isProductSlug, PRODUCTS } from "@/lib/products";
 import { PUBLIC_PAGES } from "@/lib/public-pages";
-import { mockFaq } from "@/mocks/faq";
 
 const messagesDir = (lang: string) => fileURLToPath(new URL(`../messages/${lang}`, import.meta.url));
 const load = (lang: string, file: string) => JSON.parse(readFileSync(`${messagesDir(lang)}/${file}`, "utf8"));
@@ -69,25 +68,30 @@ describe("guides and products", () => {
   });
 });
 
-describe("FAQ sample data", () => {
-  const items = [...mockFaq("bireysel"), ...mockFaq("kurumsal")];
+describe("FAQ", () => {
+  const messages = (lang: string) => load(lang, "faq.json").Faq.items as Record<string, { question: string; answer: string }>;
 
-  it("has unique ids, a known topic and both languages", () => {
-    expect(new Set(items.map((item) => item.id)).size).toBe(items.length);
-    for (const item of items) {
-      expect(FAQ_TOPICS).toContain(item.topic);
-      expect(item.question.tr && item.question.en && item.answer.tr && item.answer.en).toBeTruthy();
+  it("has unique ids and a known topic", () => {
+    expect(new Set(FAQ_ITEMS.map((item) => item.id)).size).toBe(FAQ_ITEMS.length);
+    for (const item of FAQ_ITEMS) expect(FAQ_TOPICS).toContain(item.topic);
+  });
+
+  it("has a question and an answer in both languages for every item, and no text without an item", () => {
+    const ids = FAQ_ITEMS.map((item) => item.id).sort();
+    for (const lang of ["tr", "en"]) {
+      const texts = messages(lang);
+      expect(Object.keys(texts).sort(), lang).toEqual(ids);
+      for (const id of ids) expect(texts[id]?.question && texts[id]?.answer, `${lang} ${id}`).toBeTruthy();
     }
   });
 
   it("covers every help topic", () => {
-    const used = new Set(items.map((item) => item.topic));
-    // "genel" is only for the API's questions, which come without a topic.
-    for (const topic of FAQ_TOPICS.filter((value) => value !== "genel")) expect(used, topic).toContain(topic);
+    const used = new Set(FAQ_ITEMS.map((item) => item.topic));
+    for (const topic of FAQ_TOPICS) expect(used, topic).toContain(topic);
   });
 
-  it("keeps each audience to its own questions", () => {
-    expect(mockFaq("bireysel").every((item) => item.audience === "bireysel")).toBe(true);
-    expect(mockFaq("kurumsal").every((item) => item.audience === "kurumsal")).toBe(true);
+  it("gives each audience its own questions", () => {
+    expect(FAQ_ITEMS.filter((item) => item.audience === "bireysel").length).toBeGreaterThan(0);
+    expect(FAQ_ITEMS.filter((item) => item.audience === "kurumsal").length).toBeGreaterThan(0);
   });
 });

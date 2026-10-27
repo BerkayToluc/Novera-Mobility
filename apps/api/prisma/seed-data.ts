@@ -8,7 +8,7 @@ export type FuelType = "PETROL" | "DIESEL" | "HYBRID" | "ELECTRIC";
 export type ConsumptionUnit = "L_PER_100KM" | "KWH_PER_100KM";
 
 // Sabit UUID'ler: seed tekrar çalışınca aynı kayıtlar güncellenir, çift kayıt oluşmaz.
-// kind: 1 sınıf, 2 bayi, 3 model, 6 SSS
+// kind: 1 sınıf, 2 bayi, 3 model (6 SSS'ydi; SSS artık web'in çeviri dosyalarında)
 export const uid = (kind: number, n: number): string =>
   `00000000-0000-4000-8000-${kind.toString(16).padStart(4, "0")}${n.toString(16).padStart(8, "0")}`;
 
@@ -140,34 +140,6 @@ export const rates = [
   { currency: "TRY" as const, ratePerTry: "1" },
   { currency: "EUR" as const, ratePerTry: "0.0200" },
   { currency: "USD" as const, ratePerTry: "0.0230" },
-];
-
-// ---------- SSS ----------
-
-export type FaqTopic = "rezervasyon" | "odeme" | "teslim" | "hasar" | "hesap" | "kurumsal";
-export type FaqSeed = {
-  id: string;
-  audience: "INDIVIDUAL" | "CORPORATE";
-  topic: FaqTopic;
-  sortOrder: number;
-  question: L;
-  answer: L;
-};
-
-export const faq: FaqSeed[] = [
-  { id: uid(6, 1), audience: "INDIVIDUAL", topic: "rezervasyon", sortOrder: 1, question: { tr: "Rezervasyonu iptal edebilir miyim?", en: "Can I cancel my reservation?" }, answer: { tr: "Alış saatinden 24 saat öncesine kadar ücretsiz iptal edebilirsiniz.", en: "You can cancel free of charge up to 24 hours before pick-up." } },
-  { id: uid(6, 2), audience: "INDIVIDUAL", topic: "teslim", sortOrder: 2, question: { tr: "Hangi belgeler gerekli?", en: "Which documents do I need?" }, answer: { tr: "Geçerli ehliyet ve kimlik belgesi yeterlidir.", en: "A valid driving licence and an ID document are enough." } },
-  { id: uid(6, 3), audience: "INDIVIDUAL", topic: "teslim", sortOrder: 3, question: { tr: "Aracı farklı bir şehre iade edebilir miyim?", en: "Can I return the car in another city?" }, answer: { tr: "Evet. Rezervasyon sırasında bırakılacak bayiyi seçmeniz yeterli; farklı bayiye bırakmak için ek ücret alınmaz.", en: "Yes. Just choose the drop-off branch while booking; there is no extra charge for returning to a different branch." } },
-  { id: uid(6, 4), audience: "INDIVIDUAL", topic: "odeme", sortOrder: 4, question: { tr: "Gösterilen fiyata neler dahil?", en: "What is included in the price shown?" }, answer: { tr: "Gösterilen tutarlar KDV dahildir ve rezervasyon özetinde kalem kalem yazılır. Gizli ücret yoktur.", en: "Prices include VAT and are itemised in the booking summary. There are no hidden fees." } },
-  { id: uid(6, 5), audience: "INDIVIDUAL", topic: "hasar", sortOrder: 5, question: { tr: "Yolda kalırsam ne olur?", en: "What happens if I break down?" }, answer: { tr: "Yol Boyu Güvence kapsamında 7/24 operasyon masasına ulaşabilir, çekici yönlendirme alabilirsiniz. Arıza 24 saati aşarsa yedek araç sağlanır.", en: "With Road Assurance you can reach the 24/7 operations desk and get a tow truck dispatched. If a breakdown lasts over 24 hours, a replacement car is provided." } },
-  { id: uid(6, 6), audience: "INDIVIDUAL", topic: "odeme", sortOrder: 6, question: { tr: "Ödeme gerçekten alınıyor mu?", en: "Is the payment real?" }, answer: { tr: "Hayır. Bu site kurgusal bir öğrenme projesidir; ödeme adımında para alınmaz.", en: "No. This site is a fictional learning project; no money is taken at the payment step." } },
-  { id: uid(6, 12), audience: "INDIVIDUAL", topic: "hesap", sortOrder: 7, question: { tr: "Şifremi unuttum, ne yapmalıyım?", en: "I forgot my password. What should I do?" }, answer: { tr: "Giriş sayfasındaki \"Şifremi unuttum\" bağlantısından e-posta adresinizi girerek yeni şifre belirleyebilirsiniz.", en: "Use the \"Forgot my password\" link on the log-in page and enter your email address to set a new password." } },
-  { id: uid(6, 13), audience: "INDIVIDUAL", topic: "hesap", sortOrder: 8, question: { tr: "Hesabımı silebilir miyim?", en: "Can I delete my account?" }, answer: { tr: "Evet. Profil sayfasındaki Ayarlar bölümünden hesabınızı kalıcı olarak silebilirsiniz. Geçmiş rezervasyon kayıtları anonim olarak saklanır.", en: "Yes. You can delete your account permanently from Settings on your profile page. Past booking records are kept anonymously." } },
-  { id: uid(6, 7), audience: "CORPORATE", topic: "kurumsal", sortOrder: 1, question: { tr: "Kurumsal kiralama nasıl işliyor?", en: "How does corporate rental work?" }, answer: { tr: "Formu doldurursunuz, satış ekibimiz sizi arar. Araçlar istediğiniz yere teslim edilir ve istediğiniz yerden alınır; fiyat buna göre belirlenir.", en: "You fill in the form and our sales team calls you. Cars are delivered to and collected from wherever you choose, and the price is set accordingly." } },
-  { id: uid(6, 8), audience: "CORPORATE", topic: "kurumsal", sortOrder: 2, question: { tr: "Birden fazla araç kiralayabilir miyim?", en: "Can I rent more than one car?" }, answer: { tr: "Evet. Araç sayısını ve süreyi formda belirtmeniz yeterli.", en: "Yes. Just state the number of cars and the period in the form." } },
-  { id: uid(6, 9), audience: "CORPORATE", topic: "kurumsal", sortOrder: 3, question: { tr: "Hangi kiralama süreleri var?", en: "Which rental periods are available?" }, answer: { tr: "Günlük, haftalık ve aylık kısa dönemden uzun dönem filo sözleşmelerine kadar seçenek sunuyoruz.", en: "From daily, weekly and monthly short-term rental to long-term fleet contracts." } },
-  { id: uid(6, 10), audience: "CORPORATE", topic: "kurumsal", sortOrder: 4, question: { tr: "Filo yönetim paneli var mı?", en: "Is there a fleet management panel?" }, answer: { tr: "Akıllı Kurumsal Filo Kiralama ürününde Novera Admin Paneli dahildir; araçları, sözleşmeleri ve masrafları tek yerden takip edersiniz.", en: "The Smart Corporate Fleet Rental product includes the Novera Admin Panel, where you follow cars, contracts and costs in one place." } },
-  { id: uid(6, 11), audience: "CORPORATE", topic: "kurumsal", sortOrder: 5, question: { tr: "Elektrikli ve hibrit araç seçeneği var mı?", en: "Are electric and hybrid cars available?" }, answer: { tr: "Evet. Yeşil Filo ürünümüzde en güncel elektrikli ve hibrit araçlar bulunur.", en: "Yes. Our Green Fleet product offers the latest electric and hybrid cars." } },
 ];
 
 // ---------- Ürünler (SPEC Ek A) ----------
