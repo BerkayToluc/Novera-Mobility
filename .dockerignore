@@ -1,0 +1,19 @@
+# The build context is the whole repository (apps/api/Dockerfile needs the lockfile and the workspace files);
+# keep out everything the image does not need, and anything that must never be baked into an image.
+**/node_modules
+**/.next
+**/dist
+**/test-results
+**/playwright-report
+.git
+.github
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+apps/web
+carPhotos
+docs
+*.md
