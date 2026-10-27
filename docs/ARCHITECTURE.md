@@ -46,7 +46,7 @@
 | 09 | Google Maps JS API | Geçerli; v2'de Filom haritaları da bunu kullanır |
 | 10 | Formlar React Hook Form + Zod; API class-validator | **Değişti (V2-07):** API'de de zod; `class-validator` ve `class-transformer` kaldırıldı. Bkz. ADR-26 |
 | 11 | ESLint, Prettier, Vitest, Playwright, Actions | Geçerli; v2'de CI'a güvenlik taraması eklenir (V2-18) |
-| 12 | Yayın: Vercel + Render + Neon | Geçerli ([DEPLOY.md](DEPLOY.md)) |
+| 12 | Yayın: Vercel + Render + Neon | **Değişti (27 Ekim 2026):** API Render'dan Google Cloud Run'a (europe-west3) taşınıyor; web Vercel'de, veritabanı Neon'da kalıyor. Sebep: Render'ın ücretsiz saat havuzu ve uyku sorunu. Bkz. [DEPLOY.md](DEPLOY.md) |
 | 13 | Tema çerezi + `data-theme`, sayfalar istek anında | Geçerli |
 | 14 | API'ye Next üzerinden erişim | **Değişti:** tarayıcı API'yi hiç çağırmıyor, tüm çağrılar sunucudan; `next.config.ts`'teki `/api` yönlendirmesi artık gereksiz ve V2-06'da kalkar |
 | 15 | TRY/EUR/USD, kur backend'de | Geçerli; Filom tutarları yalnızca TRY |
