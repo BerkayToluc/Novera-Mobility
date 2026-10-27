@@ -98,14 +98,14 @@ jobs:
           name: playwright-test-results
           path: apps/web/test-results
 
-  # The API's container (apps/api/Dockerfile, built by Cloud Build on every merge to main): a Dockerfile that
+  # The API's container (the Dockerfile at the root, built by Cloud Build on every merge to main): a Dockerfile that
   # no longer builds would only show up after the merge, so it is built here too. Nothing is pushed.
   api-image:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
       - name: Build the API image
-        run: docker build -f apps/api/Dockerfile -t novera-api:ci .
+        run: docker build -t novera-api:ci .
       - name: The image starts and refuses to run without its production settings
         run: |
           set +e
