@@ -16,16 +16,18 @@ export type VehicleViewProps = {
   action?: ReactNode;
   // Paying with points: how many, and what is left to pay in money (SPEC §2.3).
   pointsPayment?: { points: number; rest: Money };
+  // True for the first card of the results, whose photo is the largest thing on the screen.
+  preloadImage?: boolean;
 };
 
 // One car as a card, for the grid view of the results (SPEC §2.3).
-export async function VehicleCard({ vehicle, fromPrice, note, action, pointsPayment }: VehicleViewProps) {
+export async function VehicleCard({ vehicle, fromPrice, note, action, pointsPayment, preloadImage }: VehicleViewProps) {
   const locale = (await getLocale()) as "tr" | "en";
   const facts = await getVehicleFacts(vehicle);
 
   return (
     <article className="flex h-full flex-col gap-4 rounded-card border border-border bg-surface p-4">
-      <VehicleImage imageUrl={vehicle.imageUrl} brand={vehicle.brand} model={vehicle.model} />
+      <VehicleImage imageUrl={vehicle.imageUrl} brand={vehicle.brand} model={vehicle.model} preload={preloadImage} />
       <div className="flex flex-1 flex-col gap-3">
         <div>
           <h3 className="text-h3 text-fg">

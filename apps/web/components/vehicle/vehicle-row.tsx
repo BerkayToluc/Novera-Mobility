@@ -7,13 +7,13 @@ import { VehiclePrice } from "./vehicle-price";
 // One car as a wide row, for the list view of the results (SPEC §2.3, G): the photo, the name and
 // the facts as chips, and on the right the price with the Kirala button; like the fleet cards on
 // the home page. On a phone the photo shrinks to the left and the price block drops under both.
-export async function VehicleRow({ vehicle, note, action, pointsPayment }: VehicleViewProps) {
+export async function VehicleRow({ vehicle, note, action, pointsPayment, preloadImage }: VehicleViewProps) {
   const locale = (await getLocale()) as "tr" | "en";
   const facts = await getVehicleFacts(vehicle);
 
   return (
     <article className="grid grid-cols-media-text items-center gap-x-4 gap-y-3 rounded-card border border-border bg-surface p-3 md:grid-cols-media-text-md md:gap-x-6 md:p-4 xl:grid-cols-media-text-action">
-      <VehicleImage imageUrl={vehicle.imageUrl} brand={vehicle.brand} model={vehicle.model} />
+      <VehicleImage imageUrl={vehicle.imageUrl} brand={vehicle.brand} model={vehicle.model} preload={preloadImage} />
 
       <div className="flex min-w-0 flex-col gap-2">
         <div>

@@ -6,6 +6,9 @@ type VehicleImageProps = {
   // When the card around it already names the car, the picture is not announced again.
   decorative?: boolean;
   className?: string;
+  // The first photo that is visible without scrolling: asks the browser for it as soon as the page starts
+  // (Next 16 `preload`, which replaced `priority`), so it does not wait for the scripts. Every other photo stays lazy.
+  preload?: boolean;
   imageUrl: string | null;
   brand: string;
   model: string;
@@ -13,7 +16,7 @@ type VehicleImageProps = {
 
 // 16:10 (SPEC §6). Until real photos exist (`imageUrl` is null) a calm placeholder holds the
 // space with the car's name, so the layout does not change when photos arrive.
-export function VehicleImage({ imageUrl, brand, model, decorative = false, className }: VehicleImageProps) {
+export function VehicleImage({ imageUrl, brand, model, decorative = false, preload = false, className }: VehicleImageProps) {
   if (imageUrl) {
     return (
       <Image
@@ -21,6 +24,7 @@ export function VehicleImage({ imageUrl, brand, model, decorative = false, class
         alt={decorative ? "" : `${brand} ${model}`}
         width={640}
         height={400}
+        preload={preload}
         // Cards are at most about a third of the page wide; without this the 1920 px variant is fetched.
         sizes="(min-width: 1280px) 420px, (min-width: 768px) 50vw, 100vw"
         className={cn("aspect-16/10 w-full rounded-media object-cover", className)}
