@@ -26,7 +26,9 @@ describe('rate limits over HTTP', () => {
   let base = '';
 
   beforeAll(async () => {
-    const moduleRef = await Test.createTestingModule({ imports: [FakePrismaModule, AuthModule, HealthModule, RateLimitModule] })
+    const moduleRef = await Test.createTestingModule({
+      imports: [FakePrismaModule, AuthModule, HealthModule, RateLimitModule],
+    })
       .overrideProvider(RateLimitStore)
       .useValue(new MemoryRateLimitStore())
       .compile();
@@ -94,12 +96,16 @@ describe('rate limits over HTTP', () => {
     for (let i = 0; i <= FREE_FAILED_ATTEMPTS; i += 1) {
       expect((await call('POST', '/auth/login', { body: { email, password: 'yanlis-parola' } })).status).toBe(401);
     }
-    const refused = await call('POST', '/auth/login', { body: { email: email.toUpperCase(), password: 'yanlis-parola' } });
+    const refused = await call('POST', '/auth/login', {
+      body: { email: email.toUpperCase(), password: 'yanlis-parola' },
+    });
     expect(refused.status).toBe(429);
     expect(Number(refused.headers.get('retry-after'))).toBeGreaterThanOrEqual(1);
     expect(Number(refused.headers.get('retry-after'))).toBeLessThanOrEqual(60);
     // Someone else's e-mail from a new address is still fine.
-    expect((await call('POST', '/auth/login', { body: { email: `baska-${counter}@example.com`, password: 'x' } })).status).toBe(401);
+    expect(
+      (await call('POST', '/auth/login', { body: { email: `baska-${counter}@example.com`, password: 'x' } })).status,
+    ).toBe(401);
   });
 
   it('an address with no account waits the same way: the wait does not tell whether the account exists', async () => {
@@ -108,7 +114,8 @@ describe('rate limits over HTTP', () => {
     const email = fake.users[fake.users.length - 1]!.email as string;
     const ghost = `nobody-${counter}@example.com`;
     for (const target of [email, ghost]) {
-      for (let i = 0; i <= FREE_FAILED_ATTEMPTS; i += 1) await call('POST', '/auth/login', { body: { email: target, password: 'yanlis-parola' } });
+      for (let i = 0; i <= FREE_FAILED_ATTEMPTS; i += 1)
+        await call('POST', '/auth/login', { body: { email: target, password: 'yanlis-parola' } });
     }
     const realAnswer = await call('POST', '/auth/login', { body: { email, password: 'yanlis-parola' } });
     const ghostAnswer = await call('POST', '/auth/login', { body: { email: ghost, password: 'yanlis-parola' } });
@@ -119,7 +126,8 @@ describe('rate limits over HTTP', () => {
   it('the right password is refused during the wait, accepted after it, and clears the count', async () => {
     await call('POST', '/auth/register', { body: registration(6) });
     const email = fake.users[fake.users.length - 1]!.email as string;
-    for (let i = 0; i <= FREE_FAILED_ATTEMPTS; i += 1) await call('POST', '/auth/login', { body: { email, password: 'yanlis-parola' } });
+    for (let i = 0; i <= FREE_FAILED_ATTEMPTS; i += 1)
+      await call('POST', '/auth/login', { body: { email, password: 'yanlis-parola' } });
     expect((await call('POST', '/auth/login', { body: { email, password: 'long-enough-1' } })).status).toBe(429);
     // The wait is over (the clock is not moved, the row says so).
     fake.throttles.forEach((row) => (row.lockedUntil = new Date(Date.now() - 1000)));
@@ -136,9 +144,14 @@ describe('rate limits over HTTP', () => {
 
     const address = freshAddress();
     for (let i = 0; i < LIMITS.forgot.limit; i += 1) {
-      expect((await call('POST', '/auth/forgot-password', { body: { email: `x${i}-${counter}@example.com` }, address })).status).toBe(202);
+      expect(
+        (await call('POST', '/auth/forgot-password', { body: { email: `x${i}-${counter}@example.com` }, address }))
+          .status,
+      ).toBe(202);
     }
-    expect((await call('POST', '/auth/forgot-password', { body: { email: `y-${counter}@example.com` }, address })).status).toBe(429);
+    expect(
+      (await call('POST', '/auth/forgot-password', { body: { email: `y-${counter}@example.com` }, address })).status,
+    ).toBe(429);
   });
 
   it('keys a signed-in request by the account, not the address', async () => {

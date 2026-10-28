@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service.js';
+import { isUniqueViolation } from '../common/prisma-errors.js';
 import { parseInput } from '../common/zod-validation.js';
-import { isSpam, spamDetected, validationFailed } from './form-input.js';
+import { PrismaService } from '../prisma/prisma.service.js';
+import { validationFailed } from '../common/zod-validation.js';
+import { isSpam, spamDetected } from './form-input.js';
 import { quoteSchema } from './forms.schemas.js';
 
 // POST /quotes (BACKLOG #33, Y35, ADR-20): kurumsal teklif / görüşme talebi.
@@ -23,20 +25,9 @@ export interface QuoteSummaryView {
   status: 'RECEIVED' | 'IN_REVIEW' | 'OFFERED';
 }
 
-function isUniqueViolation(error: unknown): boolean {
-  return (
-    typeof error === 'object' &&
-    error !== null &&
-    'code' in error &&
-    (error as { code?: unknown }).code === 'P2002'
-  );
-}
-
 // Numara yılı Türkiye saatine göre belirlenir (ADR-16).
 function istanbulYear(date: Date): number {
-  return Number(
-    new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Istanbul', year: 'numeric' }).format(date),
-  );
+  return Number(new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Istanbul', year: 'numeric' }).format(date));
 }
 
 @Injectable()

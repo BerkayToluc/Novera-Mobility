@@ -49,7 +49,13 @@ describe('AuthService', () => {
       const { user } = await auth.register(VALID);
       const view = toUserResponse(user);
       expect(JSON.stringify(view)).not.toContain('passwordHash');
-      expect(view).toMatchObject({ accountType: 'INDIVIDUAL', locale: 'tr', theme: 'light', currency: 'TRY', salesContact: null });
+      expect(view).toMatchObject({
+        accountType: 'INDIVIDUAL',
+        locale: 'tr',
+        theme: 'light',
+        currency: 'TRY',
+        salesContact: null,
+      });
     });
 
     it('aynı e-posta (büyük/küçük harf farkıyla bile) 409 EMAIL_TAKEN', async () => {
@@ -60,9 +66,7 @@ describe('AuthService', () => {
     });
 
     it('alan hatalarını sabit kodlarla döner (422)', async () => {
-      const error = await catchHttp(
-        auth.register({ email: 'x', password: '123', firstName: '', consent: false }),
-      );
+      const error = await catchHttp(auth.register({ email: 'x', password: '123', firstName: '', consent: false }));
       expect(error.getStatus()).toBe(422);
       expect(bodyOf(error).fieldErrors).toEqual({
         email: 'INVALID_EMAIL',
@@ -88,7 +92,6 @@ describe('AuthService', () => {
       const error = await catchHttp(auth.login({ email: VALID.email, password: 'boşluklu parola' }));
       expect(bodyOf(error).code).toBe('INVALID_CREDENTIALS');
     });
-
   });
 
   describe('login', () => {
@@ -125,7 +128,6 @@ describe('AuthService', () => {
       expect(db.sessions.map((s) => s.id)).not.toContain('old');
       expect(db.sessions).toHaveLength(1);
     });
-
   });
 
   describe('authenticate ve logout', () => {
@@ -160,13 +162,26 @@ describe('AuthService', () => {
         currency: 'EUR',
         email: 'baska@example.com',
       });
-      expect(updated).toMatchObject({ firstName: 'Zeynep', lastName: 'Yılmaz', locale: 'EN', theme: 'DARK', currency: 'EUR', email: 'ayse@example.com' });
+      expect(updated).toMatchObject({
+        firstName: 'Zeynep',
+        lastName: 'Yılmaz',
+        locale: 'EN',
+        theme: 'DARK',
+        currency: 'EUR',
+        email: 'ayse@example.com',
+      });
     });
 
     it('geçersiz değerleri INVALID_FORMAT / REQUIRED / TOO_LONG ile reddeder', async () => {
       const { user } = await auth.register(VALID);
       const error = await catchHttp(
-        auth.updateProfile(user.id, { firstName: '  ', lastName: 'x'.repeat(81), locale: 'de', theme: 'mor', currency: 'GBP' }),
+        auth.updateProfile(user.id, {
+          firstName: '  ',
+          lastName: 'x'.repeat(81),
+          locale: 'de',
+          theme: 'mor',
+          currency: 'GBP',
+        }),
       );
       expect(error.getStatus()).toBe(422);
       expect(bodyOf(error).fieldErrors).toEqual({
@@ -195,10 +210,23 @@ describe('AuthService', () => {
 
 describe('toUserResponse satış iletişimi', () => {
   const base = {
-    id: 'u1', email: 'a@b.co', passwordHash: 'x', firstName: 'A', lastName: 'B',
-    accountType: 'CORPORATE' as const, companyName: 'Firma', taxOffice: null, companyCity: null,
-    companyPhone: null, contactTitle: null, locale: 'TR' as const, theme: 'LIGHT' as const, currency: 'TRY' as const,
-    googleSub: null, notifyReminders: true, notifyCampaigns: false,
+    id: 'u1',
+    email: 'a@b.co',
+    passwordHash: 'x',
+    firstName: 'A',
+    lastName: 'B',
+    accountType: 'CORPORATE' as const,
+    companyName: 'Firma',
+    taxOffice: null,
+    companyCity: null,
+    companyPhone: null,
+    contactTitle: null,
+    locale: 'TR' as const,
+    theme: 'LIGHT' as const,
+    currency: 'TRY' as const,
+    googleSub: null,
+    notifyReminders: true,
+    notifyCampaigns: false,
   };
 
   it('JSON alanı tam ise satış iletişimini döner', () => {

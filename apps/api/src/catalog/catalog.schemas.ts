@@ -31,4 +31,3 @@ export const vehicleSearchSchema = (now: Date) =>
       currency: queryChoice(CURRENCY_VALUES),
     }),
   );
-

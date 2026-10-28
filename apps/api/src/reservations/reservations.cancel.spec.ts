@@ -28,8 +28,17 @@ function row(over: Row = {}): Row {
     vehicle: {
       id: 'v1',
       vehicleModel: {
-        slug: 'm', brand: 'B', model: 'M', seats: 5, bags: 3, transmission: 'AUTOMATIC', fuelType: 'PETROL',
-        consumption: 5, consumptionUnit: 'L_PER_100KM', description: { tr: 't', en: 't' }, imageUrl: null,
+        slug: 'm',
+        brand: 'B',
+        model: 'M',
+        seats: 5,
+        bags: 3,
+        transmission: 'AUTOMATIC',
+        fuelType: 'PETROL',
+        consumption: 5,
+        consumptionUnit: 'L_PER_100KM',
+        description: { tr: 't', en: 't' },
+        imageUrl: null,
         class: { slug: 'c', nameTr: 'C', nameEn: 'C' },
       },
     },
@@ -45,7 +54,8 @@ function setup(rows: Row[]) {
   const reservation = {
     updateMany: async ({ where, data }: Row) => {
       const hit = rows.filter(
-        (r) => r.id === where.id && r.userId === where.userId && r.status === where.status && r.startAt > where.startAt.gt,
+        (r) =>
+          r.id === where.id && r.userId === where.userId && r.status === where.status && r.startAt > where.startAt.gt,
       );
       hit.forEach((r) => Object.assign(r, data));
       return { count: hit.length };
@@ -95,7 +105,7 @@ describe('ReservationsService.cancel', () => {
     expect(again.status).toBe('CANCELLED');
   });
 
-  it('someone else\'s or unknown reservation is 404 NOT_FOUND', async () => {
+  it("someone else's or unknown reservation is 404 NOT_FOUND", async () => {
     const service = setup([row()]);
     const other = await failure(service.cancel('someone-else', 'r1', NOW));
     expect(other.getStatus()).toBe(404);

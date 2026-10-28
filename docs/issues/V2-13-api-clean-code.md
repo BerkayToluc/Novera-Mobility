@@ -37,12 +37,12 @@ Yeni özellik; uç adı ya da cevap değişikliği.
 Klasörler: `apps/api/src/holds`, `reservations`, `catalog`, `forms`, `auth`, `config`. Taşımalar mekaniktir; her taşıma ayrı bir commit olur ki inceleme kolay olsun.
 
 ## Kabul kriterleri
-- [ ] QUALITY M-01'deki kopyaların her biri tek tanıma iner (`grep` çıktısı PR'da).
-- [ ] `process.env` yalnızca yapılandırma modülünde okunur.
-- [ ] `any` yok; `GET /` 404 döner.
-- [ ] Tüm testler değişmeden yeşil; e2e yeşil.
-- [ ] Kur koruması testi: büyük ama kalıcı bir hareket üçüncü gün kabul edilir.
-- [ ] QUALITY'de M-01–M-04 ve V-10 güncel.
+- [x] QUALITY M-01'deki kopyaların her biri tek tanıma iner (`grep` çıktısı PR'da).
+- [x] `process.env` yalnızca yapılandırma modülünde okunur.
+- [x] `any` yok; `GET /` 404 döner.
+- [x] Tüm testler değişmeden yeşil; e2e yeşil. *(634 test, aynı sayı; yalnızca taşınan yardımcıların import'ları değişti)*
+- [x] Kur koruması testi: büyük ama kalıcı bir hareket üçüncü gün kabul edilir. *(`rates-updater.service.spec.ts`, `rate-guard.spec.ts`)*
+- [x] QUALITY'de M-01–M-04 ve V-10 güncel.
 
 ## Etiketler
 `faz-2` `temel` `refactor` `P1` `api`

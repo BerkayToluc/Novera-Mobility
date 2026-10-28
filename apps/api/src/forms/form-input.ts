@@ -4,8 +4,6 @@ import { HttpException, HttpStatus } from '@nestjs/common';
 // artık zod şemalarında (common/zod-fields.ts, ADR-26); burada yalnızca hata biçimleri ve tuzak alan kaldı.
 // Hata biçimi: { code, message, fieldErrors }; alan hataları sabit makine kodlarıdır.
 
-export { validationFailed, type FieldErrors } from '../common/zod-validation.js';
-
 export type FormInput = Record<string, unknown>;
 
 export function spamDetected(): HttpException {

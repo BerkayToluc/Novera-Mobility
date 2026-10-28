@@ -51,7 +51,11 @@ describe('API access key', () => {
   };
 
   it('answers a call without the key, or with a wrong one, as if the route did not exist', async () => {
-    const wrongCalls: Array<Record<string, string>> = [{}, { [ACCESS_KEY_HEADER]: 'wrong' }, { [ACCESS_KEY_HEADER]: `${KEY}x` }];
+    const wrongCalls: Array<Record<string, string>> = [
+      {},
+      { [ACCESS_KEY_HEADER]: 'wrong' },
+      { [ACCESS_KEY_HEADER]: `${KEY}x` },
+    ];
     for (const headers of wrongCalls) {
       const response = await fetch(`${base}/secret`, { headers });
       expect(response.status).toBe(404);

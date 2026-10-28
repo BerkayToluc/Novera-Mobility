@@ -37,7 +37,13 @@ export class FakePrisma {
       };
       this.users.push(user);
       if (sessions?.create) {
-        this.sessions.push({ id: randomUUID(), createdAt: new Date(), lastUsedAt: new Date(), userId: user.id, ...sessions.create });
+        this.sessions.push({
+          id: randomUUID(),
+          createdAt: new Date(),
+          lastUsedAt: new Date(),
+          userId: user.id,
+          ...sessions.create,
+        });
       }
       return user;
     },
@@ -92,7 +98,8 @@ export class FakePrisma {
   // Sign-in waits (V2-10): the address is the key.
   throttles: Row[] = [];
   loginThrottle = {
-    findUnique: async ({ where }: { where: { email: string } }) => this.throttles.find((t) => t.email === where.email) ?? null,
+    findUnique: async ({ where }: { where: { email: string } }) =>
+      this.throttles.find((t) => t.email === where.email) ?? null,
     upsert: async ({ where, create, update }: { where: { email: string }; create: Row; update: Row }) => {
       const existing = this.throttles.find((t) => t.email === where.email);
       if (existing) return Object.assign(existing, update, { updatedAt: new Date() });

@@ -41,16 +41,30 @@ describeDb('POST /reservations (gerçek PostgreSQL)', () => {
     ids.classId = klass.id;
     const model = await prisma.vehicleModel.create({
       data: {
-        slug: `t-model-${run}`, brand: 'Test', model: 'Model', seats: 5, bags: 3, transmission: 'AUTOMATIC',
-        fuelType: 'PETROL', consumption: 5.5, consumptionUnit: 'L_PER_100KM', dailyPrice: 125000,
-        description: { tr: 'Test', en: 'Test' }, classId: klass.id,
+        slug: `t-model-${run}`,
+        brand: 'Test',
+        model: 'Model',
+        seats: 5,
+        bags: 3,
+        transmission: 'AUTOMATIC',
+        fuelType: 'PETROL',
+        consumption: 5.5,
+        consumptionUnit: 'L_PER_100KM',
+        dailyPrice: 125000,
+        description: { tr: 'Test', en: 'Test' },
+        classId: klass.id,
       },
     });
     ids.modelId = model.id;
     const branch = await prisma.branch.create({
       data: {
-        name: `Test Bayi ${run}`, city: 'Test', address: 'Test', latitude: 1, longitude: 1,
-        phone: '+90 000 000 00 00', email: `bayi-${run}@example.test`,
+        name: `Test Bayi ${run}`,
+        city: 'Test',
+        address: 'Test',
+        latitude: 1,
+        longitude: 1,
+        phone: '+90 000 000 00 00',
+        email: `bayi-${run}@example.test`,
         openingHours: { weekdays: { open: '08:00', close: '20:00' } },
       },
     });
@@ -61,7 +75,10 @@ describeDb('POST /reservations (gerçek PostgreSQL)', () => {
     vehicleId = vehicle.id;
     const created = await prisma.user.create({
       data: {
-        email: `t-${run}@example.test`, passwordHash: 'x', firstName: 'Test', lastName: 'Kullanici',
+        email: `t-${run}@example.test`,
+        passwordHash: 'x',
+        firstName: 'Test',
+        lastName: 'Kullanici',
         accountType: 'INDIVIDUAL',
       },
     });
@@ -82,8 +99,12 @@ describeDb('POST /reservations (gerçek PostgreSQL)', () => {
   });
 
   const body = () => ({
-    vehicleId, pickupBranchId: branchId, returnBranchId: branchId,
-    startAt: START.toISOString(), endAt: END.toISOString(), currency: 'TRY',
+    vehicleId,
+    pickupBranchId: branchId,
+    returnBranchId: branchId,
+    startAt: START.toISOString(),
+    endAt: END.toISOString(),
+    currency: 'TRY',
   });
 
   it('8 eşzamanlı istekten yalnız biri rezervasyon alır', async () => {
@@ -180,10 +201,19 @@ describeDb('POST /reservations (gerçek PostgreSQL)', () => {
     });
 
     it('kapatılmış kodla yeni rezervasyon yapılamaz', async () => {
-      const error = await service.create(user, promoBody(2, { startAt: new Date(PROMO_START.getTime() + 30 * DAY).toISOString(), endAt: new Date(PROMO_START.getTime() + 32 * DAY).toISOString(), promoCode: CODE })).then(
-        () => null,
-        (e: unknown) => e as HttpException,
-      );
+      const error = await service
+        .create(
+          user,
+          promoBody(2, {
+            startAt: new Date(PROMO_START.getTime() + 30 * DAY).toISOString(),
+            endAt: new Date(PROMO_START.getTime() + 32 * DAY).toISOString(),
+            promoCode: CODE,
+          }),
+        )
+        .then(
+          () => null,
+          (e: unknown) => e as HttpException,
+        );
       expect(error!.getStatus()).toBe(422);
     });
   });

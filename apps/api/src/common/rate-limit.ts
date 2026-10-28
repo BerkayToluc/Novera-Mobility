@@ -33,9 +33,6 @@ export { RATE_LIMIT_METADATA, NO_RATE_LIMIT_METADATA };
 // `Retry-After` header.
 export class RateLimitedException extends HttpException {
   constructor(readonly retryAfterSeconds: number) {
-    super(
-      { code: 'RATE_LIMITED', message: 'Too many requests, try again later' },
-      HttpStatus.TOO_MANY_REQUESTS,
-    );
+    super({ code: 'RATE_LIMITED', message: 'Too many requests, try again later' }, HttpStatus.TOO_MANY_REQUESTS);
   }
 }

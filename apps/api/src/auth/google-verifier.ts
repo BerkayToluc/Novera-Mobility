@@ -1,4 +1,5 @@
 import { createRemoteJWKSet, jwtVerify, type JWTVerifyGetKey } from 'jose';
+import { googleClientId } from '../config/env.js';
 
 // Google ile giriş: web'deki Google düğmesinin verdiği ID token burada doğrulanır.
 // İstemci sırrı gerekmez; imza Google'ın herkese açık anahtarlarıyla, hedef kitle (aud) bizim
@@ -30,7 +31,7 @@ function text(value: unknown): string | null {
 // Built by a factory in AuthModule (its constructor takes plain values, not injectable classes).
 export class JoseGoogleTokenVerifier extends GoogleTokenVerifier {
   constructor(
-    private readonly clientId: string | undefined = process.env.GOOGLE_CLIENT_ID?.trim() || undefined,
+    private readonly clientId: string | undefined = googleClientId(),
     private readonly keys: JWTVerifyGetKey = createRemoteJWKSet(new URL(GOOGLE_JWKS_URL)),
   ) {
     super();

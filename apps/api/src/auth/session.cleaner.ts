@@ -1,4 +1,6 @@
 import { Inject, Injectable, Logger, type OnModuleDestroy, type OnModuleInit } from '@nestjs/common';
+import { DAY_MS } from '../common/time.js';
+import { isTestRun } from '../config/env.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { SESSION_IDLE_DAYS } from './session-token.js';
 
@@ -6,8 +8,7 @@ import { SESSION_IDLE_DAYS } from './session-token.js';
 // password reset links that expired or were used, and the sign-in wait rows nobody touched for a day. Until now
 // they were only deleted when that person signed in again. Like the other background tasks it runs at each start
 // and every 24 hours while the instance is warm (Cloud Run scales to zero), which is enough here.
-const EVERY_MS = 24 * 60 * 60 * 1000;
-const DAY_MS = 24 * 60 * 60 * 1000;
+const EVERY_MS = DAY_MS;
 
 @Injectable()
 export class SessionCleaner implements OnModuleInit, OnModuleDestroy {
@@ -18,7 +19,7 @@ export class SessionCleaner implements OnModuleInit, OnModuleDestroy {
 
   onModuleInit(): void {
     // Tests never start a background task.
-    if (process.env.NODE_ENV === 'test') return;
+    if (isTestRun()) return;
     void this.clean();
     this.timer = setInterval(() => void this.clean(), EVERY_MS);
     this.timer.unref();
@@ -34,7 +35,10 @@ export class SessionCleaner implements OnModuleInit, OnModuleDestroy {
     try {
       const sessions = await this.prisma.session.deleteMany({
         where: {
-          OR: [{ expiresAt: { lte: now } }, { lastUsedAt: { lt: new Date(now.getTime() - SESSION_IDLE_DAYS * DAY_MS) } }],
+          OR: [
+            { expiresAt: { lte: now } },
+            { lastUsedAt: { lt: new Date(now.getTime() - SESSION_IDLE_DAYS * DAY_MS) } },
+          ],
         },
       });
       const resetTokens = await this.prisma.passwordResetToken.deleteMany({

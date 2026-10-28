@@ -39,7 +39,9 @@ describeDb('rate limit counters in PostgreSQL (ADR-27)', () => {
     const results = await Promise.all(Array.from({ length: 20 }, () => outcome(limits, `ip:${run}-parallel`)));
     expect(results.filter((result) => result === 'allowed')).toHaveLength(10);
     expect(results.filter((result) => result === 'refused')).toHaveLength(10);
-    const row = await connections[0]!.rateLimitHit.findFirst({ where: { key: `ip:${run}-parallel`, bucket: spec.bucket } });
+    const row = await connections[0]!.rateLimitHit.findFirst({
+      where: { key: `ip:${run}-parallel`, bucket: spec.bucket },
+    });
     expect(row?.count).toBe(20);
   });
 
@@ -65,7 +67,9 @@ describeDb('rate limit counters in PostgreSQL (ADR-27)', () => {
     await limits.consume(spec, `ip:${run}-old`, old);
     await limits.consume(spec, `ip:${run}-recent`, now);
     await new RateLimitCleaner(store).clean(now);
-    const keys = (await connections[0]!.rateLimitHit.findMany({ where: { bucket: spec.bucket } })).map((row) => row.key);
+    const keys = (await connections[0]!.rateLimitHit.findMany({ where: { bucket: spec.bucket } })).map(
+      (row) => row.key,
+    );
     expect(keys).not.toContain(`ip:${run}-old`);
     expect(keys).toContain(`ip:${run}-recent`);
   });

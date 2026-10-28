@@ -2,6 +2,7 @@ import type { INestApplication } from '@nestjs/common';
 import type { Express, NextFunction, Request, Response } from 'express';
 import { AllExceptionsFilter } from './common/all-exceptions.filter.js';
 import { apiAccess } from './common/api-access.js';
+import { currentEnv, type Env } from './config/env.js';
 import { trustProxyHops } from './config/runtime.js';
 
 // Answers that belong to one person must not be kept by a browser cache or a shared cache.
@@ -17,7 +18,7 @@ export function securityHeaders(request: Request, response: Response, next: Next
 
 // Everything that must be true of the running API, in one place: main.ts uses it for the real server and
 // the HTTP tests use it too, so the tests exercise the same behaviour.
-export function configureApp(app: INestApplication, env: NodeJS.ProcessEnv = process.env): void {
+export function configureApp(app: INestApplication, env: Env = currentEnv()): void {
   const server = app.getHttpAdapter().getInstance() as Express;
   // Do not announce the framework.
   server.disable('x-powered-by');
