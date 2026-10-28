@@ -9,5 +9,5 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default function Page() {
-  return <LegalPage namespace="LegalPrivacy" />;
+  return <LegalPage namespace="LegalPrivacy" related="/gizlilik-politikasi" />;
 }

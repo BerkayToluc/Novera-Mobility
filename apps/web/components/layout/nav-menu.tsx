@@ -27,7 +27,14 @@ export function useNavMenuItems() {
     label: products(`items.${product.slug}.title`),
     featured: product.featured,
   }));
-  return { allHref: "/urunler" as const, allLabel: header("allProducts"), featuredLabel: products("featuredBadge"), items };
+  return {
+    allHref: "/urunler" as const,
+    allLabel: header("allProducts"),
+    quoteHref: "/kurumsal-teklif" as const,
+    quoteLabel: header("getQuote"),
+    featuredLabel: products("featuredBadge"),
+    items,
+  };
 }
 
 // Desktop (SPEC §2.8, after the Framer Pill Dropdown Nav): the menu title opens a panel of links,
@@ -46,7 +53,7 @@ export function NavMenu({
   label: string;
   isCurrent: boolean;
 }) {
-  const { allHref, allLabel, featuredLabel, items } = useNavMenuItems();
+  const { allHref, allLabel, quoteHref, quoteLabel, featuredLabel, items } = useNavMenuItems();
   const [open, setOpen] = useState(false);
   const viaHover = useRef(false);
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -78,8 +85,10 @@ export function NavMenu({
   };
 
   const entries = [
-    ...items.map((item) => ({ ...item, all: false })),
-    { key: "all", href: allHref, label: allLabel, featured: false, all: true },
+    ...items.map((item) => ({ ...item, all: false, quote: false })),
+    { key: "all", href: allHref, label: allLabel, featured: false, all: true, quote: false },
+    // The corporate quote page is the main conversion page of the corporate side (V2-16, QUALITY U-01).
+    { key: "quote", href: quoteHref, label: quoteLabel, featured: false, all: false, quote: true },
   ];
 
   return (
@@ -124,7 +133,7 @@ export function NavMenu({
                 onClick={close}
                 className={cn(
                   "relative flex min-h-11 items-center gap-3 rounded-control px-3 py-2 transition-colors hover:bg-surface-muted focus-visible:bg-surface-muted motion-reduce:transition-none",
-                  entry.all ? "justify-between text-label text-link" : "text-body text-fg",
+                  entry.all || entry.quote ? "justify-between text-label text-link" : "text-body text-fg",
                 )}
               >
                 <span className="relative flex-1">{entry.label}</span>
@@ -133,7 +142,7 @@ export function NavMenu({
                     {featuredLabel}
                   </span>
                 )}
-                {entry.all && <ArrowRight aria-hidden="true" className="relative size-4" />}
+                {(entry.all || entry.quote) && <ArrowRight aria-hidden="true" className="relative size-4" />}
               </Link>
             </li>
           ))}
@@ -146,7 +155,7 @@ export function NavMenu({
 // Mobile panel: the title stays a link to the overview and the entries sit indented beneath it,
 // all visible at once; a phone menu is already a disclosure, so it needs no second one.
 export function NavSubList({ onNavigate }: { onNavigate?: () => void }) {
-  const { items } = useNavMenuItems();
+  const { items, quoteHref, quoteLabel } = useNavMenuItems();
   return (
     <ul className="mb-2 ml-3 flex flex-col border-l border-border pl-3">
       {items.map((item) => (
@@ -160,6 +169,15 @@ export function NavSubList({ onNavigate }: { onNavigate?: () => void }) {
           </Link>
         </li>
       ))}
+      <li>
+        <Link
+          href={quoteHref}
+          onClick={onNavigate}
+          className="inline-flex min-h-11 w-full items-center rounded-control px-3 text-label text-link transition-colors hover:bg-selected"
+        >
+          {quoteLabel}
+        </Link>
+      </li>
     </ul>
   );
 }

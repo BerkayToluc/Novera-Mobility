@@ -83,7 +83,7 @@ export async function ReservationList({
       <li key={reservation.id} className="flex flex-col gap-5 rounded-card border border-border bg-surface p-5 md:p-6">
         <div className="flex gap-4">
           <div className="w-28 shrink-0 md:w-40">
-            <VehicleImage imageUrl={null} brand={reservation.vehicle.brand} model={reservation.vehicle.model} decorative />
+            <VehicleImage imageUrl={reservation.vehicle.imageUrl} brand={reservation.vehicle.brand} model={reservation.vehicle.model} decorative />
           </div>
           <div className="flex min-w-0 flex-1 flex-col items-start gap-2">
             {/* The status is written out, never colour alone (WCAG 1.4.1). */}

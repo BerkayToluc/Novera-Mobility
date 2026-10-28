@@ -14,6 +14,7 @@
   "LegalPrivacy": {
     "title": "KVKK Aydınlatma Metni",
     "metaDescription": "Novera Mobility'nin kişisel verilerinizi nasıl topladığı, kullandığı ve koruduğuna dair KVKK aydınlatma metni.",
+    "distinction": "Bu, kişisel verilerinizin nasıl işlendiğini 6698 sayılı Kanun'un gerektirdiği ayrıntıyla anlatan hukuki aydınlatma metnidir. Aynı konunun sade bir özeti için <link>Gizlilik Politikası</link>'na bakın.",
     "sections": [
       {
         "heading": "Veri sorumlusu",
@@ -221,6 +222,7 @@
   "LegalPolicy": {
     "title": "Gizlilik Politikası",
     "metaDescription": "Novera Mobility'nin siteyi kullanırken hangi bilgileri neden topladığı ve bunları nasıl koruduğu.",
+    "distinction": "Bu, hangi bilgileri neden aldığımızı sade bir dille anlatan özettir; hukuki ayrıntı ve haklarınız <link>KVKK Aydınlatma Metni</link>'ndedir.",
     "sections": [
       {
         "heading": "Kısaca",
