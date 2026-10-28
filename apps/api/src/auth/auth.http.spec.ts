@@ -30,6 +30,7 @@ describe('auth HTTP akışı (çerez + korumalı uçlar)', () => {
   beforeEach(() => {
     fake.users = [];
     fake.sessions = [];
+    fake.quoteRequests = [];
   });
 
   const send = (path: string, init: RequestInit & { cookie?: string } = {}) =>
@@ -153,6 +154,26 @@ describe('auth HTTP akışı (çerez + korumalı uçlar)', () => {
       for (const value of [42, { a: 1 }, ['x'], true]) {
         expect((await remove(cookie, { currentPassword: value })).status).toBe(422);
       }
+    });
+
+    it('the quote requests of the deleted account lose name, e-mail, phone and notes (V2-12)', async () => {
+      const cookie = cookieOf(await send('/auth/register', { method: 'POST', body: JSON.stringify(VALID) }));
+      const userId = fake.users[0]!.id;
+      fake.quoteRequests.push(
+        { id: 'q1', userId, companyName: 'Ege', contactName: 'Mert', email: 'mert@example.com', phone: '+90 555', notes: 'kapı kodu' },
+        { id: 'q2', userId: 'someone-else', companyName: 'Başka', contactName: 'Zeynep', email: 'z@example.com', phone: null, notes: null },
+      );
+      expect((await remove(cookie, { currentPassword: VALID.password })).status).toBe(204);
+      expect(fake.quoteRequests[0]).toMatchObject({ companyName: 'Ege', contactName: 'Silindi', email: '', phone: null, notes: null });
+      expect(fake.quoteRequests[0]!.anonymizedAt).toBeInstanceOf(Date);
+      expect(fake.quoteRequests[1]).toMatchObject({ contactName: 'Zeynep', email: 'z@example.com' });
+    });
+
+    it('a wrong password leaves the quote requests alone', async () => {
+      const cookie = cookieOf(await send('/auth/register', { method: 'POST', body: JSON.stringify(VALID) }));
+      fake.quoteRequests.push({ id: 'q1', userId: fake.users[0]!.id, contactName: 'Mert', email: 'mert@example.com' });
+      expect((await remove(cookie, { currentPassword: 'yanlis-parola-1' })).status).toBe(422);
+      expect(fake.quoteRequests[0]).toMatchObject({ contactName: 'Mert', email: 'mert@example.com' });
     });
 
     it('an account opened with Google (no password) confirms with its e-mail address instead', async () => {

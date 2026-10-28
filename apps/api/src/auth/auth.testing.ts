@@ -107,6 +107,15 @@ export class FakePrisma {
     },
   };
 
+  quoteRequests: Row[] = [];
+  quoteRequest = {
+    updateMany: async ({ where, data }: { where: { userId: string }; data: Row }) => {
+      const hit = this.quoteRequests.filter((q) => q.userId === where.userId);
+      hit.forEach((q) => Object.assign(q, data));
+      return { count: hit.length };
+    },
+  };
+
   passwordResetToken: { deleteMany: (args: { where: Row }) => Promise<{ count: number }> } = {
     deleteMany: async () => ({ count: 0 }),
   };

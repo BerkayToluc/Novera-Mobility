@@ -65,6 +65,8 @@
         "heading": "Saklama süresi",
         "paragraphs": [
           "Verileriniz, işleme amacının gerektirdiği süre boyunca ve ilgili mevzuatta öngörülen azami süreler içinde saklanır; süre sonunda silinir, yok edilir veya anonim hale getirilir.",
+          "İletişim formu mesajlarınız ve kurumsal teklif talepleriniz, gönderildikleri tarihten itibaren iki yıl saklanır. Süre dolunca adınız, e-posta adresiniz, telefon numaranız ve mesaj ya da notlarınız silinir; kayıt yalnızca istatistik için (tarih, firma adı ve talep edilen araç bilgisiyle) kalır.",
+          "Hesabınızı sildiğinizde teklif taleplerinizdeki adınız, e-posta adresiniz, telefon numaranız ve notlarınız hemen silinir. Rezervasyon kayıtlarınız (araç, tarih ve tutar) hesabınızla bağlantısı kesilerek anonim olarak saklanır.",
           "Sürücü uygunluğu için girdiğiniz doğum tarihi ve sürücü belgesi bilgileri yalnızca rezervasyon sırasında kontrol için kullanılır; hesabınıza, rezervasyon kaydınıza ya da tarayıcınıza kaydedilmez ve sonrasında saklanmaz."
         ]
       },

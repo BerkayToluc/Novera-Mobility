@@ -694,7 +694,7 @@ export interface paths {
         post?: never;
         /**
          * Hesabı sil
-         * @description Hesap kalıcı silinir, oturum sonlanır. Geçmiş rezervasyon kayıtları anonim olarak kalır.
+         * @description Hesap kalıcı silinir, oturum sonlanır. Geçmiş rezervasyon kayıtları anonim olarak kalır; hesabın teklif taleplerindeki ad, e-posta, telefon ve notlar hemen silinir (firma adı ve talep edilen araç kalır).
          *     Şifresi olan hesap `currentPassword` gönderir (eksik `REQUIRED`, yanlış `INVALID_PASSWORD`).
          *     Yalnızca Google ile açılmış hesap `confirmEmail` gönderir: hesabın e-postası (eksik `REQUIRED`,
          *     farklı `EMAIL_MISMATCH`). Çalınmış bir oturum çerezi tek başına hesabı silemez.
