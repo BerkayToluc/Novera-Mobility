@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { slotDate } from '../common/zod-fields.js';
 import { startWindowError } from './booking-window.js';
+import { DAY_MS } from '../common/time.js';
 
 // The start and end of a rental, shared by holds, the vehicle search and reservations (QUALITY G-01).
 
@@ -40,7 +41,7 @@ export function withPeriodCheck<S extends z.ZodObject>(schema: S, maxDays?: numb
       (value: Period) =>
         !bothDates(value) ||
         value.endAt.getTime() <= value.startAt.getTime() ||
-        value.endAt.getTime() - value.startAt.getTime() <= maxDays * 86_400_000,
+        value.endAt.getTime() - value.startAt.getTime() <= maxDays * DAY_MS,
       { path: ['endAt'], error: 'OUT_OF_RANGE', ...always },
     ),
   );
