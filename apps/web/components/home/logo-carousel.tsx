@@ -181,7 +181,7 @@ export function LogoCarousel({ label, items }: { label: string; items: ReactNode
       tabIndex={0}
       role="group"
       aria-label={label}
-      className="group/lc relative flex h-24 cursor-grab touch-pan-y select-none items-center gap-16 overflow-hidden rounded-control [mask-image:linear-gradient(to_right,transparent,black_15%,black_85%,transparent)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus active:cursor-grabbing md:h-28"
+      className="group/lc relative flex h-24 cursor-grab touch-pan-y select-none items-center gap-16 overflow-hidden rounded-control mask-fade-edges focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus active:cursor-grabbing md:h-28"
     >
       {/* One list: the first set is read, the copies that close the loop are hidden. */}
       <ul role="list" className="contents">

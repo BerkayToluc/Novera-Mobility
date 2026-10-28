@@ -29,7 +29,7 @@ export function FleetModelCard({
   return (
     <article
       className={cn(
-        "group relative grid grid-cols-[7rem_minmax(0,1fr)] items-center gap-x-4 gap-y-3 rounded-card border border-border bg-surface p-3 transition-colors md:grid-cols-[14rem_minmax(0,1fr)_auto_auto] md:gap-x-6 md:p-4 xl:grid-cols-[16rem_minmax(0,1fr)_auto_auto]",
+        "group relative grid grid-cols-media-text items-center gap-x-4 gap-y-3 rounded-card border border-border bg-surface p-3 transition-colors md:grid-cols-media-text-actions md:gap-x-6 md:p-4 xl:grid-cols-media-text-actions-wide",
         "hover:border-primary hover:bg-surface-muted focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-focus",
         className,
       )}

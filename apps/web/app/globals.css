@@ -309,6 +309,8 @@
   /* Menus that open and close (after the Framer Pill Dropdown Nav). */
   --ease-menu: cubic-bezier(0.44, 0, 0.56, 1);
   --animate-fade-in: fade-in 0.3s ease-out;
+  /* The header's product panel settles 6 px down with a short fade (SPEC §2.8, after the Framer Pill Dropdown Nav). */
+  --animate-menu-in: menu-in 0.25s var(--ease-menu) both;
   /* The footer links' wave (SPEC §2.8, after the Framer Wavy Nav link): each letter drops 6 px and
      springs back. The curve overshoots a touch, as the original's spring does. */
   --animate-wave: wave 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
@@ -319,6 +321,16 @@
       transform: translateY(6px);
     }
     to {
+      transform: none;
+    }
+  }
+  @keyframes menu-in {
+    from {
+      opacity: 0;
+      transform: translateY(-6px) scale(0.98);
+    }
+    to {
+      opacity: 1;
       transform: none;
     }
   }
@@ -426,6 +438,62 @@ body:has(dialog[open]) {
       transition: none;
     }
   }
+}
+
+/*
+ * Named layout tokens (V2-14, QUALITY M-08). A fixed rem or percentage inside a class (`grid-cols-[10rem_1fr]`) is a
+ * value the token layer does not know, and the lint rule refuses it; the few layouts that need one are named here.
+ */
+/* A term and its text side by side (About: the claims). */
+@utility grid-cols-term {
+  grid-template-columns: 10rem 1fr;
+}
+@utility grid-cols-term-wide {
+  grid-template-columns: 14rem 1fr;
+}
+/* A navigation column beside the page (profile). */
+@utility grid-cols-sidebar {
+  grid-template-columns: 15rem minmax(0, 1fr);
+}
+/* A vehicle row: the photo, then the text, then up to two actions as the width grows. */
+@utility grid-cols-media-text {
+  grid-template-columns: 7rem minmax(0, 1fr);
+}
+@utility grid-cols-media-text-md {
+  grid-template-columns: 14rem minmax(0, 1fr);
+}
+@utility grid-cols-media-text-action {
+  grid-template-columns: 16rem minmax(0, 1fr) auto;
+}
+@utility grid-cols-media-text-actions {
+  grid-template-columns: 14rem minmax(0, 1fr) auto auto;
+}
+@utility grid-cols-media-text-actions-wide {
+  grid-template-columns: 16rem minmax(0, 1fr) auto auto;
+}
+/* Dialogs and popovers keep a 1rem margin to the edge of the screen. */
+@utility w-dialog {
+  width: calc(100% - 2rem);
+}
+@utility w-dialog-wide {
+  width: min(44rem, calc(100% - 2rem));
+}
+@utility max-w-screen-gutter {
+  max-width: calc(100vw - 2rem);
+}
+@utility max-h-dialog {
+  max-height: 90dvh;
+}
+/* The line between two steps reaches into the next column (home: the guarantee band). */
+@utility w-step-line {
+  width: calc(100% + 1.5rem);
+}
+/* Scrolling rows fade out where more is hidden. */
+@utility mask-fade-end {
+  mask-image: linear-gradient(to right, black calc(100% - 2.5rem), transparent);
+}
+@utility mask-fade-edges {
+  mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
 }
 
 /*

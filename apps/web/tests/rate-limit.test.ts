@@ -66,7 +66,7 @@ describe("a 429 from the API reaches the caller with its wait", () => {
   it("apiPost and a server action carry Retry-After", async () => {
     vi.stubEnv("API_URL", "http://api.test");
     vi.stubGlobal("fetch", answer({ "Retry-After": "120" }));
-    const { apiPost } = await import("../lib/api-post");
+    const { apiPost } = await import("../lib/api-request");
     expect(await apiPost("/contact", {})).toEqual({ status: "rate_limited", retryAfter: 120 });
     const { forgotPassword } = await import("../lib/password-reset-actions");
     expect(await forgotPassword("ece@example.com")).toEqual({ ok: false, reason: "rate_limited", retryAfter: 120 });
@@ -75,7 +75,7 @@ describe("a 429 from the API reaches the caller with its wait", () => {
   it("a 429 with no usable header has no wait", async () => {
     vi.stubEnv("API_URL", "http://api.test");
     vi.stubGlobal("fetch", answer({ "Retry-After": "later" }));
-    const { apiPost } = await import("../lib/api-post");
+    const { apiPost } = await import("../lib/api-request");
     expect(await apiPost("/contact", {})).toEqual({ status: "rate_limited", retryAfter: null });
   });
 });

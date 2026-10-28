@@ -1,26 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { switcherItemClasses, type SwitcherTone } from "@/components/ui/switcher-item";
-import {
-  CURRENCIES,
-  CURRENCY_COOKIE,
-  CURRENCY_COOKIE_MAX_AGE,
-  CURRENCY_SYMBOLS,
-  type Currency,
-} from "@/lib/currency";
+import { CURRENCIES, CURRENCY_SYMBOLS, type Currency } from "@/lib/currency";
+import { useCurrencyChoice } from "@/lib/use-currency-choice";
 
-// Outside the component: it writes to the document, which is not React state.
-// Shared with the header's currency menu so both write the same cookie.
-export function saveCurrency(currency: Currency) {
-  document.cookie = `${CURRENCY_COOKIE}=${currency}; path=/; max-age=${CURRENCY_COOKIE_MAX_AGE}; samesite=lax`;
-}
-
-// The prices on the page come from the server already converted (the backend owns the
-// exchange rates, ADR-15), so choosing a currency means asking the server again: the
-// choice is written to the cookie the server reads, then the page is refreshed.
+// The mobile menu's currency choice: three toggle buttons (the logic is in useCurrencyChoice).
 export function CurrencySwitcher({
   initialCurrency,
   tone = "default",
@@ -29,14 +14,7 @@ export function CurrencySwitcher({
   tone?: SwitcherTone;
 }) {
   const t = useTranslations("CurrencySwitcher");
-  const router = useRouter();
-  const [choice, setChoice] = useState<Currency>(initialCurrency);
-
-  function choose(currency: Currency) {
-    saveCurrency(currency);
-    setChoice(currency);
-    router.refresh();
-  }
+  const { choice, choose } = useCurrencyChoice(initialCurrency);
 
   return (
     <div role="group" aria-label={t("label")} className="flex gap-1">

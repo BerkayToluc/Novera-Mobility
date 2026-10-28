@@ -77,7 +77,7 @@ test("phone: the menu panel has Services as a link and no theme", async ({ page 
   await expect(panel).toBeHidden();
 });
 
-test("desktop: Products opens when the pointer rests on it, and a highlight follows the pointer", async ({ page }) => {
+test("desktop: Products opens when the pointer rests on it, and the entry under the pointer is highlighted", async ({ page }) => {
   test.skip((page.viewportSize()?.width ?? 0) < 1280, "the inline menu is the desktop layout");
   await page.goto("/");
   const trigger = page.getByRole("banner").getByRole("button", { name: "Ürünler" });
@@ -87,8 +87,11 @@ test("desktop: Products opens when the pointer rests on it, and a highlight foll
   await expect(all).toBeVisible();
   // Opened by hover, the focus stays where it was.
   await expect(trigger).not.toBeFocused();
+  // The highlight is the link's own background (CSS since V2-14): none until the pointer is on it.
+  const background = () => all.evaluate((el) => getComputedStyle(el).backgroundColor);
+  await expect.poll(background).toBe("rgba(0, 0, 0, 0)");
   await all.hover();
-  await expect(all.locator("[aria-hidden=true].absolute")).toHaveCount(1);
+  await expect.poll(background).not.toBe("rgba(0, 0, 0, 0)");
   // Leaving both the title and the panel closes it after a moment.
   await page.mouse.move(5, 600);
   await expect(all).toHaveCount(0);

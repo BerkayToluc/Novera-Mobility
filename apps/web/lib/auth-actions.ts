@@ -3,11 +3,10 @@
 import { cookies } from "next/headers";
 import { apiRequest } from "./api-request";
 import type { components } from "./api-types";
-import { CURRENCY_COOKIE, CURRENCY_COOKIE_MAX_AGE } from "./currency";
 import { MOCK_PREFERENCES_COOKIE, parsePreferences } from "./preferences";
 import { MOCK_GOOGLE_COOKIE, MOCK_SESSION_COOKIE, type AccountType } from "./session";
 import { SESSION_COOKIE, type SessionCookieChange } from "./session-cookie";
-import { THEME_COOKIE, THEME_COOKIE_MAX_AGE } from "./theme";
+import { setPreferenceCookies } from "./preference-cookies";
 import { isMockMode } from "./mode";
 import { loginSchema, registerSchema, type AuthErrorMessages } from "./auth-schemas";
 import { codeMessages } from "./validation";
@@ -48,9 +47,7 @@ async function keepSession(change: SessionCookieChange | undefined): Promise<boo
 // The account's saved theme and currency replace whatever this browser had (BACKLOG Y42); its
 // language is returned for the form to open the page in.
 async function applyPreferences(user: User): Promise<"tr" | "en"> {
-  const jar = await cookies();
-  jar.set(THEME_COOKIE, user.theme, { path: "/", maxAge: THEME_COOKIE_MAX_AGE, sameSite: "lax" });
-  jar.set(CURRENCY_COOKIE, user.currency, { path: "/", maxAge: CURRENCY_COOKIE_MAX_AGE, sameSite: "lax" });
+  setPreferenceCookies(await cookies(), user);
   return user.locale;
 }
 
@@ -124,10 +121,7 @@ export async function signIn(kind: AccountType, email: string, password: string)
   jar.set(MOCK_SESSION_COOKIE, kind, { httpOnly: true, sameSite: "lax", path: "/" });
 
   const preferences = parsePreferences(jar.get(MOCK_PREFERENCES_COOKIE)?.value);
-  if (preferences) {
-    jar.set(THEME_COOKIE, preferences.theme, { path: "/", maxAge: THEME_COOKIE_MAX_AGE, sameSite: "lax" });
-    jar.set(CURRENCY_COOKIE, preferences.currency, { path: "/", maxAge: CURRENCY_COOKIE_MAX_AGE, sameSite: "lax" });
-  }
+  if (preferences) setPreferenceCookies(jar, preferences);
   return { ok: true, locale: preferences?.locale ?? null };
 }
 

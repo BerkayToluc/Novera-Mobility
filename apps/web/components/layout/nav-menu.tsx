@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useId, useRef, useState, type ComponentProps, type PointerEvent } from "react";
-import { MotionConfig, motion } from "framer-motion";
+import { useEffect, useRef, useState, type ComponentProps, type PointerEvent } from "react";
 import { ArrowRight, ChevronDown } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -34,8 +33,7 @@ export function useNavMenuItems() {
 // Desktop (SPEC §2.8, after the Framer Pill Dropdown Nav): the menu title opens a panel of links,
 // on click and also when the pointer rests on it (120 ms in, 200 ms out, so passing over it does
 // nothing and moving down into the panel does not close it). The chevron turns, the panel settles
-// 10 px below with a short fade and a soft spring, and a highlight slides behind the entry under
-// the pointer or the focus. A button rather than a link, so one click always does one thing; links
+// 10 px below with a short fade, and the entry under the pointer or the focus is highlighted. A button rather than a link, so one click always does one thing; links
 // inside a popover, not an ARIA menu: Tab moves through them and Escape closes, as for any panel.
 // Opened by hover, the panel leaves the focus where it is; opened by click or key, it takes it.
 const OPEN_DELAY_MS = 120;
@@ -50,10 +48,8 @@ export function NavMenu({
 }) {
   const { allHref, allLabel, featuredLabel, items } = useNavMenuItems();
   const [open, setOpen] = useState(false);
-  const [highlight, setHighlight] = useState<string | null>(null);
   const viaHover = useRef(false);
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
-  const layoutId = useId();
 
   useEffect(() => () => clearTimeout(timer.current), []);
 
@@ -79,7 +75,6 @@ export function NavMenu({
     clearTimeout(timer.current);
     if (!next) viaHover.current = false;
     setOpen(next);
-    if (!next) setHighlight(null);
   };
 
   const entries = [
@@ -121,46 +116,28 @@ export function NavMenu({
         onOpenAutoFocus={(event) => viaHover.current && event.preventDefault()}
         onCloseAutoFocus={(event) => viaHover.current && event.preventDefault()}
       >
-        <MotionConfig reducedMotion="user">
-          <motion.ul
-            initial={{ opacity: 0, y: -6, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ opacity: { duration: 0.15, ease: [0.25, 0.1, 0.25, 1] }, default: { type: "spring", duration: 0.6, bounce: 0.08 } }}
-            className="flex origin-top-left flex-col gap-1"
-            onPointerLeave={() => setHighlight(null)}
-          >
-            {entries.map((entry) => (
-              <li key={entry.key} className={cn(entry.all && "mt-1 border-t border-border pt-1")}>
-                <Link
-                  href={entry.href}
-                  onClick={close}
-                  onPointerEnter={() => setHighlight(entry.key)}
-                  onFocus={() => setHighlight(entry.key)}
-                  className={cn(
-                    "relative flex min-h-11 items-center gap-3 rounded-control px-3 py-2",
-                    entry.all ? "justify-between text-label text-link" : "text-body text-fg",
-                  )}
-                >
-                  {highlight === entry.key && (
-                    <motion.span
-                      layoutId={layoutId}
-                      aria-hidden="true"
-                      transition={{ type: "spring", duration: 0.4, bounce: 0.12 }}
-                      className="absolute inset-0 rounded-control bg-surface-muted"
-                    />
-                  )}
-                  <span className="relative flex-1">{entry.label}</span>
-                  {entry.featured && (
-                    <span className="relative shrink-0 rounded-full bg-accent-soft px-2 py-0.5 text-small text-on-accent-soft">
-                      {featuredLabel}
-                    </span>
-                  )}
-                  {entry.all && <ArrowRight aria-hidden="true" className="relative size-4" />}
-                </Link>
-              </li>
-            ))}
-          </motion.ul>
-        </MotionConfig>
+        <ul className="flex origin-top-left animate-menu-in flex-col gap-1 motion-reduce:animate-none">
+          {entries.map((entry) => (
+            <li key={entry.key} className={cn(entry.all && "mt-1 border-t border-border pt-1")}>
+              <Link
+                href={entry.href}
+                onClick={close}
+                className={cn(
+                  "relative flex min-h-11 items-center gap-3 rounded-control px-3 py-2 transition-colors hover:bg-surface-muted focus-visible:bg-surface-muted motion-reduce:transition-none",
+                  entry.all ? "justify-between text-label text-link" : "text-body text-fg",
+                )}
+              >
+                <span className="relative flex-1">{entry.label}</span>
+                {entry.featured && (
+                  <span className="relative shrink-0 rounded-full bg-accent-soft px-2 py-0.5 text-small text-on-accent-soft">
+                    {featuredLabel}
+                  </span>
+                )}
+                {entry.all && <ArrowRight aria-hidden="true" className="relative size-4" />}
+              </Link>
+            </li>
+          ))}
+        </ul>
       </PopoverContent>
     </Popover>
   );

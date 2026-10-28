@@ -11,7 +11,7 @@
 ```
  Tarayıcı ──HTTPS──▶ apps/web (Next.js 16, Vercel)
                       │  Sayfalar, sunucu bileşenleri, server action'lar, CSP nonce (proxy.ts)
-                      │  API'yi YALNIZCA sunucudan çağırır (lib/api-request.ts, api-post.ts)
+                      │  API'yi YALNIZCA sunucudan çağırır (lib/api-request.ts)
                       │  Başlıklar: X-Novera-Key (paylaşılan gizli anahtar), X-Novera-Client-IP,
                       │             Cookie: novera_session (API'nin çerezi web'e kopyalanır)
                       ▼

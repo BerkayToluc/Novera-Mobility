@@ -4,9 +4,9 @@ import { cookies } from "next/headers";
 import { apiHeaders } from "./api-headers";
 import { parseSessionCookie, SESSION_COOKIE, type SessionCookieChange } from "./session-cookie";
 
-// What came back from a call to the API, for the calls that need more outcomes than api-post.ts
-// offers: a signed-in read (401), a booking that was taken (409), a missing record (404), an empty
-// answer (204 and 202). `code` is the API's machine code (`VEHICLE_UNAVAILABLE`, `RESET_TOKEN_INVALID`).
+// What came back from a call to the API: a signed-in read (401), a booking that was taken (409), a missing
+// record (404), an empty answer (204 and 202). `code` is the API's machine code (`VEHICLE_UNAVAILABLE`,
+// `RESET_TOKEN_INVALID`). The forms use `apiPost` below, which keeps only the outcomes they need.
 export type ApiResult<T> =
   // `sessionCookie` is set when the answer started or ended the session (sign-in, sign-up, sign-out).
   | { status: "ok"; data: T; sessionCookie?: SessionCookieChange }
@@ -63,5 +63,30 @@ export async function apiRequest<T = null>(
     return { status: "unavailable", code: error?.code };
   } catch {
     return { status: "unavailable" };
+  }
+}
+
+// What the contact and quote forms need of a JSON POST (ARCHITECTURE ADR-14, ADR-20): it worked, the API found a
+// field wrong, the honeypot caught a bot, the visitor sent too many, or the service is not there. It is `apiRequest`
+// with the other outcomes folded into "unavailable" (V2-14, QUALITY M-05: this was a second copy of the client).
+export type ApiPostResult<T> =
+  | { status: "ok"; data: T }
+  | { status: "invalid"; fieldErrors: Record<string, string> }
+  | { status: "spam" }
+  | { status: "rate_limited"; retryAfter: number | null }
+  | { status: "unavailable" };
+
+export async function apiPost<T>(path: string, body: unknown): Promise<ApiPostResult<T>> {
+  const result = await apiRequest<T>("POST", path, body);
+  switch (result.status) {
+    case "ok":
+      return { status: "ok", data: result.data };
+    case "invalid":
+      // A bot: the caller answers as if it worked and keeps nothing (ADR-20).
+      return result.code === "SPAM_DETECTED" ? { status: "spam" } : { status: "invalid", fieldErrors: result.fieldErrors };
+    case "rate_limited":
+      return result;
+    default:
+      return { status: "unavailable" };
   }
 }

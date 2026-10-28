@@ -67,14 +67,14 @@ describe("apiPost", () => {
 
   it("is unavailable without API_URL", async () => {
     vi.stubEnv("API_URL", "");
-    const { apiPost } = await import("../lib/api-post");
+    const { apiPost } = await import("../lib/api-request");
     expect(await apiPost("/contact", {})).toEqual({ status: "unavailable" });
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it("passes the visitor's address and session on", async () => {
     reply(201, { received: true });
-    const { apiPost } = await import("../lib/api-post");
+    const { apiPost } = await import("../lib/api-request");
     const result = await apiPost("/quotes", { a: 1 });
     expect(result).toEqual({ status: "ok", data: { received: true } });
     const [url, init] = fetchMock.mock.calls[0];
@@ -84,7 +84,7 @@ describe("apiPost", () => {
   });
 
   it("maps the error statuses", async () => {
-    const { apiPost } = await import("../lib/api-post");
+    const { apiPost } = await import("../lib/api-request");
     reply(429);
     expect(await apiPost("/x", {})).toEqual({ status: "rate_limited", retryAfter: null });
     reply(422, { code: "SPAM_DETECTED" });

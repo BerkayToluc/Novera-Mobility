@@ -19,7 +19,7 @@ export async function ProfileSkeleton() {
           <div className={`${block} h-4 w-1/2 max-w-xs`} />
         </div>
       </div>
-      <div aria-hidden="true" className="flex flex-col gap-8 xl:grid xl:grid-cols-[15rem_minmax(0,1fr)] xl:gap-12">
+      <div aria-hidden="true" className="flex flex-col gap-8 xl:grid xl:grid-cols-sidebar xl:gap-12">
         <div className={`${block} h-11 xl:h-48`} />
         <div className="flex flex-col gap-4">
           <div className={`${block} h-36`} />

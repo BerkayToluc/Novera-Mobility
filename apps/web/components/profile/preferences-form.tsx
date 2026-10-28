@@ -7,12 +7,10 @@ import { Button } from "@/components/ui/button";
 import { SegmentedControl } from "@/components/ui/segmented-control";
 import { useRouter } from "@/i18n/navigation";
 import { CURRENCIES, CURRENCY_SYMBOLS } from "@/lib/currency";
+import { LANGUAGE_NAMES } from "@/lib/languages";
 import type { Preferences } from "@/lib/preferences";
 import { savePreferences } from "@/lib/preferences-actions";
 import { THEMES } from "@/lib/theme";
-
-// Language names stay in their own language, as in the language switcher.
-const LANGUAGE_NAMES = { tr: "Türkçe", en: "English" } as const;
 
 // The account's defaults (SPEC §2.9): one form, one Save. They are kept on the account and
 // applied now, and again each time the visitor signs in.

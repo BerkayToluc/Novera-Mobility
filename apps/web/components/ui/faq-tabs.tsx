@@ -1,7 +1,7 @@
 "use client";
 
 import { useId, useState } from "react";
-import { AnimatePresence, MotionConfig, motion } from "framer-motion";
+import { AnimatePresence, MotionConfig, motion } from "motion/react";
 import { cn } from "@/lib/cn";
 
 export type FaqQuestion = { id: string; question: string; answer: string };

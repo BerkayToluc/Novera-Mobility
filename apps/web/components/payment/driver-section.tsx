@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useEffectEvent, useMemo, useState } from "react";
 import { Info } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useForm, useWatch } from "react-hook-form";
@@ -98,10 +98,11 @@ export function DriverSection({ rentalStart, onReady }: Props) {
       }
     : null;
   const payloadKey = payload ? key : "";
+  // `payloadKey` stands for the payload's contents, so the parent hears of changes only; the effect event reads the
+  // payload of that render without making every render a change (V2-14, QUALITY M-09: this was a disabled lint rule).
+  const tellParent = useEffectEvent(() => onReady(payload));
   useEffect(() => {
-    onReady(payload);
-    // `payloadKey` stands for the payload's contents, so the parent hears of changes only.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    tellParent();
   }, [payloadKey]);
 
   async function verify(data: DriverInput) {

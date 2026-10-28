@@ -36,7 +36,7 @@ export default async function ProfileLayout({ children }: { children: ReactNode 
   return (
     <div className="mx-auto flex max-w-content flex-col gap-8 px-4 py-10 md:px-8 xl:py-14">
       <ProfileHeader session={session} balance={balance} />
-      <div className="flex flex-col gap-8 xl:grid xl:grid-cols-[15rem_minmax(0,1fr)] xl:gap-12">
+      <div className="flex flex-col gap-8 xl:grid xl:grid-cols-sidebar xl:gap-12">
         <ProfileNav type={session.type} />
         <div className="min-w-0">{children}</div>
       </div>
