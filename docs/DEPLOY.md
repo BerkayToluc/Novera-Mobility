@@ -8,7 +8,7 @@ Gizli değerleri (veritabanı adresi, API anahtarları) **hiçbir yere yapışt�
 | Parça | Seçim | Neden |
 |-------|-------|-------|
 | Web (Next.js) | **Vercel** (Hobby) | ADR-12'deki öneri; Next.js'i kendisi yapıyor. Hobby plan yalnızca kişisel, ticari olmayan kullanım içindir: bu proje kurgusal bir demo olduğu için uygundur. Gerçek müşteriyle çalışılacaksa Pro plana geçilir. |
-| API (NestJS) | **Google Cloud Run** (europe-west3, Frankfurt), Docker kapsayıcısı | 27 Ekim'de karar: Render'ın aylık 750 saatlik havuzu başka bir projeyle paylaşılıyordu ve ücretsiz plan uyuyordu. Cloud Run istek gelmezse sıfır örneğe iner (boştayken ücret yok), aylık ücretsiz kotası küçük bir site için yeterli. Neon ile aynı şehirde. **Bütçe uyarısı ve harcama sınırı şart** (aşağıda). E-posta için SMTP portları kapalı olabileceğinden HTTPS ile çalışan Resend kullanılıyor. |
+| API (NestJS) | **Google Cloud Run** (europe-west1, Belçika; Tier 1), Docker kapsayıcısı | 27 Ekim'de karar: Render'ın aylık 750 saatlik havuzu başka bir projeyle paylaşılıyordu ve ücretsiz plan uyuyordu. Cloud Run istek gelmezse sıfır örneğe iner (boştayken ücret yok), aylık ücretsiz kotası küçük bir site için yeterli. Bölge Tier 1 olduğu için ücretsiz kota daha uzun yeter ve birim fiyat düşüktür; Neon Frankfurt'ta, yani her veritabanı sorgusu biraz daha uzun sürer (trafik küçük, ölçülen bir sorun yok). **Bütçe uyarısı ve harcama sınırı şart** (aşağıda). E-posta için SMTP portları kapalı olabileceğinden HTTPS ile çalışan Resend kullanılıyor. |
 | Veritabanı | **Neon** (Free, Frankfurt) | Render'ın ücretsiz PostgreSQL'i 30 günde siliniyor, bu yüzden kullanılmıyor. Neon Free: 1 GB, kullanılmayınca uyur (ilk istek biraz yavaş), son 6 saate geri dönüş (restore) var. |
 | E-posta | **Resend** (Free) | Parola sıfırlama bağlantısı için. Kendi alan adın olmadan yalnızca kendi e-posta adresine gönderebilir. |
 | Uyandırma | ~~UptimeRobot~~ gerekmiyor | Cloud Run sıfıra iner ve ilk istekte birkaç saniyede açılır (soğuk başlangıç); Vercel'in 10 saniyelik sınırının içinde kalır. Uyandırma izlemesi boşuna istek ve ücret demek olur. |
@@ -69,6 +69,8 @@ API, kökteki `Dockerfile` ile bir kapsayıcı olarak çalışır. Google, GitHu
 **Önce (bir kere): ücret koruması.** Faturalama hesabı ücretli olmalı (deneme bitince servisler durur) ve şunlar kurulu olmalı: **Billing → Budgets & alerts** altında bir bütçe (öneri: ayda 250 ₺, %50 / %90 / %100'de e-posta). İsteğe bağlı: aynı bütçede **Spend cap enforcement** ile yalnızca *Cloud Run* seçilir; tutar dolunca Cloud Run durur (API kapanır), bu bir hata ya da saldırıda masrafı keser. Harcama verisi gecikmeli geldiği için kesin bir sınır değildir.
 
 1. **API'leri aç.** Konsolda (proje **Novera Mobility**) arama kutusuna sırayla `Cloud Run Admin API`, `Cloud Build API`, `Artifact Registry API`, `Secret Manager API` yaz, her birinde **Enable**. (Servisi oluştururken konsol bazılarını kendisi de ister.)
+**İzinler (27 Ekim'de yaşandı):** derlemeyi ve servisi çalıştıran hesap *Compute Engine default service account*'tır (`<proje-numarası>-compute@developer.gserviceaccount.com`). Yeni projelerde şu rolleri vermen gerekir, yoksa derleme günlük bile yazamaz ve servis gizli değerleri okuyamaz: *Cloud Build Service Account*, *Cloud Run Admin*, *Service Account User*, *Artifact Registry Writer*, *Logs Writer*, *Secret Manager Secret Accessor* (**IAM & Admin → IAM → hesabın kalem simgesi → Add another role**). Aynı hesap hem derleme hem çalışma kimliği olduğu için yetkileri geniştir; ileride API için yalnızca gizli değer okuyabilen ayrı bir hesap kurulması iyi olur.
+
 2. **Gizli değerleri hazırla** (hiçbirini sohbete, Git'e ya da ekran görüntüsüne koyma):
    - `API_ACCESS_KEY`: en az 32 karakterlik rastgele bir metin. PowerShell'de üret: `-join ((48..57)+(65..90)+(97..122) | Get-Random -Count 48 | ForEach-Object {[char]$_})`. Bir kere not al; hem Cloud Run'a hem Vercel'e girilecek.
    - `DATABASE_URL`: Neon adresi (1. adım, pooling KAPALI).
@@ -76,8 +78,10 @@ API, kökteki `Dockerfile` ile bir kapsayıcı olarak çalışır. Google, GitHu
 4. **Servisi oluştur:** `Cloud Run` → **Create service** → **Continuously deploy from a repository** → **Set up with Cloud Build**:
    - Repository: GitHub ile bağlan (Google Cloud Build uygulamasını yalnızca `Novera-Mobility` deposuna yetkilendir), depoyu seç.
    - Branch: `^main$`. Build type: **Dockerfile**, Source location: `/Dockerfile` (kökteki dosya; Google derleme bağlamı olarak Dockerfile'ın klasörünü kullanır, bu yüzden `apps/api` içinde olamaz). **Save**.
-   - Service name: `novera-api`. Region: **europe-west3 (Frankfurt)**.
-   - **Authentication: Allow unauthenticated invocations.** Adres herkese açık görünür ama API, `X-Novera-Key` başlığı olmayan her isteğe 404 verir; Vercel'in sunucusu bu başlığı gönderir.
+   - **Konsol tetikleyicisini bir kere düzelt** (27 Ekim'de yaşandı): konsol, tetikleyicinin satır içi (Inline) yapılandırmasına derleme klasörünü sabit yazar. Servis oluşunca **Cloud Build → Triggers →** tetikleyici → **Configuration** (tür *Cloud Build configuration file*, konum *Inline*) → **Open editor**: `Build` adımındaki `- apps/api` satırını `- .`, `- apps/api/Dockerfile` satırını `- Dockerfile` yap; editörün **Done** düğmesine bas (sağ üstteki X değişikliği atar), sonra sayfanın altındaki **Save**'e bas. `Push` ve `Deploy` adımlarına dokunma. Kaydı doğrulamak için editörü yeniden aç.
+   - Tetikleyicide **Send build logs to GitHub** ve **Require approval** kutuları boş kalsın (depo açık olduğu için derleme günlüğü herkese görünür olmasın).
+   - Service name: `novera-mobility` (konsolun önerdiği ad; başka bir ad seçersen aşağıdaki yapılandırmadaki `_SERVICE_NAME` değeri de o olur). Region: **europe-west1 (Belgium)**.
+   - **Authentication: Allow public access.** Adres herkese açık görünür ama API, `X-Novera-Key` başlığı olmayan her isteğe 404 verir; Vercel'in sunucusu bu başlığı gönderir.
    - **Billing: Request-based.** **Autoscaling: Minimum instances 0, Maximum instances 2** (masrafı sınırlar).
    - **Container(s) → Container port: 8080.** CPU 1, bellek 512 MiB, **Request timeout** 60 sn.
 5. **Variables & Secrets** sekmesi:
@@ -110,7 +114,7 @@ Doğru mu?
 
 ## 6. Adresleri birbirine tanıt
 
-Cloud Run → `novera-api` → **Edit & deploy new revision** → **Variables & Secrets** → `WEB_URL` = Vercel adresi (`https://....vercel.app`, sonunda `/` olmasın) → **Deploy**.
+Cloud Run → `novera-mobility` → **Edit & deploy new revision** → **Variables & Secrets** → `WEB_URL` = Vercel adresi (`https://....vercel.app`, sonunda `/` olmasın) → **Deploy**.
 
 ## 7. (Gerekmiyor) UptimeRobot
 
