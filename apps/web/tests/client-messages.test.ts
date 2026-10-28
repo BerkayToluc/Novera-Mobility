@@ -23,11 +23,30 @@ function resolveImport(from: string, spec: string): string | null {
   return null;
 }
 
+// The directive comes first, after any comments. Walked by hand: a regular expression for "any number of comments, then
+// the directive" can backtrack badly on a file full of comment markers (CodeQL).
+function startsWithUseClient(source: string): boolean {
+  let rest = source.trimStart();
+  for (;;) {
+    if (rest.startsWith("//")) {
+      const end = rest.indexOf("\n");
+      if (end === -1) return false;
+      rest = rest.slice(end + 1).trimStart();
+    } else if (rest.startsWith("/*")) {
+      const end = rest.indexOf("*/");
+      if (end === -1) return false;
+      rest = rest.slice(end + 2).trimStart();
+    } else {
+      return rest.startsWith('"use client"') || rest.startsWith("'use client'");
+    }
+  }
+}
+
 function parse(file: string): Parsed {
   const cached = parsed.get(file);
   if (cached) return cached;
   const source = readFileSync(file, "utf8");
-  const client = /^\s*(\/\/[^\n]*\n|\/\*[\s\S]*?\*\/\s*)*["']use client["']/.test(source);
+  const client = startsWithUseClient(source);
   const specs = [...source.matchAll(/(?:import|export)[^;]*?from\s+["']([^"']+)["']/g)].map((match) => match[1]!);
   specs.push(...[...source.matchAll(/import\(\s*["']([^"']+)["']/g)].map((match) => match[1]!));
   const namespaces = [...source.matchAll(/useTranslations\(\s*["']([A-Za-z]+)/g)].map((match) => match[1]!);
