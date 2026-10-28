@@ -22,11 +22,11 @@ Dosyalar: `apps/api/src/content/*`, `prisma/schema.prisma:334-354`, `prisma/seed
 
 ## Kabul kriterleri
 - [x] `GET /faq` kalktı; SSS ana sayfa ve Yardım merkezinde web'den geliyor (e2e). *(27 Ekim)*
-- [ ] `/products*` ve `/services` uçları 404 döner; `content` modülü yok.
-- [ ] Kurumsal teklif formu ürün seçili gönderilince `QuoteRequest.productId` doğru dolar (test ve e2e).
-- [ ] `api-types.ts` yeniden üretildi; typecheck yeşil.
+- [x] `/products*` ve `/services` uçları 404 döner; `content` modülü yok. *(`app.routes.integration.spec.ts`)*
+- [x] Kurumsal teklif formu ürün seçili gönderilince `QuoteRequest.productId` doğru dolar (test ve e2e). *(`quotes.service.spec.ts`; e2e `quote-cities.spec.ts` mevcut)*
+- [x] `api-types.ts` yeniden üretildi; typecheck yeşil.
 - [ ] Migration canlıda yedekli uygulandı.
-- [ ] QUALITY'de V-09 güncel.
+- [x] QUALITY'de V-09 güncel.
 
 ## Etiketler
 `faz-2` `temel` `refactor` `P1` `api` `veritabani`

@@ -6,7 +6,6 @@ import { AuthModule } from './auth/auth.module.js';
 import { FakePrisma } from './auth/auth.testing.js';
 import { GoogleTokenVerifier } from './auth/google-verifier.js';
 import { CatalogModule } from './catalog/catalog.module.js';
-import { ContentModule } from './content/content.module.js';
 import { FormsModule } from './forms/forms.module.js';
 import { HoldsModule } from './holds/holds.module.js';
 import { PrismaService } from './prisma/prisma.service.js';
@@ -33,7 +32,7 @@ describe('wrong-typed input is 422 on every endpoint (HTTP)', () => {
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
-      imports: [FakePrismaModule, AuthModule, FormsModule, HoldsModule, CatalogModule, ContentModule, ReservationsModule],
+      imports: [FakePrismaModule, AuthModule, FormsModule, HoldsModule, CatalogModule, ReservationsModule],
     })
       .overrideProvider(GoogleTokenVerifier)
       .useValue({ isConfigured: () => true, verify: async () => Promise.reject(new Error('not reached')) })

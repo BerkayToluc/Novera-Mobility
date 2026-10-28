@@ -38,7 +38,7 @@ Her uçta bir sınır vardır (ADR-27). Sayaçlar Postgres'te (`RateLimitHit`) t
 | `POST /reservations/price` (gövdede `promoCode` varsa, yukarıdakine ek olarak) | 10 istek/10 dk | hesap | `promo` |
 | `POST /reservations` | 10 istek/saat (ayrıca bir hesapta en çok 3 gelecek rezervasyon; bu kural serviste) | hesap | `reserve` |
 | `GET /health` | sınır yok (barındırıcının sağlık denetimi) | — | — |
-| Yukarıda olmayan her uç: katalog okumaları, `/rates`, `/products*`, `/services`, `GET /me*`, `DELETE /holds/{id}`, `GET /me/quotes` | 300 istek/5 dk | hesap | `default` |
+| Yukarıda olmayan her uç: katalog okumaları, `/rates`, `GET /me*`, `DELETE /holds/{id}`, `GET /me/quotes` | 300 istek/5 dk | hesap | `default` |
 
 ### Canlıda G-01 kötüye kullanım tespiti (V2-02)
 

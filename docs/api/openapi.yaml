@@ -43,8 +43,6 @@ tags:
   - name: reservations
   - name: auth
   - name: me
-  - name: content
-    description: SSS, ürünler, hizmetler
   - name: forms
 paths:
   /health:
@@ -622,46 +620,6 @@ paths:
               schema: { $ref: "#/components/schemas/Error" }
         "429": { $ref: "#/components/responses/TooManyRequests" }
 
-  /products:
-    get:
-      tags: [content]
-      summary: Ürünler
-      responses:
-        "200":
-          description: Sıralı ürün listesi
-          content:
-            application/json:
-              schema:
-                type: array
-                items: { $ref: "#/components/schemas/Product" }
-
-  /products/{slug}:
-    get:
-      tags: [content]
-      summary: Ürün detayı
-      parameters:
-        - { name: slug, in: path, required: true, schema: { type: string, example: akilli-kurumsal-filo } }
-      responses:
-        "200":
-          description: Ürün
-          content:
-            application/json:
-              schema: { $ref: "#/components/schemas/Product" }
-        "404": { $ref: "#/components/responses/NotFound" }
-
-  /services:
-    get:
-      tags: [content]
-      summary: Hizmetler
-      responses:
-        "200":
-          description: Sıralı hizmet listesi
-          content:
-            application/json:
-              schema:
-                type: array
-                items: { $ref: "#/components/schemas/Service" }
-
   /quotes:
     post:
       tags: [forms]
@@ -816,13 +774,6 @@ components:
       properties:
         tr: { type: string }
         en: { type: string }
-
-    LocalizedList:
-      type: object
-      required: [tr, en]
-      properties:
-        tr: { type: array, items: { type: string } }
-        en: { type: array, items: { type: string } }
 
     Currency:
       type: string
@@ -1251,29 +1202,6 @@ components:
       properties:
         email: { type: string, format: email }
         password: { type: string }
-
-    # ---------- İçerik ----------
-    Product:
-      type: object
-      required: [slug, title, concept, whatYouGet, techBenefits, featured]
-      properties:
-        slug: { type: string, example: akilli-kurumsal-filo }
-        title: { $ref: "#/components/schemas/LocalizedText" }
-        concept: { $ref: "#/components/schemas/LocalizedText" }
-        whatYouGet: { $ref: "#/components/schemas/LocalizedText" }
-        techBenefits: { $ref: "#/components/schemas/LocalizedList" }
-        featured:
-          type: boolean
-          description: '"En çok tercih edilen" rozeti.'
-
-    Service:
-      type: object
-      required: [slug, title, summary, points]
-      properties:
-        slug: { type: string, example: akilli-yol-yardim }
-        title: { $ref: "#/components/schemas/LocalizedText" }
-        summary: { $ref: "#/components/schemas/LocalizedText" }
-        points: { $ref: "#/components/schemas/LocalizedList" }
 
     # ---------- Formlar ----------
     QuoteRequest:

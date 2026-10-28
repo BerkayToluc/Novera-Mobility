@@ -16,7 +16,7 @@
                       │             Cookie: novera_session (API'nin çerezi web'e kopyalanır)
                       ▼
                      apps/api (NestJS 12, Cloud Run, Belçika)
-                      │  Modüller: auth, catalog, holds, reservations, forms, content, health, common
+                      │  Modüller: auth, catalog, holds, reservations, forms, health, common
                       │  Anahtarsız istek 404 · hata biçimi {code, message, fieldErrors}
                       ▼
                      PostgreSQL 17 (Neon Free, Frankfurt) ── Prisma 7

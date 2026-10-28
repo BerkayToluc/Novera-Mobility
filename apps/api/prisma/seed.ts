@@ -14,7 +14,6 @@ import {
   models,
   products,
   rates,
-  services,
 } from "./seed-data";
 import { seedDemoPromoCodes, seedExchangeRates } from "./seed-reference";
 
@@ -97,26 +96,13 @@ async function main() {
   else console.log("  Örnek kampanya kodları atlandı (SEED_DEMO=1 ile gelir).");
 
   for (const p of products) {
-    const data = {
-      title: p.title,
-      concept: p.concept,
-      whatYouGet: p.whatYouGet,
-      techBenefits: p.techBenefits,
-      featured: p.featured,
-      sortOrder: p.sortOrder,
-    };
-    await prisma.product.upsert({ where: { slug: p.slug }, update: data, create: { slug: p.slug, ...data } });
-  }
-
-  for (const s of services) {
-    const data = { title: s.title, summary: s.summary, points: s.points, sortOrder: s.sortOrder };
-    await prisma.service.upsert({ where: { slug: s.slug }, update: data, create: { slug: s.slug, ...data } });
+    await prisma.product.upsert({ where: { slug: p.slug }, update: {}, create: { slug: p.slug } });
   }
 
   console.log("Seed tamam:");
   console.log(`  ${classes.length} sınıf, ${branches.length} bayi, ${models.length} model, ${vehicles.length} araç`);
   console.log(`  ${extras.length} ek hizmet, ${rates.length} kur`);
-  console.log(`  ${products.length} ürün, ${services.length} hizmet, ${demoCodes} örnek kampanya kodu`);
+  console.log(`  ${products.length} ürün, ${demoCodes} örnek kampanya kodu`);
 }
 
 main()

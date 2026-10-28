@@ -1250,117 +1250,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/products": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Ürünler */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Sıralı ürün listesi */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Product"][];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/products/{slug}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Ürün detayı */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    slug: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Ürün */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Product"];
-                    };
-                };
-                404: components["responses"]["NotFound"];
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/services": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Hizmetler */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Sıralı hizmet listesi */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Service"][];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/quotes": {
         parameters: {
             query?: never;
@@ -1478,10 +1367,6 @@ export interface components {
         LocalizedText: {
             tr: string;
             en: string;
-        };
-        LocalizedList: {
-            tr: string[];
-            en: string[];
         };
         /** @enum {string} */
         Currency: "TRY" | "EUR" | "USD";
@@ -1877,23 +1762,6 @@ export interface components {
             /** Format: email */
             email: string;
             password: string;
-        };
-        Product: {
-            /** @example akilli-kurumsal-filo */
-            slug: string;
-            title: components["schemas"]["LocalizedText"];
-            concept: components["schemas"]["LocalizedText"];
-            whatYouGet: components["schemas"]["LocalizedText"];
-            techBenefits: components["schemas"]["LocalizedList"];
-            /** @description "En çok tercih edilen" rozeti. */
-            featured: boolean;
-        };
-        Service: {
-            /** @example akilli-yol-yardim */
-            slug: string;
-            title: components["schemas"]["LocalizedText"];
-            summary: components["schemas"]["LocalizedText"];
-            points: components["schemas"]["LocalizedList"];
         };
         /** @description Geçici alanlar (BACKLOG Y35). */
         QuoteRequest: {

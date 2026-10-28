@@ -9,7 +9,6 @@ import { PasswordResetController } from './auth/password-reset.controller.js';
 import { CatalogController } from './catalog/catalog.controller.js';
 import { NO_RATE_LIMIT_METADATA, RATE_LIMIT_METADATA, type RateLimitSpec } from './common/rate-limit.js';
 import { LIMITS } from './common/rate-limits.js';
-import { ContentController } from './content/content.controller.js';
 import { FormsController } from './forms/forms.controller.js';
 import { HealthController } from './health/health.controller.js';
 import { HoldsController } from './holds/holds.controller.js';
@@ -26,7 +25,6 @@ const controllers = [
   FormsController,
   HoldsController,
   CatalogController,
-  ContentController,
   ReservationsController,
   HealthController,
 ];
