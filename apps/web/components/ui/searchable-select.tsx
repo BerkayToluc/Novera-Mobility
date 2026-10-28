@@ -125,7 +125,7 @@ export function SearchableSelect({
             role="combobox"
             aria-label={searchLabel}
             aria-expanded="true"
-            aria-controls={shown.length > 0 ? listId : undefined}
+            aria-controls={listId}
             aria-autocomplete="list"
             aria-activedescendant={activeOption ? `${listId}-${active}` : undefined}
             autoComplete="off"
@@ -140,37 +140,38 @@ export function SearchableSelect({
             className={cn(controlClasses, "pl-9")}
           />
         </div>
-        {shown.length === 0 ? (
+        {/* The listbox stays in the page (the combobox points at it) but hidden while nothing matches, since a listbox with no
+            option is not valid ARIA; the "no match" line is its own status (V2-19, axe). */}
+        <ul id={listId} ref={listRef} role="listbox" aria-label={searchLabel} hidden={shown.length === 0} className="max-h-64 overflow-y-auto">
+          {shown.map((option, index) => {
+            const selected = option.value === value;
+            return (
+              <li
+                key={option.value}
+                id={`${listId}-${index}`}
+                role="option"
+                aria-selected={selected}
+                data-index={index}
+                // The input keeps the focus; a click on a row must not take it away first.
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={() => choose(option)}
+                onMouseMove={() => setActive(index)}
+                className={cn(
+                  "flex min-h-11 cursor-pointer items-center gap-3 rounded-control px-3 text-body",
+                  index === active ? "bg-selected text-on-selected" : "text-fg",
+                )}
+              >
+                <span className="flex-1">{option.label}</span>
+                {option.hint && <span className="text-small text-fg-muted">{option.hint}</span>}
+                {selected && <Check aria-hidden="true" className="size-4 shrink-0" />}
+              </li>
+            );
+          })}
+        </ul>
+        {shown.length === 0 && (
           <p role="status" className="px-3 py-3 text-small text-fg-muted">
             {emptyText}
           </p>
-        ) : (
-          <ul id={listId} ref={listRef} role="listbox" aria-label={searchLabel} className="max-h-64 overflow-y-auto">
-            {shown.map((option, index) => {
-              const selected = option.value === value;
-              return (
-                <li
-                  key={option.value}
-                  id={`${listId}-${index}`}
-                  role="option"
-                  aria-selected={selected}
-                  data-index={index}
-                  // The input keeps the focus; a click on a row must not take it away first.
-                  onMouseDown={(event) => event.preventDefault()}
-                  onClick={() => choose(option)}
-                  onMouseMove={() => setActive(index)}
-                  className={cn(
-                    "flex min-h-11 cursor-pointer items-center gap-3 rounded-control px-3 text-body",
-                    index === active ? "bg-selected text-on-selected" : "text-fg",
-                  )}
-                >
-                  <span className="flex-1">{option.label}</span>
-                  {option.hint && <span className="text-small text-fg-muted">{option.hint}</span>}
-                  {selected && <Check aria-hidden="true" className="size-4 shrink-0" />}
-                </li>
-              );
-            })}
-          </ul>
         )}
       </PopoverContent>
     </Popover>
