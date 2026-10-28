@@ -117,6 +117,23 @@ yeni testler ve `pnpm audit`.
 - **Sınır:** 15 dakikada istemci başına 10 deneme. Parolasız hesapta parola girişi, yanlış parola gibi aynı cevabı ve aynı işi yapar (hesap varlığı sızmaz).
 - **Veri:** Google'dan yalnızca `sub`, e-posta ve ad saklanır. `googleSub` yanıtta çıkmaz (`googleLinked` bayrağı çıkar).
 
+## Veri saklama (V2-12, KVKK)
+
+Süre kararı G'nindir (SPEC §7, 22 Ekim 2026): iletişim mesajı ve teklif talebi için **2 yıl**, sonra anonimleştirme. Kaynak kod: `apps/api/src/forms/retention.ts` (süre ve silinen alanlar), `retention.task.ts` (günlük görev).
+
+| Veri | Tablo | Ne kadar | Nasıl siliniyor |
+| --- | --- | --- | --- |
+| İletişim mesajı | `ContactMessage` | Gönderildiği günden 2 yıl | Günlük görev: ad → "Silindi", e-posta ve mesaj boş, telefon boş. Konu, tarih ve onay zamanı istatistik için kalır; `anonymizedAt` dolar |
+| Teklif talebi | `QuoteRequest` | Gönderildiği günden 2 yıl; hesap silinirse hemen | Günlük görev ya da hesap silme: iletişim kişisi → "Silindi", e-posta boş, telefon ve notlar boş. Firma adı, araç/süre/şehir bilgisi ve durum kalır; `anonymizedAt` dolar |
+| Rezervasyon | `Reservation` | Süresiz (kiralama ve mali kayıt) | Hesap silinince `userId` boşalır; araç, tarih ve tutar kalır, kişiyle bağı kalmaz. Rezervasyonda ad ya da e-posta saklanmaz |
+| Hesap, oturum, puan, sıfırlama bağlantısı | `User`, `Session`, `PointTransaction`, `PasswordResetToken` | Hesap açık olduğu sürece | Hesap silinince birlikte silinir (cascade). Süresi dolan oturum ve bağlantılar günlük görevle silinir (V2-10) |
+| Hız sınırı sayaçları, giriş bekleme kayıtları | `RateLimitHit`, `LoginThrottle` | Pencere süresi / bir gün | Günlük görev siler. İstemci adresi yalnızca özet olarak tutulur |
+| Sürücü belgesi ve doğum tarihi | Saklanmaz | Yalnızca rezervasyon sırasında kontrol edilir | Hiçbir tabloya yazılmaz |
+
+- Görev her açılışta ve 24 saatte bir çalışır (Cloud Run boştayken kapanır, bir sonraki açılışta çalışır); tekrar çalışması zararsızdır, `anonymizedAt` dolu kayıtlara dokunmaz.
+- İletişim mesajı bir hesaba bağlı değildir; hesap silinince mesaj kendiliğinden anonimleşmez, 2 yıllık süreyi bekler. Bir kişi daha erken silinmesini isterse KVKK başvurusu (`kvkk@novera.example`) ile elle yapılır.
+- Yedekler: Neon'un geri dönüş penceresi 6 saattir; elle alınan yedek branch'ler 24 saat sonra kendiliğinden silinir. Anonimleştirilen veri eski bir yedekten geri gelebilir; yedek kullanılırsa görev ilk çalışmada yeniden anonimleştirir.
+
 ## Karar bekleyenler (kodda değiştirilmedi)
 
 1. **Parola sıfırlama isteği süre farkı:** e-posta gönderimi artık beklenmiyor (S10); geriye yalnızca hesap varken yapılan iki küçük veritabanı yazması kaldı. Fark çok küçük ve ağ gürültüsünün içinde kalır; ek önlem gerekmez.

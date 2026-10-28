@@ -398,6 +398,8 @@ model QuoteRequest {
   createdAt      DateTime    @default(now())
   // Teklifin durumu değiştikçe güncellenir; panelin çakışma denetimi (ADR-24) bunu kullanır.
   updatedAt      DateTime    @updatedAt
+  // Kişisel alanlar (ad, e-posta, telefon, notlar) silindiğinde dolar: saklama süresi dolunca ya da hesap silinince (V2-12).
+  anonymizedAt   DateTime?
 
   productId String?
   product   Product? @relation(fields: [productId], references: [id])
@@ -406,6 +408,7 @@ model QuoteRequest {
 
   @@index([userId])
   @@index([productId])
+  @@index([createdAt])
 }
 
 model ContactMessage {
@@ -417,6 +420,10 @@ model ContactMessage {
   message       String
   kvkkConsentAt DateTime
   createdAt     DateTime @default(now())
+  // Saklama süresi dolunca ad, e-posta, telefon ve mesaj silinir; konu ve tarih istatistik için kalır (V2-12).
+  anonymizedAt  DateTime?
+
+  @@index([createdAt])
 }
 
 model ExchangeRate {
