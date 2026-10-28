@@ -42,6 +42,9 @@ async function visit(page: Page, url: string) {
   await expectNoAxeViolations(page, url);
 }
 
+// Every page of a language in one test: opening and checking dozens of pages takes longer than the default 30 s.
+test.describe.configure({ timeout: 240_000 });
+
 for (const prefix of ["", "/en"]) {
   test(`the public pages of ${prefix || "/tr"} find all their text`, async ({ page, request }) => {
     const sitemap = await (await request.get("/sitemap.xml")).text();

@@ -125,7 +125,7 @@ export function SearchableSelect({
             role="combobox"
             aria-label={searchLabel}
             aria-expanded="true"
-            aria-controls={listId}
+            aria-controls={shown.length > 0 ? listId : undefined}
             aria-autocomplete="list"
             aria-activedescendant={activeOption ? `${listId}-${active}` : undefined}
             autoComplete="off"

@@ -132,39 +132,42 @@ export function CityPicker({ value, onChange, id, ...aria }: CityPickerProps) {
         />
       </div>
 
+      {/* A listbox with no option in it is not valid ARIA (aria-required-children); the "no such city" line is its own
+          status, shown in the same place, and the listbox stays hidden while there is nothing to choose (V2-19). */}
       <ul
         id={listId}
         role="listbox"
         aria-label={t("cities")}
-        hidden={!showList}
+        hidden={!showList || matches.length === 0}
         className="absolute z-20 mt-1 max-h-60 w-full overflow-y-auto rounded-card border border-border bg-surface p-1 shadow-overlay"
       >
-        {matches.length === 0 ? (
-          <li role="presentation" className="px-3 py-2 text-small text-fg-muted">
-            {t("citiesEmpty")}
+        {matches.map((city, index) => (
+          <li
+            key={city}
+            id={`${listId}-${index}`}
+            role="option"
+            aria-selected={index === active}
+            onMouseDown={(event) => {
+              event.preventDefault();
+              add(city);
+            }}
+            onMouseMove={() => setActive(index)}
+            className={cn(
+              "flex min-h-11 cursor-pointer items-center rounded-control px-3 text-body text-fg",
+              index === active && "bg-selected text-on-selected",
+            )}
+          >
+            {city}
           </li>
-        ) : (
-          matches.map((city, index) => (
-            <li
-              key={city}
-              id={`${listId}-${index}`}
-              role="option"
-              aria-selected={index === active}
-              onMouseDown={(event) => {
-                event.preventDefault();
-                add(city);
-              }}
-              onMouseMove={() => setActive(index)}
-              className={cn(
-                "flex min-h-11 cursor-pointer items-center rounded-control px-3 text-body text-fg",
-                index === active && "bg-selected text-on-selected",
-              )}
-            >
-              {city}
-            </li>
-          ))
-        )}
+        ))}
       </ul>
+      <p
+        role="status"
+        hidden={!showList || matches.length > 0}
+        className="absolute z-20 mt-1 w-full rounded-card border border-border bg-surface px-3 py-2 text-small text-fg-muted shadow-overlay"
+      >
+        {t("citiesEmpty")}
+      </p>
     </div>
   );
 }
