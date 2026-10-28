@@ -7,6 +7,9 @@ import { expect, type Page } from "@playwright/test";
 const WCAG_TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];
 
 export async function expectNoAxeViolations(page: Page, label = page.url()): Promise<void> {
+  // Next streams the page title in after the body, so a test that ends right after a navigation can catch the page
+  // before it has one ("document-title"); the title is part of the page, so wait for it instead of skipping the rule.
+  await page.waitForFunction(() => document.title.length > 0);
   const results = await new AxeBuilder({ page }).withTags(WCAG_TAGS).analyze();
   const summary = results.violations.map((violation) => ({
     rule: violation.id,
