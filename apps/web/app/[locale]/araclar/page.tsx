@@ -152,13 +152,14 @@ export default async function ResultsPage({ searchParams }: PageProps<"/[locale]
             </StateMessage>
           ) : (
             <ul className={view === "grid" ? "grid gap-6 md:grid-cols-2 xl:grid-cols-3" : "flex flex-col gap-4"}>
-              {shown.map((offer) => {
+              {shown.map((offer, index) => {
                 const points = usePoints ? redeemablePoints(balance ?? 0, offer.totalPrice) : 0;
                 const Item = view === "grid" ? VehicleCard : VehicleRow;
                 return (
                   <li key={offer.id} className={view === "grid" ? undefined : "grid"}>
                     <Item
                       vehicle={offer}
+                      preloadImage={index === 0}
                       pointsPayment={points > 0 ? { points, rest: afterPoints(offer.totalPrice, points) } : undefined}
                       action={
                         <RentButton

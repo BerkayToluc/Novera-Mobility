@@ -10,6 +10,7 @@
 | Tek bir işin tam metni (issue'ya kopyalanır) | [issues/](issues/) `V2-xx-*.md` | G (Berkay öneri getirir) |
 | Issue → dal → PR → kabul süreci, roller | [WORKFLOW.md](WORKFLOW.md) | G |
 | Bilinen sorunlar, denetim listeleri, Definition of Done | [QUALITY.md](QUALITY.md) | Berkay (her PR'da) |
+| Hız ölçümü (production Lighthouse) | [PERFORMANCE.md](PERFORMANCE.md) | Berkay |
 | Teknik kararlar (ADR), sistem şeması, klasörler | [ARCHITECTURE.md](ARCHITECTURE.md) | Berkay, G onaylar |
 | Renk, yazı, boşluk, panel ekran kuralları | [DESIGN.md](DESIGN.md) | Berkay, G onaylar |
 | Yönetim paneli tasarımı | [ADMIN.md](ADMIN.md) | Berkay, G onaylar |

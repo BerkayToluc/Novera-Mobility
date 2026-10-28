@@ -87,8 +87,8 @@
 |---|---|---|---|---|---|
 | P-01 | Yüksek | `NextIntlClientProvider` `messages` almadığı için her sayfa tüm çeviri dosyalarını (yaklaşık 129 KB, yalnız `legal.json` 15 KB) istemciye gönderiyor | `app/[locale]/layout.tsx:61` | V2-15 | Düzeltildi (V2-15, #305; kök provider yalnızca üstbilgi, çerez bandı ve hata sayfası metnini gönderir (`ROOT_NAMESPACES`), her bölüm kendi istemci bileşenlerinin metnini `ClientMessages` ile ekler; liste `i18n/client-messages.ts`, `tests/client-messages.test.ts` kodu okuyup listeyle karşılaştırır; ana sayfa HTML'i 469 → 413 KB, `/araclar` 278 → 210 KB (gzip 44 → 24 KB)) |
 | P-02 | Orta | `framer-motion` navbar menüsü üzerinden her sayfada yükleniyor; etkiler CSS ile yapılabilir | `components/layout/nav-menu.tsx`, `main-nav.tsx` | V2-14 | Düzeltildi (V2-14; navbar paneli CSS (`animate-menu-in`); `framer-motion` artık yalnızca SSS ve iletişim bağlantısı olan sayfalarda yüklenir; ölçüm PR'da) |
-| P-03 | Orta | İlk araç görselinde `preload` yok (Next 16'da `priority`'nin yerine geçti); 4 modelin fotoğrafı eksik; fotoğraflar sıkıştırılmadı | `components/vehicle/vehicle-image.tsx`, `public/` | V2-21 | Açık |
-| P-04 | Orta | Production build'de mobil Lighthouse hiç ölçülmedi (v1'deki sayılar geliştirme sunucusundan, geçersiz) | — | V2-21 | Açık |
+| P-03 | Orta | İlk araç görselinde `preload` yok (Next 16'da `priority`'nin yerine geçti); 4 modelin fotoğrafı eksik; fotoğraflar sıkıştırılmadı | `components/vehicle/vehicle-image.tsx`, `public/` | V2-21 | Kısmen (V2-21, #311; `VehicleImage` `preload` alıyor, sonuç listesinin ilk kartı kullanıyor; 4 fotoğraf bütçeye indirildi. **Eksik 4 modelin fotoğrafı G'nin `carPhotos/` seçimini bekliyor**, açık) |
+| P-04 | Orta | Production build'de mobil Lighthouse hiç ölçülmedi (v1'deki sayılar geliştirme sunucusundan, geçersiz) | — | V2-21 | Ölçüldü, hedef tutmadı (V2-21, #311; [PERFORMANCE.md](PERFORMANCE.md): LCP dört sayfada 2,8–4,4 sn > 2,5 sn, TBT üç sayfada > 200 ms, CLS hedefte. Neden: hidrasyon maliyeti. Sonraki adım PERFORMANCE.md'de; açık) |
 
 ### 1.6 Test ve CI (T)
 
