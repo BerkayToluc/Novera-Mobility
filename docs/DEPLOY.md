@@ -56,7 +56,7 @@ Neon panelinde **Tables** sekmesinde `Branch`, `Vehicle` vb. tabloları ve içle
 
 ## 3. Resend: e-posta (isteğe bağlı, sonra da yapılabilir)
 
-E-posta ayarı olmadan site çalışır; "Şifremi unuttum" bağlantısı gönderilmez (canlıda log'a da yazılmaz).
+E-posta ayarı olmadan site çalışır; "Şifremi unuttum" bağlantısı gönderilmez (canlıda log'a da yazılmaz). Render'dan taşırken değerler **kendiliğinden gelmez**: Cloud Run'da `RESEND_API_KEY` ve `MAIL_FROM` ayrıca girilmelidir (aşağıdaki 4. adımın sonu).
 
 1. resend.com → Sign up → **API Keys** → Create (izin: *Sending access*). Anahtarı kopyala.
 2. Kendi alan adın varsa **Domains** → ekle ve istenen DNS kayıtlarını gir; sonra `MAIL_FROM` = `Novera Mobility <noreply@senin-alan-adin>`.
@@ -98,6 +98,8 @@ Doğru mu?
 
 **Ziyaretçi adresi kontrolü (ilk canlı denemede bir kere):** hız sınırı ziyaretçileri adreslerinin özetiyle ayırır. Cloud Run'ın önünde Google'ın yük dengeleyicisi vardır ve istek Vercel'den gelir; `TRUST_PROXY_HOPS=1` bu varsayıma göre konuldu. Sitede iki farklı cihazdan (telefon ve bilgisayar) birkaç sayfa aç, sonra Neon → **SQL Editor**'de `select key, bucket from "RateLimitHit" order by "windowStart" desc limit 20;` çalıştır. İki cihaz **farklı** `ip:...` değerleri vermeli. Hepsi aynı değerse API ziyaretçileri ayıramıyordur: o zaman `TRUST_PROXY_HOPS` değerini birlikte düzeltiriz; yanlış kalırsa herkes aynı sınırı paylaşır.
 
+**E-postayı bağla (3. adımdan sonra):** Resend anahtarını Secret Manager'a koy (`resend-api-key`), sonra Cloud Run → `novera-mobility` → **Containers** → **Edit** → **Variables & secrets**: **Reference a secret** `RESEND_API_KEY` ← `resend-api-key` (latest) ve **Add variable** `MAIL_FROM` (3. adımdaki değer) → **Done** → **Deploy**. Denemek için Resend'e kayıt olduğun adresle bir hesap aç ve "Şifremi unuttum"u kullan.
+
 ## 5. Vercel: web
 
 1. vercel.com → Sign up (GitHub) → **Add New → Project** → `Novera-Mobility`.
@@ -114,7 +116,7 @@ Doğru mu?
 
 ## 6. Adresleri birbirine tanıt
 
-Cloud Run → `novera-mobility` → **Edit & deploy new revision** → **Variables & Secrets** → `WEB_URL` = Vercel adresi (`https://....vercel.app`, sonunda `/` olmasın) → **Deploy**.
+Cloud Run → `novera-mobility` → **Containers** sekmesi → **Edit** → **Variables & secrets** → `WEB_URL` = Vercel adresi (`https://....vercel.app`, sonunda `/` olmasın) → **Done**; sağ üstte **Deploy**. (Konsolun yeni arayüzünde "Edit & deploy new revision" düğmesi yoktur; ayarlar sekmelerden düzenlenir.)
 
 ## 7. (Gerekmiyor) UptimeRobot
 
