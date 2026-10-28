@@ -156,7 +156,7 @@ model RateLimitHit {
   @@id([key, bucket, windowStart])
 }
 
-// Puan kazanımı. Bakiye = bu kayıtların toplamı. Puanla ödeme v1'de yok.
+// Puan kazanımı. Bakiye = bu kayıtların toplamı. Harcanan puan ayrı bir defterde değil `Reservation.pointsUsed`'da tutulur (QUALITY V-08, V2-11'de bilerek bu şekilde bırakıldı).
 model PointTransaction {
   id        String   @id @default(uuid())
   points    Int
@@ -182,10 +182,14 @@ model Branch {
   phone        String
   email        String
   openingHours Json
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   vehicles       Vehicle[]
   pickupBookings Reservation[] @relation("PickupBranch")
   returnBookings Reservation[] @relation("ReturnBranch")
+  pickupHolds    Hold[]        @relation("HoldPickupBranch")
+  returnHolds    Hold[]        @relation("HoldReturnBranch")
 
   @@index([city])
 }
@@ -214,6 +218,8 @@ model VehicleModel {
   dailyPrice      Int // TRY, kuruş cinsinden (₺1.250 = 125000)
   description     Json // { "tr": "...", "en": "..." }
   imageUrl        String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
 
   classId String
   class   VehicleClass @relation(fields: [classId], references: [id])
@@ -229,6 +235,8 @@ model Vehicle {
   plate  String  @unique
   year   Int
   active Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   vehicleModelId String
   vehicleModel   VehicleModel @relation(fields: [vehicleModelId], references: [id])
@@ -249,6 +257,8 @@ model Extra {
   nameEn  String
   price   Int // TRY, kuruş cinsinden
   pricing ExtraPricing
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   reservationExtras ReservationExtra[]
 }
@@ -261,18 +271,22 @@ model Hold {
   id             String   @id @default(uuid())
   startAt        DateTime
   endAt          DateTime
-  pickupBranchId String
-  returnBranchId String
   expiresAt      DateTime
   clientKey      String?
   createdAt      DateTime @default(now())
 
-  vehicleId String
-  vehicle   Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  vehicleId      String
+  vehicle        Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  pickupBranchId String
+  pickupBranch   Branch  @relation("HoldPickupBranch", fields: [pickupBranchId], references: [id])
+  returnBranchId String
+  returnBranch   Branch  @relation("HoldReturnBranch", fields: [returnBranchId], references: [id])
 
   @@index([vehicleId, startAt, endAt])
   @@index([expiresAt])
   @@index([clientKey, expiresAt])
+  @@index([pickupBranchId])
+  @@index([returnBranchId])
 }
 
 model Reservation {
@@ -295,7 +309,10 @@ model Reservation {
   vehicleDailyPrice Int
   totalPrice        Int
 
-  createdAt DateTime @default(now())
+  createdAt   DateTime  @default(now())
+  // Paneldeki çakışma denetimi (ADR-24) `updatedAt`'e bakar; iptal zamanı `cancelledAt`'te durur.
+  updatedAt   DateTime  @updatedAt
+  cancelledAt DateTime?
 
   // Hesap silinince rezervasyon kalır, kullanıcı bağlantısı boşalır
   userId         String?
@@ -311,7 +328,11 @@ model Reservation {
   pointTransaction PointTransaction?
 
   @@index([vehicleId, startAt, endAt])
-  @@index([userId])
+  // Rezervasyonlarım: bir hesabın rezervasyonları başlangıca göre sıralı okunur.
+  // `(userId, startAt)` aynı zamanda yalnızca `userId` ile aramayı da karşılar; ayrı bir `userId` indeksi gerekmez.
+  @@index([userId, startAt])
+  @@index([pickupBranchId])
+  @@index([returnBranchId])
   // Kampanya kodu kullanım sayımı (V2-05): kod başına ve kişi başına.
   @@index([promoCode, status])
 }
@@ -345,6 +366,7 @@ model ReservationExtra {
   extra         Extra       @relation(fields: [extraId], references: [id])
 
   @@unique([reservationId, extraId])
+  @@index([extraId])
 }
 
 // ---------- İçerik ve formlar ----------
@@ -388,6 +410,8 @@ model QuoteRequest {
   email          String
   kvkkConsentAt  DateTime    @default(now())
   createdAt      DateTime    @default(now())
+  // Teklifin durumu değiştikçe güncellenir; panelin çakışma denetimi (ADR-24) bunu kullanır.
+  updatedAt      DateTime    @updatedAt
 
   productId String?
   product   Product? @relation(fields: [productId], references: [id])
@@ -395,6 +419,7 @@ model QuoteRequest {
   user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@index([userId])
+  @@index([productId])
 }
 
 model ContactMessage {

@@ -22,7 +22,6 @@ import {
   type ReservationRow,
 } from './reservation-view.js';
 
-const NUMBER_ATTEMPTS = 5;
 // One account cannot hold more than this many upcoming or running bookings at once (G, 24 Ekim: 3); no
 // payment is taken, so without a cap one account could lock the whole fleet for months (QUALITY G-02).
 export const MAX_ACTIVE_RESERVATIONS = 3;
@@ -48,10 +47,6 @@ function notCancellable(): HttpException {
   );
 }
 
-function isUniqueViolation(error: unknown): boolean {
-  return typeof error === 'object' && error !== null && (error as { code?: unknown }).code === 'P2002';
-}
-
 // Numara yılı Türkiye saatine göre belirlenir (ADR-16).
 function istanbulYear(date: Date): number {
   return Number(
@@ -72,18 +67,6 @@ export class ReservationsService {
     const request = parseReservationRequest(input);
     await this.pricing.assertBranchesExist(request);
 
-    // Numara çakışması (P2002) işlemi bozar; bu yüzden yeniden deneme İŞLEMİN DIŞINDADIR.
-    for (let attempt = 0; attempt < NUMBER_ATTEMPTS; attempt += 1) {
-      try {
-        return await this.createOnce(user, request, clientKey);
-      } catch (error) {
-        if (!isUniqueViolation(error)) throw error;
-      }
-    }
-    throw new Error('Could not allocate a reservation number');
-  }
-
-  private async createOnce(user: UserRow, request: ValidReservationRequest, clientKey: string | null) {
     return this.prisma.$transaction(async (tx) => {
       // Aracın satırını kilitle: aynı araç için gelen diğer istekler bu işlem bitene kadar bekler,
       // sonra çakışmayı görüp 409 alır (kilit yoksa iki kişi aynı aracı alabilir).
@@ -156,14 +139,10 @@ export class ReservationsService {
         : [];
       const extraId = new Map(extraRows.map((row) => [row.slug, row.id]));
 
-      const prefix = `NVR-${istanbulYear(now)}-`;
-      const last = await tx.reservation.findFirst({
-        where: { number: { startsWith: prefix } },
-        orderBy: { number: 'desc' },
-        select: { number: true },
-      });
-      const lastSerial = last ? Number(last.number.slice(prefix.length)) : 0;
-      const number = `${prefix}${String((Number.isFinite(lastSerial) ? lastSerial : 0) + 1).padStart(5, '0')}`;
+      // A database sequence hands out the serial, so two bookings made at the same moment never meet on one
+      // number and nothing has to be retried (QUALITY G-17). A cancelled transaction leaves a gap; that is fine.
+      const [{ serial }] = await tx.$queryRaw<{ serial: bigint }[]>`SELECT nextval('"ReservationNumber_seq"') AS serial`;
+      const number = `NVR-${istanbulYear(now)}-${String(serial).padStart(5, '0')}`;
 
       // The discount line, when there is one, is last, so the extras still line up with `request.extras`.
       const [vehicleLine, ...restLines] = price.lines;
@@ -248,7 +227,7 @@ export class ReservationsService {
   async cancel(userId: string, id: string, now: Date = new Date()) {
     const claimed = await this.prisma.reservation.updateMany({
       where: { id, userId, status: 'CONFIRMED', startAt: { gt: now } },
-      data: { status: 'CANCELLED' },
+      data: { status: 'CANCELLED', cancelledAt: now },
     });
     const row = await this.prisma.reservation.findFirst({
       where: { id, userId },

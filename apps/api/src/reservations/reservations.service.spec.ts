@@ -58,16 +58,21 @@ class FakeDb {
   reservations: Row[] = [];
   holds: Row[] = [];
   points: Row[] = [];
-  failNumbers = 0; // bu kadar kez benzersizlik ihlali at
   locks = 0;
   serial = 0;
+  numbers = 0;
 
   $transaction = async (fn: (tx: any) => Promise<any>) => {
     const snapshot = JSON.stringify([this.reservations, this.holds, this.points], (_k, v) => v);
     void snapshot;
     return fn(this);
   };
-  $queryRaw = async () => {
+  // The number comes from a database sequence; the other raw queries are row locks.
+  $queryRaw = async (strings: TemplateStringsArray) => {
+    if (strings.join('').includes('nextval')) {
+      this.numbers += 1;
+      return [{ serial: BigInt(this.numbers) }];
+    }
     this.locks += 1;
     return [];
   };
@@ -119,15 +124,7 @@ class FakeDb {
           r.startAt < where.startAt.lt &&
           r.endAt > where.endAt.gt,
       ).length,
-    findFirst: async () => {
-      const sorted = [...this.reservations].sort((a, b) => b.number.localeCompare(a.number));
-      return sorted[0] ? { number: sorted[0].number } : null;
-    },
     create: async ({ data }: any) => {
-      if (this.failNumbers > 0) {
-        this.failNumbers -= 1;
-        throw Object.assign(new Error('unique'), { code: 'P2002' });
-      }
       this.serial += 1;
       const { extras, ...rest } = data;
       const row = {
@@ -296,13 +293,6 @@ describe('ReservationsService.create', () => {
     });
     const error = await catchHttp(service.create(user, { ...base, holdId: IDS.hold }, null));
     expect(bodyOf(error).code).toBe('VEHICLE_UNAVAILABLE');
-  });
-
-  it('numara çakışırsa (P2002) yeniden dener', async () => {
-    const { service, db } = build();
-    db.failNumbers = 2;
-    const result = await service.create(user, base);
-    expect(result.number.endsWith('00001')).toBe(true);
   });
 
   it('EUR rezervasyonda saklanan kurla puan hesaplanır', async () => {

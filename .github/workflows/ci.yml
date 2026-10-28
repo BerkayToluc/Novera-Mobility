@@ -56,6 +56,17 @@ jobs:
         env:
           DATABASE_URL: postgresql://novera:novera@localhost:5432/novera_test
 
+      # Replays every migration on an empty database and compares the result with schema.prisma (V2-11, QUALITY V-05).
+      # A change to the schema that has no migration, or a migration edited by hand away from the schema, fails here
+      # (exit code 2). The shadow database is the empty one the replay needs.
+      - name: Check migrations against the schema
+        run: |
+          PGPASSWORD=novera psql -h localhost -U novera -d novera_test -c 'CREATE DATABASE novera_shadow'
+          pnpm --filter @novera/api exec prisma migrate diff --from-migrations prisma/migrations --to-schema prisma/schema.prisma --exit-code
+        env:
+          DATABASE_URL: postgresql://novera:novera@localhost:5432/novera_test
+          SHADOW_DATABASE_URL: postgresql://novera:novera@localhost:5432/novera_shadow
+
       - name: Lint
         run: pnpm -r --if-present run lint
 
