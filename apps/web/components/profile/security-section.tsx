@@ -32,7 +32,7 @@ export function SecuritySection({
   const [current, setCurrent] = useState("");
   const [next, setNext] = useState("");
   const [repeat, setRepeat] = useState("");
-  const [fieldError, setFieldError] = useState<"short" | "same" | "mismatch" | "current" | "incorrect" | null>(null);
+  const [fieldError, setFieldError] = useState<"short" | "same" | "mismatch" | "current" | "incorrect" | "common" | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
   const [pending, startTransition] = useTransition();
@@ -51,6 +51,7 @@ export function SecuritySection({
       const result = await changePassword(current, next);
       if (!result.ok) {
         if (result.reason === "incorrect") setFieldError("incorrect");
+        else if (result.reason === "too_common") setFieldError("common");
         else if (result.reason === "rate_limited") setFormError(rateLimitMessage(limitT, result.retryAfter));
         else setFormError(result.reason === "unavailable" ? errorT("unavailable") : errorT("generic"));
         return;
@@ -116,7 +117,7 @@ export function SecuritySection({
         <Field
           label={t("password.new")}
           hint={t("password.hint")}
-          error={fieldError === "short" ? t("password.short") : fieldError === "same" ? t("password.same") : undefined}
+          error={fieldError === "short" ? t("password.short") : fieldError === "same" ? t("password.same") : fieldError === "common" ? t("password.common") : undefined}
         >
           {(props) => (
             <PasswordInput autoComplete="new-password" showLabel={show} hideLabel={hide} value={next} onChange={(e) => setNext(e.target.value)} {...props} />

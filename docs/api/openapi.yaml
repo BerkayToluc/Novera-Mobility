@@ -378,12 +378,28 @@ paths:
     delete:
       tags: [me]
       summary: Hesabı sil
-      description: Hesap kalıcı silinir, oturum sonlanır. Geçmiş rezervasyon kayıtları anonim olarak kalır.
+      description: |
+        Hesap kalıcı silinir, oturum sonlanır. Geçmiş rezervasyon kayıtları anonim olarak kalır.
+        Şifresi olan hesap `currentPassword` gönderir (eksik `REQUIRED`, yanlış `INVALID_PASSWORD`).
+        Yalnızca Google ile açılmış hesap `confirmEmail` gönderir: hesabın e-postası (eksik `REQUIRED`,
+        farklı `EMAIL_MISMATCH`). Çalınmış bir oturum çerezi tek başına hesabı silemez.
+        15 dakikada en çok 5 deneme (`429`).
       security:
         - cookieAuth: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                currentPassword: { type: string, maxLength: 128 }
+                confirmEmail: { type: string, maxLength: 254 }
       responses:
         "204": { description: Silindi }
         "401": { $ref: "#/components/responses/Unauthorized" }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
 
   /me/password:
     post:
@@ -393,7 +409,7 @@ paths:
         Mevcut şifre doğrulanır; yeni şifre en az 8 karakter olur ve eskisinden farklıdır. Başarılı olunca bu oturum
         dışındaki TÜM oturumlar kapanır ve bekleyen şifre sıfırlama bağlantıları geçersiz olur.
         Mevcut şifre yanlışsa `422` (`fieldErrors.currentPassword: INCORRECT`; oturum açık kalır, 401 değildir).
-        Yeni şifre için `TOO_SHORT`, `TOO_LONG`, `SAME_AS_CURRENT`. 15 dakikada en çok 5 deneme (`429`).
+        Yeni şifre için `TOO_SHORT`, `TOO_LONG`, `SAME_AS_CURRENT`, `PASSWORD_TOO_COMMON`. 15 dakikada en çok 5 deneme (`429`).
         Hesabın şifresi yoksa (`User.hasPassword` `false`, Google ile açılmış) `409` (`PASSWORD_NOT_SET`): şifre
         `/auth/forgot-password` ile e-postadaki bağlantıdan belirlenir.
       security:
@@ -778,6 +794,9 @@ components:
               - INVALID_EMAIL
               - INVALID_FORMAT
               - TOO_SHORT
+              - PASSWORD_TOO_COMMON
+              - INVALID_PASSWORD
+              - EMAIL_MISMATCH
               - TOO_LONG
               - OUT_OF_RANGE
               - EMAIL_TAKEN

@@ -56,7 +56,7 @@ export async function SettingsView() {
         <SecuritySection sessions={sessions} hasPassword={session?.hasPassword ?? true} email={session?.user.email ?? ""} />
       </Section>
       <Section id="settings-danger" title={t("danger.title")} text={t("danger.text")}>
-        <DeleteAccount />
+        <DeleteAccount hasPassword={session?.hasPassword ?? true} email={session?.user.email ?? ""} />
       </Section>
     </div>
   );

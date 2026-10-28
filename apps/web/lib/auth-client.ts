@@ -43,7 +43,16 @@ export class EmailTakenError extends Error {
   }
 }
 
-function failure(reason: "unavailable" | "invalid" | "email_taken" | "rate_limited", retryAfter: number | null = null): Error {
+// The new password is on the list of passwords everybody tries first (API `PASSWORD_TOO_COMMON`).
+export class PasswordTooCommonError extends Error {
+  constructor() {
+    super("The password is too common.");
+    this.name = "PasswordTooCommonError";
+  }
+}
+
+function failure(reason: "unavailable" | "invalid" | "email_taken" | "too_common" | "rate_limited", retryAfter: number | null = null): Error {
+  if (reason === "too_common") return new PasswordTooCommonError();
   if (reason === "invalid") return new InvalidCredentialsError();
   if (reason === "email_taken") return new EmailTakenError();
   if (reason === "rate_limited") return new AuthRateLimitedError(retryAfter);
@@ -122,6 +131,7 @@ export async function resetPassword(token: string, password: string): Promise<vo
   const result = await resetPasswordAction(token, password);
   if (result.ok) return;
   if (result.reason === "invalid_link") throw new ResetLinkInvalidError();
+  if (result.reason === "too_common") throw new PasswordTooCommonError();
   if (result.reason === "rate_limited") throw new AuthRateLimitedError(result.retryAfter ?? null);
   throw new AuthUnavailableError();
 }

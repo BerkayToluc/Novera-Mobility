@@ -20,6 +20,8 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_REGEX = /^[0-9+()\-.\s]+$/;
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+import { isCommonPassword } from './common-passwords.js';
+
 export const PASSWORD_MIN = 8;
 export const PASSWORD_MAX = 128;
 
@@ -81,8 +83,8 @@ export const optionalFlag = () =>
     return typeof raw === 'boolean' ? { value: raw } : { code: 'INVALID_FORMAT' };
   });
 
-// Passwords are never trimmed. `newPassword` is the one that must meet the length rule; one that is only
-// presented (sign-in, the current password) just may not be absurdly long, which keeps the server from
+// Passwords are never trimmed. A `new` password is the one that must meet the length rule and is not on the
+// list of common passwords; one that is only presented (sign-in, the current password) just may not be absurdly long, which keeps the server from
 // being tired out by a huge input without saying which rule was broken.
 export const password = (kind: 'new' | 'presented') =>
   field<string>((raw) => {
@@ -90,6 +92,8 @@ export const password = (kind: 'new' | 'presented') =>
     if (typeof raw !== 'string') return { code: 'INVALID_FORMAT' };
     if (kind === 'new' && raw.length < PASSWORD_MIN) return { code: 'TOO_SHORT' };
     if (raw.length > PASSWORD_MAX) return { code: 'TOO_LONG' };
+    // Only a password being chosen is checked against the list, never one being presented at sign-in.
+    if (kind === 'new' && isCommonPassword(raw)) return { code: 'PASSWORD_TOO_COMMON' };
     return { value: raw };
   });
 

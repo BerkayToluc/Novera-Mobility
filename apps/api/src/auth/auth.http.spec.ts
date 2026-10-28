@@ -124,12 +124,48 @@ describe('auth HTTP akışı (çerez + korumalı uçlar)', () => {
     expect((await send('/me', { method: 'PATCH', body: JSON.stringify({ theme: 'dark' }) })).status).toBe(401);
   });
 
-  it('DELETE /me 204 döner, hesap ve oturum gider', async () => {
-    const cookie = cookieOf(await send('/auth/register', { method: 'POST', body: JSON.stringify(VALID) }));
-    expect((await send('/me', { method: 'DELETE', cookie })).status).toBe(204);
-    expect((await send('/me', { cookie })).status).toBe(401);
-    const login = await send('/auth/login', { method: 'POST', body: JSON.stringify({ email: VALID.email, password: VALID.password }) });
-    expect(login.status).toBe(401);
+  describe('DELETE /me asks to confirm (QUALITY G-14)', () => {
+    const remove = (cookie: string, body?: unknown) =>
+      send('/me', { method: 'DELETE', cookie, ...(body === undefined ? {} : { body: JSON.stringify(body) }) });
+
+    it('with the right password: 204, the account and the session are gone', async () => {
+      const cookie = cookieOf(await send('/auth/register', { method: 'POST', body: JSON.stringify(VALID) }));
+      expect((await remove(cookie, { currentPassword: VALID.password })).status).toBe(204);
+      expect((await send('/me', { cookie })).status).toBe(401);
+      const login = await send('/auth/login', { method: 'POST', body: JSON.stringify({ email: VALID.email, password: VALID.password }) });
+      expect(login.status).toBe(401);
+    });
+
+    it('a stolen cookie alone is not enough: no body is 422 REQUIRED, a wrong password 422 INVALID_PASSWORD, and nothing is deleted', async () => {
+      const cookie = cookieOf(await send('/auth/register', { method: 'POST', body: JSON.stringify(VALID) }));
+      const none = await remove(cookie);
+      expect(none.status).toBe(422);
+      expect(((await none.json()) as { fieldErrors: unknown }).fieldErrors).toEqual({ currentPassword: 'REQUIRED' });
+      const wrong = await remove(cookie, { currentPassword: 'yanlis-parola-1' });
+      expect(wrong.status).toBe(422);
+      expect(((await wrong.json()) as { code: string; fieldErrors: unknown }).fieldErrors).toEqual({ currentPassword: 'INVALID_PASSWORD' });
+      expect((await send('/me', { cookie })).status).toBe(200);
+      expect(fake.users).toHaveLength(1);
+    });
+
+    it('a number or an object as the password is 422, not 500', async () => {
+      const cookie = cookieOf(await send('/auth/register', { method: 'POST', body: JSON.stringify(VALID) }));
+      for (const value of [42, { a: 1 }, ['x'], true]) {
+        expect((await remove(cookie, { currentPassword: value })).status).toBe(422);
+      }
+    });
+
+    it('an account opened with Google (no password) confirms with its e-mail address instead', async () => {
+      const cookie = cookieOf(await send('/auth/register', { method: 'POST', body: JSON.stringify(VALID) }));
+      fake.users[0]!.passwordHash = null;
+      const none = await remove(cookie, {});
+      expect(((await none.json()) as { fieldErrors: unknown }).fieldErrors).toEqual({ confirmEmail: 'REQUIRED' });
+      const wrong = await remove(cookie, { confirmEmail: 'baska@example.com' });
+      expect(((await wrong.json()) as { fieldErrors: unknown }).fieldErrors).toEqual({ confirmEmail: 'EMAIL_MISMATCH' });
+      expect(fake.users).toHaveLength(1);
+      expect((await remove(cookie, { confirmEmail: ` ${VALID.email.toUpperCase()} ` })).status).toBe(204);
+      expect(fake.users).toHaveLength(0);
+    });
   });
 
   it('bozuk JSON gövdesi sunucuyu çökertmez (400)', async () => {

@@ -10,7 +10,7 @@ import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Link, useRouter } from "@/i18n/navigation";
-import { AuthRateLimitedError, AuthUnavailableError, EmailTakenError, register as registerAccount } from "@/lib/auth-client";
+import { AuthRateLimitedError, AuthUnavailableError, EmailTakenError, PasswordTooCommonError, register as registerAccount } from "@/lib/auth-client";
 import { PASSWORD_MIN_LENGTH, registerSchema, type RegisterInput } from "@/lib/auth-schemas";
 import { FormError } from "./form-error";
 import { useAuthErrorMessages } from "./use-auth-messages";
@@ -58,6 +58,7 @@ export function RegisterForm({ next }: { next?: Record<string, string> }) {
       router.refresh();
     } catch (error) {
       if (error instanceof EmailTakenError) setFormError(t("errors.emailTaken"));
+      else if (error instanceof PasswordTooCommonError) setFormError(t("errors.passwordCommon"));
       else if (error instanceof AuthRateLimitedError) setFormError(rateLimitMessage(limitT, error.retryAfter));
       else if (error instanceof AuthUnavailableError) setFormError(t("errors.unavailable"));
       else setFormError(t("errors.generic"));

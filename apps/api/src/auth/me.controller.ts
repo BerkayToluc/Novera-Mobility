@@ -80,13 +80,17 @@ export class MeController {
     if (wasCurrent) clearSessionCookie(response);
   }
 
+  // Asks for the password (or, for an account with none, the e-mail address). It checks a password, so it is limited like
+  // the password change.
   @Delete()
-  @RateLimit(LIMITS.accountWrite)
+  @RateLimit(LIMITS.changePassword)
   @HttpCode(204)
   async remove(
     @CurrentUser() user: UserRow,
+    @Body() body: unknown,
     @Res({ passthrough: true }) response: Response,
   ): Promise<void> {
+    await this.security.confirmDeletion(user, body);
     await this.authService.deleteAccount(user.id);
     clearSessionCookie(response);
   }

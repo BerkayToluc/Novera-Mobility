@@ -695,6 +695,10 @@ export interface paths {
         /**
          * Hesabı sil
          * @description Hesap kalıcı silinir, oturum sonlanır. Geçmiş rezervasyon kayıtları anonim olarak kalır.
+         *     Şifresi olan hesap `currentPassword` gönderir (eksik `REQUIRED`, yanlış `INVALID_PASSWORD`).
+         *     Yalnızca Google ile açılmış hesap `confirmEmail` gönderir: hesabın e-postası (eksik `REQUIRED`,
+         *     farklı `EMAIL_MISMATCH`). Çalınmış bir oturum çerezi tek başına hesabı silemez.
+         *     15 dakikada en çok 5 deneme (`429`).
          */
         delete: {
             parameters: {
@@ -703,7 +707,14 @@ export interface paths {
                 path?: never;
                 cookie?: never;
             };
-            requestBody?: never;
+            requestBody?: {
+                content: {
+                    "application/json": {
+                        currentPassword?: string;
+                        confirmEmail?: string;
+                    };
+                };
+            };
             responses: {
                 /** @description Silindi */
                 204: {
@@ -713,6 +724,8 @@ export interface paths {
                     content?: never;
                 };
                 401: components["responses"]["Unauthorized"];
+                422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
             };
         };
         options?: never;
@@ -763,7 +776,7 @@ export interface paths {
          * @description Mevcut şifre doğrulanır; yeni şifre en az 8 karakter olur ve eskisinden farklıdır. Başarılı olunca bu oturum
          *     dışındaki TÜM oturumlar kapanır ve bekleyen şifre sıfırlama bağlantıları geçersiz olur.
          *     Mevcut şifre yanlışsa `422` (`fieldErrors.currentPassword: INCORRECT`; oturum açık kalır, 401 değildir).
-         *     Yeni şifre için `TOO_SHORT`, `TOO_LONG`, `SAME_AS_CURRENT`. 15 dakikada en çok 5 deneme (`429`).
+         *     Yeni şifre için `TOO_SHORT`, `TOO_LONG`, `SAME_AS_CURRENT`, `PASSWORD_TOO_COMMON`. 15 dakikada en çok 5 deneme (`429`).
          *     Hesabın şifresi yoksa (`User.hasPassword` `false`, Google ile açılmış) `409` (`PASSWORD_NOT_SET`): şifre
          *     `/auth/forgot-password` ile e-postadaki bağlantıdan belirlenir.
          */
@@ -1459,7 +1472,7 @@ export interface components {
              *     }
              */
             fieldErrors?: {
-                [key: string]: "REQUIRED" | "INVALID_EMAIL" | "INVALID_FORMAT" | "TOO_SHORT" | "TOO_LONG" | "OUT_OF_RANGE" | "EMAIL_TAKEN" | "CONSENT_REQUIRED" | "INVALID_DATE_RANGE" | "NOT_IN_SLOT" | "IN_PAST" | "UNKNOWN_REFERENCE" | "UNKNOWN_CODE" | "CODE_EXHAUSTED" | "CODE_ALREADY_USED";
+                [key: string]: "REQUIRED" | "INVALID_EMAIL" | "INVALID_FORMAT" | "TOO_SHORT" | "PASSWORD_TOO_COMMON" | "INVALID_PASSWORD" | "EMAIL_MISMATCH" | "TOO_LONG" | "OUT_OF_RANGE" | "EMAIL_TAKEN" | "CONSENT_REQUIRED" | "INVALID_DATE_RANGE" | "NOT_IN_SLOT" | "IN_PAST" | "UNKNOWN_REFERENCE" | "UNKNOWN_CODE" | "CODE_EXHAUSTED" | "CODE_ALREADY_USED";
             };
         };
         LocalizedText: {

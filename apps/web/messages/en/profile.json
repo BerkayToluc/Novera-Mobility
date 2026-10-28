@@ -117,7 +117,13 @@
         "confirmText": "This cannot be undone. You will not be able to sign in to this account again.",
         "cancel": "Cancel",
         "confirm": "Yes, Delete My Account",
-        "deleting": "Deleting…"
+        "deleting": "Deleting…",
+        "passwordLabel": "Enter your password to confirm",
+        "passwordIncorrect": "The password is wrong.",
+        "emailLabel": "Type your account's e-mail ({email}) to confirm",
+        "emailMismatch": "The e-mail does not match your account.",
+        "show": "Show",
+        "hide": "Hide"
       },
       "defaults": {
         "title": "My default preferences",
@@ -154,6 +160,7 @@
           "mismatch": "The passwords do not match.",
           "save": "Change password",
           "saving": "Changing…",
+          "common": "This password is too common and easy to guess. Choose a different one.",
           "incorrect": "The current password is wrong.",
           "saved": "Your password was changed."
         },

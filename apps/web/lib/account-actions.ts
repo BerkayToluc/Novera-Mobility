@@ -17,7 +17,7 @@ import { isMockMode } from "./mode";
 // `incorrect`: the current password is wrong; `rate_limited`: too many tries.
 export type ActionResult =
   | { ok: true }
-  | { ok: false; reason: "unavailable" | "invalid" | "incorrect" | "no_password" | "rate_limited" | "signin"; retryAfter?: number | null };
+  | { ok: false; reason: "unavailable" | "invalid" | "incorrect" | "too_common" | "no_password" | "rate_limited" | "signin"; retryAfter?: number | null };
 
 type User = components["schemas"]["User"];
 
@@ -66,6 +66,7 @@ export async function changePassword(current: string, next: string): Promise<Act
   if (result.status === "invalid" && result.fieldErrors.currentPassword === "INCORRECT") {
     return { ok: false, reason: "incorrect" };
   }
+  if (result.status === "invalid" && result.fieldErrors.newPassword === "PASSWORD_TOO_COMMON") return { ok: false, reason: "too_common" };
   // An account opened with Google has no password to change: it sets one through the reset link.
   if (result.status === "conflict" && result.code === "PASSWORD_NOT_SET") return { ok: false, reason: "no_password" };
   return outcome(result);
@@ -78,11 +79,21 @@ export async function revokeOtherSessions(): Promise<ActionResult> {
   return { ok: true };
 }
 
-// `DELETE /me`: the account goes and the session ends, so the cookies are dropped here too.
-export async function deleteMyAccount(): Promise<ActionResult> {
+// `DELETE /me`: the account goes and the session ends, so the cookies are dropped here too. A stolen session
+// cookie must not be enough, so a password account sends its password and a Google-only account types its
+// e-mail (`incorrect`: the API said INVALID_PASSWORD or EMAIL_MISMATCH).
+export async function deleteMyAccount(input: { currentPassword?: string; confirmEmail?: string }): Promise<ActionResult> {
   if (!(await signedIn())) return { ok: false, reason: "signin" };
+  const { currentPassword, confirmEmail } = input ?? {};
+  if ((currentPassword !== undefined && typeof currentPassword !== "string") || (confirmEmail !== undefined && typeof confirmEmail !== "string")) {
+    return { ok: false, reason: "invalid" };
+  }
   if (isMockMode()) return { ok: false, reason: "unavailable" };
-  const result = outcome(await apiRequest("DELETE", "/me"));
+  const response = await apiRequest("DELETE", "/me", { currentPassword, confirmEmail });
+  if (response.status === "invalid" && (response.fieldErrors.currentPassword === "INVALID_PASSWORD" || response.fieldErrors.confirmEmail === "EMAIL_MISMATCH")) {
+    return { ok: false, reason: "incorrect" };
+  }
+  const result = outcome(response);
   if (result.ok) {
     const jar = await cookies();
     jar.delete(SESSION_COOKIE);

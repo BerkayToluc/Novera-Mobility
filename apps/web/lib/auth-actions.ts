@@ -24,7 +24,7 @@ const googleBody = z.object({ credential: z.string().min(1), consent: z.boolean(
 // not say which). `email_taken`: sign-up with an address that already has an account.
 export type SignInResult =
   | { ok: true; locale: "tr" | "en" | null }
-  | { ok: false; reason: "unavailable" | "invalid" | "email_taken" | "rate_limited"; retryAfter?: number | null };
+  | { ok: false; reason: "unavailable" | "invalid" | "email_taken" | "too_common" | "rate_limited"; retryAfter?: number | null };
 
 type User = components["schemas"]["User"];
 
@@ -153,6 +153,7 @@ export async function signUp(input: {
   if (result.status === "conflict" || (result.status === "invalid" && result.fieldErrors.email === "EMAIL_TAKEN")) {
     return { ok: false, reason: "email_taken" };
   }
+  if (result.status === "invalid" && result.fieldErrors.password === "PASSWORD_TOO_COMMON") return { ok: false, reason: "too_common" };
   if (result.status === "invalid") return { ok: false, reason: "invalid" };
   if (result.status === "rate_limited") return { ok: false, reason: "rate_limited", retryAfter: result.retryAfter };
   return { ok: false, reason: "unavailable" };

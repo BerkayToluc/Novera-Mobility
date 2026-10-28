@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { parseInput, validationFailed } from '../common/zod-validation.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { passwordNotSet } from './auth.errors.js';
-import { changePasswordSchema } from './auth.schemas.js';
+import { changePasswordSchema, deleteAccountSchema } from './auth.schemas.js';
 import { describeDevice } from './device.js';
 import { hashPassword, verifyPassword } from './password.js';
 import type { UserRow } from './user-view.js';
@@ -49,6 +49,23 @@ export class AccountSecurityService {
       // A reset link asked for earlier must not work after the password was changed.
       this.prisma.passwordResetToken.deleteMany({ where: { userId: user.id } }),
     ]);
+  }
+
+  // DELETE /me asks the person to confirm (QUALITY G-14): a stolen session cookie alone must not be enough to delete
+  // an account. With a password, the current password; without one (opened with Google), the e-mail address typed in.
+  async confirmDeletion(user: UserRow, input: unknown): Promise<void> {
+    const { currentPassword, confirmEmail } = parseInput(deleteAccountSchema, input, 'Account deletion data is invalid');
+    if (user.passwordHash !== null) {
+      if (currentPassword === null) throw validationFailed({ currentPassword: 'REQUIRED' }, 'The current password is required');
+      if (!(await verifyPassword(currentPassword, user.passwordHash))) {
+        throw validationFailed({ currentPassword: 'INVALID_PASSWORD' }, 'The password is wrong');
+      }
+      return;
+    }
+    if (confirmEmail === null) throw validationFailed({ confirmEmail: 'REQUIRED' }, 'The e-mail address is required');
+    if (confirmEmail.toLowerCase() !== user.email.toLowerCase()) {
+      throw validationFailed({ confirmEmail: 'EMAIL_MISMATCH' }, 'The e-mail address does not match the account');
+    }
   }
 
   // GET /me/sessions: the open sessions of the account, newest first; the one asking is marked `current`.

@@ -8,6 +8,7 @@ import { MeController } from './me.controller.js';
 import { PasswordResetController } from './password-reset.controller.js';
 import { PasswordResetService } from './password-reset.service.js';
 import { ResetLinkNotifier } from './reset-link-notifier.js';
+import { SessionCleaner } from './session.cleaner.js';
 import { SessionGuard } from './session.guard.js';
 
 // Protected endpoints elsewhere import this module and use `@UseGuards(SessionGuard)`.
@@ -17,7 +18,7 @@ import { SessionGuard } from './session.guard.js';
     AuthService,
     AccountSecurityService,
     PasswordResetService,
-    ResetLinkNotifier, SessionGuard,
+    ResetLinkNotifier, SessionGuard, SessionCleaner,
     GoogleAuthService,
     { provide: GoogleTokenVerifier, useFactory: () => new JoseGoogleTokenVerifier() },
   ],
