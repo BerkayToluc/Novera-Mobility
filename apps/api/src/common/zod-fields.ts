@@ -18,9 +18,9 @@ export function field<T>(check: Check<T>) {
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_REGEX = /^[0-9+()\-.\s]+$/;
-const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 import { isCommonPassword } from './common-passwords.js';
+import { isUuid } from './uuid.js';
 
 export const PASSWORD_MIN = 8;
 export const PASSWORD_MAX = 128;
@@ -101,7 +101,7 @@ export const password = (kind: 'new' | 'presented') =>
 const uuidField = (required: boolean) =>
   field<string | null>((raw) => {
     if (raw === undefined || raw === null || raw === '') return required ? { code: 'REQUIRED' } : { value: null };
-    return typeof raw === 'string' && UUID_REGEX.test(raw) ? { value: raw } : { code: 'INVALID_FORMAT' };
+    return isUuid(raw) ? { value: raw } : { code: 'INVALID_FORMAT' };
   });
 export const requiredUuid = () => uuidField(true) as unknown as z.ZodType<string>;
 export const optionalUuid = () => uuidField(false);

@@ -1,13 +1,13 @@
 import { Inject, Injectable, Logger, type OnModuleDestroy, type OnModuleInit } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { SESSION_IDLE_DAYS } from './session-token.js';
+import { DAY_MS } from '../common/time.js';
 
 // Once a day (V2-10, QUALITY G-13 and V-06): the sessions that ended (expired, or unused for the idle time), the
 // password reset links that expired or were used, and the sign-in wait rows nobody touched for a day. Until now
 // they were only deleted when that person signed in again. Like the other background tasks it runs at each start
 // and every 24 hours while the instance is warm (Cloud Run scales to zero), which is enough here.
-const EVERY_MS = 24 * 60 * 60 * 1000;
-const DAY_MS = 24 * 60 * 60 * 1000;
+const EVERY_MS = DAY_MS;
 
 @Injectable()
 export class SessionCleaner implements OnModuleInit, OnModuleDestroy {

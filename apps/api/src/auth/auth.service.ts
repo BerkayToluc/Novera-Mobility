@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { erasedQuoteFields } from '../forms/retention.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { isUniqueViolation } from '../common/prisma-errors.js';
 import { parseInput } from '../common/zod-validation.js';
 import { emailTaken, invalidCredentials } from './auth.errors.js';
 import {
@@ -31,9 +32,9 @@ import {
   THROTTLE_MEMORY_MS,
 } from './login-throttle.js';
 import type { UserRow } from './user-view.js';
+import { DAY_MS } from '../common/time.js';
 
 // BACKLOG #34 (kayıt, giriş, çıkış) ve #36/#37 (/me): openapi.yaml auth ve me uçları.
-const DAY_MS = 24 * 60 * 60 * 1000;
 
 export interface SessionStart {
   user: UserRow;
@@ -41,14 +42,6 @@ export interface SessionStart {
   expiresAt: Date;
 }
 
-function isUniqueViolation(error: unknown): boolean {
-  return (
-    typeof error === 'object' &&
-    error !== null &&
-    'code' in error &&
-    (error as { code?: unknown }).code === 'P2002'
-  );
-}
 
 @Injectable()
 export class AuthService {

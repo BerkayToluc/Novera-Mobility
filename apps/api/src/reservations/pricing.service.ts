@@ -5,6 +5,7 @@ import { validationFailed } from '../forms/form-input.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { loadPointsLedger } from './points-balance.js';
 import { pointsWorthMinor, redeemablePoints } from './points.rules.js';
+import { DAY_MS } from '../common/time.js';
 import {
   parseReservationRequest,
   type CurrencyCode,
@@ -17,7 +18,6 @@ import {
 
 // Veritabanında kur yoksa kullanılan yedek değerler (CatalogService ile aynı).
 const FALLBACK_RATES: Record<CurrencyCode, number> = { TRY: 1, EUR: 0.02, USD: 0.023 };
-const DAY_MS = 24 * 60 * 60 * 1000;
 
 export interface Money {
   amount: number;

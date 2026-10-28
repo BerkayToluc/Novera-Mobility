@@ -1,9 +1,10 @@
+import { DAY_MS } from './time.js';
 import { Inject, Injectable, Logger, type OnModuleDestroy, type OnModuleInit } from '@nestjs/common';
 import { RateLimitStore } from './rate-limit.store.js';
 
 // Old windows are of no use: the longest one is an hour. Once a day the ones older than a day go (ADR-27).
-const EVERY_MS = 24 * 60 * 60 * 1000;
-const KEEP_MS = 24 * 60 * 60 * 1000;
+const EVERY_MS = DAY_MS;
+const KEEP_MS = DAY_MS;
 
 @Injectable()
 export class RateLimitCleaner implements OnModuleInit, OnModuleDestroy {

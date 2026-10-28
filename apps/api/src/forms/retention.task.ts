@@ -1,11 +1,12 @@
 import { Inject, Injectable, Logger, type OnModuleDestroy, type OnModuleInit } from '@nestjs/common';
+import { DAY_MS } from '../common/time.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { erasedContactFields, erasedQuoteFields, retentionCutoff } from './retention.js';
 
 // Once a day (V2-12, QUALITY V-07): contact messages and quote requests older than the retention period lose their
 // personal fields; the rows stay for the figures. Same pattern as the other background tasks: it runs at each start and
 // every 24 hours while the instance is warm (Cloud Run scales to zero), and each run is safe to repeat.
-const EVERY_MS = 24 * 60 * 60 * 1000;
+const EVERY_MS = DAY_MS;
 
 @Injectable()
 export class RetentionTask implements OnModuleInit, OnModuleDestroy {

@@ -1,10 +1,11 @@
+import { DAY_MS } from '../common/time.js';
 import { Inject, Injectable, Logger, type OnModuleDestroy, type OnModuleInit } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 
 // BACKLOG Y1 (#192, ADR-15): the exchange rates are kept in the ExchangeRate table and refreshed
 // from an outside service about once a day. If the service is down, the last known rate stays.
 export const DEFAULT_RATES_URL = 'https://api.frankfurter.dev/v1/latest';
-export const RATES_MAX_AGE_MS = 24 * 60 * 60 * 1000;
+export const RATES_MAX_AGE_MS = DAY_MS;
 export const RATES_CHECK_EVERY_MS = 60 * 60 * 1000;
 const REQUEST_TIMEOUT_MS = 10_000;
 // A new rate that differs from the stored one by more than this share is treated as a bad feed.

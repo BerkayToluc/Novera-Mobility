@@ -1,15 +1,16 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { parseInput, validationFailed } from '../common/zod-validation.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { isUniqueViolation } from '../common/prisma-errors.js';
 import { emailTaken, googleNotAllowed, googleTokenInvalid, googleUnavailable } from './auth.errors.js';
 import { googleSchema } from './auth.schemas.js';
 import type { SessionStart } from './auth.service.js';
 import { cleanUserAgent } from './device.js';
 import { GoogleTokenError, GoogleTokenVerifier, type GoogleProfile } from './google-verifier.js';
 import { SESSION_DAYS, hashSessionToken, newSessionToken } from './session-token.js';
+import { DAY_MS } from '../common/time.js';
 
 // POST /auth/google: sign in or sign up with a Google ID token (individual accounts only).
-const DAY_MS = 24 * 60 * 60 * 1000;
 const NAME_MAX = 80;
 
 export interface GoogleSignInResult {
@@ -18,9 +19,6 @@ export interface GoogleSignInResult {
   created: boolean;
 }
 
-function isUniqueViolation(error: unknown): boolean {
-  return typeof error === 'object' && error !== null && (error as { code?: unknown }).code === 'P2002';
-}
 
 // Google gives given/family names; when it does not, split the display name, then fall back to the
 // part of the e-mail before the @, so the required name fields are never empty.
