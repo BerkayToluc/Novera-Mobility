@@ -124,8 +124,8 @@ export function SearchableSelect({
             type="text"
             role="combobox"
             aria-label={searchLabel}
-            aria-expanded="true"
-            aria-controls={listId}
+            aria-expanded={shown.length > 0}
+            aria-controls={shown.length > 0 ? listId : undefined}
             aria-autocomplete="list"
             aria-activedescendant={activeOption ? `${listId}-${active}` : undefined}
             autoComplete="off"
