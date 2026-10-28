@@ -12,7 +12,7 @@ export type Reservation = {
   endAt: string;
   days: number;
   totalPrice: Money;
-  vehicle: { brand: string; model: string };
+  vehicle: { brand: string; model: string; imageUrl: string | null };
   pickupCity: string;
   returnCity: string;
   // The branches, for the name, the way there and the phone number (SPEC §2.9, v0.8).

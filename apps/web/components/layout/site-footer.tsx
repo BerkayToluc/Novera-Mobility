@@ -61,6 +61,11 @@ export async function SiteFooter() {
                   </li>
                 ))}
                 <li>
+                  <Link href="/kurumsal-teklif" className={footerLinkClasses}>
+                    <WavyText text={nav("corporateQuote")} />
+                  </Link>
+                </li>
+                <li>
                   <Link href="/rehberler" className={footerLinkClasses}>
                     <WavyText text={nav("guides")} />
                   </Link>

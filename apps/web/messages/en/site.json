@@ -25,6 +25,8 @@
     "language": "Language",
     "currency": "Currency",
     "allProducts": "All products",
+    "getQuote": "Get a quote",
+    "corporateQuote": "Corporate quote",
     "guides": "Guides",
     "help": "Help",
     "account": "My Account"
