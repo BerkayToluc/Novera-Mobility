@@ -45,4 +45,3 @@ export function withPeriodCheck<S extends z.ZodObject>(schema: S, maxDays?: numb
     ),
   );
 }
-

@@ -33,7 +33,10 @@ function bodyOf(path: string, method: string): { properties: string[]; required:
   const operation = document.paths[path]?.[method] as Json | undefined;
   expect(operation).toBeDefined();
   const schema = resolveRef(operation!.requestBody.content['application/json'].schema);
-  return { properties: Object.keys(schema.properties ?? {}).sort((a, b) => a.localeCompare(b)), required: [...(schema.required ?? [])].sort((a, b) => a.localeCompare(b)) };
+  return {
+    properties: Object.keys(schema.properties ?? {}).sort((a, b) => a.localeCompare(b)),
+    required: [...(schema.required ?? [])].sort((a, b) => a.localeCompare(b)),
+  };
 }
 
 // What the zod schema says: its fields, and the ones that insist on a value (an empty body is rejected for them).
@@ -42,8 +45,17 @@ function shapeOf(schema: z.ZodObject): { properties: string[]; required: string[
   const result = schema.safeParse(absent);
   const required = result.success
     ? []
-    : [...new Set(result.error.issues.filter((i) => i.message === 'REQUIRED' || i.message === 'CONSENT_REQUIRED').map((i) => String(i.path[0])))];
-  return { properties: Object.keys(schema.shape).sort((a, b) => a.localeCompare(b)), required: required.sort((a, b) => a.localeCompare(b)) };
+    : [
+        ...new Set(
+          result.error.issues
+            .filter((i) => i.message === 'REQUIRED' || i.message === 'CONSENT_REQUIRED')
+            .map((i) => String(i.path[0])),
+        ),
+      ];
+  return {
+    properties: Object.keys(schema.shape).sort((a, b) => a.localeCompare(b)),
+    required: required.sort((a, b) => a.localeCompare(b)),
+  };
 }
 
 const NOW = new Date('2026-10-26T10:00:00Z');

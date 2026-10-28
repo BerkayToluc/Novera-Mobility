@@ -33,10 +33,15 @@ export class RetentionTask implements OnModuleInit, OnModuleDestroy {
   async run(now: Date = new Date()): Promise<{ contactMessages: number; quoteRequests: number }> {
     const expired = { createdAt: { lt: retentionCutoff(now) }, anonymizedAt: null };
     try {
-      const contactMessages = await this.prisma.contactMessage.updateMany({ where: expired, data: erasedContactFields(now) });
+      const contactMessages = await this.prisma.contactMessage.updateMany({
+        where: expired,
+        data: erasedContactFields(now),
+      });
       const quoteRequests = await this.prisma.quoteRequest.updateMany({ where: expired, data: erasedQuoteFields(now) });
       if (contactMessages.count + quoteRequests.count > 0) {
-        this.logger.log(`Retention: ${contactMessages.count} messages and ${quoteRequests.count} quote requests anonymised`);
+        this.logger.log(
+          `Retention: ${contactMessages.count} messages and ${quoteRequests.count} quote requests anonymised`,
+        );
       }
       return { contactMessages: contactMessages.count, quoteRequests: quoteRequests.count };
     } catch (error) {

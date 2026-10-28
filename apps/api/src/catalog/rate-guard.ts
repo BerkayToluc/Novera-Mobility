@@ -20,7 +20,10 @@ export function judgeRate(stored: number | null, fresh: number, candidate: RateC
 
   // Far from the stored rate. If it also agrees with what the feed said before (same side, within the same margin of the
   // candidate), the clock of that candidate keeps running; otherwise this value starts a new one.
-  const agrees = candidate !== null && Math.sign(candidate.ratePerTry - stored) === Math.sign(fresh - stored) && movedBy(candidate.ratePerTry, fresh) <= MAX_RATE_JUMP;
+  const agrees =
+    candidate !== null &&
+    Math.sign(candidate.ratePerTry - stored) === Math.sign(fresh - stored) &&
+    movedBy(candidate.ratePerTry, fresh) <= MAX_RATE_JUMP;
   const since = agrees ? candidate.since : now;
   if (agrees && now.getTime() - since.getTime() >= CANDIDATE_CONFIRM_AFTER_MS) return { action: 'store' };
   return {

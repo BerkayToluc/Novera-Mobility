@@ -69,16 +69,14 @@ export function toPriceBreakdown(row: ReservationRow): PriceBreakdown {
       unitPrice: money(row.vehicleDailyPrice),
       total: money(row.vehicleDailyPrice * row.days),
     },
-    ...row.extras.map(
-      (item): PriceLine => ({
-        type: 'EXTRA',
-        slug: item.extra.slug,
-        label: { tr: item.extra.nameTr, en: item.extra.nameEn },
-        quantity: item.extra.pricing === 'PER_DAY' ? item.quantity * row.days : item.quantity,
-        unitPrice: money(item.unitPrice),
-        total: money(item.totalPrice),
-      }),
-    ),
+    ...row.extras.map((item): PriceLine => ({
+      type: 'EXTRA',
+      slug: item.extra.slug,
+      label: { tr: item.extra.nameTr, en: item.extra.nameEn },
+      quantity: item.extra.pricing === 'PER_DAY' ? item.quantity * row.days : item.quantity,
+      unitPrice: money(item.unitPrice),
+      total: money(item.totalPrice),
+    })),
   ];
   // The code taken off, as it was when the reservation was made (the code may have changed since).
   if (row.promoCode && row.discountAmount > 0) {

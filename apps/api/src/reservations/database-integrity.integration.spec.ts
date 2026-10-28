@@ -36,25 +36,53 @@ describeDb('database integrity (gerçek PostgreSQL)', () => {
     ids.classId = klass.id;
     const model = await prisma.vehicleModel.create({
       data: {
-        slug: `i-model-${run}`, brand: 'Test', model: 'Model', seats: 5, bags: 3, transmission: 'AUTOMATIC',
-        fuelType: 'PETROL', consumption: 5.5, consumptionUnit: 'L_PER_100KM', dailyPrice: 125000,
-        description: { tr: 'Test', en: 'Test' }, classId: klass.id,
+        slug: `i-model-${run}`,
+        brand: 'Test',
+        model: 'Model',
+        seats: 5,
+        bags: 3,
+        transmission: 'AUTOMATIC',
+        fuelType: 'PETROL',
+        consumption: 5.5,
+        consumptionUnit: 'L_PER_100KM',
+        dailyPrice: 125000,
+        description: { tr: 'Test', en: 'Test' },
+        classId: klass.id,
       },
     });
     ids.modelId = model.id;
     const branch = await prisma.branch.create({
       data: {
-        name: `Test Bayi ${run}`, city: 'Test', address: 'Test', latitude: 1, longitude: 1,
-        phone: '+90 000 000 00 00', email: `integrity-${run}@example.test`,
+        name: `Test Bayi ${run}`,
+        city: 'Test',
+        address: 'Test',
+        latitude: 1,
+        longitude: 1,
+        phone: '+90 000 000 00 00',
+        email: `integrity-${run}@example.test`,
         openingHours: { weekdays: { open: '08:00', close: '20:00' } },
       },
     });
     ids.branchId = branch.id;
-    ids.extraId = (await prisma.extra.create({ data: { slug: `i-extra-${run}`, nameTr: 'T', nameEn: 'T', price: 1000, pricing: 'FIXED' } })).id;
+    ids.extraId = (
+      await prisma.extra.create({
+        data: { slug: `i-extra-${run}`, nameTr: 'T', nameEn: 'T', price: 1000, pricing: 'FIXED' },
+      })
+    ).id;
     for (let i = 0; i < PARALLEL; i += 1) {
-      vehicleIds.push((await prisma.vehicle.create({ data: { plate: `I${run}${i}`, year: 2030, vehicleModelId: model.id, branchId: branch.id } })).id);
+      vehicleIds.push(
+        (
+          await prisma.vehicle.create({
+            data: { plate: `I${run}${i}`, year: 2030, vehicleModelId: model.id, branchId: branch.id },
+          })
+        ).id,
+      );
       userIds.push(
-        (await prisma.user.create({ data: { email: `i${i}-${run}@example.test`, passwordHash: 'x', firstName: 'Test', lastName: 'Integrity' } })).id,
+        (
+          await prisma.user.create({
+            data: { email: `i${i}-${run}@example.test`, passwordHash: 'x', firstName: 'Test', lastName: 'Integrity' },
+          })
+        ).id,
       );
     }
   });
@@ -119,7 +147,9 @@ describeDb('database integrity (gerçek PostgreSQL)', () => {
   describe('CHECK constraints', () => {
     it('a reservation that ends before or when it starts is refused', async () => {
       await expect(insertReservation({ endAt: START })).rejects.toThrow(/Reservation_period_check/);
-      await expect(insertReservation({ endAt: new Date(START.getTime() - DAY_MS) })).rejects.toThrow(/Reservation_period_check/);
+      await expect(insertReservation({ endAt: new Date(START.getTime() - DAY_MS) })).rejects.toThrow(
+        /Reservation_period_check/,
+      );
     });
 
     it('a negative amount, a zero exchange rate or zero days is refused', async () => {
@@ -138,26 +168,44 @@ describeDb('database integrity (gerçek PostgreSQL)', () => {
     it('an extra needs a quantity of at least 1 and no negative amount', async () => {
       const reservation = await insertReservation();
       const extra = (over: Record<string, unknown>) =>
-        prisma.reservationExtra.create({ data: { reservationId: reservation.id, extraId: ids.extraId, unitPrice: 1000, totalPrice: 1000, ...over } as never });
+        prisma.reservationExtra.create({
+          data: {
+            reservationId: reservation.id,
+            extraId: ids.extraId,
+            unitPrice: 1000,
+            totalPrice: 1000,
+            ...over,
+          } as never,
+        });
       await expect(extra({ quantity: 0 })).rejects.toThrow(/ReservationExtra_quantity_check/);
       await expect(extra({ totalPrice: -1 })).rejects.toThrow(/ReservationExtra_amounts_check/);
       await expect(extra({ quantity: 1 })).resolves.toMatchObject({ quantity: 1 });
     });
 
     it('a hold that ends before or when it starts is refused', async () => {
-      await expect(prisma.hold.create({ data: holdData({ endAt: START }) as never })).rejects.toThrow(/Hold_period_check/);
+      await expect(prisma.hold.create({ data: holdData({ endAt: START }) as never })).rejects.toThrow(
+        /Hold_period_check/,
+      );
     });
 
     it('a negative catalog price is refused', async () => {
-      await expect(prisma.vehicleModel.update({ where: { id: ids.modelId }, data: { dailyPrice: -1 } })).rejects.toThrow(/VehicleModel_dailyPrice_check/);
-      await expect(prisma.extra.update({ where: { id: ids.extraId }, data: { price: -1 } })).rejects.toThrow(/Extra_price_check/);
+      await expect(
+        prisma.vehicleModel.update({ where: { id: ids.modelId }, data: { dailyPrice: -1 } }),
+      ).rejects.toThrow(/VehicleModel_dailyPrice_check/);
+      await expect(prisma.extra.update({ where: { id: ids.extraId }, data: { price: -1 } })).rejects.toThrow(
+        /Extra_price_check/,
+      );
     });
   });
 
   describe('foreign keys on holds', () => {
     it('a hold for a branch that does not exist is refused, for pickup and for return', async () => {
-      await expect(prisma.hold.create({ data: holdData({ pickupBranchId: randomUUID() }) as never })).rejects.toThrow(/Hold_pickupBranchId_fkey|foreign key/i);
-      await expect(prisma.hold.create({ data: holdData({ returnBranchId: randomUUID() }) as never })).rejects.toThrow(/Hold_returnBranchId_fkey|foreign key/i);
+      await expect(prisma.hold.create({ data: holdData({ pickupBranchId: randomUUID() }) as never })).rejects.toThrow(
+        /Hold_pickupBranchId_fkey|foreign key/i,
+      );
+      await expect(prisma.hold.create({ data: holdData({ returnBranchId: randomUUID() }) as never })).rejects.toThrow(
+        /Hold_returnBranchId_fkey|foreign key/i,
+      );
     });
   });
 
@@ -173,7 +221,9 @@ describeDb('database integrity (gerçek PostgreSQL)', () => {
 
   describe('indexes', () => {
     it('the lookups that were missing an index have one', async () => {
-      const rows = await prisma.$queryRaw<{ indexname: string }[]>`SELECT indexname FROM pg_indexes WHERE schemaname = current_schema()`;
+      const rows = await prisma.$queryRaw<
+        { indexname: string }[]
+      >`SELECT indexname FROM pg_indexes WHERE schemaname = current_schema()`;
       const names = new Set(rows.map((row) => row.indexname));
       for (const name of [
         'Reservation_pickupBranchId_idx',

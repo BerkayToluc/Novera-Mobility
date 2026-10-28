@@ -90,9 +90,7 @@ describeDb('POST /quotes kurumsal teklif (gerçek PostgreSQL)', () => {
   });
 
   it('5 talep aynı anda gelirse hepsi kaydedilir ve numaralar birbirinden farklıdır', async () => {
-    const results = await Promise.all(
-      Array.from({ length: 5 }, (_, i) => service.create(valid(`par${i}`))),
-    );
+    const results = await Promise.all(Array.from({ length: 5 }, (_, i) => service.create(valid(`par${i}`))));
     const numbers = results.map((r) => r.referenceNumber);
     expect(new Set(numbers).size).toBe(5);
     for (const number of numbers) expect(number).toMatch(NUMBER_FORMAT);
@@ -102,7 +100,13 @@ describeDb('POST /quotes kurumsal teklif (gerçek PostgreSQL)', () => {
 
   it('oturumdaki hesaba bağlanır; GET /me/quotes yalnızca kendi taleplerini yeniden eskiye döner', async () => {
     const owner = await prisma.user.create({
-      data: { email: `quote-${run}-owner@sirket.example`, passwordHash: 'x', firstName: 'A', lastName: 'B', accountType: 'CORPORATE' },
+      data: {
+        email: `quote-${run}-owner@sirket.example`,
+        passwordHash: 'x',
+        firstName: 'A',
+        lastName: 'B',
+        accountType: 'CORPORATE',
+      },
     });
     const other = await prisma.user.create({
       data: { email: `quote-${run}-other@sirket.example`, passwordHash: 'x', firstName: 'C', lastName: 'D' },
@@ -125,9 +129,14 @@ describeDb('POST /quotes kurumsal teklif (gerçek PostgreSQL)', () => {
   });
 
   it('isteğe bağlı alanlar boş bırakılabilir', async () => {
-    const result = await service.create(
-      { companyName: company('min'), email: `quote-${run}-min@sirket.example`, vehicleCount: 1, durationMonths: 1, vehicleType: 'suv', consent: true },
-    );
+    const result = await service.create({
+      companyName: company('min'),
+      email: `quote-${run}-min@sirket.example`,
+      vehicleCount: 1,
+      durationMonths: 1,
+      vehicleType: 'suv',
+      consent: true,
+    });
     const row = await prisma.quoteRequest.findUnique({ where: { number: result.referenceNumber } });
     expect(row?.contactName).toBeNull();
     expect(row?.phone).toBeNull();
@@ -206,6 +215,5 @@ describeDb('POST /quotes kurumsal teklif (gerçek PostgreSQL)', () => {
       expect(bodyOf(error).code).toBe('SPAM_DETECTED');
       expect(await prisma.quoteRequest.count({ where: { companyName: company('spam') } })).toBe(0);
     });
-
   });
 });

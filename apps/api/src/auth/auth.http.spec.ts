@@ -13,7 +13,13 @@ const fake = new FakePrisma();
 @Module({ providers: [{ provide: PrismaService, useValue: fake }], exports: [PrismaService] })
 class FakePrismaModule {}
 
-const VALID = { email: 'ayse@example.com', password: 'guclu-parola-1', firstName: 'Ayşe', lastName: 'Yılmaz', consent: true };
+const VALID = {
+  email: 'ayse@example.com',
+  password: 'guclu-parola-1',
+  firstName: 'Ayşe',
+  lastName: 'Yılmaz',
+  consent: true,
+};
 
 describe('auth HTTP akışı (çerez + korumalı uçlar)', () => {
   let app: INestApplication;
@@ -96,7 +102,10 @@ describe('auth HTTP akışı (çerez + korumalı uçlar)', () => {
 
   it('giriş 200 döner, çıkış 204 döner ve oturumu gerçekten bitirir', async () => {
     await send('/auth/register', { method: 'POST', body: JSON.stringify(VALID) });
-    const login = await send('/auth/login', { method: 'POST', body: JSON.stringify({ email: VALID.email, password: VALID.password }) });
+    const login = await send('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ email: VALID.email, password: VALID.password }),
+    });
     expect(login.status).toBe(200);
     const cookie = cookieOf(login);
     expect((await send('/me', { cookie })).status).toBe(200);
@@ -108,7 +117,10 @@ describe('auth HTTP akışı (çerez + korumalı uçlar)', () => {
 
   it('yanlış parola 401 INVALID_CREDENTIALS, çerez set etmez', async () => {
     await send('/auth/register', { method: 'POST', body: JSON.stringify(VALID) });
-    const response = await send('/auth/login', { method: 'POST', body: JSON.stringify({ email: VALID.email, password: 'yanlis-parola' }) });
+    const response = await send('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ email: VALID.email, password: 'yanlis-parola' }),
+    });
     expect(response.status).toBe(401);
     expect((await response.json()).code).toBe('INVALID_CREDENTIALS');
     expect(response.headers.get('set-cookie')).toBeNull();
@@ -133,7 +145,10 @@ describe('auth HTTP akışı (çerez + korumalı uçlar)', () => {
       const cookie = cookieOf(await send('/auth/register', { method: 'POST', body: JSON.stringify(VALID) }));
       expect((await remove(cookie, { currentPassword: VALID.password })).status).toBe(204);
       expect((await send('/me', { cookie })).status).toBe(401);
-      const login = await send('/auth/login', { method: 'POST', body: JSON.stringify({ email: VALID.email, password: VALID.password }) });
+      const login = await send('/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ email: VALID.email, password: VALID.password }),
+      });
       expect(login.status).toBe(401);
     });
 
@@ -144,7 +159,9 @@ describe('auth HTTP akışı (çerez + korumalı uçlar)', () => {
       expect(((await none.json()) as { fieldErrors: unknown }).fieldErrors).toEqual({ currentPassword: 'REQUIRED' });
       const wrong = await remove(cookie, { currentPassword: 'yanlis-parola-1' });
       expect(wrong.status).toBe(422);
-      expect(((await wrong.json()) as { code: string; fieldErrors: unknown }).fieldErrors).toEqual({ currentPassword: 'INVALID_PASSWORD' });
+      expect(((await wrong.json()) as { code: string; fieldErrors: unknown }).fieldErrors).toEqual({
+        currentPassword: 'INVALID_PASSWORD',
+      });
       expect((await send('/me', { cookie })).status).toBe(200);
       expect(fake.users).toHaveLength(1);
     });
@@ -160,11 +177,33 @@ describe('auth HTTP akışı (çerez + korumalı uçlar)', () => {
       const cookie = cookieOf(await send('/auth/register', { method: 'POST', body: JSON.stringify(VALID) }));
       const userId = fake.users[0]!.id;
       fake.quoteRequests.push(
-        { id: 'q1', userId, companyName: 'Ege', contactName: 'Mert', email: 'mert@example.com', phone: '+90 555', notes: 'kapı kodu' },
-        { id: 'q2', userId: 'someone-else', companyName: 'Başka', contactName: 'Zeynep', email: 'z@example.com', phone: null, notes: null },
+        {
+          id: 'q1',
+          userId,
+          companyName: 'Ege',
+          contactName: 'Mert',
+          email: 'mert@example.com',
+          phone: '+90 555',
+          notes: 'kapı kodu',
+        },
+        {
+          id: 'q2',
+          userId: 'someone-else',
+          companyName: 'Başka',
+          contactName: 'Zeynep',
+          email: 'z@example.com',
+          phone: null,
+          notes: null,
+        },
       );
       expect((await remove(cookie, { currentPassword: VALID.password })).status).toBe(204);
-      expect(fake.quoteRequests[0]).toMatchObject({ companyName: 'Ege', contactName: 'Silindi', email: '', phone: null, notes: null });
+      expect(fake.quoteRequests[0]).toMatchObject({
+        companyName: 'Ege',
+        contactName: 'Silindi',
+        email: '',
+        phone: null,
+        notes: null,
+      });
       expect(fake.quoteRequests[0]!.anonymizedAt).toBeInstanceOf(Date);
       expect(fake.quoteRequests[1]).toMatchObject({ contactName: 'Zeynep', email: 'z@example.com' });
     });
@@ -182,7 +221,9 @@ describe('auth HTTP akışı (çerez + korumalı uçlar)', () => {
       const none = await remove(cookie, {});
       expect(((await none.json()) as { fieldErrors: unknown }).fieldErrors).toEqual({ confirmEmail: 'REQUIRED' });
       const wrong = await remove(cookie, { confirmEmail: 'baska@example.com' });
-      expect(((await wrong.json()) as { fieldErrors: unknown }).fieldErrors).toEqual({ confirmEmail: 'EMAIL_MISMATCH' });
+      expect(((await wrong.json()) as { fieldErrors: unknown }).fieldErrors).toEqual({
+        confirmEmail: 'EMAIL_MISMATCH',
+      });
       expect(fake.users).toHaveLength(1);
       expect((await remove(cookie, { confirmEmail: ` ${VALID.email.toUpperCase()} ` })).status).toBe(204);
       expect(fake.users).toHaveLength(0);

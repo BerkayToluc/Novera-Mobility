@@ -35,7 +35,10 @@ export class SessionCleaner implements OnModuleInit, OnModuleDestroy {
     try {
       const sessions = await this.prisma.session.deleteMany({
         where: {
-          OR: [{ expiresAt: { lte: now } }, { lastUsedAt: { lt: new Date(now.getTime() - SESSION_IDLE_DAYS * DAY_MS) } }],
+          OR: [
+            { expiresAt: { lte: now } },
+            { lastUsedAt: { lt: new Date(now.getTime() - SESSION_IDLE_DAYS * DAY_MS) } },
+          ],
         },
       });
       const resetTokens = await this.prisma.passwordResetToken.deleteMany({

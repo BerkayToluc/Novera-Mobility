@@ -3,11 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { HttpException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { AvailabilityService } from '../catalog/availability.service.js';
-import {
-  HOLD_MINUTES,
-  HoldsService,
-  MAX_ACTIVE_HOLDS_PER_CLIENT,
-} from './holds.service.js';
+import { HOLD_MINUTES, HoldsService, MAX_ACTIVE_HOLDS_PER_CLIENT } from './holds.service.js';
 import { daysAhead, slotAtLeast, slotBefore } from '../reservations/dates.testing.js';
 
 // Entegrasyon testi: POST /holds, gerçek PostgreSQL'e karşı (BACKLOG Y48).
@@ -199,10 +195,7 @@ describeDb('POST /holds araç tutma (gerçek PostgreSQL)', () => {
     it('bitişik aralık (biri diğerinin bittiği anda başlar) çakışma sayılmaz', async () => {
       const s = await scenario();
       await holds.create(holdInput(s, START, END), `client-${randomUUID()}`);
-      const next = await holds.create(
-        holdInput(s, END, new Date(END.getTime() + DAY)),
-        `client-${randomUUID()}`,
-      );
+      const next = await holds.create(holdInput(s, END, new Date(END.getTime() + DAY)), `client-${randomUUID()}`);
       expect(next.vehicleId).toBe(s.vehicleId);
     });
   });
@@ -312,14 +305,10 @@ describeDb('POST /holds araç tutma (gerçek PostgreSQL)', () => {
     it('8 istek aynı anda gelirse yalnızca biri aracı tutar', async () => {
       const s = await scenario();
       const clients = Array.from({ length: 8 }, () => `client-${randomUUID()}`);
-      const results = await Promise.allSettled(
-        clients.map((client) => holds.create(holdInput(s), client)),
-      );
+      const results = await Promise.allSettled(clients.map((client) => holds.create(holdInput(s), client)));
 
       const fulfilled = results.filter((r) => r.status === 'fulfilled');
-      const rejected = results.filter(
-        (r): r is PromiseRejectedResult => r.status === 'rejected',
-      );
+      const rejected = results.filter((r): r is PromiseRejectedResult => r.status === 'rejected');
       expect(fulfilled).toHaveLength(1);
       expect(rejected).toHaveLength(7);
       for (const r of rejected) {
@@ -383,9 +372,7 @@ describeDb('POST /holds araç tutma (gerçek PostgreSQL)', () => {
     it('geçmiş ya da en yakın dilimden önceki başlangıç reddedilir (IN_PAST)', async () => {
       const s = await scenario();
       for (const start of [daysAhead(-1), slotBefore(30)]) {
-        const error = await catchHttp(
-          holds.create(holdInput(s, start, new Date(start.getTime() + DAY)), 'client-x'),
-        );
+        const error = await catchHttp(holds.create(holdInput(s, start, new Date(start.getTime() + DAY)), 'client-x'));
         expect(error.getStatus()).toBe(422);
         expect(bodyOf(error).fieldErrors?.startAt).toBe('IN_PAST');
       }
@@ -410,35 +397,27 @@ describeDb('POST /holds araç tutma (gerçek PostgreSQL)', () => {
 
     it('geçersiz kimlik biçimi reddedilir (INVALID_FORMAT)', async () => {
       const s = await scenario();
-      const error = await catchHttp(
-        holds.create({ ...holdInput(s), vehicleId: 'bu-bir-uuid-degil' }, 'client-x'),
-      );
+      const error = await catchHttp(holds.create({ ...holdInput(s), vehicleId: 'bu-bir-uuid-degil' }, 'client-x'));
       expect(bodyOf(error).fieldErrors?.vehicleId).toBe('INVALID_FORMAT');
     });
 
     it('araç alış bayisinde değilse reddedilir (UNKNOWN_REFERENCE)', async () => {
       const a = await scenario();
       const b = await scenario();
-      const error = await catchHttp(
-        holds.create({ ...holdInput(a), vehicleId: b.vehicleId }, 'client-x'),
-      );
+      const error = await catchHttp(holds.create({ ...holdInput(a), vehicleId: b.vehicleId }, 'client-x'));
       expect(error.getStatus()).toBe(422);
       expect(bodyOf(error).fieldErrors?.vehicleId).toBe('UNKNOWN_REFERENCE');
     });
 
     it('var olmayan araç reddedilir (UNKNOWN_REFERENCE)', async () => {
       const s = await scenario();
-      const error = await catchHttp(
-        holds.create({ ...holdInput(s), vehicleId: randomUUID() }, 'client-x'),
-      );
+      const error = await catchHttp(holds.create({ ...holdInput(s), vehicleId: randomUUID() }, 'client-x'));
       expect(bodyOf(error).fieldErrors?.vehicleId).toBe('UNKNOWN_REFERENCE');
     });
 
     it('var olmayan iade bayisi reddedilir (UNKNOWN_REFERENCE)', async () => {
       const s = await scenario();
-      const error = await catchHttp(
-        holds.create({ ...holdInput(s), returnBranchId: randomUUID() }, 'client-x'),
-      );
+      const error = await catchHttp(holds.create({ ...holdInput(s), returnBranchId: randomUUID() }, 'client-x'));
       expect(bodyOf(error).fieldErrors?.returnBranchId).toBe('UNKNOWN_REFERENCE');
     });
 

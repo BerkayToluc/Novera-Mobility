@@ -39,11 +39,7 @@ export function normalizePromoCode(raw: string): string | null {
 
 export function isThirtyMinuteSlot(date: Date): boolean {
   const minutes = date.getUTCMinutes();
-  return (
-    (minutes === 0 || minutes === 30) &&
-    date.getUTCSeconds() === 0 &&
-    date.getUTCMilliseconds() === 0
-  );
+  return (minutes === 0 || minutes === 30) && date.getUTCSeconds() === 0 && date.getUTCMilliseconds() === 0;
 }
 
 export function parseReservationRequest(input: unknown, now: Date = new Date()): ValidReservationRequest {

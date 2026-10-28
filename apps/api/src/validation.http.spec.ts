@@ -86,41 +86,90 @@ describe('wrong-typed input is 422 on every endpoint (HTTP)', () => {
     { method: 'POST', path: '/auth/google', fields: ['credential', 'consent'] },
     { method: 'POST', path: '/auth/forgot-password', fields: ['email'] },
     { method: 'POST', path: '/auth/reset-password', fields: ['token', 'password'] },
-    { method: 'PATCH', path: '/me', fields: ['firstName', 'lastName', 'locale', 'theme', 'currency', 'notifications'], auth: true },
+    {
+      method: 'PATCH',
+      path: '/me',
+      fields: ['firstName', 'lastName', 'locale', 'theme', 'currency', 'notifications'],
+      auth: true,
+    },
     { method: 'POST', path: '/me/password', fields: ['currentPassword', 'newPassword'], auth: true },
     { method: 'POST', path: '/contact', fields: ['name', 'email', 'phone', 'subject', 'message', 'consent'] },
     {
       method: 'POST',
       path: '/quotes',
-      fields: ['companyName', 'contactName', 'phone', 'email', 'vehicleCount', 'durationMonths', 'vehicleType', 'deliveryCities', 'notes', 'productSlug', 'consent'],
+      fields: [
+        'companyName',
+        'contactName',
+        'phone',
+        'email',
+        'vehicleCount',
+        'durationMonths',
+        'vehicleType',
+        'deliveryCities',
+        'notes',
+        'productSlug',
+        'consent',
+      ],
     },
     { method: 'POST', path: '/holds', fields: ['vehicleId', 'pickupBranchId', 'returnBranchId', 'startAt', 'endAt'] },
     {
       method: 'POST',
       path: '/reservations/price',
-      fields: ['vehicleId', 'holdId', 'pickupBranchId', 'returnBranchId', 'startAt', 'endAt', 'currency', 'extras', 'usePoints', 'promoCode'],
+      fields: [
+        'vehicleId',
+        'holdId',
+        'pickupBranchId',
+        'returnBranchId',
+        'startAt',
+        'endAt',
+        'currency',
+        'extras',
+        'usePoints',
+        'promoCode',
+      ],
     },
     {
       method: 'POST',
       path: '/reservations',
-      fields: ['vehicleId', 'holdId', 'pickupBranchId', 'returnBranchId', 'startAt', 'endAt', 'currency', 'extras', 'usePoints', 'promoCode'],
+      fields: [
+        'vehicleId',
+        'holdId',
+        'pickupBranchId',
+        'returnBranchId',
+        'startAt',
+        'endAt',
+        'currency',
+        'extras',
+        'usePoints',
+        'promoCode',
+      ],
       auth: true,
     },
   ];
 
   describe.each(endpoints)('$method $path', ({ method, path, fields, auth }) => {
-    it.each(bodies(fields, path !== '/me').map((body, index) => [index, body] as const))('body #%i is 422, not 500', async (_index, body) => {
-      const cookie = auth ? await signedIn() : undefined;
-      const response = await send(method, path, body, cookie);
-      expect(response.status).toBe(422);
-      const answer = (await response.json()) as { code: string; fieldErrors?: Record<string, string> };
-      expect(answer.code).toBe('VALIDATION_FAILED');
-      expect(Object.keys(answer.fieldErrors ?? {}).length).toBeGreaterThan(0);
-    });
+    it.each(bodies(fields, path !== '/me').map((body, index) => [index, body] as const))(
+      'body #%i is 422, not 500',
+      async (_index, body) => {
+        const cookie = auth ? await signedIn() : undefined;
+        const response = await send(method, path, body, cookie);
+        expect(response.status).toBe(422);
+        const answer = (await response.json()) as { code: string; fieldErrors?: Record<string, string> };
+        expect(answer.code).toBe('VALIDATION_FAILED');
+        expect(Object.keys(answer.fieldErrors ?? {}).length).toBeGreaterThan(0);
+      },
+    );
   });
 
   it('keeps the field codes of the form endpoints', async () => {
-    const response = await send('POST', '/contact', { name: 5, email: 'x', phone: 'abc', subject: '', message: 'm', consent: false });
+    const response = await send('POST', '/contact', {
+      name: 5,
+      email: 'x',
+      phone: 'abc',
+      subject: '',
+      message: 'm',
+      consent: false,
+    });
     expect(((await response.json()) as { fieldErrors: unknown }).fieldErrors).toEqual({
       name: 'INVALID_FORMAT',
       email: 'INVALID_EMAIL',
@@ -132,7 +181,12 @@ describe('wrong-typed input is 422 on every endpoint (HTTP)', () => {
 
   it('never reads an id or a role from a body: they are dropped', async () => {
     const cookie = await signedIn();
-    const response = await send('PATCH', '/me', { firstName: 'Yeni', id: 'someone-else', role: 'ADMIN', userId: 'x' }, cookie);
+    const response = await send(
+      'PATCH',
+      '/me',
+      { firstName: 'Yeni', id: 'someone-else', role: 'ADMIN', userId: 'x' },
+      cookie,
+    );
     expect(response.status).toBe(200);
     const me = (await response.json()) as { firstName: string; id: string };
     expect(me.firstName).toBe('Yeni');
@@ -147,7 +201,9 @@ describe('wrong-typed input is 422 on every endpoint (HTTP)', () => {
     ])('%s is 422 on %s', async (path, field) => {
       const response = await send('GET', path);
       expect(response.status).toBe(422);
-      expect(((await response.json()) as { fieldErrors: Record<string, string> }).fieldErrors[field]).toBe('INVALID_FORMAT');
+      expect(((await response.json()) as { fieldErrors: Record<string, string> }).fieldErrors[field]).toBe(
+        'INVALID_FORMAT',
+      );
     });
 
     it('a repeated or empty search parameter is 422 too', async () => {

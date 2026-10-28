@@ -47,16 +47,30 @@ describeDb('campaign code caps (gerçek PostgreSQL)', () => {
     ids.classId = klass.id;
     const model = await prisma.vehicleModel.create({
       data: {
-        slug: `p-model-${run}`, brand: 'Test', model: 'Model', seats: 5, bags: 3, transmission: 'AUTOMATIC',
-        fuelType: 'PETROL', consumption: 5.5, consumptionUnit: 'L_PER_100KM', dailyPrice: 125000,
-        description: { tr: 'Test', en: 'Test' }, classId: klass.id,
+        slug: `p-model-${run}`,
+        brand: 'Test',
+        model: 'Model',
+        seats: 5,
+        bags: 3,
+        transmission: 'AUTOMATIC',
+        fuelType: 'PETROL',
+        consumption: 5.5,
+        consumptionUnit: 'L_PER_100KM',
+        dailyPrice: 125000,
+        description: { tr: 'Test', en: 'Test' },
+        classId: klass.id,
       },
     });
     ids.modelId = model.id;
     const branch = await prisma.branch.create({
       data: {
-        name: `Test Bayi ${run}`, city: 'Test', address: 'Test', latitude: 1, longitude: 1,
-        phone: '+90 000 000 00 00', email: `promo-${run}@example.test`,
+        name: `Test Bayi ${run}`,
+        city: 'Test',
+        address: 'Test',
+        latitude: 1,
+        longitude: 1,
+        phone: '+90 000 000 00 00',
+        email: `promo-${run}@example.test`,
         openingHours: { weekdays: { open: '08:00', close: '20:00' } },
       },
     });
@@ -70,7 +84,10 @@ describeDb('campaign code caps (gerçek PostgreSQL)', () => {
     for (const name of ['a', 'b']) {
       const created = await prisma.user.create({
         data: {
-          email: `p-${name}-${run}@example.test`, passwordHash: 'x', firstName: 'Test', lastName: name,
+          email: `p-${name}-${run}@example.test`,
+          passwordHash: 'x',
+          firstName: 'Test',
+          lastName: name,
           accountType: 'INDIVIDUAL',
         },
       });
@@ -97,8 +114,13 @@ describeDb('campaign code caps (gerçek PostgreSQL)', () => {
   const body = (vehicleIndex: number, promoCode: string, startDays = 30) => {
     const startAt = daysAhead(startDays);
     return {
-      vehicleId: vehicleIds[vehicleIndex]!, pickupBranchId: branchId, returnBranchId: branchId,
-      startAt: startAt.toISOString(), endAt: new Date(startAt.getTime() + DAY_MS).toISOString(), currency: 'TRY', promoCode,
+      vehicleId: vehicleIds[vehicleIndex]!,
+      pickupBranchId: branchId,
+      returnBranchId: branchId,
+      startAt: startAt.toISOString(),
+      endAt: new Date(startAt.getTime() + DAY_MS).toISOString(),
+      currency: 'TRY',
+      promoCode,
     };
   };
   const fieldErrorOf = (error: unknown) => {
@@ -146,7 +168,9 @@ describeDb('campaign code caps (gerçek PostgreSQL)', () => {
   it('a cancelled booking gives a capped code back to everyone', async () => {
     const code = await newCode({ maxRedemptions: 1, oncePerUser: false });
     const first = await service.create(users[0]!, body(2, code, 50));
-    expect(fieldErrorOf(await service.create(users[1]!, body(3, code, 50)).catch((e: unknown) => e))).toBe('CODE_EXHAUSTED');
+    expect(fieldErrorOf(await service.create(users[1]!, body(3, code, 50)).catch((e: unknown) => e))).toBe(
+      'CODE_EXHAUSTED',
+    );
     await service.cancel(users[0]!.id, first.id, new Date());
     await expect(service.create(users[1]!, body(3, code, 50))).resolves.toMatchObject({ status: 'CONFIRMED' });
   });

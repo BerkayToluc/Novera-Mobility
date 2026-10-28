@@ -1,10 +1,4 @@
-import {
-  createParamDecorator,
-  Inject,
-  Injectable,
-  type CanActivate,
-  type ExecutionContext,
-} from '@nestjs/common';
+import { createParamDecorator, Inject, Injectable, type CanActivate, type ExecutionContext } from '@nestjs/common';
 import type { Request } from 'express';
 import { unauthenticated } from './auth.errors.js';
 import { AuthService } from './auth.service.js';

@@ -4,20 +4,9 @@ import { PrismaService } from '../prisma/prisma.service.js';
 import { isUniqueViolation } from '../common/prisma-errors.js';
 import { parseInput } from '../common/zod-validation.js';
 import { emailTaken, invalidCredentials } from './auth.errors.js';
-import {
-  LOCALES,
-  THEMES,
-  loginSchema,
-  registerSchema,
-  updateProfileSchema,
-} from './auth.schemas.js';
+import { LOCALES, THEMES, loginSchema, registerSchema, updateProfileSchema } from './auth.schemas.js';
 import { cleanUserAgent } from './device.js';
-import {
-  hashPassword,
-  needsRehash,
-  verifyAgainstDummy,
-  verifyPassword,
-} from './password.js';
+import { hashPassword, needsRehash, verifyAgainstDummy, verifyPassword } from './password.js';
 import { RateLimitedException } from '../common/rate-limit.js';
 import {
   SESSION_DAYS,
@@ -26,11 +15,7 @@ import {
   hashSessionToken,
   newSessionToken,
 } from './session-token.js';
-import {
-  failureWait,
-  FREE_FAILED_ATTEMPTS,
-  THROTTLE_MEMORY_MS,
-} from './login-throttle.js';
+import { failureWait, FREE_FAILED_ATTEMPTS, THROTTLE_MEMORY_MS } from './login-throttle.js';
 import type { UserRow } from './user-view.js';
 import { DAY_MS } from '../common/time.js';
 
@@ -42,20 +27,12 @@ export interface SessionStart {
   expiresAt: Date;
 }
 
-
 @Injectable()
 export class AuthService {
   constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
 
-  async register(
-    input: unknown,
-    userAgent: unknown = null,
-  ): Promise<SessionStart> {
-    const { email, firstName, lastName, password } = parseInput(
-      registerSchema,
-      input,
-      'Registration data is invalid',
-    );
+  async register(input: unknown, userAgent: unknown = null): Promise<SessionStart> {
+    const { email, firstName, lastName, password } = parseInput(registerSchema, input, 'Registration data is invalid');
 
     const existing = await this.prisma.user.findUnique({ where: { email } });
     if (existing) throw emailTaken();
@@ -87,15 +64,8 @@ export class AuthService {
     }
   }
 
-  async login(
-    input: unknown,
-    userAgent: unknown = null,
-  ): Promise<SessionStart> {
-    const { email, password } = parseInput(
-      loginSchema,
-      input,
-      'Login data is invalid',
-    );
+  async login(input: unknown, userAgent: unknown = null): Promise<SessionStart> {
+    const { email, password } = parseInput(loginSchema, input, 'Login data is invalid');
 
     // An address that failed too often has to wait (1, 2, 4 ... at most 15 minutes), the same whether or not it has
     // an account, and also for the right password until the wait is over (QUALITY G-15).
@@ -103,9 +73,7 @@ export class AuthService {
       where: { email },
     });
     if (throttle?.lockedUntil && throttle.lockedUntil.getTime() > Date.now()) {
-      throw new RateLimitedException(
-        Math.ceil((throttle.lockedUntil.getTime() - Date.now()) / 1000),
-      );
+      throw new RateLimitedException(Math.ceil((throttle.lockedUntil.getTime() - Date.now()) / 1000));
     }
 
     const user = await this.prisma.user.findUnique({ where: { email } });
@@ -124,8 +92,7 @@ export class AuthService {
       await this.recordFailure(email);
       throw invalidCredentials();
     }
-    if (throttle)
-      await this.prisma.loginThrottle.deleteMany({ where: { email } });
+    if (throttle) await this.prisma.loginThrottle.deleteMany({ where: { email } });
 
     // The password is known only now: a hash made with an older, cheaper setting is replaced (QUALITY G-12).
     if (needsRehash(user.passwordHash)) {
@@ -160,10 +127,7 @@ export class AuthService {
     const row = await this.prisma.loginThrottle.findUnique({
       where: { email },
     });
-    const failures =
-      row && now - row.updatedAt.getTime() < THROTTLE_MEMORY_MS
-        ? row.failures + 1
-        : 1;
+    const failures = row && now - row.updatedAt.getTime() < THROTTLE_MEMORY_MS ? row.failures + 1 : 1;
     const wait = failures > FREE_FAILED_ATTEMPTS ? failureWait(failures) : 0;
     const lockedUntil = wait > 0 ? new Date(now + wait) : null;
     await this.prisma.loginThrottle.upsert({
@@ -190,10 +154,7 @@ export class AuthService {
     if (!session) return null;
     const now = Date.now();
     const lastUsed = (session.lastUsedAt ?? session.createdAt).getTime();
-    if (
-      session.expiresAt.getTime() <= now ||
-      now - lastUsed > SESSION_IDLE_DAYS * DAY_MS
-    ) {
+    if (session.expiresAt.getTime() <= now || now - lastUsed > SESSION_IDLE_DAYS * DAY_MS) {
       await this.prisma.session.deleteMany({ where: { id: session.id } });
       return null;
     }
@@ -208,11 +169,7 @@ export class AuthService {
 
   // PATCH /me: yalnızca gönderilen alanlar güncellenir. E-posta değiştirilemez (gelirse yok sayılır).
   async updateProfile(userId: string, input: unknown): Promise<UserRow> {
-    const body = parseInput(
-      updateProfileSchema,
-      input,
-      'Profile data is invalid',
-    );
+    const body = parseInput(updateProfileSchema, input, 'Profile data is invalid');
     const data: {
       firstName?: string;
       lastName?: string;
@@ -228,10 +185,8 @@ export class AuthService {
     if (body.theme !== undefined) data.theme = THEMES[body.theme];
     if (body.currency !== undefined) data.currency = body.currency;
     // E-posta tercihleri: { notifications: { reminders?: boolean, campaigns?: boolean } }, gönderilen alan güncellenir.
-    if (body.notifications?.reminders !== undefined)
-      data.notifyReminders = body.notifications.reminders;
-    if (body.notifications?.campaigns !== undefined)
-      data.notifyCampaigns = body.notifications.campaigns;
+    if (body.notifications?.reminders !== undefined) data.notifyReminders = body.notifications.reminders;
+    if (body.notifications?.campaigns !== undefined) data.notifyCampaigns = body.notifications.campaigns;
     return this.prisma.user.update({ where: { id: userId }, data });
   }
 

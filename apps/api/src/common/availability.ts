@@ -18,10 +18,16 @@ export async function hasConflict(
   ignoreHoldId: string | null,
   now: Date,
 ): Promise<boolean> {
-  const reservations = await db.reservation.count({ where: { vehicleId: request.vehicleId, ...blockingReservation(request) } });
+  const reservations = await db.reservation.count({
+    where: { vehicleId: request.vehicleId, ...blockingReservation(request) },
+  });
   if (reservations > 0) return true;
   const holds = await db.hold.count({
-    where: { vehicleId: request.vehicleId, ...blockingHold(request, now), ...(ignoreHoldId ? { id: { not: ignoreHoldId } } : {}) },
+    where: {
+      vehicleId: request.vehicleId,
+      ...blockingHold(request, now),
+      ...(ignoreHoldId ? { id: { not: ignoreHoldId } } : {}),
+    },
   });
   return holds > 0;
 }

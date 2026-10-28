@@ -44,8 +44,24 @@ class FakeDb {
   ];
   rates: Row[] = [{ currency: 'EUR', ratePerTry: '0.02300000' }];
   promoCodes: Row[] = [
-    { code: 'NOVERA10', percent: 10, active: true, validFrom: null, validUntil: null, maxRedemptions: null, oncePerUser: true },
-    { code: 'HOSGELDIN', percent: 5, active: true, validFrom: null, validUntil: null, maxRedemptions: null, oncePerUser: true },
+    {
+      code: 'NOVERA10',
+      percent: 10,
+      active: true,
+      validFrom: null,
+      validUntil: null,
+      maxRedemptions: null,
+      oncePerUser: true,
+    },
+    {
+      code: 'HOSGELDIN',
+      percent: 5,
+      active: true,
+      validFrom: null,
+      validUntil: null,
+      maxRedemptions: null,
+      oncePerUser: true,
+    },
   ];
   branches = [IDS.pickup, IDS.dropoff];
   reservations: Row[] = [];
@@ -64,8 +80,7 @@ class FakeDb {
     findUnique: async ({ where }: any) => this.rates.find((r) => r.currency === where.currency) ?? null,
   };
   branch = {
-    findMany: async ({ where }: any) =>
-      this.branches.filter((id) => where.id.in.includes(id)).map((id) => ({ id })),
+    findMany: async ({ where }: any) => this.branches.filter((id) => where.id.in.includes(id)).map((id) => ({ id })),
   };
   reservation = {
     count: async ({ where }: any) =>
@@ -77,12 +92,12 @@ class FakeDb {
               (where.userId === undefined || r.userId === where.userId),
           ).length
         : this.reservations.filter(
-        (r) =>
-          r.vehicleId === where.vehicleId &&
-          r.status === where.status &&
-          r.startAt < where.startAt.lt &&
-          r.endAt > where.endAt.gt,
-      ).length,
+            (r) =>
+              r.vehicleId === where.vehicleId &&
+              r.status === where.status &&
+              r.startAt < where.startAt.lt &&
+              r.endAt > where.endAt.gt,
+          ).length,
   };
   hold = {
     count: async ({ where }: any) =>
@@ -171,7 +186,9 @@ describe('parseReservationRequest', () => {
   };
 
   it('biçim, dilim ve aralık hatalarını sabit kodlarla döner', () => {
-    expect(fieldErrorsOf({ ...base, vehicleId: 'x', currency: 'GBP', startAt: START.replace('T10:00:00', 'T10:15:00') })).toEqual({
+    expect(
+      fieldErrorsOf({ ...base, vehicleId: 'x', currency: 'GBP', startAt: START.replace('T10:00:00', 'T10:15:00') }),
+    ).toEqual({
       vehicleId: 'INVALID_FORMAT',
       currency: 'INVALID_FORMAT',
       startAt: 'NOT_IN_SLOT',
@@ -182,7 +199,11 @@ describe('parseReservationRequest', () => {
   });
 
   it('başlangıç geçmişteyse ya da en yakın dilimden önceyse IN_PAST, bir yıldan uzaksa OUT_OF_RANGE (G-01)', () => {
-    const inDay = (start: Date) => ({ ...base, startAt: start.toISOString(), endAt: new Date(start.getTime() + DAY_MS).toISOString() });
+    const inDay = (start: Date) => ({
+      ...base,
+      startAt: start.toISOString(),
+      endAt: new Date(start.getTime() + DAY_MS).toISOString(),
+    });
     expect(fieldErrorsOf(inDay(daysAhead(-1)))).toEqual({ startAt: 'IN_PAST' });
     expect(fieldErrorsOf(inDay(slotBefore(30)))).toEqual({ startAt: 'IN_PAST' });
     expect(() => parseReservationRequest(inDay(slotAtLeast(30)))).not.toThrow();
@@ -207,7 +228,15 @@ describe('parseReservationRequest', () => {
     expect(fieldErrorsOf({ ...base, extras: [{ slug: 'a', quantity: 0 }] })).toEqual({ extras: 'OUT_OF_RANGE' });
     expect(fieldErrorsOf({ ...base, extras: [{ slug: 'a', quantity: 11 }] })).toEqual({ extras: 'OUT_OF_RANGE' });
     expect(fieldErrorsOf({ ...base, extras: [{ slug: 'a', quantity: 1.5 }] })).toEqual({ extras: 'INVALID_FORMAT' });
-    expect(fieldErrorsOf({ ...base, extras: [{ slug: 'a', quantity: 1 }, { slug: 'a', quantity: 2 }] })).toEqual({
+    expect(
+      fieldErrorsOf({
+        ...base,
+        extras: [
+          { slug: 'a', quantity: 1 },
+          { slug: 'a', quantity: 2 },
+        ],
+      }),
+    ).toEqual({
       extras: 'INVALID_FORMAT',
     });
     expect(fieldErrorsOf({ ...base, extras: [{ quantity: 1 }] })).toEqual({ extras: 'INVALID_FORMAT' });
@@ -287,7 +316,10 @@ describe('PricingService.price', () => {
 
   it('bilinmeyen bayi, araç, başka bayideki araç, pasif araç ve ek hizmet 422 UNKNOWN_REFERENCE', async () => {
     const branch = await catchHttp(service.price({ ...base, returnBranchId: IDS.other }));
-    expect(bodyOf(branch)).toMatchObject({ code: 'VALIDATION_FAILED', fieldErrors: { returnBranchId: 'UNKNOWN_REFERENCE' } });
+    expect(bodyOf(branch)).toMatchObject({
+      code: 'VALIDATION_FAILED',
+      fieldErrors: { returnBranchId: 'UNKNOWN_REFERENCE' },
+    });
 
     const missing = await catchHttp(service.price({ ...base, vehicleId: IDS.other }));
     expect(bodyOf(missing).fieldErrors).toEqual({ vehicleId: 'UNKNOWN_REFERENCE' });
@@ -322,7 +354,12 @@ describe('PricingService.price', () => {
 
     it('yarı açık aralık: biri diğerinin bittiği anda başlayabilir', async () => {
       db.reservations.push({ vehicleId: IDS.vehicle, status: 'CONFIRMED', startAt: startPlus(3), endAt: startPlus(5) });
-      db.reservations.push({ vehicleId: IDS.vehicle, status: 'CONFIRMED', startAt: startPlus(-2), endAt: startPlus(0) });
+      db.reservations.push({
+        vehicleId: IDS.vehicle,
+        status: 'CONFIRMED',
+        startAt: startPlus(-2),
+        endAt: startPlus(0),
+      });
       await expect(service.price({ ...base })).resolves.toBeDefined();
     });
 
@@ -382,7 +419,11 @@ describe('kampanya kodu', () => {
   });
 
   it('kalemlerin toplamı (indirim dahil) total ile tam eşittir', async () => {
-    const result = await service.price({ ...base, promoCode: 'HOSGELDIN', extras: [{ slug: 'cocuk-koltugu', quantity: 3 }] });
+    const result = await service.price({
+      ...base,
+      promoCode: 'HOSGELDIN',
+      extras: [{ slug: 'cocuk-koltugu', quantity: 3 }],
+    });
     expect(result.lines.reduce((sum, line) => sum + line.total.amount, 0)).toBe(result.total.amount);
   });
 
@@ -398,7 +439,7 @@ describe('kampanya kodu', () => {
     expect(result.promo).toEqual({ code: 'NOVERA10', applied: true, percent: 10 });
   });
 
-  it('EUR\'da indirim dönüştürülmüş tutar üzerinden hesaplanır', async () => {
+  it("EUR'da indirim dönüştürülmüş tutar üzerinden hesaplanır", async () => {
     const result = await service.price({ ...base, currency: 'EUR', promoCode: 'NOVERA10' });
     const vehicleTotal = 2875 * 3; // 8 625
     expect(discountOf(result)!.total).toEqual({ amount: -Math.floor(vehicleTotal / 10), currency: 'EUR' });
@@ -420,7 +461,15 @@ describe('kampanya kodu', () => {
     const alice = { id: 'alice', accountType: 'INDIVIDUAL' } as unknown as UserRow;
 
     it('toplam tavanı dolmuş kod uygulanmaz ve cevap olmayan kodla aynı biçimdedir', async () => {
-      db.promoCodes.push({ code: 'TEKLIK', percent: 20, active: true, validFrom: null, validUntil: null, maxRedemptions: 1, oncePerUser: false });
+      db.promoCodes.push({
+        code: 'TEKLIK',
+        percent: 20,
+        active: true,
+        validFrom: null,
+        validUntil: null,
+        maxRedemptions: 1,
+        oncePerUser: false,
+      });
       db.reservations.push(used('TEKLIK', 'someone'));
       const exhausted = await service.price({ ...base, promoCode: 'TEKLIK' });
       const missing = await service.price({ ...base, promoCode: 'YOKBOYLEKOD' });
@@ -430,14 +479,30 @@ describe('kampanya kodu', () => {
     });
 
     it('iptal edilen rezervasyon kodu geri verir', async () => {
-      db.promoCodes.push({ code: 'TEKLIK', percent: 20, active: true, validFrom: null, validUntil: null, maxRedemptions: 1, oncePerUser: false });
+      db.promoCodes.push({
+        code: 'TEKLIK',
+        percent: 20,
+        active: true,
+        validFrom: null,
+        validUntil: null,
+        maxRedemptions: 1,
+        oncePerUser: false,
+      });
       db.reservations.push(used('TEKLIK', 'someone', 'CANCELLED'));
       const result = await service.price({ ...base, promoCode: 'TEKLIK' });
       expect(result.promo).toEqual({ code: 'TEKLIK', applied: true, percent: 20 });
     });
 
     it('kişi başı tek kullanım: kullanmış kişide uygulanmaz, başkasında ve girişsizde uygulanır', async () => {
-      db.promoCodes.push({ code: 'BIRKEZ', percent: 20, active: true, validFrom: null, validUntil: null, maxRedemptions: null, oncePerUser: true });
+      db.promoCodes.push({
+        code: 'BIRKEZ',
+        percent: 20,
+        active: true,
+        validFrom: null,
+        validUntil: null,
+        maxRedemptions: null,
+        oncePerUser: true,
+      });
       db.reservations.push(used('BIRKEZ', 'alice'));
       expect((await service.price({ ...base, promoCode: 'BIRKEZ' }, alice)).promo?.applied).toBe(false);
       const bob = { id: 'bob', accountType: 'INDIVIDUAL' } as unknown as UserRow;
@@ -446,7 +511,15 @@ describe('kampanya kodu', () => {
     });
 
     it('oncePerUser kapalıysa aynı kişi tekrar kullanabilir', async () => {
-      db.promoCodes.push({ code: 'HERKEZ', percent: 20, active: true, validFrom: null, validUntil: null, maxRedemptions: null, oncePerUser: false });
+      db.promoCodes.push({
+        code: 'HERKEZ',
+        percent: 20,
+        active: true,
+        validFrom: null,
+        validUntil: null,
+        maxRedemptions: null,
+        oncePerUser: false,
+      });
       db.reservations.push(used('HERKEZ', 'alice'));
       expect((await service.price({ ...base, promoCode: 'HERKEZ' }, alice)).promo?.applied).toBe(true);
     });
@@ -457,7 +530,13 @@ describe('kampanya kodu', () => {
       { code: 'KAPALI', percent: 20, active: false, validFrom: null, validUntil: null },
       { code: 'YAKINDA', percent: 20, active: true, validFrom: new Date(Date.now() + 3600_000), validUntil: null },
       { code: 'BITTI', percent: 20, active: true, validFrom: null, validUntil: new Date(Date.now() - 3600_000) },
-      { code: 'SURELI', percent: 20, active: true, validFrom: new Date(Date.now() - 3600_000), validUntil: new Date(Date.now() + 3600_000) },
+      {
+        code: 'SURELI',
+        percent: 20,
+        active: true,
+        validFrom: new Date(Date.now() - 3600_000),
+        validUntil: new Date(Date.now() + 3600_000),
+      },
     );
     for (const code of ['KAPALI', 'YAKINDA', 'BITTI']) {
       const result = await service.price({ ...base, promoCode: code });

@@ -9,11 +9,7 @@ import { PrismaService } from '../prisma/prisma.service.js';
 import { loadPointsLedger } from './points-balance.js';
 import { pointsWorthMinor, redeemablePoints } from './points.rules.js';
 import { rentalDays } from '../common/time.js';
-import {
-  parseReservationRequest,
-  type CurrencyCode,
-  type ValidReservationRequest,
-} from './reservation-input.js';
+import { parseReservationRequest, type CurrencyCode, type ValidReservationRequest } from './reservation-input.js';
 
 // POST /reservations/price: rezervasyon oluşturmadan kalem kalem fiyat (openapi.yaml PriceBreakdown).
 // Kural (ADR-15, openapi): birim fiyat ÖNCE hedef para birimine çevrilip yuvarlanır, SONRA adet/günle
@@ -165,16 +161,11 @@ export class PricingService {
       include: { vehicleModel: true },
     });
     if (!vehicle || !vehicle.active || vehicle.branchId !== request.pickupBranchId) {
-      throw validationFailed(
-        { vehicleId: 'UNKNOWN_REFERENCE' },
-        'Vehicle not found at the pickup branch',
-      );
+      throw validationFailed({ vehicleId: 'UNKNOWN_REFERENCE' }, 'Vehicle not found at the pickup branch');
     }
 
     const slugs = request.extras.map((selection) => selection.slug);
-    const extras = slugs.length
-      ? await db.extra.findMany({ where: { slug: { in: slugs } } })
-      : [];
+    const extras = slugs.length ? await db.extra.findMany({ where: { slug: { in: slugs } } }) : [];
     const extraBySlug = new Map(extras.map((extra) => [extra.slug, extra]));
     if (slugs.some((slug) => !extraBySlug.has(slug))) {
       throw validationFailed({ extras: 'UNKNOWN_REFERENCE' }, 'Extra service not found');

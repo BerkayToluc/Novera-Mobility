@@ -154,13 +154,7 @@ describeDb('GET /vehicles müsaitlik sorgusu (gerçek PostgreSQL)', () => {
     });
   }
 
-  async function hold(
-    vehicleId: string,
-    branchId: string,
-    startAt: Date,
-    endAt: Date,
-    expiresAt: Date,
-  ): Promise<void> {
+  async function hold(vehicleId: string, branchId: string, startAt: Date, endAt: Date, expiresAt: Date): Promise<void> {
     await prisma.hold.create({
       data: {
         vehicleId,
@@ -208,8 +202,16 @@ describeDb('GET /vehicles müsaitlik sorgusu (gerçek PostgreSQL)', () => {
 
     const overlaps: Array<[string, Date, Date]> = [
       ['aralığın içinde', new Date(START.getTime() + DAY), new Date(START.getTime() + 2 * DAY)],
-      ['başlangıçtan önce başlar, aralığın içinde biter', new Date(START.getTime() - DAY), new Date(START.getTime() + DAY)],
-      ['aralığın içinde başlar, bitişten sonra biter', new Date(START.getTime() + 2 * DAY), new Date(END.getTime() + DAY)],
+      [
+        'başlangıçtan önce başlar, aralığın içinde biter',
+        new Date(START.getTime() - DAY),
+        new Date(START.getTime() + DAY),
+      ],
+      [
+        'aralığın içinde başlar, bitişten sonra biter',
+        new Date(START.getTime() + 2 * DAY),
+        new Date(END.getTime() + DAY),
+      ],
       ['tüm aralığı kapsar', new Date(START.getTime() - DAY), new Date(END.getTime() + DAY)],
       ['aralıkla birebir aynı', START, END],
     ];

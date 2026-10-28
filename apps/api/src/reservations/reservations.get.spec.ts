@@ -32,16 +32,27 @@ function row(over: Row = {}): Row {
       id: 'v1',
       year: 2026,
       vehicleModel: {
-        slug: 'toyota-corolla', brand: 'Toyota', model: 'Corolla', seats: 5, bags: 3, transmission: 'AUTOMATIC',
-        fuelType: 'PETROL', consumption: 5, consumptionUnit: 'L_PER_100KM', description: { tr: 't', en: 't' },
-        imageUrl: null, class: { slug: 'c', nameTr: 'C', nameEn: 'C' },
+        slug: 'toyota-corolla',
+        brand: 'Toyota',
+        model: 'Corolla',
+        seats: 5,
+        bags: 3,
+        transmission: 'AUTOMATIC',
+        fuelType: 'PETROL',
+        consumption: 5,
+        consumptionUnit: 'L_PER_100KM',
+        description: { tr: 't', en: 't' },
+        imageUrl: null,
+        class: { slug: 'c', nameTr: 'C', nameEn: 'C' },
       },
     },
     pickupBranch: { id: 'b1', name: 'P', city: 'X' },
     returnBranch: { id: 'b1', name: 'P', city: 'X' },
     extras: [
       {
-        quantity: 2, unitPrice: 12000, totalPrice: 24000,
+        quantity: 2,
+        unitPrice: 12000,
+        totalPrice: 24000,
         extra: { slug: 'cocuk-koltugu', nameTr: 'Çocuk koltuğu', nameEn: 'Child seat', pricing: 'PER_DAY' },
       },
     ],
@@ -69,7 +80,7 @@ async function failure(promise: Promise<unknown>): Promise<HttpException> {
 }
 
 describe('ReservationsService.getMine', () => {
-  it('returns the signed-in user\'s reservation in the same shape as the list', async () => {
+  it("returns the signed-in user's reservation in the same shape as the list", async () => {
     const service = setup([row()]);
     const view = await service.getMine(OWNER, 'r1');
     expect(view.id).toBe('r1');
@@ -78,7 +89,7 @@ describe('ReservationsService.getMine', () => {
     expect(view.pointsEarned).toBe(3);
   });
 
-  it('carries the vehicle\'s year', async () => {
+  it("carries the vehicle's year", async () => {
     const view = await setup([row()]).getMine(OWNER, 'r1');
     expect(view.vehicle.year).toBe(2026);
   });
@@ -105,7 +116,7 @@ describe('ReservationsService.getMine', () => {
     expect(view.pointsEarned).toBe(0);
   });
 
-  it('someone else\'s reservation is 404 NOT_FOUND, the same as an unknown one', async () => {
+  it("someone else's reservation is 404 NOT_FOUND, the same as an unknown one", async () => {
     const service = setup([row()]);
     const other = await failure(service.getMine('someone-else', 'r1'));
     expect(other.getStatus()).toBe(404);

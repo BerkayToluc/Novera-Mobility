@@ -14,7 +14,13 @@ function setup(rows: Row[], answer: () => Promise<Response>, candidates: Candida
   const prisma = {
     rateCandidate: {
       findMany: async () => candidates,
-      upsert: async ({ where, create }: { where: { currency: string }; create: { ratePerTry: number; since: Date } }) => {
+      upsert: async ({
+        where,
+        create,
+      }: {
+        where: { currency: string };
+        create: { ratePerTry: number; since: Date };
+      }) => {
         const at = candidates.findIndex((entry) => entry.currency === where.currency);
         const next = { currency: where.currency, ratePerTry: create.ratePerTry, since: create.since };
         if (at >= 0) candidates[at] = next;
@@ -40,8 +46,10 @@ function setup(rows: Row[], answer: () => Promise<Response>, candidates: Candida
   return { updater, upserts, calls, candidates };
 }
 
-const json = (body: unknown, status = 200) => async () =>
-  new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } });
+const json =
+  (body: unknown, status = 200) =>
+  async () =>
+    new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } });
 
 const fresh = (age: number): Row[] => [
   { currency: 'EUR', ratePerTry: 0.018, updatedAt: new Date(NOW.getTime() - age) },

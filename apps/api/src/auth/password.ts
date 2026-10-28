@@ -24,8 +24,7 @@ export function currentCost(): number {
 let running = 0;
 const waiting: Array<() => void> = [];
 async function turn<T>(work: () => Promise<T>): Promise<T> {
-  if (running >= HASH_CONCURRENCY)
-    await new Promise<void>((resolve) => waiting.push(resolve));
+  if (running >= HASH_CONCURRENCY) await new Promise<void>((resolve) => waiting.push(resolve));
   running += 1;
   try {
     return await work();
@@ -57,33 +56,13 @@ function derive(
   );
 }
 
-export async function hashPassword(
-  password: string,
-  cost: number = currentCost(),
-): Promise<string> {
+export async function hashPassword(password: string, cost: number = currentCost()): Promise<string> {
   const salt = randomBytes(SALT_LENGTH);
-  const key = await derive(
-    password,
-    salt,
-    cost,
-    BLOCK_SIZE,
-    PARALLELISM,
-    KEY_LENGTH,
-  );
-  return [
-    'scrypt',
-    cost,
-    BLOCK_SIZE,
-    PARALLELISM,
-    salt.toString('base64'),
-    key.toString('base64'),
-  ].join('$');
+  const key = await derive(password, salt, cost, BLOCK_SIZE, PARALLELISM, KEY_LENGTH);
+  return ['scrypt', cost, BLOCK_SIZE, PARALLELISM, salt.toString('base64'), key.toString('base64')].join('$');
 }
 
-export async function verifyPassword(
-  password: string,
-  stored: string,
-): Promise<boolean> {
+export async function verifyPassword(password: string, stored: string): Promise<boolean> {
   const parts = stored.split('$');
   if (parts.length !== 6 || parts[0] !== 'scrypt') return false;
   const cost = Number(parts[1]);
@@ -91,23 +70,10 @@ export async function verifyPassword(
   const parallelism = Number(parts[3]);
   const salt = Buffer.from(parts[4] ?? '', 'base64');
   const expected = Buffer.from(parts[5] ?? '', 'base64');
-  if (
-    !cost ||
-    !blockSize ||
-    !parallelism ||
-    salt.length === 0 ||
-    expected.length === 0
-  ) {
+  if (!cost || !blockSize || !parallelism || salt.length === 0 || expected.length === 0) {
     return false;
   }
-  const actual = await derive(
-    password,
-    salt,
-    cost,
-    blockSize,
-    parallelism,
-    expected.length,
-  );
+  const actual = await derive(password, salt, cost, blockSize, parallelism, expected.length);
   return actual.length === expected.length && timingSafeEqual(actual, expected);
 }
 

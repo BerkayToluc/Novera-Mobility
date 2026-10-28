@@ -8,7 +8,6 @@ import { AuthModule } from './auth/auth.module.js';
 import { ReservationsModule } from './reservations/reservations.module.js';
 import { RateLimitModule } from './common/rate-limit.module.js';
 
-
 @Module({
   imports: [
     PrismaModule,

@@ -39,7 +39,10 @@ function routesOf(controller: new (...args: never[]) => object): Route[] {
   const base = Reflect.getMetadata(PATH_METADATA, controller) as string;
   const classExempt = Reflect.getMetadata(NO_RATE_LIMIT_METADATA, controller) === true;
   return Object.getOwnPropertyNames(controller.prototype)
-    .map((name) => controller.prototype[name as keyof typeof controller.prototype] as unknown as (...a: never[]) => unknown)
+    .map(
+      (name) =>
+        controller.prototype[name as keyof typeof controller.prototype] as unknown as (...a: never[]) => unknown,
+    )
     .filter((handler) => typeof handler === 'function' && Reflect.getMetadata(METHOD_METADATA, handler) !== undefined)
     .map((handler) => {
       const method = RequestMethod[Reflect.getMetadata(METHOD_METADATA, handler) as number]!;
@@ -71,10 +74,13 @@ describe('rate limits and docs/SECURITY.md', () => {
     },
   );
 
-  it.each(Object.values(LIMITS).map((spec) => [spec.bucket, spec] as const))('the bucket %s is in the table with its limit', (bucket) => {
-    const row = security.split('\n').find((line) => line.includes(`\`${bucket}\``));
-    expect(row).toBeDefined();
-  });
+  it.each(Object.values(LIMITS).map((spec) => [spec.bucket, spec] as const))(
+    'the bucket %s is in the table with its limit',
+    (bucket) => {
+      const row = security.split('\n').find((line) => line.includes(`\`${bucket}\``));
+      expect(row).toBeDefined();
+    },
+  );
 
   it('every limit of an endpoint belongs to a known bucket', () => {
     const known = new Set(Object.values(LIMITS).map((spec) => spec.bucket));

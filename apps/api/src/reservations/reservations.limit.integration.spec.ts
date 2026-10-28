@@ -38,16 +38,30 @@ describeDb('reservation cap and hold ownership (gerçek PostgreSQL)', () => {
     ids.classId = klass.id;
     const model = await prisma.vehicleModel.create({
       data: {
-        slug: `l-model-${run}`, brand: 'Test', model: 'Model', seats: 5, bags: 3, transmission: 'AUTOMATIC',
-        fuelType: 'PETROL', consumption: 5.5, consumptionUnit: 'L_PER_100KM', dailyPrice: 125000,
-        description: { tr: 'Test', en: 'Test' }, classId: klass.id,
+        slug: `l-model-${run}`,
+        brand: 'Test',
+        model: 'Model',
+        seats: 5,
+        bags: 3,
+        transmission: 'AUTOMATIC',
+        fuelType: 'PETROL',
+        consumption: 5.5,
+        consumptionUnit: 'L_PER_100KM',
+        dailyPrice: 125000,
+        description: { tr: 'Test', en: 'Test' },
+        classId: klass.id,
       },
     });
     ids.modelId = model.id;
     const branch = await prisma.branch.create({
       data: {
-        name: `Test Bayi ${run}`, city: 'Test', address: 'Test', latitude: 1, longitude: 1,
-        phone: '+90 000 000 00 00', email: `limit-${run}@example.test`,
+        name: `Test Bayi ${run}`,
+        city: 'Test',
+        address: 'Test',
+        latitude: 1,
+        longitude: 1,
+        phone: '+90 000 000 00 00',
+        email: `limit-${run}@example.test`,
         openingHours: { weekdays: { open: '08:00', close: '20:00' } },
       },
     });
@@ -60,7 +74,10 @@ describeDb('reservation cap and hold ownership (gerçek PostgreSQL)', () => {
     }
     const created = await prisma.user.create({
       data: {
-        email: `l-${run}@example.test`, passwordHash: 'x', firstName: 'Test', lastName: 'Limit',
+        email: `l-${run}@example.test`,
+        passwordHash: 'x',
+        firstName: 'Test',
+        lastName: 'Limit',
         accountType: 'INDIVIDUAL',
       },
     });
@@ -80,11 +97,14 @@ describeDb('reservation cap and hold ownership (gerçek PostgreSQL)', () => {
   });
 
   const body = (vehicleId: string, startAt = START, days = 1) => ({
-    vehicleId, pickupBranchId: branchId, returnBranchId: branchId,
-    startAt: startAt.toISOString(), endAt: new Date(startAt.getTime() + days * DAY_MS).toISOString(), currency: 'TRY',
+    vehicleId,
+    pickupBranchId: branchId,
+    returnBranchId: branchId,
+    startAt: startAt.toISOString(),
+    endAt: new Date(startAt.getTime() + days * DAY_MS).toISOString(),
+    currency: 'TRY',
   });
-  const activeCount = () =>
-    prisma.reservation.count({ where: { userId: ids.userId, status: 'CONFIRMED' } });
+  const activeCount = () => prisma.reservation.count({ where: { userId: ids.userId, status: 'CONFIRMED' } });
 
   it('simultaneous bookings on different cars still stop at the cap', async () => {
     const results = await Promise.allSettled(vehicleIds.map((id) => service.create(user, body(id))));
@@ -115,8 +135,12 @@ describeDb('reservation cap and hold ownership (gerçek PostgreSQL)', () => {
     const startAt = daysAhead(90);
     const hold = await prisma.hold.create({
       data: {
-        vehicleId, pickupBranchId: branchId, returnBranchId: branchId, startAt,
-        endAt: new Date(startAt.getTime() + DAY_MS), expiresAt: new Date(Date.now() + 10 * 60_000),
+        vehicleId,
+        pickupBranchId: branchId,
+        returnBranchId: branchId,
+        startAt,
+        endAt: new Date(startAt.getTime() + DAY_MS),
+        expiresAt: new Date(Date.now() + 10 * 60_000),
         clientKey: 'owner-client',
       },
     });

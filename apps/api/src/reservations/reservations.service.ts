@@ -14,10 +14,7 @@ import {
 import { loadPointsLedger } from './points-balance.js';
 import { POINTS_RULES, pointsForTotal } from './points.rules.js';
 import { parseReservationRequest } from './reservation-input.js';
-import {
-  RESERVATION_INCLUDE,
-  toReservationView,
-} from './reservation-view.js';
+import { RESERVATION_INCLUDE, toReservationView } from './reservation-view.js';
 
 // One account cannot hold more than this many upcoming or running bookings at once (G, 24 Ekim: 3); no
 // payment is taken, so without a cap one account could lock the whole fleet for months (QUALITY G-02).
@@ -46,9 +43,7 @@ function notCancellable(): HttpException {
 
 // Numara yılı Türkiye saatine göre belirlenir (ADR-16).
 function istanbulYear(date: Date): number {
-  return Number(
-    new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Istanbul', year: 'numeric' }).format(date),
-  );
+  return Number(new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Istanbul', year: 'numeric' }).format(date));
 }
 
 @Injectable()
@@ -114,7 +109,8 @@ export class ReservationsService {
       if (request.promoCode) {
         const code = await tx.promoCode.findUnique({ where: { code: request.promoCode } });
         const block = code && isPromoUsable(code, now) ? await promoBlock(tx, code, user.id) : null;
-        if (block === 'EXHAUSTED') throw validationFailed({ promoCode: 'CODE_EXHAUSTED' }, 'The campaign code has been used up');
+        if (block === 'EXHAUSTED')
+          throw validationFailed({ promoCode: 'CODE_EXHAUSTED' }, 'The campaign code has been used up');
         if (block === 'ALREADY_USED') {
           throw validationFailed({ promoCode: 'CODE_ALREADY_USED' }, 'This account has already used the campaign code');
         }
@@ -138,7 +134,9 @@ export class ReservationsService {
 
       // A database sequence hands out the serial, so two bookings made at the same moment never meet on one
       // number and nothing has to be retried (QUALITY G-17). A cancelled transaction leaves a gap; that is fine.
-      const [{ serial }] = await tx.$queryRaw<{ serial: bigint }[]>`SELECT nextval('"ReservationNumber_seq"') AS serial`;
+      const [{ serial }] = await tx.$queryRaw<
+        { serial: bigint }[]
+      >`SELECT nextval('"ReservationNumber_seq"') AS serial`;
       const number = `NVR-${istanbulYear(now)}-${String(serial).padStart(5, '0')}`;
 
       // The discount line, when there is one, is last, so the extras still line up with `request.extras`.

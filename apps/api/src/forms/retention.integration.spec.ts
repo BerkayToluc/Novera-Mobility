@@ -40,16 +40,30 @@ describeDb('personal data retention (gerçek PostgreSQL)', () => {
   const message = (label: string, createdAt: Date) =>
     prisma.contactMessage.create({
       data: {
-        name: 'Ayşe Yılmaz', email: `ayse-${label}-${run}@example.test`, phone: '+90 555 000 00 00',
-        subject: `T-${run} ${label}`, message: 'Merhaba, kişisel bir ayrıntı içeriyorum.', kvkkConsentAt: createdAt, createdAt,
+        name: 'Ayşe Yılmaz',
+        email: `ayse-${label}-${run}@example.test`,
+        phone: '+90 555 000 00 00',
+        subject: `T-${run} ${label}`,
+        message: 'Merhaba, kişisel bir ayrıntı içeriyorum.',
+        kvkkConsentAt: createdAt,
+        createdAt,
       },
     });
   const quote = (label: string, createdAt: Date, userId: string | null = null) =>
     prisma.quoteRequest.create({
       data: {
-        number: `T-${run}-${label}`, companyName: 'Ege Lojistik', contactName: 'Mert Kaya', phone: '+90 555 111 11 11',
-        email: `mert-${label}-${run}@example.test`, notes: 'Teslimat için kapı kodu 1234', deliveryCities: 'İzmir',
-        vehicleCount: 5, durationMonths: 12, vehicleType: 'SUV', createdAt, userId,
+        number: `T-${run}-${label}`,
+        companyName: 'Ege Lojistik',
+        contactName: 'Mert Kaya',
+        phone: '+90 555 111 11 11',
+        email: `mert-${label}-${run}@example.test`,
+        notes: 'Teslimat için kapı kodu 1234',
+        deliveryCities: 'İzmir',
+        vehicleCount: 5,
+        durationMonths: 12,
+        vehicleType: 'SUV',
+        createdAt,
+        userId,
       },
     });
 
@@ -73,14 +87,22 @@ describeDb('personal data retention (gerçek PostgreSQL)', () => {
     expect(erasedMessage.createdAt).toEqual(oldMessage.createdAt);
 
     const erasedQuote = await prisma.quoteRequest.findUniqueOrThrow({ where: { id: oldQuote.id } });
-    expect(erasedQuote).toMatchObject({ contactName: 'Silindi', email: '', phone: null, notes: null, anonymizedAt: NOW });
+    expect(erasedQuote).toMatchObject({
+      contactName: 'Silindi',
+      email: '',
+      phone: null,
+      notes: null,
+      anonymizedAt: NOW,
+    });
     expect(erasedQuote).toMatchObject({ companyName: 'Ege Lojistik', vehicleCount: 5, status: 'RECEIVED' }); // company and request stay
 
     expect(await prisma.contactMessage.findUniqueOrThrow({ where: { id: youngMessage.id } })).toMatchObject({
-      name: 'Ayşe Yılmaz', anonymizedAt: null,
+      name: 'Ayşe Yılmaz',
+      anonymizedAt: null,
     });
     expect(await prisma.quoteRequest.findUniqueOrThrow({ where: { id: youngQuote.id } })).toMatchObject({
-      contactName: 'Mert Kaya', anonymizedAt: null,
+      contactName: 'Mert Kaya',
+      anonymizedAt: null,
     });
   });
 
@@ -92,7 +114,9 @@ describeDb('personal data retention (gerçek PostgreSQL)', () => {
   });
 
   it('deleting an account erases the personal fields of its quote requests at once, and keeps the rest', async () => {
-    const user = await prisma.user.create({ data: { email: `del-${run}@example.test`, firstName: 'Mert', lastName: 'Kaya', passwordHash: 'x' } });
+    const user = await prisma.user.create({
+      data: { email: `del-${run}@example.test`, firstName: 'Mert', lastName: 'Kaya', passwordHash: 'x' },
+    });
     userIds.push(user.id);
     const mine = await quote('mine', monthsAgo(1), user.id);
     const other = await quote('other', monthsAgo(1));
@@ -101,8 +125,18 @@ describeDb('personal data retention (gerçek PostgreSQL)', () => {
 
     expect(await prisma.user.findUnique({ where: { id: user.id } })).toBeNull();
     const erased = await prisma.quoteRequest.findUniqueOrThrow({ where: { id: mine.id } });
-    expect(erased).toMatchObject({ userId: null, contactName: 'Silindi', email: '', phone: null, notes: null, anonymizedAt: NOW });
+    expect(erased).toMatchObject({
+      userId: null,
+      contactName: 'Silindi',
+      email: '',
+      phone: null,
+      notes: null,
+      anonymizedAt: NOW,
+    });
     expect(erased).toMatchObject({ companyName: 'Ege Lojistik', deliveryCities: 'İzmir', vehicleCount: 5 });
-    expect(await prisma.quoteRequest.findUniqueOrThrow({ where: { id: other.id } })).toMatchObject({ contactName: 'Mert Kaya', anonymizedAt: null });
+    expect(await prisma.quoteRequest.findUniqueOrThrow({ where: { id: other.id } })).toMatchObject({
+      contactName: 'Mert Kaya',
+      anonymizedAt: null,
+    });
   });
 });

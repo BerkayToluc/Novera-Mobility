@@ -73,8 +73,7 @@ export const integer = (min: number, max: number) =>
   });
 
 // The KVKK consent counts only as the boolean `true`.
-export const consent = () =>
-  field<true>((raw) => (raw === true ? { value: true } : { code: 'CONSENT_REQUIRED' }));
+export const consent = () => field<true>((raw) => (raw === true ? { value: true } : { code: 'CONSENT_REQUIRED' }));
 
 // A flag that may be left out (null when it is); anything but a boolean is INVALID_FORMAT.
 export const optionalFlag = () =>

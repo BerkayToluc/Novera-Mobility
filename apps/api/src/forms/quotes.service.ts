@@ -25,12 +25,9 @@ export interface QuoteSummaryView {
   status: 'RECEIVED' | 'IN_REVIEW' | 'OFFERED';
 }
 
-
 // Numara yılı Türkiye saatine göre belirlenir (ADR-16).
 function istanbulYear(date: Date): number {
-  return Number(
-    new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Istanbul', year: 'numeric' }).format(date),
-  );
+  return Number(new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Istanbul', year: 'numeric' }).format(date));
 }
 
 @Injectable()

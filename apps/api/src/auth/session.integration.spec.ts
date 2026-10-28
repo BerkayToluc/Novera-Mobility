@@ -21,7 +21,11 @@ describeDb('sessions: idle time and the daily cleanup (V2-10)', () => {
     prisma = new PrismaService();
     await prisma.$connect();
     auth = new AuthService(prisma);
-    userId = (await prisma.user.create({ data: { email: `sess-${run}@example.com`, firstName: 'S', lastName: 'T', passwordHash: 'x' } })).id;
+    userId = (
+      await prisma.user.create({
+        data: { email: `sess-${run}@example.com`, firstName: 'S', lastName: 'T', passwordHash: 'x' },
+      })
+    ).id;
   });
   afterAll(async () => {
     await prisma.user.deleteMany({ where: { id: userId } });
@@ -77,11 +81,15 @@ describeDb('sessions: idle time and the daily cleanup (V2-10)', () => {
     const alive = await addSession('c-alive', 2, 1);
     const now = new Date();
     const linkOf = (label: string, extra: object) =>
-      prisma.passwordResetToken.create({ data: { tokenHash: `${label}-${run}`, userId, expiresAt: new Date(now.getTime() + DAY), ...extra } });
+      prisma.passwordResetToken.create({
+        data: { tokenHash: `${label}-${run}`, userId, expiresAt: new Date(now.getTime() + DAY), ...extra },
+      });
     await linkOf('t-live', {});
     await linkOf('t-used', { usedAt: now });
     await linkOf('t-expired', { expiresAt: new Date(now.getTime() - DAY) });
-    await prisma.loginThrottle.create({ data: { email: `old-${run}@example.com`, failures: 6, updatedAt: new Date(now.getTime() - 2 * DAY) } });
+    await prisma.loginThrottle.create({
+      data: { email: `old-${run}@example.com`, failures: 6, updatedAt: new Date(now.getTime() - 2 * DAY) },
+    });
     await prisma.loginThrottle.create({ data: { email: `new-${run}@example.com`, failures: 2 } });
     // updatedAt is set by Prisma on create; make the "old" one old.
     await prisma.$executeRaw`UPDATE "LoginThrottle" SET "updatedAt" = now() - interval '2 days' WHERE "email" = ${`old-${run}@example.com`}`;
@@ -93,7 +101,9 @@ describeDb('sessions: idle time and the daily cleanup (V2-10)', () => {
     }
     expect(idle && gone).toBeTruthy();
     expect(await prisma.session.findUnique({ where: { tokenHash: hashSessionToken(alive) } })).not.toBeNull();
-    const links = (await prisma.passwordResetToken.findMany({ where: { tokenHash: { endsWith: run } } })).map((row) => row.tokenHash);
+    const links = (await prisma.passwordResetToken.findMany({ where: { tokenHash: { endsWith: run } } })).map(
+      (row) => row.tokenHash,
+    );
     expect(links).toEqual([`t-live-${run}`]);
     expect(await prisma.loginThrottle.findUnique({ where: { email: `old-${run}@example.com` } })).toBeNull();
     expect(await prisma.loginThrottle.findUnique({ where: { email: `new-${run}@example.com` } })).not.toBeNull();

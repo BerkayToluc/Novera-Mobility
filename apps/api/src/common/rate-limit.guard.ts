@@ -4,12 +4,7 @@ import type { Request } from 'express';
 import { AuthService } from '../auth/auth.service.js';
 import { userOfRequest, type AuthedRequest } from '../auth/session.guard.js';
 import { clientKeyOf } from './client-key.js';
-import {
-  DEFAULT_RATE_LIMIT,
-  NO_RATE_LIMIT_METADATA,
-  RATE_LIMIT_METADATA,
-  type RateLimitSpec,
-} from './rate-limit.js';
+import { DEFAULT_RATE_LIMIT, NO_RATE_LIMIT_METADATA, RATE_LIMIT_METADATA, type RateLimitSpec } from './rate-limit.js';
 import { RateLimitService } from './rate-limit.service.js';
 
 // The limit of every endpoint (ADR-27), applied as a global guard. It runs before the handler, before the

@@ -27,7 +27,13 @@ const CHROME_WINDOWS =
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36';
 const SAFARI_IPHONE =
   'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1';
-const REGISTER = { email: 'ayse@example.com', password: 'guclu-parola-1', firstName: 'Ayşe', lastName: 'Yılmaz', consent: true };
+const REGISTER = {
+  email: 'ayse@example.com',
+  password: 'guclu-parola-1',
+  firstName: 'Ayşe',
+  lastName: 'Yılmaz',
+  consent: true,
+};
 
 describe('describeDevice', () => {
   it('makes a short label from the User-Agent', () => {
@@ -69,15 +75,25 @@ describe('AccountSecurityService', () => {
 
   describe('changePassword', () => {
     it('changes the password, keeps this session and ends the others', async () => {
-      await security.changePassword(user, currentHash, { currentPassword: REGISTER.password, newPassword: 'yepyeni-parola-2' });
+      await security.changePassword(user, currentHash, {
+        currentPassword: REGISTER.password,
+        newPassword: 'yepyeni-parola-2',
+      });
       expect(db.sessions.map((s) => s.tokenHash)).toEqual([currentHash]);
-      expect((await auth.login({ ...REGISTER, password: 'yepyeni-parola-2' }, 'c2')).user.email).toBe('ayse@example.com');
+      expect((await auth.login({ ...REGISTER, password: 'yepyeni-parola-2' }, 'c2')).user.email).toBe(
+        'ayse@example.com',
+      );
       const old = await catchHttp(auth.login(REGISTER, 'c3'));
       expect(bodyOf(old).code).toBe('INVALID_CREDENTIALS');
     });
 
     it('a wrong current password is 422 on that field and nothing changes', async () => {
-      const error = await catchHttp(security.changePassword(user, currentHash, { currentPassword: 'yanlis-parola', newPassword: 'yepyeni-parola-2' }));
+      const error = await catchHttp(
+        security.changePassword(user, currentHash, {
+          currentPassword: 'yanlis-parola',
+          newPassword: 'yepyeni-parola-2',
+        }),
+      );
       expect(error.getStatus()).toBe(422);
       expect(bodyOf(error).fieldErrors).toEqual({ currentPassword: 'INCORRECT' });
       expect(db.sessions).toHaveLength(2);
@@ -85,14 +101,20 @@ describe('AccountSecurityService', () => {
     });
 
     it('the new password must differ, be long enough, and both fields are required', async () => {
-      const same = await catchHttp(security.changePassword(user, currentHash, { currentPassword: REGISTER.password, newPassword: REGISTER.password }));
+      const same = await catchHttp(
+        security.changePassword(user, currentHash, {
+          currentPassword: REGISTER.password,
+          newPassword: REGISTER.password,
+        }),
+      );
       expect(bodyOf(same).fieldErrors).toEqual({ newPassword: 'SAME_AS_CURRENT' });
-      const short = await catchHttp(security.changePassword(user, currentHash, { currentPassword: REGISTER.password, newPassword: 'kisa' }));
+      const short = await catchHttp(
+        security.changePassword(user, currentHash, { currentPassword: REGISTER.password, newPassword: 'kisa' }),
+      );
       expect(bodyOf(short).fieldErrors).toEqual({ newPassword: 'TOO_SHORT' });
       const empty = await catchHttp(security.changePassword(user, currentHash, {}));
       expect(bodyOf(empty).fieldErrors).toEqual({ currentPassword: 'REQUIRED', newPassword: 'REQUIRED' });
     });
-
   });
 
   describe('sessions', () => {
@@ -149,7 +171,9 @@ describe('AccountSecurityService', () => {
     it('refuse anything that is not a boolean', async () => {
       const error = await catchHttp(auth.updateProfile(user.id, { notifications: { reminders: 'yes' } }));
       expect(bodyOf(error).fieldErrors).toEqual({ notifications: 'INVALID_FORMAT' });
-      expect(bodyOf(await catchHttp(auth.updateProfile(user.id, { notifications: 5 }))).fieldErrors).toEqual({ notifications: 'INVALID_FORMAT' });
+      expect(bodyOf(await catchHttp(auth.updateProfile(user.id, { notifications: 5 }))).fieldErrors).toEqual({
+        notifications: 'INVALID_FORMAT',
+      });
     });
   });
 });
@@ -191,9 +215,17 @@ describe('account security over HTTP', () => {
   const cookieOf = (response: Response): string => (response.headers.get('set-cookie') ?? '').split(';')[0] ?? '';
 
   it('lists sessions with the device, changes the password and keeps the cookie working', async () => {
-    const registered = await send('/auth/register', { method: 'POST', body: JSON.stringify(REGISTER), agent: CHROME_WINDOWS });
+    const registered = await send('/auth/register', {
+      method: 'POST',
+      body: JSON.stringify(REGISTER),
+      agent: CHROME_WINDOWS,
+    });
     const cookie = cookieOf(registered);
-    const login = await send('/auth/login', { method: 'POST', body: JSON.stringify({ email: REGISTER.email, password: REGISTER.password }), agent: SAFARI_IPHONE });
+    const login = await send('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ email: REGISTER.email, password: REGISTER.password }),
+      agent: SAFARI_IPHONE,
+    });
     const otherCookie = cookieOf(login);
 
     const list = await (await send('/me/sessions', { cookie })).json();
@@ -201,7 +233,11 @@ describe('account security over HTTP', () => {
     expect(list.filter((s: { current: boolean }) => s.current)).toHaveLength(1);
     expect(list.map((s: { device: string }) => s.device).sort()).toEqual(['Chrome · Windows', 'Safari · iOS']);
 
-    const changed = await send('/me/password', { method: 'POST', cookie, body: JSON.stringify({ currentPassword: REGISTER.password, newPassword: 'yepyeni-parola-2' }) });
+    const changed = await send('/me/password', {
+      method: 'POST',
+      cookie,
+      body: JSON.stringify({ currentPassword: REGISTER.password, newPassword: 'yepyeni-parola-2' }),
+    });
     expect(changed.status).toBe(204);
     expect((await send('/me', { cookie })).status).toBe(200);
     expect((await send('/me', { cookie: otherCookie })).status).toBe(401);
@@ -209,7 +245,11 @@ describe('account security over HTTP', () => {
 
   it('a wrong current password is 422, not 401, and the session stays', async () => {
     const cookie = cookieOf(await send('/auth/register', { method: 'POST', body: JSON.stringify(REGISTER) }));
-    const response = await send('/me/password', { method: 'POST', cookie, body: JSON.stringify({ currentPassword: 'yanlis-parola', newPassword: 'yepyeni-parola-2' }) });
+    const response = await send('/me/password', {
+      method: 'POST',
+      cookie,
+      body: JSON.stringify({ currentPassword: 'yanlis-parola', newPassword: 'yepyeni-parola-2' }),
+    });
     expect(response.status).toBe(422);
     expect((await response.json()).fieldErrors).toEqual({ currentPassword: 'INCORRECT' });
     expect((await send('/me', { cookie })).status).toBe(200);
@@ -228,7 +268,12 @@ describe('account security over HTTP', () => {
 
   it('closing the other sessions leaves this one open', async () => {
     const cookie = cookieOf(await send('/auth/register', { method: 'POST', body: JSON.stringify(REGISTER) }));
-    const otherCookie = cookieOf(await send('/auth/login', { method: 'POST', body: JSON.stringify({ email: REGISTER.email, password: REGISTER.password }) }));
+    const otherCookie = cookieOf(
+      await send('/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ email: REGISTER.email, password: REGISTER.password }),
+      }),
+    );
     expect((await send('/me/sessions', { method: 'DELETE', cookie })).status).toBe(204);
     expect((await send('/me', { cookie })).status).toBe(200);
     expect((await send('/me', { cookie: otherCookie })).status).toBe(401);

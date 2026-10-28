@@ -30,10 +30,13 @@ describeDb('the routes of the whole application (gerçek PostgreSQL)', () => {
   const get = (path: string) => fetch(base + path, { headers: { 'X-Forwarded-For': '10.7.0.1' } });
 
   // '/' was the scaffold's "Hello World" (V2-13).
-  it.each(['/', '/products', '/products/akilli-kurumsal-filo', '/services', '/faq'])('GET %s is 404 now', async (path) => {
-    const response = await get(path);
-    expect(response.status).toBe(404);
-  });
+  it.each(['/', '/products', '/products/akilli-kurumsal-filo', '/services', '/faq'])(
+    'GET %s is 404 now',
+    async (path) => {
+      const response = await get(path);
+      expect(response.status).toBe(404);
+    },
+  );
 
   it('what stayed still answers', async () => {
     expect((await get('/health')).status).toBe(200);

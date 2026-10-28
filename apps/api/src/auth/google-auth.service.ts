@@ -19,7 +19,6 @@ export interface GoogleSignInResult {
   created: boolean;
 }
 
-
 // Google gives given/family names; when it does not, split the display name, then fall back to the
 // part of the e-mail before the @, so the required name fields are never empty.
 export function namesFrom(profile: GoogleProfile): { firstName: string; lastName: string } {

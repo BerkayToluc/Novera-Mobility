@@ -23,7 +23,9 @@ describe('judgeRate (QUALITY V-10)', () => {
 
   it('believes it two days after it first came', () => {
     const jumped = 0.018 * 2;
-    expect(judgeRate(0.018, jumped, { ratePerTry: jumped, since: NOW }, later(CANDIDATE_CONFIRM_AFTER_MS))).toEqual({ action: 'store' });
+    expect(judgeRate(0.018, jumped, { ratePerTry: jumped, since: NOW }, later(CANDIDATE_CONFIRM_AFTER_MS))).toEqual({
+      action: 'store',
+    });
   });
 
   it('starts a new candidate when the value is on the other side of the stored rate', () => {

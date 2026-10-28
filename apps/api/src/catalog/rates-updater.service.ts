@@ -93,7 +93,9 @@ export class RatesUpdater implements OnModuleInit, OnModuleDestroy {
       for (const currency of FOREIGN) {
         const row = stored.find((entry) => entry.currency === currency);
         const waiting = candidates.find((entry) => entry.currency === currency);
-        const candidate: RateCandidateState = waiting ? { ratePerTry: Number(waiting.ratePerTry), since: waiting.since } : null;
+        const candidate: RateCandidateState = waiting
+          ? { ratePerTry: Number(waiting.ratePerTry), since: waiting.since }
+          : null;
         const verdict = judgeRate(row ? Number(row.ratePerTry) : null, fresh[currency], candidate, now);
         if (verdict.action === 'hold') {
           held.push(`${currency} ${verdict.reason}`);

@@ -23,10 +23,7 @@ export interface HoldResponse {
 export class HoldsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(
-    input: unknown,
-    clientKey: string,
-  ): Promise<HoldResponse> {
+  async create(input: unknown, clientKey: string): Promise<HoldResponse> {
     const valid = parseInput(holdSchema(new Date()), input, 'Hold request validation failed');
 
     // Bayiler var mı? (işlem dışında, kilit tutmadan)
@@ -59,15 +56,8 @@ export class HoldsService {
           Array<{ id: string; branchId: string; active: boolean }>
         >`SELECT "id", "branchId", "active" FROM "Vehicle" WHERE "id" = ${valid.vehicleId} FOR UPDATE`;
         const vehicle = locked[0];
-        if (
-          !vehicle ||
-          !vehicle.active ||
-          vehicle.branchId !== valid.pickupBranchId
-        ) {
-          throw validationFailed(
-            { vehicleId: 'UNKNOWN_REFERENCE' },
-            'Vehicle not found at the pickup branch',
-          );
+        if (!vehicle || !vehicle.active || vehicle.branchId !== valid.pickupBranchId) {
+          throw validationFailed({ vehicleId: 'UNKNOWN_REFERENCE' }, 'Vehicle not found at the pickup branch');
         }
 
         const now = new Date();
@@ -134,11 +124,7 @@ export class HoldsService {
     await this.prisma.hold.deleteMany({ where: { id, clientKey } });
   }
 
-  private toResponse(hold: {
-    id: string;
-    vehicleId: string;
-    expiresAt: Date;
-  }): HoldResponse {
+  private toResponse(hold: { id: string; vehicleId: string; expiresAt: Date }): HoldResponse {
     return {
       id: hold.id,
       vehicleId: hold.vehicleId,
