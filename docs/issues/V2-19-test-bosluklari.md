@@ -24,10 +24,10 @@ Bugün uçtan uca testler yalnızca örnek veriyle çalışıyor; gerçek API ko
 Dosyalar: `apps/web/playwright.config.ts`, `apps/web/e2e/`, `.github/workflows/ci.yml`, `apps/api/src/**/*.spec.ts`. Smoke projesi mock projesinden ayrı çalışır ve CI'da ayrı bir adımdır.
 
 ## Kabul kriterleri
-- [ ] CI'da `smoke-api` adımı yeşil; API bilerek kapatılınca kırmızı.
-- [ ] axe yardımcısı tüm e2e sayfalarında çalışır; bilerek bozulan bir kontrast testi kırmızı yapar.
-- [ ] Listelenen API alanlarında testler var.
-- [ ] QUALITY'de T-01–T-03 güncel.
+- [x] CI'da `smoke-api` adımı yeşil; API bilerek kapatılınca kırmızı. *(yerelde doğrulandı; CI sonucu PR'da)*
+- [x] axe yardımcısı tüm e2e sayfalarında çalışır; bilerek bozulan bir kontrast testi kırmızı yapar.
+- [x] Listelenen API alanlarında testler var.
+- [x] QUALITY'de T-01–T-03 güncel.
 
 ## Etiketler
 `faz-2` `temel` `test` `ci` `P1` `api` `web`

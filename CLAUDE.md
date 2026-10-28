@@ -45,7 +45,7 @@ pnpm --filter @novera/web <script>   # run a script in one workspace
 - Every data-driven view handles loading, empty and error states.
 - API: every endpoint validates its input with a zod schema, sits under a rate limit, and has authorization tests (ARCHITECTURE ADR-26, ADR-27). `/admin/*` needs 401/403 tests; `/fleet/*` needs "other company's record is 404" tests.
 - A change to an endpoint updates `docs/api/openapi.yaml` in the same PR. Business rules are also enforced by database constraints where possible.
-- Tests: a new endpoint gets unit + HTTP tests; a new screen gets at least one Playwright test.
+- Tests: a new endpoint gets unit + HTTP tests; a new screen gets at least one Playwright test. Every Playwright test ends with an axe check (WCAG 2.2 AA) on the page it leaves open, and fails on a missing translation (`e2e/fixtures.ts`); a flow that needs the real API is added to `smoke/` (`pnpm --filter @novera/web test:smoke`).
 - Code, comments and commit messages in English. Comments explain why, not what.
 - Conventional Commits (`feat:`, `fix:`, `chore:`, `docs:`, `refactor:`, `test:`).
 - Never push to `main`. One branch and one PR per issue, branched from the latest `main`; the PR body links the GitHub issue (`Closes #N`, or `Refs #N` for partial work). The GitHub number is in docs/BACKLOG.md's mapping table, not the `V2-xx` id.
