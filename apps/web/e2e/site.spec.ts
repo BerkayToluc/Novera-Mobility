@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 // SPEC §8 steps 6 to 8: the fleet window, the contact page and the cookie banner.
 

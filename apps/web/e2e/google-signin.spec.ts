@@ -1,4 +1,5 @@
-import { expect, test, type Page } from "@playwright/test";
+import type { Page } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 // Google sign-in (individual accounts only). With sample data the button is a stand-in that needs no Google; the
 // novera-mock-google cookie plays the API's other answers (lib/session.ts), so every path can be walked.

@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 // About (SPEC §2.7): the figures count up when they come into view, the sustainability ones too.
 test.beforeEach(async ({ context }) => {

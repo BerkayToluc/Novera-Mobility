@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 // SPEC §8 step 1: from the home page, choose the branches and the dates and press Ara.
 test.beforeEach(async ({ context }) => {

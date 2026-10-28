@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import { hydrated } from "./hydration";
 
 // The header (SPEC §2.8): the floating pill, links that sit together, only Products opening a list,

@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 // The footer (SPEC §2.8, after the Framer Simple Footer): an arrow that appears on a link when it is
 // pointed at or focused, and blocks that ease into view as the page scrolls to them.

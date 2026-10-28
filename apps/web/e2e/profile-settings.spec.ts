@@ -1,4 +1,5 @@
-import { expect, test, type Page } from "@playwright/test";
+import type { Page } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 // The points and settings pages (SPEC §2.9, v0.8): points with their worth and a way to spend them;
 // settings with notifications and security, simulated while the API has no such calls.

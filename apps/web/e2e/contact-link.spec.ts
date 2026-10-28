@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import { hydrated } from "./hydration";
 
 // The e-mail addresses (SPEC §2.6, after the Framer Smart Contact Link): pressed, a bubble offers

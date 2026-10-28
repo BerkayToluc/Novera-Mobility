@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 // SPEC §8 steps 5 and 7 (the forms), and the account: signing in on each tab, the pages that
 // belong to each, and the preferences that come back at the next sign-in.

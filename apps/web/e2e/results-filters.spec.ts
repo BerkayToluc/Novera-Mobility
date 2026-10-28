@@ -1,4 +1,5 @@
-import { expect, test, type Page } from "@playwright/test";
+import type { Page } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import { RESULTS } from "./driver-helpers";
 
 // The results page (SPEC §2.3): a Filtrele panel that narrows and orders the list through the

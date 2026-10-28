@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { getTranslations } from "next-intl/server";
+import { ClientMessages } from "@/components/client-messages";
 import { AudienceSwitch } from "@/components/home/audience-switch";
 import { AppPromo } from "@/components/home/app-promo";
 import { CampaignArt, type CampaignArtKind } from "@/components/home/campaign-art";
@@ -72,7 +73,7 @@ export default async function Home({ searchParams }: PageProps<"/[locale]">) {
   }));
 
   return (
-    <>
+    <ClientMessages route="page">
       <div className="mx-auto max-w-content px-4 pt-6 md:px-8 md:pt-8">
         <CampaignGallery slides={slides} />
       </div>
@@ -142,6 +143,6 @@ export default async function Home({ searchParams }: PageProps<"/[locale]">) {
         <GuidesPreview />
         <FaqSection audience={audience} />
       </div>
-    </>
+    </ClientMessages>
   );
 }

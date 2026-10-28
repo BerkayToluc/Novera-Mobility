@@ -1,4 +1,5 @@
-import { expect, test, type Page } from "@playwright/test";
+import type { Page } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 // The home page's moving parts (SPEC §2.2.4, §5.4): nothing that moves starts by itself for long,
 // and nothing needs a pause button.

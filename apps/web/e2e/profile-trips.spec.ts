@@ -1,4 +1,5 @@
-import { expect, test, type Page } from "@playwright/test";
+import type { Page } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 // The bookings page (SPEC §2.9, v0.8): cards with the branch names and times, the way there, a call
 // to the branch, and a simulated cancellation; status chips in the address.

@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { getTranslations } from "next-intl/server";
+import { ClientMessages } from "@/components/client-messages";
 import { ProfileHeader } from "@/components/profile/profile-header";
 import { ProfileNav } from "@/components/profile/profile-nav";
 import { SignedOutNotice } from "@/components/profile/signed-out-notice";
@@ -9,7 +10,11 @@ import { getSession } from "@/lib/session";
 // One gate for every profile page: without a session the children never render, the visitor
 // gets the "sign in" notice instead. With one, the page is a greeting, the way around (a column
 // from xl, tabs below it) and the page itself (SPEC §2.9, v0.8).
-export default async function ProfileLayout({ children }: { children: ReactNode }) {
+export default function ProfileLayout({ children }: { children: ReactNode }) {
+  return <ClientMessages route="profil/layout"><ProfileGate>{children}</ProfileGate></ClientMessages>;
+}
+
+async function ProfileGate({ children }: { children: ReactNode }) {
   const t = await getTranslations("Profile");
   const session = await getSession();
 

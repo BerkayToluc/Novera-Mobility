@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import { hydrated } from "./hydration";
 
 // The helper that keeps the other specs from clicking before React has hydrated the page. The page's scripts

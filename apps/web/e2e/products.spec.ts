@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 // Products (SPEC §2.5): four cards on their own washes, each one link to its page; a product
 // page with its highlights, numbered technology points, a quote link carrying the product, and
