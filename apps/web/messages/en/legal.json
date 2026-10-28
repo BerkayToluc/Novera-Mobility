@@ -14,6 +14,7 @@
   "LegalPrivacy": {
     "title": "Privacy Notice",
     "metaDescription": "Novera Mobility's privacy notice: how your personal data is collected, used and protected.",
+    "distinction": "This is the legal notice that explains, in the detail the Turkish data protection law (no. 6698) requires, how your personal data is processed. For a short, plain summary of the same subject, see the <link>Privacy Policy</link>.",
     "sections": [
       {
         "heading": "Data controller",
@@ -221,6 +222,7 @@
   "LegalPolicy": {
     "title": "Privacy Policy",
     "metaDescription": "What information Novera Mobility collects when you use the site, why, and how it protects it.",
+    "distinction": "This is the plain-language summary of what we collect and why; the legal detail and your rights are in the <link>KVKK Notice</link>.",
     "sections": [
       {
         "heading": "In short",

@@ -22,7 +22,11 @@ export function reservationFromApi(reservation: Schemas["Reservation"]): Reserva
     endAt: reservation.endAt,
     days: reservation.price.days,
     totalPrice: reservation.price.total,
-    vehicle: { brand: reservation.vehicle.model.brand, model: reservation.vehicle.model.model },
+    vehicle: {
+      brand: reservation.vehicle.model.brand,
+      model: reservation.vehicle.model.model,
+      imageUrl: reservation.vehicle.model.imageUrl,
+    },
     pickupCity: reservation.pickupBranch.city,
     returnCity: reservation.returnBranch.city,
     pickupBranchId: reservation.pickupBranch.id,

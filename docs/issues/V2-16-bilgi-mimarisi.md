@@ -26,12 +26,12 @@ Sayfa hiyerarşisindeki boşlukları ve küçük ama görünür hataları kapatm
 Dosyalar: `apps/web/components/layout/nav-items.ts`, `site-footer.tsx`, `components/layout/nav-menu.tsx`, `app/[locale]/kvkk`, `gizlilik-politikasi`, `components/profile/reservation-list.tsx`, `app/manifest.ts`, `lib/public-pages.ts` (sitemap; kurumsal teklif zaten varsa dokunulmaz), `scripts/check-links.mjs`.
 
 ## Kabul kriterleri
-- [ ] G menü önerisini onayladı (issue yorumu).
-- [ ] Footer ve Ürünler menüsünden `/kurumsal-teklif`'e gidilir (e2e).
-- [ ] İki gizlilik sayfası birbirine bağlantı verir.
-- [ ] Rezervasyon kartlarında model fotoğrafı görünür (e2e; mock'ta da).
-- [ ] Manifest'te 192/512/maskable ikon var; Chrome DevTools "Application > Manifest" uyarısız (ekran görüntüsü).
-- [ ] 375/1280 ekran görüntüleri; QUALITY'de U-01–U-04 ve U-06 güncel.
+- [ ] G menü önerisini onayladı (issue yorumu). *(bekliyor: PR'daki ekran görüntülerine bakılacak)*
+- [x] Footer ve Ürünler menüsünden `/kurumsal-teklif`'e gidilir (e2e).
+- [x] İki gizlilik sayfası birbirine bağlantı verir.
+- [x] Rezervasyon kartlarında model fotoğrafı görünür (e2e; mock'ta da).
+- [x] Manifest'te 192/512/maskable ikon var; Chrome DevTools "Application > Manifest" uyarısız (ekran görüntüsü).
+- [x] 375/1280 ekran görüntüleri; QUALITY'de U-01–U-04 ve U-06 güncel.
 
 ## Etiketler
 `faz-2` `temel` `P1` `web`

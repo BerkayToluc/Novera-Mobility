@@ -20,8 +20,9 @@ export async function generateMetadata(): Promise<Metadata> {
 
 // The services (SPEC §2.5, v0.9, G): the five at a glance as cards; each one told in its own section
 // with how it works in three steps and which packages carry it; a few figures; a table of which
-// product includes which service; and, last, what to do in an emergency. The header menu and the
-// Road Assurance band link to one service (?hizmet=2#hizmet-2): each section has its anchor.
+// product includes which service; and, last, what to do in an emergency. The Road Assurance band on the home page
+// links to one service (?hizmet=1#hizmet-1) and the footer to the overview (the header's Services entry is a plain
+// link, SPEC §2.8): each section has its anchor.
 export default async function ServicesPage() {
   const t = await getTranslations("ServicesPage");
   const p = await getTranslations("ProductsPage");

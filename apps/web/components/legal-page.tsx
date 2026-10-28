@@ -1,4 +1,5 @@
 import { getFormatter, getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 
 // Placeholder texts for a fictional company: the date is fixed so it does not
 // pretend to change on every request.
@@ -14,7 +15,9 @@ type LegalSection = {
 // Keys of the messages that hold a legal page's content (see the `Legal*` namespaces).
 type LegalNamespace = "LegalPrivacy" | "LegalCookies" | "LegalTerms" | "LegalPolicy" | "LegalSiteTerms";
 
-export async function LegalPage({ namespace }: { namespace: LegalNamespace }) {
+// `related` is the other page about privacy: the KVKK notice and the privacy policy are told apart at the top of each
+// and link to one another (V2-16, QUALITY U-02).
+export async function LegalPage({ namespace, related }: { namespace: LegalNamespace; related?: "/kvkk" | "/gizlilik-politikasi" }) {
   const t = await getTranslations(namespace);
   const common = await getTranslations("LegalPage");
   const format = await getFormatter();
@@ -34,6 +37,18 @@ export async function LegalPage({ namespace }: { namespace: LegalNamespace }) {
             }),
           })}
         </p>
+
+        {related && (
+          <p className="mt-6 text-body text-fg">
+            {t.rich("distinction", {
+              link: (chunks) => (
+                <Link href={related} className="text-link underline underline-offset-4">
+                  {chunks}
+                </Link>
+              ),
+            })}
+          </p>
+        )}
 
         {/* Said up front so nobody mistakes sample text for a real contract. */}
         <p className="mt-6 rounded-card bg-surface-muted p-4 text-small text-fg-muted">
