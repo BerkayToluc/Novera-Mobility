@@ -76,7 +76,7 @@ export default async function AboutPage() {
         {/* A ruled list rather than three equal cards (SPEC §5.6): the number leads each row. */}
         <ul className="flex flex-col divide-y divide-border border-y border-border">
           {CLAIMS.map((claim) => (
-            <li key={claim.key} className="grid gap-2 py-6 md:grid-cols-[10rem_1fr] md:items-baseline md:gap-6 xl:grid-cols-[14rem_1fr] xl:gap-8">
+            <li key={claim.key} className="grid gap-2 py-6 md:grid-cols-term md:items-baseline md:gap-6 xl:grid-cols-term-wide xl:gap-8">
               <p className="text-h1 tabular-nums text-link">
                 {/* Counts up when the row scrolls into view, as the figures at the top do. */}
                 <CountUp value={claim.value} percent={"percent" in claim} />

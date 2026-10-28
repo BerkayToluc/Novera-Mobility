@@ -56,7 +56,7 @@ function DialogContent({ model, titleId, onClose }: { model: FleetModel; titleId
   const specs = useSpecs(model);
 
   return (
-    <div className="flex max-h-[90dvh] flex-col">
+    <div className="flex max-h-dialog flex-col">
       <header className="flex items-start justify-between gap-4 border-b border-border p-4 md:px-6">
         <div>
           <h2 id={titleId} className="text-h2 text-fg">

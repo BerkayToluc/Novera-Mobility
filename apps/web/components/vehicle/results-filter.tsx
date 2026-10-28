@@ -68,7 +68,7 @@ export function ResultsFilter({
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-96 max-w-[calc(100vw-2rem)] overflow-y-auto p-5" aria-label={t("title")}>
+      <PopoverContent align="end" className="w-96 max-w-screen-gutter overflow-y-auto p-5" aria-label={t("title")}>
         <div className="flex flex-col gap-5">
           <Group label={t("class")}>
             {classOptions.map((option) => (

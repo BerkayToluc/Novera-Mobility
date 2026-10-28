@@ -61,7 +61,7 @@ export async function GuaranteeBand() {
                 {index < STEPS.length - 1 && (
                   <span
                     aria-hidden="true"
-                    className="absolute -bottom-16 left-6 top-6 w-1 -translate-x-1/2 rounded-full bg-on-band/20 xl:bottom-auto xl:left-1/2 xl:h-1 xl:w-[calc(100%+1.5rem)] xl:translate-x-0 xl:-translate-y-1/2"
+                    className="absolute -bottom-16 left-6 top-6 w-1 -translate-x-1/2 rounded-full bg-on-band/20 xl:bottom-auto xl:left-1/2 xl:h-1 xl:w-step-line xl:translate-x-0 xl:-translate-y-1/2"
                   >
                     <span className={cn("block size-full origin-top rounded-full bg-band-accent transition-[scale] duration-800 ease-step xl:origin-left", stepDelay("line"), "group-data-[armed]/sp:scale-y-0 xl:group-data-[armed]/sp:scale-x-0 xl:group-data-[armed]/sp:scale-y-100")} />
                   </span>

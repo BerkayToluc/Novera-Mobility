@@ -12,7 +12,7 @@ export async function VehicleRow({ vehicle, note, action, pointsPayment }: Vehic
   const facts = await getVehicleFacts(vehicle);
 
   return (
-    <article className="grid grid-cols-[7rem_minmax(0,1fr)] items-center gap-x-4 gap-y-3 rounded-card border border-border bg-surface p-3 md:grid-cols-[14rem_minmax(0,1fr)] md:gap-x-6 md:p-4 xl:grid-cols-[16rem_minmax(0,1fr)_auto]">
+    <article className="grid grid-cols-media-text items-center gap-x-4 gap-y-3 rounded-card border border-border bg-surface p-3 md:grid-cols-media-text-md md:gap-x-6 md:p-4 xl:grid-cols-media-text-action">
       <VehicleImage imageUrl={vehicle.imageUrl} brand={vehicle.brand} model={vehicle.model} />
 
       <div className="flex min-w-0 flex-col gap-2">

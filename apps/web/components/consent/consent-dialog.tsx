@@ -23,7 +23,7 @@ export const ConsentDialog = forwardRef<
       ref={ref}
       aria-labelledby={titleId}
       onClose={() => setRound((current) => current + 1)}
-      className="m-auto w-[calc(100%-2rem)] max-w-lg rounded-card border border-border bg-surface p-0 text-fg backdrop:bg-fg/40"
+      className="m-auto w-dialog max-w-lg rounded-card border border-border bg-surface p-0 text-fg backdrop:bg-fg/40"
     >
       <ConsentForm key={`${analytics}-${round}`} analytics={analytics} onSave={onSave} titleId={titleId} t={t} />
     </dialog>

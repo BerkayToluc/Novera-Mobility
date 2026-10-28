@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode } from "react";
-import { AnimatePresence, MotionConfig, motion } from "framer-motion";
+import { AnimatePresence, MotionConfig, motion } from "motion/react";
 import { Check, Copy, Mail, Phone, Send } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/cn";

@@ -55,7 +55,7 @@ export function ProfileNav({ type }: { type: AccountType }) {
           onScroll={measure}
           className={cn(
             "flex gap-1 overflow-x-auto border-b border-border [scrollbar-width:none] xl:flex-col xl:gap-1 xl:overflow-visible xl:border-b-0",
-            moreToRight && "[mask-image:linear-gradient(to_right,black_calc(100%-2.5rem),transparent)] xl:[mask-image:none]",
+            moreToRight && "mask-fade-end xl:[mask-image:none]",
           )}
         >
           {TABS[type].map(({ href, labelKey, icon: Icon }) => {

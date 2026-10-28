@@ -95,7 +95,7 @@ export function FleetExplorer({
       <FleetDialog
         model={openSlug ? (models.get(openSlug) ?? null) : null}
         onClose={onDialogClosed}
-        className="fleet-dialog m-auto w-[min(44rem,calc(100%-2rem))] max-w-none rounded-card border border-border bg-surface p-0 text-fg shadow-overlay backdrop:bg-band/60"
+        className="fleet-dialog m-auto w-dialog-wide max-w-none rounded-card border border-border bg-surface p-0 text-fg shadow-overlay backdrop:bg-band/60"
       />
     </>
   );
