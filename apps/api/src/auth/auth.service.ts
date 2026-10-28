@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { erasedQuoteFields } from '../forms/retention.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { parseInput } from '../common/zod-validation.js';
 import { emailTaken, invalidCredentials } from './auth.errors.js';
@@ -241,9 +242,14 @@ export class AuthService {
     return this.prisma.user.update({ where: { id: userId }, data });
   }
 
-  // DELETE /me: hesap kalıcı silinir. Oturumlar ve puanlar birlikte gider (cascade);
-  // rezervasyon kayıtları kalır, kullanıcı bağlantısı boşalır (anonim). Teklif talepleri de öyle.
-  async deleteAccount(userId: string): Promise<void> {
-    await this.prisma.user.delete({ where: { id: userId } });
+  // DELETE /me: hesap kalıcı silinir. Oturumlar ve puanlar birlikte gider (cascade). Rezervasyon kayıtları kalır,
+  // kullanıcı bağlantısı boşalır: araç, tarih ve tutar kiralama kaydıdır, kişi bilgisi değil. Teklif taleplerinde ise
+  // ad, e-posta, telefon ve notlar hemen silinir (V2-12, KVKK); firma adı ve talep edilen araç istatistik için kalır.
+  // İkisi tek işlemde olur: teklifler silinmeden hesap gitmez.
+  async deleteAccount(userId: string, now: Date = new Date()): Promise<void> {
+    await this.prisma.$transaction([
+      this.prisma.quoteRequest.updateMany({ where: { userId }, data: erasedQuoteFields(now) }),
+      this.prisma.user.delete({ where: { id: userId } }),
+    ]);
   }
 }
