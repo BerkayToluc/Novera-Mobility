@@ -1,12 +1,14 @@
 import type { Metadata, Viewport } from "next";
 import { NextIntlClientProvider } from "next-intl";
-import { getLocale, getTranslations } from "next-intl/server";
+import { getLocale, getMessages, getTranslations } from "next-intl/server";
 import { locale } from "next/root-params";
 import { Analytics } from "@/components/analytics";
 import { ConsentProvider } from "@/components/consent/consent-provider";
 import { JsonLd } from "@/components/json-ld";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
+import { ROOT_NAMESPACES } from "@/i18n/client-messages";
+import { pickNamespaces } from "@/i18n/pick-namespaces";
 import { routing } from "@/i18n/routing";
 import { BRAND_COLORS } from "@/lib/brand";
 import { getConsent } from "@/lib/get-consent";
@@ -58,7 +60,8 @@ export default async function RootLayout({ children }: LayoutProps<"/[locale]">)
   return (
     <html lang={await locale()} data-theme={await getTheme()}>
       <body className="flex min-h-dvh flex-col">
-        <NextIntlClientProvider>
+        {/* Only what the header, the banner and the error page use; each section adds its own (i18n/client-messages.ts). */}
+        <NextIntlClientProvider messages={pickNamespaces(await getMessages(), ROOT_NAMESPACES)}>
           <JsonLd data={organizationJsonLd({ name: meta("title"), description: meta("description") })} />
           <ConsentProvider initial={await getConsent()}>
           {/* First tab stop: lets keyboard users skip the header (WCAG 2.4.1). */}

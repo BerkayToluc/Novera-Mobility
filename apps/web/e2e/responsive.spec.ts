@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 // The page never scrolls sideways, from the narrowest phone (320 px) to a desktop (SPEC §5.7):
 // a sample of every kind of page, at the widths where the layout changes. The full sweep (every

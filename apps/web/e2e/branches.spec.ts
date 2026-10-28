@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import { hydrated } from "./hydration";
 
 // The branches page (SPEC §2.6.1): open or closed on each card, rent from here, nearest first, kinds.

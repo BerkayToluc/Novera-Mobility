@@ -17,10 +17,10 @@
 - next-intl 4'ün `pick`/namespace yaklaşımı kullanılır. Kesin API için next-intl belgesine bakılır; projede `node_modules/next/dist/docs` notu (AGENTS.md) Next için geçerlidir.
 
 ## Kabul kriterleri
-- [ ] Ana sayfa, `/araclar`, `/urunler/akilli-kurumsal-filo` ve `/profil`'de istemciye giden çeviri boyutu önce/sonra ölçülür (RSC yükünde metin araması ya da `next build` analizi), PR'da tablo halinde.
-- [ ] Hiçbir sayfada eksik çeviri hatası yok (e2e tüm sayfalar, iki dil).
-- [ ] `legal` namespace'i yalnızca yasal sayfalarda istemciye gider (gerekiyorsa).
-- [ ] QUALITY'de P-01 güncel.
+- [x] Ana sayfa, `/araclar`, `/urunler/akilli-kurumsal-filo` ve `/profil`'de istemciye giden çeviri boyutu önce/sonra ölçülür (RSC yükünde metin araması ya da `next build` analizi), PR'da tablo halinde. *(sayfa HTML'inin ham ve gzip boyutu)*
+- [x] Hiçbir sayfada eksik çeviri hatası yok (e2e tüm sayfalar, iki dil). *(`e2e/messages.spec.ts` ve her e2e testine eklenen `fixtures.ts`)*
+- [x] `legal` namespace'i yalnızca yasal sayfalarda istemciye gider (gerekiyorsa). *(Legal* namespace'leri sunucu bileşenlerinde çözülür, hiçbir sayfada istemciye gitmez)*
+- [x] QUALITY'de P-01 güncel.
 
 ## Etiketler
 `faz-2` `temel` `P1` `web`

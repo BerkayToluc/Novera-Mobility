@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 // Services (SPEC §2.5, v0.9): five cards, each service told with three steps and its packages,
 // a few figures, which product includes which service, and what to do in an emergency.

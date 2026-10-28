@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import { RESULTS } from "./driver-helpers";
 
 // The results cards and their bar (SPEC §2.3): the total first and the day's price under it, the

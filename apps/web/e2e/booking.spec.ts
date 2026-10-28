@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import { EXPERIENCED, fillDriver } from "./driver-helpers";
 import { signInSample } from "./mock-session";
 

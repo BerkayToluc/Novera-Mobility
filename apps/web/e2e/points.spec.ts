@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import { RESULTS } from "./driver-helpers";
 
 // Paying with points (SPEC §2.3): chosen on the results, shown on the summary as a line that takes

@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 // The corporate quote's delivery cities (SPEC §2.2.3, v0.9): chosen from the 81 provinces, by the
 // first letters, several of them, never typed freely.
