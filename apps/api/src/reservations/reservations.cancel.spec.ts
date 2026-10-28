@@ -74,6 +74,15 @@ describe('ReservationsService.cancel', () => {
     expect(view.pointsEarned).toBe(0);
   });
 
+  it('stores the moment of the cancellation, and a repeated call does not move it', async () => {
+    const rows = [row()];
+    const service = setup(rows);
+    await service.cancel(OWNER, 'r1', NOW);
+    expect(rows[0]!.cancelledAt).toEqual(NOW);
+    await service.cancel(OWNER, 'r1', new Date(NOW.getTime() + 60_000));
+    expect(rows[0]!.cancelledAt).toEqual(NOW);
+  });
+
   it('is allowed less than 24 hours before the start too (the free window is information only)', async () => {
     const service = setup([row({ startAt: new Date(NOW.getTime() + 2 * 60 * 60 * 1000) })]);
     expect((await service.cancel(OWNER, 'r1', NOW)).status).toBe('CANCELLED');
