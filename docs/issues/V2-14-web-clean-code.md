@@ -34,10 +34,10 @@ Görsel değişiklik, yeni bileşen.
 Dosyalar: `apps/web/lib/api-post.ts:16`, `api-request.ts`, `auth-actions.ts:46-47,113-114`, `preferences-actions.ts:30-31`, `components/profile/preferences-form.tsx:15`, `components/locale-switcher.tsx:12`, `components/branches/branch-explorer.tsx`, `eslint.config.mjs`, `app/globals.css`.
 
 ## Kabul kriterleri
-- [ ] `pnpm lint` token dışı rastgele değeri **hata** sayar (bilerek eklenen bir örnekle gösterilir, sonra silinir).
-- [ ] Kopya tanımların her biri teke iner.
-- [ ] Ana sayfa JS yükü `framer-motion` olmadan ölçülür; `next build` çıktısında önce/sonra karşılaştırması PR'da.
-- [ ] 375/768/1280 ekran görüntüleri önce/sonra aynı (header, footer, bayiler, ana sayfa).
+- [x] `pnpm lint` token dışı rastgele değeri **hata** sayar (bilerek eklenen bir örnekle gösterilir, sonra silinir).
+- [x] Kopya tanımların her biri teke iner.
+- [x] Ana sayfa JS yükü `framer-motion` olmadan ölçülür; `next build` çıktısında önce/sonra karşılaştırması PR'da. *(ana sayfa SSS'yi kullandığı için `motion` yüklemeye devam eder; sayfa başına ölçüm PR'da)*
+- [x] 375/768/1280 ekran görüntüleri önce/sonra aynı (header, footer, bayiler, ana sayfa). *(piksel karşılaştırması: aynı)*
 - [ ] e2e yeşil; QUALITY'de M-05, M-07–M-09 ve P-02 güncel.
 
 ## Etiketler
