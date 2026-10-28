@@ -128,9 +128,9 @@ yeni testler ve `pnpm audit`.
 
 Adım adım uygulama: `docs/DEPLOY.md`. Burada yalnızca güvenlik açısından zorunlu olanlar.
 
-- [ ] `NODE_ENV=production` (aksi halde oturum çerezi `Secure` olmaz). `render.yaml` ayarlar.
+- [ ] `NODE_ENV=production` (aksi halde oturum çerezi `Secure` olmaz). Cloud Run'da servisin ortam değişkeni olarak girilir (DEPLOY.md §4).
 - [ ] `API_ACCESS_KEY` hem API'de hem web'de **aynı** değerde (en az 32 karakter). Web'in bu anahtarı ve ziyaretçi adresini göndermesi `apps/web/lib/api-headers.ts` ile yapılır. Anahtar olmadan canlı API açılmaz; yanlışsa her çağrı `404` olur.
-- [ ] `TRUST_PROXY_HOPS`: API'den önce kaç proxy var. Render'da `1` (Render'ın yük dengeleyicisi). Ziyaretçi adresi anahtarla gelen `X-Novera-Client-IP` başlığından alınır; canlıda her istek anahtarla geldiği için bu ayar pratikte yalnızca `/health` için geçerlidir, yine de doğru tutulur.
+- [ ] `TRUST_PROXY_HOPS`: API'den önce kaç proxy var. Cloud Run'da `1` (Google'ın yük dengeleyicisi); 28 Ekim'de iki cihazdan denendi, `RateLimitHit`'te farklı `ip:` anahtarları göründü. Ziyaretçi adresi anahtarla gelen `X-Novera-Client-IP` başlığından alınır; canlıda her istek anahtarla geldiği için bu ayar pratikte yalnızca `/health` için geçerlidir, yine de doğru tutulur.
 - [ ] `WEB_URL=https://...` ve `DATABASE_URL` tanımlı (yoksa API açılmaz).
 - [ ] `/docs` kapalı kalmalı (`ENABLE_DOCS` boş).
 - [ ] `RESEND_API_KEY` ve `MAIL_FROM` (alan adı Resend'de doğrulanmış) ya da bilinçli olarak boş: boşsa canlıda parola sıfırlama e-postası gitmez.
@@ -141,5 +141,5 @@ Adım adım uygulama: `docs/DEPLOY.md`. Burada yalnızca güvenlik açısından 
 
 ## Bilinen sınırlar (canlıda)
 
-- Render Free uyur; UptimeRobot ile uyanık tutulur ama Render istediği zaman yeniden başlatabilir. Hız sınırı sayaçları veritabanında olduğu için yeniden başlatma onları sıfırlamaz (V2-09).
+- Cloud Run boştayken sıfır örneğe iner, ilk istek birkaç saniye sürebilir (soğuk başlangıç); Google istediği zaman örneği yeniden başlatabilir. Hız sınırı sayaçları veritabanında olduğu için yeniden başlatma onları sıfırlamaz (V2-09).
 - Neon Free'nin geri dönüş penceresi 6 saattir; uzun süreli yedek haftalık elle alınır.
