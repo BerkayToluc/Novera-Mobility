@@ -371,27 +371,13 @@ model ReservationExtra {
 
 // ---------- İçerik ve formlar ----------
 
-// SPEC Ek A: Konsept, Ne Alıyorsunuz?, Teknolojik Artısı
+// Kurumsal ürünler yalnızca bir referanstır: `QuoteRequest.productId` buna bağlanır. Metinlerin tek kaynağı web'in
+// çeviri dosyalarıdır (`messages/*/products.json`, ADR-32); slug'lar `apps/web/lib/products.ts` ile aynı olmalı.
 model Product {
-  id           String  @id @default(uuid())
-  slug         String  @unique // ör. akilli-kurumsal-filo
-  title        Json // { "tr": "...", "en": "..." }
-  concept      Json
-  whatYouGet   Json
-  techBenefits Json // { "tr": ["..."], "en": ["..."] }
-  featured     Boolean @default(false) // "En çok tercih edilen"
-  sortOrder    Int     @default(0)
+  id   String @id @default(uuid())
+  slug String @unique // ör. akilli-kurumsal-filo
 
   quotes QuoteRequest[]
-}
-
-model Service {
-  id        String @id @default(uuid())
-  slug      String @unique // navbar menüsünde hizmetler sayfasındaki madde için
-  title     Json
-  summary   Json // tek cümlelik açıklama
-  points    Json // { "tr": ["...", "...", "..."], "en": [...] }
-  sortOrder Int    @default(0)
 }
 
 // Kurumsal teklif talepleri (GET /me/quotes ve POST /quotes)

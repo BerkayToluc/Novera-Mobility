@@ -2,7 +2,6 @@
 // Bu dosya Prisma'dan bağımsızdır: yalnızca veri ve küçük yardımcılar içerir.
 
 export type L = { tr: string; en: string };
-export type LL = { tr: string[]; en: string[] };
 export type Transmission = "MANUAL" | "AUTOMATIC";
 export type FuelType = "PETROL" | "DIESEL" | "HYBRID" | "ELECTRIC";
 export type ConsumptionUnit = "L_PER_100KM" | "KWH_PER_100KM";
@@ -142,104 +141,15 @@ export const rates = [
   { currency: "USD" as const, ratePerTry: "0.0230" },
 ];
 
-// ---------- Ürünler (SPEC Ek A) ----------
+// ---------- Ürünler ----------
 
+// Yalnızca slug: metinler web'in çeviri dosyalarında (ADR-32). Liste `apps/web/lib/products.ts` ile aynı olmalı;
+// kurumsal teklif formu ürünü slug ile seçer ve API `QuoteRequest.productId`'yi buradan bulur.
 export const products = [
-  {
-    slug: "akilli-kurumsal-filo", featured: true, sortOrder: 1,
-    title: { tr: "Akıllı Kurumsal Filo Kiralama", en: "Smart Corporate Fleet Rental" },
-    concept: { tr: "Şirketinize son model araç filosu tahsis ederken, arkasında tüm filoyu yöneteceğiniz Merkezi Admin Panelini hediye ediyoruz.", en: "While we assign your company a fleet of the latest cars, we also give you the Central Admin Panel to manage the whole fleet." },
-    whatYouGet: { tr: "Şirketinizin ihtiyacına uygun (binek, SUV, ticari veya hibrit) uzun dönem kiralık araç filosu.", en: "A long-term rental fleet that fits your company's needs (passenger, SUV, commercial or hybrid)." },
-    techBenefits: {
-      tr: [
-        "Novera Admin Paneli Dahil: Araçların hangi personele zimmetli olduğunu, sözleşme sürelerini, faturaları ve HGS masraflarını tek tıkla takip edin.",
-        "Canlı GPS ve Telematik: Kiralanan araçların hız, kontak durumu, rota geçmişi ve yakıt tüketimini canlı haritadan izleyin.",
-        "Masraf ve ceza takibini otomatikleştiren şirket yönetim arayüzü.",
-      ],
-      en: [
-        "Novera Admin Panel included: see which employee each car is assigned to, contract terms, invoices and toll costs in one click.",
-        "Live GPS and telematics: follow the speed, ignition status, route history and fuel use of rented cars on a live map.",
-        "A company management interface that automates cost and fine tracking.",
-      ],
-    },
-  },
-  {
-    slug: "vip-mobilite", featured: false, sortOrder: 2,
-    title: { tr: "Yönetici ve Premium Araç Kiralama (VIP Mobilite)", en: "Executive and Premium Car Rental (VIP Mobility)" },
-    concept: { tr: "Üst düzey şirket yöneticileri ve kurumsal konuklar için lüks segment, tam donanımlı ve öncelikli mobilite çözümü.", en: "A luxury-segment, fully equipped and priority mobility solution for senior executives and corporate guests." },
-    whatYouGet: { tr: "E ve F segmenti prestij araçlar (Audi, BMW, Mercedes vb.), opsiyonel VIP şoför desteği.", en: "E and F segment prestige cars (Audi, BMW, Mercedes and others), with optional VIP chauffeur support." },
-    techBenefits: {
-      tr: [
-        "Öncelikli Mobil Konsiyerj: Sürücüye ve yöneticiye özel VIP destek hattı.",
-        "Hızlı Transfer ve Şoför Koordinasyonu: Mobil arayüz üzerinden karşılama, rota optimizasyonu ve uçuş takibi.",
-      ],
-      en: [
-        "Priority mobile concierge: a VIP support line for the driver and the executive.",
-        "Fast transfer and chauffeur coordination: meet-and-greet, route optimisation and flight tracking from a mobile interface.",
-      ],
-    },
-  },
-  {
-    slug: "esnek-kisa-donem", featured: false, sortOrder: 3,
-    title: { tr: "Esnek & Kısa Dönem Araç Kiralama (KOBİ ve Bireysel)", en: "Flexible and Short-Term Car Rental (SMEs and Individuals)" },
-    concept: { tr: "Proje bazlı işler, acil saha ihtiyaçları veya dönemsel seyahatler için taahhütsüz, hızlı teslimatlı kiralama.", en: "No-commitment, fast-delivery rental for project work, urgent field needs or seasonal travel." },
-    whatYouGet: { tr: "Günlük, haftalık veya aylık periyotlarla son model araçlar.", en: "Latest-model cars on daily, weekly or monthly terms." },
-    techBenefits: {
-      tr: [
-        "Novera Driver App: Anahtarı teslim alırken çizik/hasar kaydını telefondan fotoğraflayıp dijital tutanak tutabilme.",
-        "Uygulama İçi SOS Butonu: Olası bir aksilikte tek tuşla konumu merkeze iletip yardım çağırabilme.",
-      ],
-      en: [
-        "Novera Driver App: photograph scratches or damage at key hand-over and keep a digital report from your phone.",
-        "In-app SOS button: send your location to the operations centre and call for help with one tap if something goes wrong.",
-      ],
-    },
-  },
-  {
-    slug: "yesil-filo", featured: false, sortOrder: 4,
-    title: { tr: "Yeşil Filo (Elektrikli & Hibrit Araç Kiralama)", en: "Green Fleet (Electric and Hybrid Car Rental)" },
-    concept: { tr: "Karbon ayak izini azaltmak isteyen kurumsal şirketler için sürdürülebilir yeni nesil filo çözümü.", en: "A sustainable, next-generation fleet solution for companies that want to reduce their carbon footprint." },
-    whatYouGet: { tr: "En güncel elektrikli ve hibrit araç parkı.", en: "The latest electric and hybrid car park." },
-    techBenefits: {
-      tr: ["Panel üzerinden anlık batarya sağlığı, şarj istasyonu durumu ve şirketinize sağladığı karbon emisyon tasarrufu raporlaması."],
-      en: ["Live battery health, charging station status and a report of the carbon emissions your company saves, all from the panel."],
-    },
-  },
-];
-
-// ---------- Hizmetler (SPEC Ek A; maddeleri Ek A'daki iddialarla sınırlı) ----------
-
-export const services = [
-  {
-    slug: "akilli-yol-yardim-cekici", sortOrder: 1,
-    title: { tr: "Akıllı Yol Yardım & Çekici", en: "Smart Roadside Assistance and Towing" },
-    summary: { tr: "Kaza/arıza anında GPS koordinatınıza en yakın anlaşmalı çekiciyi canlı yönlendirme.", en: "In an accident or breakdown, the nearest partner tow truck is dispatched live to your GPS position." },
-    points: { tr: ["GPS konumunuza en yakın çekici", "Canlı yönlendirme", "Kaza ve arıza anında destek"], en: ["Tow truck nearest to your GPS position", "Live dispatch", "Help for accidents and breakdowns"] },
-  },
-  {
-    slug: "canli-operasyon-masasi", sortOrder: 2,
-    title: { tr: "7/24 Canlı Operasyon Masası", en: "24/7 Live Operations Desk" },
-    summary: { tr: "Sürücülerin uygulama veya telefon üzerinden anında bağlanabildiği kriz yönetimi.", en: "Crisis management that drivers can reach instantly through the app or by phone." },
-    points: { tr: ["Gece gündüz erişim", "Uygulama veya telefonla bağlanma", "Kriz yönetimi"], en: ["Reachable day and night", "Connect through the app or by phone", "Crisis management"] },
-  },
-  {
-    slug: "kesintisiz-ikame-arac", sortOrder: 3,
-    title: { tr: "Kesintisiz İkame (Yedek) Araç", en: "Uninterrupted Replacement Car" },
-    summary: { tr: "Arıza 24 saati aştığında işin durmaması için kapınıza gelen eşdeğer yedek araç.", en: "When a breakdown lasts over 24 hours, an equivalent replacement car comes to your door so work does not stop." },
-    points: { tr: ["24 saati aşan arızada devreye girer", "Eşdeğer yedek araç", "Adresinize teslim"], en: ["Applies when a breakdown exceeds 24 hours", "An equivalent replacement car", "Delivered to your address"] },
-  },
-  {
-    slug: "periyodik-bakim-lastik-oteli", sortOrder: 4,
-    title: { tr: "Periyodik Bakım & Lastik Oteli", en: "Scheduled Maintenance and Tyre Storage" },
-    summary: { tr: "Yaz/kış lastiği değişimi, muayene takibi ve adresten vale ile servis hizmeti.", en: "Summer and winter tyre changes, inspection tracking and valet pick-up from your address for servicing." },
-    points: { tr: ["Yaz/kış lastiği değişimi", "Muayene takibi", "Adresten vale ile servis"], en: ["Summer and winter tyre changes", "Inspection tracking", "Valet service from your address"] },
-  },
-  {
-    slug: "novera-sos", sortOrder: 5,
-    title: { tr: "Novera SOS & Acil Durum Müdahale", en: "Novera SOS and Emergency Response" },
-    summary: { tr: "Tek dokunuşla tüm acil müdahale birimleri canlı konumunuzda.", en: "With one tap, all emergency response units reach your live location." },
-    points: { tr: ["Tek dokunuşla çağrı", "Canlı konumunuz iletilir", "Acil müdahale birimleri yönlendirilir"], en: ["One-tap call", "Your live location is sent", "Emergency units are dispatched"] },
-  },
+  { slug: "akilli-kurumsal-filo" },
+  { slug: "vip-mobilite" },
+  { slug: "esnek-kisa-donem" },
+  { slug: "yesil-filo" },
 ];
 
 // Kampanya kodları (SPEC §2.3, kurgusal). Yüzde, araç ve ek hizmetlerin toplamından düşer.

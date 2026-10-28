@@ -138,15 +138,7 @@ describeDb('POST /quotes kurumsal teklif (gerçek PostgreSQL)', () => {
   describe('ürün bağlantısı', () => {
     it('geçerli productSlug talebe bağlanır', async () => {
       const slug = `test-urun-${run}`;
-      const product = await prisma.product.create({
-        data: {
-          slug,
-          title: { tr: 'Ürün', en: 'Product' },
-          concept: { tr: 'K', en: 'C' },
-          whatYouGet: { tr: 'N', en: 'W' },
-          techBenefits: { tr: ['a'], en: ['a'] },
-        },
-      });
+      const product = await prisma.product.create({ data: { slug } });
       created.products.push(product.id);
 
       const result = await service.create({ ...valid('prod'), productSlug: slug });
