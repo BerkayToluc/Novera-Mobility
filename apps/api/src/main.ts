@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { AppModule } from './app.module';
+import { AppModule } from './app.module.js';
 import { configureApp } from './app.setup.js';
 import { listenHost, listenPort } from './config/env.js';
 import { assertRuntimeEnv, docsEnabled } from './config/runtime.js';
