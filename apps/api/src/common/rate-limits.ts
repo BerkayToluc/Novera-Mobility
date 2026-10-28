@@ -7,7 +7,7 @@ import type { RateLimitSpec } from './rate-limit.js';
 const MINUTE = 60;
 const HOUR = 60 * MINUTE;
 
-// The e-mail address in the body as a counter key, so one account cannot be tried from many addresses.
+// The e-mail address in the body as a counter key, so one account cannot be asked about from many addresses.
 // Skipped (null) when the body has none; an invalid body is refused by validation, and still counted by address.
 const emailKey = (request: Request): string | null => {
   const email = (request.body as { email?: unknown } | undefined)?.email;
@@ -24,7 +24,6 @@ const promoKey = (request: Request, user: { id: string } | null): string | null 
 export const LIMITS = {
   register: { bucket: 'register', limit: 10, windowSec: HOUR, key: 'client' },
   login: { bucket: 'login', limit: 10, windowSec: 15 * MINUTE, key: 'client' },
-  loginEmail: { bucket: 'login-email', limit: 10, windowSec: 15 * MINUTE, key: emailKey },
   google: { bucket: 'google', limit: 10, windowSec: 15 * MINUTE, key: 'client' },
   forgot: { bucket: 'forgot', limit: 5, windowSec: HOUR, key: 'client' },
   forgotEmail: { bucket: 'forgot-email', limit: 3, windowSec: HOUR, key: emailKey },

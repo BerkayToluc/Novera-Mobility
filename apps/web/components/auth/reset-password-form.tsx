@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Link } from "@/i18n/navigation";
-import { AuthRateLimitedError, AuthUnavailableError, ResetLinkInvalidError, resetPassword } from "@/lib/auth-client";
+import { AuthRateLimitedError, AuthUnavailableError, PasswordTooCommonError, ResetLinkInvalidError, resetPassword } from "@/lib/auth-client";
 import { PASSWORD_MIN_LENGTH, resetPasswordSchema, type ResetPasswordInput } from "@/lib/auth-schemas";
 import { FormError } from "./form-error";
 import { useAuthErrorMessages } from "./use-auth-messages";
@@ -42,6 +42,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
       setDone(true);
     } catch (error) {
       if (error instanceof ResetLinkInvalidError) setLinkInvalid(true);
+      else if (error instanceof PasswordTooCommonError) setFormError(t("errors.passwordCommon"));
       else if (error instanceof AuthRateLimitedError) setFormError(rateLimitMessage(limitT, error.retryAfter));
       else if (error instanceof AuthUnavailableError) setFormError(t("errors.unavailable"));
       else setFormError(t("errors.generic"));

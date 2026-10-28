@@ -9,6 +9,7 @@ import { RateLimitModule } from './common/rate-limit.module.js';
 import { RateLimitStore } from './common/rate-limit.store.js';
 import { MemoryRateLimitStore } from './common/rate-limit.testing.js';
 import { LIMITS } from './common/rate-limits.js';
+import { FREE_FAILED_ATTEMPTS } from './auth/login-throttle.js';
 import { HealthModule } from './health/health.module.js';
 import { PrismaService } from './prisma/prisma.service.js';
 
@@ -38,6 +39,7 @@ describe('rate limits over HTTP', () => {
   beforeEach(() => {
     fake.users = [];
     fake.sessions = [];
+    fake.throttles = [];
   });
 
   let counter = 0;
@@ -86,15 +88,43 @@ describe('rate limits over HTTP', () => {
     expect((await call('POST', '/auth/register', { body: {}, address })).status).toBe(429);
   });
 
-  it('limits one account from many addresses: sign-in by e-mail', async () => {
+  it('makes one e-mail address wait after too many wrong tries, from any address, instead of locking the account', async () => {
     const email = `hedef-${counter}@example.com`;
-    for (let i = 0; i < LIMITS.loginEmail.limit; i += 1) {
+    // The first failures cost nothing, the next one sets a wait.
+    for (let i = 0; i <= FREE_FAILED_ATTEMPTS; i += 1) {
       expect((await call('POST', '/auth/login', { body: { email, password: 'yanlis-parola' } })).status).toBe(401);
     }
     const refused = await call('POST', '/auth/login', { body: { email: email.toUpperCase(), password: 'yanlis-parola' } });
     expect(refused.status).toBe(429);
+    expect(Number(refused.headers.get('retry-after'))).toBeGreaterThanOrEqual(1);
+    expect(Number(refused.headers.get('retry-after'))).toBeLessThanOrEqual(60);
     // Someone else's e-mail from a new address is still fine.
     expect((await call('POST', '/auth/login', { body: { email: `baska-${counter}@example.com`, password: 'x' } })).status).toBe(401);
+  });
+
+  it('an address with no account waits the same way: the wait does not tell whether the account exists', async () => {
+    const real = (await call('POST', '/auth/register', { body: registration(5) })).status;
+    expect(real).toBe(201);
+    const email = fake.users[fake.users.length - 1]!.email as string;
+    const ghost = `nobody-${counter}@example.com`;
+    for (const target of [email, ghost]) {
+      for (let i = 0; i <= FREE_FAILED_ATTEMPTS; i += 1) await call('POST', '/auth/login', { body: { email: target, password: 'yanlis-parola' } });
+    }
+    const realAnswer = await call('POST', '/auth/login', { body: { email, password: 'yanlis-parola' } });
+    const ghostAnswer = await call('POST', '/auth/login', { body: { email: ghost, password: 'yanlis-parola' } });
+    expect([realAnswer.status, ghostAnswer.status]).toEqual([429, 429]);
+    expect(await realAnswer.json()).toEqual(await ghostAnswer.json());
+  });
+
+  it('the right password is refused during the wait, accepted after it, and clears the count', async () => {
+    await call('POST', '/auth/register', { body: registration(6) });
+    const email = fake.users[fake.users.length - 1]!.email as string;
+    for (let i = 0; i <= FREE_FAILED_ATTEMPTS; i += 1) await call('POST', '/auth/login', { body: { email, password: 'yanlis-parola' } });
+    expect((await call('POST', '/auth/login', { body: { email, password: 'long-enough-1' } })).status).toBe(429);
+    // The wait is over (the clock is not moved, the row says so).
+    fake.throttles.forEach((row) => (row.lockedUntil = new Date(Date.now() - 1000)));
+    expect((await call('POST', '/auth/login', { body: { email, password: 'long-enough-1' } })).status).toBe(200);
+    expect(fake.throttles.find((row) => row.email === email)).toBeUndefined();
   });
 
   it('limits password reset requests by address and by e-mail, answering alike for any account', async () => {

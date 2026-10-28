@@ -37,7 +37,7 @@ export class FakePrisma {
       };
       this.users.push(user);
       if (sessions?.create) {
-        this.sessions.push({ id: randomUUID(), createdAt: new Date(), userId: user.id, ...sessions.create });
+        this.sessions.push({ id: randomUUID(), createdAt: new Date(), lastUsedAt: new Date(), userId: user.id, ...sessions.create });
       }
       return user;
     },
@@ -66,9 +66,14 @@ export class FakePrisma {
     findFirst: async ({ where }: { where: Row }) =>
       this.sessions.find((s) => s.id === where.id && s.userId === where.userId) ?? null,
     create: async ({ data }: { data: Row }) => {
-      const session = { id: randomUUID(), createdAt: new Date(), ...data };
+      const session = { id: randomUUID(), createdAt: new Date(), lastUsedAt: new Date(), ...data };
       this.sessions.push(session);
       return session;
+    },
+    updateMany: async ({ where, data }: { where: Row; data: Row }) => {
+      const rows = this.sessions.filter((s) => s.id === where.id);
+      rows.forEach((s) => Object.assign(s, data));
+      return { count: rows.length };
     },
     deleteMany: async ({ where }: { where: Row }) => {
       const before = this.sessions.length;
@@ -81,6 +86,24 @@ export class FakePrisma {
         return false;
       });
       return { count: before - this.sessions.length };
+    },
+  };
+
+  // Sign-in waits (V2-10): the address is the key.
+  throttles: Row[] = [];
+  loginThrottle = {
+    findUnique: async ({ where }: { where: { email: string } }) => this.throttles.find((t) => t.email === where.email) ?? null,
+    upsert: async ({ where, create, update }: { where: { email: string }; create: Row; update: Row }) => {
+      const existing = this.throttles.find((t) => t.email === where.email);
+      if (existing) return Object.assign(existing, update, { updatedAt: new Date() });
+      const row = { ...create, updatedAt: new Date() };
+      this.throttles.push(row);
+      return row;
+    },
+    deleteMany: async ({ where }: { where: Row }) => {
+      const before = this.throttles.length;
+      this.throttles = this.throttles.filter((t) => !(where.email ? t.email === where.email : false));
+      return { count: before - this.throttles.length };
     },
   };
 

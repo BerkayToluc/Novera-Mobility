@@ -108,12 +108,24 @@ model Session {
   expiresAt DateTime
   userAgent String? // girişte tarayıcının bildirdiği; "açık oturumlar" listesinde cihaz adı için
   createdAt DateTime @default(now())
+  // Son kullanım (V2-10): en çok 5 dakikada bir güncellenir; 7 gün kullanılmayan oturum geçersizdir.
+  lastUsedAt DateTime @default(now())
 
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([expiresAt])
+}
+
+// Sign-in attempts that failed, per e-mail address (V2-10, QUALITY G-15). After a few failures the address has to wait,
+// 1, 2, 4 ... at most 15 minutes, instead of being locked; the same for an address with no account, so the wait
+// does not tell whether the account exists. A correct sign-in clears it; old rows are deleted by the daily task.
+model LoginThrottle {
+  email       String    @id
+  failures    Int
+  lockedUntil DateTime?
+  updatedAt   DateTime  @updatedAt
 }
 
 // Single-use password reset link (BACKLOG #27, issue #36). Only the SHA-256 hash of the token is stored.

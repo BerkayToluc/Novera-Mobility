@@ -3,6 +3,7 @@ import {
   accountEmail,
   consent,
   optionalFlag,
+  optionalText,
   oneOf,
   password,
   requiredText,
@@ -30,6 +31,17 @@ export const googleSchema = z.object({
   consent: optionalFlag(),
 });
 
+// A password that may be left out; when given it is only checked for not being absurdly long.
+function optionalPresentedPassword() {
+  return z.unknown().transform((raw, ctx): string | null => {
+    if (raw === undefined || raw === null || raw === '') return null;
+    const result = password('presented').safeParse(raw);
+    if (result.success) return result.data;
+    ctx.addIssue({ code: 'custom', message: result.error.issues[0]?.message ?? 'INVALID_FORMAT' });
+    return z.NEVER;
+  });
+}
+
 export const forgotPasswordSchema = z.object({ email: accountEmail() });
 
 export const resetPasswordSchema = z.object({
@@ -40,6 +52,13 @@ export const resetPasswordSchema = z.object({
 export const changePasswordSchema = z.object({
   currentPassword: password('presented'),
   newPassword: password('new'),
+});
+
+// DELETE /me: an account with a password asks for it; one opened with Google (no password) asks for the e-mail address.
+// Which of the two is needed depends on the account, so the service checks that; here each only has to be text.
+export const deleteAccountSchema = z.object({
+  currentPassword: optionalPresentedPassword(),
+  confirmEmail: optionalText(254),
 });
 
 export const LOCALES = { tr: 'TR', en: 'EN' } as const;

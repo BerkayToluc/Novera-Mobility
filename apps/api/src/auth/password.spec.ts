@@ -1,4 +1,4 @@
-import { hashPassword, verifyPassword } from './password.js';
+import { hashPassword, needsRehash, verifyPassword } from './password.js';
 import { hashSessionToken, newSessionToken, readCookie } from './session-token.js';
 
 describe('parola özeti', () => {
@@ -39,5 +39,40 @@ describe('oturum anahtarı', () => {
     expect(readCookie(undefined, 'novera_session')).toBeNull();
     expect(readCookie('novera_session=', 'novera_session')).toBeNull();
     expect(readCookie('novera_session=%E0%A4%A', 'novera_session')).toBeNull();
+  });
+});
+
+describe('parola özeti: maliyet ve yenileme (V2-10, QUALITY G-12)', () => {
+  // The real cost is used here (about 128 MiB and a third of a second per hash); the other specs use the light one.
+  beforeAll(() => {
+    process.env.NOVERA_REAL_SCRYPT = '1';
+  });
+  afterAll(() => {
+    delete process.env.NOVERA_REAL_SCRYPT;
+  });
+
+  it('a new hash has N = 2^17', async () => {
+    const stored = await hashPassword('guclu-parola-1');
+    expect(stored.split('$')[1]).toBe(String(2 ** 17));
+    expect(await verifyPassword('guclu-parola-1', stored)).toBe(true);
+    expect(await verifyPassword('guclu-parola-2', stored)).toBe(false);
+    expect(needsRehash(stored)).toBe(false);
+  });
+
+  it('a hash made with the old cost still verifies and is marked for replacement', async () => {
+    const old = await hashPassword('eski-parola-1', 16384);
+    expect(old.split('$')[1]).toBe('16384');
+    expect(await verifyPassword('eski-parola-1', old)).toBe(true);
+    expect(needsRehash(old)).toBe(true);
+  });
+
+  it('a stored value that is not a hash is not marked', () => {
+    expect(needsRehash('')).toBe(false);
+    expect(needsRehash('bcrypt$1$2$3$4$5')).toBe(false);
+  });
+
+  it('several hashes at once wait in line and all finish (memory stays bounded)', async () => {
+    const hashes = await Promise.all(Array.from({ length: 4 }, (_, i) => hashPassword(`parola-numara-${i}`)));
+    expect(new Set(hashes).size).toBe(4);
   });
 });

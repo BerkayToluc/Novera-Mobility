@@ -33,7 +33,7 @@ export async function forgotPassword(email: string): Promise<ForgotPasswordResul
 // `too_short`: the password broke the length rule; the link is not spent in that case.
 export type ResetPasswordResult =
   | { ok: true }
-  | { ok: false; reason: "invalid_link" | "too_short" | "rate_limited" | "unavailable"; retryAfter?: number | null };
+  | { ok: false; reason: "invalid_link" | "too_short" | "too_common" | "rate_limited" | "unavailable"; retryAfter?: number | null };
 
 // `POST /auth/reset-password`. Success ends every session of the account, so the visitor signs in
 // again. With USE_MOCKS=1 and no API_URL any token is accepted, except `expired`, which plays a link
@@ -49,6 +49,7 @@ export async function resetPassword(token: string, password: string): Promise<Re
     if (result.status === "invalid") {
       if (result.code === "RESET_TOKEN_INVALID") return { ok: false, reason: "invalid_link" };
       if (result.fieldErrors.password === "TOO_SHORT") return { ok: false, reason: "too_short" };
+      if (result.fieldErrors.password === "PASSWORD_TOO_COMMON") return { ok: false, reason: "too_common" };
     }
     return { ok: false, reason: "unavailable" };
   }

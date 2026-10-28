@@ -350,8 +350,25 @@ describe("the account", () => {
       url: "http://api.test/me",
       body: { notifications: { reminders: true, campaigns: true } },
     });
-    expect(await deleteMyAccount()).toEqual({ ok: true });
+    expect(await deleteMyAccount({ currentPassword: "sifre-1234" })).toEqual({ ok: true });
+    expect(calls.find((call) => call.method === "DELETE")).toMatchObject({ url: "http://api.test/me", body: { currentPassword: "sifre-1234" } });
     expect(deleted).toEqual(expect.arrayContaining(["novera_session", MOCK_SESSION_COOKIE]));
+  });
+
+  it("deleteMyAccount tells a wrong password or e-mail from an outage, and keeps the cookies", async () => {
+    sent.set("novera_session", "tok");
+    deleted.length = 0;
+    vi.stubGlobal("fetch", vi.fn(async (_url: string, init: RequestInit) => init.method === "GET" || !init.method ? new Response(JSON.stringify(user)) : new Response(JSON.stringify({ code: "VALIDATION_FAILED", fieldErrors: { currentPassword: "INVALID_PASSWORD" } }), { status: 422 })));
+    expect(await deleteMyAccount({ currentPassword: "yanlis" })).toEqual({ ok: false, reason: "incorrect" });
+    vi.stubGlobal("fetch", vi.fn(async (_url: string, init: RequestInit) => init.method === "GET" || !init.method ? new Response(JSON.stringify(user)) : new Response(JSON.stringify({ code: "VALIDATION_FAILED", fieldErrors: { confirmEmail: "EMAIL_MISMATCH" } }), { status: 422 })));
+    expect(await deleteMyAccount({ confirmEmail: "baska@example.com" })).toEqual({ ok: false, reason: "incorrect" });
+    expect(deleted).toEqual([]);
+  });
+
+  it("changePassword reports a password from the common list", async () => {
+    sent.set("novera_session", "tok");
+    vi.stubGlobal("fetch", vi.fn(async (_url: string, init: RequestInit) => init.method === "GET" || !init.method ? new Response(JSON.stringify(user)) : new Response(JSON.stringify({ code: "VALIDATION_FAILED", fieldErrors: { newPassword: "PASSWORD_TOO_COMMON" } }), { status: 422 })));
+    expect(await changePassword("eski-sifre-1", "password123")).toEqual({ ok: false, reason: "too_common" });
   });
 
   it("maps a corporate account with its company details", () => {

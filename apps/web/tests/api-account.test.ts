@@ -264,6 +264,8 @@ describe("calls to the API", () => {
     expect(await resetPassword("tok", "yeni-sifre-1")).toEqual({ ok: true });
     vi.stubGlobal("fetch", respond(422, { code: "RESET_TOKEN_INVALID" }));
     expect(await resetPassword("tok", "yeni-sifre-1")).toEqual({ ok: false, reason: "invalid_link" });
+    vi.stubGlobal("fetch", respond(422, { code: "VALIDATION_FAILED", fieldErrors: { password: "PASSWORD_TOO_COMMON" } }));
+    expect(await resetPassword("tok", "password123")).toEqual({ ok: false, reason: "too_common" });
     vi.stubGlobal("fetch", respond(422, { code: "VALIDATION_FAILED", fieldErrors: { password: "TOO_SHORT" } }));
     expect(await resetPassword("tok", "yeni-sifre-1")).toEqual({ ok: false, reason: "too_short" });
     vi.stubGlobal("fetch", respond(429, { code: "RATE_LIMITED" }));

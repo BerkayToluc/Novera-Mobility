@@ -1,7 +1,11 @@
 import { createHash, randomBytes } from 'node:crypto';
 
 export const SESSION_COOKIE = 'novera_session';
+// A session ends after 30 days whatever happens, and after 7 days without being used (V2-10, QUALITY G-13).
 export const SESSION_DAYS = 30;
+export const SESSION_IDLE_DAYS = 7;
+// `lastUsedAt` is written at most this often, so a busy page does not write a row on every request.
+export const SESSION_TOUCH_MINUTES = 5;
 
 // Çereze rastgele bir anahtar konur; veritabanında yalnızca özeti (SHA-256) saklanır.
 // Veritabanı sızsa bile içindeki kayıtlarla oturum açılamaz.

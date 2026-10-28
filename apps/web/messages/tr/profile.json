@@ -117,7 +117,13 @@
         "confirmText": "Bu işlem geri alınamaz. Hesabınıza bir daha giriş yapamazsınız.",
         "cancel": "Vazgeç",
         "confirm": "Evet, Hesabımı Sil",
-        "deleting": "Siliniyor…"
+        "deleting": "Siliniyor…",
+        "passwordLabel": "Onay için şifrenizi girin",
+        "passwordIncorrect": "Şifre yanlış.",
+        "emailLabel": "Onay için hesabınızın e-postasını ({email}) yazın",
+        "emailMismatch": "E-posta hesabınızla aynı değil.",
+        "show": "Göster",
+        "hide": "Gizle"
       },
       "defaults": {
         "title": "Varsayılan tercihlerim",
@@ -154,6 +160,7 @@
           "mismatch": "Şifreler aynı değil.",
           "save": "Şifreyi değiştir",
           "saving": "Değiştiriliyor…",
+          "common": "Bu şifre çok yaygın ve kolay tahmin edilir. Başka bir şifre seçin.",
           "incorrect": "Mevcut şifre yanlış.",
           "saved": "Şifreniz değiştirildi."
         },

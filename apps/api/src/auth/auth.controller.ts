@@ -61,7 +61,8 @@ export class AuthController {
   }
 
   @Post('login')
-  @RateLimit(LIMITS.login, LIMITS.loginEmail)
+  // Per address here; the wait per e-mail address (1, 2, 4 ... 15 minutes) is in AuthService.login.
+  @RateLimit(LIMITS.login)
   @HttpCode(200)
   @ApiBody({
     schema: {

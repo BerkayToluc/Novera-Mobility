@@ -25,7 +25,7 @@ Her uçta bir sınır vardır (ADR-27). Sayaçlar Postgres'te (`RateLimitHit`) t
 | Uç | Sınır | Anahtar | Kova |
 |---|---|---|---|
 | `POST /auth/register` | 10 istek/saat | adres | `register` |
-| `POST /auth/login` | 10 istek/15 dk ve ayrıca 10 istek/15 dk | adres; e-posta | `login`, `login-email` |
+| `POST /auth/login` | 10 istek/15 dk; ayrıca e-posta başına 5 yanlıştan sonra artan bekleme (`LoginThrottle`, en çok 15 dk) | adres; e-posta | `login` |
 | `POST /auth/google` | 10 istek/15 dk | adres | `google` |
 | `POST /auth/forgot-password` | 5 istek/saat ve ayrıca 3 istek/saat | adres; e-posta | `forgot`, `forgot-email` |
 | `POST /auth/reset-password` | 10 istek/15 dk | adres | `reset` |
@@ -97,7 +97,7 @@ yeni testler ve `pnpm audit`.
 ## İncelendi, sorun bulunmadı
 
 - **SQL enjeksiyonu:** tüm ham sorgular etiketli şablon (`$queryRaw` + `${}`), parametre olarak gider; `Unsafe` kullanımı yok.
-- **Parolalar:** scrypt, rastgele tuz, `timingSafeEqual`; olmayan e-postada sahte özetle doğrulama (süre farkı yok).
+- **Parolalar:** scrypt (N=2^17), rastgele tuz, `timingSafeEqual`; olmayan e-postada sahte özetle doğrulama (süre farkı yok).
 - **Oturum:** 256 bit rastgele anahtar, veritabanında yalnızca SHA-256 özeti; çerez `httpOnly`, `SameSite=Lax`, canlıda `Secure`. Parola değişince/sıfırlanınca diğer oturumlar ve sıfırlama bağlantıları silinir.
 - **Parola sıfırlama:** bağlantı tek kullanımlık, özet saklanır, 1 saat; var olan/olmayan hesap aynı yanıtı verir.
 - **Yetki (IDOR):** `/me/*`, iptal, oturum kapatma sorguları hep `userId` ile süzülür; başkasının kaydı 404.
@@ -119,12 +119,10 @@ yeni testler ve `pnpm audit`.
 
 ## Karar bekleyenler (kodda değiştirilmedi)
 
-1. **Hesap silme için parola istemek.** `DELETE /me` yalnızca oturum çerezine bakıyor; çalınmış bir oturum hesabı siler. Parola (`currentPassword`) istemek sözleşme ve ön yüz değişikliği gerektirir (G).
-2. **Girişte hesap bazlı sınır:** biri bir e-postaya 10 yanlış deneme yaparak o kişinin girişini 15 dakika kilitleyebilir. Kaba kuvveti durdurmanın bedeli bu; ileride ek sınır ya da bekleme ile yumuşatılabilir.
-3. **Parola sıfırlama isteği süre farkı:** e-posta gönderimi artık beklenmiyor (S10); geriye yalnızca hesap varken yapılan iki küçük veritabanı yazması kaldı. Fark çok küçük ve ağ gürültüsünün içinde kalır; ek önlem gerekmez.
-4. **Kayıtta `EMAIL_TAKEN`:** hesap varlığını açık eder; sözleşmeye göre bilinçli (kullanıcıya doğru mesaj). Sınır: saatte 10 kayıt/istemci.
-5. **Açık okuma uçlarına sınır yok** (`/vehicles`, `/reservations/price`, ...). Yayında CDN/yük dengeleyici düzeyinde istek sınırı eklenmesi önerilir.
-6. **Hız sınırı sayaçları** veritabanındadır (V2-09): birden fazla API sunucusu aynı sayacı görür ve yeniden başlatma onları sıfırlamaz. Her istek bir veritabanı yazması demektir; ölçek çok büyürse depo ADR-27'de yeniden ele alınır.
+1. **Parola sıfırlama isteği süre farkı:** e-posta gönderimi artık beklenmiyor (S10); geriye yalnızca hesap varken yapılan iki küçük veritabanı yazması kaldı. Fark çok küçük ve ağ gürültüsünün içinde kalır; ek önlem gerekmez.
+2. **Kayıtta `EMAIL_TAKEN`:** hesap varlığını açık eder; sözleşmeye göre bilinçli (kullanıcıya doğru mesaj). Sınır: saatte 10 kayıt/istemci.
+3. **Açık okuma uçlarına sınır yok** (`/vehicles`, `/reservations/price`, ...). Yayında CDN/yük dengeleyici düzeyinde istek sınırı eklenmesi önerilir.
+4. **Hız sınırı sayaçları** veritabanındadır (V2-09): birden fazla API sunucusu aynı sayacı görür ve yeniden başlatma onları sıfırlamaz. Her istek bir veritabanı yazması demektir; ölçek çok büyürse depo ADR-27'de yeniden ele alınır.
 
 ## Yayın (BACKLOG 40, issue #49) kontrol listesi
 
