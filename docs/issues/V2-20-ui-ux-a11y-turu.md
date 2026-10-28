@@ -25,9 +25,9 @@ v1 ölçümle denetlendi (axe, taşma, klavye) ama sayfa sayfa tasarım eleştir
 - Tasarım kaynakları: DESIGN.md, `app/globals.css`.
 
 ## Kabul kriterleri
-- [ ] Tur tablosu PR'da: sayfa × genişlik × durum.
+- [x] Tur tablosu PR'da: sayfa × genişlik × durum. (Otomatik tur: 20 sayfa × 320/375/768/1024/1280 × açık/koyu × TR/EN.)
 - [ ] Ekran okuyucu notları PR'da; engelleyici sorun kalmadı.
-- [ ] Bulunanların her biri ya düzeltildi ya QUALITY'de kayıtlı.
+- [x] Bulunanların her biri ya düzeltildi ya QUALITY'de kayıtlı. (Otomatik turda gerçek bulgu çıkmadı; 365 dokunma hedefi uyarısı elle incelendi, hepsi yanlış alarm: etiketle büyüyen onay kutusu, kartı kaplayan düğme, gizli yerel select, 43,x px yuvarlama.)
 - [ ] 375 ve 1280 ekran görüntüleri (önce/sonra) değişen sayfalar için.
 - [ ] QUALITY'de U-05 güncel.
 
