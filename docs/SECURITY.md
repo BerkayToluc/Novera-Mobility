@@ -75,7 +75,7 @@ Tam liste, seviye ve dosya:satır [QUALITY.md](QUALITY.md) §1.1'de.
 Kurallar [ADMIN.md](ADMIN.md) §6 ve [FLEET.md](FLEET.md) §6'da; uygulandıkça (V2-23, V2-35) burada "Bu PR'da düzeltilenler" düzeninde kayda geçer. Özet: yetki API'de (`AdminGuard`, `CompanyGuard`), yönetici hesabı yalnızca komut satırından, yönetici oturumu 12 saat ve Google kapalı, değiştiren her işlem `AuditLog`'a (alan adları, değer değil), şirketler arası erişim 404, dosya yükleme ADR-28 kurallarıyla.
 
 Tarih: 17 Ekim 2026. Kapsam: `apps/api` kodu, `docs/api/openapi.yaml` sözleşmesi ve web'in API'yi çağırma şekli
-(`apps/web/lib/api-post.ts`, `api-request.ts`, `next.config.ts`). Yöntem: kodun satır satır okunması,
+(`apps/web/lib/api-request.ts`, `next.config.ts`). Yöntem: kodun satır satır okunması,
 yeni testler ve `pnpm audit`.
 
 ## Bu PR'da düzeltilenler

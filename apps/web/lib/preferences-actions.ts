@@ -3,10 +3,11 @@
 import { cookies } from "next/headers";
 import { apiRequest } from "./api-request";
 import { z } from "zod";
-import { CURRENCIES, CURRENCY_COOKIE, CURRENCY_COOKIE_MAX_AGE } from "./currency";
+import { CURRENCIES } from "./currency";
 import { MOCK_PREFERENCES_COOKIE, type Preferences } from "./preferences";
 import { getSession } from "./session";
-import { THEME_COOKIE, THEME_COOKIE_MAX_AGE, THEMES } from "./theme";
+import { setPreferenceCookies } from "./preference-cookies";
+import { THEME_COOKIE_MAX_AGE, THEMES } from "./theme";
 import { isMockMode } from "./mode";
 
 const preferencesBody = z.object({ currency: z.enum(CURRENCIES), theme: z.enum(THEMES), locale: z.enum(["tr", "en"]) });
@@ -29,7 +30,6 @@ export async function savePreferences(body: Preferences): Promise<SavePreference
     const result = await apiRequest("PATCH", "/me", { locale: input.locale, theme: input.theme, currency: input.currency });
     if (result.status !== "ok") return { ok: false, reason: result.status === "unauthorized" ? "signin" : "unavailable" };
   }
-  jar.set(THEME_COOKIE, input.theme, { path: "/", maxAge: THEME_COOKIE_MAX_AGE, sameSite: "lax" });
-  jar.set(CURRENCY_COOKIE, input.currency, { path: "/", maxAge: CURRENCY_COOKIE_MAX_AGE, sameSite: "lax" });
+  setPreferenceCookies(jar, input);
   return { ok: true };
 }

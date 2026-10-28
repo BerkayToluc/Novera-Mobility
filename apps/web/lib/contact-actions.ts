@@ -1,6 +1,6 @@
 "use server";
 
-import { apiPost } from "./api-post";
+import { apiPost } from "./api-request";
 import { contactToApi } from "./api-forms";
 import { contactSchema, type ContactErrorMessages, type ContactInput } from "./contact";
 import { isMockMode } from "./mode";
