@@ -102,6 +102,20 @@ jobs:
         run: |
           pnpm --filter @novera/web exec playwright install --with-deps chromium
           pnpm --filter @novera/web test:e2e
+
+      # The same journey through the real API (V2-19, QUALITY T-01): the built API on a database that is migrated and seeded
+      # here, the built site without sample data, one Playwright project (smoke-api) at 1280 px. The sample-data tests above
+      # never reach the API code path; if the API is down or the two halves disagree, this is the step that goes red.
+      - name: Smoke test against the real API
+        env:
+          PLAYWRIGHT_CHANNEL: ""
+          SMOKE_DATABASE_URL: postgresql://novera:novera@localhost:5432/novera_smoke
+        run: |
+          PGPASSWORD=novera psql -h localhost -U novera -d novera_test -c 'CREATE DATABASE novera_smoke'
+          DATABASE_URL=$SMOKE_DATABASE_URL pnpm --filter @novera/api exec prisma migrate deploy
+          DATABASE_URL=$SMOKE_DATABASE_URL pnpm --filter @novera/api db:seed
+          pnpm --filter @novera/web test:smoke
+
       - name: Upload the Playwright traces of a failure
         if: failure()
         uses: actions/upload-artifact@v7

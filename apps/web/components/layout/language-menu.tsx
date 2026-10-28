@@ -22,12 +22,12 @@ export function LanguageMenu({ className }: { className?: string }) {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        {/* The name keeps the visible code ("TR") so voice control can say what it sees. */}
+        {/* The name starts with the visible code ("TR"): voice control can say what it sees, and WCAG 2.5.3 is met. */}
         <Button
           variant="ghost"
           size="compact"
           shape="pill"
-          aria-label={t("current", { language: LANGUAGE_NAMES[currentLocale] })}
+          aria-label={t("current", { code: currentLocale.toUpperCase(), language: LANGUAGE_NAMES[currentLocale] })}
           className={cn("group", className)}
         >
           <Flag locale={currentLocale} />

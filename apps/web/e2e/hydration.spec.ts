@@ -4,6 +4,10 @@ import { hydrated } from "./hydration";
 // The helper that keeps the other specs from clicking before React has hydrated the page. The page's scripts
 // arrive 2.5 s late, as on a busy machine; a click made at once would be lost (the bubble would never open),
 // and `hydrated()` makes the test wait until the button really works.
+// The test ends with the contact bubble open over the neighbouring contact links; a popup covering its neighbours is what
+// axe's target-size rule objects to, and the bubble is not what is being checked here (the closed page is, in the other specs).
+test.use({ axe: false });
+
 test("hydrated() waits for slow scripts, so the click is not lost", async ({ page, context }) => {
   await context.addCookies([
     { name: "novera-consent", value: encodeURIComponent('{"v":1,"analytics":false}'), url: "http://localhost:3200" },

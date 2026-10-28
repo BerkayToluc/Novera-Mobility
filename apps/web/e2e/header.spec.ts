@@ -31,7 +31,7 @@ test("desktop: the language menu lists both languages and switches", async ({ pa
   await page.goto("/");
   const header = page.getByRole("banner");
 
-  const language = header.getByRole("button", { name: "Dil: Türkçe" });
+  const language = header.getByRole("button", { name: "TR, dil: Türkçe" });
   await hydrated(language);
   await language.click();
   await expect(page.getByRole("link", { name: "Türkçe" })).toHaveAttribute("aria-current", "true");

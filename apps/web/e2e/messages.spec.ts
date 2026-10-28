@@ -1,4 +1,5 @@
 import type { Page } from "@playwright/test";
+import { expectNoAxeViolations } from "./axe";
 import { expect, test } from "./fixtures";
 import { signInSample } from "./mock-session";
 
@@ -37,7 +38,12 @@ async function visit(page: Page, url: string) {
   const text = await page.locator("body").innerText();
   const raw = text.match(RAW_KEY)?.[0];
   expect(raw ?? null, `${url} shows a message key instead of text`).toBeNull();
+  // Every page, in both languages, against WCAG 2.2 AA (V2-19, QUALITY T-02).
+  await expectNoAxeViolations(page, url);
 }
+
+// Every page of a language in one test: opening and checking dozens of pages takes longer than the default 30 s.
+test.describe.configure({ timeout: 240_000 });
 
 for (const prefix of ["", "/en"]) {
   test(`the public pages of ${prefix || "/tr"} find all their text`, async ({ page, request }) => {
