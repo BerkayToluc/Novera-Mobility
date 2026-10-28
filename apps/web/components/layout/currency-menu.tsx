@@ -1,31 +1,21 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Check, ChevronDown } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { saveCurrency } from "@/components/currency-switcher";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/cn";
 import { CURRENCIES, CURRENCY_SYMBOLS, type Currency } from "@/lib/currency";
+import { useCurrencyChoice } from "@/lib/use-currency-choice";
 
 // The header's currency choice (SPEC §2.8): the button shows the current symbol and code,
 // the panel lists the three with their names. A group of toggle buttons in a popover, not an
 // ARIA menu: a menu role promises arrow-key navigation this short list does not need.
 export function CurrencyMenu({ initialCurrency, className }: { initialCurrency: Currency; className?: string }) {
   const t = useTranslations("CurrencySwitcher");
-  const router = useRouter();
-  const [choice, setChoice] = useState<Currency>(initialCurrency);
+  const { choice, choose } = useCurrencyChoice(initialCurrency);
   const [open, setOpen] = useState(false);
-
-  function choose(currency: Currency) {
-    saveCurrency(currency);
-    setChoice(currency);
-    setOpen(false);
-    // Prices come converted from the server (ADR-15), so the page is asked for again.
-    router.refresh();
-  }
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -52,7 +42,10 @@ export function CurrencyMenu({ initialCurrency, className }: { initialCurrency: 
                 <button
                   type="button"
                   aria-pressed={isCurrent}
-                  onClick={() => choose(currency)}
+                  onClick={() => {
+                    choose(currency);
+                    setOpen(false);
+                  }}
                   className={cn(
                     "flex min-h-11 w-full items-center gap-3 rounded-control px-2 py-1.5 text-left transition-colors",
                     isCurrent ? "bg-selected" : "hover:bg-surface-muted",

@@ -1,42 +1,24 @@
 "use client";
 
-import { useParams } from "next/navigation";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { Flag } from "@/components/ui/flags";
 import { switcherItemClasses, type SwitcherTone } from "@/components/ui/switcher-item";
-import { Link, usePathname } from "@/i18n/navigation";
-import { routing } from "@/i18n/routing";
-
-// Each language is named in its own language so a visitor who cannot read the
-// current one still recognises theirs. These names are deliberately not translated.
-export const LANGUAGE_NAMES = {
-  tr: "Türkçe",
-  en: "English",
-} as const satisfies Record<(typeof routing.locales)[number], string>;
+import { Link } from "@/i18n/navigation";
+import { LANGUAGE_NAMES } from "@/lib/languages";
+import { useLocaleLinks } from "@/lib/use-locale-links";
 
 export function LocaleSwitcher({ tone = "default" }: { tone?: SwitcherTone }) {
   const t = useTranslations("LocaleSwitcher");
-  const currentLocale = useLocale();
-  const pathname = usePathname();
-  // Dynamic routes (e.g. /urunler/[slug]) need their params to build the other language's URL.
-  const params = useParams();
+  const { locales, currentLocale, linkProps } = useLocaleLinks();
 
   return (
     <nav aria-label={t("label")}>
       <ul className="flex gap-1">
-        {routing.locales.map((locale) => {
+        {locales.map((locale) => {
           const isCurrent = locale === currentLocale;
           return (
             <li key={locale}>
-              <Link
-                // @ts-expect-error -- TypeScript cannot relate a runtime pathname to its params; next-intl validates them.
-                href={{ pathname, params }}
-                locale={locale}
-                lang={locale}
-                hrefLang={locale}
-                aria-current={isCurrent ? "true" : undefined}
-                className={switcherItemClasses(isCurrent, tone)}
-              >
+              <Link {...linkProps(locale)} className={switcherItemClasses(isCurrent, tone)}>
                 <Flag locale={locale} />
                 {LANGUAGE_NAMES[locale]}
               </Link>
