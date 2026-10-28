@@ -81,7 +81,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
       this.logger.error(`${request.method} ${request.path} answered ${status}`, detail);
     }
     if (response.headersSent) return;
-    if (exception instanceof RateLimitedException) response.setHeader('Retry-After', String(exception.retryAfterSeconds));
+    if (exception instanceof RateLimitedException)
+      response.setHeader('Retry-After', String(exception.retryAfterSeconds));
     response.status(status).json(body);
   }
 }

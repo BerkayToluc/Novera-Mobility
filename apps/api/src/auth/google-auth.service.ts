@@ -1,4 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { isUniqueViolation } from '../common/prisma-errors.js';
+import { DAY_MS } from '../common/time.js';
 import { parseInput, validationFailed } from '../common/zod-validation.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { emailTaken, googleNotAllowed, googleTokenInvalid, googleUnavailable } from './auth.errors.js';
@@ -9,17 +11,12 @@ import { GoogleTokenError, GoogleTokenVerifier, type GoogleProfile } from './goo
 import { SESSION_DAYS, hashSessionToken, newSessionToken } from './session-token.js';
 
 // POST /auth/google: sign in or sign up with a Google ID token (individual accounts only).
-const DAY_MS = 24 * 60 * 60 * 1000;
 const NAME_MAX = 80;
 
 export interface GoogleSignInResult {
   session: SessionStart;
   // True when this call opened a new account (HTTP 201), false for an existing one (HTTP 200).
   created: boolean;
-}
-
-function isUniqueViolation(error: unknown): boolean {
-  return typeof error === 'object' && error !== null && (error as { code?: unknown }).code === 'P2002';
 }
 
 // Google gives given/family names; when it does not, split the display name, then fall back to the

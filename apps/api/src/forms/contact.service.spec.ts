@@ -114,5 +114,4 @@ describeDb('POST /contact iletişim formu (gerçek PostgreSQL)', () => {
     expect(bodyOf(error).fieldErrors?.consent).toBe('CONSENT_REQUIRED');
     expect(await prisma.contactMessage.count({ where: { email: email('noconsent') } })).toBe(0);
   });
-
 });

@@ -1,6 +1,7 @@
 import { createHash, timingSafeEqual } from 'node:crypto';
 import { isIP } from 'node:net';
 import type { NextFunction, Request, Response } from 'express';
+import { currentEnv, type Env } from '../config/env.js';
 
 // In production the API has a public address (the host gives it one), but only the web server may use it.
 // The web server proves who it is with a shared secret, API_ACCESS_KEY, sent in a header on every call.
@@ -21,7 +22,7 @@ export function keyMatches(given: unknown, expected: string): boolean {
   return typeof given === 'string' && timingSafeEqual(digest(given), digest(expected));
 }
 
-export function apiAccess(env: NodeJS.ProcessEnv = process.env) {
+export function apiAccess(env: Env = currentEnv()) {
   const expected = env.API_ACCESS_KEY?.trim();
   return (request: Request, response: Response, next: NextFunction): void => {
     if (!expected || OPEN_PATHS.has(request.path)) {

@@ -2,8 +2,7 @@ import { Body, Controller, Get, Inject, Post, Req, UseGuards } from '@nestjs/com
 import type { Request } from 'express';
 import { ApiBody, ApiCookieAuth, ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { AuthService } from '../auth/auth.service.js';
-import { CurrentUser, SessionGuard } from '../auth/session.guard.js';
-import { SESSION_COOKIE, readCookie } from '../auth/session-token.js';
+import { CurrentUser, SessionGuard, userOfRequest } from '../auth/session.guard.js';
 import type { UserRow } from '../auth/user-view.js';
 import { ContactService } from './contact.service.js';
 import { QuotesService, type QuoteReceived, type QuoteSummaryView } from './quotes.service.js';
@@ -66,8 +65,7 @@ export class FormsController {
   @ApiCreatedResponse({ description: 'Talep alındı, talep numarası döner' })
   async quote(@Body() body: unknown, @Req() request: Request): Promise<QuoteReceived> {
     // Visitors may send a request; when a session is present the request is linked to the account.
-    const token = readCookie(request.headers.cookie, SESSION_COOKIE);
-    const user = token ? await this.auth.authenticate(token) : null;
+    const user = await userOfRequest(this.auth, request);
     return this.quotesService.create(body, user?.id ?? null);
   }
 

@@ -10,10 +10,13 @@ describe('isSpam (tuzak alan)', () => {
     },
   );
 
-  it.each([[{ website: 'http://spam.example' }], [{ website: 'x' }], [{ website: 1 }], [{ website: true }], [{ website: {} }]])(
-    'dolu tuzak alan spamdır: %p',
-    (input) => {
-      expect(isSpam(input)).toBe(true);
-    },
-  );
+  it.each([
+    [{ website: 'http://spam.example' }],
+    [{ website: 'x' }],
+    [{ website: 1 }],
+    [{ website: true }],
+    [{ website: {} }],
+  ])('dolu tuzak alan spamdır: %p', (input) => {
+    expect(isSpam(input)).toBe(true);
+  });
 });

@@ -2,10 +2,7 @@ import { HttpException } from '@nestjs/common';
 import type { PrismaService } from '../prisma/prisma.service.js';
 import { hashPassword, verifyPassword } from './password.js';
 import { PasswordResetFake } from './password-reset.testing.js';
-import {
-  PasswordResetService,
-  RESET_TOKEN_TTL_MS,
-} from './password-reset.service.js';
+import { PasswordResetService, RESET_TOKEN_TTL_MS } from './password-reset.service.js';
 import type { ResetLinkNotifier } from './reset-link-notifier.js';
 import { hashSessionToken } from './session-token.js';
 
@@ -45,10 +42,7 @@ describe('PasswordResetService', () => {
     db = new PasswordResetFake();
     sent = [];
     const notifier = { send: async (email: string, link: string) => void sent.push({ email, link }) };
-    service = new PasswordResetService(
-      db as unknown as PrismaService,
-      notifier as unknown as ResetLinkNotifier,
-    );
+    service = new PasswordResetService(db as unknown as PrismaService, notifier as unknown as ResetLinkNotifier);
   });
 
   describe('requestReset', () => {
@@ -92,7 +86,6 @@ describe('PasswordResetService', () => {
       expect(error.getStatus()).toBe(422);
       expect(bodyOf(error).fieldErrors).toEqual({ email: 'INVALID_EMAIL' });
     });
-
   });
 
   describe('resetPassword', () => {
@@ -161,6 +154,5 @@ describe('PasswordResetService', () => {
       const error = await catchHttp(service.resetPassword({}));
       expect(bodyOf(error).fieldErrors).toEqual({ token: 'REQUIRED', password: 'REQUIRED' });
     });
-
   });
 });

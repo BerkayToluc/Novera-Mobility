@@ -4,10 +4,7 @@ import type { Request } from 'express';
 import { clientKeyOf } from '../common/client-key.js';
 import { RateLimit } from '../common/rate-limit.js';
 import { LIMITS } from '../common/rate-limits.js';
-import {
-  HoldsService,
-  type HoldResponse,
-} from './holds.service.js';
+import { HoldsService, type HoldResponse } from './holds.service.js';
 
 @ApiTags('reservations')
 @Controller()
@@ -19,13 +16,7 @@ export class HoldsController {
   @ApiBody({
     schema: {
       type: 'object',
-      required: [
-        'vehicleId',
-        'pickupBranchId',
-        'returnBranchId',
-        'startAt',
-        'endAt',
-      ],
+      required: ['vehicleId', 'pickupBranchId', 'returnBranchId', 'startAt', 'endAt'],
       properties: {
         vehicleId: { type: 'string', format: 'uuid' },
         pickupBranchId: { type: 'string', format: 'uuid' },
@@ -46,10 +37,7 @@ export class HoldsController {
       },
     },
   })
-  create(
-    @Body() body: unknown,
-    @Req() request: Request,
-  ): Promise<HoldResponse> {
+  create(@Body() body: unknown, @Req() request: Request): Promise<HoldResponse> {
     return this.holdsService.create(body, clientKeyOf(request));
   }
 

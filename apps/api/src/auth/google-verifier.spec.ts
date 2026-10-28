@@ -16,8 +16,17 @@ describe('JoseGoogleTokenVerifier', () => {
     verifier = new JoseGoogleTokenVerifier(CLIENT_ID, createLocalJWKSet({ keys: [jwk] }));
   });
 
-  const sign = (claims: Record<string, unknown> = {}, opts: { iss?: string; aud?: string; exp?: string | number; key?: CryptoKey } = {}) =>
-    new SignJWT({ email: 'Ayse@Example.com', email_verified: true, given_name: 'Ayşe', family_name: 'Yılmaz', ...claims })
+  const sign = (
+    claims: Record<string, unknown> = {},
+    opts: { iss?: string; aud?: string; exp?: string | number; key?: CryptoKey } = {},
+  ) =>
+    new SignJWT({
+      email: 'Ayse@Example.com',
+      email_verified: true,
+      given_name: 'Ayşe',
+      family_name: 'Yılmaz',
+      ...claims,
+    })
       .setProtectedHeader({ alg: 'RS256', kid: 'k1' })
       .setSubject('sub-1')
       .setIssuer(opts.iss ?? 'https://accounts.google.com')
@@ -37,7 +46,9 @@ describe('JoseGoogleTokenVerifier', () => {
   });
 
   it('"accounts.google.com" yayıncısını da kabul eder', async () => {
-    await expect(verifier.verify(await sign({}, { iss: 'accounts.google.com' }))).resolves.toMatchObject({ sub: 'sub-1' });
+    await expect(verifier.verify(await sign({}, { iss: 'accounts.google.com' }))).resolves.toMatchObject({
+      sub: 'sub-1',
+    });
   });
 
   it.each([

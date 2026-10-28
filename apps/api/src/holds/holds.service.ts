@@ -1,6 +1,9 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service.js';
+import { HOUR_MS } from '../common/time.js';
+import { hasConflict } from '../common/availability.js';
+import { isUuid } from '../common/uuid.js';
 import { parseInput, validationFailed } from '../common/zod-validation.js';
+import { PrismaService } from '../prisma/prisma.service.js';
 import { holdSchema } from './holds.schemas.js';
 
 // POST /holds: "Kirala"da aracı 15 dakika tutar (BACKLOG Y48, openapi.yaml /holds).
@@ -8,10 +11,7 @@ export const HOLD_MINUTES = 15;
 // Aynı istemcinin aynı anda tutabileceği araç sayısı (biri tüm araçları kilitlemesin).
 export const MAX_ACTIVE_HOLDS_PER_CLIENT = 5;
 // Süresi dolmuş tutmalar bu kadar süre sonra silinir (kullanıcı vazgeçmezse DELETE çağrılmaz).
-const STALE_HOLD_AGE_MS = 60 * 60 * 1000;
-
-const UUID_REGEX =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const STALE_HOLD_AGE_MS = HOUR_MS;
 
 export interface HoldResponse {
   id: string;
@@ -23,10 +23,7 @@ export interface HoldResponse {
 export class HoldsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(
-    input: unknown,
-    clientKey: string,
-  ): Promise<HoldResponse> {
+  async create(input: unknown, clientKey: string): Promise<HoldResponse> {
     const valid = parseInput(holdSchema(new Date()), input, 'Hold request validation failed');
 
     // Bayiler var mı? (işlem dışında, kilit tutmadan)
@@ -59,15 +56,8 @@ export class HoldsService {
           Array<{ id: string; branchId: string; active: boolean }>
         >`SELECT "id", "branchId", "active" FROM "Vehicle" WHERE "id" = ${valid.vehicleId} FOR UPDATE`;
         const vehicle = locked[0];
-        if (
-          !vehicle ||
-          !vehicle.active ||
-          vehicle.branchId !== valid.pickupBranchId
-        ) {
-          throw validationFailed(
-            { vehicleId: 'UNKNOWN_REFERENCE' },
-            'Vehicle not found at the pickup branch',
-          );
+        if (!vehicle || !vehicle.active || vehicle.branchId !== valid.pickupBranchId) {
+          throw validationFailed({ vehicleId: 'UNKNOWN_REFERENCE' }, 'Vehicle not found at the pickup branch');
         }
 
         const now = new Date();
@@ -98,25 +88,8 @@ export class HoldsService {
           );
         }
 
-        // Çakışma: onaylı rezervasyon ya da süresi dolmamış başka bir tutma.
-        // Aralıklar yarı açıktır: biri tam diğerinin bittiği anda başlayabilir.
-        const reservations = await tx.reservation.count({
-          where: {
-            vehicleId: valid.vehicleId,
-            status: 'CONFIRMED',
-            startAt: { lt: valid.endAt },
-            endAt: { gt: valid.startAt },
-          },
-        });
-        const holds = await tx.hold.count({
-          where: {
-            vehicleId: valid.vehicleId,
-            expiresAt: { gt: now },
-            startAt: { lt: valid.endAt },
-            endAt: { gt: valid.startAt },
-          },
-        });
-        if (reservations + holds > 0) {
+        // Çakışma: onaylı rezervasyon ya da süresi dolmamış başka bir tutma (common/availability.ts).
+        if (await hasConflict(tx, valid, null, now)) {
           throw new HttpException(
             {
               code: 'VEHICLE_UNAVAILABLE',
@@ -147,15 +120,11 @@ export class HoldsService {
   // Only the client that made the hold can release it (the same key the limit uses). A missing, expired
   // or someone else's hold is a quiet no-op, so the call can be repeated and never tells who holds what.
   async release(id: string, clientKey: string): Promise<void> {
-    if (!UUID_REGEX.test(id)) return;
+    if (!isUuid(id)) return;
     await this.prisma.hold.deleteMany({ where: { id, clientKey } });
   }
 
-  private toResponse(hold: {
-    id: string;
-    vehicleId: string;
-    expiresAt: Date;
-  }): HoldResponse {
+  private toResponse(hold: { id: string; vehicleId: string; expiresAt: Date }): HoldResponse {
     return {
       id: hold.id,
       vehicleId: hold.vehicleId,

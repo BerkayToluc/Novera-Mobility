@@ -80,7 +80,7 @@ describe('ResetLinkNotifier', () => {
       process.env.MAIL_FROM = 'Novera Mobility <noreply@novera.example>';
     });
 
-    it('sends the e-mail through Resend in the person\'s language', async () => {
+    it("sends the e-mail through Resend in the person's language", async () => {
       await notifier(ok).send('ayse@example.com', LINK, 'TR');
       expect(calls).toHaveLength(1);
       expect(calls[0]!.url).toBe(RESEND_URL);

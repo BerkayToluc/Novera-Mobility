@@ -25,9 +25,7 @@ export class PasswordResetFake extends FakePrisma {
       return { count: before - this.resetTokens.length };
     },
     updateMany: async ({ where, data }: { where: Row; data: Row }) => {
-      const matches = this.resetTokens.filter(
-        (t) => t.id === where.id && (where.usedAt !== null || t.usedAt === null),
-      );
+      const matches = this.resetTokens.filter((t) => t.id === where.id && (where.usedAt !== null || t.usedAt === null));
       for (const row of matches) Object.assign(row, data);
       return { count: matches.length };
     },

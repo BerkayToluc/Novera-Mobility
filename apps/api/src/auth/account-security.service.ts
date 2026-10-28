@@ -23,9 +23,7 @@ function sessionNotFound(): HttpException {
 
 @Injectable()
 export class AccountSecurityService {
-  constructor(
-    @Inject(PrismaService) private readonly prisma: PrismaService,
-  ) {}
+  constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
 
   // POST /me/password. A wrong current password is a 422 on that field (not 401: the person is still
   // signed in). On success every OTHER session ends, so a stolen cookie stops working; this one stays.
@@ -54,9 +52,14 @@ export class AccountSecurityService {
   // DELETE /me asks the person to confirm (QUALITY G-14): a stolen session cookie alone must not be enough to delete
   // an account. With a password, the current password; without one (opened with Google), the e-mail address typed in.
   async confirmDeletion(user: UserRow, input: unknown): Promise<void> {
-    const { currentPassword, confirmEmail } = parseInput(deleteAccountSchema, input, 'Account deletion data is invalid');
+    const { currentPassword, confirmEmail } = parseInput(
+      deleteAccountSchema,
+      input,
+      'Account deletion data is invalid',
+    );
     if (user.passwordHash !== null) {
-      if (currentPassword === null) throw validationFailed({ currentPassword: 'REQUIRED' }, 'The current password is required');
+      if (currentPassword === null)
+        throw validationFailed({ currentPassword: 'REQUIRED' }, 'The current password is required');
       if (!(await verifyPassword(currentPassword, user.passwordHash))) {
         throw validationFailed({ currentPassword: 'INVALID_PASSWORD' }, 'The password is wrong');
       }

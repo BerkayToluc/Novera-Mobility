@@ -1,26 +1,20 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import type { UserRow } from '../auth/user-view.js';
-import { validationFailed } from '../forms/form-input.js';
+import { hasConflict } from '../common/availability.js';
+import { validationFailed } from '../common/zod-validation.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import {
   PricingService,
-  hasConflict,
   isPromoUsable,
   promoBlock,
   requirePointsAccount,
   vehicleUnavailable,
   withPoints,
-  type ConflictDb,
-  type PricingDb,
 } from './pricing.service.js';
-import { loadPointsLedger, type LedgerDb } from './points-balance.js';
+import { loadPointsLedger } from './points-balance.js';
 import { POINTS_RULES, pointsForTotal } from './points.rules.js';
-import { parseReservationRequest, type ValidReservationRequest } from './reservation-input.js';
-import {
-  RESERVATION_INCLUDE,
-  toReservationView,
-  type ReservationRow,
-} from './reservation-view.js';
+import { parseReservationRequest } from './reservation-input.js';
+import { RESERVATION_INCLUDE, toReservationView } from './reservation-view.js';
 
 // One account cannot hold more than this many upcoming or running bookings at once (G, 24 Ekim: 3); no
 // payment is taken, so without a cap one account could lock the whole fleet for months (QUALITY G-02).
@@ -49,9 +43,7 @@ function notCancellable(): HttpException {
 
 // Numara yılı Türkiye saatine göre belirlenir (ADR-16).
 function istanbulYear(date: Date): number {
-  return Number(
-    new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Istanbul', year: 'numeric' }).format(date),
-  );
+  return Number(new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Istanbul', year: 'numeric' }).format(date));
 }
 
 @Injectable()
@@ -109,27 +101,28 @@ export class ReservationsService {
         }
       }
 
-      if (await hasConflict(tx as unknown as ConflictDb, request, ownHoldId, now)) {
+      if (await hasConflict(tx, request, ownHoldId, now)) {
         throw vehicleUnavailable();
       }
 
       // Toplamı sunucu hesaplar; istemciden fiyat alınmaz.
       if (request.promoCode) {
         const code = await tx.promoCode.findUnique({ where: { code: request.promoCode } });
-        const block = code && isPromoUsable(code, now) ? await promoBlock(tx as unknown as PricingDb, code, user.id) : null;
-        if (block === 'EXHAUSTED') throw validationFailed({ promoCode: 'CODE_EXHAUSTED' }, 'The campaign code has been used up');
+        const block = code && isPromoUsable(code, now) ? await promoBlock(tx, code, user.id) : null;
+        if (block === 'EXHAUSTED')
+          throw validationFailed({ promoCode: 'CODE_EXHAUSTED' }, 'The campaign code has been used up');
         if (block === 'ALREADY_USED') {
           throw validationFailed({ promoCode: 'CODE_ALREADY_USED' }, 'This account has already used the campaign code');
         }
       }
-      let price = await this.pricing.calculate(tx as unknown as PricingDb, request, now, user.id);
+      let price = await this.pricing.calculate(tx, request, now, user.id);
       // The price page shows an unknown code as "not valid" and charges the plain price; a booking must not
       // quietly do that, because the visitor was told a discount would be taken off.
       if (price.promo && !price.promo.applied) {
         throw validationFailed({ promoCode: 'UNKNOWN_CODE' }, 'The campaign code is not valid');
       }
       if (request.usePoints) {
-        const ledger = await loadPointsLedger(tx as unknown as LedgerDb, user.id, now);
+        const ledger = await loadPointsLedger(tx, user.id, now);
         price = withPoints(price, ledger.balance);
       }
 
@@ -141,7 +134,9 @@ export class ReservationsService {
 
       // A database sequence hands out the serial, so two bookings made at the same moment never meet on one
       // number and nothing has to be retried (QUALITY G-17). A cancelled transaction leaves a gap; that is fine.
-      const [{ serial }] = await tx.$queryRaw<{ serial: bigint }[]>`SELECT nextval('"ReservationNumber_seq"') AS serial`;
+      const [{ serial }] = await tx.$queryRaw<
+        { serial: bigint }[]
+      >`SELECT nextval('"ReservationNumber_seq"') AS serial`;
       const number = `NVR-${istanbulYear(now)}-${String(serial).padStart(5, '0')}`;
 
       // The discount line, when there is one, is last, so the extras still line up with `request.extras`.
@@ -194,7 +189,7 @@ export class ReservationsService {
         where: { id: created.id },
         include: RESERVATION_INCLUDE,
       });
-      return toReservationView(row as unknown as ReservationRow);
+      return toReservationView(row);
     });
   }
 
@@ -205,7 +200,7 @@ export class ReservationsService {
       orderBy: { startAt: 'desc' },
       include: RESERVATION_INCLUDE,
     });
-    return rows.map((row) => toReservationView(row as unknown as ReservationRow));
+    return rows.map((row) => toReservationView(row));
   }
 
   // GET /me/reservations/{id}: one reservation of the signed-in user (the confirmation page reads it by
@@ -216,7 +211,7 @@ export class ReservationsService {
       include: RESERVATION_INCLUDE,
     });
     if (!row) throw reservationNotFound();
-    return toReservationView(row as unknown as ReservationRow);
+    return toReservationView(row);
   }
 
   // POST /me/reservations/{id}/cancel: yalnızca kiralama BAŞLAMADAN iptal edilir (ücretsiz/ücretli ayrımı
@@ -235,7 +230,7 @@ export class ReservationsService {
     });
     if (!row) throw reservationNotFound();
     if (claimed.count === 0 && row.status === 'CONFIRMED') throw notCancellable();
-    return toReservationView(row as unknown as ReservationRow);
+    return toReservationView(row);
   }
 
   // GET /me/points: bakiye = bitmiş kiralamaların puanı eksi harcananlar, `pending` = henüz bitmemiş olanların.

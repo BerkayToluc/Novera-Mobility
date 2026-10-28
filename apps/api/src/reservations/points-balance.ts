@@ -1,9 +1,9 @@
-import type { PrismaService } from '../prisma/prisma.service.js';
+import type { Db } from '../common/db.js';
 
 // The points ledger of one account (SPEC §2.9). Earned points reach the balance when the rental ends
 // (`pending` before that); points spent on a reservation leave the balance at once and come back if
 // that reservation is cancelled (a cancelled reservation is simply not counted).
-export type LedgerDb = Pick<PrismaService, 'pointTransaction' | 'reservation'>;
+export type LedgerDb = Db<'pointTransaction' | 'reservation'>;
 
 export interface PointsHistoryEntry {
   points: number;

@@ -26,6 +26,6 @@ export function pointsWorthMinor(points: number): number {
 }
 
 export const POINTS_RULES = {
-  tr: 'Her tam ₺100 harcamanız için 1 puan kazanırsınız (ek hizmetler dahil; puanla ödenen kısım hariç). Puanlar kiralama tamamlandığında hesabınıza geçer; iptal edilen rezervasyon puan kazandırmaz. 1 puan ₺5 değerindedir; bireysel hesapta ve TL\'de, tutarın en çok yarısını puanla ödeyebilirsiniz. İptalde harcanan puan iade edilir.',
+  tr: "Her tam ₺100 harcamanız için 1 puan kazanırsınız (ek hizmetler dahil; puanla ödenen kısım hariç). Puanlar kiralama tamamlandığında hesabınıza geçer; iptal edilen rezervasyon puan kazandırmaz. 1 puan ₺5 değerindedir; bireysel hesapta ve TL'de, tutarın en çok yarısını puanla ödeyebilirsiniz. İptalde harcanan puan iade edilir.",
   en: 'You earn 1 point for every full ₺100 you spend (extras included; the part paid with points does not count). Points are credited once the rental is completed; a cancelled booking earns no points. One point is worth ₺5; on an individual account, in lira, you can pay up to half of the total with points. Points you spent are returned if you cancel.',
 };

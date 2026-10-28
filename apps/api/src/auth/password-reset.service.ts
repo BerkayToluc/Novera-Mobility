@@ -1,5 +1,6 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { parseInput } from '../common/zod-validation.js';
+import { webBaseUrl } from '../config/env.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { forgotPasswordSchema, resetPasswordSchema } from './auth.schemas.js';
 import { hashPassword } from './password.js';
@@ -79,7 +80,7 @@ export class PasswordResetService {
   }
 
   private linkFor(locale: 'TR' | 'EN', token: string): string {
-    const base = (process.env.WEB_URL ?? 'http://localhost:3000').replace(/\/+$/, '');
+    const base = webBaseUrl();
     return `${base}/${locale.toLowerCase()}/sifre-sifirla/yeni?token=${encodeURIComponent(token)}`;
   }
 }

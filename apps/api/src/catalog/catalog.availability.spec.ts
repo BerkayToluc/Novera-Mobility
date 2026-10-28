@@ -1,49 +1,23 @@
 import 'dotenv/config';
 import { randomUUID } from 'node:crypto';
-import { HttpException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
-import { CatalogService } from './catalog.service.js';
+import { AvailabilityService } from './availability.service.js';
 import { daysAhead, slotAtLeast, slotBefore } from '../reservations/dates.testing.js';
-
-// Entegrasyon testi: GET /vehicles müsaitlik sorgusunu GERÇEK PostgreSQL'e karşı sınar (BACKLOG #21).
-// Sorgunun doğruluğu veritabanının içinde olduğu için sahte (mock) veriyle sınanamaz.
-//
-// Güvenlik: yalnızca adında "test" geçen bir veritabanında çalışır, geliştirme verinize dokunmaz.
-// TEST_DATABASE_URL tanımlı değilse testler atlanır (CI'da tanımlıdır).
-const databaseUrl = process.env.TEST_DATABASE_URL;
-if (databaseUrl && !/test/i.test(databaseUrl)) {
-  throw new Error('TEST_DATABASE_URL adında "test" geçen bir veritabanını göstermeli.');
-}
-const describeDb = databaseUrl ? describe : describe.skip;
-
-const HOUR = 60 * 60 * 1000;
-const DAY = 24 * HOUR;
-const DAILY = 125000; // TRY, kuruş (₺1.250)
-const START = daysAhead(30);
-const END = new Date(START.getTime() + 3 * DAY); // 3 gün
-
-type Money = { amount: number; currency: string };
-type Offer = {
-  vehicleId: string;
-  year: number;
-  days: number;
-  dailyPrice: Money;
-  totalPrice: Money;
-};
-
-async function catchHttp(promise: Promise<unknown>): Promise<HttpException> {
-  try {
-    await promise;
-  } catch (error) {
-    if (error instanceof HttpException) return error;
-    throw error;
-  }
-  throw new Error('HttpException bekleniyordu ama hata atılmadı');
-}
+import {
+  DAILY,
+  DAY,
+  END,
+  HOUR,
+  Offer,
+  START,
+  catchHttp,
+  databaseUrl,
+  describeDb,
+} from './catalog.availability.testing.js';
 
 describeDb('GET /vehicles müsaitlik sorgusu (gerçek PostgreSQL)', () => {
   let prisma: PrismaService;
-  let service: CatalogService;
+  let service: AvailabilityService;
   const run = randomUUID().slice(0, 8);
   let counter = 0;
   let modelId = '';
@@ -58,7 +32,7 @@ describeDb('GET /vehicles müsaitlik sorgusu (gerçek PostgreSQL)', () => {
     process.env.DATABASE_URL = databaseUrl;
     prisma = new PrismaService();
     await prisma.$connect();
-    service = new CatalogService(prisma);
+    service = new AvailabilityService(prisma);
 
     const vehicleClass = await prisma.vehicleClass.create({
       data: { slug: `test-sinif-${run}`, nameTr: 'Test', nameEn: 'Test' },
@@ -154,13 +128,7 @@ describeDb('GET /vehicles müsaitlik sorgusu (gerçek PostgreSQL)', () => {
     });
   }
 
-  async function hold(
-    vehicleId: string,
-    branchId: string,
-    startAt: Date,
-    endAt: Date,
-    expiresAt: Date,
-  ): Promise<void> {
+  async function hold(vehicleId: string, branchId: string, startAt: Date, endAt: Date, expiresAt: Date): Promise<void> {
     await prisma.hold.create({
       data: {
         vehicleId,
@@ -208,8 +176,16 @@ describeDb('GET /vehicles müsaitlik sorgusu (gerçek PostgreSQL)', () => {
 
     const overlaps: Array<[string, Date, Date]> = [
       ['aralığın içinde', new Date(START.getTime() + DAY), new Date(START.getTime() + 2 * DAY)],
-      ['başlangıçtan önce başlar, aralığın içinde biter', new Date(START.getTime() - DAY), new Date(START.getTime() + DAY)],
-      ['aralığın içinde başlar, bitişten sonra biter', new Date(START.getTime() + 2 * DAY), new Date(END.getTime() + DAY)],
+      [
+        'başlangıçtan önce başlar, aralığın içinde biter',
+        new Date(START.getTime() - DAY),
+        new Date(START.getTime() + DAY),
+      ],
+      [
+        'aralığın içinde başlar, bitişten sonra biter',
+        new Date(START.getTime() + 2 * DAY),
+        new Date(END.getTime() + DAY),
+      ],
       ['tüm aralığı kapsar', new Date(START.getTime() - DAY), new Date(END.getTime() + DAY)],
       ['aralıkla birebir aynı', START, END],
     ];

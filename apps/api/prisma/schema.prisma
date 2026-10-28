@@ -431,3 +431,11 @@ model ExchangeRate {
   ratePerTry Decimal  @db.Decimal(18, 8) // 1 TRY kaç `currency` ediyor
   updatedAt  DateTime @updatedAt
 }
+// A rate from the feed that moved too far from the stored one (V2-13, QUALITY V-10). A big move is held back as a candidate;
+// when the feed keeps saying the same thing on the third day it is accepted, so a real devaluation cannot lock the rates.
+// `since` is when the candidate first came; it is kept apart from ExchangeRate so `updatedAt` there still means "last stored".
+model RateCandidate {
+  currency   Currency @id
+  ratePerTry Decimal  @db.Decimal(18, 8)
+  since      DateTime
+}

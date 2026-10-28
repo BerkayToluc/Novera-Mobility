@@ -82,8 +82,12 @@ describe('assertRuntimeEnv', () => {
 
   it('refuses to start in production without a long enough API_ACCESS_KEY', () => {
     expect(() => assertRuntimeEnv(env({ ...production, API_ACCESS_KEY: '' }))).toThrow('API_ACCESS_KEY is not set');
-    expect(() => assertRuntimeEnv(env({ ...production, API_ACCESS_KEY: ' '.repeat(40) }))).toThrow('API_ACCESS_KEY is not set');
-    expect(() => assertRuntimeEnv(env({ ...production, API_ACCESS_KEY: 'k'.repeat(31) }))).toThrow('at least 32 characters');
+    expect(() => assertRuntimeEnv(env({ ...production, API_ACCESS_KEY: ' '.repeat(40) }))).toThrow(
+      'API_ACCESS_KEY is not set',
+    );
+    expect(() => assertRuntimeEnv(env({ ...production, API_ACCESS_KEY: 'k'.repeat(31) }))).toThrow(
+      'at least 32 characters',
+    );
     expect(() => assertRuntimeEnv(env({ ...production, API_ACCESS_KEY: 'k'.repeat(32) }))).not.toThrow();
   });
 

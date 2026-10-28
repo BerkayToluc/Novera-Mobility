@@ -7,10 +7,7 @@ import type { z } from 'zod';
 export type FieldErrors = Record<string, string>;
 
 export function validationFailed(fieldErrors: FieldErrors, message: string): HttpException {
-  return new HttpException(
-    { code: 'VALIDATION_FAILED', message, fieldErrors },
-    HttpStatus.UNPROCESSABLE_ENTITY,
-  );
+  return new HttpException({ code: 'VALIDATION_FAILED', message, fieldErrors }, HttpStatus.UNPROCESSABLE_ENTITY);
 }
 
 const CODE = /^[A-Z][A-Z_]*$/;
