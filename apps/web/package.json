@@ -12,6 +12,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
+    "test:smoke": "playwright test -c playwright.smoke.config.ts",
     "gen:api": "openapi-typescript ../../docs/api/openapi.yaml -o lib/api-types.ts"
   },
   "dependencies": {

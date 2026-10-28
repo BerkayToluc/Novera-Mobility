@@ -5,7 +5,7 @@
   },
   "LocaleSwitcher": {
     "label": "Language",
-    "current": "Language: {language}"
+    "current": "{code}, language: {language}"
   },
   "Header": {
     "skip": "Skip to content",

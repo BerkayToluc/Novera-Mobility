@@ -5,7 +5,7 @@
   },
   "LocaleSwitcher": {
     "label": "Dil seçimi",
-    "current": "Dil: {language}"
+    "current": "{code}, dil: {language}"
   },
   "Header": {
     "skip": "İçeriğe geç",
