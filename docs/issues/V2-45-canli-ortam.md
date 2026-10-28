@@ -11,7 +11,7 @@ v1'den açık kalan ve v2'nin getirdiği canlı ortam ayarlarını tamamlamak; y
   - analytics aracı kararı ve `ANALYTICS_SCRIPT_URL`, `ANALYTICS_WEBSITE_ID`;
   - Blob anahtarının production'da olduğunun kontrolü.
 - **Berkay:**
-  - **API'nin Render'dan Google Cloud Run'a taşınması** (27 Ekim kararı, ADR-12): `Dockerfile`, DEPLOY.md §4 ve CI'daki imaj derlemesi hazır (`Refs #335`); servis oluşturma, gizli değerler, `API_URL` geçişi ve Render'ın kapatılması canlıda yapılır;
+  - **API'nin Render'dan Google Cloud Run'a taşınması** (27 Ekim kararı, ADR-12): `Dockerfile`, DEPLOY.md §4 ve CI'daki imaj derlemesi hazır; servis, gizli değerler, `API_URL` geçişi ve e-posta 28 Ekim'de canlıda doğrulandı (`render.yaml` kaldırıldı). Kalan: Render'daki Novera servisinin ve Blueprint'in silinmesi, UptimeRobot izleyicisinin silinmesi;
   - Google Maps anahtarına alan adı (HTTP referrer) kısıtı ve kota;
   - `API_ACCESS_KEY` Cloud Run (Secret Manager) ve Vercel'de aynı, 32+ karakter ve sızmış olabilecek eski değerden farklı;
   - ilk yönetici hesabı (`pnpm admin:create`, G'nin e-postası) ve G'nin girişi;
