@@ -2,6 +2,7 @@ import { Inject, Injectable, Logger, type OnModuleDestroy, type OnModuleInit } f
 import { DAY_MS } from '../common/time.js';
 import { isTestRun, ratesApiUrl } from '../config/env.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { judgeRate, type RateCandidateState } from './rate-guard.js';
 
 // BACKLOG Y1 (#192, ADR-15): the exchange rates are kept in the ExchangeRate table and refreshed
 // from an outside service about once a day. If the service is down, the last known rate stays.
@@ -9,8 +10,6 @@ export const DEFAULT_RATES_URL = 'https://api.frankfurter.dev/v1/latest';
 export const RATES_MAX_AGE_MS = DAY_MS;
 export const RATES_CHECK_EVERY_MS = 60 * 60 * 1000;
 const REQUEST_TIMEOUT_MS = 10_000;
-// A new rate that differs from the stored one by more than this share is treated as a bad feed.
-export const MAX_RATE_JUMP = 0.5;
 
 const FOREIGN = ['EUR', 'USD'] as const;
 type Foreign = (typeof FOREIGN)[number];
@@ -74,7 +73,7 @@ export class RatesUpdater implements OnModuleInit, OnModuleDestroy {
   }
 
   // Fetches and stores the rates. Never throws: on any problem the stored rates stay as they are.
-  async updateRates(): Promise<boolean> {
+  async updateRates(now: Date = new Date()): Promise<boolean> {
     try {
       const url = new URL(ratesApiUrl() ?? DEFAULT_RATES_URL);
       url.searchParams.set('base', 'TRY');
@@ -87,14 +86,27 @@ export class RatesUpdater implements OnModuleInit, OnModuleDestroy {
         where: { currency: { in: [...FOREIGN] } },
         select: { currency: true, ratePerTry: true },
       });
-      for (const row of stored) {
-        const previous = Number(row.ratePerTry);
-        const next = fresh[row.currency as Foreign];
-        if (previous > 0 && Math.abs(next - previous) / previous > MAX_RATE_JUMP) {
-          throw new Error(`The ${row.currency} rate moved from ${previous} to ${next}, not stored`);
+      const candidates = await this.prisma.rateCandidate.findMany({ where: { currency: { in: [...FOREIGN] } } });
+      // A big move is held back, and told in the log; one held currency keeps both from being stored, so the pair
+      // never mixes an old and a new day.
+      const held: string[] = [];
+      for (const currency of FOREIGN) {
+        const row = stored.find((entry) => entry.currency === currency);
+        const waiting = candidates.find((entry) => entry.currency === currency);
+        const candidate: RateCandidateState = waiting ? { ratePerTry: Number(waiting.ratePerTry), since: waiting.since } : null;
+        const verdict = judgeRate(row ? Number(row.ratePerTry) : null, fresh[currency], candidate, now);
+        if (verdict.action === 'hold') {
+          held.push(`${currency} ${verdict.reason}`);
+          await this.prisma.rateCandidate.upsert({
+            where: { currency },
+            update: { ratePerTry: verdict.candidate.ratePerTry, since: verdict.candidate.since },
+            create: { currency, ratePerTry: verdict.candidate.ratePerTry, since: verdict.candidate.since },
+          });
         }
       }
+      if (held.length > 0) throw new Error(`Rate not stored: ${held.join('; ')}`);
 
+      await this.prisma.rateCandidate.deleteMany({ where: { currency: { in: [...FOREIGN] } } });
       for (const currency of FOREIGN) {
         await this.prisma.exchangeRate.upsert({
           where: { currency },

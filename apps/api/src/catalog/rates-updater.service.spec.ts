@@ -1,15 +1,29 @@
 import type { PrismaService } from '../prisma/prisma.service.js';
-import { MAX_RATE_JUMP, RATES_MAX_AGE_MS, RatesUpdater, parseRates } from './rates-updater.service.js';
+import { MAX_RATE_JUMP } from './rate-guard.js';
+import { RATES_MAX_AGE_MS, RatesUpdater, parseRates } from './rates-updater.service.js';
 
 // Unit test: the database and the rate service are faked in memory.
 type Row = { currency: string; ratePerTry: number; updatedAt: Date };
+type Candidate = { currency: string; ratePerTry: number; since: Date };
 
 const NOW = new Date('2026-10-16T12:00:00.000Z');
 const HOUR = 60 * 60 * 1000;
 
-function setup(rows: Row[], answer: () => Promise<Response>) {
+function setup(rows: Row[], answer: () => Promise<Response>, candidates: Candidate[] = []) {
   const upserts: Array<{ currency: string; ratePerTry: number }> = [];
   const prisma = {
+    rateCandidate: {
+      findMany: async () => candidates,
+      upsert: async ({ where, create }: { where: { currency: string }; create: { ratePerTry: number; since: Date } }) => {
+        const at = candidates.findIndex((entry) => entry.currency === where.currency);
+        const next = { currency: where.currency, ratePerTry: create.ratePerTry, since: create.since };
+        if (at >= 0) candidates[at] = next;
+        else candidates.push(next);
+      },
+      deleteMany: async () => {
+        candidates.length = 0;
+      },
+    },
     exchangeRate: {
       findMany: async () => rows,
       upsert: async ({ where, update }: { where: { currency: string }; update: { ratePerTry: number } }) => {
@@ -23,7 +37,7 @@ function setup(rows: Row[], answer: () => Promise<Response>) {
     calls.push(String(input));
     return answer();
   }) as typeof fetch;
-  return { updater, upserts, calls };
+  return { updater, upserts, calls, candidates };
 }
 
 const json = (body: unknown, status = 200) => async () =>
@@ -86,6 +100,43 @@ describe('RatesUpdater.updateRates', () => {
     const { updater, upserts } = setup(fresh(HOUR), json({ rates: { EUR: jumped, USD: 0.02 } }));
     expect(await updater.updateRates()).toBe(false);
     expect(upserts).toEqual([]);
+  });
+
+  it('writes a refused rate down as a candidate, and says so', async () => {
+    const jumped = 0.018 * (1 + MAX_RATE_JUMP + 0.2);
+    const { updater, candidates } = setup(fresh(HOUR), json({ rates: { EUR: jumped, USD: 0.02 } }));
+    await updater.updateRates(NOW);
+    expect(candidates).toEqual([{ currency: 'EUR', ratePerTry: jumped, since: NOW }]);
+  });
+
+  // QUALITY V-10: a big move that the feed keeps repeating is believed on the third day.
+  it('takes a big, lasting move on the third day, and not before', async () => {
+    const jumped = 0.018 * (1 + MAX_RATE_JUMP + 0.2);
+    const answer = json({ rates: { EUR: jumped, USD: 0.02 } });
+    const day = (n: number) => new Date(NOW.getTime() + n * 24 * HOUR);
+    const { updater, upserts, candidates } = setup(fresh(HOUR), answer);
+    expect(await updater.updateRates(day(0))).toBe(false);
+    expect(await updater.updateRates(day(1))).toBe(false);
+    expect(upserts).toEqual([]);
+    expect(candidates[0]!.since).toEqual(day(0));
+    expect(await updater.updateRates(day(2))).toBe(true);
+    expect(upserts).toEqual([
+      { currency: 'EUR', ratePerTry: jumped },
+      { currency: 'USD', ratePerTry: 0.02 },
+    ]);
+    expect(candidates).toEqual([]);
+  });
+
+  it('starts over when the feed goes back to normal in between', async () => {
+    const jumped = 0.018 * (1 + MAX_RATE_JUMP + 0.2);
+    const day = (n: number) => new Date(NOW.getTime() + n * 24 * HOUR);
+    const { updater, upserts, candidates } = setup(fresh(HOUR), json({ rates: { EUR: jumped, USD: 0.02 } }));
+    await updater.updateRates(day(0));
+    expect(candidates).toHaveLength(1);
+    updater.fetcher = (async () => new Response(JSON.stringify({ rates: { EUR: 0.0182, USD: 0.02 } }))) as typeof fetch;
+    expect(await updater.updateRates(day(1))).toBe(true);
+    expect(candidates).toEqual([]);
+    expect(upserts).toHaveLength(2);
   });
 
   it('stores the first rates when the table is empty', async () => {
