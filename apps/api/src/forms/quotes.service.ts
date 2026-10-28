@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service.js';
 import { isUniqueViolation } from '../common/prisma-errors.js';
 import { parseInput } from '../common/zod-validation.js';
-import { isSpam, spamDetected, validationFailed } from './form-input.js';
+import { PrismaService } from '../prisma/prisma.service.js';
+import { validationFailed } from '../common/zod-validation.js';
+import { isSpam, spamDetected } from './form-input.js';
 import { quoteSchema } from './forms.schemas.js';
 
 // POST /quotes (BACKLOG #33, Y35, ADR-20): kurumsal teklif / görüşme talebi.

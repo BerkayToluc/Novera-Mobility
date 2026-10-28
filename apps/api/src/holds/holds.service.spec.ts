@@ -2,7 +2,7 @@ import 'dotenv/config';
 import { randomUUID } from 'node:crypto';
 import { HttpException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
-import { CatalogService } from '../catalog/catalog.service.js';
+import { AvailabilityService } from '../catalog/availability.service.js';
 import {
   HOLD_MINUTES,
   HoldsService,
@@ -40,7 +40,7 @@ const bodyOf = (error: HttpException): ErrorBody => error.getResponse() as Error
 describeDb('POST /holds araç tutma (gerçek PostgreSQL)', () => {
   let prisma: PrismaService;
   let holds: HoldsService;
-  let catalog: CatalogService;
+  let catalog: AvailabilityService;
   const run = randomUUID().slice(0, 8);
   let counter = 0;
   let modelId = '';
@@ -56,7 +56,7 @@ describeDb('POST /holds araç tutma (gerçek PostgreSQL)', () => {
     prisma = new PrismaService();
     await prisma.$connect();
     holds = new HoldsService(prisma);
-    catalog = new CatalogService(prisma);
+    catalog = new AvailabilityService(prisma);
 
     const vehicleClass = await prisma.vehicleClass.create({
       data: { slug: `hold-sinif-${run}`, nameTr: 'Test', nameEn: 'Test' },

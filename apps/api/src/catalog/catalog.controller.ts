@@ -1,11 +1,15 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { ApiOkResponse, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { AvailabilityService } from './availability.service.js';
 import { CatalogService } from './catalog.service.js';
 
 @ApiTags('catalog')
 @Controller()
 export class CatalogController {
-  constructor(private readonly catalogService: CatalogService) {}
+  constructor(
+    private readonly catalogService: CatalogService,
+    private readonly availability: AvailabilityService,
+  ) {}
 
   @Get('branches')
   @ApiOkResponse({ description: 'Bayi listesi' })
@@ -34,7 +38,7 @@ export class CatalogController {
     @Query('endAt') endAt?: string,
     @Query('currency') currency?: string,
   ) {
-    return this.catalogService.getAvailableVehicles({
+    return this.availability.getAvailableVehicles({
       pickupBranchId,
       returnBranchId,
       startAt,

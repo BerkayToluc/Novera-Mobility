@@ -1,8 +1,9 @@
-import { isUuid } from '../common/uuid.js';
-import { HOUR_MS } from '../common/time.js';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service.js';
+import { HOUR_MS } from '../common/time.js';
+import { hasConflict } from '../common/availability.js';
+import { isUuid } from '../common/uuid.js';
 import { parseInput, validationFailed } from '../common/zod-validation.js';
+import { PrismaService } from '../prisma/prisma.service.js';
 import { holdSchema } from './holds.schemas.js';
 
 // POST /holds: "Kirala"da aracı 15 dakika tutar (BACKLOG Y48, openapi.yaml /holds).
@@ -97,25 +98,8 @@ export class HoldsService {
           );
         }
 
-        // Çakışma: onaylı rezervasyon ya da süresi dolmamış başka bir tutma.
-        // Aralıklar yarı açıktır: biri tam diğerinin bittiği anda başlayabilir.
-        const reservations = await tx.reservation.count({
-          where: {
-            vehicleId: valid.vehicleId,
-            status: 'CONFIRMED',
-            startAt: { lt: valid.endAt },
-            endAt: { gt: valid.startAt },
-          },
-        });
-        const holds = await tx.hold.count({
-          where: {
-            vehicleId: valid.vehicleId,
-            expiresAt: { gt: now },
-            startAt: { lt: valid.endAt },
-            endAt: { gt: valid.startAt },
-          },
-        });
-        if (reservations + holds > 0) {
+        // Çakışma: onaylı rezervasyon ya da süresi dolmamış başka bir tutma (common/availability.ts).
+        if (await hasConflict(tx, valid, null, now)) {
           throw new HttpException(
             {
               code: 'VEHICLE_UNAVAILABLE',

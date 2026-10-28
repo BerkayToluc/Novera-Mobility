@@ -1,3 +1,5 @@
+import { currentEnv, type Env } from './env.js';
+
 // Settings that decide how the API behaves behind a proxy and in production. They are read from the
 // environment in one place, so a wrong value stops the server at start-up instead of failing later.
 
@@ -8,7 +10,7 @@ const MAX_TRUST_PROXY_HOPS = 5;
 // How many proxies in front of the API add their own entry to `X-Forwarded-For`, counted from the API.
 // Only those entries are believed; entries further left were written by the visitor and are ignored.
 // 0 means the API is reached directly and the header is never trusted. Empty means the default (1).
-export function trustProxyHops(env: NodeJS.ProcessEnv = process.env): number {
+export function trustProxyHops(env: Env = currentEnv()): number {
   const raw = env.TRUST_PROXY_HOPS?.trim();
   if (!raw) return DEFAULT_TRUST_PROXY_HOPS;
   const hops = /^\d+$/.test(raw) ? Number(raw) : Number.NaN;
@@ -25,7 +27,7 @@ const HOST_VARIABLES = ['RENDER', 'K_SERVICE'] as const;
 // The API treats itself as production unless it was told outright that it is not: only NODE_ENV=development
 // (or test, which Jest sets) switches the safety settings off. A missing or misspelled NODE_ENV therefore
 // fails closed (Secure cookies, no reset links in the log, no /docs) instead of open (QUALITY G-07).
-export function isProduction(env: NodeJS.ProcessEnv = process.env): boolean {
+export function isProduction(env: Env = currentEnv()): boolean {
   if (HOST_VARIABLES.some((name) => Boolean(env[name]?.trim()))) return true;
   const mode = env.NODE_ENV?.trim().toLowerCase();
   return mode !== 'development' && mode !== 'test';
@@ -35,12 +37,12 @@ export function isProduction(env: NodeJS.ProcessEnv = process.env): boolean {
 export const MIN_API_ACCESS_KEY_LENGTH = 32;
 
 // The Swagger page (/docs) lists every endpoint; in production it is off unless ENABLE_DOCS=1.
-export function docsEnabled(env: NodeJS.ProcessEnv = process.env): boolean {
+export function docsEnabled(env: Env = currentEnv()): boolean {
   return !isProduction(env) || env.ENABLE_DOCS === '1';
 }
 
 // Refuses to start in production with a setting that would only fail later or fail unsafely.
-export function assertRuntimeEnv(env: NodeJS.ProcessEnv = process.env): void {
+export function assertRuntimeEnv(env: Env = currentEnv()): void {
   trustProxyHops(env);
   if (!isProduction(env)) return;
 

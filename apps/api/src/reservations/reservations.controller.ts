@@ -5,8 +5,7 @@ import { AuthService } from '../auth/auth.service.js';
 import { clientKeyOf } from '../common/client-key.js';
 import { RateLimit } from '../common/rate-limit.js';
 import { LIMITS } from '../common/rate-limits.js';
-import { CurrentUser, SessionGuard } from '../auth/session.guard.js';
-import { SESSION_COOKIE, readCookie } from '../auth/session-token.js';
+import { CurrentUser, SessionGuard, userOfRequest } from '../auth/session.guard.js';
 import type { UserRow } from '../auth/user-view.js';
 import { PricingService, type PriceBreakdown } from './pricing.service.js';
 import { ReservationsService } from './reservations.service.js';
@@ -58,9 +57,7 @@ export class ReservationsController {
   @ApiOkResponse({ description: 'Fiyat dökümü (giriş gerekmez)' })
   async price(@Body() body: unknown, @Req() request: Request): Promise<PriceBreakdown> {
     // Open to visitors; the session is only read when the price is asked with `usePoints`.
-    const token = readCookie(request.headers.cookie, SESSION_COOKIE);
-    const user = token ? await this.auth.authenticate(token) : null;
-    return this.pricing.price(body, user);
+    return this.pricing.price(body, await userOfRequest(this.auth, request));
   }
 
   @Post('reservations')

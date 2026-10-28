@@ -1,4 +1,5 @@
 import { DAY_MS } from '../common/time.js';
+
 // When a rental may start (QUALITY G-01). A start in the past let a booking "end" at once and pay out its
 // points the same minute, so the earliest start is one slot ahead of now and the latest is a year away.
 export const MIN_START_LEAD_MINUTES = 30;

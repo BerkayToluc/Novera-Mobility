@@ -2,8 +2,7 @@ import { Inject, Injectable, type CanActivate, type ExecutionContext } from '@ne
 import { Reflector } from '@nestjs/core';
 import type { Request } from 'express';
 import { AuthService } from '../auth/auth.service.js';
-import type { AuthedRequest } from '../auth/session.guard.js';
-import { SESSION_COOKIE, readCookie } from '../auth/session-token.js';
+import { userOfRequest, type AuthedRequest } from '../auth/session.guard.js';
 import { clientKeyOf } from './client-key.js';
 import {
   DEFAULT_RATE_LIMIT,
@@ -33,12 +32,7 @@ export class RateLimitGuard implements CanActivate {
 
     const request = context.switchToHttp().getRequest<AuthedRequest>();
     // Who is asking: read once here and kept on the request, so the session guard does not look it up again.
-    if (request.user === undefined) {
-      const token = readCookie(request.headers.cookie, SESSION_COOKIE);
-      const user = token ? await this.auth.authenticate(token) : null;
-      if (user) request.user = user;
-    }
-    const user = request.user ?? null;
+    const user = await userOfRequest(this.auth, request);
 
     const now = new Date();
     for (const spec of specs) {

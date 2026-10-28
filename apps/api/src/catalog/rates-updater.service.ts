@@ -1,5 +1,6 @@
-import { DAY_MS } from '../common/time.js';
 import { Inject, Injectable, Logger, type OnModuleDestroy, type OnModuleInit } from '@nestjs/common';
+import { DAY_MS } from '../common/time.js';
+import { isTestRun, ratesApiUrl } from '../config/env.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 
 // BACKLOG Y1 (#192, ADR-15): the exchange rates are kept in the ExchangeRate table and refreshed
@@ -41,7 +42,7 @@ export class RatesUpdater implements OnModuleInit, OnModuleDestroy {
 
   onModuleInit(): void {
     // Tests never reach out to the network.
-    if (process.env.NODE_ENV === 'test') return;
+    if (isTestRun()) return;
     void this.refreshIfStale();
     this.timer = setInterval(() => void this.refreshIfStale(), RATES_CHECK_EVERY_MS);
     this.timer.unref();
@@ -75,7 +76,7 @@ export class RatesUpdater implements OnModuleInit, OnModuleDestroy {
   // Fetches and stores the rates. Never throws: on any problem the stored rates stay as they are.
   async updateRates(): Promise<boolean> {
     try {
-      const url = new URL(process.env.RATES_API_URL || DEFAULT_RATES_URL);
+      const url = new URL(ratesApiUrl() ?? DEFAULT_RATES_URL);
       url.searchParams.set('base', 'TRY');
       url.searchParams.set('symbols', FOREIGN.join(','));
       const response = await this.fetcher(url, { signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS) });

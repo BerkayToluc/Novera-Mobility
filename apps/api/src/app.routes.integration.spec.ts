@@ -29,7 +29,8 @@ describeDb('the routes of the whole application (gerçek PostgreSQL)', () => {
 
   const get = (path: string) => fetch(base + path, { headers: { 'X-Forwarded-For': '10.7.0.1' } });
 
-  it.each(['/products', '/products/akilli-kurumsal-filo', '/services', '/faq'])('GET %s is 404 now', async (path) => {
+  // '/' was the scaffold's "Hello World" (V2-13).
+  it.each(['/', '/products', '/products/akilli-kurumsal-filo', '/services', '/faq'])('GET %s is 404 now', async (path) => {
     const response = await get(path);
     expect(response.status).toBe(404);
   });

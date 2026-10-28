@@ -20,11 +20,8 @@ export class SessionGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<AuthedRequest>();
-    // The rate limit guard may have found the person already.
-    const token = readCookie(request.headers.cookie, SESSION_COOKIE);
-    const user = request.user ?? (token ? await this.auth.authenticate(token) : null);
+    const user = await userOfRequest(this.auth, request);
     if (!user) throw unauthenticated();
-    request.user = user;
     return true;
   }
 }
@@ -35,3 +32,13 @@ export const CurrentUser = createParamDecorator((_data: unknown, context: Execut
   if (!request.user) throw unauthenticated();
   return request.user;
 });
+// Who is signed in, if anyone: the session cookie is looked up once per request and the answer is kept on it, so the
+// rate limit guard, the session guard and an endpoint open to visitors all share one lookup (V2-13, QUALITY M-01).
+export async function userOfRequest(auth: AuthService, request: AuthedRequest): Promise<UserRow | null> {
+  if (request.user === undefined) {
+    const token = readCookie(request.headers.cookie, SESSION_COOKIE);
+    const user = token ? await auth.authenticate(token) : null;
+    if (user) request.user = user;
+  }
+  return request.user ?? null;
+}

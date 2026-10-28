@@ -1,4 +1,5 @@
 import { randomBytes, scrypt, timingSafeEqual } from 'node:crypto';
+import { isTestRun, useRealScrypt } from '../config/env.js';
 
 // Parola özeti (hash). Ek paket gerekmez: Node'un kendi `scrypt`'i kullanılır.
 // Saklanan metin: scrypt$N$r$p$tuz$özet (tuz ve özet base64). Parametreler metnin içinde
@@ -17,10 +18,7 @@ const HASH_CONCURRENCY = 1;
 // The cost a new hash gets. Tests lower it (a few thousand hashes at the real cost would take minutes) unless
 // NOVERA_REAL_SCRYPT=1 asks for the real one; NODE_ENV=test is already the "not production" setting (isProduction).
 export function currentCost(): number {
-  return process.env.NODE_ENV === 'test' &&
-    process.env.NOVERA_REAL_SCRYPT !== '1'
-    ? 2 ** 10
-    : COST;
+  return isTestRun() && !useRealScrypt() ? 2 ** 10 : COST;
 }
 
 let running = 0;

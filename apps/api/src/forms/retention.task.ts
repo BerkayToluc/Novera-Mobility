@@ -1,5 +1,6 @@
 import { Inject, Injectable, Logger, type OnModuleDestroy, type OnModuleInit } from '@nestjs/common';
 import { DAY_MS } from '../common/time.js';
+import { isTestRun } from '../config/env.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { erasedContactFields, erasedQuoteFields, retentionCutoff } from './retention.js';
 
@@ -17,7 +18,7 @@ export class RetentionTask implements OnModuleInit, OnModuleDestroy {
 
   onModuleInit(): void {
     // Tests never start a background task.
-    if (process.env.NODE_ENV === 'test') return;
+    if (isTestRun()) return;
     void this.run();
     this.timer = setInterval(() => void this.run(), EVERY_MS);
     this.timer.unref();

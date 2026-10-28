@@ -1,11 +1,14 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { unauthenticated } from '../auth/auth.errors.js';
 import type { UserRow } from '../auth/user-view.js';
-import { validationFailed } from '../forms/form-input.js';
+import { hasConflict } from '../common/availability.js';
+import type { Db } from '../common/db.js';
+import { convertMinor, getRate } from '../common/money.js';
+import { validationFailed } from '../common/zod-validation.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { loadPointsLedger } from './points-balance.js';
 import { pointsWorthMinor, redeemablePoints } from './points.rules.js';
-import { DAY_MS } from '../common/time.js';
+import { rentalDays } from '../common/time.js';
 import {
   parseReservationRequest,
   type CurrencyCode,
@@ -15,9 +18,6 @@ import {
 // POST /reservations/price: rezervasyon oluşturmadan kalem kalem fiyat (openapi.yaml PriceBreakdown).
 // Kural (ADR-15, openapi): birim fiyat ÖNCE hedef para birimine çevrilip yuvarlanır, SONRA adet/günle
 // çarpılır; böylece kalemlerin toplamı `total`'a tam eşit olur.
-
-// Veritabanında kur yoksa kullanılan yedek değerler (CatalogService ile aynı).
-const FALLBACK_RATES: Record<CurrencyCode, number> = { TRY: 1, EUR: 0.02, USD: 0.023 };
 
 export interface Money {
   amount: number;
@@ -53,15 +53,8 @@ export interface PriceBreakdown {
 }
 
 // Veritabanı erişiminin fiyat için gereken kısmı (hem PrismaService hem işlem içi `tx` uyar).
-export type PricingDb = Pick<PrismaService, 'vehicle' | 'extra' | 'exchangeRate' | 'promoCode' | 'reservation'>;
-export type ConflictDb = Pick<PrismaService, 'reservation' | 'hold'>;
+export type PricingDb = Db<'vehicle' | 'extra' | 'exchangeRate' | 'promoCode' | 'reservation'>;
 
-// Gün sayısı: ceil((bitiş - başlangıç) / 24 saat), en az 1.
-export function rentalDays(startAt: Date, endAt: Date): number {
-  return Math.max(1, Math.ceil((endAt.getTime() - startAt.getTime()) / DAY_MS));
-}
-
-// TRY kuruşunu hedef para biriminin alt birimine çevirir.
 // Paying with points needs a signed-in individual account and a lira reservation.
 export function requirePointsAccount(user: UserRow | null, currency: CurrencyCode): UserRow {
   if (!user) throw unauthenticated();
@@ -111,10 +104,6 @@ export async function promoBlock(
   return null;
 }
 
-export function convertMinor(tryMinor: number, rate: number, currency: CurrencyCode): number {
-  return currency === 'TRY' ? tryMinor : Math.round(tryMinor * rate);
-}
-
 export function vehicleUnavailable(): HttpException {
   return new HttpException(
     {
@@ -123,36 +112,6 @@ export function vehicleUnavailable(): HttpException {
     },
     HttpStatus.CONFLICT,
   );
-}
-
-// Aracın bu aralıkta çakışması var mı: onaylı rezervasyon ya da süresi dolmamış BAŞKA bir tutma.
-// Aralıklar yarı açıktır: biri tam diğerinin bittiği anda başlayabilir. `ignoreHoldId`, istemcinin
-// kendi tutmasıdır (kendi tutması onu engellemez).
-export async function hasConflict(
-  db: ConflictDb,
-  request: Pick<ValidReservationRequest, 'vehicleId' | 'startAt' | 'endAt'>,
-  ignoreHoldId: string | null,
-  now: Date,
-): Promise<boolean> {
-  const reservations = await db.reservation.count({
-    where: {
-      vehicleId: request.vehicleId,
-      status: 'CONFIRMED',
-      startAt: { lt: request.endAt },
-      endAt: { gt: request.startAt },
-    },
-  });
-  if (reservations > 0) return true;
-  const holds = await db.hold.count({
-    where: {
-      vehicleId: request.vehicleId,
-      expiresAt: { gt: now },
-      startAt: { lt: request.endAt },
-      endAt: { gt: request.startAt },
-      ...(ignoreHoldId ? { id: { not: ignoreHoldId } } : {}),
-    },
-  });
-  return holds > 0;
 }
 
 @Injectable()
@@ -221,7 +180,7 @@ export class PricingService {
       throw validationFailed({ extras: 'UNKNOWN_REFERENCE' }, 'Extra service not found');
     }
 
-    const rate = await this.getRate(db, currency);
+    const rate = await getRate(db, currency);
     const money = (amount: number): Money => ({ amount, currency });
 
     const model = vehicle.vehicleModel;
@@ -290,11 +249,5 @@ export class PricingService {
       pointsUsed: 0,
       payable: money(total),
     };
-  }
-
-  private async getRate(db: PricingDb, currency: CurrencyCode): Promise<number> {
-    if (currency === 'TRY') return 1;
-    const row = await db.exchangeRate.findUnique({ where: { currency } });
-    return row ? Number(row.ratePerTry) : FALLBACK_RATES[currency];
   }
 }

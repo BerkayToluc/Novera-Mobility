@@ -2,7 +2,7 @@ import 'dotenv/config';
 import { randomUUID } from 'node:crypto';
 import { HttpException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
-import { CatalogService } from './catalog.service.js';
+import { AvailabilityService } from './availability.service.js';
 import { daysAhead, slotAtLeast, slotBefore } from '../reservations/dates.testing.js';
 
 // Entegrasyon testi: GET /vehicles müsaitlik sorgusunu GERÇEK PostgreSQL'e karşı sınar (BACKLOG #21).
@@ -43,7 +43,7 @@ async function catchHttp(promise: Promise<unknown>): Promise<HttpException> {
 
 describeDb('GET /vehicles müsaitlik sorgusu (gerçek PostgreSQL)', () => {
   let prisma: PrismaService;
-  let service: CatalogService;
+  let service: AvailabilityService;
   const run = randomUUID().slice(0, 8);
   let counter = 0;
   let modelId = '';
@@ -58,7 +58,7 @@ describeDb('GET /vehicles müsaitlik sorgusu (gerçek PostgreSQL)', () => {
     process.env.DATABASE_URL = databaseUrl;
     prisma = new PrismaService();
     await prisma.$connect();
-    service = new CatalogService(prisma);
+    service = new AvailabilityService(prisma);
 
     const vehicleClass = await prisma.vehicleClass.create({
       data: { slug: `test-sinif-${run}`, nameTr: 'Test', nameEn: 'Test' },

@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { mailFrom, resendApiKey } from '../config/env.js';
 import { isProduction } from '../config/runtime.js';
 
 // The one place that delivers a password reset link (BACKLOG #27, #49).
@@ -53,8 +54,8 @@ export class ResetLinkNotifier {
   fetcher: Fetcher = (url, init) => fetch(url, init);
 
   async send(email: string, link: string, locale: Locale = 'TR'): Promise<void> {
-    const apiKey = process.env.RESEND_API_KEY?.trim();
-    const from = process.env.MAIL_FROM?.trim();
+    const apiKey = resendApiKey();
+    const from = mailFrom();
 
     if (apiKey && from) {
       await this.deliver(apiKey, from, email, link, locale);

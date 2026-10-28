@@ -1,7 +1,8 @@
 import { Inject, Injectable, Logger, type OnModuleDestroy, type OnModuleInit } from '@nestjs/common';
+import { DAY_MS } from '../common/time.js';
+import { isTestRun } from '../config/env.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { SESSION_IDLE_DAYS } from './session-token.js';
-import { DAY_MS } from '../common/time.js';
 
 // Once a day (V2-10, QUALITY G-13 and V-06): the sessions that ended (expired, or unused for the idle time), the
 // password reset links that expired or were used, and the sign-in wait rows nobody touched for a day. Until now
@@ -18,7 +19,7 @@ export class SessionCleaner implements OnModuleInit, OnModuleDestroy {
 
   onModuleInit(): void {
     // Tests never start a background task.
-    if (process.env.NODE_ENV === 'test') return;
+    if (isTestRun()) return;
     void this.clean();
     this.timer = setInterval(() => void this.clean(), EVERY_MS);
     this.timer.unref();
