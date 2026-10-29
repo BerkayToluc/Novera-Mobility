@@ -7,6 +7,7 @@ import { FormsModule } from './forms/forms.module.js';
 import { AuthModule } from './auth/auth.module.js';
 import { ReservationsModule } from './reservations/reservations.module.js';
 import { RateLimitModule } from './common/rate-limit.module.js';
+import { AdminModule } from './admin/admin.module.js';
 
 @Module({
   imports: [
@@ -18,6 +19,8 @@ import { RateLimitModule } from './common/rate-limit.module.js';
     AuthModule,
     ReservationsModule,
     RateLimitModule,
+    // After the rate limit: its guard runs first, so a request to /admin is counted before it is turned away.
+    AdminModule,
   ],
 })
 export class AppModule {}

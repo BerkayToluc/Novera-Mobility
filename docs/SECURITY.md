@@ -21,7 +21,7 @@
 
 Her uçta bir sınır vardır (ADR-27). Sayaçlar Postgres'te (`RateLimitHit`) tutulur; API yeniden başlayınca ya da ikinci bir örnek açılınca kaybolmaz. Pencere sabittir: sayaç pencerenin başında sıfırlanır, bu yüzden pencere sınırında en çok iki katı istek geçebilir. Sınırı aşan istek `429 RATE_LIMITED` ve saniye cinsinden `Retry-After` alır. Sınır doğrulamadan önce sayılır: geçersiz istek de sayılır. Eski pencereler her gün silinir.
 
-**Anahtar:** *adres* istemci adresinin özetidir (`ip:<özet>`, adresin kendisi saklanmaz); *hesap* girişli istekte `user:<id>`, girişsiz istekte adrestir; *e-posta* gövdedeki adrestir (`email:<adres>`, küçük harfe çevrilir). Yönetici sınırı (`admin:<id>`, dakikada 120) V2-23'te gelir.
+**Anahtar:** *adres* istemci adresinin özetidir (`ip:<özet>`, adresin kendisi saklanmaz); *hesap* girişli istekte `user:<id>`, girişsiz istekte adrestir; *yönetici* `admin:<id>`, oturumsuz istekte adrestir; *e-posta* gövdedeki adrestir (`email:<adres>`, küçük harfe çevrilir). Yönetici sınırı (`admin:<id>`, dakikada 120) V2-23'te gelir.
 
 | Uç | Sınır | Anahtar | Kova |
 |---|---|---|---|
@@ -38,6 +38,7 @@ Her uçta bir sınır vardır (ADR-27). Sayaçlar Postgres'te (`RateLimitHit`) t
 | `POST /reservations/price` | 60 istek/10 dk | hesap | `price` |
 | `POST /reservations/price` (gövdede `promoCode` varsa, yukarıdakine ek olarak) | 10 istek/10 dk | hesap | `promo` |
 | `POST /reservations` | 10 istek/saat (ayrıca bir hesapta en çok 3 gelecek rezervasyon; bu kural serviste) | hesap | `reserve` |
+| `/admin/*` (her uç; ADR-24) | 120 istek/dk | yönetici (`admin:<id>`); oturumsuz istekte adres | `admin` |
 | `GET /health` | sınır yok (barındırıcının sağlık denetimi) | — | — |
 | Yukarıda olmayan her uç: katalog okumaları, `/rates`, `GET /me*`, `DELETE /holds/{id}`, `GET /me/quotes` | 300 istek/5 dk | hesap | `default` |
 
@@ -116,9 +117,47 @@ Tam liste, seviye ve dosya:satır [QUALITY.md](QUALITY.md) §1.1'de.
 
 **Faz 2 kapısı için kalanlar (G):** ROADMAP §3'te kapıyı işaretlemek ve `main`'e `v2.0.0-faz2` etiketini atmak G'nin işidir; ben ikisini de yapmam.
 
-## Yönetim paneli ve Filom (v2, tasarım)
+## Yönetim paneli (V2-23)
 
-Kurallar [ADMIN.md](ADMIN.md) §6 ve [FLEET.md](FLEET.md) §6'da; uygulandıkça (V2-23, V2-35) burada "Bu PR'da düzeltilenler" düzeninde kayda geçer. Özet: yetki API'de (`AdminGuard`, `CompanyGuard`), yönetici hesabı yalnızca komut satırından, yönetici oturumu 12 saat ve Google kapalı, değiştiren her işlem `AuditLog`'a (alan adları, değer değil), şirketler arası erişim 404, dosya yükleme ADR-28 kurallarıyla.
+Kurallar [ADMIN.md](ADMIN.md) §2, §5, §6 ve ARCHITECTURE ADR-24'te. V2-23 güvenlik temelini kurar: rol, kapı, oturum, hesap açma, işlem kaydı.
+
+| Konu | Ne yapıldı |
+|---|---|
+| **Rol** | `User.role` (`CUSTOMER` varsayılan, `ADMIN`). Kayıt, Google ile giriş, `PATCH /me` ve panelin kendisi rol veremez; yalnızca `pnpm admin:create`. `GET /me` cevabında `role` var. |
+| **Kapı** | `AdminGuard` **global** koruyucudur (`common` değil `src/admin/`): `/admin/*` altına sonradan eklenen bir denetleyici onu unutamaz. Oturum yoksa `401 UNAUTHENTICATED`, rol yoksa `403 FORBIDDEN`. "Yönetici yolu mu" kararı iki bağımsız yoldan verilir (denetleyicinin bağlandığı yol ve istek yolu) ve **büyük/küçük harfe duyarsızdır**: Express yolları öyle eşler, `/ADMIN/ping` kapıyı atlayamaz (testli). Rol her istekte veritabanından okunur; rolü almak oturum süresini beklemeden hemen işler. |
+| **Oturum** | Mutlak 12 saat, boşta 1 saat (müşteride 30 gün ve 7 gün). Kural oturumun kendi `expiresAt` değerine değil **hesabın şimdiki rolüne** bakar: sonradan rol verilen hesabın eski oturumları da hemen kısa kurala girer. Rol geri alınınca ve hesap yönetici yapılınca tüm oturumlar kapanır. |
+| **Google** | Yönetici hesabında kapalı (`403 GOOGLE_NOT_ALLOWED`), e-posta eşleşse ya da hesap önceden bağlıysa da. Eşleşen e-postada bağlama yapılmaz; yoksa parola silinirdi. |
+| **Parola** | En az 12 karakter ve yaygın parola listesi: `admin:create`'te, parola değiştirmede ve sıfırlamada (kısa parola sıfırlama bağlantısını harcamaz). |
+| **Hesap açma** | `pnpm admin:create --email … --name "Ad Soyad"`; `--revoke` rolü alır. Parola **yalnızca terminalden, gizli ve iki kez** sorulur: argüman, dosya ve ortam değişkeni değildir, kabuk geçmişine düşmez; terminal yoksa (pipe) komut reddeder. Var olan hesapta parola yeniden belirlenir, açık oturumlar ve sıfırlama bağlantıları silinir. Kurumsal hesap yönetici olamaz. Hata çıktısında parola ve bağlantı adresi yoktur; adres yerine "yerel/uzak veritabanı" yazılır. |
+| **İşlem kaydı** | `AuditLog`: `id, at, actorId, companyId?, action, entity, entityId, fields[]`. **Yalnızca eklenir:** serviste güncelleme/silme yöntemi yok, üstüne veritabanı tetikleyicisi `UPDATE` ve `DELETE`'i reddeder (testli, gerçek veritabanında). Değer yazılmaz; alan adı yalnızca düz bir ad olabilir (`[A-Za-z][A-Za-z0-9_.]*`), başka bir anahtar atılır, yani kayda gövde anahtarıyla kişisel veri sokulamaz. `/admin/*` altında değiştiren (GET/HEAD/OPTIONS dışı) ve başarılı her istek yazılır; `@Audited` eylem adını verir, unutulursa `POST /admin/…` adıyla yine yazılır. Komut satırı işlemlerinde aktör `cli`'dir. |
+| **Sınırlar** | `/admin/*` için 120 istek/dk, anahtar `admin:<id>`; oturumsuz yoklama adresle sayılır ve kapıdan **önce** (modül sırası testli). JSON dışı gövde `415` (G-20). |
+
+**Bilinen sınırlar (V2-23):**
+- Kayıt, isteğin **sonunda** yazılır; yazılamazsa istek `500` döner (değişiklik yapılmış olabilir, ama kayıtsız kalmaz). Kaydı değişikliğin kendi işleminin içine almak gerekirse (V2-26 ve sonrası) `AuditService`'e işlem parametresi eklenir; bugün yok.
+- Tetikleyici `TRUNCATE`'i ve tabloyu düşürmeyi engellemez; bunlar veritabanı yöneticisinin (Neon sahibinin) yetkisindedir. Kaydın kanıt değeri bu yetkiye güvenir.
+- Tek faktörlü giriş (TOTP v2'de yok). Çalınan yönetici çerezi en çok 12 saat, boşta 1 saat işe yarar.
+- Okuma kaydı tutulmaz; panel kişisel veri gösterir (ADMIN.md §6).
+- `GET/POST /admin/ping` bir iskelettir (kapıyı ve kaydı kanıtlamak için); V2-25'te `GET /admin/summary` gelince değerlendirilir.
+
+**Elle deneme (V2-23, yerel production benzeri derleme, gerçek PostgreSQL):**
+
+| Deneme | Sonuç |
+|---|---|
+| `admin:create` (pty ile, parola iki kez) | Hesap açıldı, parola ekranda görünmedi |
+| İki parola farklı; 11 karakterli parola; pipe ile; bilinmeyen bayrak | Reddedildi, mesajlarda parola yok |
+| Oturumsuz `GET /admin/ping` | `401` |
+| Müşteri `GET /admin/ping` | `403` |
+| Yönetici girişi: cevapta `"role":"ADMIN"`, çerez süresi | 12 saat (Expires = şimdi + 12:00) |
+| Yönetici `GET /admin/ping` / `POST /admin/ping` | `200` / `204` |
+| Yönetici `POST /admin/ping` `text/plain` | `415` |
+| `AuditLog` satırı | `admin.ping`, alanlar `{note,baska}`, değer yok |
+| `admin:create --revoke`, sonra eski çerezle `GET /admin/ping` | `401` |
+
+Neon'da `admin:create` çalıştırma ve gerçek yönetici hesabıyla giriş Berkay'ın adımıdır (issue kabul kriteri); yapılana kadar **doğrulanmadı**.
+
+## Filom (v2, tasarım)
+
+Kurallar [FLEET.md](FLEET.md) §6'da; uygulandıkça (V2-35) burada "Bu PR'da düzeltilenler" düzeninde kayda geçer. Özet: yetki API'de (`CompanyGuard`), şirketler arası erişim 404, değiştiren her işlem `AuditLog`'a (alan adları, değer değil), dosya yükleme ADR-28 kurallarıyla.
 
 Tarih: 17 Ekim 2026. Kapsam: `apps/api` kodu, `docs/api/openapi.yaml` sözleşmesi ve web'in API'yi çağırma şekli
 (`apps/web/lib/api-request.ts`, `next.config.ts`). Yöntem: kodun satır satır okunması,

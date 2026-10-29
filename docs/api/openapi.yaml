@@ -8,7 +8,8 @@ info:
     ## Genel kurallar (ARCHITECTURE ADR-14…17)
 
     - **Yollar `/api` öneki olmadan** tanımlıdır. Tarayıcı `/api/...` çağırır, Next öneki kaldırıp iletir.
-    - **Oturum:** `novera_session` çerezi (`httpOnly`, `Secure` canlıda, `SameSite=Lax`). İstekler `credentials: "include"` ile atılır.
+    - **Oturum:** `novera_session` çerezi (`httpOnly`, `Secure` canlıda, `SameSite=Lax`). İstekler `credentials: "include"` ile atılır. Müşteri oturumu en çok 30 gün, boşta 7 gün; **yönetici oturumu 12 saat, boşta 1 saat** (V2-23).
+    - **Yönetim (`/admin/*`):** oturum yoksa `401 UNAUTHENTICATED`, rol `ADMIN` değilse `403 FORBIDDEN`. Yetki API'dedir; her uç aynı koruyucunun arkasındadır.
     - **Zaman:** her an ISO 8601 UTC (`2026-10-12T10:00:00Z`). Alış/iade anları 30 dakikalık dilimlere oturur (`:00` veya `:30`).
     - **Para:** her tutar `{ "amount": 125000, "currency": "TRY" }`. `amount` alt birimin (kuruş/cent) tam sayısıdır. Fiyat uçları `?currency=` alır (varsayılan `TRY`).
     - **Dil:** çevrilen alanlar iki dille birlikte döner (`{ "tr": "...", "en": "..." }`). `?lang` yoktur.
@@ -45,6 +46,8 @@ tags:
   - name: auth
   - name: me
   - name: forms
+  - name: admin
+    description: Yönetim paneli (yalnızca `role = ADMIN`; ADR-24)
 paths:
   /health:
     get:
@@ -504,7 +507,7 @@ paths:
         - Hesap yoksa yeni bireysel hesap açılır (`201`) ve `consent: true` gerekir. Onay yoksa `422`
           (`fieldErrors.consent: CONSENT_REQUIRED`) döner ve hesap açılmaz; ön yüz onay kutusunu gösterip aynı
           `credential` ile `consent: true` göndererek yeniden dener.
-        Kurumsal hesaplar Google ile giriş yapamaz (`403`, `GOOGLE_NOT_ALLOWED`). 15 dakikada istemci başına en çok
+        Kurumsal ve yönetici hesaplar Google ile giriş yapamaz (`403`, `GOOGLE_NOT_ALLOWED`). 15 dakikada istemci başına en çok
         10 deneme (`429`). Sunucuda `GOOGLE_CLIENT_ID` yoksa `503` (`GOOGLE_SIGNIN_UNAVAILABLE`).
       requestBody:
         required: true
@@ -528,7 +531,7 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/Error" }
         "403":
-          description: Bu hesap Google ile giriş yapamaz (`GOOGLE_NOT_ALLOWED`)
+          description: Bu hesap (kurumsal ya da yönetici) Google ile giriş yapamaz (`GOOGLE_NOT_ALLOWED`)
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Error" }
@@ -663,6 +666,74 @@ paths:
         "422": { $ref: "#/components/responses/ValidationFailed" }
         "429": { $ref: "#/components/responses/TooManyRequests" }
 
+  /admin/ping:
+    get:
+      tags: [admin]
+      summary: Yönetici kapısı denemesi (iskelet)
+      description: |
+        Kapıyı kanıtlar: oturumsuz `401`, müşteri `403`, yönetici `200`. Hiçbir şeyi değiştirmez. V2-25'te
+        `GET /admin/summary` gelince yerini alır. Sınır: yönetici başına dakikada 120 (`429 RATE_LIMITED`).
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Yönetici
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ok, role]
+                properties:
+                  ok: { type: boolean, example: true }
+                  role: { type: string, enum: [ADMIN] }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Giriş yapılmış ama yönetici değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+    post:
+      tags: [admin]
+      summary: Değiştiren yönetici isteği denemesi (iskelet)
+      description: |
+        Hiçbir şeyi değiştirmez; **işlem kaydını** kanıtlar: başarılı istek `AuditLog`'a `admin.ping` olarak, gövdedeki
+        alan **adlarıyla** yazılır, değerler yazılmaz. Gövde JSON olmalıdır (`415`).
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                note: { type: string, nullable: true, maxLength: 200 }
+      responses:
+        "204":
+          description: Yapıldı ve kaydedildi
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Giriş yapılmış ama yönetici değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "415":
+          description: Gövde `application/json` değil (`BAD_REQUEST`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
 components:
   securitySchemes:
     cookieAuth:
@@ -729,6 +800,7 @@ components:
             - BAD_REQUEST
             - VALIDATION_FAILED
             - UNAUTHENTICATED
+            - FORBIDDEN
             - INVALID_CREDENTIALS
             - EMAIL_TAKEN
             - NOT_FOUND
@@ -1105,13 +1177,17 @@ components:
     # ---------- Hesap ----------
     User:
       type: object
-      required: [id, email, firstName, lastName, accountType, companyName, taxOffice, companyCity, companyPhone, contactTitle, salesContact, locale, theme, currency, hasPassword, googleLinked]
+      required: [id, email, firstName, lastName, accountType, role, companyName, taxOffice, companyCity, companyPhone, contactTitle, salesContact, locale, theme, currency, hasPassword, googleLinked]
       properties:
         id: { type: string, format: uuid }
         email: { type: string, format: email }
         firstName: { type: string }
         lastName: { type: string }
         accountType: { type: string, enum: [INDIVIDUAL, CORPORATE] }
+        role:
+          type: string
+          enum: [CUSTOMER, ADMIN]
+          description: Panel yetkisi (hesap türünden ayrıdır). Yalnızca `pnpm admin:create` `ADMIN` verir. Web yalnızca yönlendirme için okur; yetki API'dedir.
         companyName: { type: string, nullable: true }
         taxOffice: { type: string, nullable: true, description: Vergi dairesi. Yalnızca kurumsal hesapta dolu; bireyselde `null`. }
         companyCity: { type: string, nullable: true, description: Şirketin şehri. Yalnızca kurumsal hesapta dolu. }

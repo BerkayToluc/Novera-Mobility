@@ -65,6 +65,7 @@ export function quoteFromApi(quote: Schemas["QuoteSummary"]): QuoteRequest {
 export function sessionFromApi(user: Schemas["User"]): Session {
   const base = { id: user.id, firstName: user.firstName, lastName: user.lastName, email: user.email };
   const saved = {
+    role: user.role === "ADMIN" ? ("admin" as const) : ("customer" as const),
     hasPassword: user.hasPassword,
     googleLinked: user.googleLinked,
     preferences: { currency: user.currency, locale: user.locale, theme: user.theme },

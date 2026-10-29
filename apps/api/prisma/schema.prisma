@@ -31,6 +31,12 @@ enum AccountType {
   CORPORATE
 }
 
+// Panel yetkisi (V2-23, ADR-24); hesap türünden (AccountType) ayrıdır. Yalnızca `pnpm admin:create` ADMIN verir.
+enum Role {
+  CUSTOMER
+  ADMIN
+}
+
 enum Transmission {
   MANUAL
   AUTOMATIC
@@ -76,6 +82,7 @@ model User {
   firstName    String
   lastName     String
   accountType  AccountType @default(INDIVIDUAL)
+  role         Role        @default(CUSTOMER)
 
   // Kurumsal hesap bilgileri (yalnızca CORPORATE hesapta dolu gelir, hesabı Novera açar)
   companyName  String?
@@ -99,6 +106,25 @@ model User {
   pointTransactions PointTransaction[]
   sessions          Session[]
   passwordResetTokens   PasswordResetToken[]
+}
+
+// Yönetimde değiştiren her işlemin kaydı (V2-23, ADR-24). Yalnızca eklenir: servis güncelleme ya da silme sunmaz ve
+// veritabanı tetikleyicisi UPDATE/DELETE'i reddeder. Değer ve kişisel veri yazılmaz, yalnızca değişen alanların adları.
+// `actorId` bilerek yabancı anahtar değildir: hesap silinse de kayıt kalır. Komut satırı işlemleri `cli` yazar.
+model AuditLog {
+  id        String   @id @default(uuid())
+  at        DateTime @default(now())
+  actorId   String
+  companyId String?
+  // Nokta ile: `admin.ping`, `branch.close` ...
+  action    String
+  entity    String
+  entityId  String?
+  fields    String[]
+
+  @@index([at])
+  @@index([actorId, at])
+  @@index([entity, entityId])
 }
 
 // Giriş oturumu (BACKLOG #34). Çerezdeki rastgele anahtarın yalnızca SHA-256 özeti saklanır.

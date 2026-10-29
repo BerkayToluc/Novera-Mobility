@@ -150,6 +150,7 @@ describe("getSession", () => {
     const session = await getSession();
     expect(session).toEqual({
       type: "individual",
+      role: "customer",
       user: { id: "u1", firstName: "Elif", lastName: "Yıldız", email: "elif@example.com" },
       preferences: { currency: "EUR", locale: "en", theme: "dark" },
     });

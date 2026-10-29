@@ -168,11 +168,11 @@ V2-22 (29 Ekim 2026) işaretledi. "Kanıt" kodu ya da testi gösterir; "elle" sa
   - özet scrypt N ≥ 2^17 ya da argon2id;
   - girişte özet yükseltme;
   - kaba kuvvete karşı hesap ve istemci sınırı.
-  - Kanıt: `common/zod-fields.ts` (`PASSWORD_TOO_COMMON`), `common/common-passwords.ts` (elle: yaygın parola ve 7 karakterli parola `422`); `auth/password.ts` (N = 2^17); `auth/auth.service.ts` (`needsRehash`); istemci 10/15 dk (elle: 11. denemede `429` + `Retry-After`) ve e-posta başına artan bekleme (`auth/login-throttle.ts`, `rate-limits.http.spec.ts`). Yönetici 12 karakter kuralı **uygulanmaz**: yönetici hesabı V2-23'te gelir. Bkz. G-21.
+  - Kanıt: `common/zod-fields.ts` (`PASSWORD_TOO_COMMON`), `common/common-passwords.ts` (elle: yaygın parola ve 7 karakterli parola `422`); `auth/password.ts` (N = 2^17); `auth/auth.service.ts` (`needsRehash`); istemci 10/15 dk (elle: 11. denemede `429` + `Retry-After`) ve e-posta başına artan bekleme (`auth/login-throttle.ts`, `rate-limits.http.spec.ts`). Yönetici için 12 karakter kuralı V2-23'te geldi (`admin:create`, parola değiştirme ve sıfırlama; `auth/admin-rules.ts`). Bkz. G-21.
 - [x] **Oturum:** rastgele 256 bit; yalnızca özeti saklanır; httpOnly/Secure/SameSite; mutlak ve boşta kalma süresi; çıkışta ve parola değişince iptal.
   - Kanıt: `auth/session-token.ts` (32 bayt, SHA-256 özeti); çerez `HttpOnly; Secure; SameSite=Lax` (elle, production modu); 30 gün mutlak, 7 gün boşta (`session.integration.spec.ts`); çıkış, parola değişimi, sıfırlama ve Google bağlama oturumları siler (`auth.service.ts`, `account-security.service.ts`, `password-reset.service.ts`, `google-auth.service.ts`; elle: çıkıştan sonra eski çerez `401`).
 - [x] **Erişim:** her uçta yetki API'de; IDOR testleri; yönetici ve şirket izolasyon testleri; en az yetki.
-  - Kanıt: `SessionGuard` (`/me*`, `POST /reservations`), tüm sorgularda `userId` koşulu (`reservations.service.ts`), `reservations.integration.spec.ts` (başkası göremez); elle: B, A'nın rezervasyonunu okuyunca ve iptal edince `404`, oturumsuz `401`. Yönetici ve şirket izolasyonu **uygulanmaz** (şimdilik): `/admin/*` V2-23, `/fleet/*` V2-35'te gelir, testleri o işlerin kabul kriteridir.
+  - Kanıt: `SessionGuard` (`/me*`, `POST /reservations`), tüm sorgularda `userId` koşulu (`reservations.service.ts`), `reservations.integration.spec.ts` (başkası göremez); elle: B, A'nın rezervasyonunu okuyunca ve iptal edince `404`, oturumsuz `401`. Yönetici: `AdminGuard` global, oturumsuz `401`, müşteri `403`, yönetici `200` (`admin/admin.http.spec.ts`; büyük/küçük harf farkıyla atlanamaz; rol her istekte okunur). Şirket izolasyonu **uygulanmaz** (şimdilik): `/fleet/*` V2-35'te gelir, testleri o işin kabul kriteridir.
 - [x] **Girdi:** her uçta şema doğrulaması (ADR-26); gövde boyut sınırı; yalnızca JSON kabul edilen uçlarda `415`.
   - Kanıt: zod şemaları (`common/zod-validation.ts`, `validation.http.spec.ts`); `413` (`app.setup.spec.ts`, elle 2 MB); `415` **bu işte eklendi** (`common/json-only.ts`, G-20; elle `text/plain` → `415`).
 - [x] **Çıktı:** ham HTML yok; JSON-LD kaçışlı; hata metninde iç ayrıntı yok.
@@ -192,7 +192,8 @@ V2-22 (29 Ekim 2026) işaretledi. "Kanıt" kodu ya da testi gösterir; "elle" sa
   - Kanıt: sıfırlama bağlantısı ve e-posta production'da günlüğe yazılmaz (`reset-link-notifier.ts`, `reset-link-notifier.spec.ts`); API günlüğünde başka kişisel veri yok (tüm `logger.*` çağrıları gözden geçirildi); saklama ve anonimleştirme görevi (`forms/retention.task.ts`, SECURITY.md "Veri saklama"); `.gitignore`: `.env*`, `carPhotos/`.
 - [x] **Bağımlılıklar:** `pnpm audit --prod` CI'da; bot güncellemeleri; bilinen bulguların gerekçeli kaydı.
   - Kanıt: `pnpm audit:prod` 29 Ekim'de: 7 uyarı, 0 engelleyici, 2 gerekçeli izinli (yalnızca Prisma komut satırı aracı; `scripts/audit-allowlist.json`, 90 günde bir gözden geçirilir); Dependabot ayarlı (V2-18).
-- [ ] → **Uygulanmaz (şimdilik)**, **Denetim kaydı:** yönetici ve Filom'da değiştiren işlemler (ADR-24). Yönetici ve Filom yok; V2-23 ve V2-35'in kabul kriteridir.
+- [x] **Denetim kaydı:** yönetici ve Filom'da değiştiren işlemler (ADR-24).
+  - Kanıt: `AuditLog` yalnızca eklenir (servis + veritabanı tetikleyicisi), değer yazılmaz, alan adları süzülür (`admin/audit.service.ts`, `admin.integration.spec.ts`, `admin.http.spec.ts`). Yönetici tarafı V2-23'te geldi; Filom'daki değiştirme uçları V2-35'in kabul kriteridir.
 
 ### 3.2 Hız sınırı tablosu (ADR-27)
 

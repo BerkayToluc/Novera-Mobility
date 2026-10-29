@@ -21,6 +21,11 @@ const promoKey = (request: Request, user: { id: string } | null): string | null 
   return user ? `user:${user.id}` : `ip:${clientKeyOf(request)}`;
 };
 
+// Everything under /admin (ADR-24): one counter for the administrator, 120 a minute. Before sign-in it counts by address,
+// so probing the door is limited too.
+const adminKey = (request: Request, user: { id: string } | null): string =>
+  user ? `admin:${user.id}` : `ip:${clientKeyOf(request)}`;
+
 export const LIMITS = {
   register: { bucket: 'register', limit: 10, windowSec: HOUR, key: 'client' },
   login: { bucket: 'login', limit: 10, windowSec: 15 * MINUTE, key: 'client' },
@@ -36,4 +41,5 @@ export const LIMITS = {
   promo: { bucket: 'promo', limit: 10, windowSec: 10 * MINUTE, key: promoKey },
   reserve: { bucket: 'reserve', limit: 10, windowSec: HOUR },
   accountWrite: { bucket: 'account-write', limit: 20, windowSec: 15 * MINUTE },
+  admin: { bucket: 'admin', limit: 120, windowSec: MINUTE, key: adminKey },
 } satisfies Record<string, RateLimitSpec>;

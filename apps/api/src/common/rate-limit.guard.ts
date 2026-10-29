@@ -3,9 +3,11 @@ import { Reflector } from '@nestjs/core';
 import type { Request } from 'express';
 import { AuthService } from '../auth/auth.service.js';
 import { userOfRequest, type AuthedRequest } from '../auth/session.guard.js';
+import { isAdminRoute } from '../admin/admin-route.js';
 import { clientKeyOf } from './client-key.js';
 import { DEFAULT_RATE_LIMIT, NO_RATE_LIMIT_METADATA, RATE_LIMIT_METADATA, type RateLimitSpec } from './rate-limit.js';
 import { RateLimitService } from './rate-limit.service.js';
+import { LIMITS } from './rate-limits.js';
 
 // The limit of every endpoint (ADR-27), applied as a global guard. It runs before the handler, before the
 // session guard and before the body is validated, so a request that is refused costs one counter write and
@@ -23,9 +25,11 @@ export class RateLimitGuard implements CanActivate {
     const targets = [context.getHandler(), context.getClass()];
     if (this.reflector.getAllAndOverride<boolean | undefined>(NO_RATE_LIMIT_METADATA, targets)) return true;
     const own = this.reflector.getAllAndOverride<RateLimitSpec[] | undefined>(RATE_LIMIT_METADATA, targets);
-    const specs = own && own.length > 0 ? own : [DEFAULT_RATE_LIMIT];
-
     const request = context.switchToHttp().getRequest<AuthedRequest>();
+    // Everything under /admin shares one limit unless the handler names its own (ADR-24).
+    const fallback = isAdminRoute(context, request) ? LIMITS.admin : DEFAULT_RATE_LIMIT;
+    const specs = own && own.length > 0 ? own : [fallback];
+
     // Who is asking: read once here and kept on the request, so the session guard does not look it up again.
     const user = await userOfRequest(this.auth, request);
 

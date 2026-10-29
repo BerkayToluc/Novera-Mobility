@@ -19,6 +19,10 @@ export type SessionUser = {
 
 export type AccountType = "individual" | "corporate";
 
+// What the account may do in the panel (V2-23, ADR-24). The site reads it only to decide what to show and where to
+// send a visitor; the API checks the role on every call to /admin/*.
+export type Role = "customer" | "admin";
+
 // A corporate account is simple (SPEC §2.9): company details and a contact person. The fleet
 // panel is out of scope.
 // Only the name comes from the API; the rest is shown when it is known (the sample account has it all).
@@ -36,6 +40,7 @@ export type CompanyInfo = {
 // `preferences` and `notifications` are what the account saved; the sample accounts keep theirs in cookies.
 export type Session = {
   type: AccountType;
+  role: Role;
   user: SessionUser;
   company?: CompanyInfo;
   preferences?: Preferences;
@@ -65,9 +70,9 @@ export const getSession = cache(async (): Promise<Session | null> => {
   const jar = await cookies();
   if (isMockMode()) {
     const value = jar.get(MOCK_SESSION_COOKIE)?.value;
-    if (value !== "corporate" && value !== "individual" && value !== "google") return null;
-    const { MOCK_CORPORATE, MOCK_GOOGLE, MOCK_INDIVIDUAL } = await import("@/mocks/accounts");
-    return { corporate: MOCK_CORPORATE, individual: MOCK_INDIVIDUAL, google: MOCK_GOOGLE }[value];
+    if (value !== "corporate" && value !== "individual" && value !== "google" && value !== "admin") return null;
+    const { MOCK_ADMIN, MOCK_CORPORATE, MOCK_GOOGLE, MOCK_INDIVIDUAL } = await import("@/mocks/accounts");
+    return { corporate: MOCK_CORPORATE, individual: MOCK_INDIVIDUAL, google: MOCK_GOOGLE, admin: MOCK_ADMIN }[value];
   }
   if (!jar.get(SESSION_COOKIE)?.value) return null;
   const result = await apiRequest<components["schemas"]["User"]>("GET", "/me");

@@ -987,7 +987,7 @@ export interface paths {
          *     - Hesap yoksa yeni bireysel hesap açılır (`201`) ve `consent: true` gerekir. Onay yoksa `422`
          *       (`fieldErrors.consent: CONSENT_REQUIRED`) döner ve hesap açılmaz; ön yüz onay kutusunu gösterip aynı
          *       `credential` ile `consent: true` göndererek yeniden dener.
-         *     Kurumsal hesaplar Google ile giriş yapamaz (`403`, `GOOGLE_NOT_ALLOWED`). 15 dakikada istemci başına en çok
+         *     Kurumsal ve yönetici hesaplar Google ile giriş yapamaz (`403`, `GOOGLE_NOT_ALLOWED`). 15 dakikada istemci başına en çok
          *     10 deneme (`429`). Sunucuda `GOOGLE_CLIENT_ID` yoksa `503` (`GOOGLE_SIGNIN_UNAVAILABLE`).
          */
         post: {
@@ -1030,7 +1030,7 @@ export interface paths {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
-                /** @description Bu hesap Google ile giriş yapamaz (`GOOGLE_NOT_ALLOWED`) */
+                /** @description Bu hesap (kurumsal ya da yönetici) Google ile giriş yapamaz (`GOOGLE_NOT_ALLOWED`) */
                 403: {
                     headers: {
                         [name: string]: unknown;
@@ -1342,6 +1342,127 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/admin/ping": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Yönetici kapısı denemesi (iskelet)
+         * @description Kapıyı kanıtlar: oturumsuz `401`, müşteri `403`, yönetici `200`. Hiçbir şeyi değiştirmez. V2-25'te
+         *     `GET /admin/summary` gelince yerini alır. Sınır: yönetici başına dakikada 120 (`429 RATE_LIMITED`).
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Yönetici */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @example true */
+                            ok: boolean;
+                            /** @enum {string} */
+                            role: "ADMIN";
+                        };
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Giriş yapılmış ama yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        put?: never;
+        /**
+         * Değiştiren yönetici isteği denemesi (iskelet)
+         * @description Hiçbir şeyi değiştirmez; **işlem kaydını** kanıtlar: başarılı istek `AuditLog`'a `admin.ping` olarak, gövdedeki
+         *     alan **adlarıyla** yazılır, değerler yazılmaz. Gövde JSON olmalıdır (`415`).
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": {
+                        note?: string | null;
+                    };
+                };
+            };
+            responses: {
+                /** @description Yapıldı ve kaydedildi */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Giriş yapılmış ama yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Gövde `application/json` değil (`BAD_REQUEST`) */
+                415: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1351,7 +1472,7 @@ export interface components {
              * @description Sabit makine kodu.
              * @enum {string}
              */
-            code: "BAD_REQUEST" | "VALIDATION_FAILED" | "UNAUTHENTICATED" | "INVALID_CREDENTIALS" | "EMAIL_TAKEN" | "NOT_FOUND" | "VEHICLE_UNAVAILABLE" | "INVALID_DATE_RANGE" | "RESERVATION_LIMIT" | "RESET_TOKEN_INVALID" | "SPAM_DETECTED" | "RATE_LIMITED" | "PAYLOAD_TOO_LARGE" | "INTERNAL_ERROR";
+            code: "BAD_REQUEST" | "VALIDATION_FAILED" | "UNAUTHENTICATED" | "FORBIDDEN" | "INVALID_CREDENTIALS" | "EMAIL_TAKEN" | "NOT_FOUND" | "VEHICLE_UNAVAILABLE" | "INVALID_DATE_RANGE" | "RESERVATION_LIMIT" | "RESET_TOKEN_INVALID" | "SPAM_DETECTED" | "RATE_LIMITED" | "PAYLOAD_TOO_LARGE" | "INTERNAL_ERROR";
             /** @description Geliştirici için İngilizce metin. Ekranda gösterilmez. */
             message: string;
             /**
@@ -1669,6 +1790,11 @@ export interface components {
             lastName: string;
             /** @enum {string} */
             accountType: "INDIVIDUAL" | "CORPORATE";
+            /**
+             * @description Panel yetkisi (hesap türünden ayrıdır). Yalnızca `pnpm admin:create` `ADMIN` verir. Web yalnızca yönlendirme için okur; yetki API'dedir.
+             * @enum {string}
+             */
+            role: "CUSTOMER" | "ADMIN";
             companyName: string | null;
             /** @description Vergi dairesi. Yalnızca kurumsal hesapta dolu; bireyselde `null`. */
             taxOffice: string | null;

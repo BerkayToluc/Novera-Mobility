@@ -3,6 +3,7 @@ import { isUniqueViolation } from '../common/prisma-errors.js';
 import { DAY_MS } from '../common/time.js';
 import { parseInput, validationFailed } from '../common/zod-validation.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { isAdmin } from './admin-rules.js';
 import { emailTaken, googleNotAllowed, googleTokenInvalid, googleUnavailable } from './auth.errors.js';
 import { googleSchema } from './auth.schemas.js';
 import type { SessionStart } from './auth.service.js';
@@ -58,7 +59,8 @@ export class GoogleAuthService {
 
     const bySub = await this.prisma.user.findUnique({ where: { googleSub: profile.sub } });
     if (bySub) {
-      if (bySub.accountType !== 'INDIVIDUAL') throw googleNotAllowed();
+      // An administrator never signs in with Google (V2-23): the account is password-only, with a longer password.
+      if (bySub.accountType !== 'INDIVIDUAL' || isAdmin(bySub)) throw googleNotAllowed();
       await this.prisma.$transaction([
         this.prisma.session.deleteMany({ where: { userId: bySub.id, expiresAt: { lt: new Date() } } }),
         this.prisma.session.create({ data: { ...newSession(), userId: bySub.id } }),
@@ -69,7 +71,8 @@ export class GoogleAuthService {
     const byEmail = await this.prisma.user.findUnique({ where: { email: profile.email } });
     if (byEmail) {
       // Same verified e-mail, but another Google account is already linked, or a corporate account.
-      if (byEmail.accountType !== 'INDIVIDUAL' || byEmail.googleSub !== null) throw googleNotAllowed();
+      // An administrator's account is not linked either, which would also remove its password.
+      if (byEmail.accountType !== 'INDIVIDUAL' || byEmail.googleSub !== null || isAdmin(byEmail)) throw googleNotAllowed();
       // Linking. Sign-up with a password never proved the e-mail belongs to the person, so whoever
       // registered it first could still hold the password or a session. Both go: the owner proved the
       // e-mail with Google now and can use Google or "forgot password" from here on.

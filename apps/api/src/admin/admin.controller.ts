@@ -1,0 +1,28 @@
+import { Body, Controller, Get, HttpCode, Post } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
+import { z } from 'zod';
+import { optionalText } from '../common/zod-fields.js';
+import { parseInput } from '../common/zod-validation.js';
+import { CurrentUser } from '../auth/session.guard.js';
+import type { UserRow } from '../auth/user-view.js';
+import { Audited } from './audit.interceptor.js';
+
+const pingSchema = z.object({ note: optionalText(200) });
+
+// The first thing behind the administration guard (V2-23): a way to prove "no session 401, customer 403, admin 200"
+// and that a change is logged, until real endpoints (V2-25 onwards) take its place. It changes nothing.
+@ApiTags('admin')
+@Controller('admin')
+export class AdminController {
+  @Get('ping')
+  ping(@CurrentUser() user: UserRow): { ok: true; role: 'ADMIN' } {
+    return { ok: true, role: user.role as 'ADMIN' };
+  }
+
+  @Post('ping')
+  @HttpCode(204)
+  @Audited({ action: 'admin.ping', entity: 'ping' })
+  pingChange(@Body() body: unknown): void {
+    parseInput(pingSchema, body, 'Ping data is invalid');
+  }
+}

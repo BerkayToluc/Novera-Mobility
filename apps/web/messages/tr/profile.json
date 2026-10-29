@@ -10,6 +10,7 @@
       "company": "Firma bilgileri",
       "quotes": "Teklif taleplerim",
       "points": "Puanlarım",
+      "admin": "Yönetim paneli",
       "newRental": "Yeni kiralama"
     },
     "signedOut": {

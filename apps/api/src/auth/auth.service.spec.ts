@@ -216,6 +216,7 @@ describe('toUserResponse satış iletişimi', () => {
     firstName: 'A',
     lastName: 'B',
     accountType: 'CORPORATE' as const,
+    role: 'CUSTOMER' as const,
     companyName: 'Firma',
     taxOffice: null,
     companyCity: null,

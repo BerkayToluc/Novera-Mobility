@@ -7,6 +7,8 @@ export interface UserRow {
   firstName: string;
   lastName: string;
   accountType: 'INDIVIDUAL' | 'CORPORATE';
+  // Panel yetkisi (V2-23); yalnızca `pnpm admin:create` değiştirir.
+  role: 'CUSTOMER' | 'ADMIN';
   companyName: string | null;
   taxOffice: string | null;
   companyCity: string | null;
@@ -27,6 +29,7 @@ export interface UserResponse {
   firstName: string;
   lastName: string;
   accountType: 'INDIVIDUAL' | 'CORPORATE';
+  role: 'CUSTOMER' | 'ADMIN';
   companyName: string | null;
   taxOffice: string | null;
   companyCity: string | null;
@@ -59,6 +62,7 @@ export function toUserResponse(user: UserRow): UserResponse {
     firstName: user.firstName,
     lastName: user.lastName,
     accountType: user.accountType,
+    role: user.role,
     companyName: user.companyName,
     taxOffice: user.taxOffice,
     companyCity: user.companyCity,

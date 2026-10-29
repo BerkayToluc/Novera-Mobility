@@ -1,7 +1,8 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { parseInput } from '../common/zod-validation.js';
+import { parseInput, validationFailed } from '../common/zod-validation.js';
 import { webBaseUrl } from '../config/env.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { ADMIN_PASSWORD_MIN } from './admin-rules.js';
 import { forgotPasswordSchema, resetPasswordSchema } from './auth.schemas.js';
 import { hashPassword } from './password.js';
 import { ResetLinkNotifier } from './reset-link-notifier.js';
@@ -60,6 +61,13 @@ export class PasswordResetService {
     });
     if (!row || row.usedAt !== null || row.expiresAt.getTime() <= Date.now()) {
       throw resetTokenInvalid();
+    }
+
+    // An administrator's password needs 12 characters (V2-23). Checked before the link is claimed, so a short one does
+    // not use the link up.
+    const owner = await this.prisma.user.findUnique({ where: { id: row.userId }, select: { role: true } });
+    if (owner?.role === 'ADMIN' && password.length < ADMIN_PASSWORD_MIN) {
+      throw validationFailed({ password: 'TOO_SHORT' }, `An administrator's password needs ${ADMIN_PASSWORD_MIN} characters`);
     }
 
     const passwordHash = await hashPassword(password);

@@ -10,6 +10,7 @@
       "company": "Company details",
       "quotes": "My quote requests",
       "points": "My Points",
+      "admin": "Admin panel",
       "newRental": "New rental"
     },
     "signedOut": {

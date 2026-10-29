@@ -371,6 +371,14 @@ describe("the account", () => {
     expect(await changePassword("eski-sifre-1", "password123")).toEqual({ ok: false, reason: "too_common" });
   });
 
+  it("maps the role: ADMIN is an administrator, CUSTOMER and anything else is a customer", () => {
+    const base = { id: "u3", email: "a@b.example", firstName: "A", lastName: "B", accountType: "INDIVIDUAL", locale: "tr", theme: "light", currency: "TRY" };
+    expect(sessionFromApi({ ...base, role: "ADMIN" } as Schemas["User"]).role).toBe("admin");
+    expect(sessionFromApi({ ...base, role: "CUSTOMER" } as Schemas["User"]).role).toBe("customer");
+    // An answer without the field (an older API) must never make someone an administrator.
+    expect(sessionFromApi(base as unknown as Schemas["User"]).role).toBe("customer");
+  });
+
   it("maps a corporate account with its company details", () => {
     const session = sessionFromApi({
       id: "u2",
