@@ -3,6 +3,8 @@ import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { AuthModule } from '../auth/auth.module.js';
 import { AdminController } from './admin.controller.js';
 import { AdminSummaryService } from './admin-summary.service.js';
+import { PromoCodesController } from './promo-codes.controller.js';
+import { PromoCodesService } from './promo-codes.service.js';
 import { AdminGuard } from './admin.guard.js';
 import { AuditInterceptor } from './audit.interceptor.js';
 import { AuditService } from './audit.service.js';
@@ -11,10 +13,11 @@ import { AuditService } from './audit.service.js';
 // rate limit module, so a request is counted before it is turned away.
 @Module({
   imports: [AuthModule],
-  controllers: [AdminController],
+  controllers: [AdminController, PromoCodesController],
   providers: [
     AuditService,
     AdminSummaryService,
+    PromoCodesService,
     { provide: APP_GUARD, useClass: AdminGuard },
     { provide: APP_INTERCEPTOR, useClass: AuditInterceptor },
   ],

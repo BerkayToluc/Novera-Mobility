@@ -6,7 +6,7 @@ import type { Currency } from "./currency";
 import type { Extra } from "./extra";
 import { ApiUnavailableError } from "./fleet-client";
 import { VehicleUnavailableError, holdApiId } from "./hold-client";
-import { promoPercent } from "./promo-codes";
+import { mockPromoPercent } from "@/mocks/promo-codes";
 import { summarize, type PriceSummary } from "./price-summary";
 import { toUtc, type RentalSearch } from "./rental-search";
 import type { Vehicle } from "./vehicle";
@@ -27,12 +27,12 @@ export type PriceRequest = {
 // The price breakdown of a booking (SPEC §2.3). The page never adds prices up itself: the total is
 // what `POST /reservations/price` returns (ADR-15), with the points the API spent when the visitor
 // pays with them. A `409` means the car is taken. With USE_MOCKS=1 the lines are added up here the way
-// the backend does, with the sample campaign codes. The API takes the code off the car and the extras and says in `promo.applied` whether it did.
+// the backend does, with the sample campaign codes (mocks/promo-codes.ts, the ones the panel edits). The API takes the code off the car and the extras and says in `promo.applied` whether it did.
 export async function quotePrice(request: PriceRequest): Promise<PriceSummary> {
   const { vehicle, days, extras, currency, promoCode, pointsBalance } = request;
   if (isMockMode()) {
     // An unknown code is simply not applied: the page says so (BookingData.promo), the price is the plain one.
-    const percent = promoCode ? promoPercent(promoCode) : null;
+    const percent = promoCode ? mockPromoPercent(promoCode) : null;
     return summarize(
       vehicle.dailyPrice,
       days,

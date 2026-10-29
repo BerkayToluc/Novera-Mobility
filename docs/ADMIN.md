@@ -145,6 +145,22 @@ Tüm sayfalar `noindex`, sitemap ve `llms.txt` dışında; navbar ve footer'da b
 
 Bir kart, bağlı olduğu liste ekranı yapılınca (`lib/admin-screens.ts` `ready`) süzgeçli bağlantıya döner. Süzgeç adları `lib/admin-summary.ts`'te durur (`baslangic=bugun`, `bitis=bugun`, `olusturma=7gun`, `durum=RECEIVED`, `durum=ele-alinmadi`, `durum=acik`); liste ekranlarını yapan işler (V2-31, V2-32, V2-41) bunları adresten okur. Hiçbir kart bir kişinin verisini göstermez, yalnızca sayı. Tüm sayılar sıfırsa ekran "Her şey yolunda" der.
 
+### 3.6 Kampanya kodları ekranı (V2-26)
+
+`/yonetim/kampanya-kodlari` (EN `/en/admin/promo-codes`), `/yeni` ve `/{kod}`; uçlar `GET/POST /admin/promo-codes`, `GET/PATCH/DELETE /admin/promo-codes/{code}`.
+
+- **Durum tek bir kelimedir.** Birden fazlası doğruysa şu sırayla ilki: `INACTIVE` (kapalı), `EXPIRED` (bitişi geçti), `EXHAUSTED` (tavan doldu), `SCHEDULED` (henüz başlamadı), `ACTIVE`. `ACTIVE` yalnızca rezervasyon anında gerçekten uygulanacak kod demektir; liste ile rezervasyon kontrolü aynı tarih kuralını okur (`isPromoUsable`, bitiş anı dahil değil), testle denetlenir.
+- **Tarihler gün olarak seçilir** (İstanbul saati): "ilk geçerli gün" günün 00:00'ında başlar, "son geçerli gün" **dahildir**; kod ertesi günün 00:00'ında biter. API kesin anları tutar; başka yoldan girilmiş saatli bir kod, form o tarihe dokunulmadıkça olduğu gibi kalır (yalnızca değişen alan gönderilir).
+- **Kod değişmez.** Ad, oluşturulurken seçilir; sonra değiştirilemez. Başka ad için yeni kod açılır.
+- **Yüzdeyi değiştirmek** var olan rezervasyonların tutarını etkilemez (tutar rezervasyonda donmuştur).
+- **Tavan** şimdiye kadarki kullanımdan az olamaz (`BELOW_USAGE`). Değişiklik ve rezervasyon aynı kod satırını kilitler; aynı anda gelen rezervasyonla sırayla çalışırlar.
+- **Silme:** hiçbir rezervasyonda, **iptal edilmiş olsa bile**, kullanılmamış kod silinir. Kullanılmışsa `409 IN_USE` döner ve **hiçbir şey değişmez**; ekran "silinemez, kapatmak ister misiniz?" der ve kodu kapatır (`PATCH active: false`). Kapalı kod yeni rezervasyonlarda uygulanmaz, eskiler değişmez.
+- **Çakışma:** düzenleme, kaydın `updatedAt` değerini taşır; arada değiştiyse `409 STALE_WRITE`, hiçbir şey yazılmaz. Ekran girilenleri korur ve "güncel kaydı yükle" önerir.
+- **Veritabanı:** kod biçimi (`^[A-Z0-9]{3,20}$`) ve `validUntil > validFrom` CHECK ile de korunur (migration `20261030120000`, `NOT VALID`: var olan satırlara bakmaz, yeni yazımları denetler).
+- **İşlem kaydı:** `promo-code.create|update|delete`; kod adı varlık kimliği, yalnızca alan adları yazılır.
+- **Liste** küçük, elle yönetilen bir tablo olduğu için sunucuda bellekte süzülür, sıralanır ve sayfalanır (kullanım sayısı rezervasyonlardan gelir). Yüzlerce satırı aşarsa veritabanı sorgusuna taşınır.
+- **Ortak liste kuralları** (`apps/api/src/admin/admin-list.ts`): `?page=&pageSize=` (en çok 100), `?sort=alan:asc|desc`, cevap `{ items, total, page, pageSize }`. Yanlış değer API'de `422`; web adresinde varsayılana düşer. Sonraki liste uçları aynı yardımcıyı kullanır.
+
 ## 4. API
 
 Tüm uçlar `/admin` önekli, `AdminGuard` arkasında, ADR-24 kurallarıyla (sayfalama, `STALE_WRITE`, yeni hata kodları). Değiştiren her istek işlem kaydına yazılır, `Content-Type: application/json` dışındakiler `415` döner, sınır dakikada 120/yönetici.

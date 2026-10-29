@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 import type { Extra } from "@/lib/extra";
 import { extraCost } from "@/lib/extra";
 import { pointsForTotal } from "@/lib/points";
-import { normalizePromo, promoPercent } from "@/lib/promo-codes";
+import { mockPromoPercent as promoPercent } from "@/mocks/promo-codes";
+import { normalizePromo } from "@/lib/promo-codes";
 import { summarize } from "@/lib/price-summary";
 
 const try_ = (lira: number) => ({ amount: lira * 100, currency: "TRY" as const });

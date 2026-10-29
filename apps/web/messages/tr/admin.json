@@ -157,6 +157,110 @@
       "save": "Kaydet",
       "bilingualHint": "Boş bırakıp Kaydet'e basın: eksik dil işaretlenir.",
       "missingText": "Bu dilde metin girin."
+    },
+    "promoCodes": {
+      "title": "Kampanya kodları",
+      "intro": "Rezervasyon özetinde yazılan indirim kodları. Eklediğiniz kod hemen kullanılabilir.",
+      "newButton": "Yeni kod",
+      "newTitle": "Yeni kampanya kodu",
+      "newIntro": "Kod oluşturulur oluşturulmaz rezervasyon özetinde kullanılabilir.",
+      "detailIntro": "Şimdiye kadar {used} rezervasyonda kullanıldı. {created} tarihinde oluşturuldu.",
+      "searchLabel": "Kod ara",
+      "filterLabel": "Duruma göre",
+      "tableCaption": "Kampanya kodları",
+      "retry": "Tekrar dene",
+      "columns": {
+        "code": "Kod",
+        "percent": "İndirim",
+        "period": "Geçerlilik",
+        "used": "Kullanım",
+        "status": "Durum"
+      },
+      "usage": "{used} / {max}",
+      "period": {
+        "always": "Süresiz",
+        "from": "{from} ve sonrası",
+        "until": "{until} tarihine kadar",
+        "range": "{from} – {until}"
+      },
+      "status": {
+        "ACTIVE": "Etkin",
+        "SCHEDULED": "Başlamadı",
+        "INACTIVE": "Kapalı",
+        "EXPIRED": "Süresi doldu",
+        "EXHAUSTED": "Tavan doldu"
+      },
+      "emptyTitle": "Henüz kampanya kodu yok",
+      "emptyText": "İlk kodu ekleyin; rezervasyon özetinde hemen kullanılabilir.",
+      "emptyFilteredTitle": "Bu aramaya uyan kod yok",
+      "emptyFilteredText": "Süzgeci kaldırmayı ya da başka bir kod aramayı deneyin.",
+      "loadErrorTitle": "Kodlar yüklenemedi",
+      "loadErrorText": "Birkaç saniye sonra yeniden deneyin.",
+      "fields": {
+        "code": "Kod",
+        "codeHint": "Harf ve rakam, 3 ile 20 karakter. Büyük harfe çevrilir; sonra değiştirilemez.",
+        "codeFixed": "Kodun adı değiştirilemez; başka bir ad için yeni kod oluşturun.",
+        "percent": "İndirim yüzdesi",
+        "percentHint": "1 ile 90 arasında bir sayı. Araç ve ek hizmetlerin toplamından düşer.",
+        "validFrom": "İlk geçerli gün",
+        "validFromHint": "Boşsa hemen geçerli.",
+        "validUntil": "Son geçerli gün",
+        "validUntilHint": "Bu gün dahil. Boşsa süresiz. İstanbul saatine göre.",
+        "maxRedemptions": "Toplam kullanım sınırı",
+        "maxRedemptionsHint": "Kodun kaç rezervasyonda kullanılabileceği. Boşsa sınırsız.",
+        "maxRedemptionsHintUsed": "Boşsa sınırsız. Şimdiye kadar {used} rezervasyonda kullanıldı, sınır bundan az olamaz.",
+        "oncePerUser": "Her hesap kodu yalnızca bir kez kullanabilir",
+        "active": "Kod açık (kapalıysa hiçbir rezervasyonda uygulanmaz)"
+      },
+      "form": {
+        "create": "Kodu oluştur",
+        "save": "Değişiklikleri kaydet",
+        "saving": "Kaydediliyor",
+        "cancel": "Vazgeç"
+      },
+      "errors": {
+        "code": "3 ile 20 karakter arasında, yalnızca harf ve rakamdan oluşan bir kod yazın.",
+        "percent": "1 ile 90 arasında bir tam sayı yazın.",
+        "validFrom": "Geçerli bir gün seçin.",
+        "validUntil": "Son gün, ilk günden önce olamaz.",
+        "dateRange": "Son gün, ilk günden sonra olmalı.",
+        "maxRedemptions": "1 ya da daha büyük bir tam sayı yazın, ya da boş bırakın.",
+        "belowUsage": "Sınır, şimdiye kadarki kullanımdan ({used}) az olamaz.",
+        "taken": "Bu adda bir kod zaten var.",
+        "generic": "Bu bilgi kabul edilmedi. Alanları gözden geçirip yeniden deneyin.",
+        "notFound": "Bu kod artık yok. Listeye dönün.",
+        "unavailable": "Kaydedilemedi. Birkaç saniye sonra yeniden deneyin.",
+        "staleShort": "Kod bu sırada başka biri tarafından değiştirilmiş. Güncel hâli yüklendi, işlemi yeniden deneyin."
+      },
+      "toast": {
+        "created": "Kod oluşturuldu",
+        "saved": "Değişiklikler kaydedildi",
+        "deleted": "Kod silindi",
+        "activated": "Kod açıldı",
+        "deactivated": "Kod kapatıldı"
+      },
+      "actions": {
+        "title": "Kodu kapat ya da sil",
+        "usedText": "Bu kod {used} rezervasyonda kullanıldı. Kapatırsanız yeni rezervasyonlarda uygulanmaz, eskiler değişmez.",
+        "unusedText": "Bu kod hiçbir rezervasyonda kullanılmadı; silebilirsiniz.",
+        "deactivate": "Kodu kapat",
+        "activate": "Kodu aç",
+        "delete": "Kodu sil"
+      },
+      "deleteDialog": {
+        "title": "{code} kodu silinsin mi?",
+        "text": "Silinen kod geri getirilemez ve rezervasyon özetinde artık uygulanmaz.",
+        "confirm": "Kodu sil"
+      },
+      "deactivateDialog": {
+        "title": "{code} kodu kapatılsın mı?",
+        "text": "Kapalı kod hiçbir yeni rezervasyonda uygulanmaz. Var olan rezervasyonların tutarı değişmez. İstediğiniz zaman yeniden açabilirsiniz.",
+        "confirm": "Kodu kapat"
+      },
+      "inUseDialog": {
+        "title": "{code} silinemez",
+        "text": "{code} en az bir rezervasyonda kullanılmış; geçmiş kayıtlar adını taşıyor. Silmek yerine kapatabilirsiniz: yeni rezervasyonlarda uygulanmaz, eskiler değişmez."
+      }
     }
   }
 }

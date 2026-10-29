@@ -157,6 +157,110 @@
       "save": "Save",
       "bilingualHint": "Leave one empty and press Save: the missing language is marked.",
       "missingText": "Enter the text in this language."
+    },
+    "promoCodes": {
+      "title": "Campaign codes",
+      "intro": "The discount codes entered on the booking summary. A code you add can be used at once.",
+      "newButton": "New code",
+      "newTitle": "New campaign code",
+      "newIntro": "As soon as the code is created it can be used on the booking summary.",
+      "detailIntro": "Used in {used} bookings so far. Created on {created}.",
+      "searchLabel": "Search codes",
+      "filterLabel": "By status",
+      "tableCaption": "Campaign codes",
+      "retry": "Try again",
+      "columns": {
+        "code": "Code",
+        "percent": "Discount",
+        "period": "Valid",
+        "used": "Used",
+        "status": "Status"
+      },
+      "usage": "{used} / {max}",
+      "period": {
+        "always": "No end date",
+        "from": "From {from}",
+        "until": "Until {until}",
+        "range": "{from} – {until}"
+      },
+      "status": {
+        "ACTIVE": "Active",
+        "SCHEDULED": "Not started",
+        "INACTIVE": "Switched off",
+        "EXPIRED": "Expired",
+        "EXHAUSTED": "Used up"
+      },
+      "emptyTitle": "No campaign codes yet",
+      "emptyText": "Add the first one; it can be used on the booking summary at once.",
+      "emptyFilteredTitle": "No code matches this search",
+      "emptyFilteredText": "Try removing the filter or searching for another code.",
+      "loadErrorTitle": "The codes could not be loaded",
+      "loadErrorText": "Try again in a few seconds.",
+      "fields": {
+        "code": "Code",
+        "codeHint": "Letters and digits, 3 to 20 characters. Made upper case; it cannot be changed later.",
+        "codeFixed": "The name of a code cannot be changed; make a new code for another name.",
+        "percent": "Discount percentage",
+        "percentHint": "A number from 1 to 90. It comes off the car and extras together.",
+        "validFrom": "First valid day",
+        "validFromHint": "If empty, valid at once.",
+        "validUntil": "Last valid day",
+        "validUntilHint": "This day included. If empty, no end date. Istanbul time.",
+        "maxRedemptions": "Total use limit",
+        "maxRedemptionsHint": "How many bookings can use the code. If empty, no limit.",
+        "maxRedemptionsHintUsed": "If empty, no limit. Used in {used} bookings so far; the limit cannot be lower.",
+        "oncePerUser": "Each account can use the code only once",
+        "active": "Code is on (when off, it is applied to no booking)"
+      },
+      "form": {
+        "create": "Create the code",
+        "save": "Save changes",
+        "saving": "Saving",
+        "cancel": "Cancel"
+      },
+      "errors": {
+        "code": "Enter a code of 3 to 20 characters, letters and digits only.",
+        "percent": "Enter a whole number from 1 to 90.",
+        "validFrom": "Choose a valid day.",
+        "validUntil": "The last day cannot be before the first day.",
+        "dateRange": "The last day must be after the first day.",
+        "maxRedemptions": "Enter a whole number of 1 or more, or leave it empty.",
+        "belowUsage": "The limit cannot be lower than the uses so far ({used}).",
+        "taken": "A code with this name already exists.",
+        "generic": "This was not accepted. Check the fields and try again.",
+        "notFound": "This code no longer exists. Go back to the list.",
+        "unavailable": "It could not be saved. Try again in a few seconds.",
+        "staleShort": "Someone else changed this code in the meantime. The current version was loaded; try again."
+      },
+      "toast": {
+        "created": "Code created",
+        "saved": "Changes saved",
+        "deleted": "Code deleted",
+        "activated": "Code switched on",
+        "deactivated": "Code switched off"
+      },
+      "actions": {
+        "title": "Switch off or delete the code",
+        "usedText": "This code was used in {used} bookings. Switched off, it is applied to no new booking and the old ones do not change.",
+        "unusedText": "This code was never used in a booking; you can delete it.",
+        "deactivate": "Switch the code off",
+        "activate": "Switch the code on",
+        "delete": "Delete the code"
+      },
+      "deleteDialog": {
+        "title": "Delete the code {code}?",
+        "text": "A deleted code cannot be brought back and is no longer applied on the booking summary.",
+        "confirm": "Delete the code"
+      },
+      "deactivateDialog": {
+        "title": "Switch off the code {code}?",
+        "text": "A code that is off is applied to no new booking. The amount of existing bookings does not change. You can switch it on again at any time.",
+        "confirm": "Switch the code off"
+      },
+      "inUseDialog": {
+        "title": "{code} cannot be deleted",
+        "text": "{code} was used in at least one booking, and the past records carry its name. Instead of deleting it you can switch it off: it is applied to no new booking and the old ones do not change."
+      }
     }
   }
 }

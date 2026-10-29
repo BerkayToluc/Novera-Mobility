@@ -54,8 +54,9 @@ test("desktop: the menu is a column on the left with the summary marked", async 
   await expect(nav.getByRole("link", { name: "Özet" })).toHaveAttribute("aria-current", "page");
   // The button that opens the list is for the narrow layouts only.
   await expect(nav.getByRole("button")).toBeHidden();
-  // Screens that do not exist yet are not in the menu.
-  await expect(nav.getByRole("link")).toHaveCount(1);
+  // Screens that do not exist yet are not in the menu: the summary and the campaign codes (V2-26) are.
+  await expect(nav.getByRole("link")).toHaveCount(2);
+  await expect(nav.getByRole("link", { name: "Kampanya kodları" })).toBeVisible();
 });
 
 test("narrow: the menu is one button that opens the list, and Escape closes it and gives the focus back", async ({ page, context }) => {
