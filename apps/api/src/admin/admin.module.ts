@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { AuthModule } from '../auth/auth.module.js';
 import { AdminController } from './admin.controller.js';
+import { AdminSummaryService } from './admin-summary.service.js';
 import { AdminGuard } from './admin.guard.js';
 import { AuditInterceptor } from './audit.interceptor.js';
 import { AuditService } from './audit.service.js';
@@ -13,6 +14,7 @@ import { AuditService } from './audit.service.js';
   controllers: [AdminController],
   providers: [
     AuditService,
+    AdminSummaryService,
     { provide: APP_GUARD, useClass: AdminGuard },
     { provide: APP_INTERCEPTOR, useClass: AuditInterceptor },
   ],

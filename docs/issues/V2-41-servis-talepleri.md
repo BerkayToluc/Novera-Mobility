@@ -33,6 +33,7 @@ Hizmetler sayfasındaki üç hizmeti (Akıllı Yol Yardım & Çekici, Kesintisiz
 - [ ] Başka şirketin talebi 404.
 - [ ] e2e: Filom'da yol yardım talebi → panelde "Yönlendirildi" → "Yolda" → Filom'da zaman çizelgesi güncel.
 - [ ] 375/1280 ekran görüntüsü; axe temiz; konum izni reddinde form kullanılabilir.
+- [ ] **V2-25'ten devreden (unutma):** `GET /admin/summary`'deki `serviceRequests` artık `null` değil, açık (kapanmamış) talepleri sayar (`apps/api/src/admin/admin-summary.service.ts`). Özet'teki "Açık servis talebi" kartı görünür ve `/yonetim/talepler?durum=acik` bağlantısı çalışır. `openapi.yaml`, `mocks/admin.ts` ve iki test dosyası (`admin-summary.integration.spec.ts`, `tests/admin-summary.test.ts`) güncellenir.
 
 ## Etiketler
 `faz-10` `ozellik` `P2` `api` `web` `veritabani`

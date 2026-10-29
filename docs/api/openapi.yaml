@@ -666,13 +666,41 @@ paths:
         "422": { $ref: "#/components/responses/ValidationFailed" }
         "429": { $ref: "#/components/responses/TooManyRequests" }
 
+  /admin/summary:
+    get:
+      tags: [admin]
+      summary: Yönetim paneli Özet ekranı
+      description: |
+        Panelin ilk ekranının sayıları (V2-25). Yalnızca okur; işlem kaydına yazılmaz. "Bugün" **İstanbul takvim günüdür**
+        (00:00 dahil, ertesi gün 00:00 hariç), sunucunun ya da tarayıcının saat diliminden bağımsız. Sınır: yönetici başına
+        dakikada 120 (`429 RATE_LIMITED`).
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Sayılar
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminSummary" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Giriş yapılmış ama yönetici değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
   /admin/ping:
     get:
       tags: [admin]
       summary: Yönetici kapısı denemesi (iskelet)
       description: |
         Kapıyı kanıtlar: oturumsuz `401`, müşteri `403`, yönetici `200`. Hiçbir şeyi değiştirmez. V2-25'te
-        `GET /admin/summary` gelince yerini alır. Sınır: yönetici başına dakikada 120 (`429 RATE_LIMITED`).
+        V2-25 ile `GET /admin/summary` geldi; bu uç kapı ve işlem kaydı testleri için kalır. Sınır: yönetici başına dakikada 120 (`429 RATE_LIMITED`).
       security:
         - cookieAuth: []
       responses:
@@ -1235,6 +1263,26 @@ components:
         device: { type: string, nullable: true, example: Chrome · Windows, description: Girişte tarayıcının bildirdiğinden çıkarılan kısa ad; bilinmiyorsa null. }
         createdAt: { type: string, format: date-time, description: Oturumun açıldığı an. }
         expiresAt: { type: string, format: date-time }
+
+    AdminSummary:
+      type: object
+      required: [date, rentalsStartingToday, rentalsEndingToday, reservationsLast7Days, quotesAwaiting, unhandledMessages, serviceRequests]
+      properties:
+        date: { type: string, format: date, example: "2026-10-29", description: Bugün sayılarının hesaplandığı İstanbul günü. }
+        rentalsStartingToday: { type: integer, minimum: 0, description: Bugün başlayan kiralama (iptal edilmemiş). }
+        rentalsEndingToday: { type: integer, minimum: 0, description: Bugün biten kiralama (iptal edilmemiş). }
+        reservationsLast7Days: { type: integer, minimum: 0, description: Bugün ve önceki altı İstanbul gününde yapılan, iptal edilmemiş rezervasyon. }
+        quotesAwaiting: { type: integer, minimum: 0, description: Yanıt bekleyen teklif talebi (`RECEIVED`). }
+        unhandledMessages:
+          type: integer
+          nullable: true
+          minimum: 0
+          description: Ele alınmamış iletişim mesajı. İletişim mesajında "ele alındı" işareti gelene kadar (V2-32) `null`; ekran kartı gizler.
+        serviceRequests:
+          type: integer
+          nullable: true
+          minimum: 0
+          description: Açık servis talebi. Talepler gelene kadar (V2-41) `null`; ekran kartı gizler.
 
     UserUpdate:
       type: object

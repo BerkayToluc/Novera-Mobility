@@ -23,8 +23,22 @@
     },
     "summary": {
       "title": "Yönetim paneli",
-      "emptyTitle": "Panel hazır",
-      "emptyText": "Bölümler sırayla eklenecek. Eklendikçe menüde görünür."
+      "asOf": "{date} itibarıyla (İstanbul saati)",
+      "cards": {
+        "rentalsStartingToday": "Bugün başlayan kiralama",
+        "rentalsEndingToday": "Bugün biten kiralama",
+        "reservationsLast7Days": "Son 7 günde yapılan rezervasyon",
+        "quotesAwaiting": "Yanıt bekleyen teklif talebi",
+        "unhandledMessages": "Ele alınmamış mesaj",
+        "serviceRequests": "Açık servis talebi"
+      },
+      "openList": "Listeyi aç",
+      "emptyTitle": "Her şey yolunda",
+      "emptyText": "Bugün başlayan ya da biten kiralama, yanıt bekleyen teklif ve son 7 günde yeni rezervasyon yok.",
+      "errorTitle": "Özet yüklenemedi",
+      "errorText": "Birkaç saniye sonra yeniden deneyin.",
+      "retry": "Tekrar dene",
+      "loading": "Özet yükleniyor"
     },
     "table": {
       "loading": "Liste yükleniyor",

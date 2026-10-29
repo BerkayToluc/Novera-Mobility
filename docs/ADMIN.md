@@ -131,6 +131,20 @@ Tüm sayfalar `noindex`, sitemap ve `llms.txt` dışında; navbar ve footer'da b
 
 **Bilinen sınırlar:** `UnsavedChangesGuard` tarayıcının Geri düğmesini Next yönlendiricisinde yakalayamaz (sekmeyi kapatma ve site içi bağlantılar yakalanır). Panel düzeni (`layout`) iki panel sayfası arasında geçişte yeniden çizilmez; bu yüzden yetkiyi asıl denetleyen API'dir (her `/admin/*` çağrısında rol).
 
+### 3.5 Özet ekranı (V2-25)
+
+`GET /admin/summary` ve `/yonetim`. Yalnızca okur, işlem kaydına yazılmaz. Sayıların tanımı:
+
+| Kart | Tanım |
+|---|---|
+| Bugün başlayan / biten kiralama | İptal edilmemiş rezervasyonlardan `startAt` / `endAt` **İstanbul gününde** olanlar. Gün `[00:00, ertesi gün 00:00)`; sunucunun ya da tarayıcının saat dilimi sayıyı değiştirmez. Bir rezervasyon aynı gün başlayıp bitiyorsa ikisinde de sayılır |
+| Son 7 günde yapılan rezervasyon | `createdAt` bugün ve önceki altı İstanbul günü içinde, iptal edilmemiş |
+| Yanıt bekleyen teklif talebi | Durumu `RECEIVED` olan |
+| Ele alınmamış mesaj | İletişim mesajında "ele alındı" işareti V2-32'de gelir; o zamana kadar API `null` döner ve kart çizilmez |
+| Açık servis talebi | Talepler V2-41'de gelir; o zamana kadar `null`, kart çizilmez |
+
+Bir kart, bağlı olduğu liste ekranı yapılınca (`lib/admin-screens.ts` `ready`) süzgeçli bağlantıya döner. Süzgeç adları `lib/admin-summary.ts`'te durur (`baslangic=bugun`, `bitis=bugun`, `olusturma=7gun`, `durum=RECEIVED`, `durum=ele-alinmadi`, `durum=acik`); liste ekranlarını yapan işler (V2-31, V2-32, V2-41) bunları adresten okur. Hiçbir kart bir kişinin verisini göstermez, yalnızca sayı. Tüm sayılar sıfırsa ekran "Her şey yolunda" der.
+
 ## 4. API
 
 Tüm uçlar `/admin` önekli, `AdminGuard` arkasında, ADR-24 kurallarıyla (sayfalama, `STALE_WRITE`, yeni hata kodları). Değiştiren her istek işlem kaydına yazılır, `Content-Type: application/json` dışındakiler `415` döner, sınır dakikada 120/yönetici.

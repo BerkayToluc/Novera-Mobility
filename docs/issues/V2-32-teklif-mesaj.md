@@ -24,6 +24,7 @@ Bugün kurumsal teklif talepleri ve iletişim mesajları yalnızca veritabanına
 - [ ] İç not `/me/quotes` cevabında yok (test).
 - [ ] e2e: teklifi "Teklif verildi" yap → müşterinin ekranında durum güncel (mock).
 - [ ] Mesaj "ele alındı" işaretlenir ve geri alınır.
+- [ ] **V2-25'ten devreden (unutma):** `GET /admin/summary`'deki `unhandledMessages` artık `null` değil, `handledAt` boş olan mesajları sayar (`apps/api/src/admin/admin-summary.service.ts`; anonimleştirilmiş eski mesajların sayılıp sayılmayacağına karar ver). Özet'teki "Ele alınmamış mesaj" kartı görünür ve `/yonetim/mesajlar?durum=ele-alinmadi` bağlantısı çalışır (`lib/admin-screens.ts`'te `messages` `ready` olunca kendiliğinden). `openapi.yaml` `AdminSummary.unhandledMessages` açıklaması, `mocks/admin.ts`, `admin-summary.integration.spec.ts` ve `tests/admin-summary.test.ts` güncellenir.
 - [ ] İşlem kaydı; yetki testleri; 375/1280 ekran görüntüsü.
 
 ## Etiketler
