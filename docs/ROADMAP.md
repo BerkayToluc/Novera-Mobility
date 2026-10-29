@@ -42,7 +42,7 @@ Her fazın sonunda G canlıda (ya da son PR'ın önizlemesinde) bir **faz turu**
 |---|---|---|---|
 | 0 · Süreç | V2-01 | v2 belgeleri, issue'lar | Etiketler, milestone'lar, 46 issue açık; eşleme tablosu dolu |
 | 1 · Acil güvenlik | V2-02 → V2-06 | Kritik ve yüksek açıklar kapalı | Geçmiş tarihli rezervasyon ve tavan denemeleri canlıda reddediliyor; QUALITY G-01–G-08 kapalı |
-| 2 · Temel | V2-07 → V2-22 | Sağlam, ölçülmüş, temiz kod tabanı | V2-22 raporu: QUALITY'de Kritik/Yüksek açık yok, Lighthouse hedefte, ekran okuyucu turu yapıldı |
+| 2 · Temel | V2-07 → V2-22 | Sağlam, ölçülmüş, temiz kod tabanı | V2-22 raporu: QUALITY'de Kritik/Yüksek/Orta açık yok ([SECURITY.md](SECURITY.md) "Faz 2 kapısı"). **Gevşetilen iki şart:** Lighthouse hedefte değil (mobil LCP/TBT, QUALITY P-04 "Kabul edildi"); gerçek ekran okuyucu turu proje kapsamına alınmadı (U-05 "Kabul edildi"). **Kapı 29 Ekim 2026'da Berkay tarafından işaretlendi** (G'nin onayı beklenmeden; G'nin itirazı olursa geri alınır) |
 | 3 · Panel temeli | V2-23 → V2-25 | Yönetici girişi, kabuk, Özet | Yönetici girer, müşteri 404 görür; işlem kaydı yazılıyor |
 | 4 · Katalog | V2-26 → V2-30 | Kod, bayi, model, araç yönetimi | SPEC §6 madde 3, 4, 5 canlıda geçiyor |
 | 5 · Operasyon | V2-31 → V2-32 | Rezervasyon, teklif, mesaj yönetimi | SPEC §6 madde 6 |
