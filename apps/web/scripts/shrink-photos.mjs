@@ -1,6 +1,7 @@
 // Re-encodes fleet photos that are over the size budget (V2-21, QUALITY P-03): at most ~120 KB per model.
 // Usage: node scripts/shrink-photos.mjs [file ...]   (default: every WebP in public/fleet that is over budget)
-// It only ever makes a file smaller and keeps the 1280x800 (16:10) size, so the layout does not change.
+// It only ever makes a file smaller. Quality comes down first (to 60, below that edges start to smear); if the budget is
+// still missed the width steps down (16:10 is kept, so the layout does not change; the site never serves more than 1280 px).
 import { readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import sharp from "sharp";
@@ -16,10 +17,12 @@ for (const name of names) {
   if (original.length <= BUDGET) continue;
   // Highest quality that fits the budget; smartSubsample keeps edges (car outlines) clean.
   let best = original;
-  for (let quality = 80; quality >= 40; quality -= 5) {
-    const out = await sharp(original).webp({ quality, effort: 6, smartSubsample: true }).toBuffer();
-    best = out;
-    if (out.length <= BUDGET) break;
+  fit: for (const width of [1280, 1120, 960]) {
+    const source = sharp(original).resize({ width, height: Math.round((width * 10) / 16), fit: "cover" });
+    for (let quality = 80; quality >= 60; quality -= 5) {
+      best = await source.clone().webp({ quality, effort: 6, smartSubsample: true }).toBuffer();
+      if (best.length <= BUDGET) break fit;
+    }
   }
   if (best.length < original.length) {
     await writeFile(file, best);

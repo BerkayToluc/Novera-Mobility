@@ -33,11 +33,11 @@ Değişiklikten önce (aynı yöntem): `/` 67 · 4,46 sn · 646 ms; `/araclar` 8
 ## Yapılanlar (V2-21)
 
 - `VehicleImage` `preload` alıyor (Next 16'da `priority`'nin yerine geçti); sonuç listesinin ilk kartı (`/araclar` arama sonucu) bunu kullanıyor, diğer fotoğraflar tembel kalıyor. Yalnızca sonuç listesinin ilk fotoğrafı ekranda görünür olduğu için orada açıldı; ana sayfa ve filo bölümü ekranın altında.
-- Bütçeyi aşan 4 fotoğraf yeniden sıkıştırıldı (`apps/web/scripts/shrink-photos.mjs`, 1280×800 korunur): `dacia-duster` 130 → 118 KB, `hyundai-i20` 172 → 112 KB, `nissan-qashqai` 141 → 115 KB, `renault-megane` 163 → 117 KB.
+- Bütçeyi aşan fotoğraflar yeniden sıkıştırıldı (`apps/web/scripts/shrink-photos.mjs`, 1280×800 korunur): `dacia-duster` 130 → 118 KB, `hyundai-i20` 172 → 112 KB, `nissan-qashqai` 141 → 115 KB, `renault-megane` 163 → 117 KB; sonradan eklenen `hyundai-ioniq-5` 258 → 118 KB (960×600) ve `peugeot-3008` 185 → 116 KB (1120×700). Betik önce kaliteyi, yetmezse genişliği düşürür.
 
 ## Yapılmadı / sonraki adım
 
-- **Eksik 4 fotoğraf** (`volkswagen-golf`, `hyundai-tucson`, `volkswagen-id4`, `audi-a6`): `carPhotos/` klasörü bu ortamda yok ve seçim G'nin. G seçince aynı betikle bütçeye indirilir, `seed-data.ts`'e eklenir, `PHOTO-CREDITS.md`'ye yazılır. `public/fleet` içindeki `volkswagen-passat`, `toyota-rav4-hybrid`, `peugeot-3008`, `hyundai-ioniq-5` dosyaları hiçbir modele bağlı değil; başka bir araç olduğu için eksik modellerin yerine kullanılmadı.
+- **Eksik fotoğraf kalmadı.** Seed'deki `volkswagen-golf`, `hyundai-tucson`, `volkswagen-id4` ve `audi-a6` modelleri güncel belgelerde (SPEC, PHOTO-CREDITS, web örnek verisi) hiç yoktu; yalnızca seed'deydi. Yerlerine belgelerdeki dört model geldi (`volkswagen-passat`, `toyota-rav4-hybrid`, `hyundai-ioniq-5`, `peugeot-3008`); dördünün fotoğrafı `public/fleet`'te hazırdı ve `PHOTO-CREDITS.md`'de yazılı. 15 modelin hepsinde fotoğraf var, hepsi ≈120 KB altında.
 - **LCP ve TBT için asıl iş: hidrasyon maliyeti.** Önerilen ayrı issue: ana sayfa, `/araclar` ve `/bayilerimiz`'de hidrate edilen istemci bileşenlerini azaltmak (sunucu bileşeni olabilecekleri ayırmak, çerez bandı ve ağır bileşenleri tembel yüklemek), sonra bu belgedeki ölçümü yinelemek. Bu, V2-21'in kapsamını aşan bir mimari iştir; G karar verir.
 
 ## Doğrulanmadı

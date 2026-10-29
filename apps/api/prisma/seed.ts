@@ -14,6 +14,7 @@ import {
   models,
   products,
   rates,
+  retiredModelSlugs,
 } from "./seed-data";
 import { seedDemoPromoCodes, seedExchangeRates } from "./seed-reference";
 
@@ -82,6 +83,11 @@ async function main() {
     const data = { year: v.year, active: true, vehicleModelId, branchId };
     await prisma.vehicle.upsert({ where: { plate: v.plate }, update: data, create: { plate: v.plate, ...data } });
   }
+
+  // Retired models lose their cars to the new ones above (same plates). Only a model with no car left is removed, so
+  // nothing a reservation points at can disappear (Vehicle -> VehicleModel is the only reference).
+  const retired = await prisma.vehicleModel.deleteMany({ where: { slug: { in: retiredModelSlugs }, vehicles: { none: {} } } });
+  if (retired.count > 0) console.log(`  ${retired.count} eski model silindi (aracı kalmamış).`);
 
   for (const e of extras) {
     // Same for an extra's price: set on creation, not overwritten.
