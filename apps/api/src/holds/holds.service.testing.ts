@@ -5,6 +5,7 @@ import { HoldsService } from './holds.service.js';
 import 'dotenv/config';
 import { HttpException } from '@nestjs/common';
 import { daysAhead } from '../reservations/dates.testing.js';
+import { testPlate } from '../common/plate.testing.js';
 
 // Shared set-up of holds.service.spec.ts (V2-13, QUALITY M-04): the fake database and the fixtures, moved out so the spec itself is only the cases.
 // Entegrasyon testi: POST /holds, gerçek PostgreSQL'e karşı (BACKLOG Y48).
@@ -105,7 +106,7 @@ export function holdsFixture() {
     });
     created.branches.push(branch.id);
     const vehicle = await prisma.vehicle.create({
-      data: { plate: `H-${run}-${counter}`, year: 2026, vehicleModelId: modelId, branchId: branch.id },
+      data: { plate: testPlate(), year: 2026, vehicleModelId: modelId, branchId: branch.id },
     });
     created.vehicles.push(vehicle.id);
     return { branchId: branch.id, vehicleId: vehicle.id };

@@ -2,6 +2,7 @@ import 'dotenv/config';
 import { randomUUID } from 'node:crypto';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { AdminSummaryService } from './admin-summary.service.js';
+import { testPlate } from '../common/plate.testing.js';
 
 // The counts against a real PostgreSQL (TEST_DATABASE_URL), like the other integration tests; skipped without one.
 // The test database is shared with other suites that run at the same time, so the day-based numbers are tested in the
@@ -77,7 +78,7 @@ describeDb('admin summary against the database (V2-25)', () => {
       })
     ).id;
     ids.vehicleId = (
-      await prisma.vehicle.create({ data: { plate: `S${run}`, year: 2030, vehicleModelId: ids.modelId, branchId: ids.branchId } })
+      await prisma.vehicle.create({ data: { plate: testPlate(), year: 2030, vehicleModelId: ids.modelId, branchId: ids.branchId } })
     ).id;
   });
 

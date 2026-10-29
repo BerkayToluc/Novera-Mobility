@@ -6,6 +6,7 @@ import { PrismaService } from '../prisma/prisma.service.js';
 import { DAY_MS, daysAhead } from './dates.testing.js';
 import { PricingService } from './pricing.service.js';
 import { MAX_ACTIVE_RESERVATIONS, ReservationsService } from './reservations.service.js';
+import { testPlate } from '../common/plate.testing.js';
 
 // Integration test against a real PostgreSQL (QUALITY G-02, G-16): the cap on upcoming bookings must hold when
 // requests arrive at the same moment, and a hold id must not open someone else's hold.
@@ -68,7 +69,7 @@ describeDb('reservation cap and hold ownership (gerçek PostgreSQL)', () => {
     branchId = branch.id;
     for (let i = 0; i < VEHICLES; i += 1) {
       const vehicle = await prisma.vehicle.create({
-        data: { plate: `L${run}${i}`, year: 2030, vehicleModelId: model.id, branchId: branch.id },
+        data: { plate: testPlate(), year: 2030, vehicleModelId: model.id, branchId: branch.id },
       });
       vehicleIds.push(vehicle.id);
     }

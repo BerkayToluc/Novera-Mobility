@@ -6,6 +6,7 @@ import { CatalogService } from '../../catalog/catalog.service.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { PricingService } from '../../reservations/pricing.service.js';
 import { BranchesService } from './branches.service.js';
+import { testPlate } from '../../common/plate.testing.js';
 
 // The branch administration against a real PostgreSQL (TEST_DATABASE_URL), like the other integration tests; skipped without
 // one. The test database is shared with suites that run at the same time and holds the seed branches, so every list is
@@ -98,7 +99,7 @@ describeDb('branch administration against the database (V2-27)', () => {
     ).id;
     // A branch that always stays open, with the one car the bookings of these tests use.
     const home = await make('EV');
-    vehicleIds.push((await prisma.vehicle.create({ data: { plate: `B${run}1`, year: 2030, vehicleModelId: ids.modelId, branchId: home.id } })).id);
+    vehicleIds.push((await prisma.vehicle.create({ data: { plate: testPlate(), year: 2030, vehicleModelId: ids.modelId, branchId: home.id } })).id);
   });
 
   afterAll(async () => {
@@ -296,7 +297,7 @@ describeDb('branch administration against the database (V2-27)', () => {
 
     it('is refused while a car that is switched on is there, and not by one that is switched off', async () => {
       const view = await make('VE');
-      const car = await prisma.vehicle.create({ data: { plate: `B${run}V`, year: 2030, vehicleModelId: ids.modelId, branchId: view.id } });
+      const car = await prisma.vehicle.create({ data: { plate: testPlate(), year: 2030, vehicleModelId: ids.modelId, branchId: view.id } });
       expect((await refused(service.close(view.id))).body).toMatchObject({ code: 'IN_USE', details: { vehicles: 1 } });
       expect((await service.get(view.id)).usage.vehicles).toBe(1);
       await prisma.vehicle.update({ where: { id: car.id }, data: { active: false } });
@@ -305,7 +306,7 @@ describeDb('branch administration against the database (V2-27)', () => {
 
     it('says all the reasons at once', async () => {
       const view = await make('AL');
-      await prisma.vehicle.create({ data: { plate: `B${run}A`, year: 2030, vehicleModelId: ids.modelId, branchId: view.id } });
+      await prisma.vehicle.create({ data: { plate: testPlate(), year: 2030, vehicleModelId: ids.modelId, branchId: view.id } });
       await prisma.hold.create({ data: holdOf(view.id, new Date(Date.now() + 10 * 60_000)) });
       await book('AL', view.id, view.id, days(3), days(4));
       expect((await refused(service.close(view.id))).body).toMatchObject({ details: { reservations: 1, holds: 1, vehicles: 1 } });

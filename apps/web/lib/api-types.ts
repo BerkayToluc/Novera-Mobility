@@ -2703,6 +2703,504 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/admin/vehicles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Araçlar (yönetim)
+         * @description Sayfalı liste (ADR-24): `{ items, total, page, pageSize }`. Kapalı (`INACTIVE`) araçlar da dahildir. Süzme, arama ve
+         *     sıralama sunucuda yapılır. `q` plakada (boşluk, tire ve büyük/küçük harf fark etmez: `34abc` → `34 ABC 123`) ve modelin
+         *     marka ve adında aranır. Sınır: yönetici başına dakikada 120 (`429 RATE_LIMITED`).
+         */
+        get: {
+            parameters: {
+                query?: {
+                    page?: number;
+                    pageSize?: number;
+                    /** @description `alan` ya da `alan:asc|desc`. Varsayılan `plate:asc`. */
+                    sort?: "plate" | "year" | "model" | "branch" | "createdAt";
+                    q?: string;
+                    /** @description Modelin adresi (`renault-clio`). Olmayan bir model hiçbir şey bulmaz. */
+                    model?: string;
+                    /** @description Bayinin kimliği. */
+                    branch?: string;
+                    status?: "ACTIVE" | "INACTIVE";
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Bir sayfa araç */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AdminVehiclePage"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        put?: never;
+        /**
+         * Yeni araç
+         * @description Araç açık (`ACTIVE`) başlar ve bayisinde, çakışan rezervasyonu olmayan tarihlerde aramada müsait görünür. **Plaka** Türk
+         *     plakasıdır: il kodu (01–81), 1–3 harf (Q, W, X ve Türkçe harfler yok), 2–4 rakam. Nasıl yazılırsa yazılsın büyük harfe
+         *     çevrilir ve `34 ABC 123` biçiminde saklanır; aynı plaka ikinci kez eklenemez (`409 PLATE_TAKEN`). Yıl 2015 ile bu yıl + 1
+         *     arasındadır. **Kapalı bayiye ya da kaldırılmış modele araç eklenemez** (`422`, `fieldErrors.branchId` /
+         *     `fieldErrors.modelSlug` = `UNKNOWN_REFERENCE`). Plaka, yıl ve model sonradan değişmez (yanlışsa araç kapatılır, yenisi
+         *     eklenir). İşlem kaydı: `vehicle.create`.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["AdminVehicleCreate"];
+                };
+            };
+            responses: {
+                /** @description Eklenen araç */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AdminVehicle"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Bu plaka kullanımda (`PLATE_TAKEN`, `fieldErrors.plate`) */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description JSON olmayan gövde (`BAD_REQUEST`) */
+                415: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/vehicles/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Aracın kimliği. Kimlik olamayacak bir değer `404` döner. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * Bir araç ve neyin onu yerinde tuttuğu
+         * @description `usage`, taşımayı ve kapatmayı engelleyen şeylerin sayısıdır; ekran düğmeye basılmadan nedenleri söyler.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Aracın kimliği. Kimlik olamayacak bir değer `404` döner. */
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Araç */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AdminVehicleDetail"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Böyle bir araç yok (`NOT_FOUND`) */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Aracı başka bayiye taşı, kapat ya da yeniden aç
+         * @description Yalnızca `branchId` ve `active` değişir; `plate`, `year` ve `modelSlug` gönderilirse `422 NOT_ALLOWED` döner. Düzenlenen
+         *     kaydın `updatedAt` değeri geri gönderilir; araç bu arada değiştiyse `409 STALE_WRITE`. **Taşımak ve kapatmak**, aracın
+         *     gelecekte başlayacak iptal edilmemiş rezervasyonu ya da süresi dolmamış tutması varsa `409 IN_USE` döner
+         *     (`details.reservations`, `details.holds`); hiçbir şey değişmez. Taşınan bayi açık olmalıdır (`fieldErrors.branchId` =
+         *     `UNKNOWN_REFERENCE`). **Yeniden açmak** için modelin kaldırılmamış ve bayinin açık olması gerekir
+         *     (`fieldErrors.active` = `NOT_ALLOWED`). İşlem kaydı: `vehicle.update`.
+         */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Aracın kimliği. Kimlik olamayacak bir değer `404` döner. */
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["AdminVehicleUpdate"];
+                };
+            };
+            responses: {
+                /** @description Güncel araç */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AdminVehicle"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Böyle bir araç yok (`NOT_FOUND`) */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Kayıt değişmiş (`STALE_WRITE`) ya da araç kullanımda (`IN_USE`, sayılar `details` içinde) */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description JSON olmayan gövde (`BAD_REQUEST`) */
+                415: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        trace?: never;
+    };
+    "/admin/extras": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Ek hizmetler (yönetim)
+         * @description Birkaç satırlık sabit liste, sayfalama yok; en ucuzdan başlar. Ek hizmet eklenmez ya da silinmez, yalnızca ad ve fiyat düzenlenir.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Ek hizmetler */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AdminExtra"][];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/extras/{slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Ek hizmetin adresi; büyük/küçük harf fark etmez. */
+                slug: string;
+            };
+            cookie?: never;
+        };
+        /** Bir ek hizmet */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Ek hizmetin adresi; büyük/küçük harf fark etmez. */
+                    slug: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Ek hizmet */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AdminExtra"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Böyle bir ek hizmet yok (`NOT_FOUND`) */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Ek hizmetin adını ve fiyatını değiştir
+         * @description Yalnızca `name` (iki dilde de zorunlu, en çok 80 karakter) ve `price` (TRY kuruş, 0–1.000.000) değişir; `slug` ve
+         *     `pricing` gönderilirse `422 NOT_ALLOWED`. **Yeni fiyat yalnızca sonraki fiyat hesaplarına ve rezervasyonlara uygulanır**:
+         *     yapılmış rezervasyon kendi birim fiyatını saklar (`ReservationExtra.unitPrice`). İşlem kaydı: `extra.update`.
+         */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Ek hizmetin adresi; büyük/küçük harf fark etmez. */
+                    slug: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["AdminExtraUpdate"];
+                };
+            };
+            responses: {
+                /** @description Güncel ek hizmet */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AdminExtra"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Böyle bir ek hizmet yok (`NOT_FOUND`) */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Kayıt değişmiş (`STALE_WRITE`) */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description JSON olmayan gövde (`BAD_REQUEST`) */
+                415: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        trace?: never;
+    };
     "/admin/ping": {
         parameters: {
             query?: never;
@@ -2833,7 +3331,7 @@ export interface components {
              * @description Sabit makine kodu.
              * @enum {string}
              */
-            code: "BAD_REQUEST" | "VALIDATION_FAILED" | "UNAUTHENTICATED" | "FORBIDDEN" | "INVALID_CREDENTIALS" | "EMAIL_TAKEN" | "NOT_FOUND" | "VEHICLE_UNAVAILABLE" | "INVALID_DATE_RANGE" | "RESERVATION_LIMIT" | "RESET_TOKEN_INVALID" | "SPAM_DETECTED" | "RATE_LIMITED" | "PAYLOAD_TOO_LARGE" | "IN_USE" | "STALE_WRITE" | "CODE_TAKEN" | "SLUG_TAKEN" | "INTERNAL_ERROR";
+            code: "BAD_REQUEST" | "VALIDATION_FAILED" | "UNAUTHENTICATED" | "FORBIDDEN" | "INVALID_CREDENTIALS" | "EMAIL_TAKEN" | "NOT_FOUND" | "VEHICLE_UNAVAILABLE" | "INVALID_DATE_RANGE" | "RESERVATION_LIMIT" | "RESET_TOKEN_INVALID" | "SPAM_DETECTED" | "RATE_LIMITED" | "PAYLOAD_TOO_LARGE" | "IN_USE" | "STALE_WRITE" | "CODE_TAKEN" | "SLUG_TAKEN" | "PLATE_TAKEN" | "INTERNAL_ERROR";
             /** @description Geliştirici için İngilizce metin. Ekranda gösterilmez. */
             message: string;
             /** @description `IN_USE` için nedenlerin sayıları (bayi: reservations, holds, vehicles); ekran bunları listeler. */
@@ -2847,7 +3345,7 @@ export interface components {
              *     }
              */
             fieldErrors?: {
-                [key: string]: "REQUIRED" | "INVALID_EMAIL" | "INVALID_FORMAT" | "TOO_SHORT" | "PASSWORD_TOO_COMMON" | "INVALID_PASSWORD" | "EMAIL_MISMATCH" | "TOO_LONG" | "OUT_OF_RANGE" | "EMAIL_TAKEN" | "CONSENT_REQUIRED" | "INVALID_DATE_RANGE" | "NOT_IN_SLOT" | "IN_PAST" | "UNKNOWN_REFERENCE" | "UNKNOWN_CODE" | "CODE_EXHAUSTED" | "CODE_ALREADY_USED" | "CODE_TAKEN" | "BELOW_USAGE" | "NOT_ALLOWED" | "SLUG_TAKEN";
+                [key: string]: "REQUIRED" | "INVALID_EMAIL" | "INVALID_FORMAT" | "TOO_SHORT" | "PASSWORD_TOO_COMMON" | "INVALID_PASSWORD" | "EMAIL_MISMATCH" | "TOO_LONG" | "OUT_OF_RANGE" | "EMAIL_TAKEN" | "CONSENT_REQUIRED" | "INVALID_DATE_RANGE" | "NOT_IN_SLOT" | "IN_PAST" | "UNKNOWN_REFERENCE" | "UNKNOWN_CODE" | "CODE_EXHAUSTED" | "CODE_ALREADY_USED" | "CODE_TAKEN" | "BELOW_USAGE" | "NOT_ALLOWED" | "SLUG_TAKEN" | "PLATE_TAKEN";
             };
         };
         LocalizedText: {
@@ -3517,6 +4015,113 @@ export interface components {
             dailyPrice?: number;
             description?: components["schemas"]["LocalizedText"];
             imageUrl?: string | null;
+        };
+        AdminVehicle: {
+            /** Format: uuid */
+            id: string;
+            /**
+             * @description Türk plakası, `34 ABC 123` biçiminde saklanır.
+             * @example 34 NV 1001
+             */
+            plate: string;
+            /** @example 2025 */
+            year: number;
+            /**
+             * @description `ACTIVE` kiralanabilir; `INACTIVE` aramada çıkmaz ve rezervasyon almaz. Araç silinmez.
+             * @enum {string}
+             */
+            status: "ACTIVE" | "INACTIVE";
+            model: {
+                /** @example renault-clio */
+                slug: string;
+                /** @example Renault */
+                brand: string;
+                /** @example Clio */
+                model: string;
+                /** @description Model kaldırılmışsa araç yeniden açılamaz. */
+                retired: boolean;
+            };
+            branch: {
+                /** Format: uuid */
+                id: string;
+                /** @example İstanbul Kadıköy */
+                name: string;
+                /** @example İstanbul */
+                city: string;
+                closed: boolean;
+            };
+            /** Format: date-time */
+            createdAt: string;
+            /**
+             * Format: date-time
+             * @description Kaydın sürümü; değiştirirken geri gönderilir (`STALE_WRITE`).
+             */
+            updatedAt: string;
+        };
+        AdminVehicleDetail: components["schemas"]["AdminVehicle"] & {
+            /** @description Aracı yerinde tutan şeyler; ikisi de sıfırsa araç taşınabilir ve kapatılabilir. */
+            usage: {
+                /** @description Araçla gelecekte başlayacak iptal edilmemiş rezervasyon. */
+                reservations: number;
+                /** @description Süresi dolmamış araç tutma. */
+                holds: number;
+            };
+        };
+        AdminVehiclePage: {
+            items: components["schemas"]["AdminVehicle"][];
+            /** @description Süzgeçten geçen tüm araçlar */
+            total: number;
+            page: number;
+            pageSize: number;
+        };
+        AdminVehicleCreate: {
+            /**
+             * @description Nasıl yazılırsa yazılsın büyük harfe çevrilir ve `34 ABC 123` olarak saklanır.
+             * @example 34 abc 123
+             */
+            plate: string;
+            /** @description 2015 ile bu yıl + 1 arası. */
+            year: number;
+            /** @example renault-clio */
+            modelSlug: string;
+            /** Format: uuid */
+            branchId: string;
+        };
+        AdminVehicleUpdate: {
+            /**
+             * Format: date-time
+             * @description Düzenlenen kaydın `updatedAt` değeri.
+             */
+            updatedAt: string;
+            /** Format: uuid */
+            branchId?: string;
+            active?: boolean;
+        };
+        AdminExtra: {
+            /** @example child-seat */
+            slug: string;
+            name: components["schemas"]["LocalizedText"];
+            /** @description TRY kuruş. */
+            price: number;
+            /**
+             * @description Günlük ya da rezervasyon başına sabit. Değişmez.
+             * @enum {string}
+             */
+            pricing: "PER_DAY" | "FIXED";
+            /**
+             * Format: date-time
+             * @description Kaydın sürümü; değiştirirken geri gönderilir (`STALE_WRITE`).
+             */
+            updatedAt: string;
+        };
+        AdminExtraUpdate: {
+            /**
+             * Format: date-time
+             * @description Düzenlenen kaydın `updatedAt` değeri.
+             */
+            updatedAt: string;
+            name?: components["schemas"]["LocalizedText"];
+            price?: number;
         };
         /** @description Gönderilen alanlar güncellenir. */
         UserUpdate: {

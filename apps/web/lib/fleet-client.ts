@@ -82,6 +82,6 @@ export async function getVehicle(slug: string, currency: Currency, pickupBranchI
 }
 
 export async function getExtras(currency: Currency): Promise<Extra[]> {
-  if (isMockMode()) return (await import("@/mocks/extras")).mockExtras(currency);
+  if (isMockMode()) return (await import("@/mocks/extras")).mockExtras(await mockWorld(), currency);
   return dataOf(await apiRequest<Schemas["Extra"][]>("GET", `/extras?currency=${currency}`)).map(extraFromApi);
 }

@@ -6,6 +6,7 @@ import { PrismaService } from '../../prisma/prisma.service.js';
 import { PricingService } from '../../reservations/pricing.service.js';
 import { parseReservationRequest } from '../../reservations/reservation-input.js';
 import { VehicleModelsService } from './vehicle-models.service.js';
+import { testPlate } from '../../common/plate.testing.js';
 
 // The vehicle model administration against a real PostgreSQL (TEST_DATABASE_URL), like the other integration tests; skipped
 // without one. The test database is shared with suites that run at the same time and holds the seed models, so every list is
@@ -66,7 +67,7 @@ describeDb('vehicle model administration against the database (V2-29)', () => {
   };
   const car = async (suffix: string, modelSlug: string, active = true) => {
     const model = await prisma.vehicleModel.findUniqueOrThrow({ where: { slug: modelSlug } });
-    return prisma.vehicle.create({ data: { plate: `V29${run.toUpperCase()}${suffix}`, year: 2030, active, vehicleModelId: model.id, branchId: ids.branchId } });
+    return prisma.vehicle.create({ data: { plate: testPlate(), year: 2030, active, vehicleModelId: model.id, branchId: ids.branchId } });
   };
   const book = (suffix: string, vehicleId: string, startAt: Date, endAt: Date, status: 'CONFIRMED' | 'CANCELLED' = 'CONFIRMED') =>
     prisma.reservation.create({

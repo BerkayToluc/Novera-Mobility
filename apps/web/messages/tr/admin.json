@@ -494,6 +494,149 @@
         "confirm": "Modeli kaldır"
       }
     },
+    "vehicles": {
+      "title": "Araçlar",
+      "intro": "Kiralanan fiziksel araçlar. Eklediğiniz araç, bayisinde ve boş tarihlerde aramada hemen müsait görünür; kapattığınız araç aramada çıkmaz.",
+      "newButton": "Yeni araç",
+      "newTitle": "Yeni araç",
+      "newIntro": "Araç açık başlar. Plaka, yıl ve model sonradan değişmez; yanlışsa aracı kapatıp yenisini ekleyin.",
+      "detailTitle": "Araç",
+      "detailIntro": "{model}, {branch} bayisinde.",
+      "searchLabel": "Plaka ya da model ara",
+      "statusFilterLabel": "Duruma göre",
+      "modelFilterLabel": "Modele göre",
+      "branchFilterLabel": "Bayiye göre",
+      "allModels": "Tüm modeller",
+      "allBranches": "Tüm bayiler",
+      "apply": "Süz",
+      "tableCaption": "Araçlar",
+      "retry": "Tekrar dene",
+      "columns": {
+        "plate": "Plaka",
+        "model": "Model",
+        "branch": "Bayi",
+        "year": "Yıl",
+        "status": "Durum"
+      },
+      "status": {
+        "ACTIVE": "Açık",
+        "INACTIVE": "Kapalı"
+      },
+      "emptyTitle": "Henüz araç yok",
+      "emptyText": "İlk aracı ekleyin; aramada hemen müsait görünür.",
+      "emptyFilteredTitle": "Bu aramaya uyan araç yok",
+      "emptyFilteredText": "Süzgeçleri kaldırmayı ya da başka bir şey aramayı deneyin.",
+      "loadErrorTitle": "Araçlar yüklenemedi",
+      "loadErrorText": "Birkaç saniye sonra yeniden deneyin.",
+      "closedBranch": "kapalı",
+      "fields": {
+        "plate": "Plaka",
+        "plateHint": "Örnek: 34 ABC 123. Boşluklu ya da boşluksuz yazabilirsiniz.",
+        "year": "Model yılı",
+        "model": "Model",
+        "modelHint": "Yalnızca sitede yayında olan modeller listelenir.",
+        "modelChoose": "Model seçin",
+        "branch": "Bayi",
+        "branchChoose": "Bayi seçin",
+        "branchMove": "Bayi",
+        "branchMoveHint": "Aracı başka bir bayiye taşımak için seçin. Yalnızca açık bayiler listelenir.",
+        "fixedHint": "Plaka, yıl ve model değişmez. Yanlışsa aracı kapatıp yenisini ekleyin."
+      },
+      "form": {
+        "create": "Aracı ekle",
+        "move": "Bayiyi değiştir",
+        "saving": "Kaydediliyor",
+        "cancel": "Vazgeç"
+      },
+      "move": {
+        "blockedTitle": "Bu araç şimdi taşınamaz",
+        "blockedText": "Önce şunlar bitmeli ya da iptal edilmeli:"
+      },
+      "usage": {
+        "reservations": "{count, plural, other {# gelecek rezervasyon (bu araçla)}}",
+        "holds": "{count, plural, other {# sürmekte olan araç tutma (en çok 15 dakika sürer)}}"
+      },
+      "errors": {
+        "plate": "Geçerli bir Türk plakası yazın (örnek: 34 ABC 123).",
+        "year": "{min} ile {max} arasında bir yıl yazın.",
+        "modelSlug": "Listeden bir model seçin.",
+        "branchId": "Listeden bir bayi seçin.",
+        "modelSlugUnavailable": "Bu model artık yayında değil. Başka bir model seçin.",
+        "branchIdUnavailable": "Bu bayi kapalı ya da artık yok. Başka bir bayi seçin.",
+        "plateTaken": "Bu plaka başka bir araçta kayıtlı.",
+        "generic": "Bu bilgi kabul edilmedi. Alanları gözden geçirip yeniden deneyin.",
+        "notFound": "Bu araç artık yok. Listeye dönün.",
+        "unavailable": "Kaydedilemedi. Birkaç saniye sonra yeniden deneyin.",
+        "stale": "Bu araç siz bakarken değişti. Sayfa yenilendi, yeniden deneyin."
+      },
+      "toast": {
+        "created": "Araç eklendi",
+        "moved": "Araç taşındı",
+        "switchedOff": "Araç kapatıldı",
+        "switchedOn": "Araç yeniden açıldı"
+      },
+      "actions": {
+        "title": "Aracı kapat ya da yeniden aç",
+        "activeText": "Kapatılan araç aramada çıkmaz ve yeni rezervasyon alamaz. Geçmiş rezervasyonlarda kalır. Araç silinmez; istediğiniz zaman yeniden açabilirsiniz.",
+        "inactiveText": "Bu araç kapalı: aramada çıkmıyor ve yeni rezervasyon almıyor.",
+        "blockedTitle": "Bu araç şimdi kapatılamaz",
+        "blockedText": "Önce şunlar bitmeli ya da iptal edilmeli:",
+        "switchOff": "Aracı kapat",
+        "switchOn": "Aracı yeniden aç",
+        "modelRetired": "Aracın modeli kaldırılmış. Önce Araç modelleri ekranından modeli geri getirin.",
+        "branchClosed": "Aracın bayisi kapalı. Önce aracı açık bir bayiye taşıyın ya da bayiyi yeniden açın.",
+        "cannotReopen": "Araç yeniden açılamadı: modeli yayında, bayisi açık olmalı."
+      },
+      "switchOffDialog": {
+        "title": "{plate} kapatılsın mı?",
+        "text": "Araç aramada çıkmaz ve yeni rezervasyon alamaz. Geçmiş rezervasyonlar etkilenmez. Yeniden açabilirsiniz.",
+        "confirm": "Aracı kapat"
+      }
+    },
+    "extras": {
+      "title": "Ek hizmetler",
+      "intro": "Rezervasyonda seçilen ek hizmetlerin adı ve fiyatı. Ek hizmet eklenmez ya da silinmez. Yeni fiyat yalnızca sonraki fiyat hesaplarına ve rezervasyonlara uygulanır; yapılmış rezervasyon kendi fiyatını korur.",
+      "detailTitle": "Ek hizmet",
+      "detailIntro": "Adı ve fiyatı değiştirebilirsiniz. Yeni fiyat yalnızca bundan sonraki rezervasyonlara uygulanır.",
+      "tableCaption": "Ek hizmetler",
+      "retry": "Tekrar dene",
+      "columns": {
+        "name": "Ek hizmet",
+        "pricing": "Fiyatlandırma",
+        "price": "Fiyat"
+      },
+      "pricing": {
+        "PER_DAY": "Günlük",
+        "FIXED": "Rezervasyon başına bir kez"
+      },
+      "emptyTitle": "Ek hizmet yok",
+      "emptyText": "Ek hizmetler sistemle birlikte gelir; burada yalnızca düzenlenir.",
+      "loadErrorTitle": "Ek hizmetler yüklenemedi",
+      "loadErrorText": "Birkaç saniye sonra yeniden deneyin.",
+      "fields": {
+        "nameTr": "Ad (Türkçe)",
+        "nameEn": "Ad (İngilizce)",
+        "pricePerDay": "Günlük fiyat (₺)",
+        "priceFixed": "Fiyat (₺, rezervasyon başına)",
+        "priceHint": "Örnek: 150 ya da 150,50. Binlik ayırıcı yazmayın."
+      },
+      "form": {
+        "save": "Değişiklikleri kaydet",
+        "saving": "Kaydediliyor",
+        "cancel": "Vazgeç"
+      },
+      "errors": {
+        "nameTr": "Türkçe adı yazın (en çok 80 karakter).",
+        "nameEn": "İngilizce adı yazın (en çok 80 karakter).",
+        "price": "Lira olarak yazın, en çok iki kuruş basamağıyla (örnek: 150 ya da 150,50).",
+        "generic": "Bu bilgi kabul edilmedi. Alanları gözden geçirip yeniden deneyin.",
+        "notFound": "Bu ek hizmet artık yok. Listeye dönün.",
+        "unavailable": "Kaydedilemedi. Birkaç saniye sonra yeniden deneyin."
+      },
+      "toast": {
+        "saved": "Ek hizmet kaydedildi"
+      }
+    },
     "cityFilter": {
       "all": "Tüm şehirler",
       "apply": "Süz"

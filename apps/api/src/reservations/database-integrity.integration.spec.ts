@@ -5,6 +5,7 @@ import { PrismaService } from '../prisma/prisma.service.js';
 import { DAY_MS, daysAhead } from './dates.testing.js';
 import { PricingService } from './pricing.service.js';
 import { ReservationsService } from './reservations.service.js';
+import { testPlate } from '../common/plate.testing.js';
 
 // V2-11: the rules the database itself keeps (CHECK, foreign keys, the number sequence, indexes), tested by writing
 // rows around the API. Runs only on a database whose name contains "test"; skipped without TEST_DATABASE_URL.
@@ -73,7 +74,7 @@ describeDb('database integrity (gerçek PostgreSQL)', () => {
       vehicleIds.push(
         (
           await prisma.vehicle.create({
-            data: { plate: `I${run}${i}`, year: 2030, vehicleModelId: model.id, branchId: branch.id },
+            data: { plate: testPlate(), year: 2030, vehicleModelId: model.id, branchId: branch.id },
           })
         ).id,
       );

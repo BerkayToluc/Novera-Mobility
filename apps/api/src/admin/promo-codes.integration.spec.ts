@@ -4,6 +4,7 @@ import { HttpException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { isPromoUsable, promoBlock } from '../reservations/pricing.service.js';
 import { PromoCodesService } from './promo-codes.service.js';
+import { testPlate } from '../common/plate.testing.js';
 
 // The campaign code administration against a real PostgreSQL (TEST_DATABASE_URL), like the other integration tests;
 // skipped without one. The test database is shared with suites that run at the same time and holds the seed codes, so
@@ -93,7 +94,7 @@ describeDb('campaign code administration against the database (V2-26)', () => {
       })
     ).id;
     ids.vehicleId = (
-      await prisma.vehicle.create({ data: { plate: `K${run}`, year: 2030, vehicleModelId: ids.modelId, branchId: ids.branchId } })
+      await prisma.vehicle.create({ data: { plate: testPlate(), year: 2030, vehicleModelId: ids.modelId, branchId: ids.branchId } })
     ).id;
   });
 

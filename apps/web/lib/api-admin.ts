@@ -67,3 +67,33 @@ export async function fetchModelClasses(): Promise<{ slug: string; name: { tr: s
   if (result.status !== "ok") throw new ApiUnavailableError();
   return result.data;
 }
+
+// `GET /admin/vehicles` (V2-30): one page of the list, switched-off cars included.
+export async function fetchAdminVehicles(query: URLSearchParams): Promise<Schemas["AdminVehiclePage"]> {
+  const result = await apiRequest<Schemas["AdminVehiclePage"]>("GET", "/admin/vehicles?" + query.toString());
+  if (result.status !== "ok") throw new ApiUnavailableError();
+  return result.data;
+}
+
+// `GET /admin/vehicles/{id}`: null when there is no such car (the page then does not exist), a failure to load otherwise.
+export async function fetchAdminVehicle(id: string): Promise<Schemas["AdminVehicleDetail"] | null> {
+  const result = await apiRequest<Schemas["AdminVehicleDetail"]>("GET", "/admin/vehicles/" + encodeURIComponent(id));
+  if (result.status === "ok") return result.data;
+  if (result.status === "not_found") return null;
+  throw new ApiUnavailableError();
+}
+
+// `GET /admin/extras`: the few extra services, cheapest first.
+export async function fetchAdminExtras(): Promise<Schemas["AdminExtra"][]> {
+  const result = await apiRequest<Schemas["AdminExtra"][]>("GET", "/admin/extras");
+  if (result.status !== "ok") throw new ApiUnavailableError();
+  return result.data;
+}
+
+// `GET /admin/extras/{slug}`: null when there is no such extra (the page then does not exist), a failure to load otherwise.
+export async function fetchAdminExtra(slug: string): Promise<Schemas["AdminExtra"] | null> {
+  const result = await apiRequest<Schemas["AdminExtra"]>("GET", "/admin/extras/" + encodeURIComponent(slug));
+  if (result.status === "ok") return result.data;
+  if (result.status === "not_found") return null;
+  throw new ApiUnavailableError();
+}
