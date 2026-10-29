@@ -70,7 +70,7 @@ const drafts = (now: number): Draft[] => [
     endAt: dayAt(now, -123, "12:00"),
     days: 2,
     totalPrice: total(3120),
-    vehicle: { brand: "Hyundai", model: "Tucson", imageUrl: null },
+    vehicle: { brand: "Toyota", model: "RAV4 Hybrid", imageUrl: null },
     pickupCity: "İzmir",
     returnCity: "İzmir",
     pickupBranchId: "izmir-adnan-menderes",

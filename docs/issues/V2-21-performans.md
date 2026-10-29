@@ -8,8 +8,7 @@ Site hızı hiçbir zaman production build'de ölçülmedi. SPEC §5'teki Core W
 
 ## Kapsam
 - **Fotoğraflar:**
-  - Eksik 4 modelin (volkswagen-golf, hyundai-tucson, volkswagen-id4, audi-a6) fotoğrafı tamamlanır.
-  - G'nin sağladığı `carPhotos/` klasöründen seçilir; seçim G'ye sorulur.
+  - ~~Eksik 4 modelin (volkswagen-golf, hyundai-tucson, volkswagen-id4, audi-a6) fotoğrafı tamamlanır.~~ Bu 4 model belgelerde yoktu (yalnızca seed'deydi); seed'de belgelerdeki 4 modelle (passat, rav4, ioniq-5, 3008) değiştirildi, fotoğrafları hazırdı (karar: 29 Ekim 2026, Berkay).
   - WebP/AVIF'e sıkıştırılır, model başına en çok ~120 KB.
   - Kaynaklar `docs/PHOTO-CREDITS.md`'ye yazılır.
 - **LCP:** ilk görünen araç ve galeri görseli `preload` alır (Next 16), `sizes` doğru verilir.
