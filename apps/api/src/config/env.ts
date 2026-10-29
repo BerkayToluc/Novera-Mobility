@@ -54,3 +54,10 @@ export function listenPort(source: Env = currentEnv()): number | string {
 export function listenHost(source: Env = currentEnv()): string | undefined {
   return text(source.HOST);
 }
+
+// The host of the public photo store (Vercel Blob, ADR-28), as given in the store's address: `<id>.public.blob.vercel-storage.com`.
+// Set in production, an image address has to be on exactly this host; left empty (local work, tests) any host of the store
+// family is accepted (common/image-url.ts).
+export function blobPublicHost(source: Env = currentEnv()): string | undefined {
+  return text(source.BLOB_PUBLIC_HOST)?.toLowerCase();
+}

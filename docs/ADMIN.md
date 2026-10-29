@@ -75,7 +75,10 @@ Tüm sayfalar `noindex`, sitemap ve `llms.txt` dışında; navbar ve footer'da b
 
 **Araç modelleri**
 - **Alanlar:** marka, model, slug (oluşturulurken addan önerilir, **sonra değişmez**: `?arac=` bağlantıları bozulmasın), sınıf, yakıt, vites, koltuk, bagaj, tüketim ve birimi, günlük fiyat (TRY), açıklama (TR/EN), fotoğraf.
-- **Fotoğraf** (ADR-28): JPEG/PNG/WebP, en çok 5 MB, en az 1200 px genişlik. Yükleme önizlemeli; alt metin model adından üretilir.
+- **Fotoğraf** (ADR-28): JPEG/PNG/WebP, **seçilen dosya en çok 5 MB**, en az 1200 px genişlik. Yükleme önizlemeli; alt metin model adından üretilir.
+  - **Sunucuya giden en çok 4 MB'tır:** Vercel işlevleri 4,5 MB'tan büyük istek gövdesini reddeder ve telefon fotoğrafı sık sık 3–8 MB'tır. Tarayıcı fotoğrafı önce 2000 px genişliğe ve WebP'ye küçültür (genelde birkaç yüz KB); sunucu aynısını yeniden yapar ve kendi kararını verir. Tarayıcı bunu yapamazsa (eski tarayıcı) dosya olduğu gibi gider; 4 MB'ı aşıyorsa kullanıcı "çok büyük" cevabı alır.
+  - **Sunucu** dosyanın türünü ilk baytlarından anlar (adına ya da bildirilen türe bakmaz), yönünü düzeltir, 2000 px'e ve WebP'ye çevirir, EXIF/ICC/XMP'yi atar, 60 milyon pikselden büyük görseli açmaz ve dosyaya rastgele bir ad verir. Yalnızca yönetici yükleyebilir.
+  - **Yetim dosya:** yükleme yapılıp form kaydedilmezse dosya depoda kalır (v2'de temizlenmez, kabul edildi).
 - **Fiyat değişikliği** yeni aramalarda geçerlidir; var olan rezervasyonun tutarı değişmez (tutar rezervasyonda donmuştur).
 - **Kaldırma (`retiredAt`):** gelecek rezervasyonu ya da etkin tutması olan modelde `409 IN_USE`. Kaldırılan modelin etkin araçları da pasifleşir. Ana sayfa filo bölümünde, aramada ve `?arac=` penceresinde görünmez; geçmiş rezervasyon kartlarında görünür.
 - Yeni sınıf eklenmez (sınıflar sabit).

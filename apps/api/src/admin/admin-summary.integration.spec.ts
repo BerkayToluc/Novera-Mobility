@@ -148,7 +148,7 @@ describeDb('admin summary against the database (V2-25)', () => {
     await quote('q4', 'OFFERED');
     // Counted over this run's rows only: the table is shared with suites that run at the same time and add and remove quote
     // requests of their own, so a count of all of them would change under the test. The rule itself (RECEIVED only) is the service's.
-    const mine = { ...prisma, quoteRequest: { count: (args: { where?: object }) => prisma.quoteRequest.count({ where: { ...args.where, number: { startsWith: `SUM-${run}` } } }) } };
+    const mine = { reservation: prisma.reservation, quoteRequest: { count: (args: { where?: object }) => prisma.quoteRequest.count({ where: { ...args.where, number: { startsWith: `SUM-${run}` } } }) } };
     expect((await new AdminSummaryService(mine as unknown as PrismaService).get(NOW)).quotesAwaiting).toBe(2);
   });
 

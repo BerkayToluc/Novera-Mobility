@@ -114,6 +114,34 @@ Doğru mu?
 4. **Deploy**. Bitince Vercel sana adres verir (`https://....vercel.app`).
 5. İlk deploy'dan sonra: `NEXT_PUBLIC_SITE_URL`'i bu adresle düzelt, **Redeploy**.
 
+## 5a. Vercel Blob: fotoğraf deposu (V2-28)
+
+Panelden yüklenen araç modeli fotoğrafları kodun içinde değil, **Vercel Blob**'da durur (ADR-28; karar 29 Ekim 2026, Berkay). Yükleme ekranı V2-29'da (araç modeli formu) gelir; depoyu ve anahtarı şimdiden kurabilirsin, ilk gerçek deneme V2-29 birleşince yapılır.
+
+**Koşullar** (Vercel'in kendi sayfalarından, **29 Ekim 2026'da okundu**: [fiyat ve sınırlar](https://vercel.com/docs/vercel-blob/usage-and-pricing), [sunucudan yükleme](https://vercel.com/docs/vercel-blob/server-upload)). Koşullar değişebilir; yeniden bak.
+
+| | Hobby (ücretsiz) |
+|---|---|
+| Depolama | 1 GB |
+| Basit işlem (adresten erişim, önbellek ıskası) | ilk 10.000 |
+| Gelişmiş işlem (yükleme, kopyalama, listeleme, mağaza oluşturma) | ilk 2.000 |
+| Veri aktarımı | ilk 10 GB; diğer Vercel hizmetleriyle ortak havuz |
+| Sınır aşılırsa | **ücret çıkmaz**, ama Blob'a erişim 30 gün kapanır; limite yaklaşınca e-posta gelir |
+| Sunucudan yükleme | gövde en çok **4,5 MB** (Vercel Functions sınırı) |
+
+Bir model fotoğrafı yaklaşık 200–500 KB'tır (2000 px'e küçültülmüş WebP); 1 GB, birkaç bin fotoğraf demektir, yani bu proje için çok fazla. Hobby plan yalnızca ticari olmayan kullanım içindir (bkz. Kararlar tablosu).
+
+**Kurulum:**
+1. Vercel'de projeyi aç → **Storage** → **Create Storage** → **Blob** → erişimi **Public** seç (fotoğraflar sitede herkese görünür; **Private** seçersen adresler açılmaz) → adı `Photos` → ortamlar: **Production** ve **Preview** (yerelde denemek istersen **Development** de) → **Create**.
+2. Vercel, projeye `BLOB_READ_WRITE_TOKEN` (ve OIDC için `BLOB_STORE_ID`) ortam değişkenlerini kendisi ekler. **Anahtarı kopyalama, sohbete ya da repoya yazma.** Vercel üzerinde kod kimlik bilgisini kendisi bulur; token yalnızca yerelde ya da Vercel dışında gerekir.
+3. Mağazanın genel adresini öğren: mağaza sayfasında ya da ilk yüklenen dosyanın adresinde `https://<kimlik>.public.blob.vercel-storage.com`. `<kimlik>.public.blob.vercel-storage.com` kısmını **iki yere** ortam değişkeni olarak gir (gizli değildir):
+   - Vercel (web): `BLOB_PUBLIC_HOST`. Sitenin güvenlik politikası (CSP `img-src`) yalnızca bu adresten görsele izin verir.
+   - Cloud Run (API): `BLOB_PUBLIC_HOST`. API, `imageUrl` olarak yalnızca bu adresi (ya da `/images/` ile başlayan site içi yolu) kabul eder; başka bir Blob mağazasının adresi reddedilir.
+   Boş bırakılırsa ikisi de mağaza ailesinin (`*.public.blob.vercel-storage.com`) herhangi bir adresini kabul eder; üretimde doldur.
+4. Web'i yeniden yayınla (ortam değişkeni yeni yayınla geçerli olur).
+
+**Nasıl çalışır:** panel formu fotoğrafı web sunucusundaki bir Server Action'a gönderir. Tarayıcı fotoğrafı önce 2000 px genişliğe ve WebP'ye küçültür (5 MB'lık bir telefon fotoğrafı böylece 4,5 MB sınırına takılmaz); sunucu dosyanın ilk baytlarından türünü anlar (yalnızca JPEG/PNG/WebP), en az 1200 px genişlik ister, EXIF'i siler, yeniden WebP yapar ve rastgele bir adla `vehicle-models/` klasörüne yazar. API'ye yalnızca dönen adres gider. Yükleme yapılıp form kaydedilmezse kalan dosya silinmez (v2'de kabul edildi); gerekirse Vercel panelinden elle silinir.
+
 ## 6. Adresleri birbirine tanıt
 
 Cloud Run → `novera-mobility` → **Containers** sekmesi → **Edit** → **Variables & secrets** → `WEB_URL` = Vercel adresi (`https://....vercel.app`, sonunda `/` olmasın) → **Done**; sağ üstte **Deploy**. (Konsolun yeni arayüzünde "Edit & deploy new revision" düğmesi yoktur; ayarlar sekmelerden düzenlenir.)
@@ -157,7 +185,7 @@ Bunlar ilgili iş birleşince bu rehbere adım olarak yazılır; burada yalnızc
 
 | Ne | İş | Nerede |
 |---|---|---|
-| Fotoğraf deposu anahtarı (öneri Vercel Blob, `BLOB_READ_WRITE_TOKEN`); ücretsiz katman koşulları uygulama günü doğrulanıp tarihle yazılır | V2-28 | Vercel |
+| Fotoğraf deposu: Vercel Blob (`BLOB_READ_WRITE_TOKEN`, `BLOB_PUBLIC_HOST`); adımlar §5a, koşullar 29 Ekim 2026 tarihli | V2-28 | Vercel ve Cloud Run |
 | İlk yönetici hesabı (`pnpm admin:create`) | V2-23, V2-45 | Neon (Berkay'ın bilgisayarından) |
 | Örnek şirket, şarj istasyonu ve rota seed'i | V2-35, V2-40, V2-43 | Neon |
 | Kullanıcı parolası için seed ortam değişkeni (repoya yazılmaz) | V2-35 | Berkay'ın bilgisayarı |

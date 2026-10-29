@@ -109,7 +109,15 @@
       "none": "No file chosen",
       "limits": "{types}; up to {size} MB",
       "tooLarge": "The file is larger than {size} MB.",
-      "wrongType": "This file type is not accepted."
+      "wrongType": "This file type is not accepted.",
+      "minWidthHint": "It has to be at least {min} pixels wide.",
+      "working": "Preparing and uploading the photo…",
+      "uploaded": "Uploaded. This photo is used when you save the form.",
+      "tooNarrow": "The photo has to be at least {min} pixels wide.",
+      "unreadable": "The file could not be read as a photo. Try another file.",
+      "serverTooLarge": "The photo is still too large even after it was made smaller. Try a smaller file.",
+      "forbidden": "You are not allowed to do this.",
+      "unavailable": "It could not be uploaded. Try again in a few seconds."
     },
     "dev": {
       "title": "Panel components",
@@ -156,7 +164,8 @@
       "retry": "Try again",
       "save": "Save",
       "bilingualHint": "Leave one empty and press Save: the missing language is marked.",
-      "missingText": "Enter the text in this language."
+      "missingText": "Enter the text in this language.",
+      "uploadedAs": "Uploaded to: {url}"
     },
     "promoCodes": {
       "title": "Campaign codes",

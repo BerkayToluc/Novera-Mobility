@@ -116,10 +116,11 @@
 
 - **Bağlam:** G, yöneticinin yeni araç modelini fotoğrafıyla panelden eklemesini istedi. Bugün fotoğraflar repoda (`apps/web/public`) duruyor.
 - **Karar:**
-  - Fotoğraf bir nesne deposuna yüklenir. Öneri **Vercel Blob**; seçim SPEC §7'de açık karar, ücretsiz katman koşulları uygulama günü doğrulanır.
+  - Fotoğraf bir nesne deposuna yüklenir: **Vercel Blob** (karar 29 Ekim 2026, Berkay; SPEC §7). Mağaza **Public** olarak açılır; koşullar ve kurulum [DEPLOY.md](DEPLOY.md) §5a.
   - **Yükleme web sunucusundan yapılır:** panel formu dosyayı bir server action'a gönderir. Action yönetici oturumunu API'ye sordurarak doğrular, dosyayı denetler ve depoya yazar; API'ye yalnızca dönen adres (`imageUrl`) gider. Depo anahtarı (`BLOB_READ_WRITE_TOKEN`) yalnızca web sunucusundadır.
-  - **Denetim:** yalnızca JPEG, PNG, WebP kabul edilir; tür uzantıya değil dosyanın ilk baytlarına bakılarak anlaşılır. En çok 5 MB, en az 1200 px genişlik. EXIF verisi silinir; dosya adı sunucuda rastgele üretilir.
-  - API, `imageUrl` alanında yalnızca izinli depo alan adını ya da `/images/` ile başlayan site içi yolu kabul eder. `next.config.ts` `images.remotePatterns` ve CSP `img-src` aynı alan adıyla güncellenir.
+  - **Denetim:** yalnızca JPEG, PNG, WebP kabul edilir; tür uzantıya değil dosyanın ilk baytlarına bakılarak anlaşılır. Kullanıcı en çok 5 MB'lık dosya seçebilir, en az 1200 px genişlik. EXIF verisi silinir (görsel sunucuda yeniden WebP'ye kodlanır); dosya adı sunucuda rastgele üretilir.
+  - **İstek boyutu (V2-28'de görüldü):** Vercel işlevlerinin istek gövdesi sınırı 4,5 MB, Next Server Action'ın varsayılanı 1 MB. Bu yüzden tarayıcı fotoğrafı göndermeden önce 2000 px'e ve WebP'ye küçültür, sunucuya **en çok 4 MB** gider (`serverActions.bodySizeLimit: 4.5mb`); 5 MB'lık telefon fotoğrafı böylece geçer. Sunucu tarayıcıya güvenmez, aynı işi yeniden yapar. Daha büyük dosya gerekirse istemciden doğrudan yükleme (client upload) gerekir, ama o zaman sunucu dosyayı görmeden depoya yazılır; bu yüzden seçilmedi.
+  - API, `imageUrl` alanında yalnızca izinli depo alan adını ya da `/images/` ile başlayan site içi yolu kabul eder (`common/image-url.ts`; üretimde `BLOB_PUBLIC_HOST` ile tek bir mağazaya sabitlenir; sorgu, parça, port, `..`, başka şema reddedilir). `next.config.ts` `images.remotePatterns` ve CSP `img-src` (`lib/csp.ts`, aynı `BLOB_PUBLIC_HOST`) aynı alan adıyla güncellenir.
   - Mevcut 15 modelin fotoğrafı repoda kalır; seed onları site içi yolla tutar.
   - Model kaldırılınca fotoğraf silinmez (geçmiş rezervasyon kartları kullanır).
 - **Sonuçları:** yeni bir dış servis ve bir gizli anahtar eklenir ([DEPLOY.md](DEPLOY.md)).

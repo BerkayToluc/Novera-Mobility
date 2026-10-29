@@ -21,3 +21,7 @@ overrides:
   # @nestjs/platform-express 12.2.0 pins multer 2.4.0 (GHSA-q7qp-rjg7-q26m, denial of service, fixed in 2.5.0).
   # The API has no file upload endpoint, so multer's middleware is not even used; the override just keeps it clean.
   multer: ">=2.5.0 <3"
+  # @vercel/blob (the photo store SDK, V2-28) reaches zod through @vercel/oidc and @vercel/cli-config, which pin a version before
+  # 4.6.6 (GHSA-mrhx-c7xc-m3w5, memory use on oversized collections). Only that copy is lifted to the patched line; the app's own
+  # zod is already 4.6.7. Remove it once @vercel/cli-config asks for a patched zod itself (checked at each Dependabot update).
+  "@vercel/cli-config>zod": ">=4.6.6 <5"
