@@ -16,8 +16,9 @@ import { FormError } from "./form-error";
 import { useAuthErrorMessages } from "./use-auth-messages";
 import { rateLimitMessage } from "@/lib/rate-limit";
 
-// `next`: the booking to go back to after signing in (the payment page asked for it).
-export function LoginForm({ next, kind = "individual" }: { next?: Record<string, string>; kind?: AccountType }) {
+// `next`: the booking to go back to after signing in (the payment page asked for it). `to`: "admin" when the panel sent the
+// visitor here (`?sonra=yonetim`); it is a fixed word, never an address taken from the link.
+export function LoginForm({ next, to, kind = "individual" }: { next?: Record<string, string>; to?: "admin"; kind?: AccountType }) {
   const t = useTranslations("Auth");
   const limitT = useTranslations("RateLimit");
   const router = useRouter();
@@ -41,7 +42,8 @@ export function LoginForm({ next, kind = "individual" }: { next?: Record<string,
     setFormError(null);
     try {
       const locale = await login(values, kind);
-      if (next) router.push({ pathname: "/odeme", query: next }, { locale });
+      if (to === "admin") router.push("/yonetim", { locale });
+      else if (next) router.push({ pathname: "/odeme", query: next }, { locale });
       else router.push("/profil", { locale });
       // The header reads the session on the server, so it has to be asked again.
       router.refresh();

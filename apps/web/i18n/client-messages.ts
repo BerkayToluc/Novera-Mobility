@@ -5,7 +5,7 @@
 //
 // tests/client-messages.test.ts reads the code and fails when this list and the `useTranslations` calls of the
 // client components a page renders stop agreeing, so a new client component cannot silently miss its text.
-// Panel (admin) and fleet-panel text will be loaded the same way, only on their own routes (V2-24).
+// The panel's text (Admin) is loaded the same way, only on its own routes: yonetim/layout, and dev/layout for the gallery.
 
 /** What every page needs: the header, the consent banner and the error page (layout.tsx and error.tsx). */
 export const ROOT_NAMESPACES: readonly string[] = ["Consent", "CurrencySwitcher", "Header", "LocaleSwitcher", "ProductsPage", "ServerError"];
@@ -13,7 +13,7 @@ export const ROOT_NAMESPACES: readonly string[] = ["Consent", "CurrencySwitcher"
 export const CLIENT_NAMESPACES = {
   "araclar/layout": ["DateRangePicker", "RentalSearch", "ResultsPage", "Vehicle"],
   "bayilerimiz/layout": ["BranchesPage", "ContactLink", "RentalSearch"],
-  "dev/layout": ["Auth", "ContactLink", "DateRangePicker", "DevGallery", "Profile", "RateLimit", "ThemeSwitcher"],
+  "dev/layout": ["Admin", "Auth", "ContactLink", "DateRangePicker", "DevGallery", "Profile", "RateLimit", "ThemeSwitcher"],
   "giris/layout": ["Auth", "RateLimit"],
   "hakkimizda/layout": ["AboutPage"],
   "hizmetler/layout": ["ContactLink"],
@@ -26,4 +26,5 @@ export const CLIENT_NAMESPACES = {
   "rezervasyon/layout": ["BookingSummary", "HoldCountdown", "Payment", "ResultsPage"],
   "sifre-sifirla/layout": ["Auth", "RateLimit"],
   "yardim/layout": ["HelpPage"],
+  "yonetim/layout": ["Admin"],
 } as const satisfies Record<string, readonly string[]>;

@@ -113,6 +113,24 @@ Tüm sayfalar `noindex`, sitemap ve `llms.txt` dışında; navbar ve footer'da b
 - **Erişilebilirlik:** `<th scope>`, `aria-sort`, klavyeyle tam kullanım, WCAG 2.2 AA.
 - **Metinler:** `messages/tr/admin.json`, `messages/en/admin.json`.
 
+**Bileşenler (V2-24):** yukarıdaki davranışlar `apps/web/components/admin/` altındadır; her ekran bunları kullanır, kendi tablosunu ya da penceresini yazmaz.
+
+| Bileşen | Ne yapar |
+|---|---|
+| `AdminShell`, `AdminNav` | Çerçeve ve menü (xl'de sol sütun, dar ekranda üstte açılır). Menü `lib/admin-screens.ts`'ten gelir: bir ekran `ready: true` olunca ve adresi `i18n/routing.ts`'e eklenince menüde görünür (testle denetlenir) |
+| `PageHeader` | Başlık ve en çok bir birincil düğme |
+| `DataTable` | Başlık sırası (`aria-sort`), ilk sütunda satır bağlantısı, yükleniyor/boş/hata, kendi kutusunda yatay kayma |
+| `Pagination`, `SearchBox`, `FilterChips` | Sayfa, arama ve süzgeç; hepsi adreste durur |
+| `StatusChip` | Metinli durum çipi (yalnız renkle durum anlatılmaz) |
+| `BilingualField`, `ListField`, `FileField` | İki dilli alan (hata olan sekme açılır), satır ekle/sil/taşı, dosya alanı (yalnız arayüz; yükleme V2-28) |
+| `ConfirmDialog`, `Toast`, `StaleWriteBanner`, `UnsavedChangesGuard` | Onay penceresi (odak "Vazgeç"te), bildirimler (`aria-live`; hata kapatılana dek durur), `409 STALE_WRITE` uyarısı, kaydedilmemiş değişiklik uyarısı |
+
+**Adres ve API sorgusu:** `lib/admin-query.ts` adresi (`sayfa`, `sirala`, `ara`, süzgeçler) okur, izin verilen değerlere göre denetler (uydurma değer hata değil varsayılan olur) ve API sorgusuna (`page`, `pageSize`, `sort`, `q`) çevirir; sayfa boyutu en çok 100.
+
+**Sergi:** `/dev/admin` (EN `/en/dev/admin`) bileşenleri örnek veriyle gösterir. Geliştirme ortamında ve test koşusunda (`NOVERA_E2E=1`) açıktır, gerçek sitede 404'tür (`lib/dev-pages.ts`).
+
+**Bilinen sınırlar:** `UnsavedChangesGuard` tarayıcının Geri düğmesini Next yönlendiricisinde yakalayamaz (sekmeyi kapatma ve site içi bağlantılar yakalanır). Panel düzeni (`layout`) iki panel sayfası arasında geçişte yeniden çizilmez; bu yüzden yetkiyi asıl denetleyen API'dir (her `/admin/*` çağrısında rol).
+
 ## 4. API
 
 Tüm uçlar `/admin` önekli, `AdminGuard` arkasında, ADR-24 kurallarıyla (sayfalama, `STALE_WRITE`, yeni hata kodları). Değiştiren her istek işlem kaydına yazılır, `Content-Type: application/json` dışındakiler `415` döner, sınır dakikada 120/yönetici.

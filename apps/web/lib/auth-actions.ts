@@ -118,7 +118,10 @@ export async function signIn(kind: AccountType, email: string, password: string)
   }
 
   const jar = await cookies();
-  jar.set(MOCK_SESSION_COOKIE, kind, { httpOnly: true, sameSite: "lax", path: "/" });
+  // Sample mode only (USE_MOCKS=1, which a real site cannot run, lib/mode.ts): an address that starts with "yonetici" signs in
+  // the sample administrator, so the panel can be walked in tests. A real account's role comes from the API.
+  const sampleKind = kind === "individual" && /^yonetici[.@+]/i.test(email) ? "admin" : kind;
+  jar.set(MOCK_SESSION_COOKIE, sampleKind, { httpOnly: true, sameSite: "lax", path: "/" });
 
   const preferences = parsePreferences(jar.get(MOCK_PREFERENCES_COOKIE)?.value);
   if (preferences) setPreferenceCookies(jar, preferences);
