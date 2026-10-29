@@ -1,0 +1,148 @@
+{
+  "Admin": {
+    "metaTitle": "Yönetim paneli",
+    "nav": {
+      "label": "Panel bölümleri",
+      "menu": "Menü",
+      "menuCurrent": "Menü: {current}",
+      "summary": "Özet",
+      "promoCodes": "Kampanya kodları",
+      "branches": "Bayiler",
+      "models": "Araç modelleri",
+      "vehicles": "Araçlar",
+      "extras": "Ek hizmetler",
+      "reservations": "Rezervasyonlar",
+      "quotes": "Teklif talepleri",
+      "messages": "Mesajlar",
+      "companies": "Şirketler",
+      "invoices": "Faturalar",
+      "fleetExpenses": "Filo masrafları",
+      "requests": "Talepler",
+      "users": "Kullanıcılar",
+      "auditLog": "İşlem kaydı"
+    },
+    "summary": {
+      "title": "Yönetim paneli",
+      "emptyTitle": "Panel hazır",
+      "emptyText": "Bölümler sırayla eklenecek. Eklendikçe menüde görünür."
+    },
+    "table": {
+      "loading": "Liste yükleniyor",
+      "emptyTitle": "Kayıt yok",
+      "errorTitle": "Liste yüklenemedi",
+      "errorText": "Birkaç saniye sonra yeniden deneyin.",
+      "scrollable": "{table} (yatay kaydırılabilir)",
+      "sortBy": "{column} sütununa göre sırala"
+    },
+    "pagination": {
+      "label": "Sayfalar",
+      "previous": "Önceki sayfa",
+      "next": "Sonraki sayfa",
+      "page": "Sayfa {page}",
+      "status": "Sayfa {page} / {pages}",
+      "range": "{from}–{to} / {total} kayıt",
+      "none": "0 kayıt"
+    },
+    "search": {
+      "label": "Ara",
+      "button": "Ara",
+      "clear": "Aramayı temizle"
+    },
+    "filter": {
+      "all": "Tümü"
+    },
+    "bilingual": {
+      "tabsLabel": "Dil",
+      "tr": "Türkçe",
+      "en": "İngilizce",
+      "required": "Her iki dil de zorunlu",
+      "missing": "{language} metni eksik"
+    },
+    "list": {
+      "add": "Satır ekle",
+      "remove": "{item} sil",
+      "moveUp": "{item} yukarı taşı",
+      "moveDown": "{item} aşağı taşı",
+      "item": "{n}. satır",
+      "empty": "Henüz satır yok.",
+      "added": "Satır eklendi. Toplam {count} satır.",
+      "removed": "Satır silindi. Toplam {count} satır.",
+      "moved": "{item} {position}. sıraya taşındı."
+    },
+    "confirm": {
+      "cancel": "Vazgeç",
+      "working": "İşleniyor…"
+    },
+    "toast": {
+      "region": "Bildirimler",
+      "close": "Bildirimi kapat"
+    },
+    "stale": {
+      "title": "Bu kayıt siz düzenlerken değişti",
+      "text": "Girdikleriniz korundu. Güncel kaydı yükleyip değişikliklerinizi yeniden uygulayabilirsiniz.",
+      "reload": "Güncel kaydı yükle"
+    },
+    "unsaved": {
+      "title": "Kaydedilmemiş değişiklikler var",
+      "text": "Bu sayfadan ayrılırsanız girdikleriniz kaybolur.",
+      "leave": "Sayfadan çık",
+      "stay": "Vazgeç"
+    },
+    "file": {
+      "choose": "Dosya seç",
+      "change": "Dosyayı değiştir",
+      "remove": "Dosyayı kaldır",
+      "none": "Dosya seçilmedi",
+      "limits": "{types}; en çok {size} MB",
+      "tooLarge": "Dosya {size} MB'tan büyük.",
+      "wrongType": "Bu dosya türü kabul edilmiyor."
+    },
+    "dev": {
+      "title": "Panel bileşenleri",
+      "intro": "Yönetim panelinin ortak bileşenleri. Yalnızca geliştirme ortamında açılır.",
+      "table": "Veri tablosu",
+      "tableCaption": "Örnek rezervasyonlar",
+      "tableStates": "Tablo durumları",
+      "loading": "Yükleniyor",
+      "empty": "Boş",
+      "error": "Hata",
+      "emptyTitle": "Henüz rezervasyon yok.",
+      "emptyText": "İlk rezervasyon geldiğinde burada görünür.",
+      "search": "Arama ve süzgeç",
+      "searchLabel": "Rezervasyon ara",
+      "filterLabel": "Durum",
+      "pagination": "Sayfalama",
+      "forms": "Form parçaları",
+      "bilingualLabel": "Açıklama",
+      "listLabel": "Çalışma saatleri",
+      "fileLabel": "Fotoğraf",
+      "dialogs": "Pencereler ve bildirimler",
+      "openConfirm": "Bayiyi kapat…",
+      "confirmTitle": "Bayi kapatılsın mı?",
+      "confirmText": "Kapanan bayi sitede görünmez. İstediğiniz zaman yeniden açabilirsiniz.",
+      "confirmAction": "Bayiyi kapat",
+      "showToast": "Başarı bildirimi göster",
+      "showErrorToast": "Hata bildirimi göster",
+      "toastDone": "Bayi kaydedildi.",
+      "toastFailed": "Kaydedilemedi. Yeniden deneyin.",
+      "stale": "Çakışma uyarısı",
+      "unsaved": "Kaydedilmemiş değişiklik",
+      "unsavedField": "Bayi adı",
+      "unsavedLink": "Özet sayfasına git",
+      "chips": "Durum çipleri",
+      "colNumber": "Numara",
+      "colName": "Ad",
+      "colTotal": "Tutar",
+      "colStatus": "Durum",
+      "confirmed": "Onaylandı",
+      "cancelled": "İptal edildi",
+      "pending": "Bekliyor",
+      "failed": "Başarısız",
+      "neutral": "Pasif",
+      "retry": "Yeniden dene",
+      "save": "Kaydet",
+      "bilingualHint": "Boş bırakıp Kaydet'e basın: eksik dil işaretlenir.",
+      "missingText": "Bu dilde metin girin."
+    }
+  }
+}

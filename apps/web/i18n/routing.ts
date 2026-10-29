@@ -45,6 +45,7 @@ export const routing = defineRouting({
     "/kullanim-sartlari": { tr: "/kullanim-sartlari", en: "/terms-of-use" },
     // Development-only galleries (404 in production); not translated.
     "/dev/components": "/dev/components",
+    "/dev/admin": "/dev/admin",
     "/dev/profile": "/dev/profile",
   },
 });

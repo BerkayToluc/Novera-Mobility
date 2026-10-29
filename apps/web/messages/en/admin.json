@@ -1,0 +1,148 @@
+{
+  "Admin": {
+    "metaTitle": "Admin panel",
+    "nav": {
+      "label": "Panel sections",
+      "menu": "Menu",
+      "menuCurrent": "Menu: {current}",
+      "summary": "Summary",
+      "promoCodes": "Promo codes",
+      "branches": "Branches",
+      "models": "Vehicle models",
+      "vehicles": "Vehicles",
+      "extras": "Extras",
+      "reservations": "Bookings",
+      "quotes": "Quote requests",
+      "messages": "Messages",
+      "companies": "Companies",
+      "invoices": "Invoices",
+      "fleetExpenses": "Fleet expenses",
+      "requests": "Requests",
+      "users": "Users",
+      "auditLog": "Audit log"
+    },
+    "summary": {
+      "title": "Admin panel",
+      "emptyTitle": "The panel is ready",
+      "emptyText": "Sections will be added one by one. They appear in the menu as they arrive."
+    },
+    "table": {
+      "loading": "Loading the list",
+      "emptyTitle": "No records",
+      "errorTitle": "The list could not be loaded",
+      "errorText": "Try again in a few seconds.",
+      "scrollable": "{table} (scrolls sideways)",
+      "sortBy": "Sort by {column}"
+    },
+    "pagination": {
+      "label": "Pages",
+      "previous": "Previous page",
+      "next": "Next page",
+      "page": "Page {page}",
+      "status": "Page {page} of {pages}",
+      "range": "{from}–{to} of {total} records",
+      "none": "0 records"
+    },
+    "search": {
+      "label": "Search",
+      "button": "Search",
+      "clear": "Clear the search"
+    },
+    "filter": {
+      "all": "All"
+    },
+    "bilingual": {
+      "tabsLabel": "Language",
+      "tr": "Turkish",
+      "en": "English",
+      "required": "Both languages are required",
+      "missing": "The {language} text is missing"
+    },
+    "list": {
+      "add": "Add a row",
+      "remove": "Delete {item}",
+      "moveUp": "Move {item} up",
+      "moveDown": "Move {item} down",
+      "item": "Row {n}",
+      "empty": "No rows yet.",
+      "added": "Row added. {count} rows in all.",
+      "removed": "Row deleted. {count} rows in all.",
+      "moved": "{item} moved to position {position}."
+    },
+    "confirm": {
+      "cancel": "Cancel",
+      "working": "Working…"
+    },
+    "toast": {
+      "region": "Notifications",
+      "close": "Dismiss the notification"
+    },
+    "stale": {
+      "title": "This record changed while you were editing it",
+      "text": "What you entered is kept. Load the current record and apply your changes again.",
+      "reload": "Load the current record"
+    },
+    "unsaved": {
+      "title": "You have unsaved changes",
+      "text": "If you leave this page, what you entered is lost.",
+      "leave": "Leave the page",
+      "stay": "Cancel"
+    },
+    "file": {
+      "choose": "Choose a file",
+      "change": "Change the file",
+      "remove": "Remove the file",
+      "none": "No file chosen",
+      "limits": "{types}; up to {size} MB",
+      "tooLarge": "The file is larger than {size} MB.",
+      "wrongType": "This file type is not accepted."
+    },
+    "dev": {
+      "title": "Panel components",
+      "intro": "The shared components of the admin panel. Open in development only.",
+      "table": "Data table",
+      "tableCaption": "Sample bookings",
+      "tableStates": "Table states",
+      "loading": "Loading",
+      "empty": "Empty",
+      "error": "Error",
+      "emptyTitle": "No bookings yet.",
+      "emptyText": "The first booking will show up here.",
+      "search": "Search and filter",
+      "searchLabel": "Search bookings",
+      "filterLabel": "Status",
+      "pagination": "Pagination",
+      "forms": "Form parts",
+      "bilingualLabel": "Description",
+      "listLabel": "Opening hours",
+      "fileLabel": "Photo",
+      "dialogs": "Dialogs and notifications",
+      "openConfirm": "Close the branch…",
+      "confirmTitle": "Close this branch?",
+      "confirmText": "A closed branch is not shown on the site. You can reopen it at any time.",
+      "confirmAction": "Close the branch",
+      "showToast": "Show a success notification",
+      "showErrorToast": "Show an error notification",
+      "toastDone": "The branch was saved.",
+      "toastFailed": "It could not be saved. Try again.",
+      "stale": "Conflict warning",
+      "unsaved": "Unsaved changes",
+      "unsavedField": "Branch name",
+      "unsavedLink": "Go to the summary page",
+      "chips": "Status chips",
+      "colNumber": "Number",
+      "colName": "Name",
+      "colTotal": "Total",
+      "colStatus": "Status",
+      "confirmed": "Confirmed",
+      "cancelled": "Cancelled",
+      "pending": "Pending",
+      "failed": "Failed",
+      "neutral": "Inactive",
+      "retry": "Try again",
+      "save": "Save",
+      "bilingualHint": "Leave one empty and press Save: the missing language is marked.",
+      "missingText": "Enter the text in this language."
+    }
+  }
+}
