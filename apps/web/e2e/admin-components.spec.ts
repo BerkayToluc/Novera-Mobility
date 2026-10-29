@@ -1,3 +1,4 @@
+import sharp from "sharp";
 import { expect, test } from "./fixtures";
 import { expectNoAxeViolations } from "./axe";
 import { hydrated } from "./hydration";
@@ -12,8 +13,6 @@ test.beforeEach(async ({ context }) => {
 });
 
 const TABLE = "Örnek rezervasyonlar (yatay kaydırılabilir)";
-// A 1x1 picture.
-const PNG = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==", "base64");
 
 test.describe("the table and the way around a list", () => {
   test("it has a name, sortable headers with aria-sort, 5 rows to a page, and the sort is in the address", async ({ page }) => {
@@ -169,7 +168,9 @@ test.describe("the form parts", () => {
     await expect(group.getByRole("textbox").nth(1)).toBeFocused();
   });
 
-  test("the file field refuses a wrong type and a big file at once, keeps a good one and can drop it", async ({ page }) => {
+  test("the file field refuses a wrong type and a big file at once, keeps a good one and can drop it", async ({ page, context }) => {
+    // The field uploads what it keeps (V2-28), and only an administrator may; the upload itself is in admin-upload.spec.ts.
+    await signInSample(context, "admin");
     await page.goto("/dev/admin");
     const input = page.getByLabel("Fotoğraf");
     await hydrated(input);
@@ -182,8 +183,9 @@ test.describe("the form parts", () => {
     await input.setInputFiles({ name: "big.png", mimeType: "image/png", buffer: Buffer.alloc(6 * 1024 * 1024) });
     await expect(page.getByText("Dosya 5 MB'tan büyük.")).toBeVisible();
 
-    await input.setInputFiles({ name: "bayi.png", mimeType: "image/png", buffer: PNG });
-    await expect(page.getByText("bayi.png")).toBeVisible();
+    const good = await sharp({ create: { width: 1300, height: 800, channels: 3, background: "#4a7" } }).jpeg().toBuffer();
+    await input.setInputFiles({ name: "bayi.jpg", mimeType: "image/jpeg", buffer: good });
+    await expect(page.getByText("bayi.jpg")).toBeVisible();
     await expect(page.getByText("Bu dosya türü kabul edilmiyor.")).toHaveCount(0);
     await page.getByRole("button", { name: "Dosyayı kaldır" }).click();
     await expect(page.getByText("Dosya seçilmedi")).toBeVisible();

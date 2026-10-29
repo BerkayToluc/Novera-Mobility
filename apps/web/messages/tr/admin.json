@@ -109,7 +109,15 @@
       "none": "Dosya seçilmedi",
       "limits": "{types}; en çok {size} MB",
       "tooLarge": "Dosya {size} MB'tan büyük.",
-      "wrongType": "Bu dosya türü kabul edilmiyor."
+      "wrongType": "Bu dosya türü kabul edilmiyor.",
+      "minWidthHint": "En az {min} piksel genişlikte olmalı.",
+      "working": "Fotoğraf hazırlanıyor ve yükleniyor…",
+      "uploaded": "Yüklendi. Formu kaydedince bu fotoğraf kullanılır.",
+      "tooNarrow": "Fotoğrafın genişliği en az {min} piksel olmalı.",
+      "unreadable": "Dosya bir fotoğraf olarak okunamadı. Başka bir dosya deneyin.",
+      "serverTooLarge": "Fotoğraf küçültüldükten sonra bile çok büyük kaldı. Daha küçük bir dosya deneyin.",
+      "forbidden": "Bu işlem için yetkiniz yok.",
+      "unavailable": "Yüklenemedi. Birkaç saniye sonra yeniden deneyin."
     },
     "dev": {
       "title": "Panel bileşenleri",
@@ -156,7 +164,8 @@
       "retry": "Yeniden dene",
       "save": "Kaydet",
       "bilingualHint": "Boş bırakıp Kaydet'e basın: eksik dil işaretlenir.",
-      "missingText": "Bu dilde metin girin."
+      "missingText": "Bu dilde metin girin.",
+      "uploadedAs": "Yüklenen adres: {url}"
     },
     "promoCodes": {
       "title": "Kampanya kodları",

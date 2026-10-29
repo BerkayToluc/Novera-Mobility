@@ -18,6 +18,7 @@ import { UnsavedChangesGuard } from "@/components/admin/unsaved-changes-guard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link } from "@/i18n/navigation";
+import { uploadVehicleImage } from "@/lib/admin-upload-actions";
 import { hrefQuery, parseAdminListParams, type AdminListConfig } from "@/lib/admin-query";
 
 type Status = "CONFIRMED" | "CANCELLED" | "PENDING" | "FAILED" | "INACTIVE";
@@ -62,6 +63,7 @@ function GalleryBody({ query }: { query: Record<string, string | string[] | unde
   const [bilingual, setBilingual] = useState<Bilingual>({ tr: "", en: "" });
   const [bilingualErrors, setBilingualErrors] = useState<Partial<Record<"tr" | "en", string>>>({});
   const [draft, setDraft] = useState("");
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
 
   // The list is made the way a screen would: filtered, searched, sorted and cut into pages by what is in the address.
   const words = params.q.toLocaleLowerCase("tr");
@@ -162,7 +164,8 @@ function GalleryBody({ query }: { query: Record<string, string | string[] | unde
           {t("save")}
         </Button>
         <ListField label={t("listLabel")} name="hours" defaultValue={["Pzt–Cum 08:30–19:00", "Cmt 09:00–17:00"]} />
-        <FileField label={t("fileLabel")} name="photo" accept="image/jpeg,image/png,image/webp" typesLabel="JPEG, PNG, WebP" maxSizeMb={5} />
+        <FileField label={t("fileLabel")} name="photo" accept="image/jpeg,image/png,image/webp" typesLabel="JPEG, PNG, WebP" maxSizeMb={5} upload={uploadVehicleImage} onUploaded={setPhotoUrl} />
+        {photoUrl && <p className="break-all text-small text-fg-muted">{t("uploadedAs", { url: photoUrl })}</p>}
       </section>
 
       <section aria-labelledby="g-dialogs" className="flex max-w-2xl flex-col gap-4">

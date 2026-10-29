@@ -21,7 +21,15 @@ const securityHeaders = [
     : []),
 ];
 
+// The photo store the panel uploads to (ADR-28): the site shows pictures from it through next/image, which has to be told the
+// host. Only the folder the panel writes to, and only the store family's public host.
+const PHOTO_STORE = "*.public.blob.vercel-storage.com";
+
 const nextConfig: NextConfig = {
+  images: { remotePatterns: [{ protocol: "https", hostname: PHOTO_STORE, pathname: "/vehicle-models/**" }] },
+  // A photo is sent to a Server Action (ADR-28). The default limit is 1 MB; the largest thing sent is 4 MB (the browser makes the
+  // picture smaller first, lib/image-rules.ts) plus the few KB multipart adds, and Vercel Functions refuse a body over 4.5 MB.
+  experimental: { serverActions: { bodySizeLimit: "4.5mb" } },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },

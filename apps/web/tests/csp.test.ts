@@ -43,3 +43,31 @@ describe("buildCsp", () => {
     expect(directive(buildCsp("n"), "connect-src")).toBe("'self' https://maps.googleapis.com https://maps.gstatic.com https://accounts.google.com");
   });
 });
+
+describe("buildCsp: the photo store (V2-28)", () => {
+  it("lets pictures load from the store's public domain when no host is named", () => {
+    expect(directive(buildCsp("n"), "img-src")).toContain("https://*.public.blob.vercel-storage.com");
+  });
+
+  it("names only our own store once it is set, and never widens to the family", () => {
+    vi.stubEnv("BLOB_PUBLIC_HOST", "ce0rcu23vrrdzqap.public.blob.vercel-storage.com");
+    const images = directive(buildCsp("n"), "img-src");
+    expect(images).toContain("https://ce0rcu23vrrdzqap.public.blob.vercel-storage.com");
+    expect(images).not.toContain("https://*.public.blob.vercel-storage.com");
+  });
+
+  it("ignores a host that is not a plain host name instead of putting it into the policy", () => {
+    for (const bad of ["evil.com; script-src *", "https://x.com", "a b", "*.com", ""]) {
+      vi.stubEnv("BLOB_PUBLIC_HOST", bad);
+      const csp = buildCsp("n");
+      expect(directive(csp, "img-src")).toContain("https://*.public.blob.vercel-storage.com");
+      expect(csp).not.toContain("script-src *");
+    }
+  });
+
+  it("does not open connections or scripts to the store", () => {
+    const csp = buildCsp("n");
+    expect(directive(csp, "connect-src")).not.toContain("blob.vercel-storage.com");
+    expect(directive(csp, "script-src")).not.toContain("blob.vercel-storage.com");
+  });
+});

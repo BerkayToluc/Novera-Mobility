@@ -206,7 +206,7 @@ v2 "bitti" sayılmadan önce canlıda, önce 375 px mobil tarayıcıda, sonra 12
 
 | Karar | Kimde | Öneri | Gerektiği an |
 |---|---|---|---|
-| Fotoğraf depolama servisi | G | Vercel Blob (ücretsiz katman koşulları uygulama günü doğrulanır); alternatif Cloudinary | V2-28 başlamadan |
+| ~~Fotoğraf depolama servisi~~ | Berkay | **Karar (29 Ekim 2026, Berkay, G'ye sorulmadan): Vercel Blob.** Ücretsiz katman koşulları o gün Vercel'in sayfalarından okundu: [DEPLOY.md](DEPLOY.md) §5a | V2-28 |
 | ~~Kişi başı aktif (gelecek) rezervasyon tavanı~~ | G | **Karar (24 Ekim 2026): 3** | V2-03 |
 | KVKK saklama süresi (iletişim mesajı, teklif talebi) | G | 2 yıl, sonra anonimleştirme | V2-12 |
 | Canlı takip ve şarj haritası | G | Google Maps (anahtar ve CSP hazır, ADR-09); anahtar yoksa yalnız liste | V2-40, V2-43 |

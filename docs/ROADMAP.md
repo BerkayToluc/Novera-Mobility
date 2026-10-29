@@ -63,7 +63,7 @@ Her fazın sonunda G canlıda (ya da son PR'ın önizlemesinde) bir **faz turu**
 | Faz 0 | V2-01 PR'ını incele ve birleştir. GitHub'da etiketleri ve milestone'ları oluştur, issue'ları aç ([WORKFLOW.md](WORKFLOW.md) §2), eşleme tablosunu doldur. Repo ayarlarında secret scanning ve push protection'ı aç (public repoda ücretsiz) |
 | V2-03 öncesi | Kişi başı aktif rezervasyon tavanı (öneri 3) |
 | V2-12 öncesi | KVKK saklama süresi (öneri 2 yıl) |
-| V2-28 öncesi | Fotoğraf depolama servisi (öneri Vercel Blob) ve hesabı açmak; token'ı Berkay Vercel'e girer |
+| V2-28 (karar verildi: Vercel Blob, 29 Ekim 2026) | Berkay Vercel'de Blob mağazasını (Public) açar ve `BLOB_PUBLIC_HOST`'u Vercel'e ve Cloud Run'a girer ([DEPLOY.md](DEPLOY.md) §5a); token Vercel'de kendiliğinden eklenir |
 | V2-36 sırasında | KVKK metnindeki kurumsal personel bölümünü onaylamak |
 | V2-40 / V2-43 öncesi | Harita kararı (öneri Google Maps; anahtar kısıtlı olmalı) |
 | V2-44 öncesi | E-posta gönderen alan adı (yoksa Resend test adresi) |
