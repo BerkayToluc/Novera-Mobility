@@ -6,6 +6,7 @@ import { PrismaService } from '../prisma/prisma.service.js';
 import { PricingService } from './pricing.service.js';
 import { ReservationsService } from './reservations.service.js';
 import { daysAhead } from './dates.testing.js';
+import { testPlate } from '../common/plate.testing.js';
 
 // Entegrasyon testi: GERÇEK PostgreSQL'e karşı. Asıl amaç iki şeyi kanıtlamak:
 //  1) aynı araca aynı anda gelen 8 istekten YALNIZ 1'i rezervasyon alır (FOR UPDATE kilidi),
@@ -70,7 +71,7 @@ describeDb('POST /reservations (gerçek PostgreSQL)', () => {
     });
     branchId = branch.id;
     const vehicle = await prisma.vehicle.create({
-      data: { plate: `T${run}`, year: 2030, vehicleModelId: model.id, branchId: branch.id },
+      data: { plate: testPlate(), year: 2030, vehicleModelId: model.id, branchId: branch.id },
     });
     vehicleId = vehicle.id;
     const created = await prisma.user.create({

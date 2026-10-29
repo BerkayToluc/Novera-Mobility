@@ -8,6 +8,7 @@ import { FALLBACK_RATES } from '../common/money.js';
 import { DAY_MS } from '../common/time.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { daysAhead } from '../reservations/dates.testing.js';
+import { testPlate } from '../common/plate.testing.js';
 
 // V2-19 (QUALITY T-03): the catalog read through the whole application over HTTP, as the web server calls it: branches,
 // models, extras, rates, and the search for vehicles with its 422 answers. Runs only on a database whose name contains
@@ -82,12 +83,12 @@ describeDb('the catalog over HTTP (gerçek PostgreSQL)', () => {
     ids.otherBranchId = (await prisma.branch.create({ data: branchData(`Katalog bayi 2 ${run}`) })).id;
     ids.vehicleId = (
       await prisma.vehicle.create({
-        data: { plate: `K-${run}`, year: 2026, vehicleModelId: ids.modelId, branchId: ids.branchId },
+        data: { plate: testPlate(), year: 2026, vehicleModelId: ids.modelId, branchId: ids.branchId },
       })
     ).id;
     // A second car of the same model at the same branch: the list names the model once.
     await prisma.vehicle.create({
-      data: { plate: `K2-${run}`, year: 2026, vehicleModelId: ids.modelId, branchId: ids.branchId },
+      data: { plate: testPlate(), year: 2026, vehicleModelId: ids.modelId, branchId: ids.branchId },
     });
     ids.extraId = (
       await prisma.extra.create({

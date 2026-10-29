@@ -1,10 +1,12 @@
 import "server-only";
 import type { AdminListParams } from "./admin-query";
 import { toApiQuery } from "./admin-query";
+import type { AdminExtra } from "./admin-extras";
+import { VEHICLE_API_FILTERS, type AdminVehicleDetail, type AdminVehiclePage, type BranchOption, type ModelOption } from "./admin-vehicles";
 import { MODEL_API_FILTERS, type AdminModelDetail, type AdminModelPage, type ModelClass } from "./admin-models";
 import { BRANCH_API_FILTERS, type AdminBranchDetail, type AdminBranchPage } from "./admin-branches";
 import { PROMO_API_FILTERS, type PromoCode, type PromoCodePage } from "./admin-promo";
-import { fetchAdminBranch, fetchAdminBranches, fetchAdminModel, fetchAdminModels, fetchAdminSummary, fetchModelClasses, fetchPromoCode, fetchPromoCodes, type AdminSummary } from "./api-admin";
+import { fetchAdminBranch, fetchAdminBranches, fetchAdminExtra, fetchAdminExtras, fetchAdminModel, fetchAdminModels, fetchAdminSummary, fetchAdminVehicle, fetchAdminVehicles, fetchModelClasses, fetchPromoCode, fetchPromoCodes, type AdminSummary } from "./api-admin";
 import { isMockMode } from "./mode";
 import { mockWorld } from "./mock-world";
 import { normalizePromo } from "./promo-codes";
@@ -76,4 +78,54 @@ export async function getAdminModel(slug: string): Promise<AdminModelDetail | nu
 export async function getModelClasses(): Promise<ModelClass[]> {
   if (!isMockMode()) return fetchModelClasses();
   return (await import("@/mocks/models")).mockClasses();
+}
+
+export async function getAdminVehicles(params: AdminListParams<"model" | "bayi" | "durum">): Promise<AdminVehiclePage> {
+  if (!isMockMode()) return fetchAdminVehicles(toApiQuery(params, VEHICLE_API_FILTERS));
+  return (await import("@/mocks/vehicles")).listMockVehicles(await mockWorld(), {
+    page: params.page,
+    pageSize: params.pageSize,
+    sort: params.sort,
+    q: params.q,
+    model: params.filters.model ?? null,
+    branch: params.filters.bayi ?? null,
+    status: params.filters.durum ?? null,
+  });
+}
+
+// `null` for a car that does not exist, or whose id cannot be one.
+export async function getAdminVehicle(id: string): Promise<AdminVehicleDetail | null> {
+  if (!isMockMode()) return fetchAdminVehicle(id);
+  return (await import("@/mocks/vehicles")).getMockVehicle(await mockWorld(), id);
+}
+
+// The models a car can be added to (the ones on the site), for the form's choice and the list's filter.
+export async function getModelOptions(includeRetired = false): Promise<ModelOption[]> {
+  const query = new URLSearchParams({ page: "1", pageSize: "100", sort: "name:asc" });
+  if (!includeRetired) query.set("status", "ACTIVE");
+  const page = isMockMode()
+    ? (await import("@/mocks/models")).listMockModels(await mockWorld(), { page: 1, pageSize: 100, sort: { key: "name", dir: "asc" }, q: "", classSlug: null, fuel: null, status: includeRetired ? null : "ACTIVE" })
+    : await fetchAdminModels(query);
+  return page.items.map((row) => ({ slug: row.slug, label: `${row.brand} ${row.model}` }));
+}
+
+// The branches a car can be put in (the open ones), for the form's choice and the list's filter.
+export async function getBranchOptions(includeClosed = false): Promise<BranchOption[]> {
+  const query = new URLSearchParams({ page: "1", pageSize: "100", sort: "name:asc" });
+  if (!includeClosed) query.set("status", "OPEN");
+  const page = isMockMode()
+    ? (await import("@/mocks/branches")).listMockBranches(await mockWorld(), { page: 1, pageSize: 100, sort: { key: "name", dir: "asc" }, q: "", city: null, status: includeClosed ? null : "OPEN" })
+    : await fetchAdminBranches(query);
+  return page.items.map((row) => ({ id: row.id, label: `${row.name} (${row.city})` }));
+}
+
+export async function getAdminExtras(): Promise<AdminExtra[]> {
+  if (!isMockMode()) return fetchAdminExtras();
+  return (await import("@/mocks/extras")).listMockExtras(await mockWorld());
+}
+
+// `null` for an extra that does not exist.
+export async function getAdminExtra(slug: string): Promise<AdminExtra | null> {
+  if (!isMockMode()) return fetchAdminExtra(slug);
+  return (await import("@/mocks/extras")).getMockExtra(await mockWorld(), slug);
 }

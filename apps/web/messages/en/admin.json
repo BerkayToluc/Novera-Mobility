@@ -494,6 +494,149 @@
         "confirm": "Retire the model"
       }
     },
+    "vehicles": {
+      "title": "Vehicles",
+      "intro": "The physical cars that are rented out. A car you add is free to rent at its branch and on free dates in search at once; a car you switch off does not show up.",
+      "newButton": "New vehicle",
+      "newTitle": "New vehicle",
+      "newIntro": "The car starts switched on. The plate, the year and the model cannot be changed later; if one is wrong, switch the car off and add a new one.",
+      "detailTitle": "Vehicle",
+      "detailIntro": "{model}, at {branch}.",
+      "searchLabel": "Search by plate or model",
+      "statusFilterLabel": "By status",
+      "modelFilterLabel": "By model",
+      "branchFilterLabel": "By branch",
+      "allModels": "All models",
+      "allBranches": "All branches",
+      "apply": "Filter",
+      "tableCaption": "Vehicles",
+      "retry": "Try again",
+      "columns": {
+        "plate": "Plate",
+        "model": "Model",
+        "branch": "Branch",
+        "year": "Year",
+        "status": "Status"
+      },
+      "status": {
+        "ACTIVE": "On",
+        "INACTIVE": "Off"
+      },
+      "emptyTitle": "No vehicles yet",
+      "emptyText": "Add the first vehicle; it is free to rent in search at once.",
+      "emptyFilteredTitle": "No vehicle matches this search",
+      "emptyFilteredText": "Try removing the filters or searching for something else.",
+      "loadErrorTitle": "The vehicles could not be loaded",
+      "loadErrorText": "Try again in a few seconds.",
+      "closedBranch": "closed",
+      "fields": {
+        "plate": "Plate",
+        "plateHint": "Example: 34 ABC 123. With or without spaces.",
+        "year": "Model year",
+        "model": "Model",
+        "modelHint": "Only models that are live on the site are listed.",
+        "modelChoose": "Choose a model",
+        "branch": "Branch",
+        "branchChoose": "Choose a branch",
+        "branchMove": "Branch",
+        "branchMoveHint": "Choose another branch to move the car there. Only open branches are listed.",
+        "fixedHint": "The plate, the year and the model do not change. If one is wrong, switch the car off and add a new one."
+      },
+      "form": {
+        "create": "Add the vehicle",
+        "move": "Change the branch",
+        "saving": "Saving",
+        "cancel": "Cancel"
+      },
+      "move": {
+        "blockedTitle": "This vehicle cannot be moved now",
+        "blockedText": "These have to finish or be cancelled first:"
+      },
+      "usage": {
+        "reservations": "{count, plural, one {# booking to come with this car} other {# bookings to come with this car}}",
+        "holds": "{count, plural, one {# car hold in progress (lasts 15 minutes at most)} other {# car holds in progress (each lasts 15 minutes at most)}}"
+      },
+      "errors": {
+        "plate": "Enter a valid Turkish plate (example: 34 ABC 123).",
+        "year": "Enter a year from {min} to {max}.",
+        "modelSlug": "Choose a model from the list.",
+        "branchId": "Choose a branch from the list.",
+        "modelSlugUnavailable": "This model is no longer live. Choose another one.",
+        "branchIdUnavailable": "This branch is closed or no longer exists. Choose another one.",
+        "plateTaken": "Another vehicle already has this plate.",
+        "generic": "This was not accepted. Check the fields and try again.",
+        "notFound": "This vehicle no longer exists. Go back to the list.",
+        "unavailable": "It could not be saved. Try again in a few seconds.",
+        "stale": "This vehicle changed while you were looking at it. The page was refreshed; try again."
+      },
+      "toast": {
+        "created": "Vehicle added",
+        "moved": "Vehicle moved",
+        "switchedOff": "Vehicle switched off",
+        "switchedOn": "Vehicle switched on again"
+      },
+      "actions": {
+        "title": "Switch the vehicle off or on",
+        "activeText": "A car that is switched off does not show up in search and takes no new bookings. Past bookings keep it. A car is never deleted; you can switch it on again at any time.",
+        "inactiveText": "This vehicle is switched off: it does not show up in search and takes no bookings.",
+        "blockedTitle": "This vehicle cannot be switched off now",
+        "blockedText": "These have to finish or be cancelled first:",
+        "switchOff": "Switch the vehicle off",
+        "switchOn": "Switch the vehicle on again",
+        "modelRetired": "The model of this car is retired. Put the model back on the Vehicle models screen first.",
+        "branchClosed": "The branch of this car is closed. Move the car to an open branch first, or open the branch again.",
+        "cannotReopen": "The vehicle could not be switched on: its model has to be live and its branch open."
+      },
+      "switchOffDialog": {
+        "title": "Switch off {plate}?",
+        "text": "The car will not show up in search and takes no new bookings. Past bookings are not affected. You can switch it on again.",
+        "confirm": "Switch the vehicle off"
+      }
+    },
+    "extras": {
+      "title": "Extra services",
+      "intro": "The name and price of the extras chosen when booking. Extras are not added or deleted. A new price only applies to later quotes and bookings; a booking that was made keeps its own price.",
+      "detailTitle": "Extra service",
+      "detailIntro": "You can change the name and the price. A new price only applies to bookings made from now on.",
+      "tableCaption": "Extra services",
+      "retry": "Try again",
+      "columns": {
+        "name": "Extra service",
+        "pricing": "Pricing",
+        "price": "Price"
+      },
+      "pricing": {
+        "PER_DAY": "Per day",
+        "FIXED": "Once per booking"
+      },
+      "emptyTitle": "No extra services",
+      "emptyText": "Extra services come with the system; they are only edited here.",
+      "loadErrorTitle": "The extra services could not be loaded",
+      "loadErrorText": "Try again in a few seconds.",
+      "fields": {
+        "nameTr": "Name (Turkish)",
+        "nameEn": "Name (English)",
+        "pricePerDay": "Price per day (₺)",
+        "priceFixed": "Price (₺, once per booking)",
+        "priceHint": "Example: 150 or 150.50. Do not type a thousands separator."
+      },
+      "form": {
+        "save": "Save changes",
+        "saving": "Saving",
+        "cancel": "Cancel"
+      },
+      "errors": {
+        "nameTr": "Enter the Turkish name (at most 80 characters).",
+        "nameEn": "Enter the English name (at most 80 characters).",
+        "price": "Enter it in lira with at most two decimals (example: 150 or 150.50).",
+        "generic": "This was not accepted. Check the fields and try again.",
+        "notFound": "This extra service no longer exists. Go back to the list.",
+        "unavailable": "It could not be saved. Try again in a few seconds."
+      },
+      "toast": {
+        "saved": "Extra service saved"
+      }
+    },
     "cityFilter": {
       "all": "All cities",
       "apply": "Filter"

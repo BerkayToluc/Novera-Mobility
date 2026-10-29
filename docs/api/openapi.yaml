@@ -1389,6 +1389,266 @@ paths:
               schema: { $ref: "#/components/schemas/Error" }
         "429": { $ref: "#/components/responses/TooManyRequests" }
 
+  /admin/vehicles:
+    get:
+      tags: [admin]
+      summary: Araçlar (yönetim)
+      description: |
+        Sayfalı liste (ADR-24): `{ items, total, page, pageSize }`. Kapalı (`INACTIVE`) araçlar da dahildir. Süzme, arama ve
+        sıralama sunucuda yapılır. `q` plakada (boşluk, tire ve büyük/küçük harf fark etmez: `34abc` → `34 ABC 123`) ve modelin
+        marka ve adında aranır. Sınır: yönetici başına dakikada 120 (`429 RATE_LIMITED`).
+      security:
+        - cookieAuth: []
+      parameters:
+        - { name: page, in: query, schema: { type: integer, minimum: 1, default: 1 } }
+        - { name: pageSize, in: query, schema: { type: integer, minimum: 1, maximum: 100, default: 20 } }
+        - name: sort
+          in: query
+          description: "`alan` ya da `alan:asc|desc`. Varsayılan `plate:asc`."
+          schema: { type: string, enum: [plate, year, model, branch, createdAt], example: "year:desc" }
+        - { name: q, in: query, schema: { type: string, maxLength: 100 } }
+        - { name: model, in: query, description: Modelin adresi (`renault-clio`). Olmayan bir model hiçbir şey bulmaz., schema: { type: string } }
+        - { name: branch, in: query, description: Bayinin kimliği., schema: { type: string, format: uuid } }
+        - { name: status, in: query, schema: { type: string, enum: [ACTIVE, INACTIVE] } }
+      responses:
+        "200":
+          description: Bir sayfa araç
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminVehiclePage" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Yönetici değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+    post:
+      tags: [admin]
+      summary: Yeni araç
+      description: |
+        Araç açık (`ACTIVE`) başlar ve bayisinde, çakışan rezervasyonu olmayan tarihlerde aramada müsait görünür. **Plaka** Türk
+        plakasıdır: il kodu (01–81), 1–3 harf (Q, W, X ve Türkçe harfler yok), 2–4 rakam. Nasıl yazılırsa yazılsın büyük harfe
+        çevrilir ve `34 ABC 123` biçiminde saklanır; aynı plaka ikinci kez eklenemez (`409 PLATE_TAKEN`). Yıl 2015 ile bu yıl + 1
+        arasındadır. **Kapalı bayiye ya da kaldırılmış modele araç eklenemez** (`422`, `fieldErrors.branchId` /
+        `fieldErrors.modelSlug` = `UNKNOWN_REFERENCE`). Plaka, yıl ve model sonradan değişmez (yanlışsa araç kapatılır, yenisi
+        eklenir). İşlem kaydı: `vehicle.create`.
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminVehicleCreate" }
+      responses:
+        "201":
+          description: Eklenen araç
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminVehicle" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Yönetici değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "409":
+          description: Bu plaka kullanımda (`PLATE_TAKEN`, `fieldErrors.plate`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "415": { description: JSON olmayan gövde (`BAD_REQUEST`) }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
+  /admin/vehicles/{id}:
+    parameters:
+      - { name: id, in: path, required: true, description: Aracın kimliği. Kimlik olamayacak bir değer `404` döner., schema: { type: string, format: uuid } }
+    get:
+      tags: [admin]
+      summary: Bir araç ve neyin onu yerinde tuttuğu
+      description: "`usage`, taşımayı ve kapatmayı engelleyen şeylerin sayısıdır; ekran düğmeye basılmadan nedenleri söyler."
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Araç
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminVehicleDetail" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Yönetici değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: Böyle bir araç yok (`NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+    patch:
+      tags: [admin]
+      summary: Aracı başka bayiye taşı, kapat ya da yeniden aç
+      description: |
+        Yalnızca `branchId` ve `active` değişir; `plate`, `year` ve `modelSlug` gönderilirse `422 NOT_ALLOWED` döner. Düzenlenen
+        kaydın `updatedAt` değeri geri gönderilir; araç bu arada değiştiyse `409 STALE_WRITE`. **Taşımak ve kapatmak**, aracın
+        gelecekte başlayacak iptal edilmemiş rezervasyonu ya da süresi dolmamış tutması varsa `409 IN_USE` döner
+        (`details.reservations`, `details.holds`); hiçbir şey değişmez. Taşınan bayi açık olmalıdır (`fieldErrors.branchId` =
+        `UNKNOWN_REFERENCE`). **Yeniden açmak** için modelin kaldırılmamış ve bayinin açık olması gerekir
+        (`fieldErrors.active` = `NOT_ALLOWED`). İşlem kaydı: `vehicle.update`.
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminVehicleUpdate" }
+      responses:
+        "200":
+          description: Güncel araç
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminVehicle" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Yönetici değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: Böyle bir araç yok (`NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "409":
+          description: Kayıt değişmiş (`STALE_WRITE`) ya da araç kullanımda (`IN_USE`, sayılar `details` içinde)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "415": { description: JSON olmayan gövde (`BAD_REQUEST`) }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
+  /admin/extras:
+    get:
+      tags: [admin]
+      summary: Ek hizmetler (yönetim)
+      description: Birkaç satırlık sabit liste, sayfalama yok; en ucuzdan başlar. Ek hizmet eklenmez ya da silinmez, yalnızca ad ve fiyat düzenlenir.
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Ek hizmetler
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/AdminExtra" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Yönetici değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
+  /admin/extras/{slug}:
+    parameters:
+      - { name: slug, in: path, required: true, description: Ek hizmetin adresi; büyük/küçük harf fark etmez., schema: { type: string, example: child-seat } }
+    get:
+      tags: [admin]
+      summary: Bir ek hizmet
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Ek hizmet
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminExtra" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Yönetici değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: Böyle bir ek hizmet yok (`NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+    patch:
+      tags: [admin]
+      summary: Ek hizmetin adını ve fiyatını değiştir
+      description: |
+        Yalnızca `name` (iki dilde de zorunlu, en çok 80 karakter) ve `price` (TRY kuruş, 0–1.000.000) değişir; `slug` ve
+        `pricing` gönderilirse `422 NOT_ALLOWED`. **Yeni fiyat yalnızca sonraki fiyat hesaplarına ve rezervasyonlara uygulanır**:
+        yapılmış rezervasyon kendi birim fiyatını saklar (`ReservationExtra.unitPrice`). İşlem kaydı: `extra.update`.
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminExtraUpdate" }
+      responses:
+        "200":
+          description: Güncel ek hizmet
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminExtra" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Yönetici değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: Böyle bir ek hizmet yok (`NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "409":
+          description: Kayıt değişmiş (`STALE_WRITE`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "415": { description: JSON olmayan gövde (`BAD_REQUEST`) }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
   /admin/ping:
     get:
       tags: [admin]
@@ -1538,6 +1798,7 @@ components:
             - STALE_WRITE
             - CODE_TAKEN
             - SLUG_TAKEN
+            - PLATE_TAKEN
             - INTERNAL_ERROR
         message:
           type: string
@@ -1574,6 +1835,7 @@ components:
               - BELOW_USAGE
               - NOT_ALLOWED
               - SLUG_TAKEN
+              - PLATE_TAKEN
           example: { email: EMAIL_TAKEN }
 
     LocalizedText:
@@ -2224,6 +2486,91 @@ components:
         dailyPrice: { type: integer, minimum: 1, maximum: 10000000 }
         description: { $ref: "#/components/schemas/LocalizedText" }
         imageUrl: { type: string, nullable: true }
+
+    AdminVehicle:
+      type: object
+      required: [id, plate, year, status, model, branch, createdAt, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        plate: { type: string, example: "34 NV 1001", description: "Türk plakası, `34 ABC 123` biçiminde saklanır." }
+        year: { type: integer, minimum: 2015, example: 2025 }
+        status: { type: string, enum: [ACTIVE, INACTIVE], description: "`ACTIVE` kiralanabilir; `INACTIVE` aramada çıkmaz ve rezervasyon almaz. Araç silinmez." }
+        model:
+          type: object
+          required: [slug, brand, model, retired]
+          properties:
+            slug: { type: string, example: renault-clio }
+            brand: { type: string, example: Renault }
+            model: { type: string, example: Clio }
+            retired: { type: boolean, description: Model kaldırılmışsa araç yeniden açılamaz. }
+        branch:
+          type: object
+          required: [id, name, city, closed]
+          properties:
+            id: { type: string, format: uuid }
+            name: { type: string, example: İstanbul Kadıköy }
+            city: { type: string, example: İstanbul }
+            closed: { type: boolean }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time, description: Kaydın sürümü; değiştirirken geri gönderilir (`STALE_WRITE`). }
+
+    AdminVehicleDetail:
+      allOf:
+        - $ref: "#/components/schemas/AdminVehicle"
+        - type: object
+          required: [usage]
+          properties:
+            usage:
+              type: object
+              required: [reservations, holds]
+              description: Aracı yerinde tutan şeyler; ikisi de sıfırsa araç taşınabilir ve kapatılabilir.
+              properties:
+                reservations: { type: integer, minimum: 0, description: Araçla gelecekte başlayacak iptal edilmemiş rezervasyon. }
+                holds: { type: integer, minimum: 0, description: Süresi dolmamış araç tutma. }
+
+    AdminVehiclePage:
+      type: object
+      required: [items, total, page, pageSize]
+      properties:
+        items: { type: array, items: { $ref: "#/components/schemas/AdminVehicle" } }
+        total: { type: integer, minimum: 0, description: Süzgeçten geçen tüm araçlar, yalnızca bu sayfa değil. }
+        page: { type: integer }
+        pageSize: { type: integer }
+
+    AdminVehicleCreate:
+      type: object
+      required: [plate, year, modelSlug, branchId]
+      properties:
+        plate: { type: string, maxLength: 30, example: "34 abc 123", description: "Nasıl yazılırsa yazılsın büyük harfe çevrilir ve `34 ABC 123` olarak saklanır." }
+        year: { type: integer, minimum: 2015, description: 2015 ile bu yıl + 1 arası. }
+        modelSlug: { type: string, example: renault-clio }
+        branchId: { type: string, format: uuid }
+
+    AdminVehicleUpdate:
+      type: object
+      required: [updatedAt]
+      properties:
+        updatedAt: { type: string, format: date-time, description: Düzenlenen kaydın `updatedAt` değeri. }
+        branchId: { type: string, format: uuid }
+        active: { type: boolean }
+
+    AdminExtra:
+      type: object
+      required: [slug, name, price, pricing, updatedAt]
+      properties:
+        slug: { type: string, example: child-seat }
+        name: { $ref: "#/components/schemas/LocalizedText" }
+        price: { type: integer, minimum: 0, description: TRY kuruş. }
+        pricing: { type: string, enum: [PER_DAY, FIXED], description: Günlük ya da rezervasyon başına sabit. Değişmez. }
+        updatedAt: { type: string, format: date-time, description: Kaydın sürümü; değiştirirken geri gönderilir (`STALE_WRITE`). }
+
+    AdminExtraUpdate:
+      type: object
+      required: [updatedAt]
+      properties:
+        updatedAt: { type: string, format: date-time, description: Düzenlenen kaydın `updatedAt` değeri. }
+        name: { $ref: "#/components/schemas/LocalizedText" }
+        price: { type: integer, minimum: 0, maximum: 1000000 }
 
     UserUpdate:
       type: object

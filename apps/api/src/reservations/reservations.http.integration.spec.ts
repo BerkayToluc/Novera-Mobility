@@ -7,6 +7,7 @@ import { configureApp } from '../app.setup.js';
 import { DAY_MS } from '../common/time.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { daysAhead } from './dates.testing.js';
+import { testPlate } from '../common/plate.testing.js';
 
 // V2-19 (QUALITY T-03): a booking through the whole application over HTTP, signed in with a real session: the booking
 // itself, a start in the past (V2-02 regression), a long history, cancelling, and whose record is whose.
@@ -77,7 +78,7 @@ describeDb('reservations over HTTP (gerçek PostgreSQL)', () => {
       vehicleIds.push(
         (
           await prisma.vehicle.create({
-            data: { plate: `R${run}${i}`, year: 2026, vehicleModelId: ids.modelId, branchId: ids.branchId },
+            data: { plate: testPlate(), year: 2026, vehicleModelId: ids.modelId, branchId: ids.branchId },
           })
         ).id,
       );

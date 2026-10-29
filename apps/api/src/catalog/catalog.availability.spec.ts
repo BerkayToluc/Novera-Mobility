@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { AvailabilityService } from './availability.service.js';
 import { daysAhead, slotAtLeast, slotBefore } from '../reservations/dates.testing.js';
+import { testPlate } from '../common/plate.testing.js';
 import {
   DAILY,
   DAY,
@@ -98,7 +99,7 @@ describeDb('GET /vehicles müsaitlik sorgusu (gerçek PostgreSQL)', () => {
   async function addVehicle(branchId: string): Promise<string> {
     counter += 1;
     const vehicle = await prisma.vehicle.create({
-      data: { plate: `T-${run}-${counter}`, year: 2026, vehicleModelId: modelId, branchId },
+      data: { plate: testPlate(), year: 2026, vehicleModelId: modelId, branchId },
     });
     created.vehicles.push(vehicle.id);
     return vehicle.id;

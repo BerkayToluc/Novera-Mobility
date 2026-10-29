@@ -6,6 +6,7 @@ import { PrismaService } from '../prisma/prisma.service.js';
 import { DAY_MS, daysAhead } from './dates.testing.js';
 import { PricingService } from './pricing.service.js';
 import { ReservationsService } from './reservations.service.js';
+import { testPlate } from '../common/plate.testing.js';
 
 // Integration test against a real PostgreSQL (QUALITY G-04): a campaign code's total cap and its one-use-per-person
 // rule must hold when bookings arrive at the same moment, and a cancelled booking gives the code back.
@@ -77,7 +78,7 @@ describeDb('campaign code caps (gerçek PostgreSQL)', () => {
     branchId = branch.id;
     for (let i = 0; i < VEHICLES; i += 1) {
       const vehicle = await prisma.vehicle.create({
-        data: { plate: `P${run}${i}`, year: 2030, vehicleModelId: model.id, branchId: branch.id },
+        data: { plate: testPlate(), year: 2030, vehicleModelId: model.id, branchId: branch.id },
       });
       vehicleIds.push(vehicle.id);
     }
