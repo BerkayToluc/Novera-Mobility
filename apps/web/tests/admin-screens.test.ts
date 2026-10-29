@@ -19,7 +19,7 @@ describe("the panel screens", () => {
 
   it("the screens that are built are on, the summary comes first, and the rest stay out of the menu", () => {
     // V2-26 turned on the campaign codes; each later issue adds its own key here when it turns its screen on.
-    expect(readyScreens().map((screen) => screen.key)).toEqual(["summary", "promoCodes"]);
+    expect(readyScreens().map((screen) => screen.key)).toEqual(["summary", "promoCodes", "branches"]);
     expect(ADMIN_SCREENS[0]!.key).toBe("summary");
   });
 

@@ -106,6 +106,7 @@ export function branchDetailFromApi(branch: Schemas["Branch"]): BranchDetail {
     longitude: branch.longitude,
     phone: branch.phone,
     email: branch.email,
+    kind: branch.kind === "AIRPORT" ? "airport" : "city",
     openingHours: {
       weekdays: parseHours(branch.openingHours.weekdays),
       saturday: parseHours(branch.openingHours.saturday),

@@ -52,7 +52,7 @@ export interface paths {
         };
         /**
          * Tüm bayiler
-         * @description ~15 bayi, düz liste. Şehir filtresi ve metin arama frontend'dedir.
+         * @description ~15 bayi, düz liste. Şehir filtresi ve metin arama frontend'dedir. **Kapatılmış bayiler listede yoktur** (V2-27); `kind` havalimanı tezgâhı mı şehir ofisi mi olduğunu söyler.
          */
         get: {
             parameters: {
@@ -1751,6 +1751,440 @@ export interface paths {
         };
         trace?: never;
     };
+    "/admin/branches": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Bayiler (yönetim)
+         * @description Sayfalı liste (ADR-24): `{ items, total, page, pageSize }`. **Kapalı bayiler de dahildir** (herkese açık `GET /branches`
+         *     onları döndürmez). Tablo küçük ve elle yönetilir; süzme, arama ve sıralama sunucuda yapılır. Arama ad, şehir ve
+         *     adreste yapılır, büyük/küçük harf ve Türkçe harfler fark etmez (`kadikoy` → Kadıköy).
+         *     Sınır: yönetici başına dakikada 120 (`429 RATE_LIMITED`).
+         */
+        get: {
+            parameters: {
+                query?: {
+                    page?: number;
+                    pageSize?: number;
+                    /** @description `alan` ya da `alan:asc|desc`. Varsayılan `name:asc`. */
+                    sort?: "name" | "city" | "activeVehicles" | "createdAt";
+                    q?: string;
+                    /** @description 81 ilden biri. */
+                    city?: string;
+                    status?: "OPEN" | "CLOSED";
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Bir sayfa bayi */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AdminBranchPage"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        put?: never;
+        /**
+         * Yeni bayi
+         * @description Bayi hemen sitede görünür (Bayilerimiz, arama seçici, harita). Bütün alanlar zorunludur. Şehir 81 ilden biri; enlem
+         *     36–42, boylam 26–45 derece dolayında (Türkiye'yi kapsayan kutu; `OUT_OF_RANGE`); çalışma saatleri üç gün, her biri
+         *     `HH:MM-HH:MM` (açılış kapanıştan önce) ya da `closed`. İşlem kaydı: `branch.create`.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["AdminBranchCreate"];
+                };
+            };
+            responses: {
+                /** @description Oluşturulan bayi */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AdminBranch"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description JSON olmayan gövde (`BAD_REQUEST`) */
+                415: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/branches/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * Bir bayi ve neyin onu açık tuttuğu
+         * @description `usage`, bayiyi kapatmayı engelleyen şeylerin sayısıdır; ekran kapatma düğmesine basılmadan nedenleri söyler.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Bayi */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AdminBranchDetail"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Böyle bir bayi yok ya da kimlik biçimi yanlış (`NOT_FOUND`) */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Bayiyi değiştir
+         * @description Yalnızca gönderilen alanlar değişir. İstek, düzenlenen kaydın `updatedAt` değerini taşır; kayıt arada değiştiyse
+         *     `409 STALE_WRITE` döner ve hiçbir şey yazılmaz. Kapalı bayi de düzeltilebilir. Kapatma ve yeniden açma bu uçla değil,
+         *     `/close` ve `/reopen` ile yapılır. İşlem kaydı: `branch.update`.
+         */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["AdminBranchUpdate"];
+                };
+            };
+            responses: {
+                /** @description Değişen bayi (yeni `updatedAt` ile) */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AdminBranch"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Böyle bir bayi yok (`NOT_FOUND`) */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Kayıt arada değişti (`STALE_WRITE`) */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description JSON olmayan gövde (`BAD_REQUEST`) */
+                415: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        trace?: never;
+    };
+    "/admin/branches/{id}/close": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Bayiyi kapat
+         * @description Bayi silinmez, kapatılır; geçmiş rezervasyonlar adını taşımaya devam eder. Kapatılan bayi herkese açık `GET /branches`'te,
+         *     aramada, tutmada, fiyatta ve rezervasyonda yoktur. **Şunlardan biri varsa `409 IN_USE`** döner ve hiçbir şey değişmez;
+         *     `details` her birinin sayısını taşır:
+         *     - `reservations`: gelecekte başlayan (alış bu bayide) ya da bitecek (dönüş bu bayide) iptal edilmemiş rezervasyon; sürmekte
+         *       olan ama buraya dönecek kiralama da sayılır;
+         *     - `holds`: süresi dolmamış araç tutma;
+         *     - `vehicles`: bayideki, açık (`active`) araç.
+         *
+         *     Bayi satırı rezervasyon ve tutmanın aldığı paylaşımlı kilidin karşısında `FOR UPDATE` ile alınır; aynı anda gelen bir
+         *     rezervasyonla sırayla çalışır. Zaten kapalı bayide çağrı bir şey değiştirmez (`200`). Gövdesizdir. İşlem kaydı: `branch.close`.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Kapanan bayi */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AdminBranch"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Böyle bir bayi yok (`NOT_FOUND`) */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Bayi hâlâ kullanımda (`IN_USE`, `details`) */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/branches/{id}/reopen": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Kapalı bayiyi yeniden aç
+         * @description Bayi olduğu gibi siteye geri döner. Açık bayide çağrı bir şey değiştirmez (`200`). Gövdesizdir. İşlem kaydı `branch.reopen`.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Açılan bayi */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AdminBranch"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Böyle bir bayi yok (`NOT_FOUND`) */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/ping": {
         parameters: {
             query?: never;
@@ -1884,6 +2318,10 @@ export interface components {
             code: "BAD_REQUEST" | "VALIDATION_FAILED" | "UNAUTHENTICATED" | "FORBIDDEN" | "INVALID_CREDENTIALS" | "EMAIL_TAKEN" | "NOT_FOUND" | "VEHICLE_UNAVAILABLE" | "INVALID_DATE_RANGE" | "RESERVATION_LIMIT" | "RESET_TOKEN_INVALID" | "SPAM_DETECTED" | "RATE_LIMITED" | "PAYLOAD_TOO_LARGE" | "IN_USE" | "STALE_WRITE" | "CODE_TAKEN" | "INTERNAL_ERROR";
             /** @description Geliştirici için İngilizce metin. Ekranda gösterilmez. */
             message: string;
+            /** @description `IN_USE` için nedenlerin sayıları (bayi: reservations, holds, vehicles); ekran bunları listeler. */
+            details?: {
+                [key: string]: number;
+            };
             /**
              * @description Alan adı → sabit hata kodu.
              * @example {
@@ -1959,6 +2397,7 @@ export interface components {
             phone: string;
             /** Format: email */
             email: string;
+            kind: components["schemas"]["BranchKind"];
             openingHours: components["schemas"]["OpeningHours"];
             /** @description Bayideki modeller (arama formundaki bayi önizlemesi için). */
             vehicleModels: {
@@ -2359,6 +2798,103 @@ export interface components {
             validUntil?: string | null;
             maxRedemptions?: number | null;
             oncePerUser?: boolean;
+        };
+        /**
+         * @description Havalimanı tezgâhı ya da şehir ofisi. Eskiden addan çıkarılıyordu; artık bayinin kendi alanı.
+         * @enum {string}
+         */
+        BranchKind: "CITY" | "AIRPORT";
+        /** @description Bayiyi açık tutan şeyler; hepsi sıfırsa bayi kapatılabilir. */
+        BranchUsage: {
+            /** @description Gelecekte başlayan ya da bitecek iptal edilmemiş rezervasyon. */
+            reservations: number;
+            /** @description Süresi dolmamış araç tutma. */
+            holds: number;
+            /** @description Bayideki açık araç. */
+            vehicles: number;
+        };
+        AdminBranch: {
+            /** Format: uuid */
+            id: string;
+            /** @example İstanbul Kadıköy */
+            name: string;
+            /**
+             * @description 81 ilden biri.
+             * @example İstanbul
+             */
+            city: string;
+            address: string;
+            /** Format: double */
+            latitude: number;
+            /** Format: double */
+            longitude: number;
+            phone: string;
+            /** Format: email */
+            email: string;
+            kind: components["schemas"]["BranchKind"];
+            openingHours: components["schemas"]["OpeningHours"];
+            /** @enum {string} */
+            status: "OPEN" | "CLOSED";
+            /**
+             * Format: date-time
+             * @description Kapatıldığı an; açıksa null.
+             */
+            closedAt: string | null;
+            activeVehicles: number;
+            /** Format: date-time */
+            createdAt: string;
+            /**
+             * Format: date-time
+             * @description Kaydın sürümü; değiştirirken geri gönderilir (`STALE_WRITE`).
+             */
+            updatedAt: string;
+        };
+        AdminBranchDetail: components["schemas"]["AdminBranch"] & {
+            usage: components["schemas"]["BranchUsage"];
+        };
+        AdminBranchPage: {
+            items: components["schemas"]["AdminBranch"][];
+            /** @description Süzgeçten geçen tüm bayiler */
+            total: number;
+            page: number;
+            pageSize: number;
+        };
+        AdminBranchCreate: {
+            name: string;
+            /** @example Ankara */
+            city: string;
+            address: string;
+            /** Format: double */
+            latitude: number;
+            /** Format: double */
+            longitude: number;
+            phone: string;
+            /**
+             * Format: email
+             * @description Küçük harfe çevrilir.
+             */
+            email: string;
+            kind: components["schemas"]["BranchKind"];
+            openingHours: components["schemas"]["OpeningHours"];
+        };
+        AdminBranchUpdate: {
+            /**
+             * Format: date-time
+             * @description Düzenlenen kaydın `updatedAt` değeri.
+             */
+            updatedAt: string;
+            name?: string;
+            city?: string;
+            address?: string;
+            /** Format: double */
+            latitude?: number;
+            /** Format: double */
+            longitude?: number;
+            phone?: string;
+            /** Format: email */
+            email?: string;
+            kind?: components["schemas"]["BranchKind"];
+            openingHours?: components["schemas"]["OpeningHours"];
         };
         /** @description Gönderilen alanlar güncellenir. */
         UserUpdate: {

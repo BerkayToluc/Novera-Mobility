@@ -21,6 +21,7 @@ const branch = (overrides: Partial<BranchDetail> = {}): BranchDetail => ({
   longitude: 27.15,
   phone: "+90 232 555 01 06",
   email: "izmir@novera.example",
+  kind: "airport",
   openingHours: {
     weekdays: { open: "00:00", close: "24:00" },
     saturday: { open: "00:00", close: "24:00" },
@@ -172,12 +173,11 @@ describe("telHref", () => {
   });
 });
 
+
 describe("branchKind", () => {
-  it("calls a branch whose name has Havalimanı an airport, and any other a city office", () => {
-    expect(branchKind({ name: "İstanbul Havalimanı" })).toBe("airport");
-    expect(branchKind({ name: "Esenboğa Havalimanı" })).toBe("airport");
-    expect(branchKind({ name: "ADNAN MENDERES HAVALİMANI" })).toBe("airport");
-    expect(branchKind({ name: "Kadıköy" })).toBe("city");
-    expect(branchKind({ name: "Merkez" })).toBe("city");
+  // V2-27: the kind is a field the panel sets, not a guess from the name.
+  it("is the branch's own field, whatever the name says", () => {
+    expect(branchKind(branch({ kind: "airport", name: "Merkez" }))).toBe("airport");
+    expect(branchKind(branch({ kind: "city", name: "Antalya Havalimanı" }))).toBe("city");
   });
 });

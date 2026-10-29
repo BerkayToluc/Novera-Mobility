@@ -1,9 +1,11 @@
 import "server-only";
 import type { AdminListParams } from "./admin-query";
 import { toApiQuery } from "./admin-query";
+import { BRANCH_API_FILTERS, type AdminBranchDetail, type AdminBranchPage } from "./admin-branches";
 import { PROMO_API_FILTERS, type PromoCode, type PromoCodePage } from "./admin-promo";
-import { fetchAdminSummary, fetchPromoCode, fetchPromoCodes, type AdminSummary } from "./api-admin";
+import { fetchAdminBranch, fetchAdminBranches, fetchAdminSummary, fetchPromoCode, fetchPromoCodes, type AdminSummary } from "./api-admin";
 import { isMockMode } from "./mode";
+import { mockWorld } from "./mock-world";
 import { normalizePromo } from "./promo-codes";
 
 // What the panel's server pages read. With USE_MOCKS=1 (local work and tests only, lib/mode.ts) the sample data is
@@ -31,4 +33,22 @@ export async function getPromoCode(raw: string): Promise<PromoCode | null> {
   if (!code) return null;
   if (!isMockMode()) return fetchPromoCode(code);
   return (await import("@/mocks/promo-codes")).getMockPromoCode(code);
+}
+
+export async function getAdminBranches(params: AdminListParams<"sehir" | "durum">): Promise<AdminBranchPage> {
+  if (!isMockMode()) return fetchAdminBranches(toApiQuery(params, BRANCH_API_FILTERS));
+  return (await import("@/mocks/branches")).listMockBranches(await mockWorld(), {
+    page: params.page,
+    pageSize: params.pageSize,
+    sort: params.sort,
+    q: params.q,
+    city: params.filters.sehir ?? null,
+    status: params.filters.durum ?? null,
+  });
+}
+
+// `null` for a branch that does not exist, or whose id cannot be one.
+export async function getAdminBranch(id: string): Promise<AdminBranchDetail | null> {
+  if (!isMockMode()) return fetchAdminBranch(id);
+  return (await import("@/mocks/branches")).getMockBranch(await mockWorld(), id);
 }

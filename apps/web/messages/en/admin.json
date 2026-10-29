@@ -261,6 +261,114 @@
         "title": "{code} cannot be deleted",
         "text": "{code} was used in at least one booking, and the past records carry its name. Instead of deleting it you can switch it off: it is applied to no new booking and the old ones do not change."
       }
+    },
+    "branches": {
+      "title": "Branches",
+      "intro": "The branches shown on the site, in the search form and on the map. A branch you add appears at once; a branch you close is shown nowhere.",
+      "newButton": "New branch",
+      "newTitle": "New branch",
+      "newIntro": "As soon as the branch is created it shows on the Branches page, in the search form and on the map. A branch with no cars says \"no cars available\" in the search; its cars are added later.",
+      "detailTitle": "Branch",
+      "detailIntro": "The {city} branch.",
+      "searchLabel": "Search branches",
+      "cityFilterLabel": "By city",
+      "filterLabel": "By status",
+      "tableCaption": "Branches",
+      "retry": "Try again",
+      "columns": {
+        "name": "Branch",
+        "city": "City",
+        "kind": "Type",
+        "vehicles": "Cars",
+        "status": "Status"
+      },
+      "kind": {
+        "CITY": "City office",
+        "AIRPORT": "Airport"
+      },
+      "status": {
+        "OPEN": "Open",
+        "CLOSED": "Closed"
+      },
+      "emptyTitle": "No branches yet",
+      "emptyText": "Add the first branch; it shows on the site at once.",
+      "emptyFilteredTitle": "No branch matches this search",
+      "emptyFilteredText": "Try removing the filters or searching for something else.",
+      "loadErrorTitle": "The branches could not be loaded",
+      "loadErrorText": "Try again in a few seconds.",
+      "fields": {
+        "name": "Branch name",
+        "city": "City",
+        "cityChoose": "Choose a city",
+        "kind": "Type",
+        "kindHint": "An airport desk or a city office. The filter on the Branches page works by it.",
+        "address": "Address",
+        "latitude": "Latitude",
+        "latitudeHint": "Example: 39.9179. In Türkiye it is between 36 and 42.",
+        "longitude": "Longitude",
+        "longitudeHint": "Example: 32.8627. In Türkiye it is between 26 and 45.",
+        "seeOnMap": "See the point on a map (opens in a new tab)",
+        "phone": "Phone",
+        "email": "E-mail"
+      },
+      "hours": {
+        "title": "Opening hours",
+        "hint": "The opening and closing time of each day; tick \"Closed\" for a day the branch is shut.",
+        "weekdays": "Weekdays",
+        "saturday": "Saturday",
+        "sunday": "Sunday",
+        "closed": "Closed",
+        "open": "Opens",
+        "close": "Closes"
+      },
+      "form": {
+        "create": "Create the branch",
+        "save": "Save changes",
+        "saving": "Saving",
+        "cancel": "Cancel"
+      },
+      "errors": {
+        "name": "Enter a name of 2 to 80 characters.",
+        "city": "Choose a city from the list.",
+        "address": "Enter the address (at least 5 characters).",
+        "latitude": "Enter a latitude between 36 and 42 (example: 39.9179). Latitude and longitude may be swapped.",
+        "longitude": "Enter a longitude between 26 and 45 (example: 32.8627).",
+        "phone": "Enter a valid phone number.",
+        "email": "Enter a valid e-mail address.",
+        "hours": "The opening time has to be before the closing time, or tick the day as closed.",
+        "generic": "This was not accepted. Check the fields and try again.",
+        "notFound": "This branch no longer exists. Go back to the list.",
+        "unavailable": "It could not be saved. Try again in a few seconds."
+      },
+      "toast": {
+        "created": "Branch created",
+        "saved": "Changes saved",
+        "closed": "Branch closed",
+        "reopened": "Branch opened again"
+      },
+      "actions": {
+        "title": "Close or reopen the branch",
+        "openText": "A closed branch is shown nowhere on the site (search, list, map) and takes no new bookings. Past bookings keep its name. A branch is never deleted; you can open it again at any time.",
+        "closedText": "This branch is closed: it is not on the site and takes no new bookings. Open it again and it comes back as it was.",
+        "blockedTitle": "This branch cannot be closed now",
+        "blockedText": "These have to finish first, or be moved to another branch:",
+        "close": "Close the branch",
+        "reopen": "Open the branch again"
+      },
+      "usage": {
+        "reservations": "{count, plural, one {# booking to come (starting at this branch or returning here)} other {# bookings to come (starting at this branch or returning here)}}",
+        "holds": "{count, plural, one {# running car hold (lasts 15 minutes at most)} other {# running car holds (last 15 minutes at most)}}",
+        "vehicles": "{count, plural, one {# car that is on (move it to another branch or remove it)} other {# cars that are on (move them to another branch or remove them)}}"
+      },
+      "closeDialog": {
+        "title": "Close {name}?",
+        "text": "The branch disappears from the site, the search and the map and takes no new bookings. Past bookings keep its name. You can open it again.",
+        "confirm": "Close the branch"
+      }
+    },
+    "cityFilter": {
+      "all": "All cities",
+      "apply": "Filter"
     }
   }
 }

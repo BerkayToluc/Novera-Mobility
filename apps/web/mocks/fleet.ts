@@ -140,9 +140,6 @@ function inCurrency(vehicle: Vehicle, currency: Currency): Vehicle {
   return { ...vehicle, dailyPrice: mockConvert(vehicle.dailyPrice, currency) };
 }
 
-export function mockBranches(): Branch[] {
-  return MOCK_BRANCHES;
-}
 
 export function mockVehicles(currency: Currency): Vehicle[] {
   return VEHICLES.map((vehicle) => inCurrency(vehicle, currency));

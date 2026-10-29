@@ -18,7 +18,9 @@ export class CatalogService {
   }
 
   async getBranches() {
+    // A closed branch is not on the site (V2-27); its past bookings still carry its name.
     const branches = await this.prisma.branch.findMany({
+      where: { closedAt: null },
       orderBy: { name: 'asc' },
       include: {
         vehicles: {
@@ -43,6 +45,7 @@ export class CatalogService {
         longitude: b.longitude,
         phone: b.phone,
         email: b.email,
+        kind: b.kind,
         openingHours: b.openingHours as { weekdays: string; saturday: string; sunday: string },
         vehicleModels: Array.from(uniqueModels.values()),
       };

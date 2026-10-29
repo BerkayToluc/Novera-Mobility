@@ -1,6 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { HOUR_MS } from '../common/time.js';
 import { hasConflict } from '../common/availability.js';
+import { lockOpenBranches } from '../common/branch-lock.js';
 import { isUuid } from '../common/uuid.js';
 import { parseInput, validationFailed } from '../common/zod-validation.js';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -28,7 +29,7 @@ export class HoldsService {
 
     // Bayiler var mı? (işlem dışında, kilit tutmadan)
     const branches = await this.prisma.branch.findMany({
-      where: { id: { in: [valid.pickupBranchId, valid.returnBranchId] } },
+      where: { id: { in: [valid.pickupBranchId, valid.returnBranchId] }, closedAt: null },
       select: { id: true },
     });
     const known = new Set(branches.map((branch) => branch.id));
@@ -59,6 +60,9 @@ export class HoldsService {
         if (!vehicle || !vehicle.active || vehicle.branchId !== valid.pickupBranchId) {
           throw validationFailed({ vehicleId: 'UNKNOWN_REFERENCE' }, 'Vehicle not found at the pickup branch');
         }
+
+        // The branches last of the locks: a branch being closed waits for this hold, or this hold finds it closed (V2-27).
+        await lockOpenBranches(tx, valid);
 
         const now = new Date();
 

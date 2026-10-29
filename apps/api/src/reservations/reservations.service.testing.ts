@@ -84,11 +84,16 @@ export class FakeDb {
     void snapshot;
     return fn(this);
   };
-  // The number comes from a database sequence; the other raw queries are row locks.
-  $queryRaw = async (strings: TemplateStringsArray) => {
-    if (strings.join('').includes('nextval')) {
+  // The number comes from a database sequence, the branches are locked for sharing as the last lock (V2-27, none of the
+  // ones this fake knows is closed), and the other raw queries are row locks.
+  $queryRaw = async (strings: TemplateStringsArray, ...values: any[]) => {
+    const text = strings.join('');
+    if (text.includes('nextval')) {
       this.numbers += 1;
       return [{ serial: BigInt(this.numbers) }];
+    }
+    if (text.includes('"Branch"')) {
+      return (values[0].values as string[]).filter((id) => this.branches.includes(id)).map((id) => ({ id }));
     }
     this.locks += 1;
     return [];

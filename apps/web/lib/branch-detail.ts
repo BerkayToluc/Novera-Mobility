@@ -6,6 +6,10 @@ export type DayHours = { open: string; close: string } | null;
 
 export type OpeningHours = { weekdays: DayHours; saturday: DayHours; sunday: DayHours };
 
+// An airport desk or a city office: a field of the branch since V2-27 (the panel chooses it). It used to be read from the name
+// ("… Havalimanı"), which broke as soon as a branch was named any other way.
+export type BranchKind = "airport" | "city";
+
 // A branch as the contact page shows it: everything needed to find it and reach it.
 export type BranchDetail = Branch & {
   address: string;
@@ -13,16 +17,11 @@ export type BranchDetail = Branch & {
   longitude: number;
   phone: string;
   email: string;
+  kind: BranchKind;
   openingHours: OpeningHours;
 };
 
-export type BranchKind = "airport" | "city";
-
-// An airport desk or a city office. The branches carry no such field yet, so it is read from the
-// name ("… Havalimanı"); when the API gives each branch a type, this is where it is replaced.
-export function branchKind(branch: Pick<Branch, "name">): BranchKind {
-  return normalizeSearch(branch.name).includes("havalimani") ? "airport" : "city";
-}
+export const branchKind = (branch: Pick<BranchDetail, "kind">): BranchKind => branch.kind;
 
 // Lowercases the Turkish way and drops accents, so "izmir", "İzmir" and "IZMIR" all find
 // the same branch and "sisli" finds "Şişli".

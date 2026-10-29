@@ -68,7 +68,7 @@ paths:
     get:
       tags: [catalog]
       summary: Tüm bayiler
-      description: ~15 bayi, düz liste. Şehir filtresi ve metin arama frontend'dedir.
+      description: ~15 bayi, düz liste. Şehir filtresi ve metin arama frontend'dedir. **Kapatılmış bayiler listede yoktur** (V2-27); `kind` havalimanı tezgâhı mı şehir ofisi mi olduğunu söyler.
       responses:
         "200":
           description: Bayi listesi
@@ -887,6 +887,233 @@ paths:
               schema: { $ref: "#/components/schemas/Error" }
         "429": { $ref: "#/components/responses/TooManyRequests" }
 
+  /admin/branches:
+    get:
+      tags: [admin]
+      summary: Bayiler (yönetim)
+      description: |
+        Sayfalı liste (ADR-24): `{ items, total, page, pageSize }`. **Kapalı bayiler de dahildir** (herkese açık `GET /branches`
+        onları döndürmez). Tablo küçük ve elle yönetilir; süzme, arama ve sıralama sunucuda yapılır. Arama ad, şehir ve
+        adreste yapılır, büyük/küçük harf ve Türkçe harfler fark etmez (`kadikoy` → Kadıköy).
+        Sınır: yönetici başına dakikada 120 (`429 RATE_LIMITED`).
+      security:
+        - cookieAuth: []
+      parameters:
+        - { name: page, in: query, schema: { type: integer, minimum: 1, default: 1 } }
+        - { name: pageSize, in: query, schema: { type: integer, minimum: 1, maximum: 100, default: 20 } }
+        - name: sort
+          in: query
+          description: "`alan` ya da `alan:asc|desc`. Varsayılan `name:asc`."
+          schema: { type: string, enum: [name, city, activeVehicles, createdAt], example: "city:asc" }
+        - { name: q, in: query, schema: { type: string, maxLength: 100 } }
+        - { name: city, in: query, description: 81 ilden biri., schema: { type: string, example: İzmir } }
+        - { name: status, in: query, schema: { type: string, enum: [OPEN, CLOSED] } }
+      responses:
+        "200":
+          description: Bir sayfa bayi
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminBranchPage" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Yönetici değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+    post:
+      tags: [admin]
+      summary: Yeni bayi
+      description: |
+        Bayi hemen sitede görünür (Bayilerimiz, arama seçici, harita). Bütün alanlar zorunludur. Şehir 81 ilden biri; enlem
+        36–42, boylam 26–45 derece dolayında (Türkiye'yi kapsayan kutu; `OUT_OF_RANGE`); çalışma saatleri üç gün, her biri
+        `HH:MM-HH:MM` (açılış kapanıştan önce) ya da `closed`. İşlem kaydı: `branch.create`.
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminBranchCreate" }
+      responses:
+        "201":
+          description: Oluşturulan bayi
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminBranch" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Yönetici değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "415": { description: JSON olmayan gövde (`BAD_REQUEST`) }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
+  /admin/branches/{id}:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+    get:
+      tags: [admin]
+      summary: Bir bayi ve neyin onu açık tuttuğu
+      description: "`usage`, bayiyi kapatmayı engelleyen şeylerin sayısıdır; ekran kapatma düğmesine basılmadan nedenleri söyler."
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Bayi
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminBranchDetail" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Yönetici değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: Böyle bir bayi yok ya da kimlik biçimi yanlış (`NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+    patch:
+      tags: [admin]
+      summary: Bayiyi değiştir
+      description: |
+        Yalnızca gönderilen alanlar değişir. İstek, düzenlenen kaydın `updatedAt` değerini taşır; kayıt arada değiştiyse
+        `409 STALE_WRITE` döner ve hiçbir şey yazılmaz. Kapalı bayi de düzeltilebilir. Kapatma ve yeniden açma bu uçla değil,
+        `/close` ve `/reopen` ile yapılır. İşlem kaydı: `branch.update`.
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminBranchUpdate" }
+      responses:
+        "200":
+          description: Değişen bayi (yeni `updatedAt` ile)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminBranch" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Yönetici değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: Böyle bir bayi yok (`NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "409":
+          description: Kayıt arada değişti (`STALE_WRITE`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "415": { description: JSON olmayan gövde (`BAD_REQUEST`) }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
+  /admin/branches/{id}/close:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+    post:
+      tags: [admin]
+      summary: Bayiyi kapat
+      description: |
+        Bayi silinmez, kapatılır; geçmiş rezervasyonlar adını taşımaya devam eder. Kapatılan bayi herkese açık `GET /branches`'te,
+        aramada, tutmada, fiyatta ve rezervasyonda yoktur. **Şunlardan biri varsa `409 IN_USE`** döner ve hiçbir şey değişmez;
+        `details` her birinin sayısını taşır:
+        - `reservations`: gelecekte başlayan (alış bu bayide) ya da bitecek (dönüş bu bayide) iptal edilmemiş rezervasyon; sürmekte
+          olan ama buraya dönecek kiralama da sayılır;
+        - `holds`: süresi dolmamış araç tutma;
+        - `vehicles`: bayideki, açık (`active`) araç.
+
+        Bayi satırı rezervasyon ve tutmanın aldığı paylaşımlı kilidin karşısında `FOR UPDATE` ile alınır; aynı anda gelen bir
+        rezervasyonla sırayla çalışır. Zaten kapalı bayide çağrı bir şey değiştirmez (`200`). Gövdesizdir. İşlem kaydı: `branch.close`.
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Kapanan bayi
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminBranch" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Yönetici değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: Böyle bir bayi yok (`NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "409":
+          description: Bayi hâlâ kullanımda (`IN_USE`, `details`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
+  /admin/branches/{id}/reopen:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+    post:
+      tags: [admin]
+      summary: Kapalı bayiyi yeniden aç
+      description: Bayi olduğu gibi siteye geri döner. Açık bayide çağrı bir şey değiştirmez (`200`). Gövdesizdir. İşlem kaydı `branch.reopen`.
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Açılan bayi
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminBranch" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Yönetici değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: Böyle bir bayi yok (`NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
   /admin/ping:
     get:
       tags: [admin]
@@ -1039,6 +1266,10 @@ components:
         message:
           type: string
           description: Geliştirici için İngilizce metin. Ekranda gösterilmez.
+        details:
+          type: object
+          description: "`IN_USE` için nedenlerin sayıları (bayi: reservations, holds, vehicles); ekran bunları listeler."
+          additionalProperties: { type: integer }
         fieldErrors:
           type: object
           description: Alan adı → sabit hata kodu.
@@ -1131,7 +1362,7 @@ components:
 
     Branch:
       type: object
-      required: [id, name, city, address, latitude, longitude, phone, email, openingHours, vehicleModels]
+      required: [id, name, city, address, latitude, longitude, phone, email, kind, openingHours, vehicleModels]
       properties:
         id: { type: string, format: uuid }
         name: { type: string, example: İzmir Adnan Menderes Havalimanı }
@@ -1141,6 +1372,7 @@ components:
         longitude: { type: number, format: double }
         phone: { type: string }
         email: { type: string, format: email }
+        kind: { $ref: "#/components/schemas/BranchKind" }
         openingHours: { $ref: "#/components/schemas/OpeningHours" }
         vehicleModels:
           type: array
@@ -1536,6 +1768,86 @@ components:
         validUntil: { type: string, format: date-time, nullable: true }
         maxRedemptions: { type: integer, nullable: true, minimum: 1 }
         oncePerUser: { type: boolean }
+
+    BranchKind:
+      type: string
+      enum: [CITY, AIRPORT]
+      description: Havalimanı tezgâhı ya da şehir ofisi. Eskiden addan çıkarılıyordu; artık bayinin kendi alanı.
+
+    BranchUsage:
+      type: object
+      required: [reservations, holds, vehicles]
+      description: Bayiyi açık tutan şeyler; hepsi sıfırsa bayi kapatılabilir.
+      properties:
+        reservations: { type: integer, minimum: 0, description: Gelecekte başlayan ya da bitecek iptal edilmemiş rezervasyon. }
+        holds: { type: integer, minimum: 0, description: Süresi dolmamış araç tutma. }
+        vehicles: { type: integer, minimum: 0, description: Bayideki açık araç. }
+
+    AdminBranch:
+      type: object
+      required: [id, name, city, address, latitude, longitude, phone, email, kind, openingHours, status, closedAt, activeVehicles, createdAt, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string, example: İstanbul Kadıköy }
+        city: { type: string, example: İstanbul, description: 81 ilden biri. }
+        address: { type: string }
+        latitude: { type: number, format: double }
+        longitude: { type: number, format: double }
+        phone: { type: string }
+        email: { type: string, format: email }
+        kind: { $ref: "#/components/schemas/BranchKind" }
+        openingHours: { $ref: "#/components/schemas/OpeningHours" }
+        status: { type: string, enum: [OPEN, CLOSED] }
+        closedAt: { type: string, format: date-time, nullable: true, description: Kapatıldığı an; açıksa null. }
+        activeVehicles: { type: integer, minimum: 0 }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time, description: Kaydın sürümü; değiştirirken geri gönderilir (`STALE_WRITE`). }
+
+    AdminBranchDetail:
+      allOf:
+        - $ref: "#/components/schemas/AdminBranch"
+        - type: object
+          required: [usage]
+          properties:
+            usage: { $ref: "#/components/schemas/BranchUsage" }
+
+    AdminBranchPage:
+      type: object
+      required: [items, total, page, pageSize]
+      properties:
+        items: { type: array, items: { $ref: "#/components/schemas/AdminBranch" } }
+        total: { type: integer, minimum: 0, description: Süzgeçten geçen tüm bayiler, yalnızca bu sayfa değil. }
+        page: { type: integer }
+        pageSize: { type: integer }
+
+    AdminBranchCreate:
+      type: object
+      required: [name, city, address, latitude, longitude, phone, email, kind, openingHours]
+      properties:
+        name: { type: string, maxLength: 80 }
+        city: { type: string, example: Ankara }
+        address: { type: string, maxLength: 200 }
+        latitude: { type: number, format: double, minimum: 35.5, maximum: 42.5 }
+        longitude: { type: number, format: double, minimum: 25.5, maximum: 45.0 }
+        phone: { type: string, maxLength: 30 }
+        email: { type: string, format: email, description: Küçük harfe çevrilir. }
+        kind: { $ref: "#/components/schemas/BranchKind" }
+        openingHours: { $ref: "#/components/schemas/OpeningHours" }
+
+    AdminBranchUpdate:
+      type: object
+      required: [updatedAt]
+      properties:
+        updatedAt: { type: string, format: date-time, description: Düzenlenen kaydın `updatedAt` değeri. }
+        name: { type: string, maxLength: 80 }
+        city: { type: string }
+        address: { type: string, maxLength: 200 }
+        latitude: { type: number, format: double, minimum: 35.5, maximum: 42.5 }
+        longitude: { type: number, format: double, minimum: 25.5, maximum: 45.0 }
+        phone: { type: string, maxLength: 30 }
+        email: { type: string, format: email }
+        kind: { $ref: "#/components/schemas/BranchKind" }
+        openingHours: { $ref: "#/components/schemas/OpeningHours" }
 
     UserUpdate:
       type: object

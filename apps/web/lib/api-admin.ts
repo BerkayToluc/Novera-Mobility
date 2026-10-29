@@ -30,3 +30,18 @@ export async function fetchPromoCode(code: string): Promise<Schemas["PromoCode"]
   if (result.status === "not_found") return null;
   throw new ApiUnavailableError();
 }
+
+// `GET /admin/branches` (V2-27): one page of the list, closed branches included.
+export async function fetchAdminBranches(query: URLSearchParams): Promise<Schemas["AdminBranchPage"]> {
+  const result = await apiRequest<Schemas["AdminBranchPage"]>("GET", "/admin/branches?" + query.toString());
+  if (result.status !== "ok") throw new ApiUnavailableError();
+  return result.data;
+}
+
+// `GET /admin/branches/{id}`: null when there is no such branch (the page then does not exist), a failure to load otherwise.
+export async function fetchAdminBranch(id: string): Promise<Schemas["AdminBranchDetail"] | null> {
+  const result = await apiRequest<Schemas["AdminBranchDetail"]>("GET", "/admin/branches/" + encodeURIComponent(id));
+  if (result.status === "ok") return result.data;
+  if (result.status === "not_found") return null;
+  throw new ApiUnavailableError();
+}

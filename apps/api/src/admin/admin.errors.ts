@@ -5,10 +5,10 @@ export function forbidden(): HttpException {
   return new HttpException({ code: 'FORBIDDEN', message: 'This is not allowed' }, HttpStatus.FORBIDDEN);
 }
 
-// The record is used by something that depends on it, so it cannot be removed (ADMIN.md §3.1). The caller is told what
-// to do instead in `message`; the screen words it itself.
-export function inUse(message: string): HttpException {
-  return new HttpException({ code: 'IN_USE', message }, HttpStatus.CONFLICT);
+// The record is used by something that depends on it, so it cannot be removed or closed (ADMIN.md §3.1). `details` says how
+// much (for a branch: its bookings, holds and cars), so the screen can list the reasons; `message` is for the developer.
+export function inUse(message: string, details?: Record<string, number>): HttpException {
+  return new HttpException({ code: 'IN_USE', message, ...(details ? { details } : {}) }, HttpStatus.CONFLICT);
 }
 
 // The edit was made against an older copy of the record: someone else changed it in between (ADR-24). Nothing was written.
