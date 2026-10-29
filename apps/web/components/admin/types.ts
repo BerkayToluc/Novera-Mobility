@@ -5,4 +5,4 @@ import type { Link } from "@/i18n/navigation";
 export type Href = ComponentProps<typeof Link>["href"];
 
 // The pages of the panel a list can live on (they are in i18n/routing.ts). A screen adds its address here when it arrives.
-export type AdminPath = "/yonetim" | "/yonetim/kampanya-kodlari" | "/dev/admin";
+export type AdminPath = "/yonetim" | "/yonetim/kampanya-kodlari" | "/yonetim/bayiler" | "/dev/admin";

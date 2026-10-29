@@ -14,12 +14,13 @@ export type ApiResult<T> =
   | { status: "unauthorized" }
   | { status: "not_found" }
   | { status: "forbidden"; code?: string }
-  | { status: "conflict"; code?: string }
+  // `details` is what the API says about a refusal (`IN_USE`: how many bookings, holds and cars keep a branch open).
+  | { status: "conflict"; code?: string; details?: Record<string, number> }
   | { status: "rate_limited"; retryAfter: number | null }
   // `code` is set when the API itself answered (a 5xx with its own code); not when it could not be reached.
   | { status: "unavailable"; code?: string };
 
-type ErrorBody = { code?: string; fieldErrors?: Record<string, string> };
+type ErrorBody = { code?: string; fieldErrors?: Record<string, string>; details?: Record<string, number> };
 
 // A call from the server to the API on behalf of the visitor: their address (`X-Novera-Client-IP`, so
 // the per-address limits see them and not this server), the shared key (`X-Novera-Key`) and their
@@ -56,7 +57,7 @@ export async function apiRequest<T = null>(
     if (response.status === 429) return { status: "rate_limited", retryAfter: parseRetryAfter(response.headers.get("retry-after")) };
     const error = (await response.json().catch(() => null)) as ErrorBody | null;
     if (response.status === 403) return { status: "forbidden", code: error?.code };
-    if (response.status === 409) return { status: "conflict", code: error?.code };
+    if (response.status === 409) return { status: "conflict", code: error?.code, details: error?.details };
     if (response.status === 422) {
       return { status: "invalid", code: error?.code, fieldErrors: error?.fieldErrors ?? {} };
     }

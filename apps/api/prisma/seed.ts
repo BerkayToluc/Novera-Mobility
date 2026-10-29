@@ -44,6 +44,7 @@ async function main() {
       phone: b.phone,
       email: b.email,
       openingHours: b.openingHours,
+      kind: b.kind,
     };
     await prisma.branch.upsert({ where: { id: b.id }, update: data, create: { id: b.id, ...data } });
   }

@@ -1,6 +1,7 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import type { UserRow } from '../auth/user-view.js';
 import { hasConflict } from '../common/availability.js';
+import { lockOpenBranches } from '../common/branch-lock.js';
 import { validationFailed } from '../common/zod-validation.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import {
@@ -75,6 +76,9 @@ export class ReservationsService {
       if (request.promoCode) {
         await tx.$queryRaw`SELECT "id" FROM "PromoCode" WHERE "code" = ${request.promoCode} FOR UPDATE`;
       }
+
+      // The branches are the last lock (V2-27): a branch being closed waits for this booking, or this booking finds it closed.
+      await lockOpenBranches(tx, request);
 
       const active = await tx.reservation.count({
         where: { userId: user.id, status: 'CONFIRMED', endAt: { gt: now } },

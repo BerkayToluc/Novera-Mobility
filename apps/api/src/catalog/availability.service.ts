@@ -27,8 +27,8 @@ export class AvailabilityService {
 
     // Both branches have to exist.
     const [pickupBranch, returnBranch] = await Promise.all([
-      this.prisma.branch.findUnique({ where: { id: pickupBranchId }, select: { id: true, name: true, city: true } }),
-      this.prisma.branch.findUnique({ where: { id: returnBranchId }, select: { id: true } }),
+      this.prisma.branch.findFirst({ where: { id: pickupBranchId, closedAt: null }, select: { id: true, name: true, city: true } }),
+      this.prisma.branch.findFirst({ where: { id: returnBranchId, closedAt: null }, select: { id: true } }),
     ]);
     const fieldErrors: Record<string, string> = {};
     if (!pickupBranch) fieldErrors.pickupBranchId = 'UNKNOWN_REFERENCE';

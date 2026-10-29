@@ -133,7 +133,7 @@ export class PricingService {
     request: Pick<ValidReservationRequest, 'pickupBranchId' | 'returnBranchId'>,
   ): Promise<void> {
     const found = await this.prisma.branch.findMany({
-      where: { id: { in: [request.pickupBranchId, request.returnBranchId] } },
+      where: { id: { in: [request.pickupBranchId, request.returnBranchId] }, closedAt: null },
       select: { id: true },
     });
     const known = new Set(found.map((branch) => branch.id));

@@ -1,14 +1,14 @@
-// Made-up contact details for the sample branches (USE_MOCKS=1). The real ones come from
-// the backend seed (BACKLOG #15). Phone numbers use the 555 01xx range reserved for fiction,
-// and the e-mail domain does not exist.
-import type { BranchDetail, DayHours, OpeningHours } from "@/lib/branch-detail";
+// The sample branches (USE_MOCKS=1): the names and cities from the sample fleet, and made-up contact details. The real ones
+// come from the backend seed. Phone numbers use the 555 01xx range reserved for fiction, and the e-mail domain does not exist.
+// This is where the sample branch store (mocks/branches.ts) starts from.
 import { MOCK_BRANCHES } from "./fleet";
 
-const hours = (open: string, close: string): DayHours => ({ open, close });
-const OFFICE: OpeningHours = { weekdays: hours("08:00", "20:00"), saturday: hours("09:00", "18:00"), sunday: null };
-const AIRPORT: OpeningHours = { weekdays: hours("00:00", "24:00"), saturday: hours("00:00", "24:00"), sunday: hours("00:00", "24:00") };
+// Hours as the API stores them (`HH:MM-HH:MM` or `closed`); "24:00" is how the sample data writes "until midnight".
+type Hours = { weekdays: string; saturday: string; sunday: string };
+const OFFICE: Hours = { weekdays: "08:00-20:00", saturday: "09:00-18:00", sunday: "closed" };
+const AIRPORT: Hours = { weekdays: "00:00-24:00", saturday: "00:00-24:00", sunday: "00:00-24:00" };
 
-type Extra = Pick<BranchDetail, "address" | "latitude" | "longitude" | "phone"> & { hours: OpeningHours };
+type Extra = { address: string; latitude: number; longitude: number; phone: string; hours: Hours };
 
 const DETAILS: Record<string, Extra> = {
   "istanbul-kadikoy": { address: "Caferağa Mah. Moda Cad. No: 12, Kadıköy", latitude: 40.9899, longitude: 29.0258, phone: "+90 216 555 01 01", hours: OFFICE },
@@ -28,9 +28,28 @@ const DETAILS: Record<string, Extra> = {
   "trabzon-havalimani": { address: "Havalimanı Mah. Terminal Binası Gelen Yolcu, Ortahisar", latitude: 40.9951, longitude: 39.7897, phone: "+90 462 555 01 15", hours: AIRPORT },
 };
 
-export function mockBranchDetails(): BranchDetail[] {
-  return MOCK_BRANCHES.map((branch) => {
-    const { hours: openingHours, ...rest } = DETAILS[branch.id];
-    return { ...branch, ...rest, email: `${branch.id}@novera.example`, openingHours };
-  });
-}
+export type SeedBranch = {
+  id: string;
+  name: string;
+  city: string;
+  address: string;
+  latitude: number;
+  longitude: number;
+  phone: string;
+  email: string;
+  kind: "CITY" | "AIRPORT";
+  openingHours: Hours;
+};
+
+// The kind of a sample branch is read from its name here, once, because the sample data has no field for it; a real branch
+// has `kind` from the panel, and nothing outside the mocks reads a name for it any more (V2-27).
+export const BRANCH_SEEDS: readonly SeedBranch[] = MOCK_BRANCHES.map((branch) => {
+  const { hours, ...rest } = DETAILS[branch.id];
+  return {
+    ...branch,
+    ...rest,
+    email: `${branch.id}@novera.example`,
+    kind: branch.name.includes("Havalimanı") ? "AIRPORT" : "CITY",
+    openingHours: hours,
+  };
+});

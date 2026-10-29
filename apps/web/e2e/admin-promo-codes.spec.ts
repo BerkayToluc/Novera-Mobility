@@ -141,6 +141,8 @@ test("the limit cannot be lowered below the uses so far, and the form says how m
 });
 
 test("two people editing the same code: the second save is refused with a warning that keeps what they typed", async ({ page, context }, testInfo) => {
+  // Two pages and a handful of hydrations: close to the default 30 seconds when the whole suite runs side by side.
+  test.slow();
   const code = nameFor(testInfo.project.name, "ST");
   await makeCode(page, code, "10");
 

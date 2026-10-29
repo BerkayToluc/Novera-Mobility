@@ -237,6 +237,116 @@ describe('administration over HTTP', () => {
     });
   });
 
+  // The door and the input of the branch endpoints (V2-27). What they do against a database is in
+  // branches/branches.integration.spec.ts; a request that is turned away is turned away before any database call.
+  describe('branches: the door and the input (V2-27)', () => {
+    const ID = '6f1c1b5e-2f3a-4c55-9d0e-0a1b2c3d4e5f';
+    const routes: [string, string][] = [
+      ['GET', '/admin/branches'],
+      ['POST', '/admin/branches'],
+      ['GET', `/admin/branches/${ID}`],
+      ['PATCH', `/admin/branches/${ID}`],
+      ['POST', `/admin/branches/${ID}/close`],
+      ['POST', `/admin/branches/${ID}/reopen`],
+    ];
+    const withBody = (method: string) => (['POST', 'PATCH'].includes(method) ? { body: {} } : {});
+
+    it('no session is 401 UNAUTHENTICATED on every route', async () => {
+      for (const [method, path] of routes) {
+        const response = await call(method, path, withBody(method));
+        expect(response.status).toBe(401);
+        expect((await response.json()).code).toBe('UNAUTHENTICATED');
+      }
+    });
+
+    it('a customer is 403 FORBIDDEN on every route', async () => {
+      const { cookie } = await signedIn('CUSTOMER');
+      for (const [method, path] of routes) {
+        const response = await call(method, path, { cookie, ...withBody(method) });
+        expect(response.status).toBe(403);
+        expect((await response.json()).code).toBe('FORBIDDEN');
+      }
+    });
+
+    it('a new branch with nothing in it asks for every field', async () => {
+      const { cookie } = await signedIn('ADMIN');
+      const response = await call('POST', '/admin/branches', { cookie, body: {} });
+      expect(response.status).toBe(422);
+      expect(Object.keys((await response.json()).fieldErrors).sort()).toEqual(
+        ['address', 'city', 'email', 'kind', 'latitude', 'longitude', 'name', 'openingHours', 'phone'],
+      );
+    });
+
+    it('wrong values are 422 with a code for each field', async () => {
+      const { cookie } = await signedIn('ADMIN');
+      const response = await call('POST', '/admin/branches', {
+        cookie,
+        body: {
+          name: 'x'.repeat(81),
+          city: 'Atlantis',
+          address: 'Adres',
+          latitude: '39.9',
+          longitude: 120,
+          phone: 'abc',
+          email: 'nope',
+          kind: 'HARBOUR',
+          openingHours: { weekdays: '08:30-19:00', saturday: '9-5', sunday: 'closed' },
+        },
+      });
+      expect(response.status).toBe(422);
+      expect((await response.json()).fieldErrors).toEqual({
+        name: 'TOO_LONG',
+        city: 'INVALID_FORMAT',
+        latitude: 'INVALID_FORMAT',
+        longitude: 'OUT_OF_RANGE',
+        phone: 'INVALID_FORMAT',
+        email: 'INVALID_EMAIL',
+        kind: 'INVALID_FORMAT',
+        openingHours: 'INVALID_FORMAT',
+      });
+    });
+
+    it('a change has to say which version it was made against', async () => {
+      const { cookie } = await signedIn('ADMIN');
+      const response = await call('PATCH', `/admin/branches/${ID}`, { cookie, body: { phone: '+90 312 555 00 00' } });
+      expect(response.status).toBe(422);
+      expect((await response.json()).fieldErrors).toEqual({ updatedAt: 'REQUIRED' });
+    });
+
+    it('a list asked for in a way that makes no sense is 422', async () => {
+      const { cookie } = await signedIn('ADMIN');
+      for (const [query, field] of [
+        ['pageSize=101', 'pageSize'],
+        ['sort=password:asc', 'sort'],
+        ['status=GONE', 'status'],
+        ['city=Atlantis', 'city'],
+      ] as const) {
+        const response = await call('GET', `/admin/branches?${query}`, { cookie });
+        expect(response.status).toBe(422);
+        expect(Object.keys((await response.json()).fieldErrors)).toEqual([field]);
+      }
+    });
+
+    it('an id that is not an id is 404 without asking the database', async () => {
+      const { cookie } = await signedIn('ADMIN');
+      for (const [method, path] of [
+        ['GET', '/admin/branches/not-an-id'],
+        ['POST', '/admin/branches/not-an-id/close'],
+        ['POST', '/admin/branches/not-an-id/reopen'],
+      ] as const) {
+        const response = await call(method, path, { cookie, ...withBody(method) });
+        expect(response.status).toBe(404);
+        expect((await response.json()).code).toBe('NOT_FOUND');
+      }
+    });
+
+    it('a body that is not JSON is 415', async () => {
+      const { cookie } = await signedIn('ADMIN');
+      const response = await call('POST', '/admin/branches', { cookie, body: 'name=x', type: 'text/plain' });
+      expect(response.status).toBe(415);
+    });
+  });
+
   describe('the audit log', () => {
     it('a change is logged with the names of its fields and none of the values', async () => {
       const { cookie, id } = await signedIn('ADMIN');

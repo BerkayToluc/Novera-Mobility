@@ -198,6 +198,12 @@ model PointTransaction {
 
 // ---------- Bayi ve araç ----------
 
+// A branch is an airport desk or a city office (V2-27); it was read from the name before.
+enum BranchKind {
+  CITY
+  AIRPORT
+}
+
 model Branch {
   id           String @id @default(uuid())
   name         String
@@ -208,6 +214,10 @@ model Branch {
   phone        String
   email        String
   openingHours Json
+  kind         BranchKind @default(CITY)
+  // Set when the branch is closed from the panel (V2-27): it is left out of the site and cannot be booked. Never deleted:
+  // past bookings keep its name. Empty means open.
+  closedAt     DateTime?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -218,6 +228,7 @@ model Branch {
   returnHolds    Hold[]        @relation("HoldReturnBranch")
 
   @@index([city])
+  @@index([closedAt])
 }
 
 model VehicleClass {

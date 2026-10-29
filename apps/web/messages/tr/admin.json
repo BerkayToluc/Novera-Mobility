@@ -261,6 +261,114 @@
         "title": "{code} silinemez",
         "text": "{code} en az bir rezervasyonda kullanılmış; geçmiş kayıtlar adını taşıyor. Silmek yerine kapatabilirsiniz: yeni rezervasyonlarda uygulanmaz, eskiler değişmez."
       }
+    },
+    "branches": {
+      "title": "Bayiler",
+      "intro": "Sitede, arama formunda ve haritada görünen bayiler. Eklediğiniz bayi hemen görünür; kapattığınız bayi hiçbir yerde görünmez.",
+      "newButton": "Yeni bayi",
+      "newTitle": "Yeni bayi",
+      "newIntro": "Bayi oluşturulur oluşturulmaz Bayilerimiz sayfasında, arama formunda ve haritada görünür. İçinde araç olmayan bayide arama \"uygun araç yok\" der; araçları sonra eklenir.",
+      "detailTitle": "Bayi",
+      "detailIntro": "{city} bayisi.",
+      "searchLabel": "Bayi ara",
+      "cityFilterLabel": "Şehre göre",
+      "filterLabel": "Duruma göre",
+      "tableCaption": "Bayiler",
+      "retry": "Tekrar dene",
+      "columns": {
+        "name": "Bayi",
+        "city": "Şehir",
+        "kind": "Tür",
+        "vehicles": "Araç",
+        "status": "Durum"
+      },
+      "kind": {
+        "CITY": "Şehir ofisi",
+        "AIRPORT": "Havalimanı"
+      },
+      "status": {
+        "OPEN": "Açık",
+        "CLOSED": "Kapalı"
+      },
+      "emptyTitle": "Henüz bayi yok",
+      "emptyText": "İlk bayiyi ekleyin; sitede hemen görünür.",
+      "emptyFilteredTitle": "Bu aramaya uyan bayi yok",
+      "emptyFilteredText": "Süzgeçleri kaldırmayı ya da başka bir şey aramayı deneyin.",
+      "loadErrorTitle": "Bayiler yüklenemedi",
+      "loadErrorText": "Birkaç saniye sonra yeniden deneyin.",
+      "fields": {
+        "name": "Bayi adı",
+        "city": "Şehir",
+        "cityChoose": "Şehir seçin",
+        "kind": "Tür",
+        "kindHint": "Havalimanı tezgâhı ya da şehir ofisi. Bayilerimiz sayfasındaki süzgeç buna göre çalışır.",
+        "address": "Adres",
+        "latitude": "Enlem",
+        "latitudeHint": "Örnek: 39,9179. Türkiye'de 36 ile 42 arasındadır.",
+        "longitude": "Boylam",
+        "longitudeHint": "Örnek: 32,8627. Türkiye'de 26 ile 45 arasındadır.",
+        "seeOnMap": "Noktayı haritada gör (yeni sekmede açılır)",
+        "phone": "Telefon",
+        "email": "E-posta"
+      },
+      "hours": {
+        "title": "Çalışma saatleri",
+        "hint": "Her gün için açılış ve kapanış saati; o gün kapalıysa \"Kapalı\" işaretlenir.",
+        "weekdays": "Hafta içi",
+        "saturday": "Cumartesi",
+        "sunday": "Pazar",
+        "closed": "Kapalı",
+        "open": "Açılış",
+        "close": "Kapanış"
+      },
+      "form": {
+        "create": "Bayiyi oluştur",
+        "save": "Değişiklikleri kaydet",
+        "saving": "Kaydediliyor",
+        "cancel": "Vazgeç"
+      },
+      "errors": {
+        "name": "2 ile 80 karakter arasında bir ad yazın.",
+        "city": "Listeden bir şehir seçin.",
+        "address": "Adresi yazın (en az 5 karakter).",
+        "latitude": "36 ile 42 arasında bir enlem yazın (örnek: 39,9179). Enlem ve boylamı yer değiştirmiş olabilirsiniz.",
+        "longitude": "26 ile 45 arasında bir boylam yazın (örnek: 32,8627).",
+        "phone": "Geçerli bir telefon numarası yazın.",
+        "email": "Geçerli bir e-posta adresi yazın.",
+        "hours": "Açılış, kapanıştan önce olmalı; ya da günü kapalı olarak işaretleyin.",
+        "generic": "Bu bilgi kabul edilmedi. Alanları gözden geçirip yeniden deneyin.",
+        "notFound": "Bu bayi artık yok. Listeye dönün.",
+        "unavailable": "Kaydedilemedi. Birkaç saniye sonra yeniden deneyin."
+      },
+      "toast": {
+        "created": "Bayi oluşturuldu",
+        "saved": "Değişiklikler kaydedildi",
+        "closed": "Bayi kapatıldı",
+        "reopened": "Bayi yeniden açıldı"
+      },
+      "actions": {
+        "title": "Bayiyi kapat ya da yeniden aç",
+        "openText": "Kapatılan bayi sitenin hiçbir yerinde (arama, liste, harita) görünmez ve yeni rezervasyon alamaz. Geçmiş rezervasyonlarda adıyla kalır. Bayi silinmez; istediğiniz zaman yeniden açabilirsiniz.",
+        "closedText": "Bu bayi kapalı: sitede görünmüyor ve yeni rezervasyon almıyor. Yeniden açarsanız olduğu gibi geri gelir.",
+        "blockedTitle": "Bu bayi şimdi kapatılamaz",
+        "blockedText": "Önce şunlar bitmeli ya da başka bayiye taşınmalı:",
+        "close": "Bayiyi kapat",
+        "reopen": "Bayiyi yeniden aç"
+      },
+      "usage": {
+        "reservations": "{count, plural, other {# gelecek rezervasyon (bu bayide başlayacak ya da buraya dönecek)}}",
+        "holds": "{count, plural, other {# sürmekte olan araç tutma (en çok 15 dakika sürer)}}",
+        "vehicles": "{count, plural, other {# açık araç (başka bayiye taşıyın ya da kaldırın)}}"
+      },
+      "closeDialog": {
+        "title": "{name} kapatılsın mı?",
+        "text": "Bayi sitede, aramada ve haritada görünmez olur; yeni rezervasyon alamaz. Geçmiş rezervasyonlar adıyla kalır. Yeniden açabilirsiniz.",
+        "confirm": "Bayiyi kapat"
+      }
+    },
+    "cityFilter": {
+      "all": "Tüm şehirler",
+      "apply": "Süz"
     }
   }
 }

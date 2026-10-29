@@ -15,6 +15,7 @@ import type { Extra } from "./extra";
 import { toUtc, type RentalSearch } from "./rental-search";
 import type { Branch, Vehicle, VehicleOffer } from "./vehicle";
 import { isMockMode } from "./mode";
+import { mockWorld } from "./mock-world";
 
 type Schemas = components["schemas"];
 
@@ -35,12 +36,12 @@ function dataOf<T>(result: ApiResult<T>): T {
 }
 
 export async function getBranches(): Promise<Branch[]> {
-  if (isMockMode()) return (await import("@/mocks/fleet")).mockBranches();
+  if (isMockMode()) return (await import("@/mocks/branches")).mockOpenBranches(await mockWorld());
   return (await getBranchDetails()).map(({ id, name, city }) => ({ id, name, city }));
 }
 
 export async function getBranchDetails(): Promise<BranchDetail[]> {
-  if (isMockMode()) return (await import("@/mocks/branch-details")).mockBranchDetails();
+  if (isMockMode()) return (await import("@/mocks/branches")).mockBranchDetails(await mockWorld());
   return dataOf(await apiRequest<Schemas["Branch"][]>("GET", "/branches")).map(branchDetailFromApi);
 }
 
