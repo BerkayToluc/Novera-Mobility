@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Building2, CalendarRange, Coins, FileText, Plus, Settings, UserRound } from "lucide-react";
+import { Building2, CalendarRange, Coins, FileText, Plus, Settings, ShieldCheck, UserRound } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Link, usePathname } from "@/i18n/navigation";
@@ -26,7 +26,9 @@ const TABS = {
 // The profile pages are real pages (own URL, back button, shareable), so this is navigation with
 // a current page, not an ARIA tablist. From xl it is a column beside the page, with the way to a
 // new rental under it (v0.8); below xl it is a row of tabs that scrolls sideways on a narrow screen.
-export function ProfileNav({ type }: { type: AccountType }) {
+// An administrator gets one more way at the end: into the panel (V2-23). It is only a way in; the panel and the API
+// check the role themselves.
+export function ProfileNav({ type, isAdmin = false }: { type: AccountType; isAdmin?: boolean }) {
   const t = useTranslations("Profile.nav");
   const pathname = usePathname();
   const listRef = useRef<HTMLUListElement>(null);
@@ -47,6 +49,11 @@ export function ProfileNav({ type }: { type: AccountType }) {
     return () => window.removeEventListener("resize", measure);
   }, [pathname, measure]);
 
+  type NavKey = (typeof TABS)[AccountType][number]["labelKey"] | "admin";
+  const tabs: ReadonlyArray<{ href: string; labelKey: NavKey; icon: typeof UserRound }> = isAdmin
+    ? [...TABS[type], { href: "/yonetim", labelKey: "admin", icon: ShieldCheck }]
+    : TABS[type];
+
   return (
     <div className="flex flex-col gap-6 xl:sticky xl:top-8 xl:self-start">
       <nav aria-label={t("label")}>
@@ -58,7 +65,7 @@ export function ProfileNav({ type }: { type: AccountType }) {
             moreToRight && "mask-fade-end xl:[mask-image:none]",
           )}
         >
-          {TABS[type].map(({ href, labelKey, icon: Icon }) => {
+          {tabs.map(({ href, labelKey, icon: Icon }) => {
             const isCurrent = pathname === href;
             return (
               <li key={href} className="shrink-0">

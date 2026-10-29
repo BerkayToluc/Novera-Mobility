@@ -21,6 +21,7 @@ export class FakePrisma {
       const user: Row = {
         id: randomUUID(),
         accountType: 'INDIVIDUAL',
+        role: 'CUSTOMER',
         companyName: null,
         taxOffice: null,
         companyCity: null,
@@ -111,6 +112,16 @@ export class FakePrisma {
       const before = this.throttles.length;
       this.throttles = this.throttles.filter((t) => !(where.email ? t.email === where.email : false));
       return { count: before - this.throttles.length };
+    },
+  };
+
+  // The audit log (V2-23): the real table only adds rows, and so does this one.
+  auditLogs: Row[] = [];
+  auditLog = {
+    create: async ({ data }: { data: Row }) => {
+      const row = { id: randomUUID(), at: new Date(), ...data };
+      this.auditLogs.push(row);
+      return row;
     },
   };
 

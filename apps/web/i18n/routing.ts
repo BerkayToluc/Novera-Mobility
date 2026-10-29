@@ -36,6 +36,8 @@ export const routing = defineRouting({
     "/profil/puanlar": { tr: "/profil/puanlar", en: "/profile/points" },
     "/profil/teklifler": { tr: "/profil/teklifler", en: "/profile/quotes" },
     "/profil/ayarlar": { tr: "/profil/ayarlar", en: "/profile/settings" },
+    // The administration (V2-23; the pages come in V2-24). Only an administrator sees the way in, the API checks the role.
+    "/yonetim": { tr: "/yonetim", en: "/admin" },
     "/kvkk": { tr: "/kvkk", en: "/privacy-notice" },
     "/cerez-politikasi": { tr: "/cerez-politikasi", en: "/cookie-policy" },
     "/kiralama-kosullari": { tr: "/kiralama-kosullari", en: "/rental-terms" },

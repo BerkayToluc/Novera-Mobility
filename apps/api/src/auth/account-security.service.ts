@@ -1,6 +1,7 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { parseInput, validationFailed } from '../common/zod-validation.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { ADMIN_PASSWORD_MIN, isAdmin } from './admin-rules.js';
 import { passwordNotSet } from './auth.errors.js';
 import { changePasswordSchema, deleteAccountSchema } from './auth.schemas.js';
 import { describeDevice } from './device.js';
@@ -33,6 +34,9 @@ export class AccountSecurityService {
     const { currentPassword, newPassword } = parseInput(changePasswordSchema, input, 'Password change data is invalid');
     if (!(await verifyPassword(currentPassword, user.passwordHash))) {
       throw validationFailed({ currentPassword: 'INCORRECT' }, 'The current password is wrong');
+    }
+    if (isAdmin(user) && newPassword.length < ADMIN_PASSWORD_MIN) {
+      throw validationFailed({ newPassword: 'TOO_SHORT' }, `An administrator's password needs ${ADMIN_PASSWORD_MIN} characters`);
     }
     if (newPassword === currentPassword) {
       throw validationFailed({ newPassword: 'SAME_AS_CURRENT' }, 'The new password must differ from the current one');

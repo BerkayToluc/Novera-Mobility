@@ -6,6 +6,7 @@ import { parseInput } from '../common/zod-validation.js';
 import { emailTaken, invalidCredentials } from './auth.errors.js';
 import { LOCALES, THEMES, loginSchema, registerSchema, updateProfileSchema } from './auth.schemas.js';
 import { cleanUserAgent } from './device.js';
+import { ADMIN_IDLE_MINUTES, ADMIN_SESSION_HOURS, isAdmin } from './admin-rules.js';
 import { hashPassword, needsRehash, verifyAgainstDummy, verifyPassword } from './password.js';
 import { RateLimitedException } from '../common/rate-limit.js';
 import {
@@ -17,7 +18,7 @@ import {
 } from './session-token.js';
 import { failureWait, FREE_FAILED_ATTEMPTS, THROTTLE_MEMORY_MS } from './login-throttle.js';
 import type { UserRow } from './user-view.js';
-import { DAY_MS } from '../common/time.js';
+import { DAY_MS, HOUR_MS } from '../common/time.js';
 
 // BACKLOG #34 (kayıt, giriş, çıkış) ve #36/#37 (/me): openapi.yaml auth ve me uçları.
 
@@ -103,7 +104,7 @@ export class AuthService {
     }
 
     const token = newSessionToken();
-    const expiresAt = new Date(Date.now() + SESSION_DAYS * DAY_MS);
+    const expiresAt = new Date(Date.now() + (isAdmin(user) ? ADMIN_SESSION_HOURS * HOUR_MS : SESSION_DAYS * DAY_MS));
     await this.prisma.$transaction([
       this.prisma.session.deleteMany({
         where: { userId: user.id, expiresAt: { lt: new Date() } },
@@ -146,22 +147,28 @@ export class AuthService {
   }
 
   // Çerezdeki anahtardan kullanıcıyı bulur; yoksa, süresi dolmuşsa ya da 7 gündür kullanılmıyorsa null.
-  async authenticate(token: string): Promise<UserRow | null> {
+  // Yönetici hesabında süreler daha kısadır (12 saat, boşta 1 saat) ve rolü ŞİMDİ olan her oturum için geçer (V2-23).
+  async authenticate(token: string, at: Date = new Date()): Promise<UserRow | null> {
     const session = await this.prisma.session.findUnique({
       where: { tokenHash: hashSessionToken(token) },
       include: { user: true },
     });
     if (!session) return null;
-    const now = Date.now();
+    const now = at.getTime();
     const lastUsed = (session.lastUsedAt ?? session.createdAt).getTime();
-    if (session.expiresAt.getTime() <= now || now - lastUsed > SESSION_IDLE_DAYS * DAY_MS) {
+    const admin = isAdmin(session.user);
+    const idleLimit = admin ? ADMIN_IDLE_MINUTES * 60_000 : SESSION_IDLE_DAYS * DAY_MS;
+    const endsAt = admin
+      ? Math.min(session.expiresAt.getTime(), session.createdAt.getTime() + ADMIN_SESSION_HOURS * HOUR_MS)
+      : session.expiresAt.getTime();
+    if (endsAt <= now || now - lastUsed > idleLimit) {
       await this.prisma.session.deleteMany({ where: { id: session.id } });
       return null;
     }
     if (now - lastUsed > SESSION_TOUCH_MINUTES * 60_000) {
       await this.prisma.session.updateMany({
         where: { id: session.id },
-        data: { lastUsedAt: new Date(now) },
+        data: { lastUsedAt: at },
       });
     }
     return session.user;
