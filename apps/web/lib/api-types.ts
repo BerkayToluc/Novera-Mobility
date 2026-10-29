@@ -1342,6 +1342,66 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/admin/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Yönetim paneli Özet ekranı
+         * @description Panelin ilk ekranının sayıları (V2-25). Yalnızca okur; işlem kaydına yazılmaz. "Bugün" **İstanbul takvim günüdür**
+         *     (00:00 dahil, ertesi gün 00:00 hariç), sunucunun ya da tarayıcının saat diliminden bağımsız. Sınır: yönetici başına
+         *     dakikada 120 (`429 RATE_LIMITED`).
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Sayılar */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AdminSummary"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Giriş yapılmış ama yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/ping": {
         parameters: {
             query?: never;
@@ -1352,7 +1412,7 @@ export interface paths {
         /**
          * Yönetici kapısı denemesi (iskelet)
          * @description Kapıyı kanıtlar: oturumsuz `401`, müşteri `403`, yönetici `200`. Hiçbir şeyi değiştirmez. V2-25'te
-         *     `GET /admin/summary` gelince yerini alır. Sınır: yönetici başına dakikada 120 (`429 RATE_LIMITED`).
+         *     V2-25 ile `GET /admin/summary` geldi; bu uç kapı ve işlem kaydı testleri için kalır. Sınır: yönetici başına dakikada 120 (`429 RATE_LIMITED`).
          */
         get: {
             parameters: {
@@ -1853,6 +1913,26 @@ export interface components {
             createdAt: string;
             /** Format: date-time */
             expiresAt: string;
+        };
+        AdminSummary: {
+            /**
+             * Format: date
+             * @description Bugün sayılarının hesaplandığı İstanbul günü.
+             * @example 2026-10-29
+             */
+            date: string;
+            /** @description Bugün başlayan kiralama (iptal edilmemiş). */
+            rentalsStartingToday: number;
+            /** @description Bugün biten kiralama (iptal edilmemiş). */
+            rentalsEndingToday: number;
+            /** @description Bugün ve önceki altı İstanbul gününde yapılan */
+            reservationsLast7Days: number;
+            /** @description Yanıt bekleyen teklif talebi (`RECEIVED`). */
+            quotesAwaiting: number;
+            /** @description Ele alınmamış iletişim mesajı. İletişim mesajında "ele alındı" işareti gelene kadar (V2-32) `null`; ekran kartı gizler. */
+            unhandledMessages: number | null;
+            /** @description Açık servis talebi. Talepler gelene kadar (V2-41) `null`; ekran kartı gizler. */
+            serviceRequests: number | null;
         };
         /** @description Gönderilen alanlar güncellenir. */
         UserUpdate: {

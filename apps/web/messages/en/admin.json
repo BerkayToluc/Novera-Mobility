@@ -23,8 +23,22 @@
     },
     "summary": {
       "title": "Admin panel",
-      "emptyTitle": "The panel is ready",
-      "emptyText": "Sections will be added one by one. They appear in the menu as they arrive."
+      "asOf": "As of {date} (Istanbul time)",
+      "cards": {
+        "rentalsStartingToday": "Rentals starting today",
+        "rentalsEndingToday": "Rentals ending today",
+        "reservationsLast7Days": "Reservations in the last 7 days",
+        "quotesAwaiting": "Quote requests awaiting a reply",
+        "unhandledMessages": "Unhandled messages",
+        "serviceRequests": "Open service requests"
+      },
+      "openList": "Open the list",
+      "emptyTitle": "All clear",
+      "emptyText": "No rentals start or end today, no quote requests are waiting, and there are no new reservations in the last 7 days.",
+      "errorTitle": "The summary could not be loaded",
+      "errorText": "Try again in a few seconds.",
+      "retry": "Try again",
+      "loading": "Loading the summary"
     },
     "table": {
       "loading": "Loading the list",

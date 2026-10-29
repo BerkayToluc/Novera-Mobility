@@ -5,15 +5,24 @@ import { optionalText } from '../common/zod-fields.js';
 import { parseInput } from '../common/zod-validation.js';
 import { CurrentUser } from '../auth/session.guard.js';
 import type { UserRow } from '../auth/user-view.js';
+import { AdminSummaryService, type AdminSummary } from './admin-summary.service.js';
 import { Audited } from './audit.interceptor.js';
 
 const pingSchema = z.object({ note: optionalText(200) });
 
-// The first thing behind the administration guard (V2-23): a way to prove "no session 401, customer 403, admin 200"
-// and that a change is logged, until real endpoints (V2-25 onwards) take its place. It changes nothing.
+// Everything here sits behind the administration guard (V2-23): no session 401, not an administrator 403.
 @ApiTags('admin')
 @Controller('admin')
 export class AdminController {
+  constructor(private readonly summary: AdminSummaryService) {}
+
+  // The first screen (V2-25). A read: it is not written to the audit log, which records changes.
+  @Get('summary')
+  getSummary(): Promise<AdminSummary> {
+    return this.summary.get();
+  }
+
+  // Kept from V2-23: the way the guard and the audit log are proved by tests, with nothing real to change yet.
   @Get('ping')
   ping(@CurrentUser() user: UserRow): { ok: true; role: 'ADMIN' } {
     return { ok: true, role: user.role as 'ADMIN' };

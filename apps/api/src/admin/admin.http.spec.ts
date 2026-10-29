@@ -10,9 +10,20 @@ import { MemoryRateLimitStore } from '../common/rate-limit.testing.js';
 import { LIMITS } from '../common/rate-limits.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { AdminModule } from './admin.module.js';
+import { AdminSummaryService } from './admin-summary.service.js';
 
 // "No session 401, customer 403, administrator 200" (ADMIN.md §6, V2-23), the audit log, and the order of the guards.
 const fake = new FakePrisma();
+// The counts themselves are tested against the database (admin-summary.integration.spec.ts); here only the door is.
+const SUMMARY = {
+  date: '2026-10-29',
+  rentalsStartingToday: 2,
+  rentalsEndingToday: 1,
+  reservationsLast7Days: 9,
+  quotesAwaiting: 3,
+  unhandledMessages: null,
+  serviceRequests: null,
+};
 
 @Global()
 @Module({ providers: [{ provide: PrismaService, useValue: fake }], exports: [PrismaService] })
@@ -24,6 +35,8 @@ describe('administration over HTTP', () => {
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({ imports: [FakePrismaModule, AuthModule, RateLimitModule, AdminModule] })
+      .overrideProvider(AdminSummaryService)
+      .useValue({ get: async () => SUMMARY })
       .overrideProvider(RateLimitStore)
       .useValue(new MemoryRateLimitStore())
       .compile();
@@ -104,6 +117,32 @@ describe('administration over HTTP', () => {
     it('the rest of the API is not behind the administrator guard', async () => {
       const { cookie } = await signedIn('CUSTOMER');
       expect((await call('GET', '/me', { cookie })).status).toBe(200);
+    });
+  });
+
+  describe('GET /admin/summary (V2-25)', () => {
+    it('no session is 401, a customer is 403, an administrator gets the numbers', async () => {
+      const anonymous = await call('GET', '/admin/summary');
+      expect(anonymous.status).toBe(401);
+      expect((await anonymous.json()).code).toBe('UNAUTHENTICATED');
+
+      const customer = await signedIn('CUSTOMER');
+      const refused = await call('GET', '/admin/summary', { cookie: customer.cookie });
+      expect(refused.status).toBe(403);
+      const refusal = await refused.json();
+      expect(refusal.code).toBe('FORBIDDEN');
+      expect(JSON.stringify(refusal)).not.toContain('quotesAwaiting');
+
+      const admin = await signedIn('ADMIN');
+      const response = await call('GET', '/admin/summary', { cookie: admin.cookie });
+      expect(response.status).toBe(200);
+      expect(await response.json()).toEqual(SUMMARY);
+    });
+
+    it('a read is not written to the audit log, which records changes', async () => {
+      const admin = await signedIn('ADMIN');
+      await call('GET', '/admin/summary', { cookie: admin.cookie });
+      expect(fake.auditLogs).toHaveLength(0);
     });
   });
 
