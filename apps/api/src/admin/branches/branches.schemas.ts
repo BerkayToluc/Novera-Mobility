@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { field } from '../../common/zod-fields.js';
 import { isProvince } from '../../common/provinces.js';
+import { required, sent, text, versionField, type Check } from '../admin-fields.js';
 import { pageFields, sortField } from '../admin-list.js';
 import { BRANCH_KINDS, BRANCH_STATUSES, isValidDay, type OpeningHours } from './branches.view.js';
 
@@ -11,21 +12,6 @@ import { BRANCH_KINDS, BRANCH_STATUSES, isValidDay, type OpeningHours } from './
 // decimal point), not a point in the sea.
 export const LATITUDE = { min: 35.5, max: 42.5 } as const;
 export const LONGITUDE = { min: 25.5, max: 45.0 } as const;
-
-type Check<T> = (raw: unknown) => { value: T } | { code: string };
-
-// Every field of a new branch is required. On a change the same rule applies to what is sent, and what is not sent
-// (`undefined`) is left as it is.
-const required = <T>(check: Check<T>) => field<T>(check);
-const sent = <T>(check: Check<T>) => field<T | undefined>((raw) => (raw === undefined ? { value: undefined } : check(raw)));
-
-const text = (max: number): Check<string> => (raw) => {
-  if (raw === undefined || raw === null) return { code: 'REQUIRED' };
-  if (typeof raw !== 'string') return { code: 'INVALID_FORMAT' };
-  const value = raw.trim();
-  if (value === '') return { code: 'REQUIRED' };
-  return value.length > max ? { code: 'TOO_LONG' } : { value };
-};
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const email: Check<string> = (raw) => {
@@ -87,11 +73,7 @@ export const createBranchSchema = z.object({
 
 // A change names only what it changes, and always the version it was made against.
 export const updateBranchSchema = z.object({
-  updatedAt: field<Date>((raw) => {
-    if (raw === undefined || raw === null || raw === '') return { code: 'REQUIRED' };
-    const date = typeof raw === 'string' ? new Date(raw) : null;
-    return date && !Number.isNaN(date.getTime()) ? { value: date } : { code: 'INVALID_FORMAT' };
-  }),
+  updatedAt: versionField(),
   name: sent(text(80)),
   city: sent(province),
   address: sent(text(200)),

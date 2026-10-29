@@ -255,6 +255,9 @@ model VehicleModel {
   dailyPrice      Int // TRY, kuruş cinsinden (₺1.250 = 125000)
   description     Json // { "tr": "...", "en": "..." }
   imageUrl        String?
+  // Set when the model is taken off the site from the panel (V2-29): it is left out of the fleet, the search and new bookings, and its
+  // cars are switched off. Never deleted: past bookings keep showing it. Empty means on the site.
+  retiredAt       DateTime?
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
 
@@ -264,6 +267,7 @@ model VehicleModel {
   vehicles Vehicle[]
 
   @@index([classId])
+  @@index([retiredAt])
 }
 
 // Bir bayide duran fiziksel araç. Müsaitlik bu tabloya göre hesaplanır.

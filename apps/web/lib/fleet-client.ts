@@ -47,7 +47,7 @@ export async function getBranchDetails(): Promise<BranchDetail[]> {
 
 // Every model at every branch that stocks it, for the fleet page (the models are folded again there).
 export async function getVehicles(currency: Currency): Promise<Vehicle[]> {
-  if (isMockMode()) return (await import("@/mocks/fleet")).mockVehicles(currency);
+  if (isMockMode()) return (await import("@/mocks/models")).mockVehicles(await mockWorld(), currency);
   return vehiclesFromModels(
     dataOf(await apiRequest<Schemas["VehicleModel"][]>("GET", `/vehicle-models?currency=${currency}`)),
   );
@@ -55,7 +55,7 @@ export async function getVehicles(currency: Currency): Promise<Vehicle[]> {
 
 // The cars free at the pick-up branch for these dates. The times go as UTC, the way the API wants them.
 export async function getAvailableVehicles(search: RentalSearch, currency: Currency): Promise<VehicleOffer[]> {
-  if (isMockMode()) return (await import("@/mocks/fleet")).mockAvailable(search, currency);
+  if (isMockMode()) return (await import("@/mocks/models")).mockAvailable(await mockWorld(), search, currency);
   const query = new URLSearchParams({
     pickupBranchId: search.pickupBranchId,
     returnBranchId: search.returnBranchId,
@@ -73,7 +73,7 @@ export async function getAvailableVehicles(search: RentalSearch, currency: Curre
 // car's id; the model gives what to show, `pickupBranchId` is where the booking says the car is (the
 // price and hold calls refuse a car that is not there).
 export async function getVehicle(slug: string, currency: Currency, pickupBranchId: string): Promise<Vehicle | null> {
-  if (isMockMode()) return (await import("@/mocks/fleet")).mockVehicles(currency).find((vehicle) => vehicle.slug === slug) ?? null;
+  if (isMockMode()) return (await import("@/mocks/models")).mockVehicles(await mockWorld(), currency).find((vehicle) => vehicle.slug === slug) ?? null;
   const parsed = parseVehicleSlug(slug);
   if (!parsed) return null;
   const models = dataOf(await apiRequest<Schemas["VehicleModel"][]>("GET", `/vehicle-models?currency=${currency}`));

@@ -160,7 +160,7 @@ export class PricingService {
       where: { id: request.vehicleId },
       include: { vehicleModel: true },
     });
-    if (!vehicle || !vehicle.active || vehicle.branchId !== request.pickupBranchId) {
+    if (!vehicle || !vehicle.active || Boolean(vehicle.vehicleModel.retiredAt) || vehicle.branchId !== request.pickupBranchId) {
       throw validationFailed({ vehicleId: 'UNKNOWN_REFERENCE' }, 'Vehicle not found at the pickup branch');
     }
 

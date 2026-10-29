@@ -1,11 +1,11 @@
 import { blobPublicHost, currentEnv, type Env } from '../config/env.js';
 import { field } from './zod-fields.js';
 
-// The address of a picture a record may carry (`imageUrl`, ARCHITECTURE ADR-28): either a path inside the site (`/images/...`,
+// The address of a picture a record may carry (`imageUrl`, ARCHITECTURE ADR-28): either a path inside the site (`/fleet/...`,
 // the 15 photos that live in the repository) or an address on the photo store the panel uploads to. Nothing else: an
 // administrator cannot point a model at a picture on any other host, so a model page can never load something from an
 // address that nobody chose on purpose, and the Content-Security-Policy of the site (img-src) is the same list.
-export const IMAGE_PATH_PREFIX = '/images/';
+export const IMAGE_PATH_PREFIX = '/fleet/';
 export const BLOB_HOST_SUFFIX = '.public.blob.vercel-storage.com';
 export const MAX_IMAGE_URL_LENGTH = 500;
 
@@ -22,7 +22,7 @@ export function isAllowedImageUrl(value: string, source: Env = currentEnv()): bo
   if (value.length === 0 || value.length > MAX_IMAGE_URL_LENGTH) return false;
 
   if (value.startsWith('/')) {
-    // A path of the site: under /images/, plain characters, no `..`, no `//`.
+    // A path of the site: under /fleet/, plain characters, no `..`, no `//`.
     return (
       value.startsWith(IMAGE_PATH_PREFIX) &&
       value.length > IMAGE_PATH_PREFIX.length &&
@@ -54,3 +54,10 @@ export const imageUrl = () =>
     if (raw === undefined || raw === null || raw === '') return { code: 'REQUIRED' };
     return typeof raw === 'string' && isAllowedImageUrl(raw.trim()) ? { value: raw.trim() } : { code: 'INVALID_FORMAT' };
   });
+
+// A picture that may be left out: empty or `null` is "no picture" (the site draws a placeholder), anything else has to be an
+// allowed address. Returned as a check so a new record and a change can both use it (admin/admin-fields.ts).
+export function checkOptionalImageUrl(raw: unknown): { value: string | null } | { code: string } {
+  if (raw === null || raw === '') return { value: null };
+  return typeof raw === 'string' && isAllowedImageUrl(raw.trim()) ? { value: raw.trim() } : { code: 'INVALID_FORMAT' };
+}

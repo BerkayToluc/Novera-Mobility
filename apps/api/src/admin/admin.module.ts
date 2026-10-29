@@ -5,6 +5,8 @@ import { AdminController } from './admin.controller.js';
 import { AdminSummaryService } from './admin-summary.service.js';
 import { BranchesController } from './branches/branches.controller.js';
 import { BranchesService } from './branches/branches.service.js';
+import { VehicleClassesController, VehicleModelsController } from './vehicle-models/vehicle-models.controller.js';
+import { VehicleModelsService } from './vehicle-models/vehicle-models.service.js';
 import { PromoCodesController } from './promo-codes.controller.js';
 import { PromoCodesService } from './promo-codes.service.js';
 import { AdminGuard } from './admin.guard.js';
@@ -15,12 +17,13 @@ import { AuditService } from './audit.service.js';
 // rate limit module, so a request is counted before it is turned away.
 @Module({
   imports: [AuthModule],
-  controllers: [AdminController, PromoCodesController, BranchesController],
+  controllers: [AdminController, PromoCodesController, BranchesController, VehicleModelsController, VehicleClassesController],
   providers: [
     AuditService,
     AdminSummaryService,
     PromoCodesService,
     BranchesService,
+    VehicleModelsService,
     { provide: APP_GUARD, useClass: AdminGuard },
     { provide: APP_INTERCEPTOR, useClass: AuditInterceptor },
   ],

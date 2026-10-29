@@ -347,6 +347,130 @@ describe('administration over HTTP', () => {
     });
   });
 
+  // The door and the input of the vehicle model endpoints (V2-29). What they do against a database is in
+  // vehicle-models/vehicle-models.integration.spec.ts; a request that is turned away is turned away before any database call.
+  describe('vehicle models: the door and the input (V2-29)', () => {
+    const SLUG = 'renault-clio';
+    const routes: [string, string][] = [
+      ['GET', '/admin/vehicle-models'],
+      ['POST', '/admin/vehicle-models'],
+      ['GET', `/admin/vehicle-models/${SLUG}`],
+      ['PATCH', `/admin/vehicle-models/${SLUG}`],
+      ['POST', `/admin/vehicle-models/${SLUG}/retire`],
+      ['POST', `/admin/vehicle-models/${SLUG}/restore`],
+      ['GET', '/admin/vehicle-classes'],
+    ];
+    const withBody = (method: string) => (['POST', 'PATCH'].includes(method) ? { body: {} } : {});
+
+    it('no session is 401 UNAUTHENTICATED on every route', async () => {
+      for (const [method, path] of routes) {
+        const response = await call(method, path, withBody(method));
+        expect(response.status).toBe(401);
+        expect((await response.json()).code).toBe('UNAUTHENTICATED');
+      }
+    });
+
+    it('a customer is 403 FORBIDDEN on every route', async () => {
+      const { cookie } = await signedIn('CUSTOMER');
+      for (const [method, path] of routes) {
+        const response = await call(method, path, { cookie, ...withBody(method) });
+        expect(response.status).toBe(403);
+        expect((await response.json()).code).toBe('FORBIDDEN');
+      }
+    });
+
+    it('a new model with nothing in it asks for every field but the address and the picture', async () => {
+      const { cookie } = await signedIn('ADMIN');
+      const response = await call('POST', '/admin/vehicle-models', { cookie, body: {} });
+      expect(response.status).toBe(422);
+      expect(Object.keys((await response.json()).fieldErrors).sort()).toEqual(
+        ['bags', 'brand', 'classSlug', 'consumption', 'dailyPrice', 'description', 'fuelType', 'model', 'seats', 'transmission'],
+      );
+    });
+
+    it('wrong values are 422 with a code for each field', async () => {
+      const { cookie } = await signedIn('ADMIN');
+      const response = await call('POST', '/admin/vehicle-models', {
+        cookie,
+        body: {
+          brand: 'Renault',
+          model: 'Clio',
+          slug: 'Bad Slug',
+          classSlug: 'ekonomik',
+          fuelType: 'STEAM',
+          transmission: 'MANUAL',
+          seats: '5',
+          bags: 2,
+          consumption: 'az',
+          dailyPrice: 12.5,
+          description: { tr: 'Türkçe', en: '' },
+          imageUrl: 'https://evil.com/a.webp',
+        },
+      });
+      expect(response.status).toBe(422);
+      expect((await response.json()).fieldErrors).toEqual({
+        slug: 'INVALID_FORMAT',
+        fuelType: 'INVALID_FORMAT',
+        seats: 'INVALID_FORMAT',
+        consumption: 'INVALID_FORMAT',
+        dailyPrice: 'INVALID_FORMAT',
+        description: 'REQUIRED',
+        imageUrl: 'INVALID_FORMAT',
+      });
+    });
+
+    it('the address of a model cannot be changed: a change that sends one is 422 NOT_ALLOWED', async () => {
+      const { cookie } = await signedIn('ADMIN');
+      const response = await call('PATCH', `/admin/vehicle-models/${SLUG}`, {
+        cookie,
+        body: { updatedAt: '2026-10-29T10:00:00.000Z', slug: 'baska-adres' },
+      });
+      expect(response.status).toBe(422);
+      expect((await response.json()).fieldErrors).toEqual({ slug: 'NOT_ALLOWED' });
+    });
+
+    it('a change has to say which version it was made against', async () => {
+      const { cookie } = await signedIn('ADMIN');
+      const response = await call('PATCH', `/admin/vehicle-models/${SLUG}`, { cookie, body: { dailyPrice: 150000 } });
+      expect(response.status).toBe(422);
+      expect((await response.json()).fieldErrors).toEqual({ updatedAt: 'REQUIRED' });
+    });
+
+    it('a list asked for in a way that makes no sense is 422', async () => {
+      const { cookie } = await signedIn('ADMIN');
+      for (const [query, field] of [
+        ['pageSize=101', 'pageSize'],
+        ['sort=passwordHash:asc', 'sort'],
+        ['status=GONE', 'status'],
+        ['fuel=STEAM', 'fuel'],
+        ['class=Not%20A%20Slug', 'class'],
+      ] as const) {
+        const response = await call('GET', `/admin/vehicle-models?${query}`, { cookie });
+        expect(response.status).toBe(422);
+        expect(Object.keys((await response.json()).fieldErrors)).toEqual([field]);
+      }
+    });
+
+    it('an address that cannot be one is 404 without asking the database', async () => {
+      const { cookie } = await signedIn('ADMIN');
+      for (const [method, path] of [
+        ['GET', '/admin/vehicle-models/Not%20A%20Slug'],
+        ['POST', '/admin/vehicle-models/Not%20A%20Slug/retire'],
+        ['POST', '/admin/vehicle-models/Not%20A%20Slug/restore'],
+      ] as const) {
+        const response = await call(method, path, { cookie, ...withBody(method) });
+        expect(response.status).toBe(404);
+        expect((await response.json()).code).toBe('NOT_FOUND');
+      }
+    });
+
+    it('a body that is not JSON is 415', async () => {
+      const { cookie } = await signedIn('ADMIN');
+      const response = await call('POST', '/admin/vehicle-models', { cookie, body: 'brand=x', type: 'text/plain' });
+      expect(response.status).toBe(415);
+    });
+  });
+
   describe('the audit log', () => {
     it('a change is logged with the names of its fields and none of the values', async () => {
       const { cookie, id } = await signedIn('ADMIN');

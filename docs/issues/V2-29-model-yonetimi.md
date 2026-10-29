@@ -19,11 +19,11 @@ G'nin isteği: yeni araç modelini fotoğrafıyla panelden eklemek, var olanı d
 - **Fotoğrafsız model:** sitede yer tutucu gösterir (bugünkü davranış).
 
 ## Kabul kriterleri
-- [ ] Yeni model ana sayfa filo bölümünde (kendi sınıf çipinde) ve `?arac=` penceresinde görünür. Araç eklenince aramada da çıkar (V2-30 ile birlikte e2e).
-- [ ] Fiyat değişikliği var olan rezervasyonun tutarını değiştirmez (entegrasyon testi).
-- [ ] Gelecek rezervasyonlu model kaldırılamaz; kaldırılan model sitede görünmez.
-- [ ] Slug değiştirilemez (PATCH'te alan reddedilir).
-- [ ] Yetki, doğrulama ve çakışma testleri; işlem kaydı; 375/1280 ekran görüntüsü.
+- [x] Yeni model ana sayfa filo bölümünde (kendi sınıf çipinde) ve `?arac=` penceresinde görünür. Araç eklenince aramada da çıkar (V2-30 ile birlikte e2e). _Nasıl: `e2e/admin-models.spec.ts` yeni modelin filo kartını doğrular; API entegrasyon testi modelin herkese açık listede olduğunu doğrular. Aramada çıkması araç gerektirir, V2-30'da bakılacak._
+- [x] Fiyat değişikliği var olan rezervasyonun tutarını değiştirmez (entegrasyon testi). _Nasıl: `vehicle-models.integration.spec.ts` "the price" bölümü._
+- [x] Gelecek rezervasyonlu model kaldırılamaz; kaldırılan model sitede görünmez. _Nasıl: entegrasyon testleri (kilit yarışı dahil) ve `e2e/admin-models.spec.ts`._
+- [x] Slug değiştirilemez (PATCH'te alan reddedilir). _Nasıl: entegrasyon testi "the address cannot be changed" (422 NOT_ALLOWED)._
+- [x] Yetki, doğrulama ve çakışma testleri; işlem kaydı; 375/1280 ekran görüntüsü. _Nasıl: HTTP 401/403 testleri, `vehicle-models.audit.spec.ts`; ekran görüntüleri PR'da._
 
 ## Etiketler
 `faz-4` `ozellik` `P2` `api` `web` `veritabani`

@@ -56,7 +56,9 @@ export class CatalogService {
     const currency = this.parseCurrency(currencyParam);
     const rate = await getRate(this.prisma, currency);
 
+    // A retired model is not on the site (V2-29); the bookings it already has still show it (the reservation views do not read this).
     const models = await this.prisma.vehicleModel.findMany({
+      where: { retiredAt: null },
       orderBy: { dailyPrice: 'asc' },
       include: {
         class: true,

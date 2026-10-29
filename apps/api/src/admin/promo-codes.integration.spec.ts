@@ -63,7 +63,7 @@ describeDb('campaign code administration against the database (V2-26)', () => {
     ids.modelId = (
       await prisma.vehicleModel.create({
         data: {
-          slug: `p26-model-${run}`,
+          slug: `p26-model-${run.toLowerCase()}`,
           brand: 'Test',
           model: 'Model',
           seats: 5,

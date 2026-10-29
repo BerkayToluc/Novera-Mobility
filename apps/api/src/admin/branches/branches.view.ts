@@ -64,12 +64,5 @@ export function branchView(row: Branch, activeVehicles: number): BranchView {
   };
 }
 
-// For searching by hand: lower case the Turkish way and without accents, so "sisli" finds "Şişli" and "izmir" "İzmir".
-export function fold(value: string): string {
-  return value
-    .toLocaleLowerCase('tr')
-    .replace(/ı/g, 'i')
-    .normalize('NFD')
-    .replace(/\p{M}/gu, '')
-    .trim();
-}
+// Searching by hand is shared by every list (admin-list.ts).
+export { fold } from '../admin-list.js';
