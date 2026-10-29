@@ -84,7 +84,7 @@ Her fazın sonunda G canlıda (ya da son PR'ın önizlemesinde) bir **faz turu**
 | Risk | Etki | Önlem |
 |---|---|---|
 | Tek geliştirici, uzun liste (46 iş) | Takvim kayar | Fazlar kendi başına değer üretir; Faz 9–11 gerekirse G kararıyla v2.1'e kayabilir. Faz 1–2 kaymaz |
-| Render Free uyuması ve yeniden başlaması | Sayaçlar ve görevler aksar | ADR-27 kalıcı sayaç; zamanlanmış görevler açılışta kaçırılanı telafi eder |
+| Cloud Run örneğinin sıfıra inmesi ve yeniden başlaması | Sayaçlar ve görevler aksar | ADR-27 kalıcı sayaç; zamanlanmış görevler açılışta kaçırılanı telafi eder |
 | Neon Free sınırları (depolama, bağlantı) | Filom seed'i ve sayaçlarla büyüme | Sayaç tablosu günlük temizlenir; seed ölçülü; V2-45'te kullanım kontrolü |
 | Ücretsiz katman koşullarının değişmesi (Vercel, Blob, Resend) | Hizmet kesilir | Her karar gününde koşullar resmi sayfadan doğrulanır, DEPLOY.md'ye tarihle yazılır |
 | Büyük refactor'ların (V2-07, V2-13, V2-14) davranışı bozması | Gerileme | Önce test (V2-19'un API kısmı gerekiyorsa öne alınır); PR'da önce/sonra e2e |

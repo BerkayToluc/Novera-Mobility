@@ -16,7 +16,7 @@
 | Yönetim paneli tasarımı | [ADMIN.md](ADMIN.md) | Berkay, G onaylar |
 | Filom (kurumsal filo paneli), talepler, simülasyon | [FLEET.md](FLEET.md) | Berkay, G onaylar |
 | Güvenlik kararları, hız sınırı tablosu, yayın güvenlik listesi | [SECURITY.md](SECURITY.md) | Berkay |
-| Canlıya çıkış adımları (Vercel, Render, Neon, Resend) | [DEPLOY.md](DEPLOY.md) | Berkay |
+| Canlıya çıkış adımları (Vercel, Cloud Run, Neon, Resend) | [DEPLOY.md](DEPLOY.md) | Berkay |
 | API sözleşmesi | [api/openapi.yaml](api/openapi.yaml) | Berkay (uç değişen her PR'da) |
 | Fotoğraf kaynakları | [PHOTO-CREDITS.md](PHOTO-CREDITS.md) | Berkay |
 | v1'in ayrıntılı sayfa tanımları, eski iş listesi, eski durum ve denetimler | [archive/v1/](archive/v1/) | Değişmez (yalnızca referans) |

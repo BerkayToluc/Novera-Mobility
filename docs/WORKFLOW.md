@@ -11,7 +11,7 @@
 | Issue | Açar, etiketler, atar | Okur; başlamadan önce soruları issue'ya yorum olarak yazar |
 | Kod | — | API, web, veritabanı, CI; hepsi |
 | PR | İnceler, önizlemede dener, birleştirir | Açar, CI'ı yeşile getirir, geri bildirimi uygular |
-| Canlı ortam | Vercel ayarları ve kararlar (analytics, alan adı) | Render, Neon, Resend, Blob, seed, yedek |
+| Canlı ortam | Vercel ayarları ve kararlar (analytics, alan adı) | Cloud Run, Neon, Resend, Blob, seed, yedek |
 | Faz kapısı | Faz turunu yapar, işaretler | Tur için örnek veriyi hazırlar |
 
 ## 2. Issue açma (G)
@@ -62,7 +62,7 @@ $env:GITHUB_TOKEN = '<token>'; .\scripts\create-issues.ps1 -Apply; Remove-Item E
 
 **Bitti sayılma (Definition of Done):** [QUALITY.md](QUALITY.md) §4.
 
-**Veritabanı migration'ı içeren PR'lar:** birleştirmeden önce Berkay canlı veritabanının yedeğini alır. Render açılışta `migrate deploy` çalıştırır; migration geri alınamazsa PR'da yazar.
+**Veritabanı migration'ı içeren PR'lar:** birleştirmeden önce Berkay canlı veritabanının yedeğini alır. Migration sunucu açılırken çalışmaz; Berkay yeni sürüm yayına girmeden önce bilgisayarından `prisma migrate deploy` ile uygular ([DEPLOY.md](DEPLOY.md) "Migration"). Geri alınamayan migration varsa PR'da yazar.
 
 ## 5. Kapsam değişikliği
 

@@ -26,7 +26,7 @@
 
 ## 2. Bugünkü ürün (v1, canlıda)
 
-Canlı ortam: web Vercel, API Render, veritabanı Neon ([DEPLOY.md](DEPLOY.md)).
+Canlı ortam: web Vercel, API Google Cloud Run, veritabanı Neon ([DEPLOY.md](DEPLOY.md)).
 
 ### 2.1 Sayfa hiyerarşisi
 
