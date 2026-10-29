@@ -15,6 +15,7 @@
 | G-06, G-08, G-19, M-06 | V2-06 ([#296](https://github.com/BerkayToluc/Novera-Mobility/issues/296)) | PR'da | `USE_MOCKS` yalnızca `apps/web/lib/mode.ts`'te okunur. Üretimde (`VERCEL_ENV=production`, ya da `NODE_ENV=production` ve test bayrağı `NOVERA_E2E` yok) `USE_MOCKS` doluysa `next build` ve `next start` hata verip durur; Vercel üretiminde `NOVERA_E2E` de işe yaramaz. Ödeme öncesi giriş zorunluluğu mock modunda da açık. `/api` yönlendirmesi kaldırıldı: API web adresi üzerinden de erişilemez. `carPhotos/` `.gitignore`'da |
 | G-03, G-07 | V2-04 ([#294](https://github.com/BerkayToluc/Novera-Mobility/issues/294)) | PR'da | API production'da açılırken `API_ACCESS_KEY` (en az 32 karakter), `DATABASE_URL` ve https `WEB_URL` yoksa hatayla durur (hata değeri yazmaz). "Production mı?" kararı tek yerde (`isProduction`): geliştirme yalnızca açıkça `NODE_ENV=development` (ya da `test`) ile geçerli; `NODE_ENV` yoksa ya da başka bir şeyse, ya da `RENDER` / `K_SERVICE` (Cloud Run) tanımlıysa production sayılır. Oturum çerezi `Secure`, sıfırlama bağlantısı günlüğe yazılmaz, `/docs` kapalı |
 | G-02, G-16 | V2-03 ([#293](https://github.com/BerkayToluc/Novera-Mobility/issues/293)) | PR'da | `POST /reservations` kullanıcı başına saatte 10 istek; bir hesapta en çok 3 gelecek ya da devam eden rezervasyon (`422 RESERVATION_LIMIT`, sayım ve ekleme kullanıcı satırı kilidiyle aynı işlemde); `POST /reservations/price` istemci başına 10 dakikada 60 istek; `holdId` yalnızca tutmayı açan istemci anahtarıyla kullanılabilir |
+| G-20 | V2-22 | PR'da | Gövdesi olan her istek `application/json` değilse `415` alır (`common/json-only.ts`); form ve `text/plain` gövdeler artık ayrıştırılmaz. Anahtar denetiminden sonra, gövde ayrıştırıcılardan önce çalışır, anahtarsız çağıran hiçbir şey öğrenmez. Gövdesiz çağrılar (çıkış, iptal, DELETE) etkilenmez. `app.setup.spec.ts`; elle denendi. |
 
 ### Hız sınırı tablosu (V2-09; tek kaynak burasıdır)
 
@@ -69,6 +70,51 @@ Tam liste, seviye ve dosya:satır [QUALITY.md](QUALITY.md) §1.1'de.
 | G-06 | Yüksek | `USE_MOCKS` üretime sızarsa giriş koruması atlanır | V2-06 |
 | G-10 | Yüksek | Web server action'larında doğrulama yok | V2-08 |
 | G-07, G-08, G-09, G-11–G-15 | Orta | Fail-open `NODE_ENV`, `/api` yönlendirmesi, etkisiz `ValidationPipe`, sınırsız uçlar, parola özeti ve oturum süresi, hesap silmede doğrulama, giriş kilidi | V2-04, V2-06, V2-07, V2-09, V2-10 |
+| G-21 | Düşük | E-posta başına giriş bekleme sayacı atomik değil (dağıtık saldırıda geç devreye girer) | — (kapı dışı) |
+
+## Faz 2 kapısı: son güvenlik turu (V2-22, 29 Ekim 2026)
+
+**Sonuç:** QUALITY.md'de **Kritik, Yüksek ve Orta seviyede açık bulgu yok.** İki Orta kayıt gerekçeyle "Kabul edildi" (U-05, P-04); iki yeni Düşük bulgu: G-20 düzeltildi, G-21 açık (kapı dışı). ASVS L1 listesi [QUALITY.md](QUALITY.md) §3.1'de işaretli ve kanıtlı.
+
+**Yöntem ve sınırlar**
+- **Kod incelemesi:** `2ff4f0a` (v1'in son durumu; repoda v1 etiketi yok) ile `main` arasındaki güvenlik açısından kritik yüzeyler okundu: kimlik, oturum, Google bağlama, parola sıfırlama, hesap silme, rezervasyon oluşturma (kilitler, sahiplik, kampanya, puan), hız sınırı deposu, API anahtarı ve istemci adresi, günlükler, web CSP, JSON-LD, yönlendirmeler. Claude Code `/security-review` becerisi çağrıldı; farkı boş geldiği için (V2'nin tamamı `main`'de) bulgular elle okumayla çıkarıldı. **`security-audit` becerisi bu ortamda yok, çalıştırılmadı.** Bağımsız bir sızma testi ya da ikinci gözden geçiren yok.
+- **Elle deneme:** yerel API, production benzeri derleme, gerçek PostgreSQL, tohumlanmış veri. `development` modunda akışlar, `production` modunda açılış ve `/docs` denendi. Canlı sitede denenmedi.
+- Bulunanlar: G-20 (düzeltildi), G-21 (açık, Düşük). Sorun bulunmayanlar yukarıdaki "İncelendi, sorun bulunmadı" listesine ek olarak: Google bağlama (doğrulanmış e-posta şartı, parola ve oturumların silinmesi), sıfırlama bağlantısının production'da günlüğe yazılmaması (test var), rezervasyonda araç ve hesap satırı kilidi ve sunucuda fiyat.
+
+**Elle deneme tablosu**
+
+| Deneme | Beklenen | Sonuç |
+|---|---|---|
+| Anahtarsız istek, yanlış anahtar | `404` | Geçti |
+| Anahtarsız `/health` | Yalnızca `{"status":"ok"}` | Geçti |
+| `/docs`, `/docs-json`, `/openapi.json` (production) | `404` | Geçti (`development`'ta açık, tasarım gereği) |
+| `X-Powered-By` | Yok | Geçti |
+| Production'da anahtarsız, 32 karakterden kısa anahtarlı, `http://` WEB_URL'li açılış | Açılmaz | Geçti (üçü de hatayla durdu) |
+| Oturum çerezi (production) | `HttpOnly; Secure; SameSite=Lax` | Geçti |
+| Çıkıştan sonra eski çerezle `/me` | `401` | Geçti |
+| Oturumsuz `/me/reservations/{id}` | `401` | Geçti |
+| IDOR: B, A'nın rezervasyonunu okur / iptal eder | `404` | Geçti |
+| B'nin rezervasyon listesi | A'nın kaydı yok | Geçti |
+| Geçmiş tarihli rezervasyon | `422 IN_PAST` | Geçti |
+| 365 günden uzun kiralama; bitiş başlangıçtan önce | `422` | Geçti |
+| 4. gelecek rezervasyon | `422 RESERVATION_LIMIT` | Geçti |
+| Başkasının tutmasıyla rezervasyon | `409` | Geçti |
+| Kampanya kodu tahmini (aynı istemci) | 11. denemede `429` + `Retry-After` | Geçti |
+| Hatalı giriş (aynı istemci) | 11. denemede `429` + `Retry-After` | Geçti |
+| 2 MB gövde | `413` | Geçti |
+| `text/plain` gövde | `415` | İlk denemede **geçmedi** (`422`): G-20, düzeltildi, tekrarında geçti |
+| Bozuk JSON; olmayan rota | `400` / `404`, yığın izi yok | Geçti |
+| Yaygın parola; 7 karakterli parola ile kayıt | `422` | Geçti |
+
+İlk koşuda 5 satır kırmızıydı: üçü betik hatasıydı (araç kimliğinin alan adı yanlıştı), biri `development` modunda `/docs`'un açık olmasıydı (tasarım gereği; production'da ayrıca denendi), biri G-20'ydi. İkinci koşuda giriş sınırı satırı kırmızıydı: sayaçlar veritabanında kalıcı olduğu için betik önceki koşunun adresini yeniden kullanmıştı; adresler rastgele yapılınca geçti.
+
+**Kabul edilen riskler (gerekçeli)**
+- **U-05:** gerçek ekran okuyucu (NVDA) turu yapılmadı, proje kapsamına alınmadı (Berkay, 29 Ekim). Yerine otomatik axe, klavye ve taşma turu var.
+- **P-04:** mobil LCP/TBT hedefi tutmadı ([PERFORMANCE.md](PERFORMANCE.md)); güvenlik riski yok, kalite borcu.
+- **Giriş beklemesi e-posta başına** (G-15 çözümü): bir yabancı, bir e-postaya hatalı denemeyle sahibini en çok 15 dakikalık aralıklarla bekletebilir. Hesap kilitlenmez, doğru parola bekleme bitince çalışır. Bilinçli ödünleşim (V2-10).
+- **Google ile açılan hesabın silinmesi** parola yerine yazılan e-posta adresiyle onaylanır (G-14). Çalınmış oturum çerezi olan biri `GET /me` ile e-postayı da görür, yani bu doğrulama yalnızca yanlışlıkla silmeyi engeller, çalınmış oturuma karşı koruma değildir. Çalınmış oturum çerezi zaten hesabın geri kalanını okuyabildiği için kabul edildi; güçlendirmek istenirse son girişten sonra kısa süre ya da Google'a yeniden doğrulatma eklenir.
+
+**Faz 2 kapısı için kalanlar (G):** ROADMAP §3'te kapıyı işaretlemek ve `main`'e `v2.0.0-faz2` etiketini atmak G'nin işidir; ben ikisini de yapmam.
 
 ## Yönetim paneli ve Filom (v2, tasarım)
 
@@ -105,7 +151,7 @@ yeni testler ve `pnpm audit`.
 - **Eşzamanlılık:** araç ve (puanla ödemede) kullanıcı satırı kilidi; iki kilit hep aynı sırayla alınır.
 - **Girdi:** kimlikler metin sütunu, uydurma kimlik hata değil 404/422 verir; gövde sınırı Express varsayılanı 100 KB (testle kanıtlandı: üstü `413`).
 - **CORS:** gerekmiyor (ADR-14: tarayıcı Next üzerinden gelir). Eklenmedi; doğrudan erişim açılırsa yeniden bakılır.
-- **CSRF:** `SameSite=Lax` + yalnızca JSON gövdeli POST/PATCH/DELETE. Çapraz site isteğine çerez eklenmez. Kodda tarayıcıdan `/api` çağrısı bulunmadı; tüm çağrılar sunucudan gidiyor.
+- **CSRF:** `SameSite=Lax` + yalnızca JSON gövdeli POST/PATCH/DELETE (JSON dışı gövde V2-22'den beri `415`, G-20) + production'da anahtar başlığı. Çapraz site isteğine çerez eklenmez. Kodda tarayıcıdan `/api` çağrısı bulunmadı; tüm çağrılar sunucudan gidiyor.
 - **Bağımlılıklar (`pnpm audit`, V2-18):** CI her çalışmada `pnpm audit:prod` koşar (`scripts/audit-prod.mjs`); çalışan uygulamaya giren pakette **yüksek ya da kritik** bulgu varsa kırmızı olur. Çalışan uygulamaya girmeyen bulgular `scripts/audit-allowlist.json` içinde, yalnızca belirli bir bağımlılık yoluna (`pathPrefix`) bağlı, gerekçeli ve gözden geçirme tarihli izin kaydıyla geçer; kayıt 90 günden eskiyse ya da aynı paket başka bir yoldan uygulamaya giriyorsa yine kırmızıdır. Bugünkü izinler (26 Ekim 2026): `deepmerge-ts` (GHSA-ggr8-5vv4-36mx) ve `mysql2` (GHSA-3f6p-5ww8-9rcr); ikisi de yalnızca Prisma **komut satırı aracından** geliyor, çalışan API'de yok (veritabanı sürücüsü `pg`, veritabanı PostgreSQL). Prisma güncellenince bunlar kalkar; betik artık eşleşmeyen kaydı "silinebilir" diye bildirir. `@nestjs/platform-express` `multer`'ı 2.4.0'a sabitlediği için `pnpm-workspace.yaml`'da `overrides` ile 2.5.0'a çekildi (platform-express yamalı sürümü istediğinde kaldırılır). Dependabot haftalık PR açar (`.github/dependabot.yml`), CodeQL her PR'da ve haftada bir çalışır (`.github/workflows/codeql.yml`).
 
 ## Google ile giriş (`POST /auth/google`)
@@ -135,6 +181,8 @@ Süre kararı G'nindir (SPEC §7, 22 Ekim 2026): iletişim mesajı ve teklif tal
 - Yedekler: Neon'un geri dönüş penceresi 6 saattir; elle alınan yedek branch'ler 24 saat sonra kendiliğinden silinir. Anonimleştirilen veri eski bir yedekten geri gelebilir; yedek kullanılırsa görev ilk çalışmada yeniden anonimleştirir.
 
 ## Karar bekleyenler (kodda değiştirilmedi)
+
+V2-22 turunda eklenen kabuller yukarıdaki "Faz 2 kapısı" bölümünde.
 
 1. **Parola sıfırlama isteği süre farkı:** e-posta gönderimi artık beklenmiyor (S10); geriye yalnızca hesap varken yapılan iki küçük veritabanı yazması kaldı. Fark çok küçük ve ağ gürültüsünün içinde kalır; ek önlem gerekmez.
 2. **Kayıtta `EMAIL_TAKEN`:** hesap varlığını açık eder; sözleşmeye göre bilinçli (kullanıcıya doğru mesaj). Sınır: saatte 10 kayıt/istemci.

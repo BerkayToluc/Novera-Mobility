@@ -2,6 +2,7 @@ import type { INestApplication } from '@nestjs/common';
 import type { Express, NextFunction, Request, Response } from 'express';
 import { AllExceptionsFilter } from './common/all-exceptions.filter.js';
 import { apiAccess } from './common/api-access.js';
+import { jsonOnly } from './common/json-only.js';
 import { currentEnv, type Env } from './config/env.js';
 import { trustProxyHops } from './config/runtime.js';
 
@@ -27,5 +28,7 @@ export function configureApp(app: INestApplication, env: Env = currentEnv()): vo
   app.use(securityHeaders);
   // Production: only the web server (which holds API_ACCESS_KEY) may call the API. See common/api-access.ts.
   app.use(apiAccess(env));
+  // After the key check (a caller without the key learns nothing), before the body parsers.
+  app.use(jsonOnly);
   app.useGlobalFilters(new AllExceptionsFilter());
 }

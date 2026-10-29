@@ -39,6 +39,8 @@
 | G-17 | Düşük | Rezervasyon numarası "en büyük + 1" ile, beş denemeyle üretiliyor; ardışık numara rezervasyon hacmini belli ediyor | `reservations/reservations.service.ts:124-131` | V2-11 | Düzeltildi (V2-11; numara Postgres sequence'ten, yeniden deneme döngüsü kalktı; 20 eşzamanlı istekte benzersiz, testle. Seri artık yıl başında sıfırlanmıyor, biçim `NVR-<yıl>-<5 hane>` aynı) |
 | G-18 | Düşük | CI'da bağımlılık taraması (`pnpm audit`), Dependabot ve gizli anahtar taraması yok. Prisma CLI içindeki bilinen bulgular (SECURITY.md) izlenmiyor | `.github/workflows/ci.yml` | V2-18 | Düzeltildi (V2-18, #308; `pnpm audit:prod` CI'da, Dependabot, CodeQL; secret scanning ayarı G'de, doğrulanmadı) |
 | G-19 | Düşük | `carPhotos/` (167 MB, izlenmeyen) `.gitignore`'da değil; tek bir `git add .` repoya sokar | kök | V2-06 | Düzeltildi (V2-06, #296; `.gitignore`'a `carPhotos/` eklendi) |
+| G-20 | Düşük | API'de JSON dışı gövdeyi reddeden bir şey yoktu: `application/x-www-form-urlencoded` ve `text/plain` gövdeler ayrıştırılıp doğrulamaya düşüyordu (`415` yok, QUALITY §3.1 Girdi maddesi karşılanmıyordu). Başka bir sitedeki form, CORS ön kontrolü olmadan bu türlerle istek atabilir; production'da anahtar başlığı ve `SameSite=Lax` çerez bunu zaten engelliyor, yani kullanılabilir bir yol bulunmadı | `app.setup.ts`, `common/json-only.ts` | V2-22 | Düzeltildi (V2-22; gövdesi olan her istek `application/json` değilse `415`; anahtar denetiminden sonra, gövde ayrıştırıcılardan önce; gövdesiz çağrılar (çıkış, iptal, DELETE) etkilenmez; `app.setup.spec.ts`, elle) |
+| G-21 | Düşük | E-posta başına giriş bekleme sayacı "oku, sonra yaz" ile güncelleniyor (atomik değil): aynı e-postaya aynı anda gelen çok sayıda hatalı deneme sayacı gerçek sayıdan az artırır. İstemci sınırı atomik olduğundan tek adres 10/15 dk'da kalır; birçok adresten dağıtık saldırıda e-posta başına bekleme geç devreye girebilir. Her deneme 2^17 scrypt maliyetli ve yaygın parolalar reddediliyor | `auth/auth.service.ts` (`recordFailure`) | — | Açık (Düşük; kapı dışı). Düzeltme: sayacı tek SQL `INSERT … ON CONFLICT DO UPDATE` ile artırmak (hız sınırı deposundaki gibi) |
 
 ### 1.2 Veritabanı (V)
 
@@ -78,7 +80,7 @@
 | U-02 | Düşük | `/kvkk` ve `/gizlilik-politikasi` ikisi de gizlilik metni; ayrımları sayfada anlatılmıyor ve birbirine bağlantı vermiyorlar | `app/[locale]/kvkk`, `gizlilik-politikasi` | V2-16 | Düzeltildi (V2-16; `/kvkk` ve `/gizlilik-politikasi` ayrı kaldı, her biri başında farkı anlatan bir cümle ve diğerine bağlantı taşıyor, TR/EN `legal.json`) |
 | U-03 | Orta | Rezervasyon kartları fotoğraf yerine hep yer tutucu gösteriyor (`imageUrl={null}` sabit) | `components/profile/reservation-list.tsx:86` | V2-16 | Düzeltildi (V2-16; `Reservation.vehicle.imageUrl` API cevabındaki modelden geliyor, mock'ta da; kartlar fotoğrafı gösteriyor, fotoğrafı olmayan araç yer tutucuda kalıyor) |
 | U-04 | Düşük | Hizmetler sayfasındaki yorum eskimiş: header menüsü hizmete bağlantı vermiyor, güvence bandı `hizmet=1`'e gidiyor | `app/[locale]/hizmetler/page.tsx:24`, `guarantee-band.tsx:43` | V2-16 | Düzeltildi (V2-16; `hizmetler/page.tsx` yorumu güncel: header'ın Hizmetler öğesi düz bağlantı, güvence bandı `hizmet=1`'e gider) |
-| U-05 | Orta | Ekran okuyucu turu hiç yapılmadı; v1'in tasarım eleştirisi sayfa sayfa yapılmadı (yalnızca ölçüm: axe, taşma, klavye) | — | V2-20 | Kısmen kapatıldı (V2-20, #310 kapandı: otomatik tur yapıldı, 20 sayfa × 5 genişlik × açık/koyu × TR/EN, taşma 0, axe 0, `responsive.spec.ts` genişletildi). NVDA + Chrome ekran okuyucu turu ve `impeccable`/`web-design-guidelines` eleştirisi bilerek ertelendi; Faz 2 kapanışından (V2-22) önce yapılacak, yapılmadan U-05 tam kapanmış sayılmaz |
+| U-05 | Orta | Ekran okuyucu turu hiç yapılmadı; v1'in tasarım eleştirisi sayfa sayfa yapılmadı (yalnızca ölçüm: axe, taşma, klavye) | — | V2-20 | Kabul edildi (V2-20, #310: otomatik tur yapıldı, 20 sayfa × 5 genişlik × açık/koyu × TR/EN, taşma 0, axe 0. NVDA + Chrome ekran okuyucu turu ve tasarım eleştirisi proje kapsamına alınmadı; karar: Berkay, 29 Ekim 2026. Risk: gerçek ekran okuyucuyla deneme yok, yalnızca axe ve klavye ölçümü) |
 | U-06 | Düşük | Web manifest yalnızca SVG ve 180 px ikon içeriyor; 192/512 px PNG, maskable ikon, `id`, `scope` yok. Telefonda "ana ekrana ekle" deneyimi zayıf | `app/manifest.ts` | V2-16 | Düzeltildi (V2-16; manifest'e 192 ve 512 px PNG, maskable ikon (`app/icons/[file]/route.tsx`, `BRAND_COLORS`'tan), `id`, `scope`; Chrome `Page.getAppManifest` hata ve yüklenebilirlik uyarısı boş) |
 
 ### 1.5 Performans (P)
@@ -88,7 +90,7 @@
 | P-01 | Yüksek | `NextIntlClientProvider` `messages` almadığı için her sayfa tüm çeviri dosyalarını (yaklaşık 129 KB, yalnız `legal.json` 15 KB) istemciye gönderiyor | `app/[locale]/layout.tsx:61` | V2-15 | Düzeltildi (V2-15, #305; kök provider yalnızca üstbilgi, çerez bandı ve hata sayfası metnini gönderir (`ROOT_NAMESPACES`), her bölüm kendi istemci bileşenlerinin metnini `ClientMessages` ile ekler; liste `i18n/client-messages.ts`, `tests/client-messages.test.ts` kodu okuyup listeyle karşılaştırır; ana sayfa HTML'i 469 → 413 KB, `/araclar` 278 → 210 KB (gzip 44 → 24 KB)) |
 | P-02 | Orta | `framer-motion` navbar menüsü üzerinden her sayfada yükleniyor; etkiler CSS ile yapılabilir | `components/layout/nav-menu.tsx`, `main-nav.tsx` | V2-14 | Düzeltildi (V2-14; navbar paneli CSS (`animate-menu-in`); `framer-motion` artık yalnızca SSS ve iletişim bağlantısı olan sayfalarda yüklenir; ölçüm PR'da) |
 | P-03 | Orta | İlk araç görselinde `preload` yok (Next 16'da `priority`'nin yerine geçti); 4 modelin fotoğrafı eksik; fotoğraflar sıkıştırılmadı | `components/vehicle/vehicle-image.tsx`, `public/` | V2-21 | Düzeltildi (V2-21, #311; `VehicleImage` `preload` alıyor, sonuç listesinin ilk kartı kullanıyor; seed'deki 4 belgesiz model (golf, tucson, id4, audi-a6) belgelerdeki 4 modelle (passat, rav4, ioniq-5, 3008) değişti, 15 modelin hepsinde fotoğraf var, hepsi ≈120 KB altında) |
-| P-04 | Orta | Production build'de mobil Lighthouse hiç ölçülmedi (v1'deki sayılar geliştirme sunucusundan, geçersiz) | — | V2-21 | Ölçüldü, hedef tutmadı (V2-21, #311; [PERFORMANCE.md](PERFORMANCE.md): LCP dört sayfada 2,8–4,4 sn > 2,5 sn, TBT üç sayfada > 200 ms, CLS hedefte. Neden: hidrasyon maliyeti. Sonraki adım PERFORMANCE.md'de; açık) |
+| P-04 | Orta | Production build'de mobil Lighthouse hiç ölçülmedi (v1'deki sayılar geliştirme sunucusundan, geçersiz) | — | V2-21 | Kabul edildi (V2-21, #311: ölçüldü, [PERFORMANCE.md](PERFORMANCE.md); mobil LCP dört sayfada 2,8–4,4 sn (hedef < 2,5), TBT üç sayfada > 200 ms, CLS hedefte; neden istemci tarafı JavaScript maliyeti (hidrasyon). Gerçek cihazda ve Vercel'de ölçülmedi; ayrı iş açılmadı; karar: Berkay, 29 Ekim 2026) |
 
 ### 1.6 Test ve CI (T)
 
@@ -149,7 +151,7 @@
 | V2-19 | T-01, T-02, T-03 |
 | V2-20 | U-05 (ve turda bulunacak yeni U-xx'ler) |
 | V2-21 | P-03, P-04 |
-| V2-22 | Faz 2 kapanış kapısı: bu belgenin tamamı |
+| V2-22 | Faz 2 kapanış kapısı: bu belgenin tamamı; yeni G-20 (düzeltildi), G-21 (açık, Düşük); U-05 ve P-04 "Kabul edildi" |
 
 ---
 
@@ -159,26 +161,38 @@
 
 ### 3.1 Güvenlik (OWASP ASVS 4.0 Seviye 1'den uygulanabilir maddeler)
 
-- [ ] **Kimlik:**
+V2-22 (29 Ekim 2026) işaretledi. "Kanıt" kodu ya da testi gösterir; "elle" satırları `main` ile aynı kodda, yerel production benzeri derleme ve gerçek PostgreSQL üzerinde denendi (tablo: [SECURITY.md](SECURITY.md) "Elle deneme").
+
+- [x] **Kimlik:**
   - parola en az 8 karakter (yönetici 12) ve yaygın parola listesine karşı denetim;
   - özet scrypt N ≥ 2^17 ya da argon2id;
   - girişte özet yükseltme;
   - kaba kuvvete karşı hesap ve istemci sınırı.
-- [ ] **Oturum:** rastgele 256 bit; yalnızca özeti saklanır; httpOnly/Secure/SameSite; mutlak ve boşta kalma süresi; çıkışta ve parola değişince iptal.
-- [ ] **Erişim:** her uçta yetki API'de; IDOR testleri; yönetici ve şirket izolasyon testleri; en az yetki.
-- [ ] **Girdi:** her uçta şema doğrulaması (ADR-26); gövde boyut sınırı; yalnızca JSON kabul edilen uçlarda `415`.
-- [ ] **Çıktı:** ham HTML yok; JSON-LD kaçışlı; hata metninde iç ayrıntı yok.
-- [ ] **İş mantığı:**
+  - Kanıt: `common/zod-fields.ts` (`PASSWORD_TOO_COMMON`), `common/common-passwords.ts` (elle: yaygın parola ve 7 karakterli parola `422`); `auth/password.ts` (N = 2^17); `auth/auth.service.ts` (`needsRehash`); istemci 10/15 dk (elle: 11. denemede `429` + `Retry-After`) ve e-posta başına artan bekleme (`auth/login-throttle.ts`, `rate-limits.http.spec.ts`). Yönetici 12 karakter kuralı **uygulanmaz**: yönetici hesabı V2-23'te gelir. Bkz. G-21.
+- [x] **Oturum:** rastgele 256 bit; yalnızca özeti saklanır; httpOnly/Secure/SameSite; mutlak ve boşta kalma süresi; çıkışta ve parola değişince iptal.
+  - Kanıt: `auth/session-token.ts` (32 bayt, SHA-256 özeti); çerez `HttpOnly; Secure; SameSite=Lax` (elle, production modu); 30 gün mutlak, 7 gün boşta (`session.integration.spec.ts`); çıkış, parola değişimi, sıfırlama ve Google bağlama oturumları siler (`auth.service.ts`, `account-security.service.ts`, `password-reset.service.ts`, `google-auth.service.ts`; elle: çıkıştan sonra eski çerez `401`).
+- [x] **Erişim:** her uçta yetki API'de; IDOR testleri; yönetici ve şirket izolasyon testleri; en az yetki.
+  - Kanıt: `SessionGuard` (`/me*`, `POST /reservations`), tüm sorgularda `userId` koşulu (`reservations.service.ts`), `reservations.integration.spec.ts` (başkası göremez); elle: B, A'nın rezervasyonunu okuyunca ve iptal edince `404`, oturumsuz `401`. Yönetici ve şirket izolasyonu **uygulanmaz** (şimdilik): `/admin/*` V2-23, `/fleet/*` V2-35'te gelir, testleri o işlerin kabul kriteridir.
+- [x] **Girdi:** her uçta şema doğrulaması (ADR-26); gövde boyut sınırı; yalnızca JSON kabul edilen uçlarda `415`.
+  - Kanıt: zod şemaları (`common/zod-validation.ts`, `validation.http.spec.ts`); `413` (`app.setup.spec.ts`, elle 2 MB); `415` **bu işte eklendi** (`common/json-only.ts`, G-20; elle `text/plain` → `415`).
+- [x] **Çıktı:** ham HTML yok; JSON-LD kaçışlı; hata metninde iç ayrıntı yok.
+  - Kanıt: tek `dangerouslySetInnerHTML` JSON-LD'de ve `<` kaçışlı (`apps/web/components/json-ld.tsx`); e-postada `escapeHtml` (`auth/reset-link-notifier.ts`); hata gövdesi sabit kodlar (`common/all-exceptions.filter.ts`, `app.setup.spec.ts`; elle: bozuk JSON ve olmayan rota cevabında yığın izi yok).
+- [x] **İş mantığı:**
   - zaman kuralları (geçmiş tarih, en uzun süre);
   - tavanlar (aktif rezervasyon, kampanya kodu kullanımı);
   - puan kuralları sunucuda;
   - geçersiz durum geçişi reddedilir.
-- [ ] **Hız sınırı:** her uç §3.2 tablosunda; `429` + `Retry-After`.
-- [ ] **Dosya:** tür imzayla, boyut sınırı, rastgele ad, EXIF temizliği, izinli alan adı (ADR-28).
-- [ ] **Yapılandırma:** production'da eksik gizli değerle açılmama (fail-closed); `/docs` kapalı; güvenlik başlıkları; CSP.
-- [ ] **Veri koruma:** kişisel veri günlüğe yazılmaz; saklama süreleri (V2-12); yedekler repoda değil.
-- [ ] **Bağımlılıklar:** `pnpm audit --prod` CI'da; bot güncellemeleri; bilinen bulguların gerekçeli kaydı.
-- [ ] **Denetim kaydı:** yönetici ve Filom'da değiştiren işlemler (ADR-24).
+  - Kanıt: `reservations/booking-window.ts` (elle: geçmiş tarih `IN_PAST`, 365 günden uzun ve ters aralık `422`); tavan 3 (`RESERVATION_LIMIT`, elle), kampanya tavanları ve kişi başı tek kullanım (`pricing.promo.spec.ts`); toplam, puan ve indirim sunucuda hesaplanır, araç ve hesap satırı kilitlenir (`reservations.service.ts`); başkasının tutmasıyla rezervasyon `409` (elle). Durum geçişi: iptal yalnızca `CONFIRMED` ve başlamamış kayıtta (`reservations.service.ts`). Teklif ve yönetici durum akışı V2-32'de gelir.
+- [x] **Hız sınırı:** her uç §3.2 tablosunda; `429` + `Retry-After`.
+  - Kanıt: `rate-limits.spec.ts` (her rota SECURITY.md tablosunda), `rate-limits.http.spec.ts`; sayaç tek SQL ile atomik (`common/rate-limit.store.ts`); elle: kampanya kodu tahmini ve giriş denemesinde `429` + `Retry-After`.
+- [ ] → **Uygulanmaz (şimdilik)**, **Dosya:** tür imzayla, boyut sınırı, rastgele ad, EXIF temizliği, izinli alan adı (ADR-28). Dosya yükleme yok; V2-28'in kabul kriteridir.
+- [x] **Yapılandırma:** production'da eksik gizli değerle açılmama (fail-closed); `/docs` kapalı; güvenlik başlıkları; CSP.
+  - Kanıt: `config/runtime.ts` (elle: anahtarsız, kısa anahtarlı ve `http` WEB_URL'li production açılmıyor); `/docs`, `/docs-json`, `/openapi.json` production'da `404` (elle); `X-Content-Type-Options`, `Referrer-Policy`, `Cross-Origin-Resource-Policy`, `Cache-Control: no-store` (`app.setup.ts`); web CSP nonce'lı, `frame-ancestors 'none'` (`apps/web/lib/csp.ts`); API anahtarı yalnızca sunucu tarafında (`server-only`, `lib/api-headers.ts`).
+- [x] **Veri koruma:** kişisel veri günlüğe yazılmaz; saklama süreleri (V2-12); yedekler repoda değil.
+  - Kanıt: sıfırlama bağlantısı ve e-posta production'da günlüğe yazılmaz (`reset-link-notifier.ts`, `reset-link-notifier.spec.ts`); API günlüğünde başka kişisel veri yok (tüm `logger.*` çağrıları gözden geçirildi); saklama ve anonimleştirme görevi (`forms/retention.task.ts`, SECURITY.md "Veri saklama"); `.gitignore`: `.env*`, `carPhotos/`.
+- [x] **Bağımlılıklar:** `pnpm audit --prod` CI'da; bot güncellemeleri; bilinen bulguların gerekçeli kaydı.
+  - Kanıt: `pnpm audit:prod` 29 Ekim'de: 7 uyarı, 0 engelleyici, 2 gerekçeli izinli (yalnızca Prisma komut satırı aracı; `scripts/audit-allowlist.json`, 90 günde bir gözden geçirilir); Dependabot ayarlı (V2-18).
+- [ ] → **Uygulanmaz (şimdilik)**, **Denetim kaydı:** yönetici ve Filom'da değiştiren işlemler (ADR-24). Yönetici ve Filom yok; V2-23 ve V2-35'in kabul kriteridir.
 
 ### 3.2 Hız sınırı tablosu (ADR-27)
 

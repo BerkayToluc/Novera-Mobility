@@ -103,6 +103,29 @@ describe('configureApp', () => {
       expect(await response.json()).toEqual({ code: 'BAD_REQUEST', message: 'The request is not valid' });
     });
 
+    it('turns away a body that is not JSON with 415 (a form post, text/plain)', async () => {
+      for (const [type, body] of [
+        ['application/x-www-form-urlencoded', 'a=1'],
+        ['text/plain', '{"a":1}'],
+        ['multipart/form-data; boundary=x', '--x--'],
+      ] as const) {
+        const response = await fetch(`${base}/echo`, { method: 'POST', headers: { 'Content-Type': type }, body });
+        expect(response.status).toBe(415);
+        expect(await response.json()).toEqual({ code: 'BAD_REQUEST', message: 'This content type is not supported' });
+      }
+    });
+
+    it('still takes JSON (also with a charset) and a call with no body at all', async () => {
+      const json = await fetch(`${base}/echo`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json; charset=utf-8' },
+        body: '{"a":1}',
+      });
+      expect(json.status).toBe(201);
+      expect(await json.json()).toEqual({ a: 1 });
+      expect((await fetch(`${base}/echo`, { method: 'POST' })).status).toBe(201);
+    });
+
     it('answers a body over the limit with 413 PAYLOAD_TOO_LARGE', async () => {
       const response = await fetch(`${base}/echo`, {
         method: 'POST',
