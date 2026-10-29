@@ -91,7 +91,7 @@ export interface paths {
         };
         /**
          * Araç modelleri (Araçlarımız sayfası)
-         * @description Tüm modeller; her modelin bulunduğu bayilerle birlikte. Müsaitlik filtresi yoktur.
+         * @description Tüm modeller; her modelin bulunduğu bayilerle birlikte. Müsaitlik filtresi yoktur. **Kaldırılmış (retired) modeller listede yoktur** (V2-29); geçmiş rezervasyonlar onları göstermeye devam eder.
          */
         get: {
             parameters: {
@@ -2185,6 +2185,524 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/admin/vehicle-classes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Araç sınıfları (yönetim)
+         * @description Bir modelin konabileceği sınıflar; formun seçeneği. Sınıflar sabittir, bu uçlardan eklenmez ya da değiştirilmez.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Sınıflar */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @example ekonomik */
+                            slug: string;
+                            name: components["schemas"]["LocalizedText"];
+                        }[];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/vehicle-models": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Araç modelleri (yönetim)
+         * @description Sayfalı liste (ADR-24): `{ items, total, page, pageSize }`. **Kaldırılmış modeller de dahildir** (herkese açık
+         *     `GET /vehicle-models` onları döndürmez). Tablo küçük ve elle yönetilir; süzme, arama ve sıralama sunucuda yapılır.
+         *     Arama marka, model ve adreste yapılır, büyük/küçük harf ve Türkçe harfler fark etmez (`sahin` → Şahin).
+         *     Sınır: yönetici başına dakikada 120 (`429 RATE_LIMITED`).
+         */
+        get: {
+            parameters: {
+                query?: {
+                    page?: number;
+                    pageSize?: number;
+                    /** @description `alan` ya da `alan:asc|desc`. Varsayılan `name:asc` (marka ve model). */
+                    sort?: "name" | "dailyPrice" | "activeVehicles" | "createdAt";
+                    q?: string;
+                    /** @description Sınıf adresi (`ekonomik`). Olmayan bir sınıf hiçbir şey bulmaz. */
+                    class?: string;
+                    fuel?: components["schemas"]["FuelType"];
+                    status?: "ACTIVE" | "RETIRED";
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Bir sayfa model */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AdminVehicleModelPage"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        put?: never;
+        /**
+         * Yeni araç modeli
+         * @description Model hemen sitede görünür (ana sayfa filo bölümü, `?arac=` penceresi); aracı yoksa aramada çıkmaz, araçlar V2-30'da
+         *     eklenir. **Adres (`slug`) isteğe bağlıdır**: verilmezse marka ve modelden üretilir (`Renault Clio` → `renault-clio`,
+         *     Türkçe harfler sadeleşir); küçük harf, rakam ve tire, en az 3 karakter. Aynı adres varsa `409 SLUG_TAKEN`. Adres
+         *     **sonradan değişmez** (`?arac=` bağlantıları bozulmasın). Tüketim birimi verilmez: elektrikte kWh/100 km, diğerlerinde
+         *     L/100 km. Açıklama iki dilde de zorunlu. `imageUrl` yalnızca `/fleet/` altında bir site yolu ya da fotoğraf deposunun
+         *     adresi olabilir (ADR-28); boş bırakılırsa site yer tutucu çizer. Fiyat TRY kuruş cinsinden, en çok 10.000.000 (₺100.000).
+         *     İşlem kaydı: `vehicle-model.create`.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["AdminVehicleModelCreate"];
+                };
+            };
+            responses: {
+                /** @description Oluşturulan model */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AdminVehicleModel"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Bu adres kullanımda (`SLUG_TAKEN`, `fieldErrors.slug`) */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description JSON olmayan gövde (`BAD_REQUEST`) */
+                415: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/vehicle-models/{slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Modelin adresi; büyük/küçük harf fark etmez. Adres olamayacak bir değer `404` döner. */
+                slug: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * Bir model ve neyin onu sitede tuttuğu
+         * @description `usage`, kaldırmayı engelleyen şeylerin sayısıdır; ekran kaldırma düğmesine basılmadan nedenleri söyler.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Modelin adresi; büyük/küçük harf fark etmez. Adres olamayacak bir değer `404` döner. */
+                    slug: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Model */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AdminVehicleModelDetail"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Böyle bir model yok (`NOT_FOUND`) */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Modeli değiştir
+         * @description Yalnızca gönderilen alanlar değişir. İstek, düzenlenen kaydın `updatedAt` değerini taşır; kayıt arada değiştiyse
+         *     `409 STALE_WRITE` döner ve hiçbir şey yazılmaz. **`slug` gönderilirse `422 NOT_ALLOWED`**: adres değişmez, görmezden
+         *     gelinmez. Yakıt elektrik ile başka bir yakıt arasında değişirse tüketim birimi de değişir ve `consumption` yeniden
+         *     verilmelidir (`422 REQUIRED`). `imageUrl: null` fotoğrafı kaldırır. **Fiyat değişikliği yalnızca bundan sonra
+         *     hesaplanan fiyatları etkiler**; var olan rezervasyonun tutarı değişmez (tutar rezervasyonda donmuştur). Kaldırılmış
+         *     model de düzeltilebilir. İşlem kaydı: `vehicle-model.update`.
+         */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Modelin adresi; büyük/küçük harf fark etmez. Adres olamayacak bir değer `404` döner. */
+                    slug: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["AdminVehicleModelUpdate"];
+                };
+            };
+            responses: {
+                /** @description Değişen model (yeni `updatedAt` ile) */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AdminVehicleModel"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Böyle bir model yok (`NOT_FOUND`) */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Kayıt arada değişti (`STALE_WRITE`) */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description JSON olmayan gövde (`BAD_REQUEST`) */
+                415: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        trace?: never;
+    };
+    "/admin/vehicle-models/{slug}/retire": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Modeli kaldır
+         * @description Model silinmez, kaldırılır; geçmiş rezervasyonlar onu göstermeye devam eder. Kaldırılan model herkese açık
+         *     `GET /vehicle-models`'te, aramada ve fiyat hesabında yoktur, **etkin araçları aynı işlemde pasifleşir**. **Şunlardan biri
+         *     varsa `409 IN_USE`** döner ve hiçbir şey değişmez; `details` her birinin sayısını taşır:
+         *     - `reservations`: modelin bir aracıyla, gelecekte başlayacak iptal edilmemiş rezervasyon (sürmekte olan kiralama
+         *       sayılmaz: aracı geri gelir ve bir daha kiralanmaz);
+         *     - `holds`: modelin bir aracında süresi dolmamış araç tutma.
+         *
+         *     Model satırı ve araçlar, rezervasyon ve tutmanın araç satırını kilitlediği sırayla kilitlenir; aynı anda gelen bir
+         *     rezervasyonla sırayla çalışır. Zaten kaldırılmış modelde çağrı bir şey değiştirmez (`200`). Gövdesizdir. İşlem
+         *     kaydı: `vehicle-model.retire`.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    slug: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Kaldırılan model */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AdminVehicleModel"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Böyle bir model yok (`NOT_FOUND`) */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Model hâlâ kullanımda (`IN_USE`, `details`) */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/vehicle-models/{slug}/restore": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Kaldırılmış modeli geri al
+         * @description Model olduğu gibi siteye döner. **Araçları pasif kalır**: hangilerinin yeniden kullanılacağı araç araç (V2-30'da)
+         *     söylenir, buradan bilinemez. Kaldırılmamış modelde çağrı bir şey değiştirmez (`200`). Gövdesizdir. İşlem kaydı:
+         *     `vehicle-model.restore`.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    slug: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Geri alınan model */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AdminVehicleModel"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Böyle bir model yok (`NOT_FOUND`) */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/ping": {
         parameters: {
             query?: never;
@@ -2315,7 +2833,7 @@ export interface components {
              * @description Sabit makine kodu.
              * @enum {string}
              */
-            code: "BAD_REQUEST" | "VALIDATION_FAILED" | "UNAUTHENTICATED" | "FORBIDDEN" | "INVALID_CREDENTIALS" | "EMAIL_TAKEN" | "NOT_FOUND" | "VEHICLE_UNAVAILABLE" | "INVALID_DATE_RANGE" | "RESERVATION_LIMIT" | "RESET_TOKEN_INVALID" | "SPAM_DETECTED" | "RATE_LIMITED" | "PAYLOAD_TOO_LARGE" | "IN_USE" | "STALE_WRITE" | "CODE_TAKEN" | "INTERNAL_ERROR";
+            code: "BAD_REQUEST" | "VALIDATION_FAILED" | "UNAUTHENTICATED" | "FORBIDDEN" | "INVALID_CREDENTIALS" | "EMAIL_TAKEN" | "NOT_FOUND" | "VEHICLE_UNAVAILABLE" | "INVALID_DATE_RANGE" | "RESERVATION_LIMIT" | "RESET_TOKEN_INVALID" | "SPAM_DETECTED" | "RATE_LIMITED" | "PAYLOAD_TOO_LARGE" | "IN_USE" | "STALE_WRITE" | "CODE_TAKEN" | "SLUG_TAKEN" | "INTERNAL_ERROR";
             /** @description Geliştirici için İngilizce metin. Ekranda gösterilmez. */
             message: string;
             /** @description `IN_USE` için nedenlerin sayıları (bayi: reservations, holds, vehicles); ekran bunları listeler. */
@@ -2329,7 +2847,7 @@ export interface components {
              *     }
              */
             fieldErrors?: {
-                [key: string]: "REQUIRED" | "INVALID_EMAIL" | "INVALID_FORMAT" | "TOO_SHORT" | "PASSWORD_TOO_COMMON" | "INVALID_PASSWORD" | "EMAIL_MISMATCH" | "TOO_LONG" | "OUT_OF_RANGE" | "EMAIL_TAKEN" | "CONSENT_REQUIRED" | "INVALID_DATE_RANGE" | "NOT_IN_SLOT" | "IN_PAST" | "UNKNOWN_REFERENCE" | "UNKNOWN_CODE" | "CODE_EXHAUSTED" | "CODE_ALREADY_USED" | "CODE_TAKEN" | "BELOW_USAGE";
+                [key: string]: "REQUIRED" | "INVALID_EMAIL" | "INVALID_FORMAT" | "TOO_SHORT" | "PASSWORD_TOO_COMMON" | "INVALID_PASSWORD" | "EMAIL_MISMATCH" | "TOO_LONG" | "OUT_OF_RANGE" | "EMAIL_TAKEN" | "CONSENT_REQUIRED" | "INVALID_DATE_RANGE" | "NOT_IN_SLOT" | "IN_PAST" | "UNKNOWN_REFERENCE" | "UNKNOWN_CODE" | "CODE_EXHAUSTED" | "CODE_ALREADY_USED" | "CODE_TAKEN" | "BELOW_USAGE" | "NOT_ALLOWED" | "SLUG_TAKEN";
             };
         };
         LocalizedText: {
@@ -2895,6 +3413,110 @@ export interface components {
             email?: string;
             kind?: components["schemas"]["BranchKind"];
             openingHours?: components["schemas"]["OpeningHours"];
+        };
+        /**
+         * @description Yakıt. Tüketim birimi bundan çıkar (elektrikte kWh, diğerlerinde litre).
+         * @enum {string}
+         */
+        FuelType: "PETROL" | "DIESEL" | "HYBRID" | "ELECTRIC";
+        /** @enum {string} */
+        Transmission: "MANUAL" | "AUTOMATIC";
+        AdminVehicleModel: {
+            /**
+             * @description Modelin adresi; oluşturulduktan sonra değişmez.
+             * @example renault-clio
+             */
+            slug: string;
+            /** @example Renault */
+            brand: string;
+            /** @example Clio */
+            model: string;
+            class: {
+                slug: string;
+                name: components["schemas"]["LocalizedText"];
+            };
+            fuelType: components["schemas"]["FuelType"];
+            transmission: components["schemas"]["Transmission"];
+            seats: number;
+            bags: number;
+            consumption: {
+                value: number;
+                /**
+                 * @description Elektrikte kWh
+                 * @enum {string}
+                 */
+                unit: "L_PER_100KM" | "KWH_PER_100KM";
+            };
+            /** @description TRY kuruş (₺1.250 = 125000). */
+            dailyPrice: number;
+            description: components["schemas"]["LocalizedText"];
+            /** @description `/fleet/…` site yolu ya da fotoğraf deposunun adresi; boşsa site yer tutucu çizer. */
+            imageUrl: string | null;
+            /** @enum {string} */
+            status: "ACTIVE" | "RETIRED";
+            /** Format: date-time */
+            retiredAt: string | null;
+            /** @description Bu modelin açık araçları */
+            activeVehicles: number;
+            /** Format: date-time */
+            createdAt: string;
+            /**
+             * Format: date-time
+             * @description Kaydın sürümü; değiştirirken geri gönderilir (`STALE_WRITE`).
+             */
+            updatedAt: string;
+        };
+        AdminVehicleModelDetail: components["schemas"]["AdminVehicleModel"] & {
+            /** @description Modeli sitede tutan şeyler; ikisi de sıfırsa model kaldırılabilir. */
+            usage: {
+                /** @description Modelin bir aracıyla gelecekte başlayacak iptal edilmemiş rezervasyon. */
+                reservations: number;
+                /** @description Modelin bir aracında süresi dolmamış araç tutma. */
+                holds: number;
+            };
+        };
+        AdminVehicleModelPage: {
+            items: components["schemas"]["AdminVehicleModel"][];
+            /** @description Süzgeçten geçen tüm modeller */
+            total: number;
+            page: number;
+            pageSize: number;
+        };
+        AdminVehicleModelCreate: {
+            brand: string;
+            model: string;
+            /** @description İsteğe bağlı; yoksa marka ve modelden üretilir. */
+            slug?: string;
+            /** @example ekonomik */
+            classSlug: string;
+            fuelType: components["schemas"]["FuelType"];
+            transmission: components["schemas"]["Transmission"];
+            seats: number;
+            bags: number;
+            /** @description Elektrikte kWh/100 km */
+            consumption: number;
+            /** @description TRY kuruş. */
+            dailyPrice: number;
+            description: components["schemas"]["LocalizedText"];
+            imageUrl?: string | null;
+        };
+        AdminVehicleModelUpdate: {
+            /**
+             * Format: date-time
+             * @description Düzenlenen kaydın `updatedAt` değeri.
+             */
+            updatedAt: string;
+            brand?: string;
+            model?: string;
+            classSlug?: string;
+            fuelType?: components["schemas"]["FuelType"];
+            transmission?: components["schemas"]["Transmission"];
+            seats?: number;
+            bags?: number;
+            consumption?: number;
+            dailyPrice?: number;
+            description?: components["schemas"]["LocalizedText"];
+            imageUrl?: string | null;
         };
         /** @description Gönderilen alanlar güncellenir. */
         UserUpdate: {

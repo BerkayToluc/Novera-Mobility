@@ -82,7 +82,7 @@ paths:
     get:
       tags: [catalog]
       summary: Araç modelleri (Araçlarımız sayfası)
-      description: Tüm modeller; her modelin bulunduğu bayilerle birlikte. Müsaitlik filtresi yoktur.
+      description: Tüm modeller; her modelin bulunduğu bayilerle birlikte. Müsaitlik filtresi yoktur. **Kaldırılmış (retired) modeller listede yoktur** (V2-29); geçmiş rezervasyonlar onları göstermeye devam eder.
       parameters:
         - $ref: "#/components/parameters/Currency"
       responses:
@@ -1114,6 +1114,281 @@ paths:
               schema: { $ref: "#/components/schemas/Error" }
         "429": { $ref: "#/components/responses/TooManyRequests" }
 
+  /admin/vehicle-classes:
+    get:
+      tags: [admin]
+      summary: Araç sınıfları (yönetim)
+      description: Bir modelin konabileceği sınıflar; formun seçeneği. Sınıflar sabittir, bu uçlardan eklenmez ya da değiştirilmez.
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Sınıflar
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  required: [slug, name]
+                  properties:
+                    slug: { type: string, example: ekonomik }
+                    name: { $ref: "#/components/schemas/LocalizedText" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Yönetici değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
+  /admin/vehicle-models:
+    get:
+      tags: [admin]
+      summary: Araç modelleri (yönetim)
+      description: |
+        Sayfalı liste (ADR-24): `{ items, total, page, pageSize }`. **Kaldırılmış modeller de dahildir** (herkese açık
+        `GET /vehicle-models` onları döndürmez). Tablo küçük ve elle yönetilir; süzme, arama ve sıralama sunucuda yapılır.
+        Arama marka, model ve adreste yapılır, büyük/küçük harf ve Türkçe harfler fark etmez (`sahin` → Şahin).
+        Sınır: yönetici başına dakikada 120 (`429 RATE_LIMITED`).
+      security:
+        - cookieAuth: []
+      parameters:
+        - { name: page, in: query, schema: { type: integer, minimum: 1, default: 1 } }
+        - { name: pageSize, in: query, schema: { type: integer, minimum: 1, maximum: 100, default: 20 } }
+        - name: sort
+          in: query
+          description: "`alan` ya da `alan:asc|desc`. Varsayılan `name:asc` (marka ve model)."
+          schema: { type: string, enum: [name, dailyPrice, activeVehicles, createdAt], example: "dailyPrice:desc" }
+        - { name: q, in: query, schema: { type: string, maxLength: 100 } }
+        - { name: class, in: query, description: Sınıf adresi (`ekonomik`). Olmayan bir sınıf hiçbir şey bulmaz., schema: { type: string } }
+        - { name: fuel, in: query, schema: { $ref: "#/components/schemas/FuelType" } }
+        - { name: status, in: query, schema: { type: string, enum: [ACTIVE, RETIRED] } }
+      responses:
+        "200":
+          description: Bir sayfa model
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminVehicleModelPage" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Yönetici değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+    post:
+      tags: [admin]
+      summary: Yeni araç modeli
+      description: |
+        Model hemen sitede görünür (ana sayfa filo bölümü, `?arac=` penceresi); aracı yoksa aramada çıkmaz, araçlar V2-30'da
+        eklenir. **Adres (`slug`) isteğe bağlıdır**: verilmezse marka ve modelden üretilir (`Renault Clio` → `renault-clio`,
+        Türkçe harfler sadeleşir); küçük harf, rakam ve tire, en az 3 karakter. Aynı adres varsa `409 SLUG_TAKEN`. Adres
+        **sonradan değişmez** (`?arac=` bağlantıları bozulmasın). Tüketim birimi verilmez: elektrikte kWh/100 km, diğerlerinde
+        L/100 km. Açıklama iki dilde de zorunlu. `imageUrl` yalnızca `/fleet/` altında bir site yolu ya da fotoğraf deposunun
+        adresi olabilir (ADR-28); boş bırakılırsa site yer tutucu çizer. Fiyat TRY kuruş cinsinden, en çok 10.000.000 (₺100.000).
+        İşlem kaydı: `vehicle-model.create`.
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminVehicleModelCreate" }
+      responses:
+        "201":
+          description: Oluşturulan model
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminVehicleModel" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Yönetici değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "409":
+          description: Bu adres kullanımda (`SLUG_TAKEN`, `fieldErrors.slug`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "415": { description: JSON olmayan gövde (`BAD_REQUEST`) }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
+  /admin/vehicle-models/{slug}:
+    parameters:
+      - { name: slug, in: path, required: true, description: Modelin adresi; büyük/küçük harf fark etmez. Adres olamayacak bir değer `404` döner., schema: { type: string, example: renault-clio } }
+    get:
+      tags: [admin]
+      summary: Bir model ve neyin onu sitede tuttuğu
+      description: "`usage`, kaldırmayı engelleyen şeylerin sayısıdır; ekran kaldırma düğmesine basılmadan nedenleri söyler."
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Model
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminVehicleModelDetail" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Yönetici değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: Böyle bir model yok (`NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+    patch:
+      tags: [admin]
+      summary: Modeli değiştir
+      description: |
+        Yalnızca gönderilen alanlar değişir. İstek, düzenlenen kaydın `updatedAt` değerini taşır; kayıt arada değiştiyse
+        `409 STALE_WRITE` döner ve hiçbir şey yazılmaz. **`slug` gönderilirse `422 NOT_ALLOWED`**: adres değişmez, görmezden
+        gelinmez. Yakıt elektrik ile başka bir yakıt arasında değişirse tüketim birimi de değişir ve `consumption` yeniden
+        verilmelidir (`422 REQUIRED`). `imageUrl: null` fotoğrafı kaldırır. **Fiyat değişikliği yalnızca bundan sonra
+        hesaplanan fiyatları etkiler**; var olan rezervasyonun tutarı değişmez (tutar rezervasyonda donmuştur). Kaldırılmış
+        model de düzeltilebilir. İşlem kaydı: `vehicle-model.update`.
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminVehicleModelUpdate" }
+      responses:
+        "200":
+          description: Değişen model (yeni `updatedAt` ile)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminVehicleModel" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Yönetici değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: Böyle bir model yok (`NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "409":
+          description: Kayıt arada değişti (`STALE_WRITE`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "415": { description: JSON olmayan gövde (`BAD_REQUEST`) }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
+  /admin/vehicle-models/{slug}/retire:
+    parameters:
+      - { name: slug, in: path, required: true, schema: { type: string, example: renault-clio } }
+    post:
+      tags: [admin]
+      summary: Modeli kaldır
+      description: |
+        Model silinmez, kaldırılır; geçmiş rezervasyonlar onu göstermeye devam eder. Kaldırılan model herkese açık
+        `GET /vehicle-models`'te, aramada ve fiyat hesabında yoktur, **etkin araçları aynı işlemde pasifleşir**. **Şunlardan biri
+        varsa `409 IN_USE`** döner ve hiçbir şey değişmez; `details` her birinin sayısını taşır:
+        - `reservations`: modelin bir aracıyla, gelecekte başlayacak iptal edilmemiş rezervasyon (sürmekte olan kiralama
+          sayılmaz: aracı geri gelir ve bir daha kiralanmaz);
+        - `holds`: modelin bir aracında süresi dolmamış araç tutma.
+
+        Model satırı ve araçlar, rezervasyon ve tutmanın araç satırını kilitlediği sırayla kilitlenir; aynı anda gelen bir
+        rezervasyonla sırayla çalışır. Zaten kaldırılmış modelde çağrı bir şey değiştirmez (`200`). Gövdesizdir. İşlem
+        kaydı: `vehicle-model.retire`.
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Kaldırılan model
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminVehicleModel" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Yönetici değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: Böyle bir model yok (`NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "409":
+          description: Model hâlâ kullanımda (`IN_USE`, `details`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
+  /admin/vehicle-models/{slug}/restore:
+    parameters:
+      - { name: slug, in: path, required: true, schema: { type: string, example: renault-clio } }
+    post:
+      tags: [admin]
+      summary: Kaldırılmış modeli geri al
+      description: |
+        Model olduğu gibi siteye döner. **Araçları pasif kalır**: hangilerinin yeniden kullanılacağı araç araç (V2-30'da)
+        söylenir, buradan bilinemez. Kaldırılmamış modelde çağrı bir şey değiştirmez (`200`). Gövdesizdir. İşlem kaydı:
+        `vehicle-model.restore`.
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Geri alınan model
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminVehicleModel" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Yönetici değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: Böyle bir model yok (`NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
   /admin/ping:
     get:
       tags: [admin]
@@ -1262,6 +1537,7 @@ components:
             - IN_USE
             - STALE_WRITE
             - CODE_TAKEN
+            - SLUG_TAKEN
             - INTERNAL_ERROR
         message:
           type: string
@@ -1296,6 +1572,8 @@ components:
               - CODE_ALREADY_USED
               - CODE_TAKEN
               - BELOW_USAGE
+              - NOT_ALLOWED
+              - SLUG_TAKEN
           example: { email: EMAIL_TAKEN }
 
     LocalizedText:
@@ -1848,6 +2126,104 @@ components:
         email: { type: string, format: email }
         kind: { $ref: "#/components/schemas/BranchKind" }
         openingHours: { $ref: "#/components/schemas/OpeningHours" }
+
+    FuelType:
+      type: string
+      enum: [PETROL, DIESEL, HYBRID, ELECTRIC]
+      description: Yakıt. Tüketim birimi bundan çıkar (elektrikte kWh, diğerlerinde litre).
+
+    Transmission:
+      type: string
+      enum: [MANUAL, AUTOMATIC]
+
+    AdminVehicleModel:
+      type: object
+      required: [slug, brand, model, class, fuelType, transmission, seats, bags, consumption, dailyPrice, description, imageUrl, status, retiredAt, activeVehicles, createdAt, updatedAt]
+      properties:
+        slug: { type: string, example: renault-clio, description: Modelin adresi; oluşturulduktan sonra değişmez. }
+        brand: { type: string, example: Renault }
+        model: { type: string, example: Clio }
+        class:
+          type: object
+          required: [slug, name]
+          properties:
+            slug: { type: string }
+            name: { $ref: "#/components/schemas/LocalizedText" }
+        fuelType: { $ref: "#/components/schemas/FuelType" }
+        transmission: { $ref: "#/components/schemas/Transmission" }
+        seats: { type: integer, minimum: 1, maximum: 9 }
+        bags: { type: integer, minimum: 0, maximum: 10 }
+        consumption:
+          type: object
+          required: [value, unit]
+          properties:
+            value: { type: number }
+            unit: { type: string, enum: [L_PER_100KM, KWH_PER_100KM], description: Elektrikte kWh, diğer yakıtlarda litre; yakıttan çıkar, verilmez. }
+        dailyPrice: { type: integer, minimum: 1, maximum: 10000000, description: TRY kuruş (₺1.250 = 125000). }
+        description: { $ref: "#/components/schemas/LocalizedText" }
+        imageUrl: { type: string, nullable: true, description: "`/fleet/…` site yolu ya da fotoğraf deposunun adresi; boşsa site yer tutucu çizer." }
+        status: { type: string, enum: [ACTIVE, RETIRED] }
+        retiredAt: { type: string, format: date-time, nullable: true }
+        activeVehicles: { type: integer, minimum: 0, description: Bu modelin açık araçları, tüm bayilerde. }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time, description: Kaydın sürümü; değiştirirken geri gönderilir (`STALE_WRITE`). }
+
+    AdminVehicleModelDetail:
+      allOf:
+        - $ref: "#/components/schemas/AdminVehicleModel"
+        - type: object
+          required: [usage]
+          properties:
+            usage:
+              type: object
+              required: [reservations, holds]
+              description: Modeli sitede tutan şeyler; ikisi de sıfırsa model kaldırılabilir.
+              properties:
+                reservations: { type: integer, minimum: 0, description: Modelin bir aracıyla gelecekte başlayacak iptal edilmemiş rezervasyon. }
+                holds: { type: integer, minimum: 0, description: Modelin bir aracında süresi dolmamış araç tutma. }
+
+    AdminVehicleModelPage:
+      type: object
+      required: [items, total, page, pageSize]
+      properties:
+        items: { type: array, items: { $ref: "#/components/schemas/AdminVehicleModel" } }
+        total: { type: integer, minimum: 0, description: Süzgeçten geçen tüm modeller, yalnızca bu sayfa değil. }
+        page: { type: integer }
+        pageSize: { type: integer }
+
+    AdminVehicleModelCreate:
+      type: object
+      required: [brand, model, classSlug, fuelType, transmission, seats, bags, consumption, dailyPrice, description]
+      properties:
+        brand: { type: string, maxLength: 40 }
+        model: { type: string, maxLength: 60 }
+        slug: { type: string, minLength: 3, maxLength: 60, pattern: "^[a-z0-9]+(-[a-z0-9]+)*$", description: İsteğe bağlı; yoksa marka ve modelden üretilir. }
+        classSlug: { type: string, example: ekonomik }
+        fuelType: { $ref: "#/components/schemas/FuelType" }
+        transmission: { $ref: "#/components/schemas/Transmission" }
+        seats: { type: integer, minimum: 1, maximum: 9 }
+        bags: { type: integer, minimum: 0, maximum: 10 }
+        consumption: { type: number, exclusiveMinimum: 0, maximum: 100, description: Elektrikte kWh/100 km, diğerlerinde L/100 km. Bir ondalığa yuvarlanır. }
+        dailyPrice: { type: integer, minimum: 1, maximum: 10000000, description: TRY kuruş. }
+        description: { $ref: "#/components/schemas/LocalizedText" }
+        imageUrl: { type: string, nullable: true }
+
+    AdminVehicleModelUpdate:
+      type: object
+      required: [updatedAt]
+      properties:
+        updatedAt: { type: string, format: date-time, description: Düzenlenen kaydın `updatedAt` değeri. }
+        brand: { type: string, maxLength: 40 }
+        model: { type: string, maxLength: 60 }
+        classSlug: { type: string }
+        fuelType: { $ref: "#/components/schemas/FuelType" }
+        transmission: { $ref: "#/components/schemas/Transmission" }
+        seats: { type: integer, minimum: 1, maximum: 9 }
+        bags: { type: integer, minimum: 0, maximum: 10 }
+        consumption: { type: number, exclusiveMinimum: 0, maximum: 100 }
+        dailyPrice: { type: integer, minimum: 1, maximum: 10000000 }
+        description: { $ref: "#/components/schemas/LocalizedText" }
+        imageUrl: { type: string, nullable: true }
 
     UserUpdate:
       type: object

@@ -1,9 +1,10 @@
 import "server-only";
 import type { AdminListParams } from "./admin-query";
 import { toApiQuery } from "./admin-query";
+import { MODEL_API_FILTERS, type AdminModelDetail, type AdminModelPage, type ModelClass } from "./admin-models";
 import { BRANCH_API_FILTERS, type AdminBranchDetail, type AdminBranchPage } from "./admin-branches";
 import { PROMO_API_FILTERS, type PromoCode, type PromoCodePage } from "./admin-promo";
-import { fetchAdminBranch, fetchAdminBranches, fetchAdminSummary, fetchPromoCode, fetchPromoCodes, type AdminSummary } from "./api-admin";
+import { fetchAdminBranch, fetchAdminBranches, fetchAdminModel, fetchAdminModels, fetchAdminSummary, fetchModelClasses, fetchPromoCode, fetchPromoCodes, type AdminSummary } from "./api-admin";
 import { isMockMode } from "./mode";
 import { mockWorld } from "./mock-world";
 import { normalizePromo } from "./promo-codes";
@@ -51,4 +52,28 @@ export async function getAdminBranches(params: AdminListParams<"sehir" | "durum"
 export async function getAdminBranch(id: string): Promise<AdminBranchDetail | null> {
   if (!isMockMode()) return fetchAdminBranch(id);
   return (await import("@/mocks/branches")).getMockBranch(await mockWorld(), id);
+}
+
+export async function getAdminModels(params: AdminListParams<"sinif" | "yakit" | "durum">): Promise<AdminModelPage> {
+  if (!isMockMode()) return fetchAdminModels(toApiQuery(params, MODEL_API_FILTERS));
+  return (await import("@/mocks/models")).listMockModels(await mockWorld(), {
+    page: params.page,
+    pageSize: params.pageSize,
+    sort: params.sort,
+    q: params.q,
+    classSlug: params.filters.sinif ?? null,
+    fuel: params.filters.yakit ?? null,
+    status: params.filters.durum ?? null,
+  });
+}
+
+// `null` for a model that does not exist, or whose address cannot be one.
+export async function getAdminModel(slug: string): Promise<AdminModelDetail | null> {
+  if (!isMockMode()) return fetchAdminModel(slug);
+  return (await import("@/mocks/models")).getMockModel(await mockWorld(), slug);
+}
+
+export async function getModelClasses(): Promise<ModelClass[]> {
+  if (!isMockMode()) return fetchModelClasses();
+  return (await import("@/mocks/models")).mockClasses();
 }

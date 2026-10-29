@@ -45,3 +45,25 @@ export async function fetchAdminBranch(id: string): Promise<Schemas["AdminBranch
   if (result.status === "not_found") return null;
   throw new ApiUnavailableError();
 }
+
+// `GET /admin/vehicle-models` (V2-29): one page of the list, retired models included.
+export async function fetchAdminModels(query: URLSearchParams): Promise<Schemas["AdminVehicleModelPage"]> {
+  const result = await apiRequest<Schemas["AdminVehicleModelPage"]>("GET", "/admin/vehicle-models?" + query.toString());
+  if (result.status !== "ok") throw new ApiUnavailableError();
+  return result.data;
+}
+
+// `GET /admin/vehicle-models/{slug}`: null when there is no such model (the page then does not exist), a failure to load otherwise.
+export async function fetchAdminModel(slug: string): Promise<Schemas["AdminVehicleModelDetail"] | null> {
+  const result = await apiRequest<Schemas["AdminVehicleModelDetail"]>("GET", "/admin/vehicle-models/" + encodeURIComponent(slug));
+  if (result.status === "ok") return result.data;
+  if (result.status === "not_found") return null;
+  throw new ApiUnavailableError();
+}
+
+// `GET /admin/vehicle-classes`: the classes a model can be put in, the options of the form.
+export async function fetchModelClasses(): Promise<{ slug: string; name: { tr: string; en: string } }[]> {
+  const result = await apiRequest<{ slug: string; name: { tr: string; en: string } }[]>("GET", "/admin/vehicle-classes");
+  if (result.status !== "ok") throw new ApiUnavailableError();
+  return result.data;
+}

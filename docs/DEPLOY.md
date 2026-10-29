@@ -136,7 +136,7 @@ Bir model fotoğrafı yaklaşık 200–500 KB'tır (2000 px'e küçültülmüş 
 2. Vercel, projeye `BLOB_READ_WRITE_TOKEN` (ve OIDC için `BLOB_STORE_ID`) ortam değişkenlerini kendisi ekler. **Anahtarı kopyalama, sohbete ya da repoya yazma.** Vercel üzerinde kod kimlik bilgisini kendisi bulur; token yalnızca yerelde ya da Vercel dışında gerekir.
 3. Mağazanın genel adresini öğren: mağaza sayfasında ya da ilk yüklenen dosyanın adresinde `https://<kimlik>.public.blob.vercel-storage.com`. `<kimlik>.public.blob.vercel-storage.com` kısmını **iki yere** ortam değişkeni olarak gir (gizli değildir):
    - Vercel (web): `BLOB_PUBLIC_HOST`. Sitenin güvenlik politikası (CSP `img-src`) yalnızca bu adresten görsele izin verir.
-   - Cloud Run (API): `BLOB_PUBLIC_HOST`. API, `imageUrl` olarak yalnızca bu adresi (ya da `/images/` ile başlayan site içi yolu) kabul eder; başka bir Blob mağazasının adresi reddedilir.
+   - Cloud Run (API): `BLOB_PUBLIC_HOST`. API, `imageUrl` olarak yalnızca bu adresi (ya da `/fleet/` ile başlayan site içi yolu) kabul eder; başka bir Blob mağazasının adresi reddedilir.
    Boş bırakılırsa ikisi de mağaza ailesinin (`*.public.blob.vercel-storage.com`) herhangi bir adresini kabul eder; üretimde doldur.
 4. Web'i yeniden yayınla (ortam değişkeni yeni yayınla geçerli olur).
 

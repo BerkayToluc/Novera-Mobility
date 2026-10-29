@@ -375,6 +375,125 @@
         "confirm": "Close the branch"
       }
     },
+    "models": {
+      "title": "Vehicle models",
+      "intro": "The models shown on the Fleet page. A model you add is visible at once; its cars are added later. A model you retire disappears from the site and keeps its name on past bookings.",
+      "newButton": "New model",
+      "newTitle": "New model",
+      "newIntro": "The model appears on the Fleet page as soon as it is created. A model with no cars does not show up in search; add its cars on the Vehicles screen.",
+      "detailTitle": "Model",
+      "detailIntro": "{count, plural, one {# active car across all branches.} other {# active cars across all branches.}}",
+      "searchLabel": "Search models",
+      "statusFilterLabel": "By status",
+      "fuelFilterLabel": "By fuel",
+      "classFilterLabel": "By class",
+      "tableCaption": "Vehicle models",
+      "retry": "Try again",
+      "columns": {
+        "name": "Model",
+        "class": "Class",
+        "fuel": "Fuel",
+        "dailyPrice": "Daily price",
+        "vehicles": "Cars",
+        "status": "Status"
+      },
+      "fuel": {
+        "PETROL": "Petrol",
+        "DIESEL": "Diesel",
+        "HYBRID": "Hybrid",
+        "ELECTRIC": "Electric"
+      },
+      "transmission": {
+        "MANUAL": "Manual",
+        "AUTOMATIC": "Automatic"
+      },
+      "status": {
+        "ACTIVE": "Live",
+        "RETIRED": "Retired"
+      },
+      "emptyTitle": "No models yet",
+      "emptyText": "Add the first model; it shows on the site at once.",
+      "emptyFilteredTitle": "No model matches this search",
+      "emptyFilteredText": "Try removing the filters or searching for something else.",
+      "loadErrorTitle": "The models could not be loaded",
+      "loadErrorText": "Try again in a few seconds.",
+      "fields": {
+        "brand": "Brand",
+        "model": "Model name",
+        "slug": "Address (optional)",
+        "slugHint": "If left empty it is made from the name: {slug}. It cannot be changed later.",
+        "slugFixed": "Address: {slug}. It cannot change because the site's links use it.",
+        "class": "Class",
+        "classChoose": "Choose a class",
+        "transmission": "Transmission",
+        "fuel": "Fuel",
+        "consumption": {
+          "L_PER_100KM": "Consumption (litres / 100 km)",
+          "KWH_PER_100KM": "Consumption (kWh / 100 km)"
+        },
+        "consumptionHint": "Example: 5.6. A comma or a dot both work.",
+        "seats": "Seats",
+        "bags": "Bags",
+        "dailyPrice": "Daily price (₺)",
+        "dailyPriceHint": "Example: 1250 or 1250.50. Do not type a thousands separator.",
+        "descriptionTr": "Description (Turkish)",
+        "descriptionEn": "Description (English)"
+      },
+      "photo": {
+        "title": "Photo",
+        "hint": "The photo is saved with the model once it is uploaded. Without one the site shows a placeholder.",
+        "currentAlt": "Photo of {name}",
+        "remove": "Remove the photo",
+        "none": "No photo; the site shows a placeholder.",
+        "choose": "Choose a new photo"
+      },
+      "form": {
+        "create": "Create the model",
+        "save": "Save changes",
+        "saving": "Saving",
+        "cancel": "Cancel"
+      },
+      "errors": {
+        "brand": "Enter a brand of 1 to 40 characters.",
+        "model": "Enter a model name of 1 to 60 characters.",
+        "slug": "Use lowercase letters, digits and hyphens, at least 3 characters (example: renault-clio).",
+        "slugTaken": "Another model already uses this address. Enter a different one.",
+        "classSlug": "Choose a class from the list.",
+        "seats": "Enter a number from 1 to 9.",
+        "bags": "Enter a number from 0 to 10.",
+        "consumption": "Enter a number above 0 and at most 100 (example: 5.6).",
+        "dailyPrice": "Enter it in lira with at most two decimals (example: 1250 or 1250.50).",
+        "descriptionTr": "Enter the Turkish description (at most 1000 characters).",
+        "descriptionEn": "Enter the English description (at most 1000 characters).",
+        "generic": "This was not accepted. Check the fields and try again.",
+        "notFound": "This model no longer exists. Go back to the list.",
+        "unavailable": "It could not be saved. Try again in a few seconds."
+      },
+      "toast": {
+        "created": "Model created",
+        "saved": "Changes saved",
+        "retired": "Model retired",
+        "restored": "Model is live again"
+      },
+      "actions": {
+        "title": "Retire or restore the model",
+        "activeText": "A retired model disappears from the site and from search, and its cars are switched off. Past bookings keep its name. A model is never deleted; you can restore it at any time.",
+        "retiredText": "This model is retired and not shown on the site. If you restore it, it goes live again; its cars stay switched off and are turned on one by one.",
+        "blockedTitle": "This model cannot be retired now",
+        "blockedText": "These have to finish first:",
+        "retire": "Retire the model",
+        "restore": "Restore the model"
+      },
+      "usage": {
+        "reservations": "{count, plural, one {# booking to come with a car of this model} other {# bookings to come with a car of this model}}",
+        "holds": "{count, plural, one {# car hold in progress (lasts 15 minutes at most)} other {# car holds in progress (each lasts 15 minutes at most)}}"
+      },
+      "retireDialog": {
+        "title": "Retire {name}?",
+        "text": "{count, plural, one {The model's # active car is switched off too.} other {The model's # active cars are switched off too.}} The model disappears from the site and from search. Past bookings keep its name. You can restore it.",
+        "confirm": "Retire the model"
+      }
+    },
     "cityFilter": {
       "all": "All cities",
       "apply": "Filter"

@@ -375,6 +375,125 @@
         "confirm": "Bayiyi kapat"
       }
     },
+    "models": {
+      "title": "Araç modelleri",
+      "intro": "Sitede Filomuz sayfasında görünen modeller. Eklediğiniz model hemen görünür; araçları sonra eklenir. Kaldırdığınız model sitede görünmez, geçmiş rezervasyonlarda adıyla kalır.",
+      "newButton": "Yeni model",
+      "newTitle": "Yeni model",
+      "newIntro": "Model oluşturulur oluşturulmaz Filomuz sayfasında görünür. İçinde araç olmayan model aramada çıkmaz; araçları Araçlar ekranından eklenir.",
+      "detailTitle": "Model",
+      "detailIntro": "{count, plural, other {Tüm bayilerde # açık araç.}}",
+      "searchLabel": "Model ara",
+      "statusFilterLabel": "Duruma göre",
+      "fuelFilterLabel": "Yakıta göre",
+      "classFilterLabel": "Sınıfa göre",
+      "tableCaption": "Araç modelleri",
+      "retry": "Tekrar dene",
+      "columns": {
+        "name": "Model",
+        "class": "Sınıf",
+        "fuel": "Yakıt",
+        "dailyPrice": "Günlük fiyat",
+        "vehicles": "Araç",
+        "status": "Durum"
+      },
+      "fuel": {
+        "PETROL": "Benzin",
+        "DIESEL": "Dizel",
+        "HYBRID": "Hibrit",
+        "ELECTRIC": "Elektrik"
+      },
+      "transmission": {
+        "MANUAL": "Manuel",
+        "AUTOMATIC": "Otomatik"
+      },
+      "status": {
+        "ACTIVE": "Yayında",
+        "RETIRED": "Kaldırılmış"
+      },
+      "emptyTitle": "Henüz model yok",
+      "emptyText": "İlk modeli ekleyin; sitede hemen görünür.",
+      "emptyFilteredTitle": "Bu aramaya uyan model yok",
+      "emptyFilteredText": "Süzgeçleri kaldırmayı ya da başka bir şey aramayı deneyin.",
+      "loadErrorTitle": "Modeller yüklenemedi",
+      "loadErrorText": "Birkaç saniye sonra yeniden deneyin.",
+      "fields": {
+        "brand": "Marka",
+        "model": "Model adı",
+        "slug": "Adres (isteğe bağlı)",
+        "slugHint": "Boş bırakırsanız addan üretilir: {slug}. Sonradan değişmez.",
+        "slugFixed": "Adres: {slug}. Sitenin bağlantıları kullandığı için değişmez.",
+        "class": "Sınıf",
+        "classChoose": "Sınıf seçin",
+        "transmission": "Vites",
+        "fuel": "Yakıt",
+        "consumption": {
+          "L_PER_100KM": "Tüketim (litre / 100 km)",
+          "KWH_PER_100KM": "Tüketim (kWh / 100 km)"
+        },
+        "consumptionHint": "Örnek: 5,6. Virgül ya da nokta kullanabilirsiniz.",
+        "seats": "Koltuk",
+        "bags": "Bagaj",
+        "dailyPrice": "Günlük fiyat (₺)",
+        "dailyPriceHint": "Örnek: 1250 ya da 1250,50. Binlik ayırıcı yazmayın.",
+        "descriptionTr": "Açıklama (Türkçe)",
+        "descriptionEn": "Açıklama (İngilizce)"
+      },
+      "photo": {
+        "title": "Fotoğraf",
+        "hint": "Fotoğraf yüklenince modelle birlikte kaydedilir. Yoksa sitede yer tutucu görünür.",
+        "currentAlt": "{name} fotoğrafı",
+        "remove": "Fotoğrafı kaldır",
+        "none": "Fotoğraf yok; sitede yer tutucu görünür.",
+        "choose": "Yeni fotoğraf seç"
+      },
+      "form": {
+        "create": "Modeli oluştur",
+        "save": "Değişiklikleri kaydet",
+        "saving": "Kaydediliyor",
+        "cancel": "Vazgeç"
+      },
+      "errors": {
+        "brand": "1 ile 40 karakter arasında bir marka yazın.",
+        "model": "1 ile 60 karakter arasında bir model adı yazın.",
+        "slug": "Küçük harf, rakam ve tire kullanın; en az 3 karakter (örnek: renault-clio).",
+        "slugTaken": "Bu adres başka bir modelde kullanılıyor. Başka bir adres yazın.",
+        "classSlug": "Listeden bir sınıf seçin.",
+        "seats": "1 ile 9 arasında bir sayı yazın.",
+        "bags": "0 ile 10 arasında bir sayı yazın.",
+        "consumption": "0'dan büyük, en çok 100 olan bir sayı yazın (örnek: 5,6).",
+        "dailyPrice": "Lira olarak yazın, en çok iki kuruş basamağıyla (örnek: 1250 ya da 1250,50).",
+        "descriptionTr": "Türkçe açıklamayı yazın (en çok 1000 karakter).",
+        "descriptionEn": "İngilizce açıklamayı yazın (en çok 1000 karakter).",
+        "generic": "Bu bilgi kabul edilmedi. Alanları gözden geçirip yeniden deneyin.",
+        "notFound": "Bu model artık yok. Listeye dönün.",
+        "unavailable": "Kaydedilemedi. Birkaç saniye sonra yeniden deneyin."
+      },
+      "toast": {
+        "created": "Model oluşturuldu",
+        "saved": "Değişiklikler kaydedildi",
+        "retired": "Model kaldırıldı",
+        "restored": "Model yeniden yayında"
+      },
+      "actions": {
+        "title": "Modeli kaldır ya da geri getir",
+        "activeText": "Kaldırılan model sitede ve aramada görünmez; araçları da kapanır. Geçmiş rezervasyonlarda adıyla kalır. Model silinmez; istediğiniz zaman geri getirebilirsiniz.",
+        "retiredText": "Bu model kaldırılmış: sitede görünmüyor. Geri getirirseniz yeniden yayına girer; araçları kapalı kalır ve tek tek açılır.",
+        "blockedTitle": "Bu model şimdi kaldırılamaz",
+        "blockedText": "Önce şunlar bitmeli:",
+        "retire": "Modeli kaldır",
+        "restore": "Modeli geri getir"
+      },
+      "usage": {
+        "reservations": "{count, plural, other {# gelecek rezervasyon (bu modelin bir aracıyla)}}",
+        "holds": "{count, plural, other {# sürmekte olan araç tutma (en çok 15 dakika sürer)}}"
+      },
+      "retireDialog": {
+        "title": "{name} kaldırılsın mı?",
+        "text": "{count, plural, other {Modelin # açık aracı da kapanır.}} Model sitede ve aramada görünmez olur. Geçmiş rezervasyonlar adıyla kalır. Geri getirebilirsiniz.",
+        "confirm": "Modeli kaldır"
+      }
+    },
     "cityFilter": {
       "all": "Tüm şehirler",
       "apply": "Süz"

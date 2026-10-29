@@ -81,7 +81,7 @@ describeDb('branch administration against the database (V2-27)', () => {
     ids.modelId = (
       await prisma.vehicleModel.create({
         data: {
-          slug: `b27-model-${run}`,
+          slug: `b27-model-${run.toLowerCase()}`,
           brand: 'Test',
           model: 'Model',
           seats: 5,

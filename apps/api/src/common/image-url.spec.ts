@@ -11,23 +11,23 @@ const refusedOf = (values: string[], env = none) => values.filter((value) => !is
 const takenOf = (values: string[], env = none) => values.filter((value) => isAllowedImageUrl(value, env));
 
 describe('the picture addresses a record may carry (V2-28, ADR-28)', () => {
-  it('takes a path of the site under /images/', () => {
-    expect(refusedOf(['/images/fleet/fiat-egea.webp', '/images/a.png', '/images/sub/dir/photo-1.jpg'])).toEqual([]);
+  it('takes a path of the site under /fleet/', () => {
+    expect(refusedOf(['/fleet/fiat-egea.webp', '/fleet/a.png', '/fleet/sub/dir/photo-1.jpg'])).toEqual([]);
   });
 
-  it('refuses a path that leaves /images/, climbs out of it, or hides something in it', () => {
+  it('refuses a path that leaves /fleet/, climbs out of it, or hides something in it', () => {
     expect(
       takenOf([
-        '/images/',
-        '/fleet/fiat-egea.webp',
-        '/images/../secret.webp',
-        '/images/./a.webp',
-        '/images//evil.com/a.webp',
-        '/images/%2e%2e/a.webp',
-        '/images/a b.webp',
-        '/images/a.webp?x=1',
-        '//evil.com/images/a.webp',
-        '/images/\\evil.webp',
+        '/fleet/',
+        '/images/fiat-egea.webp', // the path the first draft of ADR-28 named: nothing lives there
+        '/fleet/../secret.webp',
+        '/fleet/./a.webp',
+        '/fleet//evil.com/a.webp',
+        '/fleet/%2e%2e/a.webp',
+        '/fleet/a b.webp',
+        '/fleet/a.webp?x=1',
+        '//evil.com/fleet/a.webp',
+        '/fleet/\\evil.webp',
       ]),
     ).toEqual([]);
   });
@@ -71,13 +71,13 @@ describe('the picture addresses a record may carry (V2-28, ADR-28)', () => {
   });
 
   it('refuses an address that is too long', () => {
-    expect(isAllowedImageUrl(`/images/${'a'.repeat(500)}.webp`, none)).toBe(false);
+    expect(isAllowedImageUrl(`/fleet/${'a'.repeat(500)}.webp`, none)).toBe(false);
   });
 
   it('as a field: missing is REQUIRED, a wrong address INVALID_FORMAT, a good one is trimmed', () => {
     const schema = z.object({ imageUrl: imageUrl() });
     const fieldErrors = (input: unknown) => expect.objectContaining({ response: expect.objectContaining({ fieldErrors: input }) });
-    expect(parseInput(schema, { imageUrl: ' /images/a.webp ' }, 'x')).toEqual({ imageUrl: '/images/a.webp' });
+    expect(parseInput(schema, { imageUrl: ' /fleet/a.webp ' }, 'x')).toEqual({ imageUrl: '/fleet/a.webp' });
     expect(() => parseInput(schema, {}, 'x')).toThrow(fieldErrors({ imageUrl: 'REQUIRED' }));
     expect(() => parseInput(schema, { imageUrl: 'https://evil.com/a.webp' }, 'x')).toThrow(fieldErrors({ imageUrl: 'INVALID_FORMAT' }));
     expect(() => parseInput(schema, { imageUrl: 42 }, 'x')).toThrow(fieldErrors({ imageUrl: 'INVALID_FORMAT' }));

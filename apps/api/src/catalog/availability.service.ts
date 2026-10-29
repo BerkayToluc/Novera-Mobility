@@ -50,6 +50,8 @@ export class AvailabilityService {
       where: {
         branchId: pickupBranchId,
         active: true,
+        // A retired model switches its cars off; this also keeps one out that was switched on again by hand (V2-29).
+        vehicleModel: { retiredAt: null },
         reservations: { none: blockingReservation(period) },
         holds: { none: blockingHold(period, now) },
       },

@@ -41,3 +41,14 @@ export function pageOf<T>(all: readonly T[], page: number, pageSize: number): Pa
   const start = (page - 1) * pageSize;
   return { items: all.slice(start, start + pageSize), total: all.length, page, pageSize };
 }
+
+// For searching by hand: lower case the Turkish way and without accents, so "sisli" finds "Şişli", "izmir" finds "İzmir" and
+// "renault" finds "RENAULT". Both sides of a comparison go through it.
+export function fold(value: string): string {
+  return value
+    .toLocaleLowerCase('tr')
+    .replace(/ı/g, 'i')
+    .normalize('NFD')
+    .replace(/\p{M}/gu, '')
+    .trim();
+}

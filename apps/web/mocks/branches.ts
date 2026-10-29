@@ -2,7 +2,7 @@ import type { AdminBranch, AdminBranchDetail, AdminBranchPage, BranchUsage } fro
 import type { BranchDetail, DayHours } from "@/lib/branch-detail";
 import { normalizeSearch } from "@/lib/branch-detail";
 import type { Branch } from "@/lib/vehicle";
-import { mockVehicles } from "./fleet";
+import { carsAtBranch } from "./models";
 import { mockReservations } from "./reservations";
 import { BRANCH_SEEDS } from "./branch-seed";
 
@@ -42,8 +42,8 @@ function rows(world: string): Record_[] {
 }
 
 // What keeps a sample branch open: the sample cars that are there, and the sample bookings still to come.
-function usageOf(id: string, now = Date.now()): BranchUsage {
-  const vehicles = mockVehicles("TRY").filter((vehicle) => vehicle.branchId === id).length;
+function usageOf(world: string, id: string, now = Date.now()): BranchUsage {
+  const vehicles = carsAtBranch(world, id);
   const reservations = mockReservations(now).filter(
     (reservation) =>
       reservation.status === "CONFIRMED" &&
@@ -53,14 +53,14 @@ function usageOf(id: string, now = Date.now()): BranchUsage {
   return { reservations, holds: 0, vehicles };
 }
 
-const view = (row: Record_): AdminBranch => ({ ...row, status: row.closedAt ? "CLOSED" : "OPEN", activeVehicles: usageOf(row.id).vehicles });
+const view = (row: Record_, world: string): AdminBranch => ({ ...row, status: row.closedAt ? "CLOSED" : "OPEN", activeVehicles: usageOf(world, row.id).vehicles });
 
 type ListQuery = { page: number; pageSize: number; sort: { key: string; dir: "asc" | "desc" } | null; q: string; city: string | null; status: string | null };
 
 export function listMockBranches(world: string, query: ListQuery): AdminBranchPage {
   const needle = normalizeSearch(query.q);
   let items = rows(world)
-    .map(view)
+    .map((row) => view(row, world))
     .filter(
       (row) =>
         (!needle || normalizeSearch(`${row.name} ${row.city} ${row.address}`).includes(needle)) &&
@@ -77,7 +77,7 @@ export function listMockBranches(world: string, query: ListQuery): AdminBranchPa
 
 export function getMockBranch(world: string, id: string): AdminBranchDetail | null {
   const found = rows(world).find((row) => row.id === id);
-  return found ? { ...view(found), usage: usageOf(found.id) } : null;
+  return found ? { ...view(found, world), usage: usageOf(world, found.id) } : null;
 }
 
 export type MockOutcome<T> =
@@ -102,7 +102,7 @@ export function createMockBranch(world: string, body: Body): MockOutcome<AdminBr
   const now = new Date().toISOString();
   const created: Record_ = { ...body, id: "yeni-" + Math.random().toString(36).slice(2, 10), closedAt: null, createdAt: now, updatedAt: now };
   rows(world).push(created);
-  return { status: "ok", value: view(created) };
+  return { status: "ok", value: view(created, world) };
 }
 
 // A tick later than the version that was read, so two quick edits never share one.
@@ -115,24 +115,24 @@ export function updateMockBranch(world: string, id: string, body: Partial<Body> 
   const { updatedAt: _version, ...fields } = body;
   void _version;
   Object.assign(current, fields, { updatedAt: nextVersion(current.updatedAt) });
-  return { status: "ok", value: view(current) };
+  return { status: "ok", value: view(current, world) };
 }
 
 export function closeMockBranch(world: string, id: string): MockOutcome<AdminBranch> {
   const current = rows(world).find((row) => row.id === id);
   if (!current) return { status: "not_found" };
-  if (current.closedAt) return { status: "ok", value: view(current) };
-  const usage = usageOf(id);
+  if (current.closedAt) return { status: "ok", value: view(current, world) };
+  const usage = usageOf(world, id);
   if (usage.reservations > 0 || usage.holds > 0 || usage.vehicles > 0) return { status: "in_use", usage };
   Object.assign(current, { closedAt: new Date().toISOString(), updatedAt: nextVersion(current.updatedAt) });
-  return { status: "ok", value: view(current) };
+  return { status: "ok", value: view(current, world) };
 }
 
 export function reopenMockBranch(world: string, id: string): MockOutcome<AdminBranch> {
   const current = rows(world).find((row) => row.id === id);
   if (!current) return { status: "not_found" };
   if (current.closedAt) Object.assign(current, { closedAt: null, updatedAt: nextVersion(current.updatedAt) });
-  return { status: "ok", value: view(current) };
+  return { status: "ok", value: view(current, world) };
 }
 
 // ---------- What the site shows (closed branches are not on it) ----------
