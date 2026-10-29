@@ -1,7 +1,7 @@
 # Novera Mobility
 
 Website for Novera Mobility, a fictional corporate car rental company (learning project, two-person team).
-v1 is live (web on Vercel, API on Render, PostgreSQL on Neon). v2 is in progress.
+v1 is live (web on Vercel, API on Google Cloud Run, PostgreSQL on Neon). v2 is in progress.
 Roles (since 22 Oct 2026): **G** is the Product/Project Manager (opens issues, accepts and merges PRs);
 **Berkay** is the full-stack developer and writes all code, in both `apps/web` (Next.js) and `apps/api` (NestJS).
 Primary language Turkish, English shipped as well. Docs are in Turkish; code is in English.
