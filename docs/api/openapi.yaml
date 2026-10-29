@@ -14,6 +14,7 @@ info:
     - **Dil:** çevrilen alanlar iki dille birlikte döner (`{ "tr": "...", "en": "..." }`). `?lang` yoktur.
     - **Sayfalama yok.** Düz liste. Sınıf, yakıt, vites filtrelerini ve bayi arama/şehir filtresini frontend yapar; sunucu yalnızca müsaitliği süzer.
     - **Enum yazımı:** `locale` ve `theme` küçük harf (`tr`, `light`), diğer tüm enum'lar büyük harf (`CONFIRMED`, `TRY`).
+    - **Gövde:** gövdesi olan her istek `application/json` olmalıdır; başka bir tür (`text/plain`, form) `415` alır (`code: BAD_REQUEST`). Gövde sınırı aşılırsa `413 PAYLOAD_TOO_LARGE`. Gövdesiz çağrılar (çıkış, iptal, `DELETE`) etkilenmez.
     - **Hata biçimi:** `{ code, message, fieldErrors }`. `code` ve `fieldErrors` değerleri sabit makine kodlarıdır; frontend metni kendi çevirisinden gösterir, `message` ekranda gösterilmez. HTTP: 400 bozuk istek, 422 doğrulama, 401 oturum yok, 404, 409 çakışma, 429 hız sınırı (`Retry-After` başlığıyla; her uç verebilir).
 
     ## Onaylanacak öneriler (G ile)
