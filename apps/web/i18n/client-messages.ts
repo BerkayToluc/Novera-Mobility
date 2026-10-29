@@ -26,5 +26,5 @@ export const CLIENT_NAMESPACES = {
   "rezervasyon/layout": ["BookingSummary", "HoldCountdown", "Payment", "ResultsPage"],
   "sifre-sifirla/layout": ["Auth", "RateLimit"],
   "yardim/layout": ["HelpPage"],
-  "yonetim/layout": ["Admin"],
+  "yonetim/layout": ["Admin", "RateLimit"],
 } as const satisfies Record<string, readonly string[]>;

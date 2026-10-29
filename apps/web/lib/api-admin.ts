@@ -15,3 +15,18 @@ export async function fetchAdminSummary(): Promise<AdminSummary> {
   if (result.status !== "ok") throw new ApiUnavailableError();
   return result.data;
 }
+
+// `GET /admin/promo-codes` (V2-26): one page of the list, narrowed and sorted by the query (lib/admin-query.ts `toApiQuery`).
+export async function fetchPromoCodes(query: URLSearchParams): Promise<Schemas["PromoCodePage"]> {
+  const result = await apiRequest<Schemas["PromoCodePage"]>("GET", "/admin/promo-codes?" + query.toString());
+  if (result.status !== "ok") throw new ApiUnavailableError();
+  return result.data;
+}
+
+// `GET /admin/promo-codes/{code}`: null when there is no such code (the page then does not exist), a failure to load otherwise.
+export async function fetchPromoCode(code: string): Promise<Schemas["PromoCode"] | null> {
+  const result = await apiRequest<Schemas["PromoCode"]>("GET", "/admin/promo-codes/" + encodeURIComponent(code));
+  if (result.status === "ok") return result.data;
+  if (result.status === "not_found") return null;
+  throw new ApiUnavailableError();
+}

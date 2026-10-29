@@ -38,6 +38,9 @@ export const routing = defineRouting({
     "/profil/ayarlar": { tr: "/profil/ayarlar", en: "/profile/settings" },
     // The administration (V2-23; the pages come in V2-24). Only an administrator sees the way in, the API checks the role.
     "/yonetim": { tr: "/yonetim", en: "/admin" },
+    "/yonetim/kampanya-kodlari": { tr: "/yonetim/kampanya-kodlari", en: "/admin/promo-codes" },
+    "/yonetim/kampanya-kodlari/yeni": { tr: "/yonetim/kampanya-kodlari/yeni", en: "/admin/promo-codes/new" },
+    "/yonetim/kampanya-kodlari/[code]": { tr: "/yonetim/kampanya-kodlari/[code]", en: "/admin/promo-codes/[code]" },
     "/kvkk": { tr: "/kvkk", en: "/privacy-notice" },
     "/cerez-politikasi": { tr: "/cerez-politikasi", en: "/cookie-policy" },
     "/kiralama-kosullari": { tr: "/kiralama-kosullari", en: "/rental-terms" },

@@ -1402,6 +1402,355 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/admin/promo-codes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Kampanya kodları listesi
+         * @description Sayfalı liste (ADR-24): `{ items, total, page, pageSize }`. Her satırda kodun **durumu** ve kullanım sayısı vardır.
+         *     Tablo küçük ve elle yönetilir; süzme, arama ve sıralama sunucuda yapılır.
+         *
+         *     Durum tek bir değerdir; birden fazlası doğruysa şu sırayla ilki: `INACTIVE` (kapalı), `EXPIRED` (bitişi geçti),
+         *     `EXHAUSTED` (tavan doldu), `SCHEDULED` (henüz başlamadı), `ACTIVE`. `ACTIVE` yalnızca rezervasyon anında
+         *     uygulanacak kod demektir. Sınır: yönetici başına dakikada 120 (`429 RATE_LIMITED`).
+         */
+        get: {
+            parameters: {
+                query?: {
+                    page?: number;
+                    pageSize?: number;
+                    /** @description `alan` ya da `alan:asc|desc`. Varsayılan `createdAt:desc`. Bitişi olmayan kod en uzak bitiş sayılır. */
+                    sort?: "code" | "percent" | "used" | "validUntil" | "createdAt";
+                    /** @description Kodun bir parçası; büyük/küçük harf ve boşluk fark etmez. */
+                    q?: string;
+                    status?: components["schemas"]["PromoCodeStatus"];
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Bir sayfa kod */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PromoCodePage"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        put?: never;
+        /**
+         * Yeni kampanya kodu
+         * @description Kod büyük harfe çevrilir, boşluklar atılır; harf ve rakam, 3–20 karakter. Yüzde 1–90. `validUntil`, `validFrom`'dan
+         *     sonra olmalı (`INVALID_DATE_RANGE`). Aynı ad varsa `409 CODE_TAKEN`. İşlem kaydına `promo-code.create` olarak yazılır
+         *     (yalnızca alan adları). Kod oluşunca rezervasyon özetinde hemen kullanılabilir.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["PromoCodeCreate"];
+                };
+            };
+            responses: {
+                /** @description Oluşturulan kod */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PromoCode"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Bu ad kullanımda (`CODE_TAKEN`, `fieldErrors.code`) */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description JSON olmayan gövde (`BAD_REQUEST`) */
+                415: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/promo-codes/{code}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Kod; büyük/küçük harf fark etmez. Kod olamayacak bir değer `404` döner. */
+                code: string;
+            };
+            cookie?: never;
+        };
+        /** Bir kampanya kodu */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Kod; büyük/küçük harf fark etmez. Kod olamayacak bir değer `404` döner. */
+                    code: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Kod */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PromoCode"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Böyle bir kod yok (`NOT_FOUND`) */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        put?: never;
+        post?: never;
+        /**
+         * Kampanya kodunu sil
+         * @description Yalnızca hiçbir rezervasyonda kullanılmamış kod silinir. Bir rezervasyonda, iptal edilmiş olsa bile, geçmişse
+         *     `409 IN_USE` döner ve **hiçbir şey değişmez**; kod `PATCH` ile `active: false` yapılarak kapatılır (ekran bunu önerir).
+         *     İşlem kaydı: `promo-code.delete`.
+         */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Kod; büyük/küçük harf fark etmez. Kod olamayacak bir değer `404` döner. */
+                    code: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Silindi */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Böyle bir kod yok (`NOT_FOUND`) */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Kod bir rezervasyonda kullanılmış (`IN_USE`) */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        options?: never;
+        head?: never;
+        /**
+         * Kampanya kodunu değiştir
+         * @description Yalnızca gönderilen alanlar değişir (`null` = "yok": `validFrom`, `validUntil`, `maxRedemptions` temizlenir). Kodun
+         *     adı değişmez. İstek, düzenlenen kaydın `updatedAt` değerini taşır; kayıt arada değiştiyse `409 STALE_WRITE`
+         *     döner ve hiçbir şey yazılmaz. Tavan şimdiye kadarki kullanımdan az olamaz (`422 maxRedemptions: BELOW_USAGE`).
+         *     Yüzdeyi değiştirmek var olan rezervasyonların tutarını etkilemez (tutar rezervasyonda donmuştur). Kod satırı
+         *     rezervasyon anındaki gibi kilitlenir; aynı anda gelen rezervasyonla sırayla çalışır. İşlem kaydı: `promo-code.update`.
+         */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Kod; büyük/küçük harf fark etmez. Kod olamayacak bir değer `404` döner. */
+                    code: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["PromoCodeUpdate"];
+                };
+            };
+            responses: {
+                /** @description Değişen kod (yeni `updatedAt` ile) */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PromoCode"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Böyle bir kod yok (`NOT_FOUND`) */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Kayıt arada değişti (`STALE_WRITE`) */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description JSON olmayan gövde (`BAD_REQUEST`) */
+                415: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        trace?: never;
+    };
     "/admin/ping": {
         parameters: {
             query?: never;
@@ -1532,7 +1881,7 @@ export interface components {
              * @description Sabit makine kodu.
              * @enum {string}
              */
-            code: "BAD_REQUEST" | "VALIDATION_FAILED" | "UNAUTHENTICATED" | "FORBIDDEN" | "INVALID_CREDENTIALS" | "EMAIL_TAKEN" | "NOT_FOUND" | "VEHICLE_UNAVAILABLE" | "INVALID_DATE_RANGE" | "RESERVATION_LIMIT" | "RESET_TOKEN_INVALID" | "SPAM_DETECTED" | "RATE_LIMITED" | "PAYLOAD_TOO_LARGE" | "INTERNAL_ERROR";
+            code: "BAD_REQUEST" | "VALIDATION_FAILED" | "UNAUTHENTICATED" | "FORBIDDEN" | "INVALID_CREDENTIALS" | "EMAIL_TAKEN" | "NOT_FOUND" | "VEHICLE_UNAVAILABLE" | "INVALID_DATE_RANGE" | "RESERVATION_LIMIT" | "RESET_TOKEN_INVALID" | "SPAM_DETECTED" | "RATE_LIMITED" | "PAYLOAD_TOO_LARGE" | "IN_USE" | "STALE_WRITE" | "CODE_TAKEN" | "INTERNAL_ERROR";
             /** @description Geliştirici için İngilizce metin. Ekranda gösterilmez. */
             message: string;
             /**
@@ -1542,7 +1891,7 @@ export interface components {
              *     }
              */
             fieldErrors?: {
-                [key: string]: "REQUIRED" | "INVALID_EMAIL" | "INVALID_FORMAT" | "TOO_SHORT" | "PASSWORD_TOO_COMMON" | "INVALID_PASSWORD" | "EMAIL_MISMATCH" | "TOO_LONG" | "OUT_OF_RANGE" | "EMAIL_TAKEN" | "CONSENT_REQUIRED" | "INVALID_DATE_RANGE" | "NOT_IN_SLOT" | "IN_PAST" | "UNKNOWN_REFERENCE" | "UNKNOWN_CODE" | "CODE_EXHAUSTED" | "CODE_ALREADY_USED";
+                [key: string]: "REQUIRED" | "INVALID_EMAIL" | "INVALID_FORMAT" | "TOO_SHORT" | "PASSWORD_TOO_COMMON" | "INVALID_PASSWORD" | "EMAIL_MISMATCH" | "TOO_LONG" | "OUT_OF_RANGE" | "EMAIL_TAKEN" | "CONSENT_REQUIRED" | "INVALID_DATE_RANGE" | "NOT_IN_SLOT" | "IN_PAST" | "UNKNOWN_REFERENCE" | "UNKNOWN_CODE" | "CODE_EXHAUSTED" | "CODE_ALREADY_USED" | "CODE_TAKEN" | "BELOW_USAGE";
             };
         };
         LocalizedText: {
@@ -1933,6 +2282,83 @@ export interface components {
             unhandledMessages: number | null;
             /** @description Açık servis talebi. Talepler gelene kadar (V2-41) `null`; ekran kartı gizler. */
             serviceRequests: number | null;
+        };
+        /**
+         * @description Kodun şimdiki durumu (öncelik sırası için `GET /admin/promo-codes` açıklamasına bak).
+         * @enum {string}
+         */
+        PromoCodeStatus: "ACTIVE" | "SCHEDULED" | "INACTIVE" | "EXPIRED" | "EXHAUSTED";
+        PromoCode: {
+            /**
+             * @description Büyük harf
+             * @example YAZ25
+             */
+            code: string;
+            percent: number;
+            /** @description Kapalı kod hiçbir tarihte uygulanmaz. */
+            active: boolean;
+            /**
+             * Format: date-time
+             * @description Boşsa hemen geçerli.
+             */
+            validFrom: string | null;
+            /**
+             * Format: date-time
+             * @description Boşsa süresiz. Bitiş anı dahil değildir.
+             */
+            validUntil: string | null;
+            /** @description Toplam kullanım tavanı; boşsa sınırsız. */
+            maxRedemptions: number | null;
+            /** @description Aynı hesap kodu bir kez kullanabilir. */
+            oncePerUser: boolean;
+            /** @description Kodu hâlâ tutan (iptal edilmemiş) rezervasyon sayısı. */
+            used: number;
+            /** @description Hiçbir rezervasyonda */
+            deletable: boolean;
+            status: components["schemas"]["PromoCodeStatus"];
+            /** Format: date-time */
+            createdAt: string;
+            /**
+             * Format: date-time
+             * @description Kaydın sürümü; değiştirirken geri gönderilir (`STALE_WRITE`).
+             */
+            updatedAt: string;
+        };
+        PromoCodePage: {
+            items: components["schemas"]["PromoCode"][];
+            /** @description Süzgeçten geçen tüm kodlar */
+            total: number;
+            page: number;
+            pageSize: number;
+        };
+        PromoCodeCreate: {
+            /** @example YAZ25 */
+            code: string;
+            percent: number;
+            /** @default true */
+            active: boolean;
+            /** Format: date-time */
+            validFrom?: string | null;
+            /** Format: date-time */
+            validUntil?: string | null;
+            maxRedemptions?: number | null;
+            /** @default true */
+            oncePerUser: boolean;
+        };
+        PromoCodeUpdate: {
+            /**
+             * Format: date-time
+             * @description Düzenlenen kaydın `updatedAt` değeri.
+             */
+            updatedAt: string;
+            percent?: number;
+            active?: boolean;
+            /** Format: date-time */
+            validFrom?: string | null;
+            /** Format: date-time */
+            validUntil?: string | null;
+            maxRedemptions?: number | null;
+            oncePerUser?: boolean;
         };
         /** @description Gönderilen alanlar güncellenir. */
         UserUpdate: {

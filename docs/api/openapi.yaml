@@ -694,6 +694,199 @@ paths:
               schema: { $ref: "#/components/schemas/Error" }
         "429": { $ref: "#/components/responses/TooManyRequests" }
 
+  /admin/promo-codes:
+    get:
+      tags: [admin]
+      summary: Kampanya kodları listesi
+      description: |
+        Sayfalı liste (ADR-24): `{ items, total, page, pageSize }`. Her satırda kodun **durumu** ve kullanım sayısı vardır.
+        Tablo küçük ve elle yönetilir; süzme, arama ve sıralama sunucuda yapılır.
+
+        Durum tek bir değerdir; birden fazlası doğruysa şu sırayla ilki: `INACTIVE` (kapalı), `EXPIRED` (bitişi geçti),
+        `EXHAUSTED` (tavan doldu), `SCHEDULED` (henüz başlamadı), `ACTIVE`. `ACTIVE` yalnızca rezervasyon anında
+        uygulanacak kod demektir. Sınır: yönetici başına dakikada 120 (`429 RATE_LIMITED`).
+      security:
+        - cookieAuth: []
+      parameters:
+        - { name: page, in: query, schema: { type: integer, minimum: 1, default: 1 } }
+        - { name: pageSize, in: query, schema: { type: integer, minimum: 1, maximum: 100, default: 20 } }
+        - name: sort
+          in: query
+          description: "`alan` ya da `alan:asc|desc`. Varsayılan `createdAt:desc`. Bitişi olmayan kod en uzak bitiş sayılır."
+          schema: { type: string, enum: [code, percent, used, validUntil, createdAt], example: "percent:desc" }
+        - { name: q, in: query, description: Kodun bir parçası; büyük/küçük harf ve boşluk fark etmez., schema: { type: string, maxLength: 20 } }
+        - name: status
+          in: query
+          schema: { $ref: "#/components/schemas/PromoCodeStatus" }
+      responses:
+        "200":
+          description: Bir sayfa kod
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PromoCodePage" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Yönetici değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+    post:
+      tags: [admin]
+      summary: Yeni kampanya kodu
+      description: |
+        Kod büyük harfe çevrilir, boşluklar atılır; harf ve rakam, 3–20 karakter. Yüzde 1–90. `validUntil`, `validFrom`'dan
+        sonra olmalı (`INVALID_DATE_RANGE`). Aynı ad varsa `409 CODE_TAKEN`. İşlem kaydına `promo-code.create` olarak yazılır
+        (yalnızca alan adları). Kod oluşunca rezervasyon özetinde hemen kullanılabilir.
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PromoCodeCreate" }
+      responses:
+        "201":
+          description: Oluşturulan kod
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PromoCode" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Yönetici değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "409":
+          description: Bu ad kullanımda (`CODE_TAKEN`, `fieldErrors.code`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "415": { description: JSON olmayan gövde (`BAD_REQUEST`) }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
+  /admin/promo-codes/{code}:
+    parameters:
+      - name: code
+        in: path
+        required: true
+        description: Kod; büyük/küçük harf fark etmez. Kod olamayacak bir değer `404` döner.
+        schema: { type: string, example: YAZ25 }
+    get:
+      tags: [admin]
+      summary: Bir kampanya kodu
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Kod
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PromoCode" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Yönetici değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: Böyle bir kod yok (`NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+    patch:
+      tags: [admin]
+      summary: Kampanya kodunu değiştir
+      description: |
+        Yalnızca gönderilen alanlar değişir (`null` = "yok": `validFrom`, `validUntil`, `maxRedemptions` temizlenir). Kodun
+        adı değişmez. İstek, düzenlenen kaydın `updatedAt` değerini taşır; kayıt arada değiştiyse `409 STALE_WRITE`
+        döner ve hiçbir şey yazılmaz. Tavan şimdiye kadarki kullanımdan az olamaz (`422 maxRedemptions: BELOW_USAGE`).
+        Yüzdeyi değiştirmek var olan rezervasyonların tutarını etkilemez (tutar rezervasyonda donmuştur). Kod satırı
+        rezervasyon anındaki gibi kilitlenir; aynı anda gelen rezervasyonla sırayla çalışır. İşlem kaydı: `promo-code.update`.
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PromoCodeUpdate" }
+      responses:
+        "200":
+          description: Değişen kod (yeni `updatedAt` ile)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PromoCode" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Yönetici değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: Böyle bir kod yok (`NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "409":
+          description: Kayıt arada değişti (`STALE_WRITE`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "415": { description: JSON olmayan gövde (`BAD_REQUEST`) }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+    delete:
+      tags: [admin]
+      summary: Kampanya kodunu sil
+      description: |
+        Yalnızca hiçbir rezervasyonda kullanılmamış kod silinir. Bir rezervasyonda, iptal edilmiş olsa bile, geçmişse
+        `409 IN_USE` döner ve **hiçbir şey değişmez**; kod `PATCH` ile `active: false` yapılarak kapatılır (ekran bunu önerir).
+        İşlem kaydı: `promo-code.delete`.
+      security:
+        - cookieAuth: []
+      responses:
+        "204": { description: Silindi }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Yönetici değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: Böyle bir kod yok (`NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "409":
+          description: Kod bir rezervasyonda kullanılmış (`IN_USE`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
   /admin/ping:
     get:
       tags: [admin]
@@ -839,6 +1032,9 @@ components:
             - SPAM_DETECTED
             - RATE_LIMITED
             - PAYLOAD_TOO_LARGE
+            - IN_USE
+            - STALE_WRITE
+            - CODE_TAKEN
             - INTERNAL_ERROR
         message:
           type: string
@@ -867,6 +1063,8 @@ components:
               - UNKNOWN_CODE
               - CODE_EXHAUSTED
               - CODE_ALREADY_USED
+              - CODE_TAKEN
+              - BELOW_USAGE
           example: { email: EMAIL_TAKEN }
 
     LocalizedText:
@@ -1283,6 +1481,61 @@ components:
           nullable: true
           minimum: 0
           description: Açık servis talebi. Talepler gelene kadar (V2-41) `null`; ekran kartı gizler.
+
+    PromoCodeStatus:
+      type: string
+      enum: [ACTIVE, SCHEDULED, INACTIVE, EXPIRED, EXHAUSTED]
+      description: Kodun şimdiki durumu (öncelik sırası için `GET /admin/promo-codes` açıklamasına bak).
+
+    PromoCode:
+      type: object
+      required: [code, percent, active, validFrom, validUntil, maxRedemptions, oncePerUser, used, deletable, status, createdAt, updatedAt]
+      properties:
+        code: { type: string, example: YAZ25, description: Büyük harf, harf ve rakam, 3–20 karakter. }
+        percent: { type: integer, minimum: 1, maximum: 90 }
+        active: { type: boolean, description: Kapalı kod hiçbir tarihte uygulanmaz. }
+        validFrom: { type: string, format: date-time, nullable: true, description: Boşsa hemen geçerli. }
+        validUntil: { type: string, format: date-time, nullable: true, description: Boşsa süresiz. Bitiş anı dahil değildir. }
+        maxRedemptions: { type: integer, nullable: true, minimum: 1, description: Toplam kullanım tavanı; boşsa sınırsız. }
+        oncePerUser: { type: boolean, description: Aynı hesap kodu bir kez kullanabilir. }
+        used: { type: integer, minimum: 0, description: Kodu hâlâ tutan (iptal edilmemiş) rezervasyon sayısı. }
+        deletable: { type: boolean, description: Hiçbir rezervasyonda, iptal edilmiş olsa bile, kullanılmamışsa true. }
+        status: { $ref: "#/components/schemas/PromoCodeStatus" }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time, description: Kaydın sürümü; değiştirirken geri gönderilir (`STALE_WRITE`). }
+
+    PromoCodePage:
+      type: object
+      required: [items, total, page, pageSize]
+      properties:
+        items: { type: array, items: { $ref: "#/components/schemas/PromoCode" } }
+        total: { type: integer, minimum: 0, description: Süzgeçten geçen tüm kodlar, yalnızca bu sayfa değil. }
+        page: { type: integer }
+        pageSize: { type: integer }
+
+    PromoCodeCreate:
+      type: object
+      required: [code, percent]
+      properties:
+        code: { type: string, example: YAZ25 }
+        percent: { type: integer, minimum: 1, maximum: 90 }
+        active: { type: boolean, default: true }
+        validFrom: { type: string, format: date-time, nullable: true }
+        validUntil: { type: string, format: date-time, nullable: true }
+        maxRedemptions: { type: integer, nullable: true, minimum: 1 }
+        oncePerUser: { type: boolean, default: true }
+
+    PromoCodeUpdate:
+      type: object
+      required: [updatedAt]
+      properties:
+        updatedAt: { type: string, format: date-time, description: Düzenlenen kaydın `updatedAt` değeri. }
+        percent: { type: integer, minimum: 1, maximum: 90 }
+        active: { type: boolean }
+        validFrom: { type: string, format: date-time, nullable: true }
+        validUntil: { type: string, format: date-time, nullable: true }
+        maxRedemptions: { type: integer, nullable: true, minimum: 1 }
+        oncePerUser: { type: boolean }
 
     UserUpdate:
       type: object

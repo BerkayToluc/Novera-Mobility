@@ -146,6 +146,97 @@ describe('administration over HTTP', () => {
     });
   });
 
+  // The door and the input of the campaign code endpoints (V2-26). What the codes do against a database is in
+  // promo-codes.integration.spec.ts; an invalid request is turned away before any database call, so the fake does here.
+  describe('campaign codes: the door and the input (V2-26)', () => {
+    const routes: [string, string][] = [
+      ['GET', '/admin/promo-codes'],
+      ['POST', '/admin/promo-codes'],
+      ['GET', '/admin/promo-codes/YAZ25'],
+      ['PATCH', '/admin/promo-codes/YAZ25'],
+      ['DELETE', '/admin/promo-codes/YAZ25'],
+    ];
+
+    it('no session is 401 UNAUTHENTICATED on every route', async () => {
+      for (const [method, path] of routes) {
+        const response = await call(method, path, ['POST', 'PATCH'].includes(method) ? { body: {} } : {});
+        expect(response.status).toBe(401);
+        expect((await response.json()).code).toBe('UNAUTHENTICATED');
+      }
+    });
+
+    it('a customer is 403 FORBIDDEN on every route', async () => {
+      const { cookie } = await signedIn('CUSTOMER');
+      for (const [method, path] of routes) {
+        const response = await call(method, path, { cookie, ...(['POST', 'PATCH'].includes(method) ? { body: {} } : {}) });
+        expect(response.status).toBe(403);
+        expect((await response.json()).code).toBe('FORBIDDEN');
+      }
+    });
+
+    it('a new code with wrong fields is 422 with a code for each field', async () => {
+      const { cookie } = await signedIn('ADMIN');
+      const response = await call('POST', '/admin/promo-codes', {
+        cookie,
+        body: { code: 'a!', percent: 95, validFrom: 'not a date', maxRedemptions: 0, oncePerUser: 'yes' },
+      });
+      expect(response.status).toBe(422);
+      expect((await response.json()).fieldErrors).toEqual({
+        code: 'INVALID_FORMAT',
+        percent: 'OUT_OF_RANGE',
+        validFrom: 'INVALID_FORMAT',
+        maxRedemptions: 'OUT_OF_RANGE',
+        oncePerUser: 'INVALID_FORMAT',
+      });
+    });
+
+    it('a new code with nothing in it asks for the code and the percent', async () => {
+      const { cookie } = await signedIn('ADMIN');
+      const response = await call('POST', '/admin/promo-codes', { cookie, body: {} });
+      expect(response.status).toBe(422);
+      expect((await response.json()).fieldErrors).toEqual({ code: 'REQUIRED', percent: 'REQUIRED' });
+    });
+
+    it('a change has to say which version of the record it was made against', async () => {
+      const { cookie } = await signedIn('ADMIN');
+      const response = await call('PATCH', '/admin/promo-codes/YAZ25', { cookie, body: { percent: 10 } });
+      expect(response.status).toBe(422);
+      expect((await response.json()).fieldErrors).toEqual({ updatedAt: 'REQUIRED' });
+    });
+
+    it('a change with a percent that is too high or a flag that is not a flag is 422', async () => {
+      const { cookie } = await signedIn('ADMIN');
+      const response = await call('PATCH', '/admin/promo-codes/YAZ25', {
+        cookie,
+        body: { updatedAt: '2026-10-29T10:00:00.000Z', percent: 91, active: 'no' },
+      });
+      expect(response.status).toBe(422);
+      expect((await response.json()).fieldErrors).toEqual({ percent: 'OUT_OF_RANGE', active: 'INVALID_FORMAT' });
+    });
+
+    it('a list asked for in a way that makes no sense is 422, not quietly something else', async () => {
+      const { cookie } = await signedIn('ADMIN');
+      for (const [query, field, code] of [
+        ['pageSize=500', 'pageSize', 'OUT_OF_RANGE'],
+        ['page=0', 'page', 'OUT_OF_RANGE'],
+        ['page=abc', 'page', 'INVALID_FORMAT'],
+        ['sort=passwordHash:asc', 'sort', 'INVALID_FORMAT'],
+        ['sort=code:sideways', 'sort', 'INVALID_FORMAT'],
+        ['status=DELETED', 'status', 'INVALID_FORMAT'],
+      ] as const) {
+        const response = await call('GET', `/admin/promo-codes?${query}`, { cookie });
+        expect(response.status).toBe(422);
+        expect((await response.json()).fieldErrors).toEqual({ [field]: code });
+      }
+    });
+
+    it('a body that is not JSON is 415 before anything is read', async () => {
+      const { cookie } = await signedIn('ADMIN');
+      const response = await call('POST', '/admin/promo-codes', { cookie, body: 'code=YAZ25', type: 'text/plain' });
+      expect(response.status).toBe(415);
+    });
+  });
+
   describe('the audit log', () => {
     it('a change is logged with the names of its fields and none of the values', async () => {
       const { cookie, id } = await signedIn('ADMIN');
