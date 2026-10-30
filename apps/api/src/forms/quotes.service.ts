@@ -22,7 +22,7 @@ export interface QuoteSummaryView {
   vehicleCount: number;
   durationMonths: number;
   productSlug: string | null;
-  status: 'RECEIVED' | 'IN_REVIEW' | 'OFFERED';
+  status: 'RECEIVED' | 'IN_REVIEW' | 'OFFERED' | 'CLOSED';
 }
 
 // Numara yılı Türkiye saatine göre belirlenir (ADR-16).

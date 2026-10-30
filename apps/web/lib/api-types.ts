@@ -3455,6 +3455,440 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/admin/quotes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Teklif talepleri (yönetim)
+         * @description Sayfalı liste (ADR-24): `{ items, total, page, pageSize }`. Talepler sürekli geldiği için süzme, sıralama ve sayfalama
+         *     veritabanı sorgusudur. `q` talep numarasında, şirket adında ya da e-posta adresinde aranır (büyük/küçük harf fark etmez;
+         *     İngiliz alfabesindeki harfler için, Ş gibi Türkçe büyük harfler yazıldığı gibi eşleşir). Varsayılan sıra en yeni üstte. Kişisel
+         *     alanları saklama süresi dolduğunda silinmiş talepler de listelenir (`anonymized: true`). Sınır: yönetici başına dakikada 120.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    page?: number;
+                    pageSize?: number;
+                    /** @description `alan` ya da `alan:asc|desc`. Varsayılan `createdAt:desc`. */
+                    sort?: "createdAt" | "number" | "vehicleCount";
+                    q?: string;
+                    status?: components["schemas"]["QuoteStatus"];
+                    source?: components["schemas"]["QuoteSource"];
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Bir sayfa teklif talebi */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AdminQuotePage"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/quotes/{number}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Talep numarası (`TKL-2026-00042`); büyük/küçük harf fark etmez. Numara olamayacak bir değer `404` döner. */
+                number: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * Bir teklif talebi
+         * @description Müşterinin yazdıkları, iç not, talebi gönderen hesap ve talebin geçebileceği durumlar (`nextStatuses`).
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Talep numarası (`TKL-2026-00042`); büyük/küçük harf fark etmez. Numara olamayacak bir değer `404` döner. */
+                    number: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Teklif talebi */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AdminQuoteDetail"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Böyle bir talep yok (`NOT_FOUND`) */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Teklif talebinin durumunu ve iç notunu değiştir
+         * @description Gönderilmeyen alan olduğu gibi kalır. Düzenlenen kaydın `updatedAt` değeri geri gönderilir; talep bu arada değiştiyse
+         *     `409 STALE_WRITE`. **Durum yalnızca ileri gider:** `RECEIVED → IN_REVIEW → OFFERED → CLOSED`; ileri atlamak serbesttir
+         *     (hemen yanıtlanan talep doğrudan `OFFERED`ya da `CLOSED` olabilir), **geri gidiş** `409 INVALID_TRANSITION` döner ve hiçbir
+         *     şey yazılmaz (aynı istekteki not da). Zaten içinde olduğu durumu istemek hata değildir ve bir şey değiştirmez. İç not en
+         *     çok 2000 karakterdir; boş metin ya da `null` notu siler. **İç not yalnızca çalışana görünür:** `GET /me/quotes`
+         *     cevabında yoktur. Not ve müşteri bilgisi işlem kaydına yazılmaz, işlem kaydı yalnızca alan adlarını tutar (`quote.update`).
+         */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Talep numarası (`TKL-2026-00042`); büyük/küçük harf fark etmez. Numara olamayacak bir değer `404` döner. */
+                    number: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["AdminQuoteUpdate"];
+                };
+            };
+            responses: {
+                /** @description Güncel talep */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AdminQuoteDetail"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Böyle bir talep yok (`NOT_FOUND`) */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Kayıt değişmiş (`STALE_WRITE`) ya da durum geri gidiyor (`INVALID_TRANSITION`) */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description JSON olmayan gövde (`BAD_REQUEST`) */
+                415: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        trace?: never;
+    };
+    "/admin/contact-messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * İletişim mesajları (yönetim)
+         * @description Sayfalı liste (ADR-24). `q` ad, e-posta ya da konuda aranır (büyük/küçük harf: İngiliz alfabesindeki harfler için). Varsayılan
+         *     sıra en yeni üstte. Listede mesajın yalnızca ilk sözleri (`preview`) vardır; tamamı mesajın kendi sayfasındadır.
+         *     **`handled=false` bekleyen mesajlardır:** ele alınmamış **ve** kişisel alanları silinmemiş olanlar (silinmiş mesajda
+         *     yanıtlanacak bir şey kalmaz). Özetteki "Ele alınmamış mesaj" kartı (`unhandledMessages`) aynı kuralla sayar, bu yüzden
+         *     kartın sayısı bu listenin toplamıyla aynıdır. `handled=true` ele alınanlardır.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    page?: number;
+                    pageSize?: number;
+                    /** @description `createdAt` ya da `createdAt:asc|desc`. Varsayılan `createdAt:desc`. */
+                    sort?: "createdAt";
+                    q?: string;
+                    handled?: "true" | "false";
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Bir sayfa mesaj */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AdminMessagePage"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/contact-messages/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Mesajın kimliği. Kimlik olamayacak bir değer `404` döner. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * Bir iletişim mesajı
+         * @description Mesajın tamamı, telefon ve kimin ele aldığı.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Mesajın kimliği. Kimlik olamayacak bir değer `404` döner. */
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Mesaj */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AdminMessageDetail"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Böyle bir mesaj yok (`NOT_FOUND`) */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Mesajı ele alındı olarak işaretle ya da işareti geri al
+         * @description `handled: true` zamanı ve yöneticiyi yazar; mesaj zaten ele alınmışsa **ilk işaret kalır** (iki yönetici aynı anda
+         *     basarsa biri yazar). `handled: false` ikisini de siler. İki çağrı da tekrarlanabilir, bu yüzden sürüm (`updatedAt`) gönderilmez.
+         *     İşlem kaydı: `contact-message.handle` (yalnızca `handled` alan adı; mesajın metni ve gönderenin bilgisi yazılmaz).
+         */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Mesajın kimliği. Kimlik olamayacak bir değer `404` döner. */
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["AdminMessageHandle"];
+                };
+            };
+            responses: {
+                /** @description Güncel mesaj */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AdminMessageDetail"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Böyle bir mesaj yok (`NOT_FOUND`) */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description JSON olmayan gövde (`BAD_REQUEST`) */
+                415: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        trace?: never;
+    };
     "/admin/ping": {
         parameters: {
             query?: never;
@@ -3617,8 +4051,11 @@ export interface components {
             amount: number;
             currency: components["schemas"]["Currency"];
         };
-        /** @enum {string} */
-        QuoteStatus: "RECEIVED" | "IN_REVIEW" | "OFFERED";
+        /**
+         * @description Talebin durumu; yalnızca ileri gider (`RECEIVED → IN_REVIEW → OFFERED → CLOSED`).
+         * @enum {string}
+         */
+        QuoteStatus: "RECEIVED" | "IN_REVIEW" | "OFFERED" | "CLOSED";
         QuoteSummary: {
             /** Format: uuid */
             id: string;
@@ -3987,8 +4424,8 @@ export interface components {
             reservationsLast7Days: number;
             /** @description Yanıt bekleyen teklif talebi (`RECEIVED`). */
             quotesAwaiting: number;
-            /** @description Ele alınmamış iletişim mesajı. İletişim mesajında "ele alındı" işareti gelene kadar (V2-32) `null`; ekran kartı gizler. */
-            unhandledMessages: number | null;
+            /** @description Ele alınmamış iletişim mesajı (V2-32). Kişisel alanları saklama süresi dolduğu için silinmiş mesaj sayılmaz: yanıtlanacak bir şey kalmamıştır. `GET /admin/contact-messages?handled=false` aynı kuralla sayar. */
+            unhandledMessages: number;
             /** @description Açık servis talebi. Talepler gelene kadar (V2-41) `null`; ekran kartı gizler. */
             serviceRequests: number | null;
         };
@@ -4456,6 +4893,105 @@ export interface components {
              * @example Müşteri aradı
              */
             reason: string;
+        };
+        /**
+         * @description Talebin nereden geldiği; sitedeki form (`WEB`) ya da Filom'dan sözleşme yenileme talebi (`FLEET_RENEWAL`, V2-38).
+         * @enum {string}
+         */
+        QuoteSource: "WEB" | "FLEET_RENEWAL";
+        AdminQuoteListItem: {
+            /** @example TKL-2026-00042 */
+            number: string;
+            status: components["schemas"]["QuoteStatus"];
+            source: components["schemas"]["QuoteSource"];
+            companyName: string;
+            contactName: string | null;
+            /** @description Kişisel veri. Saklama süresi dolunca silinir (boş metin). */
+            email: string;
+            vehicleCount: number;
+            durationMonths: number;
+            vehicleType: string;
+            productSlug: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /**
+             * Format: date-time
+             * @description Kaydın sürümü; değiştirirken geri gönderilir (`STALE_WRITE`).
+             */
+            updatedAt: string;
+            /** @description Kişisel alanlar saklama süresi dolduğu için silinmişse doğrudur. */
+            anonymized: boolean;
+        };
+        AdminQuoteDetail: components["schemas"]["AdminQuoteListItem"] & {
+            /** Format: uuid */
+            id: string;
+            phone: string | null;
+            deliveryCities: string | null;
+            /** @description Müşterinin forma yazdığı not. */
+            notes: string | null;
+            /** @description Yalnızca çalışanın okuduğu not; müşteriye giden hiçbir cevapta yoktur. */
+            internalNote: string | null;
+            /** @description Talep oturum açıkken gönderildiyse hesap. */
+            account: {
+                /** Format: email */
+                email: string;
+            } | null;
+            /** @description Talebin geçebileceği durumlar (bulunduğundan sonrakiler). */
+            nextStatuses: components["schemas"]["QuoteStatus"][];
+        };
+        AdminQuotePage: {
+            items: components["schemas"]["AdminQuoteListItem"][];
+            /** @description Süzgeçten geçen tüm talepler */
+            total: number;
+            page: number;
+            pageSize: number;
+        };
+        AdminQuoteUpdate: {
+            /**
+             * Format: date-time
+             * @description Düzenlenen kaydın `updatedAt` değeri.
+             */
+            updatedAt: string;
+            status?: components["schemas"]["QuoteStatus"];
+            /** @description Boş metin ya da `null` notu siler. */
+            internalNote?: string | null;
+        };
+        AdminMessageListItem: {
+            /** Format: uuid */
+            id: string;
+            /** @description Kişisel veri. Saklama süresi dolunca `Silindi` olur. */
+            name: string;
+            /** @description Kişisel veri. Saklama süresi dolunca boş metin olur. */
+            email: string;
+            subject: string;
+            /** @description Mesajın ilk sözleri; uzunsa `…` ile biter. */
+            preview: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            handledAt: string | null;
+            anonymized: boolean;
+        };
+        AdminMessageDetail: components["schemas"]["AdminMessageListItem"] & {
+            phone: string | null;
+            message: string;
+            /** @description İşareti koyan yönetici; kimse koymadıysa ya da hesap silindiyse boştur. */
+            handledBy: {
+                name: string;
+                /** Format: email */
+                email: string;
+            } | null;
+        };
+        AdminMessagePage: {
+            items: components["schemas"]["AdminMessageListItem"][];
+            /** @description Süzgeçten geçen tüm mesajlar */
+            total: number;
+            page: number;
+            pageSize: number;
+        };
+        AdminMessageHandle: {
+            /** @description `true` ele alındı işareti koyar, `false` geri alır. */
+            handled: boolean;
         };
         /** @description Gönderilen alanlar güncellenir. */
         UserUpdate: {

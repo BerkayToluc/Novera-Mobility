@@ -734,6 +734,151 @@
         "remove": "Remove the filter"
       }
     },
+    "quotes": {
+      "title": "Quote requests",
+      "intro": "Corporate quote requests. Move the state on and write yourself an internal note. The state only goes forward; the customer never sees the note.",
+      "detailTitle": "Quote request",
+      "detailIntro": "Request from {company}.",
+      "tableCaption": "Quote requests",
+      "retry": "Try again",
+      "statusFilterLabel": "By state",
+      "sourceFilterLabel": "By source",
+      "searchLabel": "Search by number, company or e-mail",
+      "erased": "Erased",
+      "noAccount": "Sent without signing in",
+      "fleet": "{vehicles} vehicles, {months} months",
+      "columns": {
+        "number": "Number",
+        "company": "Company",
+        "fleet": "Fleet",
+        "source": "Source",
+        "status": "State",
+        "created": "Date"
+      },
+      "state": {
+        "RECEIVED": "Received",
+        "IN_REVIEW": "In review",
+        "OFFERED": "Offer made",
+        "CLOSED": "Closed"
+      },
+      "source": {
+        "WEB": "Site form",
+        "FLEET_RENEWAL": "Fleet renewal"
+      },
+      "emptyTitle": "No quote requests yet",
+      "emptyText": "Requests show up here when the corporate quote form is filled in.",
+      "emptyFilteredTitle": "No request matches this search",
+      "emptyFilteredText": "Try removing the filters or searching for something else.",
+      "loadErrorTitle": "The quote requests could not be loaded",
+      "loadErrorText": "Try again in a few seconds.",
+      "facts": {
+        "title": "Request",
+        "company": "Company",
+        "contact": "Contact person",
+        "email": "E-mail",
+        "phone": "Phone",
+        "fleet": "Fleet",
+        "vehicleType": "Vehicle type",
+        "cities": "Delivery cities",
+        "source": "Source",
+        "account": "Sending account",
+        "created": "Sent",
+        "customerNote": "The customer's note"
+      },
+      "status": {
+        "title": "State",
+        "text": "The state only goes forward: received, in review, offer made, closed. You can skip a step; there is no way back. The customer sees the state on their Quote requests screen.",
+        "closedText": "The request is closed; its state no longer changes. You can still edit the internal note.",
+        "move": {
+          "IN_REVIEW": "Take into review",
+          "OFFERED": "Mark as offer made",
+          "CLOSED": "Close the request"
+        }
+      },
+      "moveDialog": {
+        "title": "Set {number} to \"{status}\"?",
+        "text": "The state cannot be taken back. The customer sees the new state on their Quote requests screen.",
+        "keep": "Keep it"
+      },
+      "note": {
+        "title": "Internal note",
+        "label": "Internal note (only the team sees it)",
+        "hint": "At most {max} characters. The customer never sees this note anywhere. Saving it empty deletes it.",
+        "tooLong": "The note can be {max} characters at most.",
+        "save": "Save the note",
+        "saving": "Saving"
+      },
+      "toast": {
+        "moved": "State updated",
+        "noteSaved": "Note saved"
+      },
+      "errors": {
+        "invalidTransition": "The state cannot be taken back. The request may have moved on meanwhile; the page was refreshed.",
+        "notFound": "This request no longer exists. Go back to the list.",
+        "unavailable": "It could not be saved. Try again in a few seconds."
+      }
+    },
+    "messages": {
+      "title": "Contact messages",
+      "intro": "Messages from the contact form. Mark one \"handled\" once you have answered it; the mark can be taken back.",
+      "detailTitle": "Message",
+      "detailIntro": "A message from the contact form.",
+      "tableCaption": "Contact messages",
+      "retry": "Try again",
+      "stateFilterLabel": "By state",
+      "searchLabel": "Search by name, e-mail or subject",
+      "erased": "Erased",
+      "columns": {
+        "subject": "Subject",
+        "from": "From and message",
+        "received": "Received",
+        "status": "State"
+      },
+      "state": {
+        "waiting": "Waiting",
+        "handled": "Handled",
+        "erased": "Erased"
+      },
+      "filter": {
+        "ele-alinmadi": "Not handled",
+        "ele-alindi": "Handled"
+      },
+      "emptyTitle": "No messages yet",
+      "emptyText": "Messages show up here when the contact form is filled in.",
+      "emptyFilteredTitle": "No message matches this search",
+      "emptyFilteredText": "Try removing the filters or searching for something else.",
+      "loadErrorTitle": "The messages could not be loaded",
+      "loadErrorText": "Try again in a few seconds.",
+      "facts": {
+        "title": "Sender",
+        "from": "Name",
+        "email": "E-mail",
+        "phone": "Phone",
+        "received": "Received",
+        "handled": "Handled",
+        "handledBy": "{at}, {name}"
+      },
+      "text": {
+        "title": "Message",
+        "erased": "The text of the message was erased because its retention period ran out."
+      },
+      "actions": {
+        "title": "Handled mark",
+        "waitingText": "This message is waiting. Mark it handled once you have answered it; it then leaves the \"Unhandled messages\" number on the summary.",
+        "handledText": "This message is handled. If it was marked by mistake, you can take the mark back.",
+        "erasedText": "The personal details of this message were erased because its retention period ran out; nothing is left to answer, so it takes no mark.",
+        "mark": "Mark as handled",
+        "undo": "Take the mark back"
+      },
+      "toast": {
+        "handled": "Message marked as handled",
+        "undone": "Mark taken back"
+      },
+      "errors": {
+        "notFound": "This message no longer exists. Go back to the list.",
+        "unavailable": "It could not be saved. Try again in a few seconds."
+      }
+    },
     "cityFilter": {
       "all": "All cities",
       "apply": "Filter"

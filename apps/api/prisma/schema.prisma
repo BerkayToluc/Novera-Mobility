@@ -64,10 +64,18 @@ enum ReservationStatus {
   CANCELLED
 }
 
+// RECEIVED → IN_REVIEW → OFFERED → CLOSED: ileri atlama serbest, geri gidiş yok (V2-32).
 enum QuoteStatus {
   RECEIVED
   IN_REVIEW
   OFFERED
+  CLOSED
+}
+
+// Teklifin nereden geldiği: sitedeki form ya da Filom'daki sözleşme yenileme talebi (V2-38).
+enum QuoteSource {
+  WEB
+  FLEET_RENEWAL
 }
 
 // ---------- Hesap ----------
@@ -104,6 +112,8 @@ model User {
   reservations      Reservation[]       @relation("ReservationOwner")
   // Rezervasyonlar, bu hesabın (yönetici) panelden iptal ettikleri (V2-31).
   cancelledReservations Reservation[]   @relation("ReservationCanceller")
+  // İletişim mesajları, bu hesabın (yönetici) "ele alındı" dediği (V2-32).
+  handledMessages       ContactMessage[] @relation("MessageHandler")
   quoteRequests     QuoteRequest[]
   pointTransactions PointTransaction[]
   sessions          Session[]
@@ -433,6 +443,7 @@ model QuoteRequest {
   id             String      @id @default(uuid())
   number         String      @unique // ör. TKL-2026-00042
   status         QuoteStatus @default(RECEIVED)
+  source         QuoteSource @default(WEB)
   companyName    String
   contactName    String?
   phone          String?
@@ -446,6 +457,8 @@ model QuoteRequest {
   createdAt      DateTime    @default(now())
   // Teklifin durumu değiştikçe güncellenir; panelin çakışma denetimi (ADR-24) bunu kullanır.
   updatedAt      DateTime    @updatedAt
+  // Yalnızca çalışanın okuduğu not (en çok 2000 karakter, CHECK ile de korunur). Müşteriye giden hiçbir cevapta yoktur (V2-32).
+  internalNote   String?
   // Kişisel alanlar (ad, e-posta, telefon, notlar) silindiğinde dolar: saklama süresi dolunca ya da hesap silinince (V2-12).
   anonymizedAt   DateTime?
 
@@ -470,8 +483,13 @@ model ContactMessage {
   createdAt     DateTime @default(now())
   // Saklama süresi dolunca ad, e-posta, telefon ve mesaj silinir; konu ve tarih istatistik için kalır (V2-12).
   anonymizedAt  DateTime?
+  // "Ele alındı" işareti: ne zaman ve hangi yönetici. Geri alınabilir (ikisi de boşalır). Yönetici hesabı silinirse bağlantı boşalır (V2-32).
+  handledAt     DateTime?
+  handledById   String?
+  handledBy     User?     @relation("MessageHandler", fields: [handledById], references: [id], onDelete: SetNull)
 
   @@index([createdAt])
+  @@index([handledAt])
 }
 
 model ExchangeRate {

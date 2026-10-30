@@ -1777,6 +1777,234 @@ paths:
         "422": { $ref: "#/components/responses/ValidationFailed" }
         "429": { $ref: "#/components/responses/TooManyRequests" }
 
+  /admin/quotes:
+    get:
+      tags: [admin]
+      summary: Teklif talepleri (yönetim)
+      description: |
+        Sayfalı liste (ADR-24): `{ items, total, page, pageSize }`. Talepler sürekli geldiği için süzme, sıralama ve sayfalama
+        veritabanı sorgusudur. `q` talep numarasında, şirket adında ya da e-posta adresinde aranır (büyük/küçük harf fark etmez;
+        İngiliz alfabesindeki harfler için, Ş gibi Türkçe büyük harfler yazıldığı gibi eşleşir). Varsayılan sıra en yeni üstte. Kişisel
+        alanları saklama süresi dolduğunda silinmiş talepler de listelenir (`anonymized: true`). Sınır: yönetici başına dakikada 120.
+      security:
+        - cookieAuth: []
+      parameters:
+        - { name: page, in: query, schema: { type: integer, minimum: 1, default: 1 } }
+        - { name: pageSize, in: query, schema: { type: integer, minimum: 1, maximum: 100, default: 20 } }
+        - name: sort
+          in: query
+          description: "`alan` ya da `alan:asc|desc`. Varsayılan `createdAt:desc`."
+          schema: { type: string, enum: [createdAt, number, vehicleCount], example: "createdAt:desc" }
+        - { name: q, in: query, schema: { type: string, maxLength: 100 } }
+        - { name: status, in: query, schema: { $ref: "#/components/schemas/QuoteStatus" } }
+        - { name: source, in: query, schema: { $ref: "#/components/schemas/QuoteSource" } }
+      responses:
+        "200":
+          description: Bir sayfa teklif talebi
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminQuotePage" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Yönetici değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
+  /admin/quotes/{number}:
+    parameters:
+      - { name: number, in: path, required: true, description: "Talep numarası (`TKL-2026-00042`); büyük/küçük harf fark etmez. Numara olamayacak bir değer `404` döner.", schema: { type: string, example: TKL-2026-00042 } }
+    get:
+      tags: [admin]
+      summary: Bir teklif talebi
+      description: Müşterinin yazdıkları, iç not, talebi gönderen hesap ve talebin geçebileceği durumlar (`nextStatuses`).
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Teklif talebi
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminQuoteDetail" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Yönetici değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: Böyle bir talep yok (`NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+    patch:
+      tags: [admin]
+      summary: Teklif talebinin durumunu ve iç notunu değiştir
+      description: |
+        Gönderilmeyen alan olduğu gibi kalır. Düzenlenen kaydın `updatedAt` değeri geri gönderilir; talep bu arada değiştiyse
+        `409 STALE_WRITE`. **Durum yalnızca ileri gider:** `RECEIVED → IN_REVIEW → OFFERED → CLOSED`; ileri atlamak serbesttir
+        (hemen yanıtlanan talep doğrudan `OFFERED`ya da `CLOSED` olabilir), **geri gidiş** `409 INVALID_TRANSITION` döner ve hiçbir
+        şey yazılmaz (aynı istekteki not da). Zaten içinde olduğu durumu istemek hata değildir ve bir şey değiştirmez. İç not en
+        çok 2000 karakterdir; boş metin ya da `null` notu siler. **İç not yalnızca çalışana görünür:** `GET /me/quotes`
+        cevabında yoktur. Not ve müşteri bilgisi işlem kaydına yazılmaz, işlem kaydı yalnızca alan adlarını tutar (`quote.update`).
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminQuoteUpdate" }
+      responses:
+        "200":
+          description: Güncel talep
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminQuoteDetail" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Yönetici değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: Böyle bir talep yok (`NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "409":
+          description: Kayıt değişmiş (`STALE_WRITE`) ya da durum geri gidiyor (`INVALID_TRANSITION`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "415": { description: JSON olmayan gövde (`BAD_REQUEST`) }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
+  /admin/contact-messages:
+    get:
+      tags: [admin]
+      summary: İletişim mesajları (yönetim)
+      description: |
+        Sayfalı liste (ADR-24). `q` ad, e-posta ya da konuda aranır (büyük/küçük harf: İngiliz alfabesindeki harfler için). Varsayılan
+        sıra en yeni üstte. Listede mesajın yalnızca ilk sözleri (`preview`) vardır; tamamı mesajın kendi sayfasındadır.
+        **`handled=false` bekleyen mesajlardır:** ele alınmamış **ve** kişisel alanları silinmemiş olanlar (silinmiş mesajda
+        yanıtlanacak bir şey kalmaz). Özetteki "Ele alınmamış mesaj" kartı (`unhandledMessages`) aynı kuralla sayar, bu yüzden
+        kartın sayısı bu listenin toplamıyla aynıdır. `handled=true` ele alınanlardır.
+      security:
+        - cookieAuth: []
+      parameters:
+        - { name: page, in: query, schema: { type: integer, minimum: 1, default: 1 } }
+        - { name: pageSize, in: query, schema: { type: integer, minimum: 1, maximum: 100, default: 20 } }
+        - name: sort
+          in: query
+          description: "`createdAt` ya da `createdAt:asc|desc`. Varsayılan `createdAt:desc`."
+          schema: { type: string, enum: [createdAt], example: "createdAt:desc" }
+        - { name: q, in: query, schema: { type: string, maxLength: 100 } }
+        - { name: handled, in: query, schema: { type: string, enum: ["true", "false"] } }
+      responses:
+        "200":
+          description: Bir sayfa mesaj
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminMessagePage" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Yönetici değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
+  /admin/contact-messages/{id}:
+    parameters:
+      - { name: id, in: path, required: true, description: Mesajın kimliği. Kimlik olamayacak bir değer `404` döner., schema: { type: string, format: uuid } }
+    get:
+      tags: [admin]
+      summary: Bir iletişim mesajı
+      description: Mesajın tamamı, telefon ve kimin ele aldığı.
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Mesaj
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminMessageDetail" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Yönetici değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: Böyle bir mesaj yok (`NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+    patch:
+      tags: [admin]
+      summary: Mesajı ele alındı olarak işaretle ya da işareti geri al
+      description: |
+        `handled: true` zamanı ve yöneticiyi yazar; mesaj zaten ele alınmışsa **ilk işaret kalır** (iki yönetici aynı anda
+        basarsa biri yazar). `handled: false` ikisini de siler. İki çağrı da tekrarlanabilir, bu yüzden sürüm (`updatedAt`) gönderilmez.
+        İşlem kaydı: `contact-message.handle` (yalnızca `handled` alan adı; mesajın metni ve gönderenin bilgisi yazılmaz).
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminMessageHandle" }
+      responses:
+        "200":
+          description: Güncel mesaj
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminMessageDetail" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Yönetici değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: Böyle bir mesaj yok (`NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "415": { description: JSON olmayan gövde (`BAD_REQUEST`) }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
   /admin/ping:
     get:
       tags: [admin]
@@ -1991,7 +2219,8 @@ components:
 
     QuoteStatus:
       type: string
-      enum: [RECEIVED, IN_REVIEW, OFFERED]
+      enum: [RECEIVED, IN_REVIEW, OFFERED, CLOSED]
+      description: Talebin durumu; yalnızca ileri gider (`RECEIVED → IN_REVIEW → OFFERED → CLOSED`).
 
     QuoteSummary:
       type: object
@@ -2374,9 +2603,8 @@ components:
         quotesAwaiting: { type: integer, minimum: 0, description: Yanıt bekleyen teklif talebi (`RECEIVED`). }
         unhandledMessages:
           type: integer
-          nullable: true
           minimum: 0
-          description: Ele alınmamış iletişim mesajı. İletişim mesajında "ele alındı" işareti gelene kadar (V2-32) `null`; ekran kartı gizler.
+          description: "Ele alınmamış iletişim mesajı (V2-32). Kişisel alanları saklama süresi dolduğu için silinmiş mesaj sayılmaz: yanıtlanacak bir şey kalmamıştır. `GET /admin/contact-messages?handled=false` aynı kuralla sayar."
         serviceRequests:
           type: integer
           nullable: true
@@ -2792,6 +3020,114 @@ components:
       required: [reason]
       properties:
         reason: { type: string, minLength: 5, maxLength: 500, description: İptal nedeni; rezervasyona yazılır., example: Müşteri aradı, aracı istemiyor. }
+
+    QuoteSource:
+      type: string
+      enum: [WEB, FLEET_RENEWAL]
+      description: Talebin nereden geldiği; sitedeki form (`WEB`) ya da Filom'dan sözleşme yenileme talebi (`FLEET_RENEWAL`, V2-38).
+
+    AdminQuoteListItem:
+      type: object
+      required: [number, status, source, companyName, contactName, email, vehicleCount, durationMonths, vehicleType, productSlug, createdAt, updatedAt, anonymized]
+      properties:
+        number: { type: string, example: TKL-2026-00042 }
+        status: { $ref: "#/components/schemas/QuoteStatus" }
+        source: { $ref: "#/components/schemas/QuoteSource" }
+        companyName: { type: string }
+        contactName: { type: string, nullable: true }
+        email: { type: string, description: "Kişisel veri. Saklama süresi dolunca silinir (boş metin)." }
+        vehicleCount: { type: integer }
+        durationMonths: { type: integer }
+        vehicleType: { type: string }
+        productSlug: { type: string, nullable: true }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time, description: Kaydın sürümü; değiştirirken geri gönderilir (`STALE_WRITE`). }
+        anonymized: { type: boolean, description: Kişisel alanlar saklama süresi dolduğu için silinmişse doğrudur. }
+
+    AdminQuoteDetail:
+      allOf:
+        - $ref: "#/components/schemas/AdminQuoteListItem"
+        - type: object
+          required: [id, phone, deliveryCities, notes, internalNote, account, nextStatuses]
+          properties:
+            id: { type: string, format: uuid }
+            phone: { type: string, nullable: true }
+            deliveryCities: { type: string, nullable: true }
+            notes: { type: string, nullable: true, description: Müşterinin forma yazdığı not. }
+            internalNote: { type: string, nullable: true, maxLength: 2000, description: Yalnızca çalışanın okuduğu not; müşteriye giden hiçbir cevapta yoktur. }
+            account:
+              type: object
+              nullable: true
+              description: Talep oturum açıkken gönderildiyse hesap.
+              required: [email]
+              properties:
+                email: { type: string, format: email }
+            nextStatuses:
+              type: array
+              description: Talebin geçebileceği durumlar (bulunduğundan sonrakiler).
+              items: { $ref: "#/components/schemas/QuoteStatus" }
+
+    AdminQuotePage:
+      type: object
+      required: [items, total, page, pageSize]
+      properties:
+        items: { type: array, items: { $ref: "#/components/schemas/AdminQuoteListItem" } }
+        total: { type: integer, minimum: 0, description: Süzgeçten geçen tüm talepler, yalnızca bu sayfa değil. }
+        page: { type: integer }
+        pageSize: { type: integer }
+
+    AdminQuoteUpdate:
+      type: object
+      required: [updatedAt]
+      properties:
+        updatedAt: { type: string, format: date-time, description: Düzenlenen kaydın `updatedAt` değeri. }
+        status: { $ref: "#/components/schemas/QuoteStatus" }
+        internalNote: { type: string, nullable: true, maxLength: 2000, description: Boş metin ya da `null` notu siler. }
+
+    AdminMessageListItem:
+      type: object
+      required: [id, name, email, subject, preview, createdAt, handledAt, anonymized]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string, description: Kişisel veri. Saklama süresi dolunca `Silindi` olur. }
+        email: { type: string, description: Kişisel veri. Saklama süresi dolunca boş metin olur. }
+        subject: { type: string }
+        preview: { type: string, maxLength: 120, description: Mesajın ilk sözleri; uzunsa `…` ile biter. }
+        createdAt: { type: string, format: date-time }
+        handledAt: { type: string, format: date-time, nullable: true }
+        anonymized: { type: boolean }
+
+    AdminMessageDetail:
+      allOf:
+        - $ref: "#/components/schemas/AdminMessageListItem"
+        - type: object
+          required: [phone, message, handledBy]
+          properties:
+            phone: { type: string, nullable: true }
+            message: { type: string }
+            handledBy:
+              type: object
+              nullable: true
+              description: İşareti koyan yönetici; kimse koymadıysa ya da hesap silindiyse boştur.
+              required: [name, email]
+              properties:
+                name: { type: string }
+                email: { type: string, format: email }
+
+    AdminMessagePage:
+      type: object
+      required: [items, total, page, pageSize]
+      properties:
+        items: { type: array, items: { $ref: "#/components/schemas/AdminMessageListItem" } }
+        total: { type: integer, minimum: 0, description: Süzgeçten geçen tüm mesajlar, yalnızca bu sayfa değil. }
+        page: { type: integer }
+        pageSize: { type: integer }
+
+    AdminMessageHandle:
+      type: object
+      required: [handled]
+      properties:
+        handled: { type: boolean, description: "`true` ele alındı işareti koyar, `false` geri alır." }
 
     UserUpdate:
       type: object
