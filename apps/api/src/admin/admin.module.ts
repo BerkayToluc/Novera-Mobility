@@ -7,6 +7,8 @@ import { BranchesController } from './branches/branches.controller.js';
 import { BranchesService } from './branches/branches.service.js';
 import { VehicleClassesController, VehicleModelsController } from './vehicle-models/vehicle-models.controller.js';
 import { VehicleModelsService } from './vehicle-models/vehicle-models.service.js';
+import { AdminReservationsController } from './reservations/reservations.controller.js';
+import { AdminReservationsService } from './reservations/reservations.service.js';
 import { ExtrasController } from './extras/extras.controller.js';
 import { ExtrasService } from './extras/extras.service.js';
 import { VehiclesController } from './vehicles/vehicles.controller.js';
@@ -21,7 +23,7 @@ import { AuditService } from './audit.service.js';
 // rate limit module, so a request is counted before it is turned away.
 @Module({
   imports: [AuthModule],
-  controllers: [AdminController, PromoCodesController, BranchesController, VehicleModelsController, VehicleClassesController, VehiclesController, ExtrasController],
+  controllers: [AdminController, PromoCodesController, BranchesController, VehicleModelsController, VehicleClassesController, VehiclesController, ExtrasController, AdminReservationsController],
   providers: [
     AuditService,
     AdminSummaryService,
@@ -30,6 +32,7 @@ import { AuditService } from './audit.service.js';
     VehicleModelsService,
     VehiclesService,
     ExtrasService,
+    AdminReservationsService,
     { provide: APP_GUARD, useClass: AdminGuard },
     { provide: APP_INTERCEPTOR, useClass: AuditInterceptor },
   ],

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useRef } from "react";
+import { useEffect, useId, useRef, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 
@@ -16,12 +16,14 @@ type Props = {
   pending?: boolean;
   onConfirm: () => void;
   onCancel: () => void;
+  // A field the person fills in before confirming (the reason of a cancellation), shown under the text.
+  children?: ReactNode;
 };
 
 // The window that asks before something that cannot be undone (ADMIN.md §3.4). A native modal <dialog>, so the browser
 // traps the focus, and Escape asks to close it. Focus starts on "Cancel", the safe answer: Enter on the open window does
 // nothing harmful. The browser gives focus back to what opened it.
-export function ConfirmDialog({ open, title, text, confirmLabel, cancelLabel, tone = "destructive", pending = false, onConfirm, onCancel }: Props) {
+export function ConfirmDialog({ open, title, text, confirmLabel, cancelLabel, tone = "destructive", pending = false, onConfirm, onCancel, children }: Props) {
   const t = useTranslations("Admin.confirm");
   const ref = useRef<HTMLDialogElement>(null);
   const cancelRef = useRef<HTMLButtonElement>(null);
@@ -60,6 +62,7 @@ export function ConfirmDialog({ open, title, text, confirmLabel, cancelLabel, to
             {text}
           </p>
         </div>
+        {children}
         <div className="flex flex-wrap justify-end gap-3">
           <Button ref={cancelRef} type="button" variant="outline" disabled={pending} onClick={onCancel}>
             {cancelLabel ?? t("cancel")}

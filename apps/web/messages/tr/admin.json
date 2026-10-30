@@ -637,6 +637,103 @@
         "saved": "Ek hizmet kaydedildi"
       }
     },
+    "reservations": {
+      "title": "Rezervasyonlar",
+      "intro": "Müşterilerin yaptığı rezervasyonlar. Numara ya da e-posta ile arayın, ayrıntıyı açın, gerekirse iptal edin. İptal, müşterinin kendi iptaliyle aynı sonucu verir.",
+      "detailTitle": "Rezervasyon",
+      "detailIntro": "{vehicle} kiralaması.",
+      "tableCaption": "Rezervasyonlar",
+      "retry": "Tekrar dene",
+      "statusFilterLabel": "Duruma göre",
+      "branchFilterLabel": "Alış bayisine göre",
+      "allBranches": "Tüm bayiler",
+      "apply": "Süz",
+      "fromLabel": "İlk gün",
+      "toLabel": "Son gün",
+      "clearDates": "Tarihleri temizle",
+      "searchLabel": "Numara ya da e-posta ara",
+      "noCustomer": "Hesap silinmiş",
+      "columns": {
+        "number": "Numara",
+        "customer": "Müşteri",
+        "vehicle": "Araç ve alış bayisi",
+        "start": "Başlangıç",
+        "status": "Durum",
+        "total": "Tutar"
+      },
+      "status": {
+        "CONFIRMED": "Onaylı",
+        "CANCELLED": "İptal"
+      },
+      "phase": {
+        "UPCOMING": "Yaklaşan",
+        "ACTIVE": "Sürüyor",
+        "COMPLETED": "Tamamlandı",
+        "CANCELLED": "İptal"
+      },
+      "emptyTitle": "Henüz rezervasyon yok",
+      "emptyText": "Müşteriler rezervasyon yaptıkça burada görünür.",
+      "emptyFilteredTitle": "Bu aramaya uyan rezervasyon yok",
+      "emptyFilteredText": "Süzgeçleri kaldırmayı ya da başka bir şey aramayı deneyin.",
+      "loadErrorTitle": "Rezervasyonlar yüklenemedi",
+      "loadErrorText": "Birkaç saniye sonra yeniden deneyin.",
+      "facts": {
+        "title": "Kiralama",
+        "start": "Başlangıç",
+        "end": "Bitiş",
+        "days": "Gün",
+        "created": "Oluşturulma",
+        "pickup": "Alış bayisi",
+        "return": "Dönüş bayisi",
+        "vehicle": "Araç",
+        "customer": "Müşteri"
+      },
+      "price": {
+        "title": "Fiyat",
+        "total": "Toplam",
+        "pointsUsed": "Puanla ödenen: {points} puan",
+        "payable": "Ödenecek: {amount}",
+        "promo": "Kampanya kodu: {code}.",
+        "noPromo": "Kampanya kodu yok.",
+        "points": "Kazanılan puan: {points}."
+      },
+      "cancellation": {
+        "title": "İptal",
+        "at": "İptal zamanı: {at}",
+        "by": "İptal eden: {name} (yönetici)",
+        "byCustomer": "Müşteri kendisi iptal etti.",
+        "reason": "Neden: {reason}"
+      },
+      "actions": {
+        "title": "Rezervasyonu iptal et",
+        "cancelledText": "Bu rezervasyon iptal edilmiş. Araç yeniden müsait, harcanan puan müşteriye geri döndü ve kampanya kodunun kullanımı geri geldi.",
+        "startedText": "Kiralama başlamış, bu yüzden iptal edilemez.",
+        "cancellableText": "İptal, müşterinin kendi iptaliyle aynı sonucu verir: araç hemen yeniden müsait olur, harcanan puan geri döner, bekleyen puan düşer ve kampanya kodunun kullanımı geri gelir. Nedeni rezervasyona yazılır.",
+        "cancel": "Rezervasyonu iptal et"
+      },
+      "cancelDialog": {
+        "title": "{number} iptal edilsin mi?",
+        "text": "Bu işlem geri alınamaz. Müşterinin Rezervasyonlarım ekranında iptal olarak görünür.",
+        "keep": "Vazgeç",
+        "confirm": "Rezervasyonu iptal et",
+        "reason": "İptal nedeni",
+        "reasonHint": "{min} ile {max} karakter. Rezervasyona yazılır.",
+        "reasonError": "{min} ile {max} karakter arasında bir neden yazın."
+      },
+      "toast": {
+        "cancelled": "Rezervasyon iptal edildi"
+      },
+      "errors": {
+        "notCancellable": "Rezervasyon artık iptal edilemiyor: kiralama başlamış ya da zaten iptal edilmiş. Sayfa yenilendi.",
+        "unavailable": "İptal edilemedi. Birkaç saniye sonra yeniden deneyin."
+      },
+      "quick": {
+        "baslangic": "Bugün başlayan kiralamalar (İstanbul günü).",
+        "bitis": "Bugün biten kiralamalar (İstanbul günü).",
+        "olusturma": "Son 7 günde yapılan rezervasyonlar.",
+        "remove": "Süzgeci kaldır"
+      }
+    },
     "cityFilter": {
       "all": "Tüm şehirler",
       "apply": "Süz"

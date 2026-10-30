@@ -590,6 +590,80 @@ describe('administration over HTTP', () => {
     });
   });
 
+  // The door and the input of the booking endpoints (V2-31). What they do against a database is in
+  // reservations/reservations.integration.spec.ts; a request that is turned away is turned away before any database call.
+  describe('bookings: the door and the input (V2-31)', () => {
+    const NUMBER = 'NVR-2026-00123';
+    const routes: [string, string][] = [
+      ['GET', '/admin/reservations'],
+      ['GET', `/admin/reservations/${NUMBER}`],
+      ['POST', `/admin/reservations/${NUMBER}/cancel`],
+    ];
+    const withBody = (method: string) => (method === 'POST' ? { body: {} } : {});
+
+    it('no session is 401 UNAUTHENTICATED on every route', async () => {
+      for (const [method, path] of routes) {
+        const response = await call(method, path, withBody(method));
+        expect(response.status).toBe(401);
+        expect((await response.json()).code).toBe('UNAUTHENTICATED');
+      }
+    });
+
+    it('a customer is 403 FORBIDDEN on every route', async () => {
+      const { cookie } = await signedIn('CUSTOMER');
+      for (const [method, path] of routes) {
+        const response = await call(method, path, { cookie, ...withBody(method) });
+        expect(response.status).toBe(403);
+        expect((await response.json()).code).toBe('FORBIDDEN');
+      }
+    });
+
+    it('a cancellation without a reason, or with one that is too short, is 422 with a code', async () => {
+      const { cookie } = await signedIn('ADMIN');
+      const none = await call('POST', `/admin/reservations/${NUMBER}/cancel`, { cookie, body: {} });
+      expect(none.status).toBe(422);
+      expect((await none.json()).fieldErrors).toEqual({ reason: 'REQUIRED' });
+      const short = await call('POST', `/admin/reservations/${NUMBER}/cancel`, { cookie, body: { reason: 'kısa' } });
+      expect(short.status).toBe(422);
+      expect((await short.json()).fieldErrors).toEqual({ reason: 'TOO_SHORT' });
+    });
+
+    it('a list asked for in a way that makes no sense is 422', async () => {
+      const { cookie } = await signedIn('ADMIN');
+      for (const [query, field] of [
+        ['pageSize=101', 'pageSize'],
+        ['sort=passwordHash:asc', 'sort'],
+        ['status=GONE', 'status'],
+        ['branch=istanbul', 'branch'],
+        ['from=yesterday', 'from'],
+        ['to=2026-13-40', 'to'],
+        ['from=2026-10-12&to=2026-10-10', 'to'],
+      ] as const) {
+        const response = await call('GET', `/admin/reservations?${query}`, { cookie });
+        expect(response.status).toBe(422);
+        expect(Object.keys((await response.json()).fieldErrors)).toEqual([field]);
+      }
+    });
+
+    it('a number that cannot be one is 404 without asking the database', async () => {
+      const { cookie } = await signedIn('ADMIN');
+      for (const [method, path] of [
+        ['GET', '/admin/reservations/not-a-number'],
+        ['POST', '/admin/reservations/not-a-number/cancel'],
+      ] as const) {
+        const response = await call(method, path, method === 'POST' ? { cookie, body: { reason: 'Deneme nedeni' } } : { cookie });
+        expect(response.status).toBe(404);
+        expect((await response.json()).code).toBe('NOT_FOUND');
+      }
+    });
+
+    it('a body that is not JSON is 415', async () => {
+      const { cookie } = await signedIn('ADMIN');
+      const response = await call('POST', `/admin/reservations/${NUMBER}/cancel`, { cookie, body: 'reason=x', type: 'text/plain' });
+      expect(response.status).toBe(415);
+    });
+  });
+
   describe('the audit log', () => {
     it('a change is logged with the names of its fields and none of the values', async () => {
       const { cookie, id } = await signedIn('ADMIN');

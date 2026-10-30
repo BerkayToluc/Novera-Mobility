@@ -52,6 +52,8 @@ export const routing = defineRouting({
     "/yonetim/araclar/[id]": { tr: "/yonetim/araclar/[id]", en: "/admin/vehicles/[id]" },
     "/yonetim/ek-hizmetler": { tr: "/yonetim/ek-hizmetler", en: "/admin/extras" },
     "/yonetim/ek-hizmetler/[slug]": { tr: "/yonetim/ek-hizmetler/[slug]", en: "/admin/extras/[slug]" },
+    "/yonetim/rezervasyonlar": { tr: "/yonetim/rezervasyonlar", en: "/admin/reservations" },
+    "/yonetim/rezervasyonlar/[number]": { tr: "/yonetim/rezervasyonlar/[number]", en: "/admin/reservations/[number]" },
     "/kvkk": { tr: "/kvkk", en: "/privacy-notice" },
     "/cerez-politikasi": { tr: "/cerez-politikasi", en: "/cookie-policy" },
     "/kiralama-kosullari": { tr: "/kiralama-kosullari", en: "/rental-terms" },

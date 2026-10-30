@@ -13,9 +13,9 @@ export type SummaryCardKey =
   | "serviceRequests";
 
 export const SUMMARY_CARDS: readonly { key: SummaryCardKey; screen: AdminScreenKey; filter: Record<string, string> }[] = [
-  { key: "rentalsStartingToday", screen: "reservations", filter: { baslangic: "bugun" } },
-  { key: "rentalsEndingToday", screen: "reservations", filter: { bitis: "bugun" } },
-  { key: "reservationsLast7Days", screen: "reservations", filter: { olusturma: "7gun" } },
+  { key: "rentalsStartingToday", screen: "reservations", filter: { durum: "CONFIRMED", baslangic: "bugun" } },
+  { key: "rentalsEndingToday", screen: "reservations", filter: { durum: "CONFIRMED", bitis: "bugun" } },
+  { key: "reservationsLast7Days", screen: "reservations", filter: { durum: "CONFIRMED", olusturma: "7gun" } },
   { key: "quotesAwaiting", screen: "quotes", filter: { durum: "RECEIVED" } },
   { key: "unhandledMessages", screen: "messages", filter: { durum: "ele-alinmadi" } },
   { key: "serviceRequests", screen: "requests", filter: { durum: "acik" } },

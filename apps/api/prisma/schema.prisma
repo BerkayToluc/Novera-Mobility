@@ -101,7 +101,9 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  reservations      Reservation[]
+  reservations      Reservation[]       @relation("ReservationOwner")
+  // Rezervasyonlar, bu hesabın (yönetici) panelden iptal ettikleri (V2-31).
+  cancelledReservations Reservation[]   @relation("ReservationCanceller")
   quoteRequests     QuoteRequest[]
   pointTransactions PointTransaction[]
   sessions          Session[]
@@ -354,10 +356,15 @@ model Reservation {
   // Paneldeki çakışma denetimi (ADR-24) `updatedAt`'e bakar; iptal zamanı `cancelledAt`'te durur.
   updatedAt   DateTime  @updatedAt
   cancelledAt DateTime?
+  // Panelden iptalde zorunlu neden (5-500 karakter, CHECK ile de korunur) ve iptal eden yönetici (V2-31). Müşterinin kendi iptalinde boş kalır;
+  // yönetici hesabı silinirse bağlantı boşalır, neden kalır.
+  cancelReason  String?
+  cancelledById String?
+  cancelledBy   User?     @relation("ReservationCanceller", fields: [cancelledById], references: [id], onDelete: SetNull)
 
   // Hesap silinince rezervasyon kalır, kullanıcı bağlantısı boşalır
   userId         String?
-  user           User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+  user           User?   @relation("ReservationOwner", fields: [userId], references: [id], onDelete: SetNull)
   vehicleId      String
   vehicle        Vehicle @relation(fields: [vehicleId], references: [id])
   pickupBranchId String
