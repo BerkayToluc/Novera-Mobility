@@ -35,7 +35,8 @@ export async function getMyPoints(): Promise<PointsAccount> {
 
 export async function getMyQuoteRequests(): Promise<QuoteRequest[]> {
   if (!isMockMode()) return fetchMyQuoteRequests();
-  return (await import("@/mocks/quotes")).MOCK_QUOTE_REQUESTS;
+  // The state the panel left them in (the sample fleet of the world, V2-32).
+  return (await import("@/mocks/admin-quotes")).mockQuoteRequestsFor(await mockWorld());
 }
 
 // Where the account is signed in. The sample account has this browser and one phone, until the others are closed.

@@ -112,3 +112,33 @@ export async function fetchAdminReservation(number: string): Promise<Schemas["Ad
   if (result.status === "not_found") return null;
   throw new ApiUnavailableError();
 }
+
+// `GET /admin/quotes` (V2-32): one page of the list, closed requests included.
+export async function fetchAdminQuotes(query: URLSearchParams): Promise<Schemas["AdminQuotePage"]> {
+  const result = await apiRequest<Schemas["AdminQuotePage"]>("GET", "/admin/quotes?" + query.toString());
+  if (result.status !== "ok") throw new ApiUnavailableError();
+  return result.data;
+}
+
+// `GET /admin/quotes/{number}`: null when there is no such request (the page then does not exist), a failure to load otherwise.
+export async function fetchAdminQuote(number: string): Promise<Schemas["AdminQuoteDetail"] | null> {
+  const result = await apiRequest<Schemas["AdminQuoteDetail"]>("GET", "/admin/quotes/" + encodeURIComponent(number));
+  if (result.status === "ok") return result.data;
+  if (result.status === "not_found") return null;
+  throw new ApiUnavailableError();
+}
+
+// `GET /admin/contact-messages`: one page of the list.
+export async function fetchAdminMessages(query: URLSearchParams): Promise<Schemas["AdminMessagePage"]> {
+  const result = await apiRequest<Schemas["AdminMessagePage"]>("GET", "/admin/contact-messages?" + query.toString());
+  if (result.status !== "ok") throw new ApiUnavailableError();
+  return result.data;
+}
+
+// `GET /admin/contact-messages/{id}`: null when there is no such message, a failure to load otherwise.
+export async function fetchAdminMessage(id: string): Promise<Schemas["AdminMessageDetail"] | null> {
+  const result = await apiRequest<Schemas["AdminMessageDetail"]>("GET", "/admin/contact-messages/" + encodeURIComponent(id));
+  if (result.status === "ok") return result.data;
+  if (result.status === "not_found") return null;
+  throw new ApiUnavailableError();
+}

@@ -211,7 +211,8 @@
       "status": {
         "RECEIVED": "Alındı",
         "IN_REVIEW": "İnceleniyor",
-        "OFFERED": "Teklif hazır"
+        "OFFERED": "Teklif hazır",
+        "CLOSED": "Kapandı"
       },
       "empty": {
         "title": "Henüz teklif talebiniz yok",

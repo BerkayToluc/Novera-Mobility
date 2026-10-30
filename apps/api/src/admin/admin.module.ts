@@ -7,6 +7,10 @@ import { BranchesController } from './branches/branches.controller.js';
 import { BranchesService } from './branches/branches.service.js';
 import { VehicleClassesController, VehicleModelsController } from './vehicle-models/vehicle-models.controller.js';
 import { VehicleModelsService } from './vehicle-models/vehicle-models.service.js';
+import { AdminMessagesController } from './messages/messages.controller.js';
+import { AdminMessagesService } from './messages/messages.service.js';
+import { AdminQuotesController } from './quotes/quotes.controller.js';
+import { AdminQuotesService } from './quotes/quotes.service.js';
 import { AdminReservationsController } from './reservations/reservations.controller.js';
 import { AdminReservationsService } from './reservations/reservations.service.js';
 import { ExtrasController } from './extras/extras.controller.js';
@@ -23,7 +27,7 @@ import { AuditService } from './audit.service.js';
 // rate limit module, so a request is counted before it is turned away.
 @Module({
   imports: [AuthModule],
-  controllers: [AdminController, PromoCodesController, BranchesController, VehicleModelsController, VehicleClassesController, VehiclesController, ExtrasController, AdminReservationsController],
+  controllers: [AdminController, PromoCodesController, BranchesController, VehicleModelsController, VehicleClassesController, VehiclesController, ExtrasController, AdminReservationsController, AdminQuotesController, AdminMessagesController],
   providers: [
     AuditService,
     AdminSummaryService,
@@ -33,6 +37,8 @@ import { AuditService } from './audit.service.js';
     VehiclesService,
     ExtrasService,
     AdminReservationsService,
+    AdminQuotesService,
+    AdminMessagesService,
     { provide: APP_GUARD, useClass: AdminGuard },
     { provide: APP_INTERCEPTOR, useClass: AuditInterceptor },
   ],

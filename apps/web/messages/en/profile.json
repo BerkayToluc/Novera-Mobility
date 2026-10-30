@@ -211,7 +211,8 @@
       "status": {
         "RECEIVED": "Received",
         "IN_REVIEW": "In review",
-        "OFFERED": "Offer ready"
+        "OFFERED": "Offer ready",
+        "CLOSED": "Closed"
       },
       "empty": {
         "title": "No quote requests yet",

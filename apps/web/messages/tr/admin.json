@@ -734,6 +734,151 @@
         "remove": "Süzgeci kaldır"
       }
     },
+    "quotes": {
+      "title": "Teklif talepleri",
+      "intro": "Kurumsal teklif talepleri. Durumu ilerletin, kendinize iç not yazın. Durum yalnızca ileri gider; iç notu müşteri görmez.",
+      "detailTitle": "Teklif talebi",
+      "detailIntro": "{company} için talep.",
+      "tableCaption": "Teklif talepleri",
+      "retry": "Tekrar dene",
+      "statusFilterLabel": "Duruma göre",
+      "sourceFilterLabel": "Kaynağa göre",
+      "searchLabel": "Numara, şirket ya da e-posta ara",
+      "erased": "Silindi",
+      "noAccount": "Oturumsuz gönderilmiş",
+      "fleet": "{vehicles} araç, {months} ay",
+      "columns": {
+        "number": "Numara",
+        "company": "Şirket",
+        "fleet": "Filo",
+        "source": "Kaynak",
+        "status": "Durum",
+        "created": "Tarih"
+      },
+      "state": {
+        "RECEIVED": "Alındı",
+        "IN_REVIEW": "İnceleniyor",
+        "OFFERED": "Teklif verildi",
+        "CLOSED": "Kapandı"
+      },
+      "source": {
+        "WEB": "Site formu",
+        "FLEET_RENEWAL": "Filom yenileme"
+      },
+      "emptyTitle": "Henüz teklif talebi yok",
+      "emptyText": "Kurumsal teklif formu doldurulunca talepler burada görünür.",
+      "emptyFilteredTitle": "Bu aramaya uyan talep yok",
+      "emptyFilteredText": "Süzgeçleri kaldırmayı ya da başka bir şey aramayı deneyin.",
+      "loadErrorTitle": "Teklif talepleri yüklenemedi",
+      "loadErrorText": "Birkaç saniye sonra yeniden deneyin.",
+      "facts": {
+        "title": "Talep",
+        "company": "Şirket",
+        "contact": "Yetkili",
+        "email": "E-posta",
+        "phone": "Telefon",
+        "fleet": "Filo",
+        "vehicleType": "Araç türü",
+        "cities": "Teslim şehirleri",
+        "source": "Kaynak",
+        "account": "Gönderen hesap",
+        "created": "Gönderilme",
+        "customerNote": "Müşterinin notu"
+      },
+      "status": {
+        "title": "Durum",
+        "text": "Durum yalnızca ileri gider: alındı, inceleniyor, teklif verildi, kapandı. Bir adımı atlayabilirsiniz; geri dönüş yoktur. Müşteri durumu Teklif taleplerim ekranında görür.",
+        "closedText": "Talep kapandı; durumu artık değişmez. İç notu yine de düzenleyebilirsiniz.",
+        "move": {
+          "IN_REVIEW": "İncelemeye al",
+          "OFFERED": "Teklif verildi olarak işaretle",
+          "CLOSED": "Talebi kapat"
+        }
+      },
+      "moveDialog": {
+        "title": "{number} \"{status}\" olsun mu?",
+        "text": "Durum geri alınamaz. Müşteri yeni durumu Teklif taleplerim ekranında görür.",
+        "keep": "Vazgeç"
+      },
+      "note": {
+        "title": "İç not",
+        "label": "İç not (yalnızca ekip görür)",
+        "hint": "En çok {max} karakter. Müşteri bu notu hiçbir yerde görmez. Boş bırakıp kaydederseniz not silinir.",
+        "tooLong": "Not en çok {max} karakter olabilir.",
+        "save": "Notu kaydet",
+        "saving": "Kaydediliyor"
+      },
+      "toast": {
+        "moved": "Durum güncellendi",
+        "noteSaved": "Not kaydedildi"
+      },
+      "errors": {
+        "invalidTransition": "Durum geri alınamaz. Talep bu arada ilerlemiş olabilir; sayfa yenilendi.",
+        "notFound": "Bu talep artık yok. Listeye dönün.",
+        "unavailable": "Kaydedilemedi. Birkaç saniye sonra yeniden deneyin."
+      }
+    },
+    "messages": {
+      "title": "İletişim mesajları",
+      "intro": "İletişim formundan gelen mesajlar. Yanıtladıktan sonra \"ele alındı\" olarak işaretleyin; işaret geri alınabilir.",
+      "detailTitle": "Mesaj",
+      "detailIntro": "İletişim formundan gelen mesaj.",
+      "tableCaption": "İletişim mesajları",
+      "retry": "Tekrar dene",
+      "stateFilterLabel": "Duruma göre",
+      "searchLabel": "Ad, e-posta ya da konu ara",
+      "erased": "Silindi",
+      "columns": {
+        "subject": "Konu",
+        "from": "Gönderen ve mesaj",
+        "received": "Geldiği zaman",
+        "status": "Durum"
+      },
+      "state": {
+        "waiting": "Bekliyor",
+        "handled": "Ele alındı",
+        "erased": "Silinmiş"
+      },
+      "filter": {
+        "ele-alinmadi": "Ele alınmadı",
+        "ele-alindi": "Ele alındı"
+      },
+      "emptyTitle": "Henüz mesaj yok",
+      "emptyText": "İletişim formu doldurulunca mesajlar burada görünür.",
+      "emptyFilteredTitle": "Bu aramaya uyan mesaj yok",
+      "emptyFilteredText": "Süzgeçleri kaldırmayı ya da başka bir şey aramayı deneyin.",
+      "loadErrorTitle": "Mesajlar yüklenemedi",
+      "loadErrorText": "Birkaç saniye sonra yeniden deneyin.",
+      "facts": {
+        "title": "Gönderen",
+        "from": "Ad",
+        "email": "E-posta",
+        "phone": "Telefon",
+        "received": "Geldiği zaman",
+        "handled": "Ele alındı",
+        "handledBy": "{at}, {name}"
+      },
+      "text": {
+        "title": "Mesaj",
+        "erased": "Saklama süresi dolduğu için mesajın metni silindi."
+      },
+      "actions": {
+        "title": "Ele alındı işareti",
+        "waitingText": "Bu mesaj bekliyor. Yanıtladığınızda ele alındı olarak işaretleyin; özetteki \"Ele alınmamış mesaj\" sayısından düşer.",
+        "handledText": "Bu mesaj ele alındı. Yanlışlıkla işaretlendiyse işareti geri alabilirsiniz.",
+        "erasedText": "Saklama süresi dolduğu için bu mesajın kişisel bilgileri silindi; yanıtlanacak bir şey kalmadı, bu yüzden işaret konmaz.",
+        "mark": "Ele alındı olarak işaretle",
+        "undo": "İşareti geri al"
+      },
+      "toast": {
+        "handled": "Mesaj ele alındı olarak işaretlendi",
+        "undone": "İşaret geri alındı"
+      },
+      "errors": {
+        "notFound": "Bu mesaj artık yok. Listeye dönün.",
+        "unavailable": "Kaydedilemedi. Birkaç saniye sonra yeniden deneyin."
+      }
+    },
     "cityFilter": {
       "all": "Tüm şehirler",
       "apply": "Süz"

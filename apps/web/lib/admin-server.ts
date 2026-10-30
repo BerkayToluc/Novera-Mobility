@@ -1,13 +1,15 @@
 import "server-only";
 import type { AdminListParams } from "./admin-query";
 import { toApiQuery } from "./admin-query";
+import { MESSAGE_API_VALUES, type AdminMessageDetail, type AdminMessagePage } from "./admin-messages";
+import { QUOTE_API_FILTERS, type AdminQuoteDetail, type AdminQuotePage } from "./admin-quotes";
 import type { AdminExtra } from "./admin-extras";
 import { QUICK_API_VALUES, RESERVATION_API_FILTERS, validDay, type ReservationFilter, type AdminReservationDetail, type AdminReservationPage } from "./admin-reservations";
 import { VEHICLE_API_FILTERS, type AdminVehicleDetail, type AdminVehiclePage, type BranchOption, type ModelOption } from "./admin-vehicles";
 import { MODEL_API_FILTERS, type AdminModelDetail, type AdminModelPage, type ModelClass } from "./admin-models";
 import { BRANCH_API_FILTERS, type AdminBranchDetail, type AdminBranchPage } from "./admin-branches";
 import { PROMO_API_FILTERS, type PromoCode, type PromoCodePage } from "./admin-promo";
-import { fetchAdminBranch, fetchAdminBranches, fetchAdminExtra, fetchAdminExtras, fetchAdminModel, fetchAdminModels, fetchAdminReservation, fetchAdminReservations, fetchAdminSummary, fetchAdminVehicle, fetchAdminVehicles, fetchModelClasses, fetchPromoCode, fetchPromoCodes, type AdminSummary } from "./api-admin";
+import { fetchAdminBranch, fetchAdminBranches, fetchAdminExtra, fetchAdminExtras, fetchAdminModel, fetchAdminMessage, fetchAdminMessages, fetchAdminModels, fetchAdminQuote, fetchAdminQuotes, fetchAdminReservation, fetchAdminReservations, fetchAdminSummary, fetchAdminVehicle, fetchAdminVehicles, fetchModelClasses, fetchPromoCode, fetchPromoCodes, type AdminSummary } from "./api-admin";
 import { isMockMode } from "./mode";
 import { mockWorld } from "./mock-world";
 import { normalizePromo } from "./promo-codes";
@@ -162,4 +164,44 @@ export async function getAdminReservations(params: AdminListParams<ReservationFi
 export async function getAdminReservation(number: string): Promise<AdminReservationDetail | null> {
   if (!isMockMode()) return fetchAdminReservation(number);
   return (await import("@/mocks/admin-reservations")).getMockAdminReservation(await mockWorld(), number);
+}
+
+export async function getAdminQuotes(params: AdminListParams<"durum" | "kaynak">): Promise<AdminQuotePage> {
+  if (!isMockMode()) return fetchAdminQuotes(toApiQuery(params, QUOTE_API_FILTERS));
+  return (await import("@/mocks/admin-quotes")).listMockQuotes(await mockWorld(), {
+    page: params.page,
+    pageSize: params.pageSize,
+    sort: params.sort,
+    q: params.q,
+    status: params.filters.durum ?? null,
+    source: params.filters.kaynak ?? null,
+  });
+}
+
+// `null` for a request that does not exist, or whose number cannot be one.
+export async function getAdminQuote(number: string): Promise<AdminQuoteDetail | null> {
+  if (!isMockMode()) return fetchAdminQuote(number);
+  return (await import("@/mocks/admin-quotes")).getMockQuote(await mockWorld(), number);
+}
+
+export async function getAdminMessages(params: AdminListParams<"durum">): Promise<AdminMessagePage> {
+  const state = params.filters.durum as keyof typeof MESSAGE_API_VALUES | undefined;
+  if (!isMockMode()) {
+    const query = toApiQuery({ ...params, filters: {} });
+    if (state) query.set("handled", MESSAGE_API_VALUES[state]);
+    return fetchAdminMessages(query);
+  }
+  return (await import("@/mocks/admin-messages")).listMockMessages(await mockWorld(), {
+    page: params.page,
+    pageSize: params.pageSize,
+    sort: params.sort,
+    q: params.q,
+    handled: state ? state === "ele-alindi" : null,
+  });
+}
+
+// `null` for a message that does not exist, or whose id cannot be one.
+export async function getAdminMessage(id: string): Promise<AdminMessageDetail | null> {
+  if (!isMockMode()) return fetchAdminMessage(id);
+  return (await import("@/mocks/admin-messages")).getMockMessage(await mockWorld(), id);
 }

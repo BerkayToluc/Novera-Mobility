@@ -85,6 +85,7 @@ describeDb('admin summary against the database (V2-25)', () => {
   afterAll(async () => {
     await prisma.reservation.deleteMany({ where: { vehicleId: ids.vehicleId } });
     await prisma.quoteRequest.deleteMany({ where: { number: { in: quoteNumbers } } });
+    await prisma.contactMessage.deleteMany({ where: { subject: { startsWith: `SUM-${run}` } } });
     await prisma.vehicle.deleteMany({ where: { id: ids.vehicleId } });
     await prisma.branch.deleteMany({ where: { id: ids.branchId } });
     await prisma.vehicleModel.deleteMany({ where: { id: ids.modelId } });
@@ -149,13 +150,30 @@ describeDb('admin summary against the database (V2-25)', () => {
     await quote('q4', 'OFFERED');
     // Counted over this run's rows only: the table is shared with suites that run at the same time and add and remove quote
     // requests of their own, so a count of all of them would change under the test. The rule itself (RECEIVED only) is the service's.
-    const mine = { reservation: prisma.reservation, quoteRequest: { count: (args: { where?: object }) => prisma.quoteRequest.count({ where: { ...args.where, number: { startsWith: `SUM-${run}` } } }) } };
+    const mine = { reservation: prisma.reservation, contactMessage: prisma.contactMessage, quoteRequest: { count: (args: { where?: object }) => prisma.quoteRequest.count({ where: { ...args.where, number: { startsWith: `SUM-${run}` } } }) } };
     expect((await new AdminSummaryService(mine as unknown as PrismaService).get(NOW)).quotesAwaiting).toBe(2);
   });
 
-  it('leaves the numbers that have no source yet as null, not zero', async () => {
-    const summary = await service.get(NOW);
-    expect(summary.unhandledMessages).toBeNull();
-    expect(summary.serviceRequests).toBeNull();
+  it('counts the contact messages nobody has handled, and not the ones the retention task already erased', async () => {
+    const message = (label: string, extra: Record<string, unknown> = {}) =>
+      prisma.contactMessage.create({
+        data: { name: 'Deneme', email: `m-${label}-${run}@example.test`, subject: `SUM-${run} ${label}`, message: 'Merhaba', kvkkConsentAt: new Date(), ...extra },
+      });
+    await message('m1');
+    await message('m2');
+    await message('handled', { handledAt: new Date() });
+    await message('erased', { anonymizedAt: new Date(), name: 'Silindi', email: '', message: '' });
+    // Counted over this run's rows only: the table is shared with suites that run at the same time and add messages of their own.
+    // The rule itself (not handled, not erased) is the service's.
+    const mine = {
+      reservation: prisma.reservation,
+      quoteRequest: prisma.quoteRequest,
+      contactMessage: { count: (args: { where?: object }) => prisma.contactMessage.count({ where: { ...args.where, subject: { startsWith: `SUM-${run}` } } }) },
+    };
+    expect((await new AdminSummaryService(mine as unknown as PrismaService).get(NOW)).unhandledMessages).toBe(2);
+  });
+
+  it('leaves the number that has no source yet as null, not zero', async () => {
+    expect((await service.get(NOW)).serviceRequests).toBeNull();
   });
 });

@@ -21,13 +21,16 @@ test("the summary shows the day's numbers, and the day they are for", async ({ p
   await expect(number("Son 7 günde yapılan rezervasyon")).toHaveText("17");
   await expect(number("Yanıt bekleyen teklif talebi")).toHaveText("3");
 
-  // No source yet: no card, and no wrong zero in its place.
-  await expect(page.getByText("Ele alınmamış mesaj")).toHaveCount(0);
+  // The messages now have a source (V2-32), so their card is there; the service requests have none yet: no card, and no wrong
+  // zero in its place.
+  await expect(number("Ele alınmamış mesaj")).toHaveText("4");
   await expect(page.getByText("Açık servis talebi")).toHaveCount(0);
-  // The bookings list is built (V2-31), so the three booking cards open it, narrowed the way the card counts (confirmed bookings
-  // only); the quotes card has no list yet, so it has no link.
+  // The lists are built (bookings V2-31, quotes and messages V2-32), so every card that is shown opens its list, narrowed the way
+  // the card counts (confirmed bookings only).
   const links = page.getByRole("link", { name: "Listeyi aç" });
-  await expect(links).toHaveCount(3);
+  await expect(links).toHaveCount(5);
+  await expect(links.nth(3)).toHaveAttribute("href", /\/yonetim\/teklifler\?.*durum=RECEIVED/);
+  await expect(links.nth(4)).toHaveAttribute("href", /\/yonetim\/mesajlar\?.*durum=ele-alinmadi/);
   for (const [index, filter] of ["baslangic=bugun", "bitis=bugun", "olusturma=7gun"].entries()) {
     await expect(links.nth(index)).toHaveAttribute("href", new RegExp(String.raw`/yonetim/rezervasyonlar\?.*${filter}`));
     await expect(links.nth(index)).toHaveAttribute("href", /durum=CONFIRMED/);

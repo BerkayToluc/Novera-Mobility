@@ -21,7 +21,7 @@ const SUMMARY = {
   rentalsEndingToday: 1,
   reservationsLast7Days: 9,
   quotesAwaiting: 3,
-  unhandledMessages: null,
+  unhandledMessages: 4,
   serviceRequests: null,
 };
 
@@ -660,6 +660,104 @@ describe('administration over HTTP', () => {
     it('a body that is not JSON is 415', async () => {
       const { cookie } = await signedIn('ADMIN');
       const response = await call('POST', `/admin/reservations/${NUMBER}/cancel`, { cookie, body: 'reason=x', type: 'text/plain' });
+      expect(response.status).toBe(415);
+    });
+  });
+
+  // The door and the input of the quote request and contact message endpoints (V2-32). What they do against a database is in
+  // quotes/quotes.integration.spec.ts and messages/messages.integration.spec.ts; a request that is turned away is turned away
+  // before any database call.
+  describe('quote requests and contact messages: the door and the input (V2-32)', () => {
+    const NUMBER = 'TKL-2026-00042';
+    const ID = '6f0a1f7e-8f5e-4b86-9f5c-2d2f6d9a0b11';
+    const routes: [string, string][] = [
+      ['GET', '/admin/quotes'],
+      ['GET', `/admin/quotes/${NUMBER}`],
+      ['PATCH', `/admin/quotes/${NUMBER}`],
+      ['GET', '/admin/contact-messages'],
+      ['GET', `/admin/contact-messages/${ID}`],
+      ['PATCH', `/admin/contact-messages/${ID}`],
+    ];
+    const withBody = (method: string) => (method === 'PATCH' ? { body: {} } : {});
+
+    it('no session is 401 UNAUTHENTICATED on every route', async () => {
+      for (const [method, path] of routes) {
+        const response = await call(method, path, withBody(method));
+        expect(response.status).toBe(401);
+        expect((await response.json()).code).toBe('UNAUTHENTICATED');
+      }
+    });
+
+    it('a customer is 403 FORBIDDEN on every route', async () => {
+      const { cookie } = await signedIn('CUSTOMER');
+      for (const [method, path] of routes) {
+        const response = await call(method, path, { cookie, ...withBody(method) });
+        expect(response.status).toBe(403);
+        expect((await response.json()).code).toBe('FORBIDDEN');
+      }
+    });
+
+    it('a change to a quote request has to say which version it was made against', async () => {
+      const { cookie } = await signedIn('ADMIN');
+      const response = await call('PATCH', `/admin/quotes/${NUMBER}`, { cookie, body: { status: 'OFFERED' } });
+      expect(response.status).toBe(422);
+      expect((await response.json()).fieldErrors).toEqual({ updatedAt: 'REQUIRED' });
+    });
+
+    it('a state that does not exist, and a note that is not text or is too long, are 422 with a code each', async () => {
+      const { cookie } = await signedIn('ADMIN');
+      const response = await call('PATCH', `/admin/quotes/${NUMBER}`, {
+        cookie,
+        body: { updatedAt: '2026-10-29T10:00:00.000Z', status: 'DONE', internalNote: 12 },
+      });
+      expect(response.status).toBe(422);
+      expect((await response.json()).fieldErrors).toEqual({ status: 'INVALID_FORMAT', internalNote: 'INVALID_FORMAT' });
+      const long = await call('PATCH', `/admin/quotes/${NUMBER}`, { cookie, body: { updatedAt: '2026-10-29T10:00:00.000Z', internalNote: 'x'.repeat(2001) } });
+      expect((await long.json()).fieldErrors).toEqual({ internalNote: 'TOO_LONG' });
+    });
+
+    it('the mark on a message needs a real true or false', async () => {
+      const { cookie } = await signedIn('ADMIN');
+      const none = await call('PATCH', `/admin/contact-messages/${ID}`, { cookie, body: {} });
+      expect(none.status).toBe(422);
+      expect((await none.json()).fieldErrors).toEqual({ handled: 'REQUIRED' });
+      const text = await call('PATCH', `/admin/contact-messages/${ID}`, { cookie, body: { handled: 'yes' } });
+      expect((await text.json()).fieldErrors).toEqual({ handled: 'INVALID_FORMAT' });
+    });
+
+    it('a list asked for in a way that makes no sense is 422', async () => {
+      const { cookie } = await signedIn('ADMIN');
+      for (const [path, field] of [
+        ['/admin/quotes?pageSize=101', 'pageSize'],
+        ['/admin/quotes?sort=internalNote:asc', 'sort'],
+        ['/admin/quotes?status=GONE', 'status'],
+        ['/admin/quotes?source=MAIL', 'source'],
+        ['/admin/contact-messages?handled=maybe', 'handled'],
+        ['/admin/contact-messages?sort=message:asc', 'sort'],
+      ] as const) {
+        const response = await call('GET', path, { cookie });
+        expect(response.status).toBe(422);
+        expect(Object.keys((await response.json()).fieldErrors)).toEqual([field]);
+      }
+    });
+
+    it('a number or an id that cannot be one is 404 without asking the database', async () => {
+      const { cookie } = await signedIn('ADMIN');
+      for (const [method, path] of [
+        ['GET', '/admin/quotes/not-a-number'],
+        ['PATCH', '/admin/quotes/not-a-number'],
+        ['GET', '/admin/contact-messages/not-an-id'],
+        ['PATCH', '/admin/contact-messages/not-an-id'],
+      ] as const) {
+        const response = await call(method, path, { cookie, ...(method === 'PATCH' ? { body: { handled: true, updatedAt: '2026-10-29T10:00:00.000Z' } } : {}) });
+        expect(response.status).toBe(404);
+        expect((await response.json()).code).toBe('NOT_FOUND');
+      }
+    });
+
+    it('a body that is not JSON is 415', async () => {
+      const { cookie } = await signedIn('ADMIN');
+      const response = await call('PATCH', `/admin/quotes/${NUMBER}`, { cookie, body: 'status=OFFERED', type: 'text/plain' });
       expect(response.status).toBe(415);
     });
   });
