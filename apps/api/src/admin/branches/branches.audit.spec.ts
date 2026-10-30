@@ -110,7 +110,9 @@ describe('branches in the audit log (V2-27)', () => {
     // Names only: not the address, not the phone numbers.
     const written = JSON.stringify(fake.auditLogs);
     expect(written).not.toContain('Kızılay');
-    expect(written).not.toContain('555');
+    // The whole numbers, not "555": the random ids and the time stamps in the rows can hold those three digits by chance.
+    expect(written).not.toContain('555 01 03');
+    expect(written).not.toContain('555 99 99');
   });
 
   it('a read is not logged', async () => {
