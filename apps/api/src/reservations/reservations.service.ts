@@ -4,6 +4,7 @@ import { hasConflict } from '../common/availability.js';
 import { lockOpenBranches } from '../common/branch-lock.js';
 import { validationFailed } from '../common/zod-validation.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { claimCancellation } from './cancellation.js';
 import {
   PricingService,
   isPromoUsable,
@@ -224,16 +225,13 @@ export class ReservationsService {
   // Araç, iptalle hemen yeniden müsait olur (çakışma yalnız CONFIRMED'a bakar); puan kaydı durur ama
   // GET /me/points iptal edilenleri saymaz.
   async cancel(userId: string, id: string, now: Date = new Date()) {
-    const claimed = await this.prisma.reservation.updateMany({
-      where: { id, userId, status: 'CONFIRMED', startAt: { gt: now } },
-      data: { status: 'CANCELLED', cancelledAt: now },
-    });
+    const claimed = await claimCancellation(this.prisma, { id, userId }, now);
     const row = await this.prisma.reservation.findFirst({
       where: { id, userId },
       include: RESERVATION_INCLUDE,
     });
     if (!row) throw reservationNotFound();
-    if (claimed.count === 0 && row.status === 'CONFIRMED') throw notCancellable();
+    if (!claimed && row.status === 'CONFIRMED') throw notCancellable();
     return toReservationView(row);
   }
 

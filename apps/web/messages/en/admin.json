@@ -637,6 +637,103 @@
         "saved": "Extra service saved"
       }
     },
+    "reservations": {
+      "title": "Bookings",
+      "intro": "The bookings customers made. Search by number or e-mail, open one, and cancel it if needed. A cancellation gives the same result as the customer cancelling.",
+      "detailTitle": "Booking",
+      "detailIntro": "Rental of {vehicle}.",
+      "tableCaption": "Bookings",
+      "retry": "Try again",
+      "statusFilterLabel": "By status",
+      "branchFilterLabel": "By pick-up branch",
+      "allBranches": "All branches",
+      "apply": "Filter",
+      "fromLabel": "First day",
+      "toLabel": "Last day",
+      "clearDates": "Clear dates",
+      "searchLabel": "Search by number or e-mail",
+      "noCustomer": "Account removed",
+      "columns": {
+        "number": "Number",
+        "customer": "Customer",
+        "vehicle": "Vehicle and pick-up branch",
+        "start": "Start",
+        "status": "Status",
+        "total": "Total"
+      },
+      "status": {
+        "CONFIRMED": "Confirmed",
+        "CANCELLED": "Cancelled"
+      },
+      "phase": {
+        "UPCOMING": "Upcoming",
+        "ACTIVE": "Under way",
+        "COMPLETED": "Completed",
+        "CANCELLED": "Cancelled"
+      },
+      "emptyTitle": "No bookings yet",
+      "emptyText": "Bookings show up here as customers make them.",
+      "emptyFilteredTitle": "No booking matches this search",
+      "emptyFilteredText": "Try removing the filters or searching for something else.",
+      "loadErrorTitle": "The bookings could not be loaded",
+      "loadErrorText": "Try again in a few seconds.",
+      "facts": {
+        "title": "Rental",
+        "start": "Start",
+        "end": "End",
+        "days": "Days",
+        "created": "Made on",
+        "pickup": "Pick-up branch",
+        "return": "Return branch",
+        "vehicle": "Vehicle",
+        "customer": "Customer"
+      },
+      "price": {
+        "title": "Price",
+        "total": "Total",
+        "pointsUsed": "Paid with points: {points} points",
+        "payable": "To pay: {amount}",
+        "promo": "Campaign code: {code}.",
+        "noPromo": "No campaign code.",
+        "points": "Points earned: {points}."
+      },
+      "cancellation": {
+        "title": "Cancellation",
+        "at": "Cancelled on: {at}",
+        "by": "Cancelled by: {name} (administrator)",
+        "byCustomer": "The customer cancelled it themselves.",
+        "reason": "Reason: {reason}"
+      },
+      "actions": {
+        "title": "Cancel the booking",
+        "cancelledText": "This booking is cancelled. The car is free again, the points that were spent went back to the customer, and the use of the campaign code is back.",
+        "startedText": "The rental has started, so it cannot be cancelled.",
+        "cancellableText": "A cancellation gives the same result as the customer cancelling: the car is free again at once, spent points go back, waiting points go, and the use of the campaign code is back. The reason is written on the booking.",
+        "cancel": "Cancel the booking"
+      },
+      "cancelDialog": {
+        "title": "Cancel {number}?",
+        "text": "This cannot be undone. It shows as cancelled on the customer's My bookings screen.",
+        "keep": "Keep it",
+        "confirm": "Cancel the booking",
+        "reason": "Reason for cancelling",
+        "reasonHint": "{min} to {max} characters. It is written on the booking.",
+        "reasonError": "Write a reason of {min} to {max} characters."
+      },
+      "toast": {
+        "cancelled": "Booking cancelled"
+      },
+      "errors": {
+        "notCancellable": "The booking can no longer be cancelled: the rental has started or it is already cancelled. The page was refreshed.",
+        "unavailable": "It could not be cancelled. Try again in a few seconds."
+      },
+      "quick": {
+        "baslangic": "Rentals starting today (Istanbul day).",
+        "bitis": "Rentals ending today (Istanbul day).",
+        "olusturma": "Bookings made in the last 7 days.",
+        "remove": "Remove the filter"
+      }
+    },
     "cityFilter": {
       "all": "All cities",
       "apply": "Filter"

@@ -2,11 +2,12 @@ import "server-only";
 import type { AdminListParams } from "./admin-query";
 import { toApiQuery } from "./admin-query";
 import type { AdminExtra } from "./admin-extras";
+import { QUICK_API_VALUES, RESERVATION_API_FILTERS, validDay, type ReservationFilter, type AdminReservationDetail, type AdminReservationPage } from "./admin-reservations";
 import { VEHICLE_API_FILTERS, type AdminVehicleDetail, type AdminVehiclePage, type BranchOption, type ModelOption } from "./admin-vehicles";
 import { MODEL_API_FILTERS, type AdminModelDetail, type AdminModelPage, type ModelClass } from "./admin-models";
 import { BRANCH_API_FILTERS, type AdminBranchDetail, type AdminBranchPage } from "./admin-branches";
 import { PROMO_API_FILTERS, type PromoCode, type PromoCodePage } from "./admin-promo";
-import { fetchAdminBranch, fetchAdminBranches, fetchAdminExtra, fetchAdminExtras, fetchAdminModel, fetchAdminModels, fetchAdminSummary, fetchAdminVehicle, fetchAdminVehicles, fetchModelClasses, fetchPromoCode, fetchPromoCodes, type AdminSummary } from "./api-admin";
+import { fetchAdminBranch, fetchAdminBranches, fetchAdminExtra, fetchAdminExtras, fetchAdminModel, fetchAdminModels, fetchAdminReservation, fetchAdminReservations, fetchAdminSummary, fetchAdminVehicle, fetchAdminVehicles, fetchModelClasses, fetchPromoCode, fetchPromoCodes, type AdminSummary } from "./api-admin";
 import { isMockMode } from "./mode";
 import { mockWorld } from "./mock-world";
 import { normalizePromo } from "./promo-codes";
@@ -128,4 +129,37 @@ export async function getAdminExtras(): Promise<AdminExtra[]> {
 export async function getAdminExtra(slug: string): Promise<AdminExtra | null> {
   if (!isMockMode()) return fetchAdminExtra(slug);
   return (await import("@/mocks/extras")).getMockExtra(await mockWorld(), slug);
+}
+
+export async function getAdminReservations(params: AdminListParams<ReservationFilter>): Promise<AdminReservationPage> {
+  // A day that is not one is left out, so a made-up address shows the list; and a last day before the first is not asked for.
+  const from = validDay(params.filters.bas);
+  const to = validDay(params.filters.bit);
+  const filters = { ...params.filters, bas: from, bit: from && to && to < from ? undefined : to };
+  const clean = { ...params, filters };
+  if (!isMockMode()) {
+    const query = toApiQuery(clean, RESERVATION_API_FILTERS);
+    // The three summary windows go with the API's own words for them.
+    for (const name of ["baslangic", "bitis", "olusturma"] as const) if (filters[name]) query.set(RESERVATION_API_FILTERS[name], QUICK_API_VALUES[name]);
+    return fetchAdminReservations(query);
+  }
+  return (await import("@/mocks/admin-reservations")).listMockAdminReservations(await mockWorld(), {
+    page: params.page,
+    pageSize: params.pageSize,
+    sort: params.sort,
+    q: params.q,
+    status: filters.durum ?? null,
+    branch: filters.bayi ?? null,
+    from: filters.bas ?? null,
+    to: filters.bit ?? null,
+    startsToday: Boolean(filters.baslangic),
+    endsToday: Boolean(filters.bitis),
+    madeLast7Days: Boolean(filters.olusturma),
+  });
+}
+
+// `null` for a booking that does not exist, or whose number cannot be one.
+export async function getAdminReservation(number: string): Promise<AdminReservationDetail | null> {
+  if (!isMockMode()) return fetchAdminReservation(number);
+  return (await import("@/mocks/admin-reservations")).getMockAdminReservation(await mockWorld(), number);
 }

@@ -24,8 +24,14 @@ test("the summary shows the day's numbers, and the day they are for", async ({ p
   // No source yet: no card, and no wrong zero in its place.
   await expect(page.getByText("Ele alınmamış mesaj")).toHaveCount(0);
   await expect(page.getByText("Açık servis talebi")).toHaveCount(0);
-  // The list screens are not built, so a card has no link to them.
-  await expect(page.getByRole("link", { name: "Listeyi aç" })).toHaveCount(0);
+  // The bookings list is built (V2-31), so the three booking cards open it, narrowed the way the card counts (confirmed bookings
+  // only); the quotes card has no list yet, so it has no link.
+  const links = page.getByRole("link", { name: "Listeyi aç" });
+  await expect(links).toHaveCount(3);
+  for (const [index, filter] of ["baslangic=bugun", "bitis=bugun", "olusturma=7gun"].entries()) {
+    await expect(links.nth(index)).toHaveAttribute("href", new RegExp(String.raw`/yonetim/rezervasyonlar\?.*${filter}`));
+    await expect(links.nth(index)).toHaveAttribute("href", /durum=CONFIRMED/);
+  }
 });
 
 test("the English panel says the same in English", async ({ page }) => {

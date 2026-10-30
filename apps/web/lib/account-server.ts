@@ -7,6 +7,7 @@ import type { PointsAccount } from "./points";
 import type { QuoteRequest } from "./quote-request";
 import { CANCELLED_COOKIE, type Reservation } from "./reservation";
 import { isMockMode } from "./mode";
+import { mockWorld } from "./mock-world";
 
 // The account's bookings, points and quote requests as the server pages read them. The session is a
 // sample one while sign-in is not connected (lib/session.ts), so with USE_MOCKS=1 the sample data is
@@ -14,8 +15,11 @@ import { isMockMode } from "./mode";
 // cancellation is kept in a cookie). Otherwise these are `GET /me/reservations`, `/me/points` and
 // `/me/quotes`, which see the visitor through the session cookie. They live here, not in
 // account-client.ts, because that file is imported by client components and these need the request.
+// The ones this browser cancelled (a cookie) and the ones the panel cancelled (the sample fleet of the world, V2-31).
 async function cancelledIds(): Promise<string[]> {
-  return ((await cookies()).get(CANCELLED_COOKIE)?.value ?? "").split(",").filter(Boolean);
+  const own = ((await cookies()).get(CANCELLED_COOKIE)?.value ?? "").split(",").filter(Boolean);
+  const { fleetOf } = await import("@/mocks/fleet-world");
+  return [...own, ...fleetOf(await mockWorld()).cancellations.map((entry) => entry.id)];
 }
 
 export async function getMyReservations(): Promise<Reservation[]> {

@@ -18,3 +18,9 @@ export function staleWrite(): HttpException {
     HttpStatus.CONFLICT,
   );
 }
+
+// The thing asked for cannot happen from where the record is now: a booking that has started or is already cancelled cannot be
+// cancelled (ADMIN.md §3.2). Nothing was written. `message` is for the developer.
+export function invalidTransition(message: string): HttpException {
+  return new HttpException({ code: 'INVALID_TRANSITION', message }, HttpStatus.CONFLICT);
+}

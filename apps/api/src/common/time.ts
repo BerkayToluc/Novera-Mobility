@@ -42,3 +42,10 @@ export function istanbulDay(now: Date): { date: string; start: Date; end: Date; 
     weekStart: istanbulMidnight(year, month, day, -6),
   };
 }
+
+// The instant an Istanbul calendar day starts, from its date as people write it ("2026-10-30"); `dayOffset` 1 gives the start of
+// the next day, so a range "from the 1st to the 3rd, both days included" is [start of the 1st, start of the 4th) (V2-31).
+export function istanbulDateStart(date: string, dayOffset = 0): Date {
+  const [year, month, day] = date.split('-').map(Number) as [number, number, number];
+  return istanbulMidnight(year, month, day, dayOffset);
+}

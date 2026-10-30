@@ -41,7 +41,10 @@ export type VehicleRecord = {
 
 export type ExtraRecord = { slug: string; name: { tr: string; en: string }; price: number; pricing: ExtraPricing; updatedAt: string };
 
-export type FleetWorld = { models: ModelRecord[]; vehicles: VehicleRecord[]; extras: ExtraRecord[] };
+// A sample booking cancelled from the panel (V2-31): which one, when, and why. The sample bookings themselves are fixed (mocks/reservations.ts).
+export type CancellationRecord = { id: string; at: string; reason: string };
+
+export type FleetWorld = { models: ModelRecord[]; vehicles: VehicleRecord[]; extras: ExtraRecord[]; cancellations: CancellationRecord[] };
 
 const store = globalThis as typeof globalThis & { __noveraMockFleet?: Map<string, FleetWorld> };
 // A world holds a copy of the sample data; an idle server keeps at most this many of them.
@@ -111,7 +114,7 @@ function seed(): FleetWorld {
     }
   }
   const extras: ExtraRecord[] = EXTRAS.map((extra) => ({ ...extra, updatedAt: created }));
-  return { models, vehicles, extras };
+  return { models, vehicles, extras, cancellations: [] };
 }
 
 export function fleetOf(world: string): FleetWorld {

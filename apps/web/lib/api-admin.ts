@@ -97,3 +97,18 @@ export async function fetchAdminExtra(slug: string): Promise<Schemas["AdminExtra
   if (result.status === "not_found") return null;
   throw new ApiUnavailableError();
 }
+
+// `GET /admin/reservations` (V2-31): one page of the list, cancelled bookings included.
+export async function fetchAdminReservations(query: URLSearchParams): Promise<Schemas["AdminReservationPage"]> {
+  const result = await apiRequest<Schemas["AdminReservationPage"]>("GET", "/admin/reservations?" + query.toString());
+  if (result.status !== "ok") throw new ApiUnavailableError();
+  return result.data;
+}
+
+// `GET /admin/reservations/{number}`: null when there is no such booking (the page then does not exist), a failure to load otherwise.
+export async function fetchAdminReservation(number: string): Promise<Schemas["AdminReservationDetail"] | null> {
+  const result = await apiRequest<Schemas["AdminReservationDetail"]>("GET", "/admin/reservations/" + encodeURIComponent(number));
+  if (result.status === "ok") return result.data;
+  if (result.status === "not_found") return null;
+  throw new ApiUnavailableError();
+}

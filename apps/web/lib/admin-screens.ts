@@ -45,7 +45,7 @@ export const ADMIN_SCREENS: readonly AdminScreen[] = [
   { key: "models", href: "/yonetim/modeller", icon: CarFront, ready: true },
   { key: "vehicles", href: "/yonetim/araclar", icon: Car, ready: true },
   { key: "extras", href: "/yonetim/ek-hizmetler", icon: Wrench, ready: true },
-  { key: "reservations", href: "/yonetim/rezervasyonlar", icon: CalendarRange, ready: false },
+  { key: "reservations", href: "/yonetim/rezervasyonlar", icon: CalendarRange, ready: true },
   { key: "quotes", href: "/yonetim/teklifler", icon: FileText, ready: false },
   { key: "messages", href: "/yonetim/mesajlar", icon: MessageSquare, ready: false },
   { key: "companies", href: "/yonetim/sirketler", icon: Building2, ready: false },

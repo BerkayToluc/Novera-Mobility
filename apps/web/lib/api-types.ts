@@ -3201,6 +3201,260 @@ export interface paths {
         };
         trace?: never;
     };
+    "/admin/reservations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Rezervasyonlar (yönetim)
+         * @description Sayfalı liste (ADR-24): `{ items, total, page, pageSize }`. İptal edilenler de dahildir. Rezervasyonlar sürekli büyüdüğü için
+         *     süzme, sıralama ve sayfalama veritabanı sorgusudur. `q` rezervasyon numarasında ya da müşterinin e-posta adresinde aranır
+         *     (büyük/küçük harf fark etmez, parça yeter). `from` ve `to`, kiralamanın **başladığı** günlerdir, ikisi de dahil, İstanbul
+         *     takvimine göre; `to`, `from`'dan önceyse `422 INVALID_DATE_RANGE`. `branch` alış bayisidir. Sınır: yönetici başına
+         *     dakikada 120 (`429 RATE_LIMITED`).
+         */
+        get: {
+            parameters: {
+                query?: {
+                    page?: number;
+                    pageSize?: number;
+                    /** @description `alan` ya da `alan:asc|desc`. Varsayılan `startAt:desc` (en geç başlayan üstte). */
+                    sort?: "startAt" | "createdAt" | "number";
+                    q?: string;
+                    status?: "CONFIRMED" | "CANCELLED";
+                    /** @description Alış bayisinin kimliği. */
+                    branch?: string;
+                    /** @description İlk gün (`2026-10-30`). */
+                    from?: string;
+                    /** @description Son gün (`2026-11-05`), bu gün de dahil. */
+                    to?: string;
+                    /** @description Yönetim özetindeki "Bugün başlayan kiralama" kartı: kiralaması **bugün** (İstanbul günü) başlayanlar. Kart iptal edilmemişleri saydığı için ekran `status=CONFIRMED` ile birlikte ister. */
+                    start?: "today";
+                    /** @description "Bugün biten kiralama" kartı: kiralaması bugün (İstanbul günü) bitenler. */
+                    end?: "today";
+                    /** @description "Son 7 günde yapılan rezervasyon" kartı: bugün ve önceki altı gün (İstanbul günleri) içinde yapılanlar. */
+                    created?: "last7days";
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Bir sayfa rezervasyon */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AdminReservationPage"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/reservations/{number}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Rezervasyon numarası (`NVR-2026-00123`); büyük/küçük harf fark etmez. Numara olamayacak bir değer `404` döner. */
+                number: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * Bir rezervasyon
+         * @description Fiyat dökümü (oluşturulduğu anki haliyle), kampanya kodu, puan, müşteri, araç ve bayiler. `cancellable`, iptal düğmesinin çalışıp çalışmayacağını söyler.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Rezervasyon numarası (`NVR-2026-00123`); büyük/küçük harf fark etmez. Numara olamayacak bir değer `404` döner. */
+                    number: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Rezervasyon */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AdminReservationDetail"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Böyle bir rezervasyon yok (`NOT_FOUND`) */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/reservations/{number}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Rezervasyon numarası. */
+                number: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Rezervasyonu iptal et
+         * @description Müşterinin kendi iptaliyle **aynı iptaldir** (`POST /me/reservations/{id}/cancel`): tek bir koşullu güncelleme; araç hemen
+         *     yeniden müsait olur, harcanan puan geri döner, bekleyen puan düşer, kampanya kodunun kullanımı geri gelir. Fark, **nedenin**
+         *     (5–500 karakter, zorunlu) ve iptal eden yöneticinin rezervasyona yazılmasıdır (`cancelReason`, `cancelledById`); neden işlem
+         *     kaydına yazılmaz, işlem kaydı yalnızca alan adını tutar (`reservation.cancel`). **Kiralaması başlamış ya da zaten iptal
+         *     edilmiş** rezervasyon `409 INVALID_TRANSITION` döner ve hiçbir şey değişmez. Müşteri ile yönetici aynı anda iptal ederse
+         *     biri kazanır, diğeri `409` alır. Müşteriye e-posta V2-44'te gelir.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Rezervasyon numarası. */
+                    number: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["AdminReservationCancel"];
+                };
+            };
+            responses: {
+                /** @description İptal edilmiş rezervasyon */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AdminReservationDetail"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Böyle bir rezervasyon yok (`NOT_FOUND`) */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Kiralama başlamış ya da rezervasyon zaten iptal edilmiş (`INVALID_TRANSITION`) */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description JSON olmayan gövde (`BAD_REQUEST`) */
+                415: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/ping": {
         parameters: {
             query?: never;
@@ -3331,7 +3585,7 @@ export interface components {
              * @description Sabit makine kodu.
              * @enum {string}
              */
-            code: "BAD_REQUEST" | "VALIDATION_FAILED" | "UNAUTHENTICATED" | "FORBIDDEN" | "INVALID_CREDENTIALS" | "EMAIL_TAKEN" | "NOT_FOUND" | "VEHICLE_UNAVAILABLE" | "INVALID_DATE_RANGE" | "RESERVATION_LIMIT" | "RESET_TOKEN_INVALID" | "SPAM_DETECTED" | "RATE_LIMITED" | "PAYLOAD_TOO_LARGE" | "IN_USE" | "STALE_WRITE" | "CODE_TAKEN" | "SLUG_TAKEN" | "PLATE_TAKEN" | "INTERNAL_ERROR";
+            code: "BAD_REQUEST" | "VALIDATION_FAILED" | "UNAUTHENTICATED" | "FORBIDDEN" | "INVALID_CREDENTIALS" | "EMAIL_TAKEN" | "NOT_FOUND" | "VEHICLE_UNAVAILABLE" | "INVALID_DATE_RANGE" | "RESERVATION_LIMIT" | "RESET_TOKEN_INVALID" | "SPAM_DETECTED" | "RATE_LIMITED" | "PAYLOAD_TOO_LARGE" | "IN_USE" | "STALE_WRITE" | "CODE_TAKEN" | "SLUG_TAKEN" | "PLATE_TAKEN" | "INVALID_TRANSITION" | "INTERNAL_ERROR";
             /** @description Geliştirici için İngilizce metin. Ekranda gösterilmez. */
             message: string;
             /** @description `IN_USE` için nedenlerin sayıları (bayi: reservations, holds, vehicles); ekran bunları listeler. */
@@ -4122,6 +4376,86 @@ export interface components {
             updatedAt: string;
             name?: components["schemas"]["LocalizedText"];
             price?: number;
+        };
+        AdminReservationListItem: {
+            /** @example NVR-2026-00123 */
+            number: string;
+            /** @enum {string} */
+            status: "CONFIRMED" | "CANCELLED";
+            /** Format: date-time */
+            startAt: string;
+            /** Format: date-time */
+            endAt: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            cancelledAt: string | null;
+            /** @description Hesap silinmişse boştur; rezervasyon kalır. */
+            customer: {
+                /** @example Ayşe Yılmaz */
+                name: string;
+                /** Format: email */
+                email: string;
+            } | null;
+            vehicle: {
+                /** @example 34 NV 1001 */
+                plate: string;
+                brand: string;
+                model: string;
+            };
+            pickupBranch: components["schemas"]["AdminReservationBranch"];
+            returnBranch: components["schemas"]["AdminReservationBranch"];
+            /** @description Rezervasyonun kendi para biriminde, alt birimiyle (kuruş, cent). */
+            total: {
+                amount: number;
+                /** @enum {string} */
+                currency: "TRY" | "EUR" | "USD";
+            };
+        };
+        AdminReservationBranch: {
+            id: string;
+            name: string;
+            city: string;
+        };
+        AdminReservationDetail: components["schemas"]["AdminReservationListItem"] & {
+            /** Format: uuid */
+            id: string;
+            days: number;
+            customerAccount: {
+                /** @enum {string} */
+                type: "INDIVIDUAL" | "CORPORATE";
+                companyName: string | null;
+            } | null;
+            price: components["schemas"]["PriceBreakdown"];
+            /** @description İptal edilen rezervasyon puan kazandırmaz. */
+            pointsEarned: number;
+            /** @description İptal edilmişse; müşteri kendisi iptal ettiyse `reason` ve `by` boştur. */
+            cancellation: {
+                /** Format: date-time */
+                at: string;
+                reason: string | null;
+                by: {
+                    name: string;
+                    /** Format: email */
+                    email: string;
+                } | null;
+            } | null;
+            /** @description İptal edilmemiş ve henüz başlamamışsa doğrudur. */
+            cancellable: boolean;
+        };
+        AdminReservationPage: {
+            items: components["schemas"]["AdminReservationListItem"][];
+            /** @description Süzgeçten geçen tüm rezervasyonlar */
+            total: number;
+            page: number;
+            pageSize: number;
+        };
+        AdminReservationCancel: {
+            /**
+             * @description İptal nedeni; rezervasyona yazılır.
+             * @example Müşteri aradı
+             */
+            reason: string;
         };
         /** @description Gönderilen alanlar güncellenir. */
         UserUpdate: {

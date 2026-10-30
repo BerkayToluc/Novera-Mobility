@@ -1649,6 +1649,134 @@ paths:
         "422": { $ref: "#/components/responses/ValidationFailed" }
         "429": { $ref: "#/components/responses/TooManyRequests" }
 
+  /admin/reservations:
+    get:
+      tags: [admin]
+      summary: Rezervasyonlar (yönetim)
+      description: |
+        Sayfalı liste (ADR-24): `{ items, total, page, pageSize }`. İptal edilenler de dahildir. Rezervasyonlar sürekli büyüdüğü için
+        süzme, sıralama ve sayfalama veritabanı sorgusudur. `q` rezervasyon numarasında ya da müşterinin e-posta adresinde aranır
+        (büyük/küçük harf fark etmez, parça yeter). `from` ve `to`, kiralamanın **başladığı** günlerdir, ikisi de dahil, İstanbul
+        takvimine göre; `to`, `from`'dan önceyse `422 INVALID_DATE_RANGE`. `branch` alış bayisidir. Sınır: yönetici başına
+        dakikada 120 (`429 RATE_LIMITED`).
+      security:
+        - cookieAuth: []
+      parameters:
+        - { name: page, in: query, schema: { type: integer, minimum: 1, default: 1 } }
+        - { name: pageSize, in: query, schema: { type: integer, minimum: 1, maximum: 100, default: 20 } }
+        - name: sort
+          in: query
+          description: "`alan` ya da `alan:asc|desc`. Varsayılan `startAt:desc` (en geç başlayan üstte)."
+          schema: { type: string, enum: [startAt, createdAt, number], example: "startAt:desc" }
+        - { name: q, in: query, schema: { type: string, maxLength: 100 } }
+        - { name: status, in: query, schema: { type: string, enum: [CONFIRMED, CANCELLED] } }
+        - { name: branch, in: query, description: Alış bayisinin kimliği., schema: { type: string, format: uuid } }
+        - { name: from, in: query, description: "İlk gün (`2026-10-30`).", schema: { type: string, format: date } }
+        - { name: to, in: query, description: "Son gün (`2026-11-05`), bu gün de dahil.", schema: { type: string, format: date } }
+        - { name: start, in: query, description: "Yönetim özetindeki \"Bugün başlayan kiralama\" kartı: kiralaması **bugün** (İstanbul günü) başlayanlar. Kart iptal edilmemişleri saydığı için ekran `status=CONFIRMED` ile birlikte ister.", schema: { type: string, enum: [today] } }
+        - { name: end, in: query, description: "\"Bugün biten kiralama\" kartı: kiralaması bugün (İstanbul günü) bitenler.", schema: { type: string, enum: [today] } }
+        - { name: created, in: query, description: "\"Son 7 günde yapılan rezervasyon\" kartı: bugün ve önceki altı gün (İstanbul günleri) içinde yapılanlar.", schema: { type: string, enum: [last7days] } }
+      responses:
+        "200":
+          description: Bir sayfa rezervasyon
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminReservationPage" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Yönetici değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
+  /admin/reservations/{number}:
+    parameters:
+      - { name: number, in: path, required: true, description: "Rezervasyon numarası (`NVR-2026-00123`); büyük/küçük harf fark etmez. Numara olamayacak bir değer `404` döner.", schema: { type: string, example: NVR-2026-00123 } }
+    get:
+      tags: [admin]
+      summary: Bir rezervasyon
+      description: Fiyat dökümü (oluşturulduğu anki haliyle), kampanya kodu, puan, müşteri, araç ve bayiler. `cancellable`, iptal düğmesinin çalışıp çalışmayacağını söyler.
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Rezervasyon
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminReservationDetail" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Yönetici değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: Böyle bir rezervasyon yok (`NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
+  /admin/reservations/{number}/cancel:
+    parameters:
+      - { name: number, in: path, required: true, description: Rezervasyon numarası., schema: { type: string, example: NVR-2026-00123 } }
+    post:
+      tags: [admin]
+      summary: Rezervasyonu iptal et
+      description: |
+        Müşterinin kendi iptaliyle **aynı iptaldir** (`POST /me/reservations/{id}/cancel`): tek bir koşullu güncelleme; araç hemen
+        yeniden müsait olur, harcanan puan geri döner, bekleyen puan düşer, kampanya kodunun kullanımı geri gelir. Fark, **nedenin**
+        (5–500 karakter, zorunlu) ve iptal eden yöneticinin rezervasyona yazılmasıdır (`cancelReason`, `cancelledById`); neden işlem
+        kaydına yazılmaz, işlem kaydı yalnızca alan adını tutar (`reservation.cancel`). **Kiralaması başlamış ya da zaten iptal
+        edilmiş** rezervasyon `409 INVALID_TRANSITION` döner ve hiçbir şey değişmez. Müşteri ile yönetici aynı anda iptal ederse
+        biri kazanır, diğeri `409` alır. Müşteriye e-posta V2-44'te gelir.
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminReservationCancel" }
+      responses:
+        "200":
+          description: İptal edilmiş rezervasyon
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminReservationDetail" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Yönetici değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: Böyle bir rezervasyon yok (`NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "409":
+          description: Kiralama başlamış ya da rezervasyon zaten iptal edilmiş (`INVALID_TRANSITION`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "415": { description: JSON olmayan gövde (`BAD_REQUEST`) }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
   /admin/ping:
     get:
       tags: [admin]
@@ -1799,6 +1927,7 @@ components:
             - CODE_TAKEN
             - SLUG_TAKEN
             - PLATE_TAKEN
+            - INVALID_TRANSITION
             - INTERNAL_ERROR
         message:
           type: string
@@ -2571,6 +2700,98 @@ components:
         updatedAt: { type: string, format: date-time, description: Düzenlenen kaydın `updatedAt` değeri. }
         name: { $ref: "#/components/schemas/LocalizedText" }
         price: { type: integer, minimum: 0, maximum: 1000000 }
+
+    AdminReservationListItem:
+      type: object
+      required: [number, status, startAt, endAt, createdAt, cancelledAt, customer, vehicle, pickupBranch, returnBranch, total]
+      properties:
+        number: { type: string, example: NVR-2026-00123 }
+        status: { type: string, enum: [CONFIRMED, CANCELLED] }
+        startAt: { type: string, format: date-time }
+        endAt: { type: string, format: date-time }
+        createdAt: { type: string, format: date-time }
+        cancelledAt: { type: string, format: date-time, nullable: true }
+        customer:
+          type: object
+          nullable: true
+          description: Hesap silinmişse boştur; rezervasyon kalır.
+          required: [name, email]
+          properties:
+            name: { type: string, example: Ayşe Yılmaz }
+            email: { type: string, format: email }
+        vehicle:
+          type: object
+          required: [plate, brand, model]
+          properties:
+            plate: { type: string, example: "34 NV 1001" }
+            brand: { type: string }
+            model: { type: string }
+        pickupBranch: { $ref: "#/components/schemas/AdminReservationBranch" }
+        returnBranch: { $ref: "#/components/schemas/AdminReservationBranch" }
+        total:
+          type: object
+          required: [amount, currency]
+          description: Rezervasyonun kendi para biriminde, alt birimiyle (kuruş, cent).
+          properties:
+            amount: { type: integer }
+            currency: { type: string, enum: [TRY, EUR, USD] }
+
+    AdminReservationBranch:
+      type: object
+      required: [id, name, city]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        city: { type: string }
+
+    AdminReservationDetail:
+      allOf:
+        - $ref: "#/components/schemas/AdminReservationListItem"
+        - type: object
+          required: [id, days, customerAccount, price, pointsEarned, cancellation, cancellable]
+          properties:
+            id: { type: string, format: uuid }
+            days: { type: integer, minimum: 1 }
+            customerAccount:
+              type: object
+              nullable: true
+              required: [type, companyName]
+              properties:
+                type: { type: string, enum: [INDIVIDUAL, CORPORATE] }
+                companyName: { type: string, nullable: true }
+            price: { $ref: "#/components/schemas/PriceBreakdown" }
+            pointsEarned: { type: integer, minimum: 0, description: İptal edilen rezervasyon puan kazandırmaz. }
+            cancellation:
+              type: object
+              nullable: true
+              description: İptal edilmişse; müşteri kendisi iptal ettiyse `reason` ve `by` boştur.
+              required: [at, reason, by]
+              properties:
+                at: { type: string, format: date-time }
+                reason: { type: string, nullable: true }
+                by:
+                  type: object
+                  nullable: true
+                  required: [name, email]
+                  properties:
+                    name: { type: string }
+                    email: { type: string, format: email }
+            cancellable: { type: boolean, description: İptal edilmemiş ve henüz başlamamışsa doğrudur. }
+
+    AdminReservationPage:
+      type: object
+      required: [items, total, page, pageSize]
+      properties:
+        items: { type: array, items: { $ref: "#/components/schemas/AdminReservationListItem" } }
+        total: { type: integer, minimum: 0, description: Süzgeçten geçen tüm rezervasyonlar, yalnızca bu sayfa değil. }
+        page: { type: integer }
+        pageSize: { type: integer }
+
+    AdminReservationCancel:
+      type: object
+      required: [reason]
+      properties:
+        reason: { type: string, minLength: 5, maxLength: 500, description: İptal nedeni; rezervasyona yazılır., example: Müşteri aradı, aracı istemiyor. }
 
     UserUpdate:
       type: object
