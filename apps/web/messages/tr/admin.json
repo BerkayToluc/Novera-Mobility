@@ -1138,6 +1138,144 @@
           "update": "Aracı değiştirdi"
         }
       }
+    },
+    "contracts": {
+      "title": "Sözleşmeler",
+      "intro": "Şirketin uzun dönem filo sözleşmeleri. Sözleşmeye araç ekler, okuma girer ve aracı iade edersiniz; şirket kendi Filom ekranında bunları görür.",
+      "empty": "Bu şirketin henüz sözleşmesi yok.",
+      "loadErrorTitle": "Sözleşme yüklenemedi",
+      "loadErrorText": "Sözleşmeler yüklenemedi. Sayfayı birkaç saniye sonra yenileyin.",
+      "retry": "Tekrar dene",
+      "detailTitle": "Sözleşme",
+      "detailIntro": "{company} şirketinin filo sözleşmesi.",
+      "backToCompany": "Şirkete dön",
+      "editTitle": "Sözleşmeyi değiştir",
+      "vehiclesCount": "{count, plural, =0 {araç yok} other {# araç}}",
+      "status": {
+        "ACTIVE": "Etkin",
+        "ENDED": "Bitti"
+      },
+      "products": {
+        "akilli-kurumsal-filo": "Akıllı Kurumsal Filo",
+        "yesil-filo": "Yeşil Filo",
+        "vip-mobilite": "VIP Mobilite",
+        "esnek-kisa-donem": "Esnek Kısa Dönem"
+      },
+      "facts": {
+        "title": "Sözleşme bilgileri",
+        "company": "Şirket",
+        "product": "Ürün",
+        "period": "Dönem",
+        "remaining": "Kalan süre",
+        "remainingValue": "{count, plural, =0 {Bugün bitiyor} other {# gün}}",
+        "ended": "Bitti",
+        "monthlyFee": "Aylık bedel",
+        "deliveryCity": "Teslim şehri",
+        "vehicles": "Şirketin yanındaki araç"
+      },
+      "fields": {
+        "product": "Ürün",
+        "deliveryCity": "Teslim şehri",
+        "cityChoose": "Şehir seçin",
+        "startAt": "Başlangıç günü",
+        "endAt": "Bitiş günü",
+        "monthlyFee": "Aylık bedel (₺)",
+        "monthlyFeeHint": "Liraya yazın: 45000 ya da 45000,50. Binlik ayırıcı kullanmayın.",
+        "status": "Durum",
+        "statusHint": "Aracı hâlâ şirketin yanında olan sözleşme bitirilmez; önce araçları iade edin."
+      },
+      "form": {
+        "newLabel": "Yeni sözleşme",
+        "editLabel": "Sözleşmeyi değiştir",
+        "newTitle": "Yeni sözleşme",
+        "create": "Sözleşmeyi oluştur",
+        "save": "Değişiklikleri kaydet",
+        "saving": "Kaydediliyor"
+      },
+      "errors": {
+        "productSlug": "Listeden bir ürün seçin.",
+        "startAt": "Geçerli bir başlangıç günü seçin.",
+        "endAt": "Bitiş günü, başlangıç gününden sonra olmalı.",
+        "monthlyFee": "Aylık bedeli liraya yazın (örnek: 45000 ya da 45000,50).",
+        "deliveryCity": "Listeden bir şehir seçin.",
+        "generic": "Bu bilgi kabul edilmedi. Alanları gözden geçirip yeniden deneyin.",
+        "inUse": "{count, plural, one {Bu sözleşmenin # aracı hâlâ şirketin yanında.} other {Bu sözleşmenin # aracı hâlâ şirketin yanında.}} Önce araçları iade edin.",
+        "notFound": "Bu şirket ya da sözleşme artık yok. Listeye dönün.",
+        "unavailable": "Yapılamadı. Birkaç saniye sonra yeniden deneyin.",
+        "modelSlug": "Listeden bir model seçin.",
+        "plate": "Geçerli bir plaka yazın (örnek: 35 ABC 123).",
+        "plateTaken": "Bu plakayla başka bir araç var (kiralık ya da filo).",
+        "year": "2000 ile gelecek yıl arasında bir model yılı yazın.",
+        "startKm": "0 ile 2.000.000 arasında bir kilometre yazın.",
+        "day": "Geçerli bir gün seçin ya da boş bırakın.",
+        "contractEnded": "Bu sözleşme bitmiş; araç eklenemez.",
+        "contractNotFound": "Bu sözleşme artık yok. Listeye dönün.",
+        "km": "Kilometreyi tam sayı olarak yazın.",
+        "kmBack": "Kilometre, son okumadan ({km}) küçük olamaz.",
+        "percent": "0 ile 100 arasında bir yüzde yazın ya da boş bırakın.",
+        "vehicle": "Bir araç seçin.",
+        "vehicleChanged": "Araç bu arada değişmiş ya da iade edilmiş. Sayfa yenilendi, yeniden deneyin.",
+        "vehicleNotFound": "Bu araç artık yok."
+      },
+      "toast": {
+        "created": "Sözleşme oluşturuldu",
+        "saved": "Değişiklikler kaydedildi",
+        "vehicleAdded": "Araç eklendi",
+        "readingAdded": "Okuma kaydedildi",
+        "returned": "Araç iade edildi"
+      },
+      "vehicles": {
+        "title": "Araçlar",
+        "intro": "Sözleşmenin filo araçları. İade edilen araç silinmez; geçmişi şirketin kaydında kalır.",
+        "empty": "Bu sözleşmeye henüz araç eklenmedi.",
+        "endedText": "Sözleşme bitmiş; araç eklenemez."
+      },
+      "vehicle": {
+        "active": "Kullanımda",
+        "returned": "İade edildi",
+        "km": "Son kilometre",
+        "kmValue": "{km} km",
+        "assignee": "Kimde",
+        "idle": "Boşta",
+        "returnedOn": "{date} tarihinde iade edildi",
+        "maintenance": "Sonraki bakım",
+        "inspection": "Muayene",
+        "giveBack": "İade et",
+        "giveBackFor": "İade et: {plate}"
+      },
+      "giveBackDialog": {
+        "title": "{plate} iade edilsin mi?",
+        "text": "Araç şirketin kullandığı filodan çıkar ve varsa zimmeti hemen biter. Araç silinmez ama bundan sonra değiştirilemez ve okuma alınamaz.",
+        "confirm": "Aracı iade et",
+        "keep": "Vazgeç"
+      },
+      "vehicleForm": {
+        "title": "Araç ekle",
+        "hint": "Araç şirketin filosuna girer. Plaka, kiralık araçlarla da çakışamaz.",
+        "model": "Model",
+        "modelChoose": "Model seçin",
+        "plate": "Plaka",
+        "plateHint": "Nasıl yazarsanız yazın: 35abc123 ya da 35 ABC 123.",
+        "year": "Model yılı",
+        "startKm": "Başlangıç kilometresi",
+        "maintenance": "Sonraki bakım günü",
+        "inspection": "Muayene günü",
+        "add": "Aracı ekle",
+        "adding": "Ekleniyor"
+      },
+      "readingForm": {
+        "title": "Okuma gir",
+        "hint": "Aracın kilometresi ve varsa yakıt, şarj ve batarya sağlığı. Kilometre geri gitmez.",
+        "noVehicles": "Okuma girilecek kullanımda araç yok.",
+        "vehicle": "Araç",
+        "km": "Kilometre",
+        "kmHint": "Son okuma: {km} km.",
+        "fuel": "Yakıt (%)",
+        "charge": "Şarj (%)",
+        "battery": "Batarya sağlığı (%)",
+        "save": "Okumayı kaydet",
+        "saving": "Kaydediliyor"
+      }
     }
   }
 }

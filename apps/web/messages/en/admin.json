@@ -1138,6 +1138,144 @@
           "update": "Changed a vehicle"
         }
       }
+    },
+    "contracts": {
+      "title": "Contracts",
+      "intro": "The company's long-term fleet contracts. You add cars to a contract, enter readings and give cars back; the company sees them on its own Filom screen.",
+      "empty": "This company has no contract yet.",
+      "loadErrorTitle": "The contract could not be loaded",
+      "loadErrorText": "The contracts could not be loaded. Reload the page in a few seconds.",
+      "retry": "Try again",
+      "detailTitle": "Contract",
+      "detailIntro": "The fleet contract of {company}.",
+      "backToCompany": "Back to the company",
+      "editTitle": "Change the contract",
+      "vehiclesCount": "{count, plural, =0 {no cars} one {# car} other {# cars}}",
+      "status": {
+        "ACTIVE": "Active",
+        "ENDED": "Ended"
+      },
+      "products": {
+        "akilli-kurumsal-filo": "Smart Corporate Fleet",
+        "yesil-filo": "Green Fleet",
+        "vip-mobilite": "VIP Mobility",
+        "esnek-kisa-donem": "Flexible Short-term"
+      },
+      "facts": {
+        "title": "Contract details",
+        "company": "Company",
+        "product": "Product",
+        "period": "Period",
+        "remaining": "Time left",
+        "remainingValue": "{count, plural, =0 {Ends today} one {# day} other {# days}}",
+        "ended": "Ended",
+        "monthlyFee": "Monthly fee",
+        "deliveryCity": "Delivery city",
+        "vehicles": "Cars with the company"
+      },
+      "fields": {
+        "product": "Product",
+        "deliveryCity": "Delivery city",
+        "cityChoose": "Choose a city",
+        "startAt": "Start day",
+        "endAt": "End day",
+        "monthlyFee": "Monthly fee (₺)",
+        "monthlyFeeHint": "Write it in lira: 45000 or 45000,50. No thousands separator.",
+        "status": "Status",
+        "statusHint": "A contract whose cars are still with the company is not ended; give the cars back first."
+      },
+      "form": {
+        "newLabel": "New contract",
+        "editLabel": "Change the contract",
+        "newTitle": "New contract",
+        "create": "Create the contract",
+        "save": "Save changes",
+        "saving": "Saving"
+      },
+      "errors": {
+        "productSlug": "Choose a product from the list.",
+        "startAt": "Choose a valid start day.",
+        "endAt": "The end day has to be after the start day.",
+        "monthlyFee": "Write the monthly fee in lira (example: 45000 or 45000,50).",
+        "deliveryCity": "Choose a city from the list.",
+        "generic": "This information was not accepted. Check the fields and try again.",
+        "inUse": "{count, plural, one {# car of this contract is still with the company.} other {# cars of this contract are still with the company.}} Give the cars back first.",
+        "notFound": "This company or contract no longer exists. Go back to the list.",
+        "unavailable": "That did not work. Try again in a few seconds.",
+        "modelSlug": "Choose a model from the list.",
+        "plate": "Write a valid plate (example: 35 ABC 123).",
+        "plateTaken": "Another car, rented or of a fleet, has this plate.",
+        "year": "Write a model year between 2000 and next year.",
+        "startKm": "Write a kilometre between 0 and 2,000,000.",
+        "day": "Choose a valid day, or leave it empty.",
+        "contractEnded": "This contract has ended; no car can be added.",
+        "contractNotFound": "This contract no longer exists. Go back to the list.",
+        "km": "Write the kilometre as a whole number.",
+        "kmBack": "The kilometre cannot be lower than the last reading ({km}).",
+        "percent": "Write a percentage between 0 and 100, or leave it empty.",
+        "vehicle": "Choose a car.",
+        "vehicleChanged": "The car changed in the meantime or was given back. The page was reloaded; try again.",
+        "vehicleNotFound": "This car no longer exists."
+      },
+      "toast": {
+        "created": "Contract created",
+        "saved": "Changes saved",
+        "vehicleAdded": "Car added",
+        "readingAdded": "Reading saved",
+        "returned": "Car given back"
+      },
+      "vehicles": {
+        "title": "Cars",
+        "intro": "The fleet cars of the contract. A car that is given back is not deleted; its history stays in the company's record.",
+        "empty": "No car has been added to this contract yet.",
+        "endedText": "The contract has ended; no car can be added."
+      },
+      "vehicle": {
+        "active": "In use",
+        "returned": "Given back",
+        "km": "Last kilometre",
+        "kmValue": "{km} km",
+        "assignee": "With",
+        "idle": "Idle",
+        "returnedOn": "Given back on {date}",
+        "maintenance": "Next maintenance",
+        "inspection": "Inspection",
+        "giveBack": "Give back",
+        "giveBackFor": "Give back: {plate}"
+      },
+      "giveBackDialog": {
+        "title": "Give back {plate}?",
+        "text": "The car leaves the fleet the company uses, and its assignment, if any, ends at once. The car is not deleted, but it can no longer be changed and no reading is taken.",
+        "confirm": "Give the car back",
+        "keep": "Keep it"
+      },
+      "vehicleForm": {
+        "title": "Add a car",
+        "hint": "The car joins the company's fleet. A plate cannot clash with a rented car either.",
+        "model": "Model",
+        "modelChoose": "Choose a model",
+        "plate": "Plate",
+        "plateHint": "However you type it: 35abc123 or 35 ABC 123.",
+        "year": "Model year",
+        "startKm": "Starting kilometre",
+        "maintenance": "Next maintenance day",
+        "inspection": "Inspection day",
+        "add": "Add the car",
+        "adding": "Adding"
+      },
+      "readingForm": {
+        "title": "Enter a reading",
+        "hint": "The car's kilometre and, where they apply, fuel, charge and battery health. The kilometre does not go back.",
+        "noVehicles": "There is no car in use to enter a reading for.",
+        "vehicle": "Car",
+        "km": "Kilometre",
+        "kmHint": "Last reading: {km} km.",
+        "fuel": "Fuel (%)",
+        "charge": "Charge (%)",
+        "battery": "Battery health (%)",
+        "save": "Save the reading",
+        "saving": "Saving"
+      }
     }
   }
 }

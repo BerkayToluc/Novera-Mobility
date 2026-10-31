@@ -48,6 +48,8 @@ tags:
   - name: forms
   - name: admin
     description: Yönetim paneli (yalnızca `role = ADMIN`; ADR-24)
+  - name: fleet
+    description: Filom, kurumsal müşterinin filo paneli (yalnızca etkin kurumsal hesap, kendi şirketinin kayıtları; ADR-25)
 paths:
   /health:
     get:
@@ -2421,7 +2423,704 @@ paths:
         "422": { $ref: "#/components/responses/ValidationFailed" }
         "429": { $ref: "#/components/responses/TooManyRequests" }
 
+  /admin/companies/{id}/contracts:
+    parameters:
+      - { name: id, in: path, required: true, description: "Şirketin kimliği.", schema: { type: string, format: uuid } }
+    get:
+      tags: [admin]
+      summary: Şirketin sözleşmeleri
+      description: |
+        Şirketin sözleşmeleri, etkinler önce, önce biten üstte. Bir şirketin birkaç sözleşmesi olur, bu yüzden sayfalama yoktur.
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Sözleşmeler
+          content:
+            application/json:
+              schema: { type: object, required: [items], properties: { items: { type: array, items: { $ref: "#/components/schemas/FleetContract" } } } }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Yönetici değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: Böyle bir şirket yok (`NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+    post:
+      tags: [admin]
+      summary: Sözleşme oluştur
+      description: |
+        Numara (`SZL-<yıl>-<5 hane>`) bir veritabanı sequence'inden gelir; aynı anda açılan iki sözleşme aynı numarayı almaz. Ürün slug'ı olmayan ürün `422 UNKNOWN_REFERENCE`, bitiş başlangıçtan sonra olmalıdır (`INVALID_DATE_RANGE`). Bedel TRY kuruş. İşlem kaydı: `contract.create` (şirket satırda).
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminContractCreate" }
+      responses:
+        "201":
+          description: Oluşturulan sözleşme
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FleetContract" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Yönetici değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: Böyle bir şirket yok (`NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "415": { description: JSON olmayan gövde (`BAD_REQUEST`) }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
+
+  /admin/contracts/{number}:
+    parameters:
+      - { name: number, in: path, required: true, description: "Sözleşme numarası (`SZL-2026-00001`); büyük/küçük harf fark etmez.", schema: { type: string, example: SZL-2026-00001 } }
+    get:
+      tags: [admin]
+      summary: Bir sözleşme
+      description: |
+        Sözleşme ve araçları (iade edilenler dahil).
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Sözleşme
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FleetContractDetail" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Yönetici değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: Böyle bir sözleşme yok (`NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+    patch:
+      tags: [admin]
+      summary: Sözleşmeyi güncelle
+      description: |
+        Bitiş günü, aylık bedel, teslim şehri ve durum değişir; ürün ve başlangıç değişmez. Düzenlenen kaydın `updatedAt` değeri geri gönderilir; sözleşme bu arada değiştiyse `409 STALE_WRITE`. **Araçları hâlâ kullanımda olan sözleşme bitirilmez** (`409 IN_USE`, `details.vehicles` kaç araç olduğunu söyler). İşlem kaydı: `contract.update`.
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminContractUpdate" }
+      responses:
+        "200":
+          description: Güncel sözleşme
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FleetContract" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Yönetici değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: Böyle bir sözleşme yok (`NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "409":
+          description: Kayıt değişmiş (`STALE_WRITE`) ya da sözleşmenin araçları var (`IN_USE`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "415": { description: JSON olmayan gövde (`BAD_REQUEST`) }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
+
+  /admin/contracts/{number}/vehicles:
+    parameters:
+      - { name: number, in: path, required: true, description: "Sözleşme numarası.", schema: { type: string, example: SZL-2026-00001 } }
+    post:
+      tags: [admin]
+      summary: Sözleşmeye filo aracı ekle
+      description: |
+        Araç sözleşmenin şirketine eklenir. Plaka `34 ABC 123` biçiminde saklanır ve **hem filo araçlarında hem kiralık araçlarda benzersizdir** (`409 PLATE_TAKEN`). Bitmiş sözleşmeye araç eklenmez (`409 INVALID_TRANSITION`). Araçlar sözleşmenin detayında (`GET /admin/contracts/{number}`) listelenir. İşlem kaydı: `fleet-vehicle.create`.
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminFleetVehicleCreate" }
+      responses:
+        "201":
+          description: Eklenen araç
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FleetVehicle" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Yönetici değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: Böyle bir sözleşme yok (`NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "409":
+          description: Plaka kullanımda (`PLATE_TAKEN`) ya da sözleşme bitmiş (`INVALID_TRANSITION`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "415": { description: JSON olmayan gövde (`BAD_REQUEST`) }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
+
+  /admin/fleet-vehicles/{id}:
+    parameters:
+      - { name: id, in: path, required: true, description: "Filo aracının kimliği.", schema: { type: string, format: uuid } }
+    patch:
+      tags: [admin]
+      summary: Filo aracını güncelle (bakım, muayene, iade)
+      description: |
+        Bakım ve muayene günleri değişir (boş değer siler); `returned: true` aracı **iade eder**: araç kullanımdan çıkar ve açık zimmeti aynı anda kapanır. Araç silinmez, geçmişi şirketindir. İade edilmiş araç değişmez (`409 INVALID_TRANSITION`). Düzenlenen kaydın `updatedAt` değeri geri gönderilir (`409 STALE_WRITE`). İşlem kaydı: `fleet-vehicle.update`.
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminFleetVehicleUpdate" }
+      responses:
+        "200":
+          description: Güncel araç
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FleetVehicle" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Yönetici değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: Böyle bir araç yok (`NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "409":
+          description: Kayıt değişmiş (`STALE_WRITE`) ya da araç iade edilmiş (`INVALID_TRANSITION`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "415": { description: JSON olmayan gövde (`BAD_REQUEST`) }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
+
+  /admin/fleet-vehicles/{id}/readings:
+    parameters:
+      - { name: id, in: path, required: true, description: "Filo aracının kimliği.", schema: { type: string, format: uuid } }
+    post:
+      tags: [admin]
+      summary: Okuma gir
+      description: |
+        Kilometre, yakıt %, şarj % ve batarya sağlığı % (hepsi isteğe bağlı olan yüzdeler 0–100). **Kilometre geri gitmez** ve okuma bir öncekinden eski olamaz (`422 OUT_OF_RANGE`); zaman gelecekte olamaz. İade edilmiş araçtan okuma alınmaz (`409 INVALID_TRANSITION`). İşlem kaydı: `fleet-vehicle.reading`.
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminReadingCreate" }
+      responses:
+        "201":
+          description: Girilen okuma
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FleetReading" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Yönetici değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: Böyle bir araç yok (`NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "409":
+          description: Araç iade edilmiş (`INVALID_TRANSITION`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "415": { description: JSON olmayan gövde (`BAD_REQUEST`) }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
+  /fleet/summary:
+    get:
+      tags: [fleet]
+      summary: Filom özeti
+      description: |
+        Özet kartlarının sayıları (V2-35). Şirketin etkin sözleşmesi yoksa `hasActiveContract` yanlıştır ve sayılar sıfırdır. Faturalar, masraflar ve talepler kartları V2-37, V2-38 ve V2-41'de eklenir.
+        Yalnızca **kurumsal hesabın kendi şirketinin** kayıtları görünür; başka şirketin kaydı `404` döner (ADR-25). Sınır: hesap başına dakikada 120.
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Özet
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FleetSummary" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Kurumsal hesap değil ya da bir şirkete bağlı değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
+
+  /fleet/vehicles:
+    get:
+      tags: [fleet]
+      summary: Filo araçları
+      description: |
+        Sayfalı liste (ADR-24). `q` plakada ya da modelin adında aranır (plaka nasıl yazılırsa yazılsın: `35abc123`, `35 ABC 123`). `assigned=true` zimmetli, `false` boştaki araçlardır.
+        Yalnızca **kurumsal hesabın kendi şirketinin** kayıtları görünür; başka şirketin kaydı `404` döner (ADR-25). Sınır: hesap başına dakikada 120.
+      security:
+        - cookieAuth: []
+      parameters:
+        - { name: page, in: query, schema: { type: integer, minimum: 1, default: 1 } }
+        - { name: pageSize, in: query, schema: { type: integer, minimum: 1, maximum: 100, default: 20 } }
+        - name: sort
+          in: query
+          description: "`alan` ya da `alan:asc|desc`. Varsayılan `plate:asc`."
+          schema: { type: string, enum: [plate, year, createdAt], example: "plate:asc" }
+        - { name: q, in: query, schema: { type: string, maxLength: 100 } }
+        - { name: status, in: query, schema: { type: string, enum: [ACTIVE, RETURNED] } }
+        - { name: assigned, in: query, schema: { type: string, enum: ["true", "false"] } }
+        - { name: contract, in: query, schema: { type: string, example: SZL-2026-00001 } }
+      responses:
+        "200":
+          description: Bir sayfa araç
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FleetVehiclePage" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Kurumsal hesap değil ya da bir şirkete bağlı değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
+
+  /fleet/vehicles/{plate}:
+    parameters:
+      - { name: plate, in: path, required: true, description: "Plaka; boşluklu ya da boşluksuz yazılabilir. Plaka olamayacak bir değer `404` döner.", schema: { type: string, example: 35 FLM 101 } }
+    get:
+      tags: [fleet]
+      summary: Bir filo aracı
+      description: |
+        Aracın bilgisi, şu anki zimmeti, tüm zimmet geçmişi ve son 10 okuması.
+        Yalnızca **kurumsal hesabın kendi şirketinin** kayıtları görünür; başka şirketin kaydı `404` döner (ADR-25). Sınır: hesap başına dakikada 120.
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Araç
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FleetVehicleDetail" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Kurumsal hesap değil ya da bir şirkete bağlı değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: Böyle bir araç yok ya da başka şirketin (`NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
+
+  /fleet/contracts:
+    get:
+      tags: [fleet]
+      summary: Filo sözleşmeleri
+      description: |
+        Sayfalı liste. Sözleşmesi olmayan şirkette boş döner, hata değil.
+        Yalnızca **kurumsal hesabın kendi şirketinin** kayıtları görünür; başka şirketin kaydı `404` döner (ADR-25). Sınır: hesap başına dakikada 120.
+      security:
+        - cookieAuth: []
+      parameters:
+        - { name: page, in: query, schema: { type: integer, minimum: 1, default: 1 } }
+        - { name: pageSize, in: query, schema: { type: integer, minimum: 1, maximum: 100, default: 20 } }
+        - name: sort
+          in: query
+          description: "`alan` ya da `alan:asc|desc`. Varsayılan `endAt:asc`."
+          schema: { type: string, enum: [endAt, startAt, number], example: "endAt:asc" }
+        - { name: status, in: query, schema: { type: string, enum: [ACTIVE, ENDED] } }
+      responses:
+        "200":
+          description: Bir sayfa sözleşme
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FleetContractPage" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Kurumsal hesap değil ya da bir şirkete bağlı değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
+
+  /fleet/contracts/{number}:
+    parameters:
+      - { name: number, in: path, required: true, description: "Sözleşme numarası (`SZL-2026-00001`); büyük/küçük harf fark etmez.", schema: { type: string, example: SZL-2026-00001 } }
+    get:
+      tags: [fleet]
+      summary: Bir filo sözleşmesi
+      description: |
+        Sözleşme ve araçları. `remainingDays` bitişe kalan gündür (İstanbul takvimiyle).
+        Yalnızca **kurumsal hesabın kendi şirketinin** kayıtları görünür; başka şirketin kaydı `404` döner (ADR-25). Sınır: hesap başına dakikada 120.
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Sözleşme
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FleetContractDetail" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Kurumsal hesap değil ya da bir şirkete bağlı değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: Böyle bir sözleşme yok ya da başka şirketin (`NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
+
+  /fleet/employees:
+    get:
+      tags: [fleet]
+      summary: Personel
+      description: |
+        Sayfalı liste. `q` ad, soyad, departman ve sicil no'da aranır; birden çok sözcük yazılırsa her biri bulunmalıdır.
+        Yalnızca **kurumsal hesabın kendi şirketinin** kayıtları görünür; başka şirketin kaydı `404` döner (ADR-25). Sınır: hesap başına dakikada 120.
+      security:
+        - cookieAuth: []
+      parameters:
+        - { name: page, in: query, schema: { type: integer, minimum: 1, default: 1 } }
+        - { name: pageSize, in: query, schema: { type: integer, minimum: 1, maximum: 100, default: 20 } }
+        - name: sort
+          in: query
+          description: "`alan` ya da `alan:asc|desc`. Varsayılan `lastName:asc`."
+          schema: { type: string, enum: [lastName, createdAt], example: "lastName:asc" }
+        - { name: q, in: query, schema: { type: string, maxLength: 100 } }
+        - { name: active, in: query, schema: { type: string, enum: ["true", "false"] } }
+      responses:
+        "200":
+          description: Bir sayfa personel
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FleetEmployeePage" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Kurumsal hesap değil ya da bir şirkete bağlı değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+    post:
+      tags: [fleet]
+      summary: Personel ekle
+      description: |
+        Şirkete bir kişi ekler. Aynı şirkette aynı sicil no iki kişide olmaz (`409 EMPLOYEE_NO_TAKEN`; başka şirketin aynı numarası engel değildir). Ehliyet bilgisi saklanmaz. İşlem kaydı: `fleet-employee.create` (şirket satırda, yalnızca alan adları).
+        Yalnızca **kurumsal hesabın kendi şirketinin** kayıtları görünür; başka şirketin kaydı `404` döner (ADR-25). Sınır: hesap başına dakikada 120.
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/FleetEmployeeCreate" }
+      responses:
+        "201":
+          description: Eklenen kişi
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FleetEmployee" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Kurumsal hesap değil ya da bir şirkete bağlı değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "409":
+          description: Bu sicil no şirketin başka bir kişisinde (`EMPLOYEE_NO_TAKEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "415": { description: JSON olmayan gövde (`BAD_REQUEST`) }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
+
+  /fleet/employees/{id}:
+    parameters:
+      - { name: id, in: path, required: true, description: "Kişinin kimliği. Kimlik olamayacak bir değer `404` döner.", schema: { type: string, format: uuid } }
+    patch:
+      tags: [fleet]
+      summary: Personeli güncelle
+      description: |
+        Gönderilmeyen alan olduğu gibi kalır; boş metin isteğe bağlı bir alanı siler. Düzenlenen kaydın `updatedAt` değeri geri gönderilir; kişi bu arada değiştiyse `409 STALE_WRITE`. **Kimse silinmez:** ayrılan kişi `active: false` olur ve **açık zimmeti aynı anda kapanır**. İşlem kaydı: `fleet-employee.update`.
+        Yalnızca **kurumsal hesabın kendi şirketinin** kayıtları görünür; başka şirketin kaydı `404` döner (ADR-25). Sınır: hesap başına dakikada 120.
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/FleetEmployeeUpdate" }
+      responses:
+        "200":
+          description: Güncel kişi
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FleetEmployee" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Kurumsal hesap değil ya da bir şirkete bağlı değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: Böyle bir kişi yok ya da başka şirketin (`NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "409":
+          description: Kayıt değişmiş (`STALE_WRITE`) ya da sicil no başkasında (`EMPLOYEE_NO_TAKEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "415": { description: JSON olmayan gövde (`BAD_REQUEST`) }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
+
+  /fleet/assignments:
+    get:
+      tags: [fleet]
+      summary: Zimmetler
+      description: |
+        Sayfalı liste, en yeni başlayan üstte. `open=true` hâlâ açık olanlar, `false` kapanmış olanlardır.
+        Yalnızca **kurumsal hesabın kendi şirketinin** kayıtları görünür; başka şirketin kaydı `404` döner (ADR-25). Sınır: hesap başına dakikada 120.
+      security:
+        - cookieAuth: []
+      parameters:
+        - { name: page, in: query, schema: { type: integer, minimum: 1, default: 1 } }
+        - { name: pageSize, in: query, schema: { type: integer, minimum: 1, maximum: 100, default: 20 } }
+        - { name: vehicle, in: query, schema: { type: string, format: uuid } }
+        - { name: employee, in: query, schema: { type: string, format: uuid } }
+        - { name: open, in: query, schema: { type: string, enum: ["true", "false"] } }
+      responses:
+        "200":
+          description: Bir sayfa zimmet
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FleetAssignmentPage" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Kurumsal hesap değil ya da bir şirkete bağlı değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+    post:
+      tags: [fleet]
+      summary: Aracı personele ver
+      description: |
+        Aracı bir kişiye verir. **Araç başına tek açık zimmet:** açık zimmeti olan araca yenisi `409 VEHICLE_ASSIGNED` döner (servis ve veritabanındaki kısmi benzersiz indeks; iki istek aynı anda gelirse biri kazanır). Araç ya da kişi bulunamazsa (başka şirketinki de dahil) aynı cevap: `422` alan `UNKNOWN_REFERENCE`. Pasif kişiye zimmet verilmez (`NOT_ALLOWED`), iade edilmiş araç verilmez (`409 INVALID_TRANSITION`). Başlangıç gelecekte olamaz ve aracın önceki zimmetinin bitişinden önce olamaz (`OUT_OF_RANGE`). İşlem kaydı: `fleet-assignment.create`.
+        Yalnızca **kurumsal hesabın kendi şirketinin** kayıtları görünür; başka şirketin kaydı `404` döner (ADR-25). Sınır: hesap başına dakikada 120.
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/FleetAssignmentCreate" }
+      responses:
+        "201":
+          description: Verilen zimmet
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FleetAssignment" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Kurumsal hesap değil ya da bir şirkete bağlı değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "409":
+          description: Araç zimmetli (`VEHICLE_ASSIGNED`) ya da iade edilmiş (`INVALID_TRANSITION`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "415": { description: JSON olmayan gövde (`BAD_REQUEST`) }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
+
+  /fleet/assignments/{id}/end:
+    parameters:
+      - { name: id, in: path, required: true, description: "Zimmetin kimliği.", schema: { type: string, format: uuid } }
+    post:
+      tags: [fleet]
+      summary: Zimmeti bitir (aracı geri al)
+      description: |
+        Bitişi yazar (`endedAt` verilmezse şimdi); araç yeniden boştadır. Zaten bitmiş zimmet `409 INVALID_TRANSITION`. Bitiş başlangıçtan önce ya da gelecekte olamaz. İşlem kaydı: `fleet-assignment.end`.
+        Yalnızca **kurumsal hesabın kendi şirketinin** kayıtları görünür; başka şirketin kaydı `404` döner (ADR-25). Sınır: hesap başına dakikada 120.
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/FleetAssignmentEnd" }
+      responses:
+        "200":
+          description: Bitmiş zimmet
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FleetAssignment" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Kurumsal hesap değil ya da bir şirkete bağlı değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: Böyle bir zimmet yok ya da başka şirketin (`NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "409":
+          description: Zimmet zaten bitmiş (`INVALID_TRANSITION`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
   /admin/ping:
+
     get:
       tags: [admin]
       summary: Yönetici kapısı denemesi (iskelet)
@@ -2572,6 +3271,8 @@ components:
             - SLUG_TAKEN
             - PLATE_TAKEN
             - NAME_TAKEN
+            - VEHICLE_ASSIGNED
+            - EMPLOYEE_NO_TAKEN
             - INVALID_TRANSITION
             - INTERNAL_ERROR
         message:
@@ -2611,6 +3312,7 @@ components:
               - SLUG_TAKEN
               - PLATE_TAKEN
               - NAME_TAKEN
+              - EMPLOYEE_NO_TAKEN
           example: { email: EMAIL_TAKEN }
 
     LocalizedText:
@@ -3741,6 +4443,275 @@ components:
         total: { type: integer, minimum: 0 }
         page: { type: integer }
         pageSize: { type: integer }
+
+    FleetVehicle:
+      type: object
+      required: [id, plate, model, year, contract, status, startKm, lastKm, lastReadingAt, assignee, nextMaintenanceOn, inspectionDueOn, returnedAt, createdAt, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        plate: { type: string, example: 35 FLM 101 }
+        model:
+          type: object
+          required: [slug, brand, model]
+          properties: { slug: { type: string }, brand: { type: string }, model: { type: string } }
+        year: { type: integer }
+        contract:
+          type: object
+          required: [number, productSlug]
+          properties: { number: { type: string }, productSlug: { type: string } }
+        status: { type: string, enum: [ACTIVE, RETURNED] }
+        startKm: { type: integer, minimum: 0 }
+        lastKm: { type: integer, minimum: 0, description: Son okumanın kilometresi; okuma yoksa aracın başladığı kilometre. }
+        lastReadingAt: { type: string, format: date-time, nullable: true }
+        assignee:
+          type: object
+          nullable: true
+          description: Aracın şu an kimde olduğu (açık zimmet).
+          required: [employeeId, name, department, since]
+          properties:
+            employeeId: { type: string, format: uuid }
+            name: { type: string }
+            department: { type: string, nullable: true }
+            since: { type: string, format: date-time }
+        nextMaintenanceOn: { type: string, format: date, nullable: true }
+        inspectionDueOn: { type: string, format: date, nullable: true }
+        returnedAt: { type: string, format: date-time, nullable: true }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time, description: Kaydın sürümü; düzenleme bunu geri gönderir. }
+
+    FleetReading:
+      type: object
+      required: [id, at, km, fuelPercent, chargePercent, batteryHealthPercent, source]
+      properties:
+        id: { type: string, format: uuid }
+        at: { type: string, format: date-time }
+        km: { type: integer, minimum: 0 }
+        fuelPercent: { type: integer, minimum: 0, maximum: 100, nullable: true }
+        chargePercent: { type: integer, minimum: 0, maximum: 100, nullable: true }
+        batteryHealthPercent: { type: integer, minimum: 0, maximum: 100, nullable: true }
+        source: { type: string, enum: [MANUAL, SEED] }
+
+    FleetVehicleDetail:
+      allOf:
+        - $ref: "#/components/schemas/FleetVehicle"
+        - type: object
+          required: [assignments, readings]
+          properties:
+            assignments: { type: array, items: { $ref: "#/components/schemas/FleetAssignment" }, description: Aracın tüm zimmetleri, en yeni başlayan üstte. }
+            readings: { type: array, items: { $ref: "#/components/schemas/FleetReading" }, description: Son 10 okuma, en yeni üstte. }
+
+    FleetVehiclePage:
+      type: object
+      required: [items, total, page, pageSize]
+      properties:
+        items: { type: array, items: { $ref: "#/components/schemas/FleetVehicle" } }
+        total: { type: integer, minimum: 0 }
+        page: { type: integer }
+        pageSize: { type: integer }
+
+    FleetSummary:
+      type: object
+      required: [date, hasActiveContract, vehicles, contracts, maintenanceDue]
+      properties:
+        date: { type: string, format: date, description: Sayıların ait olduğu İstanbul günü. }
+        hasActiveContract: { type: boolean, description: Etkin filo sözleşmesi olan şirkette Filom bağlantısı ve ekranları görünür. }
+        vehicles:
+          type: object
+          required: [total, assigned, idle]
+          properties:
+            total: { type: integer, minimum: 0, description: Kullanımdaki (iade edilmemiş) araçlar. }
+            assigned: { type: integer, minimum: 0 }
+            idle: { type: integer, minimum: 0 }
+        contracts:
+          type: object
+          required: [active, endingSoon]
+          properties:
+            active: { type: integer, minimum: 0 }
+            endingSoon: { type: integer, minimum: 0, description: 60 gün içinde biten etkin sözleşmeler. }
+        maintenanceDue: { type: integer, minimum: 0, description: Bakımı ya da muayenesi 30 gün içinde olan (ya da geçmiş) araçlar. }
+
+    FleetContract:
+      type: object
+      required: [id, number, company, productSlug, startAt, endAt, monthlyFee, deliveryCity, status, vehicleCount, remainingDays, createdAt, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        number: { type: string, example: SZL-2026-00001 }
+        company:
+          type: object
+          required: [id, name]
+          properties: { id: { type: string, format: uuid }, name: { type: string } }
+        productSlug: { type: string, example: akilli-kurumsal-filo }
+        startAt: { type: string, format: date }
+        endAt: { type: string, format: date }
+        monthlyFee: { type: integer, minimum: 1, description: Aylık bedel, TRY kuruş. }
+        deliveryCity: { type: string }
+        status: { type: string, enum: [ACTIVE, ENDED] }
+        vehicleCount: { type: integer, minimum: 0, description: Şirketin yanında olan (iade edilmemiş) araçlar. }
+        remainingDays: { type: integer, minimum: 0, description: Bitişe kalan gün (İstanbul takvimi); bitmiş sözleşmede 0. }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+
+    FleetContractDetail:
+      allOf:
+        - $ref: "#/components/schemas/FleetContract"
+        - type: object
+          required: [vehicles]
+          properties:
+            vehicles: { type: array, items: { $ref: "#/components/schemas/FleetVehicle" } }
+
+    FleetContractPage:
+      type: object
+      required: [items, total, page, pageSize]
+      properties:
+        items: { type: array, items: { $ref: "#/components/schemas/FleetContract" } }
+        total: { type: integer, minimum: 0 }
+        page: { type: integer }
+        pageSize: { type: integer }
+
+    FleetEmployee:
+      type: object
+      required: [id, firstName, lastName, department, employeeNo, email, phone, active, vehicle, createdAt, updatedAt]
+      description: Kişisel veri. Yalnızca o şirketin kullanıcıları ve yönetici görür.
+      properties:
+        id: { type: string, format: uuid }
+        firstName: { type: string }
+        lastName: { type: string }
+        department: { type: string, nullable: true }
+        employeeNo: { type: string, nullable: true }
+        email: { type: string, format: email, nullable: true }
+        phone: { type: string, nullable: true }
+        active: { type: boolean }
+        vehicle:
+          type: object
+          nullable: true
+          description: Şu an kullandığı aracın plakası.
+          required: [plate]
+          properties: { plate: { type: string } }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+
+    FleetEmployeeCreate:
+      type: object
+      required: [firstName, lastName]
+      properties:
+        firstName: { type: string, maxLength: 60 }
+        lastName: { type: string, maxLength: 60 }
+        department: { type: string, maxLength: 60 }
+        employeeNo: { type: string, maxLength: 30 }
+        email: { type: string, format: email }
+        phone: { type: string }
+
+    FleetEmployeeUpdate:
+      type: object
+      required: [updatedAt]
+      properties:
+        updatedAt: { type: string, format: date-time, description: Düzenlenen kaydın `updatedAt` değeri. }
+        firstName: { type: string, maxLength: 60 }
+        lastName: { type: string, maxLength: 60 }
+        department: { type: string, nullable: true, maxLength: 60 }
+        employeeNo: { type: string, nullable: true, maxLength: 30 }
+        email: { type: string, format: email, nullable: true }
+        phone: { type: string, nullable: true }
+        active: { type: boolean, description: "`false` kişiyi pasifleştirir ve açık zimmetini kapatır." }
+
+    FleetEmployeePage:
+      type: object
+      required: [items, total, page, pageSize]
+      properties:
+        items: { type: array, items: { $ref: "#/components/schemas/FleetEmployee" } }
+        total: { type: integer, minimum: 0 }
+        page: { type: integer }
+        pageSize: { type: integer }
+
+    FleetAssignment:
+      type: object
+      required: [id, vehicle, employee, startedAt, endedAt, note]
+      properties:
+        id: { type: string, format: uuid }
+        vehicle:
+          type: object
+          required: [id, plate]
+          properties: { id: { type: string, format: uuid }, plate: { type: string } }
+        employee:
+          type: object
+          required: [id, name, department]
+          properties: { id: { type: string, format: uuid }, name: { type: string }, department: { type: string, nullable: true } }
+        startedAt: { type: string, format: date-time }
+        endedAt: { type: string, format: date-time, nullable: true, description: Zimmet açıkken boştur. }
+        note: { type: string, nullable: true, maxLength: 200 }
+
+    FleetAssignmentCreate:
+      type: object
+      required: [fleetVehicleId, employeeId]
+      properties:
+        fleetVehicleId: { type: string, format: uuid }
+        employeeId: { type: string, format: uuid }
+        startedAt: { type: string, description: "Tarih-saat (`2026-10-31T09:30:00Z`) ya da gün (`2026-10-31`, İstanbul 00:00). Verilmezse şimdi." }
+        note: { type: string, maxLength: 200 }
+
+    FleetAssignmentEnd:
+      type: object
+      properties:
+        endedAt: { type: string, description: "Tarih-saat ya da gün. Verilmezse şimdi." }
+
+    FleetAssignmentPage:
+      type: object
+      required: [items, total, page, pageSize]
+      properties:
+        items: { type: array, items: { $ref: "#/components/schemas/FleetAssignment" } }
+        total: { type: integer, minimum: 0 }
+        page: { type: integer }
+        pageSize: { type: integer }
+
+    AdminContractCreate:
+      type: object
+      required: [productSlug, startAt, endAt, monthlyFee, deliveryCity]
+      properties:
+        productSlug: { type: string, example: akilli-kurumsal-filo }
+        startAt: { type: string, format: date }
+        endAt: { type: string, format: date, description: Başlangıçtan sonra olmalıdır. }
+        monthlyFee: { type: integer, minimum: 1, maximum: 10000000000, description: TRY kuruş. }
+        deliveryCity: { type: string, description: Türkiye'nin 81 ilinden biri. }
+
+    AdminContractUpdate:
+      type: object
+      required: [updatedAt]
+      properties:
+        updatedAt: { type: string, format: date-time, description: Düzenlenen kaydın `updatedAt` değeri. }
+        endAt: { type: string, format: date }
+        monthlyFee: { type: integer, minimum: 1, maximum: 10000000000 }
+        deliveryCity: { type: string }
+        status: { type: string, enum: [ACTIVE, ENDED] }
+
+    AdminFleetVehicleCreate:
+      type: object
+      required: [modelSlug, plate, year, startKm]
+      properties:
+        modelSlug: { type: string, description: Araç modelinin slug'ı. }
+        plate: { type: string, example: 35 FLM 101 }
+        year: { type: integer, minimum: 2000 }
+        startKm: { type: integer, minimum: 0, maximum: 2000000 }
+        nextMaintenanceOn: { type: string, format: date }
+        inspectionDueOn: { type: string, format: date }
+
+    AdminFleetVehicleUpdate:
+      type: object
+      required: [updatedAt]
+      properties:
+        updatedAt: { type: string, format: date-time, description: Düzenlenen kaydın `updatedAt` değeri. }
+        nextMaintenanceOn: { type: string, format: date, nullable: true }
+        inspectionDueOn: { type: string, format: date, nullable: true }
+        returned: { type: boolean, enum: [true], description: "`true` aracı iade eder ve açık zimmetini kapatır." }
+
+    AdminReadingCreate:
+      type: object
+      required: [km]
+      properties:
+        km: { type: integer, minimum: 0, maximum: 2000000, description: Bir öncekinden küçük olamaz. }
+        fuelPercent: { type: integer, minimum: 0, maximum: 100, nullable: true }
+        chargePercent: { type: integer, minimum: 0, maximum: 100, nullable: true }
+        batteryHealthPercent: { type: integer, minimum: 0, maximum: 100, nullable: true }
+        at: { type: string, description: Tarih-saat ya da gün; verilmezse şimdi. Gelecekte ve bir önceki okumadan eski olamaz. }
 
     UserUpdate:
       type: object

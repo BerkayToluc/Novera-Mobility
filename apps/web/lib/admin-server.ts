@@ -12,7 +12,8 @@ import { PROMO_API_FILTERS, type PromoCode, type PromoCodePage } from "./admin-p
 import type { AdminCompanyDetail, AdminCompanyPage } from "./admin-companies";
 import { AUDIT_API_FILTERS, validActor, type AdminAuditPage, type AuditFilter } from "./admin-audit";
 import { USER_API_FILTERS, type AdminUserDetail, type AdminUserPage, type UserFilter } from "./admin-users";
-import { fetchAdminAudit, fetchAdminUser, fetchAdminUsers, fetchAdminBranch, fetchAdminCompanies, fetchAdminCompany, fetchAdminBranches, fetchAdminExtra, fetchAdminExtras, fetchAdminModel, fetchAdminMessage, fetchAdminMessages, fetchAdminModels, fetchAdminQuote, fetchAdminQuotes, fetchAdminReservation, fetchAdminReservations, fetchAdminSummary, fetchAdminVehicle, fetchAdminVehicles, fetchModelClasses, fetchPromoCode, fetchPromoCodes, type AdminSummary } from "./api-admin";
+import type { FleetContract, FleetContractDetail } from "./admin-contracts";
+import { fetchAdminContract, fetchCompanyContracts, fetchAdminAudit, fetchAdminUser, fetchAdminUsers, fetchAdminBranch, fetchAdminCompanies, fetchAdminCompany, fetchAdminBranches, fetchAdminExtra, fetchAdminExtras, fetchAdminModel, fetchAdminMessage, fetchAdminMessages, fetchAdminModels, fetchAdminQuote, fetchAdminQuotes, fetchAdminReservation, fetchAdminReservations, fetchAdminSummary, fetchAdminVehicle, fetchAdminVehicles, fetchModelClasses, fetchPromoCode, fetchPromoCodes, type AdminSummary } from "./api-admin";
 import { isMockMode } from "./mode";
 import { mockWorld } from "./mock-world";
 import { normalizePromo } from "./promo-codes";
@@ -261,4 +262,16 @@ export async function getAuditActors(): Promise<Array<{ id: string; label: strin
     : await fetchAdminUsers(new URLSearchParams({ page: "1", pageSize: "100", type: "ADMIN", sort: "lastName:asc" }));
   const admins = page ? page.items.map((user) => ({ id: user.id, label: `${user.firstName} ${user.lastName}` })) : (await import("@/mocks/admin-users")).mockAdministrators(await mockWorld());
   return admins;
+}
+
+// `null` for a company that does not exist.
+export async function getCompanyContracts(companyId: string): Promise<FleetContract[] | null> {
+  if (!isMockMode()) return fetchCompanyContracts(companyId);
+  return (await import("@/mocks/admin-contracts")).listMockContracts(await mockWorld(), companyId);
+}
+
+// `null` for a contract that does not exist, or whose number cannot be one.
+export async function getAdminContract(number: string): Promise<FleetContractDetail | null> {
+  if (!isMockMode()) return fetchAdminContract(number);
+  return (await import("@/mocks/admin-contracts")).getMockContract(await mockWorld(), number);
 }

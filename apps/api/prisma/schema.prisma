@@ -143,7 +143,138 @@ model Company {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  users User[]
+  users          User[]
+  employees      CompanyEmployee[]
+  fleetContracts FleetContract[]
+}
+
+// ---------- Filom: filo verisi (V2-35, ADR-25, docs/FLEET.md §5) ----------
+// Uzun dönem filo araçları kiralık `Vehicle`'dan ayrı tablodadır; müsaitlik ve arama kodu bunları hiç görmez. Her tabloda `companyId` vardır ve
+// bileşik yabancı anahtarlarla üst kaydın şirketine bağlıdır: bir şirketin kaydı başka şirketin kaydına bağlanamaz (veritabanı reddeder).
+
+enum FleetContractStatus {
+  ACTIVE
+  ENDED
+}
+
+enum FleetVehicleStatus {
+  ACTIVE
+  RETURNED
+}
+
+enum ReadingSource {
+  MANUAL
+  SEED
+}
+
+// Şirketin personeli (zimmet alan kişiler). Silinmez, `active: false` olur. Ehliyet bilgisi saklanmaz (KVKK, FLEET.md §6).
+model CompanyEmployee {
+  id         String   @id @default(uuid())
+  companyId  String
+  company    Company  @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  firstName  String
+  lastName   String
+  department String?
+  employeeNo String?
+  email      String?
+  phone      String?
+  active     Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  assignments VehicleAssignment[]
+
+  @@unique([id, companyId])
+  // Aynı şirkette aynı sicil no iki kişide olmaz (boş sicil no kısıtlanmaz).
+  @@unique([companyId, employeeNo])
+  @@index([companyId, active])
+}
+
+// Uzun dönem filo sözleşmesi. Numara `SZL-<yıl>-<5 hane>`, bir veritabanı sequence'inden gelir. Tutarlar TRY kuruş.
+// CHECK: `endAt > startAt`, `monthlyFee > 0` (migration'da).
+model FleetContract {
+  id           String              @id @default(uuid())
+  number       String              @unique
+  companyId    String
+  company      Company             @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  productId    String
+  product      Product             @relation(fields: [productId], references: [id])
+  startAt      DateTime            @db.Date
+  endAt        DateTime            @db.Date
+  monthlyFee   Int
+  deliveryCity String
+  status       FleetContractStatus @default(ACTIVE)
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+
+  vehicles FleetVehicle[]
+
+  @@unique([id, companyId])
+  @@index([companyId, status])
+  @@index([productId])
+}
+
+// Filo aracı. Plaka benzersizdir ve kiralık `Vehicle` plakalarıyla da çakışmaz (ikincisi servis denetimidir).
+model FleetVehicle {
+  id                String             @id @default(uuid())
+  contractId        String
+  companyId         String
+  contract          FleetContract      @relation(fields: [contractId, companyId], references: [id, companyId], onDelete: Restrict)
+  vehicleModelId    String
+  vehicleModel      VehicleModel       @relation(fields: [vehicleModelId], references: [id])
+  plate             String             @unique
+  year              Int
+  startKm           Int
+  nextMaintenanceOn DateTime?          @db.Date
+  inspectionDueOn   DateTime?          @db.Date
+  status            FleetVehicleStatus @default(ACTIVE)
+  returnedAt        DateTime?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  assignments VehicleAssignment[]
+  readings    VehicleReading[]
+
+  @@unique([id, companyId])
+  @@index([contractId])
+  @@index([companyId, status])
+  @@index([vehicleModelId])
+}
+
+// Zimmet: bir araç bir personelde. `endedAt` boşsa açıktır; araç başına en çok bir açık zimmet olur (migration'daki kısmi benzersiz indeks,
+// `VehicleAssignment_open_vehicle_key`). Araç ve personel aynı şirkettendir (bileşik yabancı anahtarlar).
+model VehicleAssignment {
+  id             String          @id @default(uuid())
+  companyId      String
+  fleetVehicleId String
+  vehicle        FleetVehicle    @relation(fields: [fleetVehicleId, companyId], references: [id, companyId], onDelete: Restrict)
+  employeeId     String
+  employee       CompanyEmployee @relation(fields: [employeeId, companyId], references: [id, companyId], onDelete: Restrict)
+  startedAt      DateTime
+  endedAt        DateTime?
+  note           String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@index([fleetVehicleId, startedAt])
+  @@index([employeeId])
+  @@index([companyId])
+}
+
+// Okuma: Novera'nın girdiği km, yakıt, şarj ve batarya sağlığı. Yüzdeler 0–100 (CHECK, migration'da).
+model VehicleReading {
+  id                   String        @id @default(uuid())
+  fleetVehicleId       String
+  vehicle              FleetVehicle  @relation(fields: [fleetVehicleId], references: [id], onDelete: Restrict)
+  at                   DateTime      @default(now())
+  km                   Int
+  fuelPercent          Int?
+  chargePercent        Int?
+  batteryHealthPercent Int?
+  source               ReadingSource @default(MANUAL)
+  createdAt            DateTime      @default(now())
+
+  @@index([fleetVehicleId, at])
 }
 
 // Yönetimde değiştiren her işlemin kaydı (V2-23, ADR-24). Yalnızca eklenir: servis güncelleme ya da silme sunmaz ve
@@ -304,7 +435,8 @@ model VehicleModel {
   classId String
   class   VehicleClass @relation(fields: [classId], references: [id])
 
-  vehicles Vehicle[]
+  vehicles      Vehicle[]
+  fleetVehicles FleetVehicle[]
 
   @@index([classId])
   @@index([retiredAt])
@@ -463,7 +595,8 @@ model Product {
   id   String @id @default(uuid())
   slug String @unique // ör. akilli-kurumsal-filo
 
-  quotes QuoteRequest[]
+  quotes         QuoteRequest[]
+  fleetContracts FleetContract[]
 }
 
 // Kurumsal teklif talepleri (GET /me/quotes ve POST /quotes)

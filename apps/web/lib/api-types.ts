@@ -4718,6 +4718,1363 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/admin/companies/{id}/contracts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Şirketin kimliği. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * Şirketin sözleşmeleri
+         * @description Şirketin sözleşmeleri, etkinler önce, önce biten üstte. Bir şirketin birkaç sözleşmesi olur, bu yüzden sayfalama yoktur.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Şirketin kimliği. */
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Sözleşmeler */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            items: components["schemas"]["FleetContract"][];
+                        };
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Böyle bir şirket yok (`NOT_FOUND`) */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        put?: never;
+        /**
+         * Sözleşme oluştur
+         * @description Numara (`SZL-<yıl>-<5 hane>`) bir veritabanı sequence'inden gelir; aynı anda açılan iki sözleşme aynı numarayı almaz. Ürün slug'ı olmayan ürün `422 UNKNOWN_REFERENCE`, bitiş başlangıçtan sonra olmalıdır (`INVALID_DATE_RANGE`). Bedel TRY kuruş. İşlem kaydı: `contract.create` (şirket satırda).
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Şirketin kimliği. */
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["AdminContractCreate"];
+                };
+            };
+            responses: {
+                /** @description Oluşturulan sözleşme */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["FleetContract"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Böyle bir şirket yok (`NOT_FOUND`) */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description JSON olmayan gövde (`BAD_REQUEST`) */
+                415: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/contracts/{number}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Sözleşme numarası (`SZL-2026-00001`); büyük/küçük harf fark etmez. */
+                number: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * Bir sözleşme
+         * @description Sözleşme ve araçları (iade edilenler dahil).
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Sözleşme numarası (`SZL-2026-00001`); büyük/küçük harf fark etmez. */
+                    number: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Sözleşme */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["FleetContractDetail"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Böyle bir sözleşme yok (`NOT_FOUND`) */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Sözleşmeyi güncelle
+         * @description Bitiş günü, aylık bedel, teslim şehri ve durum değişir; ürün ve başlangıç değişmez. Düzenlenen kaydın `updatedAt` değeri geri gönderilir; sözleşme bu arada değiştiyse `409 STALE_WRITE`. **Araçları hâlâ kullanımda olan sözleşme bitirilmez** (`409 IN_USE`, `details.vehicles` kaç araç olduğunu söyler). İşlem kaydı: `contract.update`.
+         */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Sözleşme numarası (`SZL-2026-00001`); büyük/küçük harf fark etmez. */
+                    number: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["AdminContractUpdate"];
+                };
+            };
+            responses: {
+                /** @description Güncel sözleşme */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["FleetContract"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Böyle bir sözleşme yok (`NOT_FOUND`) */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Kayıt değişmiş (`STALE_WRITE`) ya da sözleşmenin araçları var (`IN_USE`) */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description JSON olmayan gövde (`BAD_REQUEST`) */
+                415: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        trace?: never;
+    };
+    "/admin/contracts/{number}/vehicles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Sözleşme numarası. */
+                number: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Sözleşmeye filo aracı ekle
+         * @description Araç sözleşmenin şirketine eklenir. Plaka `34 ABC 123` biçiminde saklanır ve **hem filo araçlarında hem kiralık araçlarda benzersizdir** (`409 PLATE_TAKEN`). Bitmiş sözleşmeye araç eklenmez (`409 INVALID_TRANSITION`). Araçlar sözleşmenin detayında (`GET /admin/contracts/{number}`) listelenir. İşlem kaydı: `fleet-vehicle.create`.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Sözleşme numarası. */
+                    number: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["AdminFleetVehicleCreate"];
+                };
+            };
+            responses: {
+                /** @description Eklenen araç */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["FleetVehicle"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Böyle bir sözleşme yok (`NOT_FOUND`) */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Plaka kullanımda (`PLATE_TAKEN`) ya da sözleşme bitmiş (`INVALID_TRANSITION`) */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description JSON olmayan gövde (`BAD_REQUEST`) */
+                415: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/fleet-vehicles/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Filo aracının kimliği. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Filo aracını güncelle (bakım, muayene, iade)
+         * @description Bakım ve muayene günleri değişir (boş değer siler); `returned: true` aracı **iade eder**: araç kullanımdan çıkar ve açık zimmeti aynı anda kapanır. Araç silinmez, geçmişi şirketindir. İade edilmiş araç değişmez (`409 INVALID_TRANSITION`). Düzenlenen kaydın `updatedAt` değeri geri gönderilir (`409 STALE_WRITE`). İşlem kaydı: `fleet-vehicle.update`.
+         */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Filo aracının kimliği. */
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["AdminFleetVehicleUpdate"];
+                };
+            };
+            responses: {
+                /** @description Güncel araç */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["FleetVehicle"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Böyle bir araç yok (`NOT_FOUND`) */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Kayıt değişmiş (`STALE_WRITE`) ya da araç iade edilmiş (`INVALID_TRANSITION`) */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description JSON olmayan gövde (`BAD_REQUEST`) */
+                415: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        trace?: never;
+    };
+    "/admin/fleet-vehicles/{id}/readings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Filo aracının kimliği. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Okuma gir
+         * @description Kilometre, yakıt %, şarj % ve batarya sağlığı % (hepsi isteğe bağlı olan yüzdeler 0–100). **Kilometre geri gitmez** ve okuma bir öncekinden eski olamaz (`422 OUT_OF_RANGE`); zaman gelecekte olamaz. İade edilmiş araçtan okuma alınmaz (`409 INVALID_TRANSITION`). İşlem kaydı: `fleet-vehicle.reading`.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Filo aracının kimliği. */
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["AdminReadingCreate"];
+                };
+            };
+            responses: {
+                /** @description Girilen okuma */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["FleetReading"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Böyle bir araç yok (`NOT_FOUND`) */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Araç iade edilmiş (`INVALID_TRANSITION`) */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description JSON olmayan gövde (`BAD_REQUEST`) */
+                415: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/fleet/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Filom özeti
+         * @description Özet kartlarının sayıları (V2-35). Şirketin etkin sözleşmesi yoksa `hasActiveContract` yanlıştır ve sayılar sıfırdır. Faturalar, masraflar ve talepler kartları V2-37, V2-38 ve V2-41'de eklenir.
+         *     Yalnızca **kurumsal hesabın kendi şirketinin** kayıtları görünür; başka şirketin kaydı `404` döner (ADR-25). Sınır: hesap başına dakikada 120.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Özet */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["FleetSummary"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Kurumsal hesap değil ya da bir şirkete bağlı değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/fleet/vehicles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Filo araçları
+         * @description Sayfalı liste (ADR-24). `q` plakada ya da modelin adında aranır (plaka nasıl yazılırsa yazılsın: `35abc123`, `35 ABC 123`). `assigned=true` zimmetli, `false` boştaki araçlardır.
+         *     Yalnızca **kurumsal hesabın kendi şirketinin** kayıtları görünür; başka şirketin kaydı `404` döner (ADR-25). Sınır: hesap başına dakikada 120.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    page?: number;
+                    pageSize?: number;
+                    /** @description `alan` ya da `alan:asc|desc`. Varsayılan `plate:asc`. */
+                    sort?: "plate" | "year" | "createdAt";
+                    q?: string;
+                    status?: "ACTIVE" | "RETURNED";
+                    assigned?: "true" | "false";
+                    contract?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Bir sayfa araç */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["FleetVehiclePage"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Kurumsal hesap değil ya da bir şirkete bağlı değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/fleet/vehicles/{plate}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Plaka; boşluklu ya da boşluksuz yazılabilir. Plaka olamayacak bir değer `404` döner. */
+                plate: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * Bir filo aracı
+         * @description Aracın bilgisi, şu anki zimmeti, tüm zimmet geçmişi ve son 10 okuması.
+         *     Yalnızca **kurumsal hesabın kendi şirketinin** kayıtları görünür; başka şirketin kaydı `404` döner (ADR-25). Sınır: hesap başına dakikada 120.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Plaka; boşluklu ya da boşluksuz yazılabilir. Plaka olamayacak bir değer `404` döner. */
+                    plate: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Araç */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["FleetVehicleDetail"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Kurumsal hesap değil ya da bir şirkete bağlı değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Böyle bir araç yok ya da başka şirketin (`NOT_FOUND`) */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/fleet/contracts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Filo sözleşmeleri
+         * @description Sayfalı liste. Sözleşmesi olmayan şirkette boş döner, hata değil.
+         *     Yalnızca **kurumsal hesabın kendi şirketinin** kayıtları görünür; başka şirketin kaydı `404` döner (ADR-25). Sınır: hesap başına dakikada 120.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    page?: number;
+                    pageSize?: number;
+                    /** @description `alan` ya da `alan:asc|desc`. Varsayılan `endAt:asc`. */
+                    sort?: "endAt" | "startAt" | "number";
+                    status?: "ACTIVE" | "ENDED";
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Bir sayfa sözleşme */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["FleetContractPage"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Kurumsal hesap değil ya da bir şirkete bağlı değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/fleet/contracts/{number}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Sözleşme numarası (`SZL-2026-00001`); büyük/küçük harf fark etmez. */
+                number: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * Bir filo sözleşmesi
+         * @description Sözleşme ve araçları. `remainingDays` bitişe kalan gündür (İstanbul takvimiyle).
+         *     Yalnızca **kurumsal hesabın kendi şirketinin** kayıtları görünür; başka şirketin kaydı `404` döner (ADR-25). Sınır: hesap başına dakikada 120.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Sözleşme numarası (`SZL-2026-00001`); büyük/küçük harf fark etmez. */
+                    number: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Sözleşme */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["FleetContractDetail"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Kurumsal hesap değil ya da bir şirkete bağlı değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Böyle bir sözleşme yok ya da başka şirketin (`NOT_FOUND`) */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/fleet/employees": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Personel
+         * @description Sayfalı liste. `q` ad, soyad, departman ve sicil no'da aranır; birden çok sözcük yazılırsa her biri bulunmalıdır.
+         *     Yalnızca **kurumsal hesabın kendi şirketinin** kayıtları görünür; başka şirketin kaydı `404` döner (ADR-25). Sınır: hesap başına dakikada 120.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    page?: number;
+                    pageSize?: number;
+                    /** @description `alan` ya da `alan:asc|desc`. Varsayılan `lastName:asc`. */
+                    sort?: "lastName" | "createdAt";
+                    q?: string;
+                    active?: "true" | "false";
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Bir sayfa personel */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["FleetEmployeePage"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Kurumsal hesap değil ya da bir şirkete bağlı değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        put?: never;
+        /**
+         * Personel ekle
+         * @description Şirkete bir kişi ekler. Aynı şirkette aynı sicil no iki kişide olmaz (`409 EMPLOYEE_NO_TAKEN`; başka şirketin aynı numarası engel değildir). Ehliyet bilgisi saklanmaz. İşlem kaydı: `fleet-employee.create` (şirket satırda, yalnızca alan adları).
+         *     Yalnızca **kurumsal hesabın kendi şirketinin** kayıtları görünür; başka şirketin kaydı `404` döner (ADR-25). Sınır: hesap başına dakikada 120.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["FleetEmployeeCreate"];
+                };
+            };
+            responses: {
+                /** @description Eklenen kişi */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["FleetEmployee"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Kurumsal hesap değil ya da bir şirkete bağlı değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Bu sicil no şirketin başka bir kişisinde (`EMPLOYEE_NO_TAKEN`) */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description JSON olmayan gövde (`BAD_REQUEST`) */
+                415: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/fleet/employees/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Kişinin kimliği. Kimlik olamayacak bir değer `404` döner. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Personeli güncelle
+         * @description Gönderilmeyen alan olduğu gibi kalır; boş metin isteğe bağlı bir alanı siler. Düzenlenen kaydın `updatedAt` değeri geri gönderilir; kişi bu arada değiştiyse `409 STALE_WRITE`. **Kimse silinmez:** ayrılan kişi `active: false` olur ve **açık zimmeti aynı anda kapanır**. İşlem kaydı: `fleet-employee.update`.
+         *     Yalnızca **kurumsal hesabın kendi şirketinin** kayıtları görünür; başka şirketin kaydı `404` döner (ADR-25). Sınır: hesap başına dakikada 120.
+         */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Kişinin kimliği. Kimlik olamayacak bir değer `404` döner. */
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["FleetEmployeeUpdate"];
+                };
+            };
+            responses: {
+                /** @description Güncel kişi */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["FleetEmployee"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Kurumsal hesap değil ya da bir şirkete bağlı değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Böyle bir kişi yok ya da başka şirketin (`NOT_FOUND`) */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Kayıt değişmiş (`STALE_WRITE`) ya da sicil no başkasında (`EMPLOYEE_NO_TAKEN`) */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description JSON olmayan gövde (`BAD_REQUEST`) */
+                415: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        trace?: never;
+    };
+    "/fleet/assignments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Zimmetler
+         * @description Sayfalı liste, en yeni başlayan üstte. `open=true` hâlâ açık olanlar, `false` kapanmış olanlardır.
+         *     Yalnızca **kurumsal hesabın kendi şirketinin** kayıtları görünür; başka şirketin kaydı `404` döner (ADR-25). Sınır: hesap başına dakikada 120.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    page?: number;
+                    pageSize?: number;
+                    vehicle?: string;
+                    employee?: string;
+                    open?: "true" | "false";
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Bir sayfa zimmet */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["FleetAssignmentPage"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Kurumsal hesap değil ya da bir şirkete bağlı değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        put?: never;
+        /**
+         * Aracı personele ver
+         * @description Aracı bir kişiye verir. **Araç başına tek açık zimmet:** açık zimmeti olan araca yenisi `409 VEHICLE_ASSIGNED` döner (servis ve veritabanındaki kısmi benzersiz indeks; iki istek aynı anda gelirse biri kazanır). Araç ya da kişi bulunamazsa (başka şirketinki de dahil) aynı cevap: `422` alan `UNKNOWN_REFERENCE`. Pasif kişiye zimmet verilmez (`NOT_ALLOWED`), iade edilmiş araç verilmez (`409 INVALID_TRANSITION`). Başlangıç gelecekte olamaz ve aracın önceki zimmetinin bitişinden önce olamaz (`OUT_OF_RANGE`). İşlem kaydı: `fleet-assignment.create`.
+         *     Yalnızca **kurumsal hesabın kendi şirketinin** kayıtları görünür; başka şirketin kaydı `404` döner (ADR-25). Sınır: hesap başına dakikada 120.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["FleetAssignmentCreate"];
+                };
+            };
+            responses: {
+                /** @description Verilen zimmet */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["FleetAssignment"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Kurumsal hesap değil ya da bir şirkete bağlı değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Araç zimmetli (`VEHICLE_ASSIGNED`) ya da iade edilmiş (`INVALID_TRANSITION`) */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description JSON olmayan gövde (`BAD_REQUEST`) */
+                415: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/fleet/assignments/{id}/end": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Zimmetin kimliği. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Zimmeti bitir (aracı geri al)
+         * @description Bitişi yazar (`endedAt` verilmezse şimdi); araç yeniden boştadır. Zaten bitmiş zimmet `409 INVALID_TRANSITION`. Bitiş başlangıçtan önce ya da gelecekte olamaz. İşlem kaydı: `fleet-assignment.end`.
+         *     Yalnızca **kurumsal hesabın kendi şirketinin** kayıtları görünür; başka şirketin kaydı `404` döner (ADR-25). Sınır: hesap başına dakikada 120.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Zimmetin kimliği. */
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["FleetAssignmentEnd"];
+                };
+            };
+            responses: {
+                /** @description Bitmiş zimmet */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["FleetAssignment"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Kurumsal hesap değil ya da bir şirkete bağlı değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Böyle bir zimmet yok ya da başka şirketin (`NOT_FOUND`) */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Zimmet zaten bitmiş (`INVALID_TRANSITION`) */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/ping": {
         parameters: {
             query?: never;
@@ -4848,7 +6205,7 @@ export interface components {
              * @description Sabit makine kodu.
              * @enum {string}
              */
-            code: "BAD_REQUEST" | "VALIDATION_FAILED" | "UNAUTHENTICATED" | "FORBIDDEN" | "INVALID_CREDENTIALS" | "EMAIL_TAKEN" | "NOT_FOUND" | "VEHICLE_UNAVAILABLE" | "INVALID_DATE_RANGE" | "RESERVATION_LIMIT" | "RESET_TOKEN_INVALID" | "SPAM_DETECTED" | "RATE_LIMITED" | "PAYLOAD_TOO_LARGE" | "IN_USE" | "STALE_WRITE" | "CODE_TAKEN" | "SLUG_TAKEN" | "PLATE_TAKEN" | "NAME_TAKEN" | "INVALID_TRANSITION" | "INTERNAL_ERROR";
+            code: "BAD_REQUEST" | "VALIDATION_FAILED" | "UNAUTHENTICATED" | "FORBIDDEN" | "INVALID_CREDENTIALS" | "EMAIL_TAKEN" | "NOT_FOUND" | "VEHICLE_UNAVAILABLE" | "INVALID_DATE_RANGE" | "RESERVATION_LIMIT" | "RESET_TOKEN_INVALID" | "SPAM_DETECTED" | "RATE_LIMITED" | "PAYLOAD_TOO_LARGE" | "IN_USE" | "STALE_WRITE" | "CODE_TAKEN" | "SLUG_TAKEN" | "PLATE_TAKEN" | "NAME_TAKEN" | "VEHICLE_ASSIGNED" | "EMPLOYEE_NO_TAKEN" | "INVALID_TRANSITION" | "INTERNAL_ERROR";
             /** @description Geliştirici için İngilizce metin. Ekranda gösterilmez. */
             message: string;
             /** @description `IN_USE` için nedenlerin sayıları (bayi: reservations, holds, vehicles); ekran bunları listeler. */
@@ -4862,7 +6219,7 @@ export interface components {
              *     }
              */
             fieldErrors?: {
-                [key: string]: "REQUIRED" | "INVALID_EMAIL" | "INVALID_FORMAT" | "TOO_SHORT" | "PASSWORD_TOO_COMMON" | "INVALID_PASSWORD" | "EMAIL_MISMATCH" | "TOO_LONG" | "OUT_OF_RANGE" | "EMAIL_TAKEN" | "CONSENT_REQUIRED" | "INVALID_DATE_RANGE" | "NOT_IN_SLOT" | "IN_PAST" | "UNKNOWN_REFERENCE" | "UNKNOWN_CODE" | "CODE_EXHAUSTED" | "CODE_ALREADY_USED" | "CODE_TAKEN" | "BELOW_USAGE" | "NOT_ALLOWED" | "SLUG_TAKEN" | "PLATE_TAKEN" | "NAME_TAKEN";
+                [key: string]: "REQUIRED" | "INVALID_EMAIL" | "INVALID_FORMAT" | "TOO_SHORT" | "PASSWORD_TOO_COMMON" | "INVALID_PASSWORD" | "EMAIL_MISMATCH" | "TOO_LONG" | "OUT_OF_RANGE" | "EMAIL_TAKEN" | "CONSENT_REQUIRED" | "INVALID_DATE_RANGE" | "NOT_IN_SLOT" | "IN_PAST" | "UNKNOWN_REFERENCE" | "UNKNOWN_CODE" | "CODE_EXHAUSTED" | "CODE_ALREADY_USED" | "CODE_TAKEN" | "BELOW_USAGE" | "NOT_ALLOWED" | "SLUG_TAKEN" | "PLATE_TAKEN" | "NAME_TAKEN" | "EMPLOYEE_NO_TAKEN";
             };
         };
         LocalizedText: {
@@ -6003,6 +7360,295 @@ export interface components {
             total: number;
             page: number;
             pageSize: number;
+        };
+        FleetVehicle: {
+            /** Format: uuid */
+            id: string;
+            /** @example 35 FLM 101 */
+            plate: string;
+            model: {
+                slug: string;
+                brand: string;
+                model: string;
+            };
+            year: number;
+            contract: {
+                number: string;
+                productSlug: string;
+            };
+            /** @enum {string} */
+            status: "ACTIVE" | "RETURNED";
+            startKm: number;
+            /** @description Son okumanın kilometresi; okuma yoksa aracın başladığı kilometre. */
+            lastKm: number;
+            /** Format: date-time */
+            lastReadingAt: string | null;
+            /** @description Aracın şu an kimde olduğu (açık zimmet). */
+            assignee: {
+                /** Format: uuid */
+                employeeId: string;
+                name: string;
+                department: string | null;
+                /** Format: date-time */
+                since: string;
+            } | null;
+            /** Format: date */
+            nextMaintenanceOn: string | null;
+            /** Format: date */
+            inspectionDueOn: string | null;
+            /** Format: date-time */
+            returnedAt: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /**
+             * Format: date-time
+             * @description Kaydın sürümü; düzenleme bunu geri gönderir.
+             */
+            updatedAt: string;
+        };
+        FleetReading: {
+            /** Format: uuid */
+            id: string;
+            /** Format: date-time */
+            at: string;
+            km: number;
+            fuelPercent: number | null;
+            chargePercent: number | null;
+            batteryHealthPercent: number | null;
+            /** @enum {string} */
+            source: "MANUAL" | "SEED";
+        };
+        FleetVehicleDetail: components["schemas"]["FleetVehicle"] & {
+            /** @description Aracın tüm zimmetleri */
+            assignments: components["schemas"]["FleetAssignment"][];
+            /** @description Son 10 okuma */
+            readings: components["schemas"]["FleetReading"][];
+        };
+        FleetVehiclePage: {
+            items: components["schemas"]["FleetVehicle"][];
+            total: number;
+            page: number;
+            pageSize: number;
+        };
+        FleetSummary: {
+            /**
+             * Format: date
+             * @description Sayıların ait olduğu İstanbul günü.
+             */
+            date: string;
+            /** @description Etkin filo sözleşmesi olan şirkette Filom bağlantısı ve ekranları görünür. */
+            hasActiveContract: boolean;
+            vehicles: {
+                /** @description Kullanımdaki (iade edilmemiş) araçlar. */
+                total: number;
+                assigned: number;
+                idle: number;
+            };
+            contracts: {
+                active: number;
+                /** @description 60 gün içinde biten etkin sözleşmeler. */
+                endingSoon: number;
+            };
+            /** @description Bakımı ya da muayenesi 30 gün içinde olan (ya da geçmiş) araçlar. */
+            maintenanceDue: number;
+        };
+        FleetContract: {
+            /** Format: uuid */
+            id: string;
+            /** @example SZL-2026-00001 */
+            number: string;
+            company: {
+                /** Format: uuid */
+                id: string;
+                name: string;
+            };
+            /** @example akilli-kurumsal-filo */
+            productSlug: string;
+            /** Format: date */
+            startAt: string;
+            /** Format: date */
+            endAt: string;
+            /** @description Aylık bedel */
+            monthlyFee: number;
+            deliveryCity: string;
+            /** @enum {string} */
+            status: "ACTIVE" | "ENDED";
+            /** @description Şirketin yanında olan (iade edilmemiş) araçlar. */
+            vehicleCount: number;
+            /** @description Bitişe kalan gün (İstanbul takvimi); bitmiş sözleşmede 0. */
+            remainingDays: number;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        FleetContractDetail: components["schemas"]["FleetContract"] & {
+            vehicles: components["schemas"]["FleetVehicle"][];
+        };
+        FleetContractPage: {
+            items: components["schemas"]["FleetContract"][];
+            total: number;
+            page: number;
+            pageSize: number;
+        };
+        /** @description Kişisel veri. Yalnızca o şirketin kullanıcıları ve yönetici görür. */
+        FleetEmployee: {
+            /** Format: uuid */
+            id: string;
+            firstName: string;
+            lastName: string;
+            department: string | null;
+            employeeNo: string | null;
+            /** Format: email */
+            email: string | null;
+            phone: string | null;
+            active: boolean;
+            /** @description Şu an kullandığı aracın plakası. */
+            vehicle: {
+                plate: string;
+            } | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        FleetEmployeeCreate: {
+            firstName: string;
+            lastName: string;
+            department?: string;
+            employeeNo?: string;
+            /** Format: email */
+            email?: string;
+            phone?: string;
+        };
+        FleetEmployeeUpdate: {
+            /**
+             * Format: date-time
+             * @description Düzenlenen kaydın `updatedAt` değeri.
+             */
+            updatedAt: string;
+            firstName?: string;
+            lastName?: string;
+            department?: string | null;
+            employeeNo?: string | null;
+            /** Format: email */
+            email?: string | null;
+            phone?: string | null;
+            /** @description `false` kişiyi pasifleştirir ve açık zimmetini kapatır. */
+            active?: boolean;
+        };
+        FleetEmployeePage: {
+            items: components["schemas"]["FleetEmployee"][];
+            total: number;
+            page: number;
+            pageSize: number;
+        };
+        FleetAssignment: {
+            /** Format: uuid */
+            id: string;
+            vehicle: {
+                /** Format: uuid */
+                id: string;
+                plate: string;
+            };
+            employee: {
+                /** Format: uuid */
+                id: string;
+                name: string;
+                department: string | null;
+            };
+            /** Format: date-time */
+            startedAt: string;
+            /**
+             * Format: date-time
+             * @description Zimmet açıkken boştur.
+             */
+            endedAt: string | null;
+            note: string | null;
+        };
+        FleetAssignmentCreate: {
+            /** Format: uuid */
+            fleetVehicleId: string;
+            /** Format: uuid */
+            employeeId: string;
+            /** @description Tarih-saat (`2026-10-31T09:30:00Z`) ya da gün (`2026-10-31`, İstanbul 00:00). Verilmezse şimdi. */
+            startedAt?: string;
+            note?: string;
+        };
+        FleetAssignmentEnd: {
+            /** @description Tarih-saat ya da gün. Verilmezse şimdi. */
+            endedAt?: string;
+        };
+        FleetAssignmentPage: {
+            items: components["schemas"]["FleetAssignment"][];
+            total: number;
+            page: number;
+            pageSize: number;
+        };
+        AdminContractCreate: {
+            /** @example akilli-kurumsal-filo */
+            productSlug: string;
+            /** Format: date */
+            startAt: string;
+            /**
+             * Format: date
+             * @description Başlangıçtan sonra olmalıdır.
+             */
+            endAt: string;
+            /** @description TRY kuruş. */
+            monthlyFee: number;
+            /** @description Türkiye'nin 81 ilinden biri. */
+            deliveryCity: string;
+        };
+        AdminContractUpdate: {
+            /**
+             * Format: date-time
+             * @description Düzenlenen kaydın `updatedAt` değeri.
+             */
+            updatedAt: string;
+            /** Format: date */
+            endAt?: string;
+            monthlyFee?: number;
+            deliveryCity?: string;
+            /** @enum {string} */
+            status?: "ACTIVE" | "ENDED";
+        };
+        AdminFleetVehicleCreate: {
+            /** @description Araç modelinin slug'ı. */
+            modelSlug: string;
+            /** @example 35 FLM 101 */
+            plate: string;
+            year: number;
+            startKm: number;
+            /** Format: date */
+            nextMaintenanceOn?: string;
+            /** Format: date */
+            inspectionDueOn?: string;
+        };
+        AdminFleetVehicleUpdate: {
+            /**
+             * Format: date-time
+             * @description Düzenlenen kaydın `updatedAt` değeri.
+             */
+            updatedAt: string;
+            /** Format: date */
+            nextMaintenanceOn?: string | null;
+            /** Format: date */
+            inspectionDueOn?: string | null;
+            /**
+             * @description `true` aracı iade eder ve açık zimmetini kapatır.
+             * @enum {boolean}
+             */
+            returned?: true;
+        };
+        AdminReadingCreate: {
+            /** @description Bir öncekinden küçük olamaz. */
+            km: number;
+            fuelPercent?: number | null;
+            chargePercent?: number | null;
+            batteryHealthPercent?: number | null;
+            /** @description Tarih-saat ya da gün; verilmezse şimdi. Gelecekte ve bir önceki okumadan eski olamaz. */
+            at?: string;
         };
         /** @description Gönderilen alanlar güncellenir. */
         UserUpdate: {

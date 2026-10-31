@@ -97,7 +97,7 @@ Adres TR `/filom/...`, EN `/en/my-fleet/...`. Hepsi `noindex`, giriş gerektirir
 | `GET/POST /admin/companies`, `GET/PATCH /admin/companies/{id}` | Şirket |
 | `POST /admin/companies/{id}/users` | Kurumsal kullanıcı daveti |
 | `GET/POST /admin/companies/{id}/contracts`, `PATCH /admin/contracts/{number}` | Sözleşme (ürün slug'ı, başlangıç, bitiş, aylık bedel, teslim şehri, durum) |
-| `GET/POST /admin/contracts/{number}/vehicles`, `PATCH /admin/fleet-vehicles/{id}` | Filo aracı (model, plaka, yıl, başlangıç km, bakım ve muayene tarihleri, iade) |
+| `POST /admin/contracts/{number}/vehicles` (araçlar `GET /admin/contracts/{number}`'de gelir), `PATCH /admin/fleet-vehicles/{id}` | Filo aracı (model, plaka, yıl, başlangıç km, bakım ve muayene tarihleri, iade) |
 | `POST /admin/fleet-vehicles/{id}/readings` | Okuma: km, yakıt %, şarj %, batarya sağlığı % |
 | `POST /admin/invoices/generate?period=YYYY-MM` | Dönemin faturaları; aynı dönem ikinci kez `409 ALREADY_GENERATED` |
 | `GET /admin/invoices`, `PATCH /admin/invoices/{number}` | Liste, ödendi işareti |
