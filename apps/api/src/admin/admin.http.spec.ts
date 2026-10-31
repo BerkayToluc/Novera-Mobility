@@ -1134,6 +1134,12 @@ describe('administration over HTTP', () => {
   });
 
   describe('the limit (120 a minute for the administrator)', () => {
+    // The counters are per clock minute: a loop that crosses the minute starts a new count and never reaches the limit, so a test waits for the next minute when it is close.
+    beforeEach(async () => {
+      const left = 60_000 - (Date.now() % 60_000);
+      if (left < 15_000) await new Promise((resolve) => setTimeout(resolve, left + 50));
+    }, 30_000);
+
     it('counts the administrator, not the address, and refuses the 121st with 429', async () => {
       const first = await signedIn('ADMIN');
       const second = await signedIn('ADMIN');
