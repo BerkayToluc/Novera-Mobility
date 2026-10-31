@@ -50,6 +50,7 @@ export const routing = defineRouting({
     "/filom/faturalar/[number]": { tr: "/filom/faturalar/[number]", en: "/my-fleet/invoices/[number]" },
     "/filom/masraflar": { tr: "/filom/masraflar", en: "/my-fleet/expenses" },
     "/filom/raporlar": { tr: "/filom/raporlar", en: "/my-fleet/reports" },
+    "/filom/yesil-filo": { tr: "/filom/yesil-filo", en: "/my-fleet/green-fleet" },
     "/yonetim": { tr: "/yonetim", en: "/admin" },
     "/yonetim/kampanya-kodlari": { tr: "/yonetim/kampanya-kodlari", en: "/admin/promo-codes" },
     "/yonetim/kampanya-kodlari/yeni": { tr: "/yonetim/kampanya-kodlari/yeni", en: "/admin/promo-codes/new" },

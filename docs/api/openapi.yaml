@@ -3726,6 +3726,75 @@ paths:
         "422": { $ref: "#/components/responses/ValidationFailed" }
         "429": { $ref: "#/components/responses/TooManyRequests" }
 
+  /fleet/green:
+    get:
+      tags: [fleet]
+      summary: Yeşil Filo
+      description: |
+        Şirketin **elektrikli ve hibrit** (kullanımdaki) araçları: son şarj seviyesi, batarya sağlığı ve son 6 ayın okumalarından eğilimi, dönemin kilometresi ve **karbon tasarrufu**. Dönem `from` ve `to` (`YYYY-MM`, ikisi dahil, en çok 24 ay; ikisi de yoksa son 3 ay, yalnız `to` varsa tek ay). Başlamamış ay ve ters sıra `422 OUT_OF_RANGE`.
+        **Karbon tasarrufu bir örnek hesaptır** (ekranda yazar): kilometre × (benzinli eşdeğer − aracın emisyonu); katsayılar g CO₂/km olarak cevapta (`coefficients`: benzin 170, hibrit 105, elektrikli 45) ve tek yerde (`src/fleet/fleet-report.ts`). Şarj seviyesi ve batarya sağlığı Novera'nın girdiği okumalardır (simülasyon değil). Kilometre, rapordaki gibi dönem sonu ve başındaki okumanın farkıdır.
+        Yalnızca **kurumsal hesabın kendi şirketinin** araçları gelir; elektrikli ya da hibrit aracı yoksa `vehicles` boştur. Sınır: hesap başına dakikada 120.
+      security:
+        - cookieAuth: []
+      parameters:
+        - { name: from, in: query, description: "İlk ay, `YYYY-MM`.", schema: { type: string, example: "2026-08" } }
+        - { name: to, in: query, description: "Son ay, `YYYY-MM`.", schema: { type: string, example: "2026-10" } }
+      responses:
+        "200":
+          description: Yeşil Filo
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/GreenReport" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Kurumsal hesap değil ya da bir şirkete bağlı değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
+  /fleet/vehicles/{plate}/charging-stations:
+    parameters:
+      - { name: plate, in: path, required: true, description: "Plaka; boşluksuz ya da küçük harfle de olur.", schema: { type: string, example: 06 FLM 201 } }
+    get:
+      tags: [fleet]
+      summary: Aracın en yakın şarj istasyonları
+      description: |
+        Aracın konumuna en yakın istasyonlar, yakından uzağa. **Cevap bir simülasyondur** (ADR-30): `simulated: true`. Araç henüz canlı konum üretmediği için (V2-43) **sözleşmesinin teslim şehrinin merkezinde** sayılır; o şehrin merkezi bilinmiyorsa istasyonlar uzaklıksız (`distanceKm: null`) ve aracın kendi şehrindekiler önce gelir. İstasyonun durumu (`AVAILABLE`, `BUSY`, `OUT_OF_ORDER`) saklanmaz: istasyon kimliği ve **5 dakikalık dilimden** deterministik üretilir, yani aynı araç ve aynı dilim için her istek aynı cevabı verir (`updatedAt` dilimin başlangıcıdır).
+        Elektrikli ya da hibrit olmayan araç, başka şirketin aracı ve plaka olamayacak değer aynı `404`'tür. Sınır: hesap başına dakikada 120.
+      security:
+        - cookieAuth: []
+      parameters:
+        - { name: limit, in: query, description: "Kaç istasyon (1–20, varsayılan 5).", schema: { type: integer, minimum: 1, maximum: 20, default: 5 } }
+      responses:
+        "200":
+          description: En yakın istasyonlar
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/StationList" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Kurumsal hesap değil ya da bir şirkete bağlı değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: Böyle bir elektrikli ya da hibrit araç yok ya da başka şirketin (`NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
   /admin/ping:
 
     get:
@@ -5119,7 +5188,7 @@ components:
 
     FleetSummary:
       type: object
-      required: [date, hasActiveContract, vehicles, contracts, maintenanceDue, invoices, expenses]
+      required: [date, hasActiveContract, vehicles, contracts, maintenanceDue, invoices, expenses, greenVehicles]
       properties:
         date: { type: string, format: date, description: Sayıların ait olduğu İstanbul günü. }
         hasActiveContract: { type: boolean, description: Etkin filo sözleşmesi olan şirkette Filom bağlantısı ve ekranları görünür. }
@@ -5157,6 +5226,7 @@ components:
                 count: { type: integer, minimum: 0, description: Ödenmemiş faturalar (gecikenler dahil). }
                 total: { type: integer, minimum: 0, description: Bunların toplamı, TRY kuruş. }
             overdue: { type: integer, minimum: 0, description: Vadesi geçmiş, ödenmemiş faturalar. }
+        greenVehicles: { type: integer, minimum: 0, description: Kullanımdaki elektrikli ve hibrit araçlar; 0 ise Yeşil Filo menüde görünmez. }
         expenses:
           type: object
           required: [open]
@@ -5349,6 +5419,99 @@ components:
               required: [km]
               properties:
                 km: { type: integer, minimum: 0 }
+
+    GreenVehicle:
+      type: object
+      required: [id, plate, model, fuel, charge, batteryHealth, batteryTrend, km, savedGrams]
+      properties:
+        id: { type: string, format: uuid }
+        plate: { type: string }
+        model: { type: string }
+        fuel: { type: string, enum: [ELECTRIC, HYBRID] }
+        charge:
+          type: object
+          nullable: true
+          description: Yazılmış son şarj seviyesi; hiç yoksa null.
+          required: [percent, at]
+          properties:
+            percent: { type: integer, minimum: 0, maximum: 100 }
+            at: { type: string, format: date-time }
+        batteryHealth:
+          type: object
+          nullable: true
+          description: Yazılmış son batarya sağlığı; hiç yoksa null.
+          required: [percent, at]
+          properties:
+            percent: { type: integer, minimum: 0, maximum: 100 }
+            at: { type: string, format: date-time }
+        batteryTrend:
+          type: array
+          description: Son 6 ayın batarya sağlığı okumaları, eskiden yeniye.
+          items:
+            type: object
+            required: [at, percent]
+            properties:
+              at: { type: string, format: date-time }
+              percent: { type: integer, minimum: 0, maximum: 100 }
+        km: { type: integer, minimum: 0, description: Dönemin kilometresi. }
+        savedGrams: { type: integer, minimum: 0, description: "Dönemde tasarruf edilen CO₂, gram (örnek hesap)." }
+
+    GreenReport:
+      type: object
+      required: [from, to, vehicles, totals, coefficients]
+      properties:
+        from: { type: string, example: "2026-08" }
+        to: { type: string, example: "2026-10" }
+        vehicles: { type: array, items: { $ref: "#/components/schemas/GreenVehicle" } }
+        totals:
+          type: object
+          required: [km, savedGrams]
+          properties:
+            km: { type: integer, minimum: 0 }
+            savedGrams: { type: integer, minimum: 0 }
+        coefficients:
+          type: object
+          description: "g CO₂/km: benzinli eşdeğer ve her tür için aracın emisyonu."
+          required: [petrol, hybrid, electric]
+          properties:
+            petrol: { type: integer, example: 170 }
+            hybrid: { type: integer, example: 105 }
+            electric: { type: integer, example: 45 }
+
+    ChargingStation:
+      type: object
+      required: [id, name, city, latitude, longitude, sockets, distanceKm, status]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        city: { type: string }
+        latitude: { type: number }
+        longitude: { type: number }
+        sockets: { type: array, items: { type: string, example: CCS }, description: "Soket türleri (CCS, CHAdeMO, TYPE2)." }
+        distanceKm: { type: number, nullable: true, description: Aracın konumuna kuş uçuşu uzaklık, bir ondalık; konum bilinmiyorsa null. }
+        status: { type: string, enum: [AVAILABLE, BUSY, OUT_OF_ORDER], description: Müsait, dolu, arızalı; 5 dakikalık dilimle üretilir (simülasyon). }
+
+    StationList:
+      type: object
+      required: [simulated, vehicle, updatedAt, items]
+      properties:
+        simulated: { type: boolean, enum: [true], description: Durumlar ve aracın konumu üretilmiştir (ADR-30); ekranda "Simülasyon" rozeti gösterilir. }
+        vehicle:
+          type: object
+          required: [plate, city, position]
+          properties:
+            plate: { type: string }
+            city: { type: string, description: Sözleşmenin teslim şehri. }
+            position:
+              type: object
+              nullable: true
+              description: Aracın sayılan konumu (şehir merkezi); şehir bilinmiyorsa null.
+              required: [latitude, longitude]
+              properties:
+                latitude: { type: number }
+                longitude: { type: number }
+        updatedAt: { type: string, format: date-time, description: Durumların ait olduğu 5 dakikalık dilimin başlangıcı. }
+        items: { type: array, items: { $ref: "#/components/schemas/ChargingStation" } }
 
     FleetContract:
       type: object

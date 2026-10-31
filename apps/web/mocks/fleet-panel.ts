@@ -2,6 +2,7 @@ import type { AssignFormValues, EmployeeFormValues, FleetAssignment, FleetAssign
 import { normalizePlate } from "@/lib/admin-vehicles";
 import { normalizeSearch } from "@/lib/branch-detail";
 import { expenseSummary } from "./expenses";
+import { MODELS } from "./fleet";
 import { invoiceSummary } from "./invoices";
 import { getMockCarReadings, getMockContract, listMockCompanyCars, listMockContracts, setMockCarAssignee } from "./admin-contracts";
 
@@ -11,6 +12,8 @@ import { getMockCarReadings, getMockContract, listMockCompanyCars, listMockContr
 // back, a sicil no is one person's, and a change carries the version it was made against. Another company has nothing.
 //
 // Kept per "world" (lib/mock-world.ts) on `globalThis`, like the contracts: a test that gives a car away works in a world of its own.
+// The models whose cars run on a battery, wholly or partly (V2-40): the Green Fleet is in the menu only when a company has one in use.
+const GREEN = new Set(MODELS.filter((model) => model.fuelType === "ELECTRIC" || model.fuelType === "HYBRID").map((model) => model.slug));
 const EGE = "5d0c1c0e-6f3a-4a52-9c1e-0a1b2c3d4e01";
 const DAY = 86_400_000;
 
@@ -123,6 +126,7 @@ export function fleetSummary(world_: string, companyId: string): FleetSummary {
     maintenanceDue: cars.filter((c) => within(c.nextMaintenanceOn, 30) || within(c.inspectionDueOn, 30)).length,
     invoices: invoiceSummary(world_, companyId),
     expenses: expenseSummary(world_, companyId),
+    greenVehicles: cars.filter((c) => GREEN.has(c.model.slug)).length,
   };
 }
 

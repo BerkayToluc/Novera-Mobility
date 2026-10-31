@@ -14,6 +14,7 @@ import { FleetExpensesService, type ReflectResult } from './fleet-expenses.servi
 import type { ExpenseView } from './expense.view.js';
 import { FleetInvoicesService } from './fleet-invoices.service.js';
 import type { InvoiceView } from './invoice.view.js';
+import { FleetGreenService, type GreenReport, type StationList } from './fleet-green.service.js';
 import { FleetReportsService } from './fleet-reports.service.js';
 import type { Report } from './report-calc.js';
 import { FleetSummaryService, type FleetSummary } from './fleet-summary.service.js';
@@ -69,6 +70,23 @@ export class FleetVehiclesController {
   @Get(':plate')
   get(@CurrentCompany() companyId: string, @Param('plate') plate: string): Promise<FleetVehicleDetail> {
     return this.vehicles.get(companyId, plate);
+  }
+}
+
+@ApiTags('fleet')
+@Controller('fleet')
+export class FleetGreenController {
+  constructor(private readonly green: FleetGreenService) {}
+
+  @Get('green')
+  get(@CurrentCompany() companyId: string, @Query() query: unknown): Promise<GreenReport> {
+    return this.green.green(companyId, query);
+  }
+
+  // The stations nearest to an electric or hybrid car, in the state they are in during these five minutes (a simulation, ADR-30).
+  @Get('vehicles/:plate/charging-stations')
+  stations(@CurrentCompany() companyId: string, @Param('plate') plate: string, @Query() query: unknown): Promise<StationList> {
+    return this.green.stations(companyId, plate, query);
   }
 }
 

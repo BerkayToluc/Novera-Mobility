@@ -24,6 +24,8 @@ export type FleetSummary = {
     unpaid: { count: number; total: number };
     overdue: number;
   };
+  // The electric and hybrid cars in use: the Green Fleet screen is in the menu only when there are some (V2-40).
+  greenVehicles: number;
   // The costs (V2-38): those still open, which the customer has to look at.
   expenses: { open: { count: number; total: number } };
 };
@@ -37,7 +39,7 @@ export class FleetSummaryService {
   async get(companyId: string, now: Date = new Date()): Promise<FleetSummary> {
     const day = istanbulDay(now);
     const today = parseDay(day.date)!;
-    const [activeContracts, endingSoon, total, assigned, maintenanceDue, thisMonth, unpaid, overdue, openExpenses] = await Promise.all([
+    const [activeContracts, endingSoon, total, assigned, maintenanceDue, thisMonth, unpaid, overdue, openExpenses, greenVehicles] = await Promise.all([
       this.prisma.fleetContract.count({ where: { companyId, status: 'ACTIVE' } }),
       this.prisma.fleetContract.count({ where: { companyId, status: 'ACTIVE', endAt: { lte: addDays(today, CONTRACT_ENDING_DAYS) } } }),
       this.prisma.fleetVehicle.count({ where: { companyId, status: 'ACTIVE' } }),
@@ -53,6 +55,7 @@ export class FleetSummaryService {
       this.prisma.fleetInvoice.aggregate({ where: { companyId, paidAt: null }, _count: true, _sum: { total: true } }),
       this.prisma.fleetInvoice.count({ where: { companyId, paidAt: null, dueAt: { lt: today } } }),
       this.prisma.fleetExpense.aggregate({ where: { companyId, status: 'OPEN' }, _count: true, _sum: { amount: true } }),
+      this.prisma.fleetVehicle.count({ where: { companyId, status: 'ACTIVE', vehicleModel: { fuelType: { in: ['ELECTRIC', 'HYBRID'] } } } }),
     ]);
     return {
       date: day.date,
@@ -65,6 +68,7 @@ export class FleetSummaryService {
         unpaid: { count: unpaid._count, total: unpaid._sum.total ?? 0 },
         overdue,
       },
+      greenVehicles,
       expenses: { open: { count: openExpenses._count, total: openExpenses._sum.amount ?? 0 } },
     };
   }

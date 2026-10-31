@@ -343,6 +343,22 @@ model FleetExpense {
   @@index([fleetVehicleId, occurredAt])
 }
 
+// Kurgusal şarj istasyonu (V2-40, ADR-30, docs/FLEET.md §3.1): ad, şehir, konum ve soket türleri seed'de sabittir. Müsaitlik (müsait, dolu,
+// arızalı) SAKLANMAZ: istasyon kimliği ve 5 dakikalık dilimden deterministik üretilir (`src/fleet/simulation/`). Bir şehirde aynı ad iki kez olmaz.
+model ChargingStation {
+  id        String   @id @default(uuid())
+  name      String
+  city      String
+  latitude  Float
+  longitude Float
+  // "CCS", "CHAdeMO", "TYPE2" ... en az bir tane (migration'daki CHECK).
+  sockets   String[]
+  createdAt DateTime @default(now())
+
+  @@unique([city, name])
+  @@index([city])
+}
+
 // Yönetimde değiştiren her işlemin kaydı (V2-23, ADR-24). Yalnızca eklenir: servis güncelleme ya da silme sunmaz ve
 // veritabanı tetikleyicisi UPDATE/DELETE'i reddeder. Değer ve kişisel veri yazılmaz, yalnızca değişen alanların adları.
 // `actorId` bilerek yabancı anahtar değildir: hesap silinse de kayıt kalır. Komut satırı işlemleri `cli` yazar.

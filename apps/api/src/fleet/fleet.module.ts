@@ -8,6 +8,7 @@ import { FleetContractsService } from './fleet-contracts.service.js';
 import { FleetEmployeesService } from './fleet-employees.service.js';
 import { FleetExpensesService } from './fleet-expenses.service.js';
 import { FleetInvoicesService } from './fleet-invoices.service.js';
+import { FleetGreenService } from './fleet-green.service.js';
 import { FleetReportsService } from './fleet-reports.service.js';
 import { FleetSummaryService } from './fleet-summary.service.js';
 import { FleetVehiclesService } from './fleet-vehicles.service.js';
@@ -16,6 +17,7 @@ import {
   FleetContractsController,
   FleetEmployeesController,
   FleetExpensesController,
+  FleetGreenController,
   FleetInvoicesController,
   FleetReportsController,
   FleetSummaryController,
@@ -27,7 +29,7 @@ import {
 // written by the administration's interceptor, which covers `/fleet/*` writes as well.
 @Module({
   imports: [AuthModule, FormsModule],
-  controllers: [FleetSummaryController, FleetVehiclesController, FleetContractsController, FleetEmployeesController, FleetAssignmentsController, FleetInvoicesController, FleetExpensesController, FleetReportsController],
+  controllers: [FleetSummaryController, FleetVehiclesController, FleetContractsController, FleetEmployeesController, FleetAssignmentsController, FleetInvoicesController, FleetExpensesController, FleetReportsController, FleetGreenController],
   providers: [
     FleetSummaryService,
     FleetVehiclesService,
@@ -37,6 +39,7 @@ import {
     FleetInvoicesService,
     FleetExpensesService,
     FleetReportsService,
+    FleetGreenService,
     { provide: APP_GUARD, useClass: CompanyGuard },
   ],
 })
