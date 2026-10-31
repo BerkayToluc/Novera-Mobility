@@ -324,6 +324,26 @@ Adresler (TR / EN): Yönetim'de `/yonetim/filo-masraflari` (`/admin/fleet-expens
 - **Sözleşme sayfası:** etkin sözleşmede "Sözleşmeyi yenile": isteğe bağlı not (en çok 500 karakter) ve "Yenileme talebi gönder"; gönderilince başvuru numarası yazar, işlemde bir talep varsa bunu söyler.
 - **Örnek veri:** seed her şirkete 20 masraf ekler (toplam 40: çoğu HGS, her on masraftan ikisi ceza, biri bakım; bir kısmı itirazlı, zimmeti olan araçlarda bir kısmı yansıtılmış); yeniden çalışınca kopya yapmaz. Sample mod `mocks/expenses.ts`: Ege Lojistik'in dokuz masrafı (5'i Ayşe Demir'in, 2'si Burak Yılmaz'ın, 2'si kimsenin).
 
+### 3.17 Raporlar (V2-39)
+
+Adres (TR / EN): `/filom/raporlar` (`/my-fleet/reports`). Metinler `messages/*/fleet-panel.json` (`FleetPanel.reports`). Uç: `GET /fleet/reports?from=YYYY-MM&to=YYYY-MM` (ikisi dahil; ikisi de yoksa bu ay; en çok 24 ay; başlamamış ay ve ters sıra `422 OUT_OF_RANGE`). Kural `apps/api/src/fleet/report-calc.ts`'tedir (saf fonksiyonlar); sample mod aynı kuralın `lib/report-calc.ts`'teki karşılığını kullanır.
+
+**Maliyet = fatura payı + masraflar.** Para TRY kuruş, hepsi tam sayı.
+
+- **Fatura payı, araç başına eşit bölüşüm:** faturalar **KDV'siz**, satırlarının toplamıyla (ara toplam) alınır. Bir faturanın bir satırı, o sözleşmenin **tüm araçları** arasında (durumu ne olursa olsun, plaka sırasıyla) eşit bölünür; bölünmeyen kuruşlar ilk araçlara gider (toplam her zaman satırla kuruşu kuruşuna tutar). **Aracı olmayan sözleşmenin** (ör. VIP Mobilite) satırı hiçbir araca düşmez: `unallocated` olarak ayrıca verilir ve toplamdadır.
+- **Hangi ay:** fatura, ait olduğu dönemin ayına; masraf, gerçekleştiği **İstanbul ayına** yazılır.
+- **Departman:** faturada o ayın son anında (bu ay için şu an), masrafta masrafın anında aracı kimin kullandığına göre kişinin departmanıdır. Kimse kullanmıyorsa ya da kişinin departmanı yoksa `null` ("Atanmamış / departmansız"). Zimmet §3.1'deki gibi hesaplanır, saklanmaz.
+- **Kilometre:** ayın sonundaki (bu ay için şu an) odometre eksi ayın başındaki; okuma yoksa aracın başlangıç km'si. Aylık farkların toplamı dönem farkına eşittir. Departmanın kilometresi, ayın sonunda aracı kullanan kişinin departmanına yazılır.
+- **Doğruluk:** aynı toplam üç kesitte de tutar: aylar, departmanlar ve (`unallocated` ile birlikte) araçlar; fatura toplamı dönemdeki faturaların ara toplamlarının, masraf toplamı dönemdeki masrafların toplamıdır (entegrasyon testi veritabanında bunu `aggregate` ile karşılaştırır).
+
+**Ekran:** üstte dönem seçimi (**Bu ay**, **Son 3 ay** varsayılan, **Bu yıl**, **Özel dönem**; özelde iki ay alanı ve "Raporu göster"); adreste `donem` (`bu-ay`, `bu-yil`, `ozel`) ve özel için `bas`, `bit` (`YYYY-MM`). Saçma bir adres (ay olmayan, ters, gelecek, 24 aydan uzun) hata değil varsayılan raporu gösterir. Dört toplam kartı, sonra dört grafik: **aylara göre maliyet**, **aylara göre kilometre**, **araçlara göre maliyet**, **departmanlara göre maliyet**. Boş dönemde "Bu dönemde veri yok" ve "Bu yılı göster"; yüklenemezse hata durumu ve "Tekrar dene".
+
+**Grafikler (karar):** kütüphane **eklenmedi**. Yatay, tek ölçekli yığılmış çubuklar; çubuklar elle çizilmiş SVG (`components/fleet/bar-chart.tsx`), etiketler ve sayılar HTML. Gerekçe: DESIGN.md §8'in istediği şey sade çubuktur, ekran okuyucu zaten tabloyu okur, kütüphane hem bağımlılık hem rotaya bir betik ekler. Renkler marka paletinden (`bg-primary`/`fill-primary` zeytin, `fill-accent` Ege mavisi), en çok iki seri; renk tek başına anlam taşımaz, her çubuğun ucunda sayı yazar. **Resim ekran okuyucudan gizlenir (`aria-hidden`), altındaki tablo okunur**: başlık hücreleri `scope`'lu, başlık ve toplam satırı var, yatay taşan tablo odaklanabilir kutuda kaydırılır. Araç ve departman grafikleri en yüksek 10 satırı çizer, tablo hepsini içerir.
+
+**Özet kartı:** "bakım ya da muayenesi yaklaşan araçlar" kartı V2-35/V2-36'da zaten vardır (`maintenanceDue`, Özet'te "Bakımı ya da muayenesi 30 gün içinde olan araç"); V2-39 yeni kart eklemedi.
+
+**Örnek veri (USE_MOCKS=1):** `mocks/reports.ts` örnek şirketin faturalarından, masraflarından, araçlarından, okumalarından ve zimmetlerinden kurar; yani rapor o ekranlarla kuruşu kuruşuna tutar.
+
 ## 4. API
 
 Tüm uçlar `/admin` önekli, `AdminGuard` arkasında, ADR-24 kurallarıyla (sayfalama, `STALE_WRITE`, yeni hata kodları). Değiştiren her istek işlem kaydına yazılır, `Content-Type: application/json` dışındakiler `415` döner, sınır dakikada 120/yönetici.

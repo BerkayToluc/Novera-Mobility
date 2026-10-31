@@ -10,7 +10,8 @@
       "assignments": "Assignments",
       "contracts": "Contracts",
       "invoices": "Invoices",
-      "expenses": "Expenses"
+      "expenses": "Expenses",
+      "reports": "Reports"
     },
     "empty": {
       "title": "My fleet",
@@ -458,6 +459,68 @@
         "to": "Last day",
         "apply": "Apply",
         "clear": "Clear days"
+      }
+    },
+    "reports": {
+      "title": "Reports",
+      "intro": "What your fleet spent and how far it drove, by month, vehicle and department. Under every chart is a table of the same data.",
+      "periodLabel": "Period",
+      "periods": {
+        "bu-ay": "This month",
+        "son-3-ay": "Last 3 months",
+        "bu-yil": "This year",
+        "ozel": "Custom period"
+      },
+      "from": "First month",
+      "to": "Last month",
+      "apply": "Show report",
+      "showing": "Showing {period}.",
+      "showingRange": "Showing {from} – {to}.",
+      "retry": "Try again",
+      "loadErrorTitle": "The report could not be loaded",
+      "loadErrorText": "Try again in a few seconds.",
+      "emptyTitle": "No data in this period",
+      "emptyText": "There are no invoices, expenses or kilometres in the months you chose. Try a wider period.",
+      "emptyAction": "Show this year",
+      "totals": {
+        "total": "Total cost",
+        "invoice": "Invoice share",
+        "expenses": "Expenses",
+        "km": "Kilometres"
+      },
+      "basis": "Amounts are in TRY. The invoice share is without VAT: each line of an invoice is divided equally between all the vehicles on that contract; the department is that of the person who had the vehicle at the end of the invoice's month, or at the moment of the expense.",
+      "series": {
+        "invoice": "Invoice share",
+        "expenses": "Expenses",
+        "km": "Kilometres"
+      },
+      "tableBelow": "The same data is in the table below.",
+      "topNote": "The {count} highest rows are drawn; the table has every row.",
+      "noDepartment": "Unassigned / no department",
+      "unallocated": "Not shared out (contract with no vehicle)",
+      "scrollable": "{table} (scrolls sideways)",
+      "months": {
+        "title": "Cost by month"
+      },
+      "km": {
+        "title": "Kilometres by month"
+      },
+      "kmUnit": "{value} km",
+      "vehicles": {
+        "title": "Cost by vehicle"
+      },
+      "departments": {
+        "title": "Cost by department"
+      },
+      "columns": {
+        "month": "Month",
+        "invoice": "Invoice share",
+        "expenses": "Expenses",
+        "total": "Total",
+        "km": "Kilometres",
+        "vehicle": "Vehicle",
+        "department": "Department",
+        "sum": "Total"
       }
     }
   }

@@ -14,6 +14,8 @@ import { FleetExpensesService, type ReflectResult } from './fleet-expenses.servi
 import type { ExpenseView } from './expense.view.js';
 import { FleetInvoicesService } from './fleet-invoices.service.js';
 import type { InvoiceView } from './invoice.view.js';
+import { FleetReportsService } from './fleet-reports.service.js';
+import type { Report } from './report-calc.js';
 import { FleetSummaryService, type FleetSummary } from './fleet-summary.service.js';
 import { FleetVehiclesService, type FleetVehicleDetail } from './fleet-vehicles.service.js';
 import type { AssignmentView, ContractDetail, ContractView, EmployeeView, FleetVehicleView } from './fleet.view.js';
@@ -31,6 +33,17 @@ const numberParam = (request: Request): string | null => {
   return typeof raw === 'string' ? raw.toUpperCase() : null;
 };
 const resultId = (_request: Request, result: unknown): string | null => (result as { id?: string } | null)?.id ?? null;
+
+@ApiTags('fleet')
+@Controller('fleet/reports')
+export class FleetReportsController {
+  constructor(private readonly reports: FleetReportsService) {}
+
+  @Get()
+  get(@CurrentCompany() companyId: string, @Query() query: unknown): Promise<Report> {
+    return this.reports.get(companyId, query);
+  }
+}
 
 @ApiTags('fleet')
 @Controller('fleet/summary')

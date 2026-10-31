@@ -1,8 +1,8 @@
-import { Car, FileText, KeyRound, LayoutDashboard, Receipt, Users, Wallet, type LucideIcon } from "lucide-react";
+import { Car, FileText, KeyRound, LayoutDashboard, Receipt, Users, Wallet, BarChart3, type LucideIcon } from "lucide-react";
 
 // The screens of Filom (docs/FLEET.md §3), in the order of the menu. The screens of the later issues (invoices, expenses, requests,
 // live tracking, reports, green fleet) are added here when they are built, with their addresses in i18n/routing.ts (a test checks it).
-export type FleetScreenKey = "summary" | "vehicles" | "employees" | "assignments" | "contracts" | "invoices" | "expenses";
+export type FleetScreenKey = "summary" | "vehicles" | "employees" | "assignments" | "contracts" | "invoices" | "expenses" | "reports";
 
 export type FleetScreen = { key: FleetScreenKey; href: string; icon: LucideIcon };
 
@@ -14,6 +14,7 @@ export const FLEET_SCREENS: readonly FleetScreen[] = [
   { key: "contracts", href: "/filom/sozlesmeler", icon: FileText },
   { key: "invoices", href: "/filom/faturalar", icon: Receipt },
   { key: "expenses", href: "/filom/masraflar", icon: Wallet },
+  { key: "reports", href: "/filom/raporlar", icon: BarChart3 },
 ];
 
 // The summary is the front door, so it is the current screen only on its own address; the others also own what is under them.

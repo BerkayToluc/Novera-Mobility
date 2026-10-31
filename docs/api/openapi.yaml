@@ -3693,6 +3693,39 @@ paths:
         "422": { $ref: "#/components/responses/ValidationFailed" }
         "429": { $ref: "#/components/responses/TooManyRequests" }
 
+  /fleet/reports:
+    get:
+      tags: [fleet]
+      summary: Dönem raporu
+      description: |
+        Şirketin bir ay aralığındaki (`from` ve `to`, `YYYY-MM`, ikisi dahil; ikisi de yoksa bu ay, biri yoksa tek ay) **maliyeti ve kilometresi**: ay, araç ve departman bazında. En çok 24 ay; henüz başlamamış ay ve ters sıra `422` `OUT_OF_RANGE`.
+        **Maliyet = fatura payı + masraflar.** Faturalar KDV'siz, satırlarının toplamıyla (ara toplam) alınır: bir faturanın bir satırı, sözleşmenin **tüm araçları** arasında eşit bölünür (plaka sırasıyla; bölünmeyen kuruşlar ilk araçlara gider), böylece toplam faturalarla kuruşu kuruşuna tutar. Aracı olmayan sözleşmenin satırı hiçbir araca düşmez, `unallocated`'dadır ve toplamdadır. Fatura, ait olduğu **dönemin** ayına; masraf, gerçekleştiği **İstanbul ayına** yazılır.
+        **Departman:** faturada o ayın son anında, masrafta masrafın anında aracı kimin kullandığına göre kişinin departmanıdır; kimse kullanmıyorsa ya da kişinin departmanı yoksa `null`. **Kilometre:** ayın sonundaki ile başındaki okumanın farkı (okuma yoksa aracın başlangıç km'si); ay toplamları dönem toplamına eşittir.
+        Aynı toplam üç kesitte de tutar: aylar, departmanlar ve (`unallocated` ile birlikte) araçlar. Yalnızca **kurumsal hesabın kendi şirketinin** verisi gelir. Sınır: hesap başına dakikada 120.
+      security:
+        - cookieAuth: []
+      parameters:
+        - { name: from, in: query, description: "İlk ay, `YYYY-MM`.", schema: { type: string, example: "2026-08" } }
+        - { name: to, in: query, description: "Son ay, `YYYY-MM`.", schema: { type: string, example: "2026-10" } }
+      responses:
+        "200":
+          description: Rapor
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FleetReport" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Kurumsal hesap değil ya da bir şirkete bağlı değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
   /admin/ping:
 
     get:
@@ -5254,6 +5287,68 @@ components:
         vehicleCount: { type: integer, minimum: 1, maximum: 10000, nullable: true, description: Boşsa sözleşmedeki kullanımdaki araç sayısı. }
         durationMonths: { type: integer, minimum: 1, maximum: 120, nullable: true, description: Boşsa sözleşmenin süresi. }
         notes: { type: string, nullable: true, maxLength: 500, description: Satış ekibine not. }
+
+    FleetReportMoney:
+      type: object
+      required: [invoice, expenses, total]
+      properties:
+        invoice: { type: integer, minimum: 0, description: Fatura payı, KDV'siz, TRY kuruş. }
+        expenses: { type: integer, minimum: 0, description: Masraflar, TRY kuruş. }
+        total: { type: integer, minimum: 0, description: İkisinin toplamı. }
+
+    FleetReport:
+      type: object
+      required: [from, to, months, vehicles, departments, unallocated, totals]
+      properties:
+        from: { type: string, example: "2026-08" }
+        to: { type: string, example: "2026-10" }
+        months:
+          type: array
+          description: Aralıktaki her ay (boş olanlar da), eskiden yeniye.
+          items:
+            allOf:
+              - { $ref: "#/components/schemas/FleetReportMoney" }
+              - type: object
+                required: [period, km]
+                properties:
+                  period: { type: string, example: "2026-10" }
+                  km: { type: integer, minimum: 0 }
+        vehicles:
+          type: array
+          description: Maliyeti ya da kilometresi olan araçlar, maliyete göre çoktan aza.
+          items:
+            allOf:
+              - { $ref: "#/components/schemas/FleetReportMoney" }
+              - type: object
+                required: [id, plate, model, km]
+                properties:
+                  id: { type: string, format: uuid }
+                  plate: { type: string }
+                  model: { type: string }
+                  km: { type: integer, minimum: 0 }
+        departments:
+          type: array
+          description: "Departman bazında; `department: null` kimsenin kullanmadığı ya da departmanı olmayan kişinin payıdır."
+          items:
+            allOf:
+              - { $ref: "#/components/schemas/FleetReportMoney" }
+              - type: object
+                required: [department, km]
+                properties:
+                  department: { type: string, nullable: true }
+                  km: { type: integer, minimum: 0 }
+        unallocated:
+          type: object
+          required: [invoice]
+          properties:
+            invoice: { type: integer, minimum: 0, description: Aracı olmayan sözleşmelerin fatura satırları; toplamdadır, hiçbir araçta değildir. }
+        totals:
+          allOf:
+            - { $ref: "#/components/schemas/FleetReportMoney" }
+            - type: object
+              required: [km]
+              properties:
+                km: { type: integer, minimum: 0 }
 
     FleetContract:
       type: object
