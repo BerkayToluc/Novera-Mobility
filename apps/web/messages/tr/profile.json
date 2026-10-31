@@ -11,7 +11,8 @@
       "quotes": "Teklif taleplerim",
       "points": "Puanlarım",
       "admin": "Yönetim paneli",
-      "newRental": "Yeni kiralama"
+      "newRental": "Yeni kiralama",
+      "fleet": "Filom"
     },
     "signedOut": {
       "title": "Giriş yapmanız gerekiyor",

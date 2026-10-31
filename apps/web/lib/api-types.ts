@@ -5772,7 +5772,61 @@ export interface paths {
             };
             cookie?: never;
         };
-        get?: never;
+        /**
+         * Bir personel
+         * @description Kişinin bilgisi ve şu an kullandığı aracın plakası. Başka şirketin kişisi `404` döner (ADR-25). Sınır: hesap başına dakikada 120.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Kişinin kimliği. Kimlik olamayacak bir değer `404` döner. */
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Kişi */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["FleetEmployee"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Kurumsal hesap değil ya da bir şirkete bağlı değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Böyle bir kişi yok ya da başka şirketin (`NOT_FOUND`) */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
         put?: never;
         post?: never;
         delete?: never;
@@ -6565,6 +6619,8 @@ export interface components {
             hasPassword: boolean;
             /** @description Hesap bir Google hesabına bağlı mı. */
             googleLinked: boolean;
+            /** @description Kurumsal hesabın şirketinin etkin bir filo sözleşmesi var (V2-36). `true` ise Filom'un giriş noktaları görünür; bireysel hesapta ve sözleşmesiz şirkette `false`. */
+            hasFleet: boolean;
         };
         /** @description E-posta tercihleri. Varsayılan hatırlatma açık, kampanya kapalı (pazarlama postası için onay gerekir). */
         Notifications: {

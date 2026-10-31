@@ -49,6 +49,14 @@ export class FleetEmployeesService {
     return { items: rows.map(employeeView), total, page: input.page, pageSize: input.pageSize };
   }
 
+  // One person of the company, for the screen that edits them. Another company's person is a 404, like one that is not there.
+  async get(companyId: string, id: string): Promise<EmployeeView> {
+    if (!isUuid(id)) throw fleetNotFound('Employee');
+    const row = await this.prisma.companyEmployee.findFirst({ where: { id, companyId }, include: EMPLOYEE_INCLUDE });
+    if (!row) throw fleetNotFound('Employee');
+    return employeeView(row);
+  }
+
   async create(companyId: string, body: unknown): Promise<EmployeeView> {
     const input = parseInput(createEmployeeSchema, body, 'Employee validation failed');
     try {

@@ -2958,6 +2958,35 @@ paths:
   /fleet/employees/{id}:
     parameters:
       - { name: id, in: path, required: true, description: "Kişinin kimliği. Kimlik olamayacak bir değer `404` döner.", schema: { type: string, format: uuid } }
+    get:
+      tags: [fleet]
+      summary: Bir personel
+      description: |
+        Kişinin bilgisi ve şu an kullandığı aracın plakası. Başka şirketin kişisi `404` döner (ADR-25). Sınır: hesap başına dakikada 120.
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Kişi
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FleetEmployee" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Kurumsal hesap değil ya da bir şirkete bağlı değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: Böyle bir kişi yok ya da başka şirketin (`NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
     patch:
       tags: [fleet]
       summary: Personeli güncelle
@@ -3653,7 +3682,7 @@ components:
     # ---------- Hesap ----------
     User:
       type: object
-      required: [id, email, firstName, lastName, accountType, role, companyName, taxOffice, companyCity, companyPhone, contactTitle, salesContact, locale, theme, currency, hasPassword, googleLinked]
+      required: [id, email, firstName, lastName, accountType, role, companyName, taxOffice, companyCity, companyPhone, contactTitle, salesContact, locale, theme, currency, hasPassword, googleLinked, hasFleet]
       properties:
         id: { type: string, format: uuid }
         email: { type: string, format: email }
@@ -3686,6 +3715,7 @@ components:
           type: boolean
           description: "`false` ise hesap Google ile açılmış ve henüz şifresi yok (şifre belirlemek için `/auth/forgot-password` akışı kullanılır, `/me/password` 409 döner)."
         googleLinked: { type: boolean, description: Hesap bir Google hesabına bağlı mı. }
+        hasFleet: { type: boolean, description: "Kurumsal hesabın şirketinin etkin bir filo sözleşmesi var (V2-36). `true` ise Filom'un giriş noktaları görünür; bireysel hesapta ve sözleşmesiz şirkette `false`." }
 
     Notifications:
       type: object

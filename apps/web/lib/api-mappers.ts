@@ -68,6 +68,7 @@ export function sessionFromApi(user: Schemas["User"]): Session {
     role: user.role === "ADMIN" ? ("admin" as const) : ("customer" as const),
     hasPassword: user.hasPassword,
     googleLinked: user.googleLinked,
+    hasFleet: user.hasFleet,
     preferences: { currency: user.currency, locale: user.locale, theme: user.theme },
     ...(user.notifications ? { notifications: user.notifications } : {}),
   };

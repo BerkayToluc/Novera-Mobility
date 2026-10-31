@@ -41,6 +41,7 @@ describe('toUserResponse', () => {
       notifications: { reminders: true, campaigns: false },
       hasPassword: true,
       googleLinked: false,
+      hasFleet: false,
     });
     expect(JSON.stringify(view)).not.toContain('scrypt');
     expect(view).not.toHaveProperty('passwordHash');
@@ -58,6 +59,17 @@ describe('toUserResponse', () => {
       hasPassword: false,
       googleLinked: true,
     });
+  });
+
+  // The Filom link is for a company with an active fleet contract (V2-36): the row carries at most one such contract.
+  it('says a corporate account has a fleet only when its company has an active contract', () => {
+    const company = { name: 'Ege Lojistik', taxOffice: null, city: null, phone: null, salesContact: null };
+    expect(toUserResponse(row({ accountType: 'CORPORATE', company: { ...company, fleetContracts: [{ id: 'c1' }] } })).hasFleet).toBe(true);
+    expect(toUserResponse(row({ accountType: 'CORPORATE', company: { ...company, fleetContracts: [] } })).hasFleet).toBe(false);
+    expect(toUserResponse(row({ accountType: 'CORPORATE', company })).hasFleet).toBe(false);
+    expect(toUserResponse(row({ accountType: 'CORPORATE', company: null })).hasFleet).toBe(false);
+    // An individual account has none, whatever the row says.
+    expect(toUserResponse(row({ company: { ...company, fleetContracts: [{ id: 'c1' }] } })).hasFleet).toBe(false);
   });
 
   it('reads the sales contact of a corporate account', () => {

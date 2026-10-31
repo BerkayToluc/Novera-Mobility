@@ -1,0 +1,329 @@
+{
+  "FleetPanel": {
+    "metaTitle": "Filom",
+    "nav": {
+      "label": "Filom bölümleri",
+      "menuCurrent": "Menü: {current}",
+      "summary": "Özet",
+      "vehicles": "Araçlar",
+      "employees": "Personel",
+      "assignments": "Zimmet",
+      "contracts": "Sözleşmeler"
+    },
+    "empty": {
+      "title": "Filom",
+      "heading": "Filonuz henüz yok",
+      "text": "Filom, filo sözleşmesi olan şirketlerin araçlarını, personelini ve zimmetlerini tek ekrandan yönettiği paneldir. Şirketinizin henüz etkin bir filo sözleşmesi yok; teklif alın, sözleşme açıldığında Filom kendiliğinden açılır.",
+      "cta": "Kurumsal teklif al"
+    },
+    "filter": {
+      "all": "Tümü"
+    },
+    "summary": {
+      "title": "Filom",
+      "asOf": "{date} itibarıyla (İstanbul saati)",
+      "errorTitle": "Özet yüklenemedi",
+      "errorText": "Birkaç saniye sonra yeniden deneyin.",
+      "retry": "Tekrar dene",
+      "openList": "Listeyi aç",
+      "cards": {
+        "vehicles": "Kullanımdaki araç",
+        "assigned": "Zimmetli araç",
+        "idle": "Boşta araç",
+        "contracts": "Etkin sözleşme",
+        "endingSoon": "60 gün içinde biten sözleşme",
+        "maintenanceDue": "Bakımı ya da muayenesi 30 gün içinde olan araç"
+      }
+    },
+    "vehicles": {
+      "title": "Araçlar",
+      "intro": "Sözleşmelerinizdeki filo araçları. Bir araca tıklayınca bilgisini, zimmet geçmişini ve son okumalarını görür, aracı bir personele verirsiniz.",
+      "statusFilterLabel": "Duruma göre",
+      "assignFilterLabel": "Zimmete göre",
+      "searchLabel": "Plaka ya da model ara",
+      "tableCaption": "Araçlar",
+      "retry": "Tekrar dene",
+      "idle": "Boşta",
+      "kmValue": "{km} km",
+      "columns": {
+        "plate": "Plaka",
+        "model": "Model",
+        "assignee": "Kimde",
+        "km": "Son km",
+        "status": "Durum"
+      },
+      "status": {
+        "ACTIVE": "Kullanımda",
+        "RETURNED": "İade edildi"
+      },
+      "filters": {
+        "kullanimda": "Kullanımda",
+        "iade": "İade edildi",
+        "zimmetli": "Zimmetli",
+        "bosta": "Boşta"
+      },
+      "emptyTitle": "Henüz araç yok",
+      "emptyText": "Araçlar Novera sözleşmenize ekledikçe burada görünür.",
+      "emptyFilteredTitle": "Bu aramaya uyan araç yok",
+      "emptyFilteredText": "Süzgeçleri kaldırmayı ya da başka bir şey aramayı deneyin.",
+      "loadErrorTitle": "Araçlar yüklenemedi",
+      "loadErrorText": "Birkaç saniye sonra yeniden deneyin."
+    },
+    "vehicle": {
+      "metaTitle": "Araç",
+      "loadErrorTitle": "Araç yüklenemedi",
+      "loadErrorText": "Birkaç saniye sonra yeniden deneyin.",
+      "retry": "Tekrar dene",
+      "back": "Araçlara dön",
+      "status": {
+        "ACTIVE": "Kullanımda",
+        "RETURNED": "İade edildi"
+      },
+      "facts": {
+        "title": "Araç bilgileri",
+        "model": "Model",
+        "year": "Model yılı",
+        "km": "Son kilometre",
+        "kmValue": "{km} km",
+        "assignee": "Kimde",
+        "idle": "Boşta",
+        "maintenance": "Sonraki bakım",
+        "inspection": "Muayene",
+        "returnedAt": "İade tarihi",
+        "contract": "Sözleşme",
+        "overdue": "{date} (tarihi geçti)",
+        "inDays": "{count, plural, =0 {{date} (bugün)} other {{date} (# gün sonra)}}"
+      },
+      "history": {
+        "title": "Zimmet geçmişi",
+        "empty": "Bu araç henüz kimseye verilmedi.",
+        "period": "{from} – {to}",
+        "since": "{from} tarihinden beri"
+      },
+      "readings": {
+        "title": "Son okumalar",
+        "empty": "Henüz okuma girilmedi.",
+        "fuel": "Yakıt %{value}",
+        "charge": "Şarj %{value}",
+        "battery": "Batarya sağlığı %{value}"
+      }
+    },
+    "assignment": {
+      "title": "Zimmet",
+      "returnedText": "Bu araç iade edilmiş; kimseye verilemez.",
+      "current": "{name} kullanıyor ({date} tarihinden beri).",
+      "takeBack": "Aracı geri al",
+      "noEmployees": "Aracı verebileceğiniz etkin bir personel yok.",
+      "addEmployee": "Personel ekleyin",
+      "idleText": "Araç boşta. Bir personele vermek için seçin; aracın başka zimmeti olamaz.",
+      "employee": "Personel",
+      "employeeChoose": "Personel seçin",
+      "startedAt": "Başlangıç günü",
+      "startedAtHint": "Boş bırakırsanız şimdi başlar.",
+      "note": "Not",
+      "give": "Aracı ver",
+      "giving": "Veriliyor",
+      "toast": {
+        "given": "Araç verildi",
+        "taken": "Araç geri alındı"
+      },
+      "errors": {
+        "employee": "Listeden bir personel seçin.",
+        "startedAt": "Geçerli bir gün seçin: gelecekte olamaz ve aracın önceki zimmeti bitmeden başlayamaz.",
+        "note": "En çok 200 karakter yazın.",
+        "assigned": "Bu araç az önce başkasına verilmiş. Sayfa yenilendi.",
+        "returned": "Bu araç iade edilmiş; kimseye verilemez.",
+        "inactive": "Bu personel artık etkin değil.",
+        "generic": "Bu bilgi kabul edilmedi. Alanları gözden geçirip yeniden deneyin.",
+        "notFound": "Bu kayıt artık yok. Sayfayı yenileyin.",
+        "unavailable": "Yapılamadı. Birkaç saniye sonra yeniden deneyin.",
+        "alreadyEnded": "Bu zimmet zaten bitmiş. Sayfa yenilendi."
+      },
+      "takeBackDialog": {
+        "title": "{plate} geri alınsın mı?",
+        "text": "Zimmet hemen biter ve araç boşta olur. {name} adlı kişiye ait geçmiş kaydı silinmez.",
+        "confirm": "Aracı geri al",
+        "keep": "Vazgeç"
+      }
+    },
+    "employees": {
+      "title": "Personel",
+      "intro": "Araç verebileceğiniz kişiler. Kimse silinmez: ayrılan personel pasifleştirilir ve elindeki araç hemen geri gelir.",
+      "newButton": "Yeni personel",
+      "newTitle": "Yeni personel",
+      "newIntro": "Kişi eklendikten sonra ona bir araç verebilirsiniz. Ehliyet bilgisi istenmez ve saklanmaz.",
+      "detailTitle": "Personel",
+      "detailIntro": "Kişinin bilgileri.",
+      "detailWithCar": "{plate} plakalı aracı kullanıyor.",
+      "statusFilterLabel": "Duruma göre",
+      "searchLabel": "Personel ara",
+      "tableCaption": "Personel",
+      "retry": "Tekrar dene",
+      "columns": {
+        "name": "Ad soyad",
+        "employeeNo": "Sicil no",
+        "vehicle": "Aracı",
+        "status": "Durum"
+      },
+      "status": {
+        "active": "Etkin",
+        "inactive": "Pasif"
+      },
+      "filters": {
+        "aktif": "Etkin",
+        "pasif": "Pasif"
+      },
+      "emptyTitle": "Henüz personel yok",
+      "emptyText": "İlk kişiyi ekleyin; sonra ona araç verebilirsiniz.",
+      "emptyFilteredTitle": "Bu aramaya uyan kişi yok",
+      "emptyFilteredText": "Süzgeçleri kaldırmayı ya da başka bir şey aramayı deneyin.",
+      "loadErrorTitle": "Personel yüklenemedi",
+      "loadErrorText": "Birkaç saniye sonra yeniden deneyin."
+    },
+    "employeeForm": {
+      "newLabel": "Yeni personel",
+      "editLabel": "Personeli değiştir",
+      "fields": {
+        "firstName": "Ad",
+        "lastName": "Soyad",
+        "department": "Departman",
+        "employeeNo": "Sicil no",
+        "employeeNoHint": "İsteğe bağlı. Şirketinizde aynı sicil no iki kişide olamaz.",
+        "email": "E-posta",
+        "phone": "Telefon"
+      },
+      "privacy": "Bu bilgiler yalnızca sizin şirketinizin kullanıcıları ve Novera yönetimi tarafından görülür; personel bilgisini Novera, şirketiniz adına işler.",
+      "form": {
+        "create": "Personeli ekle",
+        "save": "Değişiklikleri kaydet",
+        "saving": "Kaydediliyor",
+        "cancel": "Vazgeç"
+      },
+      "errors": {
+        "firstName": "Adı yazın (en çok 60 karakter).",
+        "lastName": "Soyadı yazın (en çok 60 karakter).",
+        "department": "En çok 60 karakter yazın.",
+        "employeeNo": "En çok 30 karakter yazın.",
+        "employeeNoTaken": "Bu sicil no şirketinizin başka bir kişisinde.",
+        "email": "Geçerli bir e-posta adresi yazın ya da boş bırakın.",
+        "phone": "Geçerli bir telefon numarası yazın ya da boş bırakın.",
+        "generic": "Bu bilgi kabul edilmedi. Alanları gözden geçirip yeniden deneyin.",
+        "notFound": "Bu kişi artık yok. Listeye dönün.",
+        "unavailable": "Kaydedilemedi. Birkaç saniye sonra yeniden deneyin."
+      },
+      "toast": {
+        "created": "Personel eklendi",
+        "saved": "Değişiklikler kaydedildi"
+      }
+    },
+    "employeeActions": {
+      "title": "Pasifleştir ya da yeniden etkinleştir",
+      "activeText": "Ayrılan personel silinmez, pasifleştirilir. Pasif kişiye araç verilemez; kaydı ve zimmet geçmişi kalır.",
+      "activeWithCar": "Bu kişi {plate} plakalı aracı kullanıyor. Pasifleştirirseniz araç hemen geri gelir ve boşta olur; zimmet geçmişi kalır.",
+      "inactiveText": "Bu kişi pasif: araç verilemez. Yeniden etkinleştirirseniz tekrar araç verebilirsiniz.",
+      "deactivate": "Pasifleştir",
+      "activate": "Yeniden etkinleştir",
+      "toast": {
+        "activated": "Personel yeniden etkinleştirildi",
+        "deactivated": "Personel pasifleştirildi"
+      },
+      "errors": {
+        "stale": "Kişi bu arada değişmiş. Sayfa yenilendi, yeniden deneyin.",
+        "notFound": "Bu kişi artık yok.",
+        "unavailable": "Yapılamadı. Birkaç saniye sonra yeniden deneyin."
+      },
+      "dialog": {
+        "title": "{name} pasifleştirilsin mi?",
+        "text": "Kişi pasif olur ve ona araç verilemez. Kaydı ve geçmişi silinmez; istediğiniz zaman yeniden etkinleştirebilirsiniz.",
+        "textWithCar": "{plate} plakalı araç hemen geri gelir ve boşta olur. Kişi pasif olur ve ona araç verilemez. Kaydı ve geçmişi silinmez; istediğiniz zaman yeniden etkinleştirebilirsiniz.",
+        "confirm": "Pasifleştir",
+        "keep": "Vazgeç"
+      }
+    },
+    "assignments": {
+      "title": "Zimmet",
+      "intro": "Hangi araç kimde oldu: tüm zimmetler, en yeni başlayan üstte. Aracı vermek ve geri almak için aracın kendi sayfasına gidin.",
+      "statusFilterLabel": "Duruma göre",
+      "tableCaption": "Zimmetler",
+      "retry": "Tekrar dene",
+      "columns": {
+        "vehicle": "Araç",
+        "employee": "Personel",
+        "start": "Başlangıç",
+        "end": "Bitiş",
+        "status": "Durum"
+      },
+      "status": {
+        "open": "Açık",
+        "closed": "Kapandı"
+      },
+      "filters": {
+        "acik": "Açık",
+        "kapali": "Kapanmış"
+      },
+      "emptyTitle": "Henüz zimmet yok",
+      "emptyText": "Bir aracı personele verdiğinizde burada görünür.",
+      "emptyFilteredTitle": "Bu süzgece uyan zimmet yok",
+      "emptyFilteredText": "Süzgeçleri kaldırmayı deneyin.",
+      "loadErrorTitle": "Zimmetler yüklenemedi",
+      "loadErrorText": "Birkaç saniye sonra yeniden deneyin."
+    },
+    "contracts": {
+      "title": "Sözleşmeler",
+      "intro": "Filo sözleşmeleriniz. Sözleşmeleri ve araçlarını Novera girer; yenileme için Novera ile iletişime geçin.",
+      "statusFilterLabel": "Duruma göre",
+      "tableCaption": "Sözleşmeler",
+      "retry": "Tekrar dene",
+      "currencyNote": "Tutarlar TL olarak gösterilir.",
+      "columns": {
+        "number": "Numara",
+        "product": "Ürün",
+        "period": "Dönem",
+        "fee": "Aylık bedel",
+        "vehicles": "Araç",
+        "status": "Durum"
+      },
+      "products": {
+        "akilli-kurumsal-filo": "Akıllı Kurumsal Filo",
+        "yesil-filo": "Yeşil Filo",
+        "vip-mobilite": "VIP Mobilite",
+        "esnek-kisa-donem": "Esnek Kısa Dönem"
+      },
+      "status": {
+        "ACTIVE": "Etkin",
+        "ENDED": "Bitti"
+      },
+      "emptyTitle": "Henüz sözleşme yok",
+      "emptyText": "Sözleşmeniz açıldığında burada görünür.",
+      "emptyFilteredTitle": "Bu süzgece uyan sözleşme yok",
+      "emptyFilteredText": "Süzgeçleri kaldırmayı deneyin.",
+      "loadErrorTitle": "Sözleşmeler yüklenemedi",
+      "loadErrorText": "Birkaç saniye sonra yeniden deneyin."
+    },
+    "contract": {
+      "metaTitle": "Sözleşme",
+      "intro": "Sözleşmenizin bilgileri ve araçları.",
+      "back": "Sözleşmelere dön",
+      "retry": "Tekrar dene",
+      "loadErrorTitle": "Sözleşme yüklenemedi",
+      "loadErrorText": "Birkaç saniye sonra yeniden deneyin.",
+      "facts": {
+        "title": "Sözleşme bilgileri",
+        "product": "Ürün",
+        "period": "Dönem",
+        "remaining": "Kalan süre",
+        "remainingValue": "{count, plural, =0 {Bugün bitiyor} other {# gün}}",
+        "ended": "Bitti",
+        "monthlyFee": "Aylık bedel",
+        "deliveryCity": "Teslim şehri",
+        "vehicles": "Araç sayısı"
+      },
+      "vehicles": {
+        "title": "Araçlar",
+        "empty": "Bu sözleşmeye henüz araç eklenmedi.",
+        "idle": "Boşta",
+        "returned": "İade edildi"
+      }
+    }
+  }
+}

@@ -24,6 +24,7 @@ export const MOCK_CORPORATE: Session = {
   role: "customer",
   user: { id: "u-corporate", firstName: "Mert", lastName: "Kaya", email: "filo@egelojistik.example" },
   company: {
+    id: "5d0c1c0e-6f3a-4a52-9c1e-0a1b2c3d4e01",
     name: "Ege Lojistik A.Ş.",
     taxOffice: "Bornova",
     city: "İzmir",
@@ -33,6 +34,19 @@ export const MOCK_CORPORATE: Session = {
   },
   hasPassword: true,
   googleLinked: false,
+  // Its company has an active fleet contract (mocks/admin-contracts.ts), so Filom is open to it (V2-36).
+  hasFleet: true,
+};
+
+// A corporate account whose company has no fleet contract yet: Filom shows its empty state and the call for a quote.
+export const MOCK_CORPORATE_NOFLEET: Session = {
+  type: "corporate",
+  role: "customer",
+  user: { id: "u-corporate-nofleet", firstName: "Aylin", lastName: "Sönmez", email: "aylin@anadoluinsaat.example" },
+  company: { name: "Anadolu İnşaat A.Ş.", taxOffice: "Çankaya", city: "Ankara", phone: "+90 312 555 03 00" },
+  hasPassword: true,
+  googleLinked: false,
+  hasFleet: false,
 };
 
 // An administrator (V2-23): signs in with the cookie only (`novera-mock-session=admin`), as the sign-in form has no tab for it.

@@ -279,3 +279,22 @@ export function addMockReading(name: string, id: string, values: ReadingFormValu
   found.car.readings.push(reading);
   return { status: "ok", value: reading };
 }
+
+// ---------- What the customer's fleet screens read from the same store (mocks/fleet.ts, V2-36) ----------
+// The cars of a company, with their contract number and product, the readings of a car (newest first), and the person a car is with: the
+// assignment is made on the customer's screen and shows on the administrator's contract page too.
+export function listMockCompanyCars(name: string, companyId: string): FleetVehicle[] {
+  return world(name)
+    .contracts.filter((c) => c.companyId === companyId)
+    .flatMap((c) => c.cars.map((car) => carView(c, car)));
+}
+
+export function getMockCarReadings(name: string, carId: string): FleetReading[] {
+  const found = findCar(world(name), carId);
+  return found ? [...found.car.readings].sort((a, b) => (a.at < b.at ? 1 : -1)) : [];
+}
+
+export function setMockCarAssignee(name: string, carId: string, assignee: FleetVehicle["assignee"]): void {
+  const found = findCar(world(name), carId);
+  if (found) found.car.assignee = assignee;
+}

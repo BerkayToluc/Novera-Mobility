@@ -42,7 +42,7 @@ async function ProfileGate({ children }: { children: ReactNode }) {
     <div className="mx-auto flex max-w-content flex-col gap-8 px-4 py-10 md:px-8 xl:py-14">
       <ProfileHeader session={session} balance={balance} />
       <div className="flex flex-col gap-8 xl:grid xl:grid-cols-sidebar xl:gap-12">
-        <ProfileNav type={session.type} isAdmin={session.role === "admin"} />
+        <ProfileNav type={session.type} isAdmin={session.role === "admin"} hasFleet={session.hasFleet === true} />
         <div className="min-w-0">{children}</div>
       </div>
     </div>

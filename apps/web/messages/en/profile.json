@@ -11,7 +11,8 @@
       "quotes": "My quote requests",
       "points": "My Points",
       "admin": "Admin panel",
-      "newRental": "New rental"
+      "newRental": "New rental",
+      "fleet": "My fleet"
     },
     "signedOut": {
       "title": "You need to sign in",

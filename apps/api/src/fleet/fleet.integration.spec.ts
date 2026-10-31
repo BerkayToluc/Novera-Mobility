@@ -2,6 +2,9 @@ import 'dotenv/config';
 import { randomUUID } from 'node:crypto';
 import { HttpException } from '@nestjs/common';
 import { AdminContractsService } from '../admin/contracts/contracts.service.js';
+import { AuthService } from '../auth/auth.service.js';
+import { hashSessionToken, newSessionToken } from '../auth/session-token.js';
+import { toUserResponse } from '../auth/user-view.js';
 import { testPlate } from '../common/plate.testing.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { FleetAssignmentsService } from './fleet-assignments.service.js';
@@ -179,6 +182,14 @@ describeDb('the fleet panel against the database (V2-35)', () => {
       expect((await refused(employees.list(A.id, { active: 'maybe' }))).status).toBe(422);
     });
 
+    it('opens one person; another company’s person, or an id that cannot be one, is 404', async () => {
+      const made = await employees.create(A.id, { firstName: 'Tek', lastName: 'Kişi', employeeNo: 'T-1' });
+      expect(await employees.get(A.id, made.id)).toMatchObject({ id: made.id, firstName: 'Tek', employeeNo: 'T-1', active: true, vehicle: null });
+      expect((await refused(employees.get(B.id, made.id))).status).toBe(404);
+      expect((await refused(employees.get(A.id, 'not-an-id'))).status).toBe(404);
+      expect((await refused(employees.get(A.id, randomUUID()))).status).toBe(404);
+    });
+
     it('changes only what is sent, and an old copy is refused; another company’s person is 404 and is not changed', async () => {
       const made = await employees.create(A.id, { firstName: 'Değişen', lastName: 'Kişi', department: 'Eski' });
       const changed = await employees.update(A.id, made.id, { updatedAt: made.updatedAt, department: 'Yeni', phone: '' });
@@ -286,6 +297,37 @@ describeDb('the fleet panel against the database (V2-35)', () => {
       const target = detail.vehicles.find((row) => row.id === car.id)!;
       await admin.updateVehicle(car.id, { updatedAt: target.updatedAt, returned: true });
       expect((await refused(assignments.create(B.id, { fleetVehicleId: car.id, employeeId: person.id }))).body).toMatchObject({ code: 'INVALID_TRANSITION' });
+    });
+  });
+  // The Filom link (V2-36): `GET /me` says whether the company has an active contract, so the profile shows the link only then.
+  describe('who has a fleet', () => {
+    it('says so for a corporate account whose company has an active contract, and for no other', async () => {
+      const auth = new AuthService(prisma);
+      const made: string[] = [];
+      const hasFleet = async (word: string, companyId: string | null, accountType: 'CORPORATE' | 'INDIVIDUAL' = 'CORPORATE') => {
+        const user = await prisma.user.create({ data: { email: `${word}-${run}@example.test`, passwordHash: 'x', firstName: 'Kişi', lastName: word, accountType, companyId } });
+        made.push(user.id);
+        const token = newSessionToken();
+        await prisma.session.create({ data: { tokenHash: hashSessionToken(token), expiresAt: new Date(Date.now() + 86_400_000), userId: user.id } });
+        const row = await auth.authenticate(token);
+        return toUserResponse(row!).hasFleet;
+      };
+      try {
+        expect(await hasFleet('var', A.id)).toBe(true);
+        expect(await hasFleet('yok', NONE.id)).toBe(false);
+        expect(await hasFleet('sirketsiz', null)).toBe(false);
+        expect(await hasFleet('bireysel', A.id, 'INDIVIDUAL')).toBe(false);
+
+        // A contract that has ended is no fleet: B has one contract, and it is ended once its cars are given back.
+        const contract = await admin.get(B.contract);
+        for (const car of contract.vehicles.filter((row) => row.status === 'ACTIVE')) await admin.updateVehicle(car.id, { updatedAt: car.updatedAt, returned: true });
+        const fresh = await admin.get(B.contract);
+        await admin.update(B.contract, { updatedAt: fresh.updatedAt, status: 'ENDED' });
+        expect(await hasFleet('bitti', B.id)).toBe(false);
+      } finally {
+        await prisma.session.deleteMany({ where: { userId: { in: made } } });
+        await prisma.user.deleteMany({ where: { id: { in: made } } });
+      }
     });
   });
 });

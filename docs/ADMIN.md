@@ -253,7 +253,7 @@ Bir kart, bağlı olduğu liste ekranı yapılınca (`lib/admin-screens.ts` `rea
 
 ### 3.13 Filom veri uçları (V2-35)
 
-Müşteri tarafının `/fleet/*` uçları `CompanyGuard` arkasındadır (FLEET.md §4.1; ekranları V2-36 yapar): `GET /fleet/summary`, `GET /fleet/vehicles` ve `/{plaka}`, `GET /fleet/contracts` ve `/{numara}`, `GET/POST /fleet/employees`, `PATCH /fleet/employees/{id}`, `GET/POST /fleet/assignments`, `POST /fleet/assignments/{id}/end`.
+Müşteri tarafının `/fleet/*` uçları `CompanyGuard` arkasındadır (FLEET.md §4.1; ekranları V2-36 yapar): `GET /fleet/summary`, `GET /fleet/vehicles` ve `/{plaka}`, `GET /fleet/contracts` ve `/{numara}`, `GET/POST /fleet/employees`, `GET/PATCH /fleet/employees/{id}`, `GET/POST /fleet/assignments`, `POST /fleet/assignments/{id}/end`.
 
 - **Kapı:** global `CompanyGuard` (`AdminGuard` gibi: `/fleet/*` altına sonradan eklenen bir denetleyici onu unutamaz; yol büyük/küçük harfe duyarsızdır). Oturum yoksa `401`; **bireysel hesap, yönetici hesabı ve şirketi olmayan kurumsal hesap `403`**. Sınır: hesap başına dakikada 120 (`fleet:<id>`).
 - **Şirket ayrımı:** her servis şirketi ilk parametre olarak alır ve her sorguyu onunla süzer; **başka şirketin kaydı `404`** (olmayan kayıtla aynı cevap). Gövdede verilen başka şirketin araç ya da personeli de olmayanla aynı cevabı alır (`422 UNKNOWN_REFERENCE`), yani cevap diğer şirketlerin neleri olduğunu söylemez. Testle sabit.
@@ -261,6 +261,21 @@ Müşteri tarafının `/fleet/*` uçları `CompanyGuard` arkasındadır (FLEET.m
 - **Personel:** kimse silinmez, `active: false` olur ve **açık zimmeti aynı anda kapanır**. Aynı şirkette aynı sicil no iki kişide olmaz (`409 EMPLOYEE_NO_TAKEN`; başka şirketin aynı numarası engel değil). Ehliyet bilgisi saklanmaz. Personel kişisel veridir: yalnızca o şirketin kullanıcıları ve yönetici görür.
 - **İşlem kaydı:** `fleet-employee.create`, `fleet-employee.update`, `fleet-assignment.create`, `fleet-assignment.end`; **aktör müşteri hesabı, satırda `companyId` dolu**, yalnızca alan adları (Yönetim > İşlem kaydı'nda görünür).
 - **Özet:** `hasActiveContract`, araç sayıları (kullanımda / zimmetli / boşta), 60 gün içinde biten etkin sözleşmeler, bakımı ya da muayenesi 30 gün içinde (ya da geçmiş) olan araçlar. Faturalar, masraflar ve talepler kartları V2-37, V2-38 ve V2-41'de eklenir.
+
+### 3.14 Filom ekranları: Özet, Araçlar, Personel, Zimmet, Sözleşmeler (V2-36)
+
+Adresler (TR / EN): `/filom` / `/en/my-fleet`, `/filom/araclar` ve `/{plaka}` (`/my-fleet/vehicles`), `/filom/personel`, `/yeni` ve `/{id}` (`/my-fleet/employees`), `/filom/zimmet` (`/my-fleet/assignments`), `/filom/sozlesmeler` ve `/{numara}` (`/my-fleet/contracts`). Metinler `messages/*/fleet-panel.json` (`FleetPanel`).
+
+- **Kapı** (`app/[locale]/filom/layout.tsx`, sunucuda): oturum yoksa kurumsal girişe (`/giris?tip=kurumsal&sonra=filom`, giriş sonrası `/filom`'a döner; `sonra` sabit bir sözcüktür, adres değildir); **bireysel hesap ve yönetici hesabı `404`** (Filom'un var olduğu bile doğrulanmaz); sözleşmesi olmayan kurumsal hesap ekranlar yerine **boş durum ve "Kurumsal teklif al" (`/kurumsal-teklif`)** görür, bu `/filom` altındaki her adres için aynıdır. Hepsi `noindex`. Gerçek koruma API'dedir; sayfaların verisi API'den gelir ve API reddeder.
+- **Giriş noktası:** kurumsal profilin menüsünde, yalnızca `hasFleet` olan hesapta "Filom" (`GET /me`'deki `hasFleet`: şirketin etkin bir sözleşmesi var; kurumsal hesap oturumuyla birlikte tek küçük sorguyla gelir). Bireysel hesapta ve sözleşmesiz şirkette yoktur.
+- **Özet:** kullanımdaki / zimmetli / boşta araç, etkin sözleşme, 60 gün içinde biten sözleşme, bakımı ya da muayenesi 30 gün içinde olan araç. Kullanımdaki, zimmetli, boşta ve etkin sözleşme kartlarının sayısı, açtıkları listenin toplamıyla aynıdır (aynı süzgeç); "60 gün içinde biten" ve "bakımı yaklaşan" kartları ilgili listeyi (etkin sözleşmeler, kullanımdaki araçlar) açar ve sayıları onun bir alt kümesidir. Fatura, masraf ve talep kartları V2-37, V2-38, V2-41'de eklenir.
+- **Araçlar:** liste (plaka, model, kimde, son km, durum; süzgeç `durum` ve `zimmet`, arama plaka ve modelde, plaka nasıl yazılırsa yazılsın). Detay `/{plaka}` (boşluksuz da olur): bilgiler (bakım ve muayene için kalan gün), **zimmet** (boştaysa "Aracı ver" formu, kimdeyse "Aracı geri al" ve onay penceresi; zimmetli araca ikinci kişi verilemez, form yoktur), zimmet geçmişi, son 10 okuma. İade edilmiş araç kimseye verilemez.
+- **Personel:** liste, ekleme (`/yeni`), kişinin sayfası (düzenleme ve **Pasifleştir**). Pasifleştirme onay ister ve kişinin elindeki araç varsa onu söyler: **araç hemen geri gelir** (API zimmeti aynı adımda kapatır). Pasif kişiye araç verilmez; yeniden etkinleştirmek tek basıştır. Ehliyet bilgisi istenmez. Formun altında bilgilerin kime görüneceği ve verinin Novera tarafından şirket adına işlendiği yazar.
+- **Zimmet** (`/filom/zimmet`): tüm zimmetlerin kaydı, en yeni başlayan üstte, süzgeç `durum` (açık / kapanmış); satır aracın sayfasına gider. Vermek ve geri almak aracın sayfasındadır.
+- **Sözleşmeler:** liste ve detay (araçlar, kimde). Aylık bedel ₺ ve "Tutarlar TL olarak gösterilir" notu, kullanıcının para birimi tercihinden bağımsız. Yenileme talebi V2-38'de.
+- **Dar ekran:** tablolar kendi kutusunda yatay kayar (admin paneliyle aynı DataTable), yönetim paneliyle aynı çerçeve ve menü; 375 px'te sayfa yana kaymaz. Her ekran yükleniyor, boş ve hata durumunu gösterir.
+- **KVKK:** aydınlatma metnine "Kurumsal müşterilerin personel bilgileri" bölümü eklendi (`legal.json`, TR/EN): veri sorumlusu kurumsal müşteridir, Novera veri işleyendir, ehliyet bilgisi alınmaz, yalnızca o şirketin kullanıcıları ve yönetim görür. Metni Berkay onaylar.
+- **Örnek veri (USE_MOCKS=1):** `mocks/fleet-panel.ts` (kişiler ve zimmetler; sözleşme ve araçlar `mocks/admin-contracts.ts`'ten, yani yönetim ekranıyla aynı veri). Örnek kurumsal hesap Ege Lojistik A.Ş.'dir (iki araç, beş kişi; biri pasif); `novera-mock-session=corporate-nofleet` sözleşmesiz Anadolu İnşaat'ın hesabıdır (boş durum).
 
 ## 4. API
 

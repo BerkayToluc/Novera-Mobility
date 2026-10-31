@@ -39,6 +39,7 @@ const ROUTES: Array<[string, string, unknown?]> = [
   ['GET', '/fleet/contracts'],
   ['GET', '/fleet/contracts/SZL-2026-00001'],
   ['GET', '/fleet/employees'],
+  ['GET', `/fleet/employees/${ID}`],
   ['POST', '/fleet/employees', { firstName: 'Ada', lastName: 'Kaya', email: 'ada@example.test' }],
   ['PATCH', `/fleet/employees/${ID}`, { updatedAt: '2026-10-31T10:00:00.000Z', department: 'Satış' }],
   ['GET', '/fleet/assignments'],
@@ -59,7 +60,7 @@ describe('the fleet panel over HTTP (V2-35)', () => {
       .overrideProvider(FleetContractsService)
       .useValue(stub(['list', 'get']))
       .overrideProvider(FleetEmployeesService)
-      .useValue(stub(['list', 'create', 'update']))
+      .useValue(stub(['list', 'get', 'create', 'update']))
       .overrideProvider(FleetAssignmentsService)
       .useValue(stub(['list', 'create', 'end']))
       .overrideProvider(RateLimitStore)

@@ -27,6 +27,8 @@ export type Role = "customer" | "admin";
 // panel is out of scope.
 // Only the name comes from the API; the rest is shown when it is known (the sample account has it all).
 export type CompanyInfo = {
+  // Only the sample account has it (the sample fleet is found by it); the API knows the company from the session.
+  id?: string;
   name: string;
   taxOffice?: string;
   city?: string;
@@ -49,6 +51,8 @@ export type Session = {
   // reset link (the password change refuses it). googleLinked: the account is tied to a Google account.
   hasPassword: boolean;
   googleLinked: boolean;
+  // A corporate account whose company has an active fleet contract (V2-36): the ways into Filom show only then.
+  hasFleet?: boolean;
 };
 
 // The cookie that stands in for the real session in development (BACKLOG #25). It only means
@@ -70,9 +74,9 @@ export const getSession = cache(async (): Promise<Session | null> => {
   const jar = await cookies();
   if (isMockMode()) {
     const value = jar.get(MOCK_SESSION_COOKIE)?.value;
-    if (value !== "corporate" && value !== "individual" && value !== "google" && value !== "admin") return null;
-    const { MOCK_ADMIN, MOCK_CORPORATE, MOCK_GOOGLE, MOCK_INDIVIDUAL } = await import("@/mocks/accounts");
-    return { corporate: MOCK_CORPORATE, individual: MOCK_INDIVIDUAL, google: MOCK_GOOGLE, admin: MOCK_ADMIN }[value];
+    if (value !== "corporate" && value !== "corporate-nofleet" && value !== "individual" && value !== "google" && value !== "admin") return null;
+    const { MOCK_ADMIN, MOCK_CORPORATE, MOCK_CORPORATE_NOFLEET, MOCK_GOOGLE, MOCK_INDIVIDUAL } = await import("@/mocks/accounts");
+    return { corporate: MOCK_CORPORATE, "corporate-nofleet": MOCK_CORPORATE_NOFLEET, individual: MOCK_INDIVIDUAL, google: MOCK_GOOGLE, admin: MOCK_ADMIN }[value];
   }
   if (!jar.get(SESSION_COOKIE)?.value) return null;
   const result = await apiRequest<components["schemas"]["User"]>("GET", "/me");

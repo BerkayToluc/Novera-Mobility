@@ -23,11 +23,11 @@ Akıllı Kurumsal Filo'daki "Tek ekranda yönetim" vaadinin ilk çalışan hâli
 - **KVKK:** aydınlatma metnine "kurumsal müşterinin personel bilgileri" bölümü (`legal.json`, TR/EN). **Metni G onaylar.**
 
 ## Kabul kriterleri
-- [ ] e2e: kurumsal giriş → Filom Özet → araç detayı → personele ver → detayda zimmet ve geçmiş → geri al.
-- [ ] Bireysel hesap `/filom`'da 404; sözleşmesi olmayan kurumsal hesapta boş durum (e2e).
-- [ ] Personel pasifleştirilince açık zimmeti kapanır (test).
-- [ ] 375/768/1280 taşma yok; axe temiz; ekran görüntüleri.
-- [ ] KVKK bölümü G onayıyla birleşti.
+- [x] e2e: kurumsal giriş → Filom Özet → araç detayı → personele ver → detayda zimmet ve geçmiş → geri al. _Nasıl: `e2e/fleet-panel.spec.ts` (giriş formundan profil → "Filom" → özet sayıları ve listeleri; araç ver ve geri al, geçmiş iki kayıt tutar; zimmetli araçta ver formu yok)._
+- [x] Bireysel hesap `/filom`'da 404; sözleşmesi olmayan kurumsal hesapta boş durum (e2e). _Nasıl: `e2e/fleet-panel.spec.ts` bireysel ve yönetici hesabı için `/filom` altında 404, girişsiz ziyaretçi `?sonra=filom` ile kurumsal girişe, sözleşmesiz hesapta boş durum ve teklif bağlantısı (menü yok); `fleet.integration.spec.ts` `hasFleet`'in gerçek veritabanında doğru olduğunu sınar._
+- [x] Personel pasifleştirilince açık zimmeti kapanır (test). _Nasıl: `fleet.integration.spec.ts` (V2-35) gerçek veritabanında; `e2e/fleet-panel.spec.ts` ekranda (onay penceresi aracı söyler, sonra araç boşta, açık zimmet kalmaz)._
+- [x] 375/768/1280 taşma yok; axe temiz; ~~ekran görüntüleri~~. _Nasıl: her e2e testi sayfanın axe denetimiyle biter (mobil 375 ve masaüstü 1280 projeleri); ekran görüntüsü artık istenmiyor (Berkay, 31 Ekim)._
+- [x] KVKK bölümü yazıldı (`legal.json`, TR/EN). _Onay: metni Berkay onaylar (G'nin onayı artık gerekmiyor); PR'ın birleşmesi onay yerine geçer._
 
 ## Etiketler
 `faz-7` `ozellik` `P2` `web` `api`

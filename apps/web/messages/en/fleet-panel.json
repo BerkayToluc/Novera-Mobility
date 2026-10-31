@@ -1,0 +1,329 @@
+{
+  "FleetPanel": {
+    "metaTitle": "My fleet",
+    "nav": {
+      "label": "Fleet sections",
+      "menuCurrent": "Menu: {current}",
+      "summary": "Summary",
+      "vehicles": "Cars",
+      "employees": "People",
+      "assignments": "Assignments",
+      "contracts": "Contracts"
+    },
+    "empty": {
+      "title": "My fleet",
+      "heading": "You have no fleet yet",
+      "text": "My fleet is where a company with a fleet contract manages its cars, its people and who has which car, on one screen. Your company has no active fleet contract yet; ask for a quote, and My fleet opens by itself once the contract is made.",
+      "cta": "Ask for a corporate quote"
+    },
+    "filter": {
+      "all": "All"
+    },
+    "summary": {
+      "title": "My fleet",
+      "asOf": "As of {date} (Istanbul time)",
+      "errorTitle": "The summary could not be loaded",
+      "errorText": "Try again in a few seconds.",
+      "retry": "Try again",
+      "openList": "Open the list",
+      "cards": {
+        "vehicles": "Cars in use",
+        "assigned": "Cars with someone",
+        "idle": "Idle cars",
+        "contracts": "Active contracts",
+        "endingSoon": "Contracts ending within 60 days",
+        "maintenanceDue": "Cars due for maintenance or inspection within 30 days"
+      }
+    },
+    "vehicles": {
+      "title": "Cars",
+      "intro": "The fleet cars of your contracts. Open a car to see its details, its assignment history and its latest readings, and to give it to a person.",
+      "statusFilterLabel": "By status",
+      "assignFilterLabel": "By assignment",
+      "searchLabel": "Search by plate or model",
+      "tableCaption": "Cars",
+      "retry": "Try again",
+      "idle": "Idle",
+      "kmValue": "{km} km",
+      "columns": {
+        "plate": "Plate",
+        "model": "Model",
+        "assignee": "With",
+        "km": "Last km",
+        "status": "Status"
+      },
+      "status": {
+        "ACTIVE": "In use",
+        "RETURNED": "Given back"
+      },
+      "filters": {
+        "kullanimda": "In use",
+        "iade": "Given back",
+        "zimmetli": "With someone",
+        "bosta": "Idle"
+      },
+      "emptyTitle": "No cars yet",
+      "emptyText": "Cars show up here as Novera adds them to your contract.",
+      "emptyFilteredTitle": "No car matches this search",
+      "emptyFilteredText": "Try removing the filters or searching for something else.",
+      "loadErrorTitle": "The cars could not be loaded",
+      "loadErrorText": "Try again in a few seconds."
+    },
+    "vehicle": {
+      "metaTitle": "Car",
+      "loadErrorTitle": "The car could not be loaded",
+      "loadErrorText": "Try again in a few seconds.",
+      "retry": "Try again",
+      "back": "Back to the cars",
+      "status": {
+        "ACTIVE": "In use",
+        "RETURNED": "Given back"
+      },
+      "facts": {
+        "title": "Car details",
+        "model": "Model",
+        "year": "Model year",
+        "km": "Last kilometre",
+        "kmValue": "{km} km",
+        "assignee": "With",
+        "idle": "Idle",
+        "maintenance": "Next maintenance",
+        "inspection": "Inspection",
+        "returnedAt": "Given back on",
+        "contract": "Contract",
+        "overdue": "{date} (overdue)",
+        "inDays": "{count, plural, =0 {{date} (today)} one {{date} (in # day)} other {{date} (in # days)}}"
+      },
+      "history": {
+        "title": "Assignment history",
+        "empty": "This car has not been given to anyone yet.",
+        "period": "{from} – {to}",
+        "since": "Since {from}"
+      },
+      "readings": {
+        "title": "Latest readings",
+        "empty": "No reading has been entered yet.",
+        "fuel": "Fuel {value}%",
+        "charge": "Charge {value}%",
+        "battery": "Battery health {value}%"
+      }
+    },
+    "assignment": {
+      "title": "Assignment",
+      "returnedText": "This car has been given back; it cannot be given to anyone.",
+      "current": "{name} has it (since {date}).",
+      "takeBack": "Take the car back",
+      "noEmployees": "There is no active person to give the car to.",
+      "addEmployee": "Add a person",
+      "idleText": "The car is idle. Choose a person to give it to; a car can have only one assignment at a time.",
+      "employee": "Person",
+      "employeeChoose": "Choose a person",
+      "startedAt": "Start day",
+      "startedAtHint": "Left empty, it starts now.",
+      "note": "Note",
+      "give": "Give the car",
+      "giving": "Giving",
+      "toast": {
+        "given": "Car given",
+        "taken": "Car taken back"
+      },
+      "errors": {
+        "employee": "Choose a person from the list.",
+        "startedAt": "Choose a valid day: it cannot be in the future or before the car's last assignment ended.",
+        "note": "Write 200 characters at most.",
+        "assigned": "This car was just given to someone else. The page was reloaded.",
+        "returned": "This car has been given back; it cannot be given to anyone.",
+        "inactive": "This person is no longer active.",
+        "generic": "This information was not accepted. Check the fields and try again.",
+        "notFound": "This record no longer exists. Reload the page.",
+        "unavailable": "That did not work. Try again in a few seconds.",
+        "alreadyEnded": "This assignment has ended already. The page was reloaded."
+      },
+      "takeBackDialog": {
+        "title": "Take {plate} back?",
+        "text": "The assignment ends at once and the car is idle. The record of {name} having it is kept.",
+        "confirm": "Take the car back",
+        "keep": "Keep it"
+      }
+    },
+    "employees": {
+      "title": "People",
+      "intro": "The people you can give a car to. Nobody is deleted: a person who leaves is made inactive, and the car they have comes back at once.",
+      "newButton": "New person",
+      "newTitle": "New person",
+      "newIntro": "Once the person is added you can give them a car. No licence data is asked for or kept.",
+      "detailTitle": "Person",
+      "detailIntro": "The person's details.",
+      "detailWithCar": "They have the car with plate {plate}.",
+      "statusFilterLabel": "By status",
+      "searchLabel": "Search people",
+      "tableCaption": "People",
+      "retry": "Try again",
+      "columns": {
+        "name": "Name",
+        "employeeNo": "Staff no",
+        "vehicle": "Car",
+        "status": "Status"
+      },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "filters": {
+        "aktif": "Active",
+        "pasif": "Inactive"
+      },
+      "emptyTitle": "No people yet",
+      "emptyText": "Add the first person; then you can give them a car.",
+      "emptyFilteredTitle": "No person matches this search",
+      "emptyFilteredText": "Try removing the filters or searching for something else.",
+      "loadErrorTitle": "The people could not be loaded",
+      "loadErrorText": "Try again in a few seconds."
+    },
+    "employeeForm": {
+      "newLabel": "New person",
+      "editLabel": "Change the person",
+      "fields": {
+        "firstName": "First name",
+        "lastName": "Last name",
+        "department": "Department",
+        "employeeNo": "Staff no",
+        "employeeNoHint": "Optional. Two people of your company cannot have the same staff number.",
+        "email": "E-mail",
+        "phone": "Phone"
+      },
+      "privacy": "This information is seen only by the users of your company and by Novera's administration; Novera handles staff data on your company's behalf.",
+      "form": {
+        "create": "Add the person",
+        "save": "Save changes",
+        "saving": "Saving",
+        "cancel": "Cancel"
+      },
+      "errors": {
+        "firstName": "Enter the first name (60 characters at most).",
+        "lastName": "Enter the last name (60 characters at most).",
+        "department": "Enter 60 characters at most.",
+        "employeeNo": "Enter 30 characters at most.",
+        "employeeNoTaken": "Another person of your company has this staff number.",
+        "email": "Enter a valid e-mail address, or leave it empty.",
+        "phone": "Enter a valid phone number, or leave it empty.",
+        "generic": "This information was not accepted. Check the fields and try again.",
+        "notFound": "This person no longer exists. Go back to the list.",
+        "unavailable": "It could not be saved. Try again in a few seconds."
+      },
+      "toast": {
+        "created": "Person added",
+        "saved": "Changes saved"
+      }
+    },
+    "employeeActions": {
+      "title": "Make inactive or active again",
+      "activeText": "A person who leaves is not deleted, only made inactive. An inactive person cannot be given a car; their record and assignment history stay.",
+      "activeWithCar": "This person has the car with plate {plate}. If you make them inactive the car comes back at once and is idle; the assignment history stays.",
+      "inactiveText": "This person is inactive: no car can be given to them. If you make them active again you can give them a car again.",
+      "deactivate": "Make inactive",
+      "activate": "Make active again",
+      "toast": {
+        "activated": "Person made active again",
+        "deactivated": "Person made inactive"
+      },
+      "errors": {
+        "stale": "The person changed in the meantime. The page was reloaded; try again.",
+        "notFound": "This person no longer exists.",
+        "unavailable": "That did not work. Try again in a few seconds."
+      },
+      "dialog": {
+        "title": "Make {name} inactive?",
+        "text": "The person becomes inactive and no car can be given to them. Their record and history are not deleted; you can make them active again at any time.",
+        "textWithCar": "The car with plate {plate} comes back at once and is idle. The person becomes inactive and no car can be given to them. Their record and history are not deleted; you can make them active again at any time.",
+        "confirm": "Make inactive",
+        "keep": "Keep active"
+      }
+    },
+    "assignments": {
+      "title": "Assignments",
+      "intro": "Who had which car: every assignment, the newest first. To give a car or take it back, go to the car's own page.",
+      "statusFilterLabel": "By status",
+      "tableCaption": "Assignments",
+      "retry": "Try again",
+      "columns": {
+        "vehicle": "Car",
+        "employee": "Person",
+        "start": "Start",
+        "end": "End",
+        "status": "Status"
+      },
+      "status": {
+        "open": "Open",
+        "closed": "Closed"
+      },
+      "filters": {
+        "acik": "Open",
+        "kapali": "Closed"
+      },
+      "emptyTitle": "No assignments yet",
+      "emptyText": "When you give a car to a person it shows up here.",
+      "emptyFilteredTitle": "No assignment matches this filter",
+      "emptyFilteredText": "Try removing the filters.",
+      "loadErrorTitle": "The assignments could not be loaded",
+      "loadErrorText": "Try again in a few seconds."
+    },
+    "contracts": {
+      "title": "Contracts",
+      "intro": "Your fleet contracts. Novera enters the contracts and their cars; to renew, get in touch with Novera.",
+      "statusFilterLabel": "By status",
+      "tableCaption": "Contracts",
+      "retry": "Try again",
+      "currencyNote": "Amounts are shown in Turkish lira (TRY).",
+      "columns": {
+        "number": "Number",
+        "product": "Product",
+        "period": "Period",
+        "fee": "Monthly fee",
+        "vehicles": "Cars",
+        "status": "Status"
+      },
+      "products": {
+        "akilli-kurumsal-filo": "Smart Corporate Fleet",
+        "yesil-filo": "Green Fleet",
+        "vip-mobilite": "VIP Mobility",
+        "esnek-kisa-donem": "Flexible Short-term"
+      },
+      "status": {
+        "ACTIVE": "Active",
+        "ENDED": "Ended"
+      },
+      "emptyTitle": "No contracts yet",
+      "emptyText": "Your contract shows up here once it is made.",
+      "emptyFilteredTitle": "No contract matches this filter",
+      "emptyFilteredText": "Try removing the filters.",
+      "loadErrorTitle": "The contracts could not be loaded",
+      "loadErrorText": "Try again in a few seconds."
+    },
+    "contract": {
+      "metaTitle": "Contract",
+      "intro": "The details and cars of your contract.",
+      "back": "Back to the contracts",
+      "retry": "Try again",
+      "loadErrorTitle": "The contract could not be loaded",
+      "loadErrorText": "Try again in a few seconds.",
+      "facts": {
+        "title": "Contract details",
+        "product": "Product",
+        "period": "Period",
+        "remaining": "Time left",
+        "remainingValue": "{count, plural, =0 {Ends today} one {# day} other {# days}}",
+        "ended": "Ended",
+        "monthlyFee": "Monthly fee",
+        "deliveryCity": "Delivery city",
+        "vehicles": "Number of cars"
+      },
+      "vehicles": {
+        "title": "Cars",
+        "empty": "No car has been added to this contract yet.",
+        "idle": "Idle",
+        "returned": "Given back"
+      }
+    }
+  }
+}
