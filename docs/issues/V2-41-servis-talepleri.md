@@ -28,12 +28,12 @@ Hizmetler sayfasındaki üç hizmeti (Akıllı Yol Yardım & Çekici, Kesintisiz
 - **E-posta:** durum değişikliği e-postası V2-44'te; burada olay kaydı yeterli.
 
 ## Kabul kriterleri
-- [ ] Üç türde talep açılır; türe uymayan `details` 422 döner (test).
-- [ ] Geçersiz geçiş 409; müşteri yalnızca `RECEIVED` durumundaki talebi iptal edebilir (test).
-- [ ] Başka şirketin talebi 404.
-- [ ] e2e: Filom'da yol yardım talebi → panelde "Yönlendirildi" → "Yolda" → Filom'da zaman çizelgesi güncel.
-- [ ] 375/1280 ekran görüntüsü; axe temiz; konum izni reddinde form kullanılabilir.
-- [ ] **V2-25'ten devreden (unutma):** `GET /admin/summary`'deki `serviceRequests` artık `null` değil, açık (kapanmamış) talepleri sayar (`apps/api/src/admin/admin-summary.service.ts`). Özet'teki "Açık servis talebi" kartı görünür ve `/yonetim/talepler?durum=acik` bağlantısı çalışır. `openapi.yaml`, `mocks/admin.ts` ve iki test dosyası (`admin-summary.integration.spec.ts`, `tests/admin-summary.test.ts`) güncellenir.
+- [x] Üç türde talep açılır; türe uymayan `details` 422 döner (test). _`fleet-requests.integration.spec.ts` (üç tür açılır, yedi hatalı `details` örneği noktalı alan adıyla 422, hiçbir şey yazılmaz), `request-details.spec.ts` (alan alan)._
+- [x] Geçersiz geçiş 409; müşteri yalnızca `RECEIVED` durumundaki talebi iptal edebilir (test). _Entegrasyon testi: geri, aynı adım, başka türün adımı ve bitmiş talepten çıkış `409 INVALID_TRANSITION`; Novera ele aldıktan sonra müşteri iptali `409`; iki eşzamanlı hamleden biri kazanır; veritabanı da kendi türünün olmayan adımı reddeder. `request-flow.spec.ts` tabloyu sınar._
+- [x] Başka şirketin talebi 404. _Entegrasyon testi: açma, iptal ve listeleme başka şirketin talebini bulamaz ve cevap olmayan talebinkiyle aynıdır; aracı başka şirketinse `UNKNOWN_REFERENCE`; veritabanı tetikleyicisi başka şirketin aracını reddeder. e2e: sample'da Anadolu İnşaat'ın talebi Ege için `404`._
+- [x] e2e: Filom'da yol yardım talebi → panelde "Yönlendirildi" → "Yolda" → Filom'da zaman çizelgesi güncel. _`e2e/requests.spec.ts` ("a request made in Filom is moved on in the panel…"): not ve atanan da çizelgede._
+- [x] 375/1280 ekran görüntüsü; axe temiz; konum izni reddinde form kullanılabilir. _Ekran görüntüsü artık istenmiyor; e2e mobil 375 ve masaüstü 1280'de koşar, her test axe ile biter. Konum izni reddi ve verilmesi iki ayrı testte: reddedilince not çıkar ve adresle talep açılır; verilince adres olmadan açılır._
+- [x] **V2-25'ten devreden (unutma):** `GET /admin/summary`'deki `serviceRequests` artık `null` değil, açık (kapanmamış) talepleri sayar (`apps/api/src/admin/admin-summary.service.ts`). Özet'teki "Açık servis talebi" kartı görünür ve `/yonetim/talepler?durum=acik` bağlantısı çalışır. `openapi.yaml`, `mocks/admin.ts` ve iki test dosyası (`admin-summary.integration.spec.ts`, `tests/admin-summary.test.ts`) güncellenir.
 
 ## Etiketler
 `faz-10` `ozellik` `P2` `api` `web` `veritabani`

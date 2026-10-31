@@ -14,6 +14,13 @@ import { FleetExpensesService, type ReflectResult } from './fleet-expenses.servi
 import type { ExpenseView } from './expense.view.js';
 import { FleetInvoicesService } from './fleet-invoices.service.js';
 import type { InvoiceView } from './invoice.view.js';
+import { FleetGreenService, type GreenReport, type StationList } from './fleet-green.service.js';
+import { FleetReportsService } from './fleet-reports.service.js';
+import { FleetRequestsService, type CreatedRequest } from './fleet-requests.service.js';
+import type { RequestDetail, RequestView } from './requests/request.view.js';
+import { RateLimit } from '../common/rate-limit.js';
+import { LIMITS } from '../common/rate-limits.js';
+import type { Report } from './report-calc.js';
 import { FleetSummaryService, type FleetSummary } from './fleet-summary.service.js';
 import { FleetVehiclesService, type FleetVehicleDetail } from './fleet-vehicles.service.js';
 import type { AssignmentView, ContractDetail, ContractView, EmployeeView, FleetVehicleView } from './fleet.view.js';
@@ -31,6 +38,17 @@ const numberParam = (request: Request): string | null => {
   return typeof raw === 'string' ? raw.toUpperCase() : null;
 };
 const resultId = (_request: Request, result: unknown): string | null => (result as { id?: string } | null)?.id ?? null;
+
+@ApiTags('fleet')
+@Controller('fleet/reports')
+export class FleetReportsController {
+  constructor(private readonly reports: FleetReportsService) {}
+
+  @Get()
+  get(@CurrentCompany() companyId: string, @Query() query: unknown): Promise<Report> {
+    return this.reports.get(companyId, query);
+  }
+}
 
 @ApiTags('fleet')
 @Controller('fleet/summary')
@@ -56,6 +74,23 @@ export class FleetVehiclesController {
   @Get(':plate')
   get(@CurrentCompany() companyId: string, @Param('plate') plate: string): Promise<FleetVehicleDetail> {
     return this.vehicles.get(companyId, plate);
+  }
+}
+
+@ApiTags('fleet')
+@Controller('fleet')
+export class FleetGreenController {
+  constructor(private readonly green: FleetGreenService) {}
+
+  @Get('green')
+  get(@CurrentCompany() companyId: string, @Query() query: unknown): Promise<GreenReport> {
+    return this.green.green(companyId, query);
+  }
+
+  // The stations nearest to an electric or hybrid car, in the state they are in during these five minutes (a simulation, ADR-30).
+  @Get('vehicles/:plate/charging-stations')
+  stations(@CurrentCompany() companyId: string, @Param('plate') plate: string, @Query() query: unknown): Promise<StationList> {
+    return this.green.stations(companyId, plate, query);
   }
 }
 
@@ -177,5 +212,36 @@ export class FleetExpensesController {
   @Audited({ action: 'fleet-expense.update', entity: 'expense', entityId: idParam })
   update(@CurrentCompany() companyId: string, @Param('id') id: string, @Body() body: unknown): Promise<ExpenseView> {
     return this.expenses.setStatus(companyId, id, body);
+  }
+}
+
+@ApiTags('fleet')
+@Controller('fleet/requests')
+export class FleetRequestsController {
+  constructor(private readonly requests: FleetRequestsService) {}
+
+  @Get()
+  list(@CurrentCompany() companyId: string, @Query() query: unknown): Promise<Page<RequestView>> {
+    return this.requests.list(companyId, query);
+  }
+
+  // At most 20 an hour for the company, on top of the limit of every call (docs/FLEET.md §4.1).
+  @Post()
+  @RateLimit(LIMITS.fleet, LIMITS.fleetRequests)
+  @Audited({ action: 'fleet-request.create', entity: 'request', entityId: (_request, result) => (result as { number?: string } | null)?.number ?? null })
+  create(@CurrentCompany() companyId: string, @CurrentUser() user: UserRow, @Body() body: unknown): Promise<CreatedRequest> {
+    return this.requests.create(companyId, user.id, body);
+  }
+
+  @Get(':number')
+  get(@CurrentCompany() companyId: string, @Param('number') number: string): Promise<RequestDetail> {
+    return this.requests.get(companyId, number);
+  }
+
+  @Post(':number/cancel')
+  @HttpCode(200)
+  @Audited({ action: 'fleet-request.cancel', entity: 'request', entityId: numberParam })
+  cancel(@CurrentCompany() companyId: string, @CurrentUser() user: UserRow, @Param('number') number: string): Promise<RequestDetail> {
+    return this.requests.cancel(companyId, user.id, number);
   }
 }

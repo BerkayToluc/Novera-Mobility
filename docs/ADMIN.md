@@ -144,7 +144,7 @@ Tüm sayfalar `noindex`, sitemap ve `llms.txt` dışında; navbar ve footer'da b
 | Son 7 günde yapılan rezervasyon | `createdAt` bugün ve önceki altı İstanbul günü içinde, iptal edilmemiş |
 | Yanıt bekleyen teklif talebi | Durumu `RECEIVED` olan |
 | Ele alınmamış mesaj | İletişim mesajında "ele alındı" işareti V2-32'de gelir; o zamana kadar API `null` döner ve kart çizilmez |
-| Açık servis talebi | Talepler V2-41'de gelir; o zamana kadar `null`, kart çizilmez |
+| Açık servis talebi | Bitmemiş servis talepleri (V2-41; türünün son adımına ulaşmamış, iptal edilmemiş). `/yonetim/talepler?durum=acik` ile aynı kural |
 
 Bir kart, bağlı olduğu liste ekranı yapılınca (`lib/admin-screens.ts` `ready`) süzgeçli bağlantıya döner. Süzgeç adları `lib/admin-summary.ts`'te durur (`baslangic=bugun`, `bitis=bugun`, `olusturma=7gun`, `durum=RECEIVED`, `durum=ele-alinmadi`, `durum=acik`); liste ekranlarını yapan işler (V2-31, V2-32, V2-41) bunları adresten okur. Hiçbir kart bir kişinin verisini göstermez, yalnızca sayı. Tüm sayılar sıfırsa ekran "Her şey yolunda" der.
 
@@ -260,7 +260,7 @@ Müşteri tarafının `/fleet/*` uçları `CompanyGuard` arkasındadır (FLEET.m
 - **Zimmet:** araç başına tek açık zimmet: servis önce bakar (`409 VEHICLE_ASSIGNED`), aynı anda gelen iki istekte araç satırı kilitlenir ve veritabanındaki kısmi benzersiz indeks son sözü söyler. Pasif personele zimmet verilmez, iade edilmiş araç verilmez, başlangıç gelecekte ve aracın önceki zimmetinin bitişinden önce olamaz. Zimmeti biten araç yeniden boştadır; geçmiş silinmez.
 - **Personel:** kimse silinmez, `active: false` olur ve **açık zimmeti aynı anda kapanır**. Aynı şirkette aynı sicil no iki kişide olmaz (`409 EMPLOYEE_NO_TAKEN`; başka şirketin aynı numarası engel değil). Ehliyet bilgisi saklanmaz. Personel kişisel veridir: yalnızca o şirketin kullanıcıları ve yönetici görür.
 - **İşlem kaydı:** `fleet-employee.create`, `fleet-employee.update`, `fleet-assignment.create`, `fleet-assignment.end`; **aktör müşteri hesabı, satırda `companyId` dolu**, yalnızca alan adları (Yönetim > İşlem kaydı'nda görünür).
-- **Özet:** `hasActiveContract`, araç sayıları (kullanımda / zimmetli / boşta), 60 gün içinde biten etkin sözleşmeler, bakımı ya da muayenesi 30 gün içinde (ya da geçmiş) olan araçlar. Fatura kartları V2-37'de (§3.15), masraf kartı V2-38'de (§3.16) eklendi; talepler kartı V2-41'de eklenir.
+- **Özet:** `hasActiveContract`, araç sayıları (kullanımda / zimmetli / boşta), 60 gün içinde biten etkin sözleşmeler, bakımı ya da muayenesi 30 gün içinde (ya da geçmiş) olan araçlar. Fatura kartları V2-37'de (§3.15), masraf kartı V2-38'de (§3.16), talepler kartı V2-41'de (§3.19) eklendi.
 
 ### 3.14 Filom ekranları: Özet, Araçlar, Personel, Zimmet, Sözleşmeler (V2-36)
 
@@ -268,7 +268,7 @@ Adresler (TR / EN): `/filom` / `/en/my-fleet`, `/filom/araclar` ve `/{plaka}` (`
 
 - **Kapı** (`app/[locale]/filom/layout.tsx`, sunucuda): oturum yoksa kurumsal girişe (`/giris?tip=kurumsal&sonra=filom`, giriş sonrası `/filom`'a döner; `sonra` sabit bir sözcüktür, adres değildir); **bireysel hesap ve yönetici hesabı `404`** (Filom'un var olduğu bile doğrulanmaz); sözleşmesi olmayan kurumsal hesap ekranlar yerine **boş durum ve "Kurumsal teklif al" (`/kurumsal-teklif`)** görür, bu `/filom` altındaki her adres için aynıdır. Hepsi `noindex`. Gerçek koruma API'dedir; sayfaların verisi API'den gelir ve API reddeder.
 - **Giriş noktası:** kurumsal profilin menüsünde, yalnızca `hasFleet` olan hesapta "Filom" (`GET /me`'deki `hasFleet`: şirketin etkin bir sözleşmesi var; kurumsal hesap oturumuyla birlikte tek küçük sorguyla gelir). Bireysel hesapta ve sözleşmesiz şirkette yoktur.
-- **Özet:** kullanımdaki / zimmetli / boşta araç, etkin sözleşme, 60 gün içinde biten sözleşme, bakımı ya da muayenesi 30 gün içinde olan araç. Kullanımdaki, zimmetli, boşta ve etkin sözleşme kartlarının sayısı, açtıkları listenin toplamıyla aynıdır (aynı süzgeç); "60 gün içinde biten" ve "bakımı yaklaşan" kartları ilgili listeyi (etkin sözleşmeler, kullanımdaki araçlar) açar ve sayıları onun bir alt kümesidir. Fatura kartları V2-37'de eklendi (§3.15, "Bu ayın faturası" ve "Ödenmemiş fatura toplamı"); "Açık masraf" kartı V2-38'de eklendi (§3.16); talep kartı V2-41'de eklenir.
+- **Özet:** kullanımdaki / zimmetli / boşta araç, etkin sözleşme, 60 gün içinde biten sözleşme, bakımı ya da muayenesi 30 gün içinde olan araç. Kullanımdaki, zimmetli, boşta ve etkin sözleşme kartlarının sayısı, açtıkları listenin toplamıyla aynıdır (aynı süzgeç); "60 gün içinde biten" ve "bakımı yaklaşan" kartları ilgili listeyi (etkin sözleşmeler, kullanımdaki araçlar) açar ve sayıları onun bir alt kümesidir. Fatura kartları V2-37'de eklendi (§3.15, "Bu ayın faturası" ve "Ödenmemiş fatura toplamı"); "Açık masraf" kartı V2-38'de eklendi (§3.16); "Açık talep" kartı V2-41'de eklendi (§3.19).
 - **Araçlar:** liste (plaka, model, kimde, son km, durum; süzgeç `durum` ve `zimmet`, arama plaka ve modelde, plaka nasıl yazılırsa yazılsın). Detay `/{plaka}` (boşluksuz da olur): bilgiler (bakım ve muayene için kalan gün), **zimmet** (boştaysa "Aracı ver" formu, kimdeyse "Aracı geri al" ve onay penceresi; zimmetli araca ikinci kişi verilemez, form yoktur), zimmet geçmişi, son 10 okuma. İade edilmiş araç kimseye verilemez.
 - **Personel:** liste, ekleme (`/yeni`), kişinin sayfası (düzenleme ve **Pasifleştir**). Pasifleştirme onay ister ve kişinin elindeki araç varsa onu söyler: **araç hemen geri gelir** (API zimmeti aynı adımda kapatır). Pasif kişiye araç verilmez; yeniden etkinleştirmek tek basıştır. Ehliyet bilgisi istenmez. Formun altında bilgilerin kime görüneceği ve verinin Novera tarafından şirket adına işlendiği yazar.
 - **Zimmet** (`/filom/zimmet`): tüm zimmetlerin kaydı, en yeni başlayan üstte, süzgeç `durum` (açık / kapanmış); satır aracın sayfasına gider. Vermek ve geri almak aracın sayfasındadır.
@@ -324,6 +324,87 @@ Adresler (TR / EN): Yönetim'de `/yonetim/filo-masraflari` (`/admin/fleet-expens
 - **Sözleşme sayfası:** etkin sözleşmede "Sözleşmeyi yenile": isteğe bağlı not (en çok 500 karakter) ve "Yenileme talebi gönder"; gönderilince başvuru numarası yazar, işlemde bir talep varsa bunu söyler.
 - **Örnek veri:** seed her şirkete 20 masraf ekler (toplam 40: çoğu HGS, her on masraftan ikisi ceza, biri bakım; bir kısmı itirazlı, zimmeti olan araçlarda bir kısmı yansıtılmış); yeniden çalışınca kopya yapmaz. Sample mod `mocks/expenses.ts`: Ege Lojistik'in dokuz masrafı (5'i Ayşe Demir'in, 2'si Burak Yılmaz'ın, 2'si kimsenin).
 
+### 3.17 Raporlar (V2-39)
+
+Adres (TR / EN): `/filom/raporlar` (`/my-fleet/reports`). Metinler `messages/*/fleet-panel.json` (`FleetPanel.reports`). Uç: `GET /fleet/reports?from=YYYY-MM&to=YYYY-MM` (ikisi dahil; ikisi de yoksa bu ay; en çok 24 ay; başlamamış ay ve ters sıra `422 OUT_OF_RANGE`). Kural `apps/api/src/fleet/report-calc.ts`'tedir (saf fonksiyonlar); sample mod aynı kuralın `lib/report-calc.ts`'teki karşılığını kullanır.
+
+**Maliyet = fatura payı + masraflar.** Para TRY kuruş, hepsi tam sayı.
+
+- **Fatura payı, araç başına eşit bölüşüm:** faturalar **KDV'siz**, satırlarının toplamıyla (ara toplam) alınır. Bir faturanın bir satırı, o sözleşmenin **tüm araçları** arasında (durumu ne olursa olsun, plaka sırasıyla) eşit bölünür; bölünmeyen kuruşlar ilk araçlara gider (toplam her zaman satırla kuruşu kuruşuna tutar). **Aracı olmayan sözleşmenin** (ör. VIP Mobilite) satırı hiçbir araca düşmez: `unallocated` olarak ayrıca verilir ve toplamdadır.
+- **Hangi ay:** fatura, ait olduğu dönemin ayına; masraf, gerçekleştiği **İstanbul ayına** yazılır.
+- **Departman:** faturada o ayın son anında (bu ay için şu an), masrafta masrafın anında aracı kimin kullandığına göre kişinin departmanıdır. Kimse kullanmıyorsa ya da kişinin departmanı yoksa `null` ("Atanmamış / departmansız"). Zimmet §3.1'deki gibi hesaplanır, saklanmaz.
+- **Kilometre:** ayın sonundaki (bu ay için şu an) odometre eksi ayın başındaki; okuma yoksa aracın başlangıç km'si. Aylık farkların toplamı dönem farkına eşittir. Departmanın kilometresi, ayın sonunda aracı kullanan kişinin departmanına yazılır.
+- **Doğruluk:** aynı toplam üç kesitte de tutar: aylar, departmanlar ve (`unallocated` ile birlikte) araçlar; fatura toplamı dönemdeki faturaların ara toplamlarının, masraf toplamı dönemdeki masrafların toplamıdır (entegrasyon testi veritabanında bunu `aggregate` ile karşılaştırır).
+
+**Ekran:** üstte dönem seçimi (**Bu ay**, **Son 3 ay** varsayılan, **Bu yıl**, **Özel dönem**; özelde iki ay alanı ve "Raporu göster"); adreste `donem` (`bu-ay`, `bu-yil`, `ozel`) ve özel için `bas`, `bit` (`YYYY-MM`). Saçma bir adres (ay olmayan, ters, gelecek, 24 aydan uzun) hata değil varsayılan raporu gösterir. Dört toplam kartı, sonra dört grafik: **aylara göre maliyet**, **aylara göre kilometre**, **araçlara göre maliyet**, **departmanlara göre maliyet**. Boş dönemde "Bu dönemde veri yok" ve "Bu yılı göster"; yüklenemezse hata durumu ve "Tekrar dene".
+
+**Grafikler (karar):** kütüphane **eklenmedi**. Yatay, tek ölçekli yığılmış çubuklar; çubuklar elle çizilmiş SVG (`components/fleet/bar-chart.tsx`), etiketler ve sayılar HTML. Gerekçe: DESIGN.md §8'in istediği şey sade çubuktur, ekran okuyucu zaten tabloyu okur, kütüphane hem bağımlılık hem rotaya bir betik ekler. Renkler marka paletinden (`bg-primary`/`fill-primary` zeytin, `fill-accent` Ege mavisi), en çok iki seri; renk tek başına anlam taşımaz, her çubuğun ucunda sayı yazar. **Resim ekran okuyucudan gizlenir (`aria-hidden`), altındaki tablo okunur**: başlık hücreleri `scope`'lu, başlık ve toplam satırı var, yatay taşan tablo odaklanabilir kutuda kaydırılır. Araç ve departman grafikleri en yüksek 10 satırı çizer, tablo hepsini içerir.
+
+**Özet kartı:** "bakım ya da muayenesi yaklaşan araçlar" kartı V2-35/V2-36'da zaten vardır (`maintenanceDue`, Özet'te "Bakımı ya da muayenesi 30 gün içinde olan araç"); V2-39 yeni kart eklemedi.
+
+**Örnek veri (USE_MOCKS=1):** `mocks/reports.ts` örnek şirketin faturalarından, masraflarından, araçlarından, okumalarından ve zimmetlerinden kurar; yani rapor o ekranlarla kuruşu kuruşuna tutar.
+
+### 3.18 Yeşil Filo (V2-40)
+
+Adres (TR / EN): `/filom/yesil-filo` (`/my-fleet/green-fleet`). Metinler `messages/*/fleet-panel.json` (`FleetPanel.green`). Uçlar: `GET /fleet/green?from=YYYY-MM&to=YYYY-MM` (dönem raporla aynı kurallarla; ikisi de yoksa son 3 ay) ve `GET /fleet/vehicles/{plaka}/charging-stations?limit=5` (1–20). Veri: `ChargingStation` (ad, şehir, enlem, boylam, soketler; `(şehir, ad)` benzersiz, konum ve soket sayısı `CHECK`), seed'de 30 kurgusal istasyon (`prisma/seed-stations.ts`; İzmir, Ankara, İstanbul 5'er, Bursa, Antalya 3'er, Eskişehir, Adana, Konya 2'şer, Gaziantep, Kayseri, Mersin 1'er; yeniden çalışınca kopya yapmaz).
+
+**Hangi araçlar:** şirketin kullanımdaki (iade edilmemiş) **elektrikli ve hibrit** araçları (`VehicleModel.fuelType`). Benzinli, dizel, iade edilmiş ya da başka şirketin aracı hiçbir cevapta yoktur.
+
+**Karbon tasarrufu (örnek hesap, ekranda yazar):** dönemin kilometresi (rapordaki gibi: dönem sonu ve başındaki okumanın farkı) × (benzinli eşdeğer − aracın emisyonu). Katsayılar **g CO₂/km olarak** tek yerde, `apps/api/src/fleet/fleet-report.ts`'te: benzinli 170, hibrit 105, elektrikli 45 (FLEET.md §3.1'deki 0,170 / 0,105 / 0,045 kg/km; tam sayı kalsın diye gram). Cevap tasarrufu **gram** (tam sayı) verir, ekran kg'a çevirir; katsayılar cevapta `coefficients` olarak gelir ve ekranda yazar.
+
+**Şarj seviyesi ve batarya sağlığı:** Novera'nın girdiği okumalardır (simülasyon değil). Şarj seviyesi yazılmış **son** değerdir; hiç yoksa (şebekeden şarj edilmeyen bir hibrit gibi) `null` ve ekranda "Okuma yok". Batarya sağlığının eğilimi **son 6 ayın** okumalarıdır, eskiden yeniye.
+
+**Şarj istasyonları (simülasyon, ADR-30):**
+- Sıralama: aracın konumuna kuş uçuşu uzaklık (haversine, bir ondalık), yakından uzağa. Araç henüz canlı konum üretmediği için (V2-43) **sözleşmenin teslim şehrinin merkezinde** sayılır (`src/fleet/simulation/stations.ts` içindeki şehir merkezleri). Merkezi bilinmeyen şehirde uzaklık `null` olur ve aracın kendi şehrindeki istasyonlar önce gelir.
+- Durum `AVAILABLE` (~%60), `BUSY` (~%30), `OUT_OF_ORDER` (~%10): **saklanmaz**, istasyon kimliği ve **5 dakikalık dilimden** deterministik üretilir (`seeded`: FNV-1a + mulberry32). Aynı araç ve aynı dilim için her istek aynı cevabı verir; cevaptaki `updatedAt` dilimin başlangıcıdır.
+- Cevapta `simulated: true`. Ekranda her yerde **"Simülasyon" rozeti** ve "gerçek bir istasyon ağına bağlı değildir" notu vardır. Elektrikli ya da hibrit olmayan, iade edilmiş ya da başka şirketin aracı `404` (olmayan araçla aynı cevap).
+- Sample mod aynı aritmetiği `lib/simulation.ts`'te taşır; web testi API'nin verdiği sayıları sabitleyerek ikisinin aynı olduğunu gösterir.
+
+**Harita (SPEC §7 kararı):** karar Google Maps'tir ama anahtar bu ortamda yoktur ve issue "harita yoksa liste yeterli" der; bu yüzden **harita eklenmedi**, istasyonlar yalnız listede (uzaklık, soketler, durum). V2-43 canlı takip haritayı getirdiğinde istasyonlar da oraya eklenebilir; uçların biçimi (enlem, boylam) buna hazırdır.
+
+**Görünürlük:** `GET /fleet/summary` `greenVehicles` verir (kullanımdaki elektrikli ve hibrit sayısı). Filom menüsünde "Yeşil Filo" yalnız `greenVehicles > 0` ise vardır (düzen sunucuda özeti bir kez okur; okunamazsa öğe şimdilik gizlenir). Aracı olmayan şirkette adres boş durum gösterir ("Yeşil Filo'da araç yok", "Araçlarınızı görün").
+
+**Ekran:** dönem seçimi raporlardaki gibi (`donem`, `bas`, `bit`); üç toplam kartı (tasarruf edilen CO₂, kilometre, araç sayısı) ve "Örnek hesap" rozeti, araç tablosu; **şarj seviyesi** tablosu (yüzde, küçük çubuk, okuma tarihi); **batarya sağlığı** çizgi grafiği (ilk dört araç, her çizginin kendi desenli çizgisi var, renk tek başına değil; son değer açıklamada) ve altında bütün okumaların tablosu; **yakındaki istasyonlar** (araç seçimi `arac`, varsayılan ilk elektrikli araç). Resim ekran okuyucudan gizlenir, tablolar okunur.
+
+**Örnek veri (USE_MOCKS=1):** `mocks/green.ts`: Ege Lojistik'in Togg T10X'i (35 FLM 102; benzinli Egea yok) ve İzmir'de 5 kurgusal istasyon (+ Ankara, İstanbul'dan birer tane); admin sözleşme sayfasından araç iade edilirse menüden kaybolur. Issue'daki Yeşil Enerji Ltd. seed şirketidir (sample modda yoktur); onun durumu API entegrasyon testlerinde sınanır.
+
+### 3.19 Servis talepleri (V2-41)
+
+Adresler (TR / EN): Filom'da `/filom/talepler`, `/yeni` ve `/{numara}` (`/my-fleet/requests`); Yönetim'de `/yonetim/talepler` ve `/{numara}` (`/admin/requests`). Metinler `messages/*/fleet-panel.json` (`FleetPanel.requests`, `.requestForm`, `.summary.requests`) ve `admin.json` (`Admin.requests`). Uçlar: `GET/POST /fleet/requests`, `GET /fleet/requests/{numara}`, `POST /fleet/requests/{numara}/cancel`; `GET /admin/requests`, `GET /admin/requests/{numara}`, `POST /admin/requests/{numara}/status`. Karar ADR-31: tek tablo, türe göre ayrıntı.
+
+**Veri:** `ServiceRequest` (numara `TLP-<yıl>-<5 hane>` bir sequence'ten, şirket, açan hesap, tür, durum, araç, `details` JSON, `assignee` serbest metin) ve `ServiceRequestEvent` (zaman çizelgesi; durum, not, kim: `COMPANY` ya da `NOVERA`, an). Kimsenin adı ne müşteriye ne yöneticiye gösterilir; çizelge yalnız şirketin mi Novera'nın mı yaptığını söyler. Veritabanı şunları ayrıca ister: `details` bir nesne olsun, `TRANSFER` dışındaki her türde araç dolu olsun, **her türün yalnızca kendi adımları olsun** (yol yardım "teslim edildi" olamaz) ve **aracın şirketi talebin şirketi olsun** (tetikleyici).
+
+**Türler ve `details`** (zod benzeri doğrulama `apps/api/src/fleet/requests/request-details.ts`; hatalı alan noktalı adla söylenir, ör. `details.location: REQUIRED`):
+- `ROADSIDE`: `incident` (`BREAKDOWN`, `ACCIDENT`, `TIRE`, `FUEL_OR_CHARGE`), `location` (adres ve/veya telefondan alınan enlem+boylam; **en az biri**, yarım konum geçersiz), `description` (en çok 500).
+- `REPLACEMENT_VEHICLE`: `address`, `date` (bugünden, İstanbul, bir yıl sonrasına kadar), `durationDays` (1–90).
+- `MAINTENANCE`: `service` (`PERIODIC`, `SUMMER_TIRES`, `WINTER_TIRES`, `INSPECTION`), `preferredDate` (aynı aralık), `valet` (evet/hayır), `address` (**vale ise zorunlu**).
+- `TRANSFER` (V2-42): bkz. aşağıdaki "VIP transfer". Enum ve geçiş tablosu V2-41'den beri içindeydi, bu yüzden V2-42'nin migration'ı yoktur.
+
+**Adımlar** (`request-flow.ts`; web'de aynı tablo `lib/requests.ts`'te): yol yardım `RECEIVED → DISPATCHED → EN_ROUTE → COMPLETED`; ikame araç `RECEIVED → APPROVED → DELIVERED → RETURNED`; bakım `RECEIVED → SCHEDULED → IN_SERVICE → COMPLETED`; hepsinde `CANCELLED`. Novera bir talebi **daha sonraki herhangi bir adıma** ya da iptale taşıyabilir (iş tek seferde bittiyse adım atlanabilir); geri, aynı adıma, başka türün adımına ve **bitmiş** (son adım ya da iptal) talepten çıkış `409 INVALID_TRANSITION`. Satır kilitlenir; iki hamle aynı anda gelirse ikincisi birincinin bıraktığı duruma göre değerlendirilir. "Açık", bitmemiş demektir; türden ve adımdan hesaplanır, saklanmaz.
+
+**Müşteri:** talebi **yalnızca `RECEIVED` iken** iptal eder (`POST …/cancel`; sonrası `409`, satır kilitli olduğundan iptal ile Novera'nın ilk hamlesi sıraya girer). Araç şirketin **kullanımdaki** aracı olmalı; başka şirketin aracı, iade edilmiş ve olmayan araç aynı cevabı verir (`fleetVehicleId: UNKNOWN_REFERENCE`). **Şirket başına saatte en çok 20 talep** açılır (`429`; şirketin bütün hesapları tek sayacı paylaşır, her çağrıya uygulanan dakikada 120'ye ek; SECURITY.md `fleet-requests`). Aynı araçta aynı türde açık başka talep varsa **engel değil uyarı**: cevaptaki `similarOpen` numaraları ekranda bildirimle söylenir. Başka şirketin talebi `404`.
+
+**Konum ("konumumu kullan"):** yalnızca **düğmeyle** istenir, sayfa açılırken hiçbir şey sorulmaz. İzin verilmezse ya da konum alınamazsa form çalışmaya devam eder: adres alanı yeterlidir ve bunu söyleyen bir not çıkar. Alınan konum iki sayı olarak gönderilir (5 ondalık), "Konumu kaldır" ile silinir.
+
+**Her talep ekranında** (liste, yeni, detay): 7/24 operasyon masasının telefonu (`ContactLink`, basınca Ara / Kopyala; `COMPANY.phone`) ve "can güvenliği söz konusuysa 112" notu. Araç sayfasında o aracın son 5 talebi ve "Bu araç için talep aç" (`?arac=` ile formu doldurur).
+
+**Panel:** `/yonetim/talepler` (tür zinciri, durum seçimi: **Açık talepler** ya da tek adım, arama numara/plaka/şirket, sıralama oluşturma/güncelleme) ve detay (bilgiler, şirket, atanan, zaman çizelgesi, **"Talebi ilerlet"**: yalnız gidilebilecek adımlar, not ve atanan; boş atanan eskisini siler, hiç gönderilmeyen korur). Not ve atanan müşterinin çizelgesinde görünür. İşlem kaydı: `fleet-request.create`, `fleet-request.cancel` (müşteri hesabıyla, şirket satırda), `request.status` (yönetici, şirket satırda); yalnız alan adları, not ve adres yazılmaz.
+
+**Özetler:** Yönetim Özet'indeki "Açık servis talebi" kartı artık `null` değil sayıdır (`GET /admin/summary` → `serviceRequests`, `/admin/requests?open=true` ile aynı kural) ve `/yonetim/talepler?durum=acik` bağlantısını açar. Filom Özet'te "Açık talep" kartı (`GET /fleet/summary` → `requests.open`).
+
+**VIP transfer (V2-42, `TRANSFER`):**
+- **Kim açar:** yalnızca **etkin (`ACTIVE`) bir `vip-mobilite` sözleşmesi olan** şirket. Başka şirket `403 FORBIDDEN` alır; bu, gövdeye hiç bakılmadan en başta söylenir (geçersiz gövde de 403 verir, yani cevap gönderilene bağlı değildir). Bitmiş sözleşme saymaz. Filom'da tür seçiminde ve listenin tür zincirinde "VIP transfer" yalnızca bu şirkette görünür (`GET /fleet/summary` → `hasVipContract`); özet okunamazsa gösterilmez. Yönetim listesinde tür zinciri herkes için vardır.
+- **Araç yok:** `fleetVehicleId` gönderilirse `422` `NOT_ALLOWED`; veritabanında araç boştur (CHECK yalnız transferde buna izin verir). "Aynı araçta açık talep" uyarısı transferde yoktur (`similarOpen` boş).
+- **`details`:** `passengerName` (en çok 100), `passengers` (1–7), `flightNumber` (isteğe bağlı; boşluksuz büyük harfle saklanır; biçim havayolunun iki karakteri, **en az biri harf**, ve bir ile dört rakam: `TK1234`), `meeting` (**havalimanı listesinden `airport` ya da `address`, ikisinden tam biri**; liste: IST, SAW, ESB, ADB, AYT, BJV, DLM, ADA, GZT, ASR, TZX, SZF), `meetingAt` (bir an; **şu andan en az 2 saat sonrası**, kenarın kendisi dahil, en çok bir yıl; form İstanbul saati yazar, API anı UTC olarak saklar), `destination` (en çok 200), `note` (en çok 500).
+- **Adımlar:** `RECEIVED → DRIVER_ASSIGNED → MET → COMPLETED` (ya da `CANCELLED`). **`DRIVER_ASSIGNED`, `MET` ve `COMPLETED` adımlarına geçmek için `assignee` (şoförün adı, telefonu, aracı; serbest metin) yazılı olmalıdır**: bu hamleyle gönderilmişse ya da önceki bir hamleden kalmışsa. Yoksa `422` `assignee: REQUIRED` ve hiçbir şey yazılmaz; bir adım atlanıp doğrudan `MET`'e gidilse de şoför yazılı olmak zorundadır. Şoförü `MET`'te boş göndererek silmek de reddedilir. İptal için şoför gerekmez.
+- **Uçuş takibi:** gerçek bir servise bağlanmaz. Uçuş numarası gösterilir ve ekranda "Uçuş durumu operasyon masası tarafından izlenir." yazar.
+- **Panel:** durum formunda şoför alanının altında bu kural yazar; kural istemcide de denenir, ama API'nin cevabı da aynı alanda gösterilir.
+- **Örnek veri (USE_MOCKS=1):** örnek şirket Ege Lojistik'in VIP sözleşmesi yoktur; yönetici şirket sayfasından "VIP Mobilite" ürünüyle sözleşme açınca transfer seçeneği Filom'da belirir. Issue'daki Yeşil Enerji Ltd. seed şirketidir (sample modda yoktur); onun durumu API entegrasyon testlerindedir.
+
+**E-posta:** durum değişikliği e-postası V2-44'tedir; burada olay kaydı yeterli.
+
+**Örnek veri (USE_MOCKS=1):** `mocks/requests.ts`: Ege Lojistik'in dört talebi (yolda olan bir yol yardım, randevusu verilmiş bir bakım, iade alınmış bir ikame araç, yeni alınmış bir yol yardım) ve Anadolu İnşaat'ın bir talebi (Ege hiçbir yerde göremez, `404`). Açık olanlar: Ege 3, hepsi 4.
+
 ## 4. API
 
 Tüm uçlar `/admin` önekli, `AdminGuard` arkasında, ADR-24 kurallarıyla (sayfalama, `STALE_WRITE`, yeni hata kodları). Değiştiren her istek işlem kaydına yazılır, `Content-Type: application/json` dışındakiler `415` döner, sınır dakikada 120/yönetici.
@@ -337,6 +418,7 @@ Tüm uçlar `/admin` önekli, `AdminGuard` arkasında, ADR-24 kurallarıyla (say
 | Araçlar | `GET/POST /admin/vehicles`, `PATCH /admin/vehicles/{id}` (bayi, `active`) |
 | Faturalar | `POST /admin/invoices/generate?period=YYYY-MM` (aynı ay ikinci kez `409 ALREADY_GENERATED`), `GET /admin/invoices`, `GET/PATCH /admin/invoices/{numara}` (ödendi işareti) |
 | Filo masrafları | `GET/POST /admin/fleet-expenses`, `GET/PATCH /admin/fleet-expenses/{id}` (plakayla giriş; yansıtılmış masraf kesin) |
+| Servis talepleri | `GET /admin/requests`, `GET /admin/requests/{numara}`, `POST /admin/requests/{numara}/status` (`{ status, note?, assignee? }`; geçersiz geçiş `409 INVALID_TRANSITION`) |
 | Ek hizmetler | `GET /admin/extras`, `PATCH /admin/extras/{slug}` |
 | Rezervasyonlar | `GET /admin/reservations`, `GET /admin/reservations/{number}`, `POST /admin/reservations/{number}/cancel` |
 | Teklifler | `GET /admin/quotes`, `GET/PATCH /admin/quotes/{number}` |

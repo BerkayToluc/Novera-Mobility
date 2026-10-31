@@ -122,6 +122,8 @@ model User {
   // İletişim mesajları, bu hesabın (yönetici) "ele alındı" dediği (V2-32).
   handledMessages       ContactMessage[] @relation("MessageHandler")
   quoteRequests     QuoteRequest[]
+  // Filom'dan açtığı servis talepleri (V2-41); hesap silinince talep kalır, açan kişi boşalır.
+  serviceRequests   ServiceRequest[]
   pointTransactions PointTransaction[]
   sessions          Session[]
   passwordResetTokens   PasswordResetToken[]
@@ -147,6 +149,7 @@ model Company {
   employees      CompanyEmployee[]
   fleetContracts FleetContract[]
   fleetInvoices  FleetInvoice[]
+  serviceRequests ServiceRequest[]
 }
 
 // ---------- Filom: filo verisi (V2-35, ADR-25, docs/FLEET.md §5) ----------
@@ -250,6 +253,7 @@ model FleetVehicle {
   assignments VehicleAssignment[]
   readings    VehicleReading[]
   expenses    FleetExpense[]
+  serviceRequests ServiceRequest[]
 
   @@unique([id, companyId])
   @@index([contractId])
@@ -341,6 +345,101 @@ model FleetExpense {
   @@index([companyId, occurredAt])
   @@index([companyId, status])
   @@index([fleetVehicleId, occurredAt])
+}
+
+// Kurgusal şarj istasyonu (V2-40, ADR-30, docs/FLEET.md §3.1): ad, şehir, konum ve soket türleri seed'de sabittir. Müsaitlik (müsait, dolu,
+// arızalı) SAKLANMAZ: istasyon kimliği ve 5 dakikalık dilimden deterministik üretilir (`src/fleet/simulation/`). Bir şehirde aynı ad iki kez olmaz.
+model ChargingStation {
+  id        String   @id @default(uuid())
+  name      String
+  city      String
+  latitude  Float
+  longitude Float
+  // "CCS", "CHAdeMO", "TYPE2" ... en az bir tane (migration'daki CHECK).
+  sockets   String[]
+  createdAt DateTime @default(now())
+
+  @@unique([city, name])
+  @@index([city])
+}
+
+// ---------- Servis talepleri (V2-41, ADR-31, docs/FLEET.md §3, SPEC §3.D) ----------
+// Tek tablo, türe göre ayrıntı: `details` her tür için ayrı bir zod şemasıyla doğrulanır (src/fleet/requests/request-details.ts), durum geçişleri tür
+// başına bir tabloda tanımlıdır (request-flow.ts). Tek durum listesi tüm türlerin adımlarını taşır; hangi türün hangi adımları kullanabildiği
+// migration'daki CHECK ile de korunur.
+
+enum ServiceRequestType {
+  ROADSIDE
+  REPLACEMENT_VEHICLE
+  MAINTENANCE
+  // V2-42: yalnızca etkin `vip-mobilite` sözleşmesi olan şirkette açılır.
+  TRANSFER
+}
+
+enum ServiceRequestStatus {
+  RECEIVED
+  // Yol yardım: Yönlendirildi → Yolda → Tamamlandı
+  DISPATCHED
+  EN_ROUTE
+  // İkame araç: Onaylandı → Teslim edildi → İade alındı
+  APPROVED
+  DELIVERED
+  RETURNED
+  // Bakım ve lastik: Randevu verildi → Serviste → Tamamlandı
+  SCHEDULED
+  IN_SERVICE
+  // VIP transfer: Şoför atandı → Karşılandı → Tamamlandı
+  DRIVER_ASSIGNED
+  MET
+  COMPLETED
+  CANCELLED
+}
+
+// Olayı kimin yaptığı: şirketin kendi hesabı mı, Novera mı. Kişinin adı müşteriye ve yöneticiye gösterilmez, bu iki söz yeter.
+enum ServiceRequestActor {
+  COMPANY
+  NOVERA
+}
+
+model ServiceRequest {
+  id          String               @id @default(uuid())
+  // `TLP-<yıl>-<5 hane>`, `ServiceRequestNumber_seq` sequence'inden gelir.
+  number      String               @unique
+  companyId   String
+  company     Company              @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  createdById String?
+  createdBy   User?                @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  type        ServiceRequestType
+  status      ServiceRequestStatus @default(RECEIVED)
+  // Transfer dışındaki her türde dolu (CHECK). Aracın şirketin olması bir tetikleyiciyle de korunur (migration).
+  fleetVehicleId String?
+  vehicle        FleetVehicle?     @relation(fields: [fleetVehicleId], references: [id], onDelete: Restrict)
+  details     Json
+  // Yöneticinin girdiği serbest metin: çekici, servis ya da şoför bilgisi (gerçek tedarikçi entegrasyonu yok).
+  assignee    String?
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+
+  events ServiceRequestEvent[]
+
+  @@index([companyId, createdAt])
+  @@index([status])
+  @@index([fleetVehicleId])
+}
+
+// Talebin zaman çizelgesi: her durum değişikliği bir satır. Yalnızca eklenir.
+model ServiceRequestEvent {
+  id        String               @id @default(uuid())
+  requestId String
+  request   ServiceRequest       @relation(fields: [requestId], references: [id], onDelete: Restrict)
+  status    ServiceRequestStatus
+  note      String?
+  actor     ServiceRequestActor
+  // Kimin yaptığı kişisel veri olmasın diye yabancı anahtar değildir; hesap silinse de olay kalır.
+  actorId   String?
+  at        DateTime             @default(now())
+
+  @@index([requestId, at])
 }
 
 // Yönetimde değiştiren her işlemin kaydı (V2-23, ADR-24). Yalnızca eklenir: servis güncelleme ya da silme sunmaz ve

@@ -10,7 +10,10 @@
       "assignments": "Assignments",
       "contracts": "Contracts",
       "invoices": "Invoices",
-      "expenses": "Expenses"
+      "expenses": "Expenses",
+      "reports": "Reports",
+      "green": "Green Fleet",
+      "requests": "Requests"
     },
     "empty": {
       "title": "My fleet",
@@ -50,6 +53,11 @@
         "open": "Open expenses",
         "openTotal": "Total {total}",
         "openList": "Open expenses"
+      },
+      "requests": {
+        "title": "Requests",
+        "open": "Open requests",
+        "openList": "Open requests"
       }
     },
     "vehicles": {
@@ -458,6 +466,408 @@
         "to": "Last day",
         "apply": "Apply",
         "clear": "Clear days"
+      }
+    },
+    "reports": {
+      "title": "Reports",
+      "intro": "What your fleet spent and how far it drove, by month, vehicle and department. Under every chart is a table of the same data.",
+      "periodLabel": "Period",
+      "periods": {
+        "bu-ay": "This month",
+        "son-3-ay": "Last 3 months",
+        "bu-yil": "This year",
+        "ozel": "Custom period"
+      },
+      "from": "First month",
+      "to": "Last month",
+      "apply": "Show report",
+      "showing": "Showing {period}.",
+      "showingRange": "Showing {from} – {to}.",
+      "retry": "Try again",
+      "loadErrorTitle": "The report could not be loaded",
+      "loadErrorText": "Try again in a few seconds.",
+      "emptyTitle": "No data in this period",
+      "emptyText": "There are no invoices, expenses or kilometres in the months you chose. Try a wider period.",
+      "emptyAction": "Show this year",
+      "totals": {
+        "total": "Total cost",
+        "invoice": "Invoice share",
+        "expenses": "Expenses",
+        "km": "Kilometres"
+      },
+      "basis": "Amounts are in TRY. The invoice share is without VAT: each line of an invoice is divided equally between all the vehicles on that contract; the department is that of the person who had the vehicle at the end of the invoice's month, or at the moment of the expense.",
+      "series": {
+        "invoice": "Invoice share",
+        "expenses": "Expenses",
+        "km": "Kilometres"
+      },
+      "tableBelow": "The same data is in the table below.",
+      "topNote": "The {count} highest rows are drawn; the table has every row.",
+      "noDepartment": "Unassigned / no department",
+      "unallocated": "Not shared out (contract with no vehicle)",
+      "scrollable": "{table} (scrolls sideways)",
+      "months": {
+        "title": "Cost by month"
+      },
+      "km": {
+        "title": "Kilometres by month"
+      },
+      "kmUnit": "{value} km",
+      "vehicles": {
+        "title": "Cost by vehicle"
+      },
+      "departments": {
+        "title": "Cost by department"
+      },
+      "columns": {
+        "month": "Month",
+        "invoice": "Invoice share",
+        "expenses": "Expenses",
+        "total": "Total",
+        "km": "Kilometres",
+        "vehicle": "Vehicle",
+        "department": "Department",
+        "sum": "Total"
+      }
+    },
+    "green": {
+      "title": "Green Fleet",
+      "intro": "The charge, battery health and carbon saving of your electric and hybrid vehicles, and the charging stations nearby.",
+      "simulation": "Simulation",
+      "retry": "Try again",
+      "scrollable": "{table} (scrolls sideways)",
+      "percent": "{value}%",
+      "km": "{value} km",
+      "distance": "{value} km",
+      "tableBelow": "The same data is in the table below.",
+      "loadErrorTitle": "The Green Fleet could not be loaded",
+      "loadErrorText": "Try again in a few seconds.",
+      "emptyTitle": "No vehicles in the Green Fleet",
+      "emptyText": "Your company has no electric or hybrid vehicle in use. Once one is added to your contract, its carbon saving, battery and charge show here.",
+      "emptyAction": "See your vehicles",
+      "fuel": {
+        "ELECTRIC": "Electric",
+        "HYBRID": "Hybrid"
+      },
+      "carbon": {
+        "title": "Carbon saving",
+        "example": "Example calculation",
+        "saved": "CO₂ saved",
+        "km": "Kilometres",
+        "cars": "Electric and hybrid vehicles",
+        "kg": "{value} kg",
+        "how": "This is an example calculation: kilometres × (petrol equivalent − the vehicle's emissions). The petrol equivalent is {petrol} g CO₂/km, hybrid {hybrid} g, electric {electric} g (grid share). It is not a measurement."
+      },
+      "charge": {
+        "title": "Charge level",
+        "text": "The latest reading Novera wrote down. A vehicle that has none (a hybrid that is not charged from the grid, for one) has no figure.",
+        "none": "No reading"
+      },
+      "battery": {
+        "title": "Battery health",
+        "chart": "Battery health over the last 6 months",
+        "firstFour": "The lines of the first four vehicles are drawn; the table has every vehicle."
+      },
+      "stations": {
+        "title": "Charging stations nearby",
+        "vehicleLabel": "Vehicle",
+        "fromCity": "The vehicle {plate} is taken to be in the centre of {city} for now; distances are from there.",
+        "noPosition": "The position of {city}, the city of vehicle {plate}, is not known; stations are listed without distances, those of its own city first.",
+        "updated": "States as of {time} (they change every 5 minutes).",
+        "note": "The stations and their states are examples; they are not connected to a real charging network.",
+        "emptyTitle": "No station found",
+        "emptyText": "There is no charging station to show for this vehicle.",
+        "errorTitle": "The stations could not be loaded",
+        "errorText": "Try again in a few seconds."
+      },
+      "stationStatus": {
+        "AVAILABLE": "Available",
+        "BUSY": "In use",
+        "OUT_OF_ORDER": "Out of order"
+      },
+      "columns": {
+        "vehicle": "Vehicle",
+        "fuel": "Type",
+        "km": "Kilometres",
+        "saved": "Saved",
+        "sum": "Total",
+        "charge": "Charge level",
+        "date": "Date",
+        "health": "Battery health",
+        "station": "Station",
+        "distance": "Distance",
+        "sockets": "Sockets",
+        "status": "Status"
+      }
+    },
+    "requests": {
+      "title": "Requests",
+      "intro": "Open roadside assistance, replacement vehicle and maintenance or tyre requests here, and follow them step by step.",
+      "newButton": "New request",
+      "tableCaption": "Service requests",
+      "retry": "Try again",
+      "typeFilterLabel": "By type",
+      "statusFilterLabel": "By status",
+      "filterAll": "All",
+      "filterOpen": "Open requests",
+      "apply": "Apply",
+      "columns": {
+        "number": "Number",
+        "type": "Type",
+        "vehicle": "Vehicle",
+        "status": "Status",
+        "updated": "Last update"
+      },
+      "type": {
+        "ROADSIDE": "Roadside assistance",
+        "REPLACEMENT_VEHICLE": "Replacement vehicle",
+        "MAINTENANCE": "Maintenance and tyres",
+        "TRANSFER": "VIP transfer"
+      },
+      "status": {
+        "RECEIVED": "Received",
+        "DISPATCHED": "Dispatched",
+        "EN_ROUTE": "On the way",
+        "APPROVED": "Approved",
+        "DELIVERED": "Delivered",
+        "RETURNED": "Returned",
+        "SCHEDULED": "Appointment made",
+        "IN_SERVICE": "In service",
+        "DRIVER_ASSIGNED": "Driver assigned",
+        "MET": "Met",
+        "COMPLETED": "Completed",
+        "CANCELLED": "Cancelled"
+      },
+      "emptyTitle": "You have no requests yet",
+      "emptyText": "You can open a new request for roadside assistance, a replacement vehicle or maintenance.",
+      "emptyFilteredTitle": "No request matches this filter",
+      "emptyFilteredText": "Try removing the filters.",
+      "loadErrorTitle": "Requests could not be loaded",
+      "loadErrorText": "Try again in a few seconds.",
+      "help": {
+        "title": "Need help?",
+        "desk": "24/7 Operations Desk:",
+        "emergency": "If anyone's safety is at risk, do not fill in a form: call 112 at once."
+      },
+      "detail": {
+        "metaTitle": "Request",
+        "intro": "{type} request",
+        "back": "Back to requests",
+        "retry": "Try again",
+        "loadErrorTitle": "The request could not be loaded",
+        "loadErrorText": "Try again in a few seconds.",
+        "factsTitle": "Request details",
+        "timelineTitle": "Timeline",
+        "assignee": "Assigned",
+        "noAssignee": "Nobody has been assigned yet",
+        "opened": "Opened",
+        "vehicle": "Vehicle"
+      },
+      "facts": {
+        "incident": "Incident",
+        "location": "Location",
+        "description": "Description",
+        "deliveryAddress": "Delivery address",
+        "deliveryDate": "Delivery day",
+        "duration": "Estimated duration",
+        "durationValue": "{count} days",
+        "service": "Service",
+        "preferredDate": "Preferred day",
+        "valet": "Valet",
+        "valetYes": "Yes, collect it with a valet",
+        "valetNo": "No, the vehicle will be brought in",
+        "pickupAddress": "Address to collect from",
+        "position": "Position: {latitude}, {longitude}",
+        "none": "—",
+        "passenger": "Yolcu",
+        "passengerCount": "{count} passengers",
+        "flight": "Uçuş",
+        "flightNote": "The flight status is followed by the operations desk.",
+        "meetingPlace": "Meeting place",
+        "meetingAt": "Meeting time",
+        "destination": "Destination",
+        "note": "Note"
+      },
+      "incidents": {
+        "BREAKDOWN": "Breakdown",
+        "ACCIDENT": "Accident",
+        "TIRE": "Tyre",
+        "FUEL_OR_CHARGE": "Fuel or charge"
+      },
+      "services": {
+        "PERIODIC": "Periodic maintenance",
+        "SUMMER_TIRES": "Summer tyres",
+        "WINTER_TIRES": "Winter tyres",
+        "INSPECTION": "Vehicle inspection"
+      },
+      "timeline": {
+        "label": "Steps of the request",
+        "company": "Your company",
+        "novera": "Novera"
+      },
+      "cancel": {
+        "title": "Cancel the request",
+        "text": "You can cancel the request because nobody has taken it up yet. Once it is taken up, call the operations desk to cancel.",
+        "button": "Cancel the request",
+        "toast": "Request {number} was cancelled.",
+        "dialog": {
+          "title": "Cancel {number}?",
+          "text": "A cancelled request cannot be reopened; open a new one if you need to.",
+          "confirm": "Cancel the request",
+          "keep": "Keep it"
+        },
+        "errors": {
+          "notAllowed": "The request has been taken up in the meantime and can no longer be cancelled. Call the operations desk.",
+          "notFound": "This request no longer exists.",
+          "unavailable": "The action could not be completed. Try again in a few seconds."
+        }
+      },
+      "vehicleSection": {
+        "title": "Requests for this vehicle",
+        "empty": "There are no requests for this vehicle yet.",
+        "new": "Open a request for this vehicle",
+        "all": "All requests"
+      },
+      "airports": {
+        "IST": "Istanbul Airport (IST)",
+        "SAW": "Sabiha Gökçen (SAW)",
+        "ESB": "Ankara Esenboğa (ESB)",
+        "ADB": "İzmir Adnan Menderes (ADB)",
+        "AYT": "Antalya (AYT)",
+        "BJV": "Milas-Bodrum (BJV)",
+        "DLM": "Dalaman (DLM)",
+        "ADA": "Adana Şakirpaşa (ADA)",
+        "GZT": "Gaziantep (GZT)",
+        "ASR": "Kayseri Erkilet (ASR)",
+        "TZX": "Trabzon (TZX)",
+        "SZF": "Samsun Çarşamba (SZF)"
+      }
+    },
+    "requestForm": {
+      "label": "New service request",
+      "type": {
+        "legend": "Type of request",
+        "ROADSIDE": {
+          "title": "Roadside assistance",
+          "text": "Breakdown, accident, tyre or fuel/charge: a tow and help are sent."
+        },
+        "REPLACEMENT_VEHICLE": {
+          "title": "Replacement vehicle",
+          "text": "A spare vehicle while yours is in service or cannot be used."
+        },
+        "MAINTENANCE": {
+          "title": "Maintenance and tyres",
+          "text": "Periodic maintenance, summer/winter tyres or an inspection appointment."
+        },
+        "TRANSFER": {
+          "title": "VIP transfer",
+          "text": "A chauffeured transfer: a meeting at the airport, flight following and driver coordination."
+        }
+      },
+      "fields": {
+        "vehicle": "Vehicle",
+        "vehicleChoose": "Choose a vehicle",
+        "incident": "Type of incident",
+        "incidentChoose": "Choose the incident",
+        "address": "Address",
+        "roadsideAddressHint": "The address or place where the vehicle is. You can leave it empty if you use your location.",
+        "description": "Description (optional)",
+        "descriptionHint": "Say briefly what happened. At most 500 characters.",
+        "deliveryAddress": "Delivery address",
+        "deliveryDate": "Delivery day",
+        "durationDays": "Estimated duration (days)",
+        "durationDaysHint": "Between 1 and 90.",
+        "service": "Service",
+        "serviceChoose": "Choose the service",
+        "preferredDate": "Preferred day",
+        "valet": "Collect my vehicle with a valet",
+        "pickupAddress": "Address to collect from",
+        "pickupAddressOptional": "Address (optional)",
+        "pickupHint": "You can leave it empty if you do not want a valet.",
+        "passengerName": "Passenger name",
+        "passengers": "Number of passengers",
+        "passengersHint": "Between 1 and 7.",
+        "flightNumber": "Flight number (optional)",
+        "flightNumberHint": "For example TK1234. The operations desk follows the flight; it is not linked to a real flight service.",
+        "meetingPlace": "Meeting place",
+        "meetingKind": {
+          "airport": "Airport",
+          "address": "Address"
+        },
+        "airport": "Airport",
+        "airportChoose": "Choose an airport",
+        "meetingAddress": "Meeting address",
+        "meetingAt": "Meeting date and time",
+        "meetingAtHint": "In Istanbul time; at least 2 hours from now.",
+        "destination": "Destination address",
+        "note": "Note (optional)",
+        "noteHint": "For example, meeting with a name sign. At most 500 characters."
+      },
+      "incidents": {
+        "BREAKDOWN": "Breakdown",
+        "ACCIDENT": "Accident",
+        "TIRE": "Tyre",
+        "FUEL_OR_CHARGE": "Fuel or charge"
+      },
+      "services": {
+        "PERIODIC": "Periodic maintenance",
+        "SUMMER_TIRES": "Summer tyres",
+        "WINTER_TIRES": "Winter tyres",
+        "INSPECTION": "Vehicle inspection"
+      },
+      "location": {
+        "button": "Use my location",
+        "asking": "Asking for your location…",
+        "got": "Location found: {latitude}, {longitude}",
+        "forget": "Remove location",
+        "denied": "The location could not be had or was not allowed; that is fine, just fill in the address field above."
+      },
+      "errors": {
+        "type": "Choose a type of request.",
+        "fleetVehicleId": "Choose a vehicle.",
+        "incident": "Choose the incident.",
+        "location": "Say where the vehicle is, or use your location.",
+        "address": "Write a valid address (at most 200 characters).",
+        "description": "The description can be at most 500 characters.",
+        "date": "Choose a valid day from today to a year ahead.",
+        "durationDays": "Write a duration between 1 and 90 days.",
+        "service": "Choose a service.",
+        "preferredDate": "Choose a valid day from today to a year ahead.",
+        "generic": "The request could not be sent. Check the fields and try again.",
+        "unavailable": "The action could not be completed. Try again in a few seconds.",
+        "passengerName": "Write the passenger's name (at most 100 characters).",
+        "passengers": "Write a number of passengers between 1 and 7.",
+        "flightNumber": "The flight number should look like TK1234 (two characters, one to four digits).",
+        "meeting": "Choose or write the meeting place.",
+        "meetingAt": "Enter a valid time from at least 2 hours from now to a year ahead.",
+        "destination": "Write the destination address (at most 200 characters).",
+        "note": "The note can be at most 500 characters.",
+        "forbidden": "A VIP transfer can only be opened by companies with a VIP Mobilite contract."
+      },
+      "toast": {
+        "created": "Your request was received: {number}.",
+        "createdWithOpen": "Your request was received: {number}. There is another open request of this kind for this vehicle: {others}."
+      },
+      "send": "Send the request",
+      "sending": "Sending…",
+      "back": "Cancel",
+      "noVehicles": {
+        "title": "No vehicles",
+        "text": "You need a fleet vehicle in use to open a request."
+      },
+      "airports": {
+        "IST": "Istanbul Airport (IST)",
+        "SAW": "Sabiha Gökçen (SAW)",
+        "ESB": "Ankara Esenboğa (ESB)",
+        "ADB": "İzmir Adnan Menderes (ADB)",
+        "AYT": "Antalya (AYT)",
+        "BJV": "Milas-Bodrum (BJV)",
+        "DLM": "Dalaman (DLM)",
+        "ADA": "Adana Şakirpaşa (ADA)",
+        "GZT": "Gaziantep (GZT)",
+        "ASR": "Kayseri Erkilet (ASR)",
+        "TZX": "Trabzon (TZX)",
+        "SZF": "Samsun Çarşamba (SZF)"
       }
     }
   }

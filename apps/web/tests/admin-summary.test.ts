@@ -10,21 +10,27 @@ const summary = (overrides: Partial<AdminSummary> = {}): AdminSummary => ({
   reservationsLast7Days: 0,
   quotesAwaiting: 0,
   unhandledMessages: 0,
-  serviceRequests: null,
+  serviceRequests: 0,
   ...overrides,
 });
 
 describe("the summary cards (V2-25)", () => {
-  it("leaves out a card whose number has no source yet, instead of showing a zero", () => {
-    // The service requests have no source before V2-41: their card is not there, the message card (V2-32) is.
+  it("shows every card now that every number has a source (the service requests came with V2-41)", () => {
     expect(shownCards(summary()).map((card) => card.key)).toEqual([
       "rentalsStartingToday",
       "rentalsEndingToday",
       "reservationsLast7Days",
       "quotesAwaiting",
       "unhandledMessages",
+      "serviceRequests",
     ]);
-    expect(shownCards(summary({ serviceRequests: 0 })).map((card) => card.key)).toContain("serviceRequests");
+  });
+
+  it("still leaves out a card whose number is missing, instead of showing a wrong zero", () => {
+    // A number that is null has no source: the screen does not guess. (The API gives a number for all of them now.)
+    const missing = summary({ serviceRequests: null as unknown as number });
+    expect(shownCards(missing).map((card) => card.key)).not.toContain("serviceRequests");
+    expect(summaryIsEmpty(missing)).toBe(true);
   });
 
   it("is all clear only when every shown card is zero; a missing number does not count as one", () => {
@@ -32,7 +38,7 @@ describe("the summary cards (V2-25)", () => {
     expect(summaryIsEmpty(summary({ quotesAwaiting: 1 }))).toBe(false);
     expect(summaryIsEmpty(summary({ reservationsLast7Days: 5 }))).toBe(false);
     expect(summaryIsEmpty(summary({ unhandledMessages: 2 }))).toBe(false);
-    // A card that appears later (V2-41) with something in it ends the all-clear.
+    // An open service request (V2-41) ends the all-clear too.
     expect(summaryIsEmpty(summary({ serviceRequests: 1 }))).toBe(false);
   });
 

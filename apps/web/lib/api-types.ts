@@ -7213,6 +7213,728 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/fleet/reports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Dönem raporu
+         * @description Şirketin bir ay aralığındaki (`from` ve `to`, `YYYY-MM`, ikisi dahil; ikisi de yoksa bu ay, biri yoksa tek ay) **maliyeti ve kilometresi**: ay, araç ve departman bazında. En çok 24 ay; henüz başlamamış ay ve ters sıra `422` `OUT_OF_RANGE`.
+         *     **Maliyet = fatura payı + masraflar.** Faturalar KDV'siz, satırlarının toplamıyla (ara toplam) alınır: bir faturanın bir satırı, sözleşmenin **tüm araçları** arasında eşit bölünür (plaka sırasıyla; bölünmeyen kuruşlar ilk araçlara gider), böylece toplam faturalarla kuruşu kuruşuna tutar. Aracı olmayan sözleşmenin satırı hiçbir araca düşmez, `unallocated`'dadır ve toplamdadır. Fatura, ait olduğu **dönemin** ayına; masraf, gerçekleştiği **İstanbul ayına** yazılır.
+         *     **Departman:** faturada o ayın son anında, masrafta masrafın anında aracı kimin kullandığına göre kişinin departmanıdır; kimse kullanmıyorsa ya da kişinin departmanı yoksa `null`. **Kilometre:** ayın sonundaki ile başındaki okumanın farkı (okuma yoksa aracın başlangıç km'si); ay toplamları dönem toplamına eşittir.
+         *     Aynı toplam üç kesitte de tutar: aylar, departmanlar ve (`unallocated` ile birlikte) araçlar. Yalnızca **kurumsal hesabın kendi şirketinin** verisi gelir. Sınır: hesap başına dakikada 120.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description İlk ay, `YYYY-MM`. */
+                    from?: string;
+                    /** @description Son ay, `YYYY-MM`. */
+                    to?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Rapor */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["FleetReport"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Kurumsal hesap değil ya da bir şirkete bağlı değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/fleet/green": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Yeşil Filo
+         * @description Şirketin **elektrikli ve hibrit** (kullanımdaki) araçları: son şarj seviyesi, batarya sağlığı ve son 6 ayın okumalarından eğilimi, dönemin kilometresi ve **karbon tasarrufu**. Dönem `from` ve `to` (`YYYY-MM`, ikisi dahil, en çok 24 ay; ikisi de yoksa son 3 ay, yalnız `to` varsa tek ay). Başlamamış ay ve ters sıra `422 OUT_OF_RANGE`.
+         *     **Karbon tasarrufu bir örnek hesaptır** (ekranda yazar): kilometre × (benzinli eşdeğer − aracın emisyonu); katsayılar g CO₂/km olarak cevapta (`coefficients`: benzin 170, hibrit 105, elektrikli 45) ve tek yerde (`src/fleet/fleet-report.ts`). Şarj seviyesi ve batarya sağlığı Novera'nın girdiği okumalardır (simülasyon değil). Kilometre, rapordaki gibi dönem sonu ve başındaki okumanın farkıdır.
+         *     Yalnızca **kurumsal hesabın kendi şirketinin** araçları gelir; elektrikli ya da hibrit aracı yoksa `vehicles` boştur. Sınır: hesap başına dakikada 120.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description İlk ay, `YYYY-MM`. */
+                    from?: string;
+                    /** @description Son ay, `YYYY-MM`. */
+                    to?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Yeşil Filo */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["GreenReport"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Kurumsal hesap değil ya da bir şirkete bağlı değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/fleet/vehicles/{plate}/charging-stations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Plaka; boşluksuz ya da küçük harfle de olur. */
+                plate: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * Aracın en yakın şarj istasyonları
+         * @description Aracın konumuna en yakın istasyonlar, yakından uzağa. **Cevap bir simülasyondur** (ADR-30): `simulated: true`. Araç henüz canlı konum üretmediği için (V2-43) **sözleşmesinin teslim şehrinin merkezinde** sayılır; o şehrin merkezi bilinmiyorsa istasyonlar uzaklıksız (`distanceKm: null`) ve aracın kendi şehrindekiler önce gelir. İstasyonun durumu (`AVAILABLE`, `BUSY`, `OUT_OF_ORDER`) saklanmaz: istasyon kimliği ve **5 dakikalık dilimden** deterministik üretilir, yani aynı araç ve aynı dilim için her istek aynı cevabı verir (`updatedAt` dilimin başlangıcıdır).
+         *     Elektrikli ya da hibrit olmayan araç, başka şirketin aracı ve plaka olamayacak değer aynı `404`'tür. Sınır: hesap başına dakikada 120.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Kaç istasyon (1–20, varsayılan 5). */
+                    limit?: number;
+                };
+                header?: never;
+                path: {
+                    /** @description Plaka; boşluksuz ya da küçük harfle de olur. */
+                    plate: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description En yakın istasyonlar */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["StationList"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Kurumsal hesap değil ya da bir şirkete bağlı değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Böyle bir elektrikli ya da hibrit araç yok ya da başka şirketin (`NOT_FOUND`) */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/fleet/requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Servis talepleri
+         * @description Sayfalı liste, varsayılan olarak en yeni talep üstte. Yalnızca **kurumsal hesabın kendi şirketinin** talepleri görünür; başka şirketin talebi `404` döner (ADR-25). Sınır: hesap başına dakikada 120.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    page?: number;
+                    pageSize?: number;
+                    /** @description `createdAt` ya da `updatedAt`; `:asc|desc`. Varsayılan en yeni talep üstte. */
+                    sort?: string;
+                    type?: components["schemas"]["ServiceRequestType"];
+                    status?: components["schemas"]["ServiceRequestStatus"];
+                    /** @description `true`: henüz bitmemiş (türünün son adımına ulaşmamış ve iptal edilmemiş), `false`: bitmiş. */
+                    open?: boolean;
+                    vehicle?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Bir sayfa talep */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ServiceRequestPage"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Kurumsal hesap değil ya da bir şirkete bağlı değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        put?: never;
+        /**
+         * Servis talebi aç
+         * @description Yol yardım (`ROADSIDE`), ikame araç (`REPLACEMENT_VEHICLE`) ya da bakım ve lastik (`MAINTENANCE`) talebi açar; talep `RECEIVED` olarak başlar ve zaman çizelgesinin ilk satırı yazılır. `details` türe göre doğrulanır ve hatalı alan **noktalı adla** söylenir (`422`, `fieldErrors: { "details.location": "REQUIRED" }`). `fleetVehicleId` şirketin kullanımdaki bir aracı olmalıdır; başka şirketin aracı, iade edilmiş araç ve olmayan araç aynı cevabı verir (`fleetVehicleId: UNKNOWN_REFERENCE`). `TRANSFER` (VIP transfer) araçla ilgili değildir (`fleetVehicleId` gönderilirse `422 NOT_ALLOWED`) ve **yalnızca etkin `vip-mobilite` sözleşmesi olan şirkette** açılır; başka şirkette **`403 FORBIDDEN`** döner (gövdeye bakılmadan). Karşılama anı en az 2 saat sonrası, en çok bir yıl sonrasıdır.
+         *     Aynı araçta aynı türde açık başka talep varsa **engel değildir**: cevaptaki `similarOpen` numaralarını söyler. **Şirket başına saatte en çok 20 talep** (`429`, şirketin hesapları tek sayacı paylaşır), üstüne hesap başına dakikada 120. İşlem kaydı: `fleet-request.create` (kayıt kimliği talep numarası, yalnız alan adları).
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ServiceRequestCreate"];
+                };
+            };
+            responses: {
+                /** @description Açılan talep */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ServiceRequestCreated"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Kurumsal hesap değil ya da bir şirkete bağlı değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description JSON olmayan gövde (`BAD_REQUEST`) */
+                415: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/fleet/requests/{number}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Talep numarası (`TLP-2026-00001`); büyük/küçük harf fark etmez. */
+                number: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * Bir servis talebi
+         * @description Ayrıntılar, zaman çizelgesi (`events`: adım, not, an ve işlemi şirketin mi Novera'nın mı yaptığı; kimsenin adı yok), atanan kişi bilgisi. `canCancel` yalnızca `RECEIVED` durumundaki talepte doğrudur. Başka şirketin talebi `404`.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Talep numarası (`TLP-2026-00001`); büyük/küçük harf fark etmez. */
+                    number: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Talep */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ServiceRequestDetail"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Kurumsal hesap değil ya da bir şirkete bağlı değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Böyle bir talep yok ya da başka şirketin (`NOT_FOUND`) */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/fleet/requests/{number}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                number: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Talebi iptal et
+         * @description Müşteri yalnızca henüz kimsenin ele almadığı (`RECEIVED`) talebi iptal edebilir; başka durumda `409 INVALID_TRANSITION` ve hiçbir şey yazılmaz. Satır kilitlenir: iptal ile Novera'nın ilk hamlesi sıraya girer, ikincisi reddedilir. İşlem kaydı: `fleet-request.cancel`.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    number: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description İptal edilen talep */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ServiceRequestDetail"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Kurumsal hesap değil ya da bir şirkete bağlı değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Böyle bir talep yok ya da başka şirketin (`NOT_FOUND`) */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Talep artık iptal edilemez (`INVALID_TRANSITION`) */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Servis talepleri
+         * @description Bütün şirketlerin talepleri, sayfalı, varsayılan olarak en yeni üstte. `q` talep numarasında, plakada ve şirket adında arar (büyük/küçük harf fark etmez); `company` şirkete göre süzer. `open=true` Özet'teki "açık servis talebi" kartının saydığı kuraldır.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    page?: number;
+                    pageSize?: number;
+                    /** @description `createdAt` ya da `updatedAt`; `:asc|desc`. Varsayılan en yeni talep üstte. */
+                    sort?: string;
+                    type?: components["schemas"]["ServiceRequestType"];
+                    status?: components["schemas"]["ServiceRequestStatus"];
+                    /** @description `true`: henüz bitmemiş (türünün son adımına ulaşmamış ve iptal edilmemiş), `false`: bitmiş. */
+                    open?: boolean;
+                    vehicle?: string;
+                    company?: string;
+                    q?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Bir sayfa talep */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ServiceRequestPage"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/requests/{number}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                number: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * Bir servis talebi
+         * @description Ayrıntılar, zaman çizelgesi ve Novera'nın talebi hangi adımlara taşıyabildiği (`nextStatuses`).
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    number: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Talep */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ServiceRequestDetail"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Böyle bir talep yok (`NOT_FOUND`) */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/requests/{number}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                number: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Talebi bir sonraki adıma taşı
+         * @description Talebi **türünün daha sonraki bir adımına** ya da `CANCELLED`'a taşır (bir adım atlanabilir); geri, aynı adıma, başka türün adımına ve bitmiş talepten çıkış `409 INVALID_TRANSITION`. Adımlar: yol yardım `RECEIVED → DISPATCHED → EN_ROUTE → COMPLETED`; ikame araç `RECEIVED → APPROVED → DELIVERED → RETURNED`; bakım `RECEIVED → SCHEDULED → IN_SERVICE → COMPLETED`. Satır kilitlenir; aynı anda gelen iki hamleden ikincisi birincinin bıraktığı duruma göre değerlendirilir. `note` zaman çizelgesine yazılır (müşteri görür); `assignee` serbest metindir (çekici, servis, şoför): gönderilmezse korunur, boş gönderilirse silinir. **Transferde** `DRIVER_ASSIGNED`, `MET` ve `COMPLETED` adımlarına geçmek için şoförün (ad, telefon, araç) yazılı olması gerekir: yoksa `422` `assignee: REQUIRED`; iptal için gerekmez. İşlem kaydı: `request.status` (şirket satırda, yalnız alan adları).
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    number: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ServiceRequestStatusChange"];
+                };
+            };
+            responses: {
+                /** @description Güncel talep */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ServiceRequestDetail"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Böyle bir talep yok (`NOT_FOUND`) */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Bu geçiş yapılamaz (`INVALID_TRANSITION`) */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description JSON olmayan gövde (`BAD_REQUEST`) */
+                415: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/ping": {
         parameters: {
             query?: never;
@@ -7752,8 +8474,8 @@ export interface components {
             quotesAwaiting: number;
             /** @description Ele alınmamış iletişim mesajı (V2-32). Kişisel alanları saklama süresi dolduğu için silinmiş mesaj sayılmaz: yanıtlanacak bir şey kalmamıştır. `GET /admin/contact-messages?handled=false` aynı kuralla sayar. */
             unhandledMessages: number;
-            /** @description Açık servis talebi. Talepler gelene kadar (V2-41) `null`; ekran kartı gizler. */
-            serviceRequests: number | null;
+            /** @description Açık (türünün son adımına ulaşmamış, iptal edilmemiş) servis talebi (V2-41). `GET /admin/requests?open=true` aynı kuralla sayar. */
+            serviceRequests: number;
         };
         /**
          * @description Kodun şimdiki durumu (öncelik sırası için `GET /admin/promo-codes` açıklamasına bak).
@@ -8608,6 +9330,14 @@ export interface components {
                 /** @description Vadesi geçmiş */
                 overdue: number;
             };
+            /** @description Etkin bir VIP Mobilite sözleşmesi var; yalnızca bu şirketler transfer talebi açabilir (V2-42). */
+            hasVipContract: boolean;
+            requests: {
+                /** @description Henüz bitmemiş servis talepleri. */
+                open: number;
+            };
+            /** @description Kullanımdaki elektrikli ve hibrit araçlar; 0 ise Yeşil Filo menüde görünmez. */
+            greenVehicles: number;
             expenses: {
                 open: {
                     /** @description Açık (yansıtılmamış */
@@ -8740,6 +9470,280 @@ export interface components {
             durationMonths?: number | null;
             /** @description Satış ekibine not. */
             notes?: string | null;
+        };
+        FleetReportMoney: {
+            /** @description Fatura payı */
+            invoice: number;
+            /** @description Masraflar */
+            expenses: number;
+            /** @description İkisinin toplamı. */
+            total: number;
+        };
+        FleetReport: {
+            /** @example 2026-08 */
+            from: string;
+            /** @example 2026-10 */
+            to: string;
+            /** @description Aralıktaki her ay (boş olanlar da), eskiden yeniye. */
+            months: (components["schemas"]["FleetReportMoney"] & {
+                /** @example 2026-10 */
+                period: string;
+                km: number;
+            })[];
+            /** @description Maliyeti ya da kilometresi olan araçlar, maliyete göre çoktan aza. */
+            vehicles: (components["schemas"]["FleetReportMoney"] & {
+                /** Format: uuid */
+                id: string;
+                plate: string;
+                model: string;
+                km: number;
+            })[];
+            /** @description Departman bazında; `department: null` kimsenin kullanmadığı ya da departmanı olmayan kişinin payıdır. */
+            departments: (components["schemas"]["FleetReportMoney"] & {
+                department: string | null;
+                km: number;
+            })[];
+            unallocated: {
+                /** @description Aracı olmayan sözleşmelerin fatura satırları; toplamdadır */
+                invoice: number;
+            };
+            totals: components["schemas"]["FleetReportMoney"] & {
+                km: number;
+            };
+        };
+        GreenVehicle: {
+            /** Format: uuid */
+            id: string;
+            plate: string;
+            model: string;
+            /** @enum {string} */
+            fuel: "ELECTRIC" | "HYBRID";
+            /** @description Yazılmış son şarj seviyesi; hiç yoksa null. */
+            charge: {
+                percent: number;
+                /** Format: date-time */
+                at: string;
+            } | null;
+            /** @description Yazılmış son batarya sağlığı; hiç yoksa null. */
+            batteryHealth: {
+                percent: number;
+                /** Format: date-time */
+                at: string;
+            } | null;
+            /** @description Son 6 ayın batarya sağlığı okumaları, eskiden yeniye. */
+            batteryTrend: {
+                /** Format: date-time */
+                at: string;
+                percent: number;
+            }[];
+            /** @description Dönemin kilometresi. */
+            km: number;
+            /** @description Dönemde tasarruf edilen CO₂, gram (örnek hesap). */
+            savedGrams: number;
+        };
+        GreenReport: {
+            /** @example 2026-08 */
+            from: string;
+            /** @example 2026-10 */
+            to: string;
+            vehicles: components["schemas"]["GreenVehicle"][];
+            totals: {
+                km: number;
+                savedGrams: number;
+            };
+            /** @description g CO₂/km: benzinli eşdeğer ve her tür için aracın emisyonu. */
+            coefficients: {
+                /** @example 170 */
+                petrol: number;
+                /** @example 105 */
+                hybrid: number;
+                /** @example 45 */
+                electric: number;
+            };
+        };
+        ChargingStation: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            city: string;
+            latitude: number;
+            longitude: number;
+            /** @description Soket türleri (CCS, CHAdeMO, TYPE2). */
+            sockets: string[];
+            /** @description Aracın konumuna kuş uçuşu uzaklık */
+            distanceKm: number | null;
+            /**
+             * @description Müsait
+             * @enum {string}
+             */
+            status: "AVAILABLE" | "BUSY" | "OUT_OF_ORDER";
+        };
+        StationList: {
+            /**
+             * @description Durumlar ve aracın konumu üretilmiştir (ADR-30); ekranda "Simülasyon" rozeti gösterilir.
+             * @enum {boolean}
+             */
+            simulated: true;
+            vehicle: {
+                plate: string;
+                /** @description Sözleşmenin teslim şehri. */
+                city: string;
+                /** @description Aracın sayılan konumu (şehir merkezi); şehir bilinmiyorsa null. */
+                position: {
+                    latitude: number;
+                    longitude: number;
+                } | null;
+            };
+            /**
+             * Format: date-time
+             * @description Durumların ait olduğu 5 dakikalık dilimin başlangıcı.
+             */
+            updatedAt: string;
+            items: components["schemas"]["ChargingStation"][];
+        };
+        /**
+         * @description Yol yardım, ikame araç, bakım ve lastik, VIP transfer (transfer V2-42'de açılır).
+         * @enum {string}
+         */
+        ServiceRequestType: "ROADSIDE" | "REPLACEMENT_VEHICLE" | "MAINTENANCE" | "TRANSFER";
+        /**
+         * @description Her türün kendi adımları vardır: yol yardım RECEIVED, DISPATCHED, EN_ROUTE, COMPLETED; ikame araç RECEIVED, APPROVED, DELIVERED, RETURNED; bakım RECEIVED, SCHEDULED, IN_SERVICE, COMPLETED; transfer RECEIVED, DRIVER_ASSIGNED, MET, COMPLETED. CANCELLED hepsinde var. Veritabanı da bunu CHECK ile ister.
+         * @enum {string}
+         */
+        ServiceRequestStatus: "RECEIVED" | "DISPATCHED" | "EN_ROUTE" | "APPROVED" | "DELIVERED" | "RETURNED" | "SCHEDULED" | "IN_SERVICE" | "DRIVER_ASSIGNED" | "MET" | "COMPLETED" | "CANCELLED";
+        RoadsideDetails: {
+            /**
+             * @description Arıza, kaza, lastik, yakıt/şarj.
+             * @enum {string}
+             */
+            incident: "BREAKDOWN" | "ACCIDENT" | "TIRE" | "FUEL_OR_CHARGE";
+            /** @description Adres, ya da telefondan alınan konum (enlem ve boylam birlikte), ya da ikisi; en az biri gerekir. */
+            location: {
+                address?: string | null;
+                latitude?: number | null;
+                longitude?: number | null;
+            };
+            description?: string | null;
+        };
+        ReplacementVehicleDetails: {
+            /** @description Teslim adresi. */
+            address: string;
+            /**
+             * Format: date
+             * @description Teslim günü; bugünden (İstanbul) bir yıl sonrasına kadar.
+             */
+            date: string;
+            /** @description Tahmini süre. */
+            durationDays: number;
+        };
+        MaintenanceDetails: {
+            /**
+             * @description Periyodik bakım, yaz lastiği, kış lastiği, muayene.
+             * @enum {string}
+             */
+            service: "PERIODIC" | "SUMMER_TIRES" | "WINTER_TIRES" | "INSPECTION";
+            /** Format: date */
+            preferredDate: string;
+            /** @description Vale ile alınsın mı. */
+            valet: boolean;
+            /** @description Vale gelecekse zorunlu. */
+            address?: string | null;
+        };
+        TransferDetails: {
+            passengerName: string;
+            passengers: number;
+            /**
+             * @description İsteğe bağlı; havayolunun iki karakteri (en az biri harf) ve bir ile dört rakam. Boşluksuz ve büyük harfle saklanır. Gerçek bir uçuş servisine bağlanmaz; operasyon masası izler.
+             * @example TK1234
+             */
+            flightNumber?: string | null;
+            /** @description Karşılama yeri; havalimanı (liste) **ya da** adres, ikisinden tam biri. */
+            meeting: {
+                /** @enum {string|null} */
+                airport?: "IST" | "SAW" | "ESB" | "ADB" | "AYT" | "BJV" | "DLM" | "ADA" | "GZT" | "ASR" | "TZX" | "SZF" | null;
+                address?: string | null;
+            };
+            /**
+             * Format: date-time
+             * @description Karşılama anı; şu andan en az 2 saat sonra
+             */
+            meetingAt: string;
+            /** @description Varış adresi. */
+            destination: string;
+            note?: string | null;
+        };
+        ServiceRequest: {
+            /** Format: uuid */
+            id: string;
+            /** @example TLP-2026-00001 */
+            number: string;
+            company: {
+                /** Format: uuid */
+                id: string;
+                name: string;
+            };
+            type: components["schemas"]["ServiceRequestType"];
+            status: components["schemas"]["ServiceRequestStatus"];
+            /** @description Henüz bitmemiş; türünden ve adımından hesaplanır */
+            open: boolean;
+            vehicle: {
+                /** Format: uuid */
+                id: string;
+                plate: string;
+                model: string;
+            } | null;
+            /** @description Türe göre ayrıntılar. */
+            details: components["schemas"]["RoadsideDetails"] | components["schemas"]["ReplacementVehicleDetails"] | components["schemas"]["MaintenanceDetails"] | components["schemas"]["TransferDetails"];
+            /** @description Novera'nın yazdığı çekici */
+            assignee: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        ServiceRequestEvent: {
+            status: components["schemas"]["ServiceRequestStatus"];
+            note: string | null;
+            /** Format: date-time */
+            at: string;
+            /**
+             * @description İşlemi şirketin kendi hesabı mı Novera mı yaptı. Kimsenin adı yoktur.
+             * @enum {string}
+             */
+            by: "COMPANY" | "NOVERA";
+        };
+        ServiceRequestDetail: components["schemas"]["ServiceRequest"] & {
+            /** @description Zaman çizelgesi */
+            events: components["schemas"]["ServiceRequestEvent"][];
+            /** @description Müşteri talebi iptal edebilir (yalnız RECEIVED). */
+            canCancel: boolean;
+            /** @description Novera'nın talebi taşıyabileceği adımlar; bitmiş talepte boş. */
+            nextStatuses: components["schemas"]["ServiceRequestStatus"][];
+        };
+        ServiceRequestPage: {
+            items: components["schemas"]["ServiceRequest"][];
+            total: number;
+            page: number;
+            pageSize: number;
+        };
+        ServiceRequestCreate: {
+            type: components["schemas"]["ServiceRequestType"];
+            /**
+             * Format: uuid
+             * @description `TRANSFER` dışındaki her türde zorunlu; transferde gönderilemez.
+             */
+            fleetVehicleId?: string;
+            details: components["schemas"]["RoadsideDetails"] | components["schemas"]["ReplacementVehicleDetails"] | components["schemas"]["MaintenanceDetails"] | components["schemas"]["TransferDetails"];
+        };
+        ServiceRequestCreated: components["schemas"]["ServiceRequestDetail"] & {
+            /** @description Aynı araçta aynı türde */
+            similarOpen: string[];
+        };
+        ServiceRequestStatusChange: {
+            status: components["schemas"]["ServiceRequestStatus"];
+            note?: string | null;
+            /** @description Gönderilmezse korunur, boş gönderilirse silinir. */
+            assignee?: string | null;
         };
         FleetContract: {
             /** Format: uuid */

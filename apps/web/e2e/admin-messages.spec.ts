@@ -50,7 +50,7 @@ test("the list shows each message with who sent it, the first words and the stat
 test("the summary card opens the list of the messages still waiting, with the same number", async ({ page }) => {
   await page.goto("/yonetim");
   await expect(page.locator("dt", { hasText: "Ele alınmamış mesaj" }).locator("xpath=following-sibling::dd[1]")).toHaveText("4");
-  await page.getByRole("link", { name: "Listeyi aç" }).last().click();
+  await page.locator(`a[href*="/yonetim/mesajlar?"]`, { hasText: "Listeyi aç" }).click();
   await expect(page).toHaveURL(/\/yonetim\/mesajlar\?.*durum=ele-alinmadi/);
   await expect(page.getByRole("table", { name: "İletişim mesajları" }).getByRole("row")).toHaveCount(5);
 });

@@ -10,7 +10,10 @@
       "assignments": "Zimmet",
       "contracts": "Sözleşmeler",
       "invoices": "Faturalar",
-      "expenses": "Masraflar"
+      "expenses": "Masraflar",
+      "reports": "Raporlar",
+      "green": "Yeşil Filo",
+      "requests": "Talepler"
     },
     "empty": {
       "title": "Filom",
@@ -50,6 +53,11 @@
         "open": "Açık masraf",
         "openTotal": "Toplam {total}",
         "openList": "Masrafları aç"
+      },
+      "requests": {
+        "title": "Talepler",
+        "open": "Açık talep",
+        "openList": "Talepleri aç"
       }
     },
     "vehicles": {
@@ -458,6 +466,408 @@
         "to": "Son gün",
         "apply": "Uygula",
         "clear": "Günleri temizle"
+      }
+    },
+    "reports": {
+      "title": "Raporlar",
+      "intro": "Filonuzun ne kadar harcadığı ve kaç kilometre yaptığı: ay, araç ve departman bazında. Her grafiğin altında aynı verinin tablosu vardır.",
+      "periodLabel": "Dönem",
+      "periods": {
+        "bu-ay": "Bu ay",
+        "son-3-ay": "Son 3 ay",
+        "bu-yil": "Bu yıl",
+        "ozel": "Özel dönem"
+      },
+      "from": "İlk ay",
+      "to": "Son ay",
+      "apply": "Raporu göster",
+      "showing": "{period} gösteriliyor.",
+      "showingRange": "{from} – {to} gösteriliyor.",
+      "retry": "Tekrar dene",
+      "loadErrorTitle": "Rapor yüklenemedi",
+      "loadErrorText": "Birkaç saniye sonra yeniden deneyin.",
+      "emptyTitle": "Bu dönemde veri yok",
+      "emptyText": "Seçtiğiniz aylarda fatura, masraf ya da kilometre kaydı yok. Daha geniş bir dönem seçmeyi deneyin.",
+      "emptyAction": "Bu yılı göster",
+      "totals": {
+        "total": "Toplam maliyet",
+        "invoice": "Fatura payı",
+        "expenses": "Masraflar",
+        "km": "Kilometre"
+      },
+      "basis": "Tutarlar TL'dir. Fatura payı KDV hariçtir: bir faturanın her satırı, o sözleşmedeki tüm araçlar arasında eşit bölünür; araç, masrafın ya da faturanın kendi ayının sonunda kimdeyse departman onunkidir.",
+      "series": {
+        "invoice": "Fatura payı",
+        "expenses": "Masraflar",
+        "km": "Kilometre"
+      },
+      "km": {
+        "title": "Aylara göre kilometre"
+      },
+      "tableBelow": "Aynı veri aşağıdaki tabloda.",
+      "topNote": "En yüksek {count} satır çizilir; tablo hepsini içerir.",
+      "noDepartment": "Atanmamış / departmansız",
+      "unallocated": "Araçlara dağıtılamayan (aracı olmayan sözleşme)",
+      "scrollable": "{table} (yatay kaydırılabilir)",
+      "months": {
+        "title": "Aylara göre maliyet"
+      },
+      "vehicles": {
+        "title": "Araçlara göre maliyet"
+      },
+      "departments": {
+        "title": "Departmanlara göre maliyet"
+      },
+      "columns": {
+        "month": "Ay",
+        "invoice": "Fatura payı",
+        "expenses": "Masraflar",
+        "total": "Toplam",
+        "km": "Kilometre",
+        "vehicle": "Araç",
+        "department": "Departman",
+        "sum": "Toplam"
+      },
+      "kmUnit": "{value} km"
+    },
+    "green": {
+      "title": "Yeşil Filo",
+      "intro": "Elektrikli ve hibrit araçlarınızın şarj seviyesi, batarya sağlığı ve karbon tasarrufu; yakındaki şarj istasyonları.",
+      "simulation": "Simülasyon",
+      "retry": "Tekrar dene",
+      "scrollable": "{table} (yatay kaydırılabilir)",
+      "percent": "%{value}",
+      "km": "{value} km",
+      "distance": "{value} km",
+      "tableBelow": "Aynı veri aşağıdaki tabloda.",
+      "loadErrorTitle": "Yeşil Filo yüklenemedi",
+      "loadErrorText": "Birkaç saniye sonra yeniden deneyin.",
+      "emptyTitle": "Yeşil Filo'da araç yok",
+      "emptyText": "Şirketinizin kullandığı elektrikli ya da hibrit bir araç yok. Böyle bir araç sözleşmenize eklenince karbon tasarrufu, batarya ve şarj bilgisi burada görünür.",
+      "emptyAction": "Araçlarınızı görün",
+      "fuel": {
+        "ELECTRIC": "Elektrikli",
+        "HYBRID": "Hibrit"
+      },
+      "carbon": {
+        "title": "Karbon tasarrufu",
+        "example": "Örnek hesap",
+        "saved": "Tasarruf edilen CO₂",
+        "km": "Kilometre",
+        "cars": "Elektrikli ve hibrit araç",
+        "kg": "{value} kg",
+        "how": "Örnek bir hesaptır: kilometre × (benzinli eşdeğer − aracın emisyonu). Benzinli eşdeğer {petrol} g CO₂/km, hibrit {hybrid} g, elektrikli {electric} g (şebeke payı). Gerçek ölçüm değildir."
+      },
+      "charge": {
+        "title": "Şarj seviyesi",
+        "text": "Novera'nın en son yazdığı okuma. Şarj bilgisi olmayan araçta (şebekeden şarj edilmeyen bir hibrit gibi) yazılmamıştır.",
+        "none": "Okuma yok"
+      },
+      "battery": {
+        "title": "Batarya sağlığı",
+        "chart": "Son 6 ayda batarya sağlığı",
+        "firstFour": "İlk dört aracın çizgisi çizilir; tablo hepsini içerir."
+      },
+      "stations": {
+        "title": "Yakındaki şarj istasyonları",
+        "vehicleLabel": "Araç",
+        "fromCity": "{plate} plakalı araç şu an {city} merkezinde sayılıyor; uzaklıklar buradan.",
+        "noPosition": "{plate} plakalı aracın şehri ({city}) için konum bilinmiyor; istasyonlar uzaklıksız, kendi şehrindekiler önde.",
+        "updated": "Durumlar {time} itibarıyla (5 dakikada bir değişir).",
+        "note": "İstasyonlar ve durumları örnektir; gerçek bir istasyon ağına bağlı değildir.",
+        "emptyTitle": "İstasyon bulunamadı",
+        "emptyText": "Bu araç için gösterilecek bir şarj istasyonu yok.",
+        "errorTitle": "İstasyonlar yüklenemedi",
+        "errorText": "Birkaç saniye sonra yeniden deneyin."
+      },
+      "stationStatus": {
+        "AVAILABLE": "Müsait",
+        "BUSY": "Dolu",
+        "OUT_OF_ORDER": "Arızalı"
+      },
+      "columns": {
+        "vehicle": "Araç",
+        "fuel": "Tür",
+        "km": "Kilometre",
+        "saved": "Tasarruf",
+        "sum": "Toplam",
+        "charge": "Şarj seviyesi",
+        "date": "Tarih",
+        "health": "Batarya sağlığı",
+        "station": "İstasyon",
+        "distance": "Uzaklık",
+        "sockets": "Soketler",
+        "status": "Durum"
+      }
+    },
+    "requests": {
+      "title": "Talepler",
+      "intro": "Yol yardım, ikame araç ve bakım ya da lastik taleplerinizi buradan açar, adım adım izlersiniz.",
+      "newButton": "Yeni talep",
+      "tableCaption": "Servis talepleri",
+      "retry": "Tekrar dene",
+      "typeFilterLabel": "Türe göre",
+      "statusFilterLabel": "Duruma göre",
+      "filterAll": "Tümü",
+      "filterOpen": "Açık talepler",
+      "apply": "Uygula",
+      "columns": {
+        "number": "Numara",
+        "type": "Tür",
+        "vehicle": "Araç",
+        "status": "Durum",
+        "updated": "Son güncelleme"
+      },
+      "type": {
+        "ROADSIDE": "Yol yardım",
+        "REPLACEMENT_VEHICLE": "İkame araç",
+        "MAINTENANCE": "Bakım ve lastik",
+        "TRANSFER": "VIP transfer"
+      },
+      "status": {
+        "RECEIVED": "Alındı",
+        "DISPATCHED": "Yönlendirildi",
+        "EN_ROUTE": "Yolda",
+        "APPROVED": "Onaylandı",
+        "DELIVERED": "Teslim edildi",
+        "RETURNED": "İade alındı",
+        "SCHEDULED": "Randevu verildi",
+        "IN_SERVICE": "Serviste",
+        "DRIVER_ASSIGNED": "Şoför atandı",
+        "MET": "Karşılandı",
+        "COMPLETED": "Tamamlandı",
+        "CANCELLED": "İptal edildi"
+      },
+      "emptyTitle": "Henüz talebiniz yok",
+      "emptyText": "Yol yardım, ikame araç ya da bakım için yeni bir talep açabilirsiniz.",
+      "emptyFilteredTitle": "Bu süzgece uyan talep yok",
+      "emptyFilteredText": "Süzgeçleri kaldırmayı deneyin.",
+      "loadErrorTitle": "Talepler yüklenemedi",
+      "loadErrorText": "Birkaç saniye sonra yeniden deneyin.",
+      "help": {
+        "title": "Yardıma mı ihtiyacınız var?",
+        "desk": "7/24 Operasyon Masası:",
+        "emergency": "Can güvenliği söz konusuysa form doldurmayın, hemen 112'yi arayın."
+      },
+      "detail": {
+        "metaTitle": "Talep",
+        "intro": "{type} talebi",
+        "back": "Taleplere dön",
+        "retry": "Tekrar dene",
+        "loadErrorTitle": "Talep yüklenemedi",
+        "loadErrorText": "Birkaç saniye sonra yeniden deneyin.",
+        "factsTitle": "Talep bilgileri",
+        "timelineTitle": "Zaman çizelgesi",
+        "assignee": "Atanan",
+        "noAssignee": "Henüz atama yapılmadı",
+        "opened": "Açıldı",
+        "vehicle": "Araç"
+      },
+      "facts": {
+        "incident": "Olay",
+        "location": "Konum",
+        "description": "Açıklama",
+        "deliveryAddress": "Teslim adresi",
+        "deliveryDate": "Teslim günü",
+        "duration": "Tahmini süre",
+        "durationValue": "{count} gün",
+        "service": "İşlem",
+        "preferredDate": "Tercih edilen gün",
+        "valet": "Vale",
+        "valetYes": "Evet, vale ile alınsın",
+        "valetNo": "Hayır, araç servise getirilecek",
+        "pickupAddress": "Alınacak adres",
+        "position": "Konum: {latitude}, {longitude}",
+        "none": "—",
+        "passenger": "Yolcu",
+        "passengerCount": "{count} yolcu",
+        "flight": "Uçuş",
+        "flightNote": "Uçuş durumu operasyon masası tarafından izlenir.",
+        "meetingPlace": "Karşılama yeri",
+        "meetingAt": "Karşılama zamanı",
+        "destination": "Varış adresi",
+        "note": "Not"
+      },
+      "incidents": {
+        "BREAKDOWN": "Arıza",
+        "ACCIDENT": "Kaza",
+        "TIRE": "Lastik",
+        "FUEL_OR_CHARGE": "Yakıt ya da şarj"
+      },
+      "services": {
+        "PERIODIC": "Periyodik bakım",
+        "SUMMER_TIRES": "Yaz lastiği",
+        "WINTER_TIRES": "Kış lastiği",
+        "INSPECTION": "Muayene"
+      },
+      "timeline": {
+        "label": "Talebin adımları",
+        "company": "Şirketiniz",
+        "novera": "Novera"
+      },
+      "cancel": {
+        "title": "Talebi iptal et",
+        "text": "Talebi henüz kimse ele almadığı için iptal edebilirsiniz. Ele alındıktan sonra iptal için operasyon masasını arayın.",
+        "button": "Talebi iptal et",
+        "toast": "{number} numaralı talep iptal edildi.",
+        "dialog": {
+          "title": "{number} iptal edilsin mi?",
+          "text": "İptal edilen talep yeniden açılamaz; gerekirse yeni bir talep açarsınız.",
+          "confirm": "Talebi iptal et",
+          "keep": "Vazgeç"
+        },
+        "errors": {
+          "notAllowed": "Talep bu arada ele alındı; artık iptal edilemez. Operasyon masasını arayın.",
+          "notFound": "Bu talep artık yok.",
+          "unavailable": "İşlem yapılamadı. Birkaç saniye sonra yeniden deneyin."
+        }
+      },
+      "vehicleSection": {
+        "title": "Bu aracın talepleri",
+        "empty": "Bu araç için henüz talep yok.",
+        "new": "Bu araç için talep aç",
+        "all": "Tüm talepler"
+      },
+      "airports": {
+        "IST": "İstanbul Havalimanı (IST)",
+        "SAW": "Sabiha Gökçen (SAW)",
+        "ESB": "Ankara Esenboğa (ESB)",
+        "ADB": "İzmir Adnan Menderes (ADB)",
+        "AYT": "Antalya (AYT)",
+        "BJV": "Milas-Bodrum (BJV)",
+        "DLM": "Dalaman (DLM)",
+        "ADA": "Adana Şakirpaşa (ADA)",
+        "GZT": "Gaziantep (GZT)",
+        "ASR": "Kayseri Erkilet (ASR)",
+        "TZX": "Trabzon (TZX)",
+        "SZF": "Samsun Çarşamba (SZF)"
+      }
+    },
+    "requestForm": {
+      "label": "Yeni servis talebi",
+      "type": {
+        "legend": "Talep türü",
+        "ROADSIDE": {
+          "title": "Yol yardım",
+          "text": "Arıza, kaza, lastik ya da yakıt/şarj: çekici ve yardım yönlendirilir."
+        },
+        "REPLACEMENT_VEHICLE": {
+          "title": "İkame araç",
+          "text": "Aracınız servisteyken ya da kullanılamazken yedek araç."
+        },
+        "MAINTENANCE": {
+          "title": "Bakım ve lastik",
+          "text": "Periyodik bakım, yaz/kış lastiği ya da muayene randevusu."
+        },
+        "TRANSFER": {
+          "title": "VIP transfer",
+          "text": "Şoförlü transfer: havalimanında karşılama, uçuş takibi ve şoför koordinasyonu."
+        }
+      },
+      "fields": {
+        "vehicle": "Araç",
+        "vehicleChoose": "Araç seçin",
+        "incident": "Olay türü",
+        "incidentChoose": "Olay türünü seçin",
+        "address": "Adres",
+        "roadsideAddressHint": "Aracın bulunduğu adres ya da yer. Konumunuzu kullanırsanız boş bırakabilirsiniz.",
+        "description": "Açıklama (isteğe bağlı)",
+        "descriptionHint": "Ne olduğunu kısaca yazın. En çok 500 karakter.",
+        "deliveryAddress": "Teslim adresi",
+        "deliveryDate": "Teslim günü",
+        "durationDays": "Tahmini süre (gün)",
+        "durationDaysHint": "1 ile 90 arasında.",
+        "service": "İşlem",
+        "serviceChoose": "İşlemi seçin",
+        "preferredDate": "Tercih edilen gün",
+        "valet": "Aracım vale ile alınsın",
+        "pickupAddress": "Alınacak adres",
+        "pickupAddressOptional": "Adres (isteğe bağlı)",
+        "pickupHint": "Vale istemiyorsanız boş bırakabilirsiniz.",
+        "passengerName": "Yolcu adı",
+        "passengers": "Yolcu sayısı",
+        "passengersHint": "1 ile 7 arasında.",
+        "flightNumber": "Uçuş numarası (isteğe bağlı)",
+        "flightNumberHint": "Örneğin TK1234. Uçuşu operasyon masası izler; gerçek bir uçuş servisine bağlanmaz.",
+        "meetingPlace": "Karşılama yeri",
+        "meetingKind": {
+          "airport": "Havalimanı",
+          "address": "Adres"
+        },
+        "airport": "Havalimanı",
+        "airportChoose": "Havalimanı seçin",
+        "meetingAddress": "Karşılama adresi",
+        "meetingAt": "Karşılama tarihi ve saati",
+        "meetingAtHint": "İstanbul saatiyle; en az 2 saat sonrası.",
+        "destination": "Varış adresi",
+        "note": "Not (isteğe bağlı)",
+        "noteHint": "Örneğin tabela ile karşılama. En çok 500 karakter."
+      },
+      "incidents": {
+        "BREAKDOWN": "Arıza",
+        "ACCIDENT": "Kaza",
+        "TIRE": "Lastik",
+        "FUEL_OR_CHARGE": "Yakıt ya da şarj"
+      },
+      "services": {
+        "PERIODIC": "Periyodik bakım",
+        "SUMMER_TIRES": "Yaz lastiği",
+        "WINTER_TIRES": "Kış lastiği",
+        "INSPECTION": "Muayene"
+      },
+      "location": {
+        "button": "Konumumu kullan",
+        "asking": "Konum isteniyor…",
+        "got": "Konum alındı: {latitude}, {longitude}",
+        "forget": "Konumu kaldır",
+        "denied": "Konum alınamadı ya da izin verilmedi; sorun değil, yukarıdaki adres alanını doldurmanız yeterli."
+      },
+      "errors": {
+        "type": "Bir talep türü seçin.",
+        "fleetVehicleId": "Bir araç seçin.",
+        "incident": "Olay türünü seçin.",
+        "location": "Aracın nerede olduğunu yazın ya da konumunuzu kullanın.",
+        "address": "Geçerli bir adres yazın (en çok 200 karakter).",
+        "description": "Açıklama en çok 500 karakter olabilir.",
+        "date": "Bugünden bir yıl sonrasına kadar geçerli bir gün seçin.",
+        "durationDays": "Süreyi 1 ile 90 gün arasında yazın.",
+        "service": "Bir işlem seçin.",
+        "preferredDate": "Bugünden bir yıl sonrasına kadar geçerli bir gün seçin.",
+        "generic": "Talep gönderilemedi. Alanları denetleyip yeniden deneyin.",
+        "unavailable": "İşlem yapılamadı. Birkaç saniye sonra yeniden deneyin.",
+        "passengerName": "Yolcunun adını yazın (en çok 100 karakter).",
+        "passengers": "Yolcu sayısını 1 ile 7 arasında yazın.",
+        "flightNumber": "Uçuş numarası TK1234 gibi olmalı (iki karakter, bir ile dört rakam).",
+        "meeting": "Karşılama yerini seçin ya da yazın.",
+        "meetingAt": "Şu andan en az 2 saat sonrası, en çok bir yıl içinde geçerli bir zaman girin.",
+        "destination": "Varış adresini yazın (en çok 200 karakter).",
+        "note": "Not en çok 500 karakter olabilir.",
+        "forbidden": "VIP transfer yalnızca VIP Mobilite sözleşmesi olan şirketlerde açılabilir."
+      },
+      "toast": {
+        "created": "Talebiniz alındı: {number}.",
+        "createdWithOpen": "Talebiniz alındı: {number}. Bu araç için aynı türde açık başka talep de var: {others}."
+      },
+      "send": "Talebi gönder",
+      "sending": "Gönderiliyor…",
+      "back": "Vazgeç",
+      "noVehicles": {
+        "title": "Aracınız yok",
+        "text": "Talep açabilmek için kullanımda bir filo aracınız olmalı."
+      },
+      "airports": {
+        "IST": "İstanbul Havalimanı (IST)",
+        "SAW": "Sabiha Gökçen (SAW)",
+        "ESB": "Ankara Esenboğa (ESB)",
+        "ADB": "İzmir Adnan Menderes (ADB)",
+        "AYT": "Antalya (AYT)",
+        "BJV": "Milas-Bodrum (BJV)",
+        "DLM": "Dalaman (DLM)",
+        "ADA": "Adana Şakirpaşa (ADA)",
+        "GZT": "Gaziantep (GZT)",
+        "ASR": "Kayseri Erkilet (ASR)",
+        "TZX": "Trabzon (TZX)",
+        "SZF": "Samsun Çarşamba (SZF)"
       }
     }
   }

@@ -1429,6 +1429,86 @@
       "toast": {
         "created": "Expense saved."
       }
+    },
+    "requests": {
+      "title": "Service requests",
+      "intro": "The roadside, replacement vehicle and maintenance requests of the fleet customers. You move a request along step by step and write down the tow truck, workshop or driver; the customer sees it on their timeline at once.",
+      "searchLabel": "Search number, plate or company",
+      "tableCaption": "Service requests",
+      "retry": "Try again",
+      "typeFilterLabel": "By type",
+      "statusFilterLabel": "By status",
+      "statusAll": "All statuses",
+      "statusOpen": "Open requests",
+      "filterAll": "All",
+      "apply": "Apply",
+      "columns": {
+        "number": "Number",
+        "company": "Company",
+        "type": "Type",
+        "vehicle": "Vehicle",
+        "status": "Status",
+        "updated": "Last update"
+      },
+      "type": {
+        "ROADSIDE": "Roadside assistance",
+        "REPLACEMENT_VEHICLE": "Replacement vehicle",
+        "MAINTENANCE": "Maintenance and tyres",
+        "TRANSFER": "VIP transfer"
+      },
+      "status": {
+        "RECEIVED": "Received",
+        "DISPATCHED": "Dispatched",
+        "EN_ROUTE": "On the way",
+        "APPROVED": "Approved",
+        "DELIVERED": "Delivered",
+        "RETURNED": "Returned",
+        "SCHEDULED": "Appointment made",
+        "IN_SERVICE": "In service",
+        "DRIVER_ASSIGNED": "Driver assigned",
+        "MET": "Met",
+        "COMPLETED": "Completed",
+        "CANCELLED": "Cancelled"
+      },
+      "emptyTitle": "No requests yet",
+      "emptyText": "Requests the fleet customers open in Filom show here.",
+      "emptyFilteredTitle": "No request matches this search",
+      "emptyFilteredText": "Try removing the filters or searching for something else.",
+      "loadErrorTitle": "Requests could not be loaded",
+      "loadErrorText": "Try again in a few seconds.",
+      "detail": {
+        "back": "Back to requests",
+        "retry": "Try again",
+        "loadErrorTitle": "The request could not be loaded",
+        "intro": "A {type} request of {company}.",
+        "company": "Company",
+        "assignee": "Assigned",
+        "noAssignee": "Nobody has been assigned yet"
+      },
+      "move": {
+        "title": "Move the request on",
+        "text": "A request can only be moved to a later step of its kind, or cancelled; it cannot be taken back. The note and the assignee show on the customer's timeline.",
+        "status": "New status",
+        "choose": "Choose a status",
+        "note": "Note (optional)",
+        "noteHint": "Written on the timeline, which the customer sees. At most 500 characters.",
+        "assignee": "Assigned (tow truck, workshop, driver)",
+        "assigneeHint": "Free text. If you leave it empty the current one is removed. At most 200 characters.",
+        "button": "Save the status",
+        "sending": "Saving…",
+        "finished": "This request is over; it can no longer be moved.",
+        "toast": "{number} is now \"{status}\".",
+        "errors": {
+          "status": "Choose a status.",
+          "note": "The note can be at most 500 characters.",
+          "assignee": "The assignee can be at most 200 characters.",
+          "notAllowed": "The request changed in the meantime and this move can no longer be made; the page was reloaded.",
+          "notFound": "This request no longer exists.",
+          "unavailable": "The action could not be completed. Try again in a few seconds.",
+          "assigneeRequired": "Write the driver's name, phone and vehicle for this step."
+        },
+        "assigneeDriverHint": "On a transfer the steps \"Driver assigned\", \"Met\" and \"Completed\" need the driver's name, phone and vehicle written down."
+      }
     }
   }
 }

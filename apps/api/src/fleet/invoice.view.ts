@@ -27,7 +27,7 @@ export type InvoiceView = {
 };
 
 // The lines are JSON in the row; one whose shape is wrong is left out instead of breaking the page that lists the invoice.
-function readLines(value: unknown): InvoiceLine[] {
+export function readLines(value: unknown): InvoiceLine[] {
   if (!Array.isArray(value)) return [];
   return value.flatMap((entry): InvoiceLine[] => {
     if (entry === null || typeof entry !== 'object') return [];

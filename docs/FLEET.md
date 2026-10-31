@@ -56,8 +56,8 @@ Adres TR `/filom/...`, EN `/en/my-fleet/...`. Hepsi `noindex`, giriş gerektirir
 
 - **Para ve zaman:** tutarlar TRY'dir ve kullanıcının para birimi tercihinden bağımsız ₺ gösterilir ("Tutarlar TL" notu). Tarihler İstanbul saatiyledir (ADR-16).
 - **Masrafın personeli:** masrafın `occurredAt` anında aracın açık zimmeti kimdeyse odur. Zimmet geriye dönük değişirse eşleme yeniden hesaplanır; masrafın durumu ne olursa olsun (ADR-25: saklanmaz, hesaplanır; ayrıntı ve devir anı kuralı ADMIN.md §3.16).
-- **Rapor doğruluğu:** rapor sayıları kuruşu kuruşuna faturalar ve masraflarla tutar (test).
-- **Karbon tasarrufu (örnek hesap, ekranda yazar):** km × (benzinli eşdeğer emisyon − aracın emisyonu). Katsayılar tek yerde (`fleet-report.ts`) ve burada: benzinli eşdeğer 0,170 kg CO₂/km, hibrit 0,105, elektrikli 0,045 (şebeke payı).
+- **Rapor doğruluğu:** rapor sayıları kuruşu kuruşuna faturalar ve masraflarla tutar (test). Bölüşüm ve departman kuralları ADMIN.md §3.17'dedir.
+- **Karbon tasarrufu (örnek hesap, ekranda yazar):** km × (benzinli eşdeğer emisyon − aracın emisyonu). Katsayılar tek yerde (`fleet-report.ts`, tam sayı kalsın diye g CO₂/km: 170, 105, 45) ve burada: benzinli eşdeğer 0,170 kg CO₂/km, hibrit 0,105, elektrikli 0,045 (şebeke payı). Ayrıntı ADMIN.md §3.18.
 - **Talepler:**
   - Talep açılınca durum `RECEIVED` olur; aynı araçta aynı türde açık talep varsa uyarı çıkar (engel değil).
   - Müşteri yalnızca `RECEIVED` durumundaki talebi iptal edebilir.

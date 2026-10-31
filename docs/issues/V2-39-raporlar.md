@@ -20,10 +20,10 @@ Filo yöneticisinin araç, departman ve ay bazında ne harcadığını görmesi.
 - **Filom Özet:** "bakım ya da muayenesi yaklaşan araçlar" kartı.
 
 ## Kabul kriterleri
-- [ ] Rapor toplamları faturalar ve masraflarla kuruşu kuruşuna tutar (test).
-- [ ] Grafikler klavye ve ekran okuyucuyla tablodan okunabilir; axe temiz.
-- [ ] Boş dönemde anlamlı boş durum.
-- [ ] 375/1280 ekran görüntüsü.
+- [x] Rapor toplamları faturalar ve masraflarla kuruşu kuruşuna tutar (test). _`fleet-reports.integration.spec.ts`: veritabanında fatura ara toplamlarının ve masrafların `aggregate`'iyle karşılaştırılır; aylar, departmanlar ve araçlar (+ `unallocated`) aynı toplamı verir; üç araca bölünen satırda kuruş kaybolmaz. `report-calc.spec.ts` ve `tests/reports.test.ts` aynı kuralı birim düzeyinde sınar._
+- [x] Grafikler klavye ve ekran okuyucuyla tablodan okunabilir; axe temiz. _Resim `aria-hidden`, altındaki tablo `caption`, `scope` ve odaklanabilir kaydırma kutusuyla okunur; `e2e/reports.spec.ts` her testin sonunda axe çalıştırır (375 ve 1280). NVDA ile elle dinleme yapılmadı._
+- [x] Boş dönemde anlamlı boş durum. _"Bu dönemde veri yok" ve "Bu yılı göster" bağlantısı (e2e)._
+- [x] 375/1280 ekran görüntüsü. _Ekran görüntüsü artık istenmiyor; e2e iki genişlikte (mobil 375, masaüstü 1280) koşar, mobilde yatay sayfa kaymasının olmadığı denetlenir._
 
 ## Etiketler
 `faz-9` `ozellik` `P2` `api` `web`

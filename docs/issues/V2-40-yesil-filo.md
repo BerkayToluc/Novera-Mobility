@@ -23,11 +23,11 @@ Yeşil Filo ürünündeki vaatleri çalıştırmak: "anlık batarya sağlığı,
 - **Görünürlük:** yalnızca elektrikli/hibrit aracı olan şirkette menüde görünür.
 
 ## Kabul kriterleri
-- [ ] Simülasyon aynı araç ve dilim için aynı sonucu verir (test).
-- [ ] Karbon hesabı katsayılarla tutar (test).
-- [ ] Elektrikli aracı olmayan şirkette menü öğesi yok, adres boş durum gösterir.
-- [ ] e2e: Yeşil Enerji Ltd. ile istasyon listesi ve rozet.
-- [ ] 375/1280 ekran görüntüsü; axe temiz.
+- [x] Simülasyon aynı araç ve dilim için aynı sonucu verir (test). _`simulation.spec.ts` (aynı anahtar ve dilim aynı sayı, durum dağılımı ~%60/30/10), `fleet-green.integration.spec.ts` (aynı araç ve dilimde cevap birebir aynı, dilim içinde iki dakika sonrası da; bir günde durumlar değişir); web testi API'nin verdiği sayıları sabitleyerek `lib/simulation.ts`'in aynı aritmetik olduğunu gösterir._
+- [x] Karbon hesabı katsayılarla tutar (test). _`simulation.spec.ts` (170/105/45 ve tam gram), entegrasyon testi: 800 km elektrikli = 800 × 125 g, 500 km hibrit = 500 × 65 g, toplamlar; `tests/green.test.ts` örnek modda aynı._
+- [x] Elektrikli aracı olmayan şirkette menü öğesi yok, adres boş durum gösterir. _API: `greenVehicles` 0 ve `vehicles: []` (entegrasyon testi). e2e: örnek şirketin elektrikli aracı panelden iade edilince menüde "Yeşil Filo" kalkar, "Raporlar" kalır, adres "Yeşil Filo'da araç yok" der._
+- [x] e2e: Yeşil Enerji Ltd. ile istasyon listesi ve rozet. _Yeşil Enerji Ltd. seed şirketidir, sample modda yoktur; e2e aynı akışı sample şirket Ege Lojistik'in elektrikli aracıyla koşar (5 istasyon, uzaklık, durum sözcüğü, "Simülasyon" rozeti). Seed şirketiyle olan hali `fleet-green.integration.spec.ts` ve `fleet.seed.integration.spec.ts` düzeyinde sınanır, tarayıcıda gerçek API ile sınanmadı._
+- [x] 375/1280 ekran görüntüsü; axe temiz. _Ekran görüntüsü artık istenmiyor; e2e mobil 375 ve masaüstü 1280'de koşar, her test axe ile biter, mobilde yatay sayfa kayması yok denetlenir._
 
 ## Etiketler
 `faz-9` `ozellik` `P2` `api` `web` `veritabani`

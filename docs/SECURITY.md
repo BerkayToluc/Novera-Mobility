@@ -40,6 +40,7 @@ Her uçta bir sınır vardır (ADR-27). Sayaçlar Postgres'te (`RateLimitHit`) t
 | `POST /reservations` | 10 istek/saat (ayrıca bir hesapta en çok 3 gelecek rezervasyon; bu kural serviste) | hesap | `reserve` |
 | `/admin/*` (her uç; ADR-24) | 120 istek/dk | yönetici (`admin:<id>`); oturumsuz istekte adres | `admin` |
 | `/fleet/*` (her uç; ADR-25) | 120 istek/dk | hesap (`fleet:<id>`); oturumsuz istekte adres | `fleet` |
+| `POST /fleet/requests` (servis talebi açma; V2-41) | 20 istek/saat (üstüne `fleet` sınırı da işler) | **şirket** (`company:<id>`): aynı şirketin hesapları tek sayacı paylaşır | `fleet-requests` |
 | `GET /health` | sınır yok (barındırıcının sağlık denetimi) | — | — |
 | Yukarıda olmayan her uç: katalog okumaları, `/rates`, `GET /me*`, `DELETE /holds/{id}`, `GET /me/quotes` | 300 istek/5 dk | hesap | `default` |
 
