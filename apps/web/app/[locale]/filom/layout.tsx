@@ -7,6 +7,7 @@ import { FleetShell } from "@/components/fleet/fleet-shell";
 import { Button } from "@/components/ui/button";
 import { StateMessage } from "@/components/ui/state-message";
 import { Link, redirect } from "@/i18n/navigation";
+import { getFleetSummary } from "@/lib/fleet-server";
 import { getSession } from "@/lib/session";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -46,5 +47,12 @@ async function FleetGate({ children }: { children: ReactNode }) {
       </div>
     );
   }
-  return <FleetShell company={session.company?.name ?? ""}>{children}</FleetShell>;
+  // The Green Fleet is in the menu only when there is an electric or hybrid car in use. If the summary cannot be had, the menu is without it
+  // for now; the pages ask the API themselves.
+  const green = await getFleetSummary().then((summary) => summary.greenVehicles > 0).catch(() => false);
+  return (
+    <FleetShell company={session.company?.name ?? ""} green={green}>
+      {children}
+    </FleetShell>
+  );
 }

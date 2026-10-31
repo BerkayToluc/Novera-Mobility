@@ -7280,6 +7280,150 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/fleet/green": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Yeşil Filo
+         * @description Şirketin **elektrikli ve hibrit** (kullanımdaki) araçları: son şarj seviyesi, batarya sağlığı ve son 6 ayın okumalarından eğilimi, dönemin kilometresi ve **karbon tasarrufu**. Dönem `from` ve `to` (`YYYY-MM`, ikisi dahil, en çok 24 ay; ikisi de yoksa son 3 ay, yalnız `to` varsa tek ay). Başlamamış ay ve ters sıra `422 OUT_OF_RANGE`.
+         *     **Karbon tasarrufu bir örnek hesaptır** (ekranda yazar): kilometre × (benzinli eşdeğer − aracın emisyonu); katsayılar g CO₂/km olarak cevapta (`coefficients`: benzin 170, hibrit 105, elektrikli 45) ve tek yerde (`src/fleet/fleet-report.ts`). Şarj seviyesi ve batarya sağlığı Novera'nın girdiği okumalardır (simülasyon değil). Kilometre, rapordaki gibi dönem sonu ve başındaki okumanın farkıdır.
+         *     Yalnızca **kurumsal hesabın kendi şirketinin** araçları gelir; elektrikli ya da hibrit aracı yoksa `vehicles` boştur. Sınır: hesap başına dakikada 120.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description İlk ay, `YYYY-MM`. */
+                    from?: string;
+                    /** @description Son ay, `YYYY-MM`. */
+                    to?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Yeşil Filo */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["GreenReport"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Kurumsal hesap değil ya da bir şirkete bağlı değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/fleet/vehicles/{plate}/charging-stations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Plaka; boşluksuz ya da küçük harfle de olur. */
+                plate: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * Aracın en yakın şarj istasyonları
+         * @description Aracın konumuna en yakın istasyonlar, yakından uzağa. **Cevap bir simülasyondur** (ADR-30): `simulated: true`. Araç henüz canlı konum üretmediği için (V2-43) **sözleşmesinin teslim şehrinin merkezinde** sayılır; o şehrin merkezi bilinmiyorsa istasyonlar uzaklıksız (`distanceKm: null`) ve aracın kendi şehrindekiler önce gelir. İstasyonun durumu (`AVAILABLE`, `BUSY`, `OUT_OF_ORDER`) saklanmaz: istasyon kimliği ve **5 dakikalık dilimden** deterministik üretilir, yani aynı araç ve aynı dilim için her istek aynı cevabı verir (`updatedAt` dilimin başlangıcıdır).
+         *     Elektrikli ya da hibrit olmayan araç, başka şirketin aracı ve plaka olamayacak değer aynı `404`'tür. Sınır: hesap başına dakikada 120.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Kaç istasyon (1–20, varsayılan 5). */
+                    limit?: number;
+                };
+                header?: never;
+                path: {
+                    /** @description Plaka; boşluksuz ya da küçük harfle de olur. */
+                    plate: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description En yakın istasyonlar */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["StationList"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Kurumsal hesap değil ya da bir şirkete bağlı değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Böyle bir elektrikli ya da hibrit araç yok ya da başka şirketin (`NOT_FOUND`) */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/ping": {
         parameters: {
             query?: never;
@@ -8675,6 +8819,8 @@ export interface components {
                 /** @description Vadesi geçmiş */
                 overdue: number;
             };
+            /** @description Kullanımdaki elektrikli ve hibrit araçlar; 0 ise Yeşil Filo menüde görünmez. */
+            greenVehicles: number;
             expenses: {
                 open: {
                     /** @description Açık (yansıtılmamış */
@@ -8847,6 +8993,96 @@ export interface components {
             totals: components["schemas"]["FleetReportMoney"] & {
                 km: number;
             };
+        };
+        GreenVehicle: {
+            /** Format: uuid */
+            id: string;
+            plate: string;
+            model: string;
+            /** @enum {string} */
+            fuel: "ELECTRIC" | "HYBRID";
+            /** @description Yazılmış son şarj seviyesi; hiç yoksa null. */
+            charge: {
+                percent: number;
+                /** Format: date-time */
+                at: string;
+            } | null;
+            /** @description Yazılmış son batarya sağlığı; hiç yoksa null. */
+            batteryHealth: {
+                percent: number;
+                /** Format: date-time */
+                at: string;
+            } | null;
+            /** @description Son 6 ayın batarya sağlığı okumaları, eskiden yeniye. */
+            batteryTrend: {
+                /** Format: date-time */
+                at: string;
+                percent: number;
+            }[];
+            /** @description Dönemin kilometresi. */
+            km: number;
+            /** @description Dönemde tasarruf edilen CO₂, gram (örnek hesap). */
+            savedGrams: number;
+        };
+        GreenReport: {
+            /** @example 2026-08 */
+            from: string;
+            /** @example 2026-10 */
+            to: string;
+            vehicles: components["schemas"]["GreenVehicle"][];
+            totals: {
+                km: number;
+                savedGrams: number;
+            };
+            /** @description g CO₂/km: benzinli eşdeğer ve her tür için aracın emisyonu. */
+            coefficients: {
+                /** @example 170 */
+                petrol: number;
+                /** @example 105 */
+                hybrid: number;
+                /** @example 45 */
+                electric: number;
+            };
+        };
+        ChargingStation: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            city: string;
+            latitude: number;
+            longitude: number;
+            /** @description Soket türleri (CCS, CHAdeMO, TYPE2). */
+            sockets: string[];
+            /** @description Aracın konumuna kuş uçuşu uzaklık */
+            distanceKm: number | null;
+            /**
+             * @description Müsait
+             * @enum {string}
+             */
+            status: "AVAILABLE" | "BUSY" | "OUT_OF_ORDER";
+        };
+        StationList: {
+            /**
+             * @description Durumlar ve aracın konumu üretilmiştir (ADR-30); ekranda "Simülasyon" rozeti gösterilir.
+             * @enum {boolean}
+             */
+            simulated: true;
+            vehicle: {
+                plate: string;
+                /** @description Sözleşmenin teslim şehri. */
+                city: string;
+                /** @description Aracın sayılan konumu (şehir merkezi); şehir bilinmiyorsa null. */
+                position: {
+                    latitude: number;
+                    longitude: number;
+                } | null;
+            };
+            /**
+             * Format: date-time
+             * @description Durumların ait olduğu 5 dakikalık dilimin başlangıcı.
+             */
+            updatedAt: string;
+            items: components["schemas"]["ChargingStation"][];
         };
         FleetContract: {
             /** Format: uuid */

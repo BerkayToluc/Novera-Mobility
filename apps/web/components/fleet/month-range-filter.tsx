@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { useRouter } from "@/i18n/navigation";
 
 type Props = {
+  // The page the months are for.
+  pathname: "/filom/raporlar" | "/filom/yesil-filo";
   // The first month and the last ("2026-08") as they are now, the latest month that can be chosen, and the words.
   from: string;
   to: string;
@@ -17,7 +19,7 @@ type Props = {
 
 // The custom period of the report: two month fields and a button, not fields that act by themselves, so a keyboard user can type a whole
 // month without the page changing under them. The months go in the address (`donem=ozel&bas=…&bit=…`), so the report can be shared.
-export function MonthRangeFilter({ from, to, max, fromLabel, toLabel, applyLabel }: Props) {
+export function MonthRangeFilter({ pathname, from, to, max, fromLabel, toLabel, applyLabel }: Props) {
   const router = useRouter();
   const fromId = useId();
   const toId = useId();
@@ -25,7 +27,7 @@ export function MonthRangeFilter({ from, to, max, fromLabel, toLabel, applyLabel
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    router.push({ pathname: "/filom/raporlar", query: { donem: "ozel", bas: String(data.get("bas") ?? ""), bit: String(data.get("bit") ?? "") } });
+    router.push({ pathname, query: { donem: "ozel", bas: String(data.get("bas") ?? ""), bit: String(data.get("bit") ?? "") } });
   }
 
   return (

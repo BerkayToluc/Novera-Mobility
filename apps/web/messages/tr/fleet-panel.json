@@ -11,7 +11,8 @@
       "contracts": "Sözleşmeler",
       "invoices": "Faturalar",
       "expenses": "Masraflar",
-      "reports": "Raporlar"
+      "reports": "Raporlar",
+      "green": "Yeşil Filo"
     },
     "empty": {
       "title": "Filom",
@@ -522,6 +523,76 @@
         "sum": "Toplam"
       },
       "kmUnit": "{value} km"
+    },
+    "green": {
+      "title": "Yeşil Filo",
+      "intro": "Elektrikli ve hibrit araçlarınızın şarj seviyesi, batarya sağlığı ve karbon tasarrufu; yakındaki şarj istasyonları.",
+      "simulation": "Simülasyon",
+      "retry": "Tekrar dene",
+      "scrollable": "{table} (yatay kaydırılabilir)",
+      "percent": "%{value}",
+      "km": "{value} km",
+      "distance": "{value} km",
+      "tableBelow": "Aynı veri aşağıdaki tabloda.",
+      "loadErrorTitle": "Yeşil Filo yüklenemedi",
+      "loadErrorText": "Birkaç saniye sonra yeniden deneyin.",
+      "emptyTitle": "Yeşil Filo'da araç yok",
+      "emptyText": "Şirketinizin kullandığı elektrikli ya da hibrit bir araç yok. Böyle bir araç sözleşmenize eklenince karbon tasarrufu, batarya ve şarj bilgisi burada görünür.",
+      "emptyAction": "Araçlarınızı görün",
+      "fuel": {
+        "ELECTRIC": "Elektrikli",
+        "HYBRID": "Hibrit"
+      },
+      "carbon": {
+        "title": "Karbon tasarrufu",
+        "example": "Örnek hesap",
+        "saved": "Tasarruf edilen CO₂",
+        "km": "Kilometre",
+        "cars": "Elektrikli ve hibrit araç",
+        "kg": "{value} kg",
+        "how": "Örnek bir hesaptır: kilometre × (benzinli eşdeğer − aracın emisyonu). Benzinli eşdeğer {petrol} g CO₂/km, hibrit {hybrid} g, elektrikli {electric} g (şebeke payı). Gerçek ölçüm değildir."
+      },
+      "charge": {
+        "title": "Şarj seviyesi",
+        "text": "Novera'nın en son yazdığı okuma. Şarj bilgisi olmayan araçta (şebekeden şarj edilmeyen bir hibrit gibi) yazılmamıştır.",
+        "none": "Okuma yok"
+      },
+      "battery": {
+        "title": "Batarya sağlığı",
+        "chart": "Son 6 ayda batarya sağlığı",
+        "firstFour": "İlk dört aracın çizgisi çizilir; tablo hepsini içerir."
+      },
+      "stations": {
+        "title": "Yakındaki şarj istasyonları",
+        "vehicleLabel": "Araç",
+        "fromCity": "{plate} plakalı araç şu an {city} merkezinde sayılıyor; uzaklıklar buradan.",
+        "noPosition": "{plate} plakalı aracın şehri ({city}) için konum bilinmiyor; istasyonlar uzaklıksız, kendi şehrindekiler önde.",
+        "updated": "Durumlar {time} itibarıyla (5 dakikada bir değişir).",
+        "note": "İstasyonlar ve durumları örnektir; gerçek bir istasyon ağına bağlı değildir.",
+        "emptyTitle": "İstasyon bulunamadı",
+        "emptyText": "Bu araç için gösterilecek bir şarj istasyonu yok.",
+        "errorTitle": "İstasyonlar yüklenemedi",
+        "errorText": "Birkaç saniye sonra yeniden deneyin."
+      },
+      "stationStatus": {
+        "AVAILABLE": "Müsait",
+        "BUSY": "Dolu",
+        "OUT_OF_ORDER": "Arızalı"
+      },
+      "columns": {
+        "vehicle": "Araç",
+        "fuel": "Tür",
+        "km": "Kilometre",
+        "saved": "Tasarruf",
+        "sum": "Toplam",
+        "charge": "Şarj seviyesi",
+        "date": "Tarih",
+        "health": "Batarya sağlığı",
+        "station": "İstasyon",
+        "distance": "Uzaklık",
+        "sockets": "Soketler",
+        "status": "Durum"
+      }
     }
   }
 }

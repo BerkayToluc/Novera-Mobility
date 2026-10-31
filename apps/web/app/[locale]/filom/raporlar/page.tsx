@@ -64,7 +64,7 @@ export default async function FleetReportsPage({ searchParams }: PageProps<"/[lo
       <PageHeader title={t("title")} description={t("intro")} />
       <div className="flex flex-col gap-3">
         <FilterChips label={t("periodLabel")} current={range.choice} options={chips} />
-        {range.choice === "ozel" && <MonthRangeFilter from={range.from} to={range.to} max={thisMonth} fromLabel={t("from")} toLabel={t("to")} applyLabel={t("apply")} />}
+        {range.choice === "ozel" && <MonthRangeFilter pathname="/filom/raporlar" from={range.from} to={range.to} max={thisMonth} fromLabel={t("from")} toLabel={t("to")} applyLabel={t("apply")} />}
         <p className="text-small text-fg-muted">{range.from === range.to ? t("showing", { period: monthLabel(range.from, locale) }) : t("showingRange", { from: monthLabel(range.from, locale), to: monthLabel(range.to, locale) })}</p>
       </div>
 

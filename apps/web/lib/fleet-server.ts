@@ -19,8 +19,9 @@ import {
 } from "./fleet-panel";
 import { FLEET_EXPENSE_API_FILTERS, type ExpenseStatus, type ExpenseType, type FleetExpenseFilter, type FleetExpensePage } from "./expenses";
 import type { Invoice, InvoiceFilter, InvoicePage } from "./invoices";
-import { fetchFleetReport, fetchFleetAssignments, fetchFleetExpenses, fetchFleetInvoice, fetchFleetInvoices, fetchFleetContract, fetchFleetContracts, fetchFleetEmployee, fetchFleetEmployees, fetchFleetSummary, fetchFleetVehicle, fetchFleetVehicles } from "./api-fleet";
+import { fetchFleetGreen, fetchFleetReport, fetchFleetStations, fetchFleetAssignments, fetchFleetExpenses, fetchFleetInvoice, fetchFleetInvoices, fetchFleetContract, fetchFleetContracts, fetchFleetEmployee, fetchFleetEmployees, fetchFleetSummary, fetchFleetVehicle, fetchFleetVehicles } from "./api-fleet";
 import type { FleetReport } from "./report-calc";
+import type { GreenReport, StationList } from "./green";
 import { isMockMode } from "./mode";
 import { mockWorld } from "./mock-world";
 import { getSession } from "./session";
@@ -140,6 +141,18 @@ export async function getFleetExpenses(params: AdminListParams<FleetExpenseFilte
 export async function getFleetReport(from: string, to: string): Promise<FleetReport> {
   if (!isMockMode()) return fetchFleetReport(from, to);
   return (await import("@/mocks/reports")).sampleReport(await mockWorld(), await sampleCompany(), from, to);
+}
+
+// The electric and hybrid cars of the company for the months from `from` to `to`, with the carbon they saved.
+export async function getFleetGreen(from: string, to: string): Promise<GreenReport> {
+  if (!isMockMode()) return fetchFleetGreen(from, to);
+  return (await import("@/mocks/green")).sampleGreen(await mockWorld(), await sampleCompany(), from, to);
+}
+
+// The charging stations nearest to a car (a simulation); `null` for a car that does not exist, is another company's or is not electric or hybrid.
+export async function getFleetStations(plate: string, limit: number): Promise<StationList | null> {
+  if (!isMockMode()) return fetchFleetStations(plate, limit);
+  return (await import("@/mocks/green")).sampleStations(await mockWorld(), await sampleCompany(), plate, limit);
 }
 
 // The people a car can be given to: the active ones, by surname, for the form's choice (a company has a few dozen at most).
