@@ -132,3 +132,56 @@ describe('resetEmail', () => {
     expect(html).toContain('&amp;b=&quot;2&quot;&lt;script&gt;');
   });
 });
+
+// The invitation of a person to a corporate account (V2-33): the same delivery as a reset link, with its own text.
+describe('the invitation e-mail', () => {
+  const INVITE = { company: 'Ege Lojistik A.Ş.', name: 'Mert' };
+
+  it('names the person and the company, says the link lives seven days, and carries the link', () => {
+    const tr = resetEmail(LINK, 'TR', INVITE);
+    expect(tr.subject).toBe('Novera Mobility: kurumsal hesabın hazır');
+    expect(tr.text).toContain('Merhaba Mert');
+    expect(tr.text).toContain('Ege Lojistik A.Ş.');
+    expect(tr.text).toContain('7 gün');
+    expect(tr.text).toContain(LINK);
+    expect(tr.html).toContain(`href="${LINK}"`);
+    // It is not the reset text: that one lives an hour.
+    expect(tr.text).not.toContain('1 saat');
+
+    const en = resetEmail(LINK, 'EN', INVITE);
+    expect(en.subject).toBe('Novera Mobility: your corporate account is ready');
+    expect(en.text).toContain('Hello Mert');
+    expect(en.text).toContain('7 days');
+    expect(en.text).not.toContain('1 hour');
+  });
+
+  it('escapes the company and the name in the HTML, so a name cannot add markup to the mail', () => {
+    const { html, text } = resetEmail(LINK, 'EN', { company: '<b>Acme</b> & "Co"', name: '<script>x</script>' });
+    expect(html).not.toContain('<script>');
+    expect(html).not.toContain('<b>Acme</b>');
+    expect(html).toContain('&lt;b&gt;Acme&lt;/b&gt; &amp; &quot;Co&quot;');
+    // The plain text is plain: it is not HTML, so it keeps what was written.
+    expect(text).toContain('<b>Acme</b> & "Co"');
+  });
+
+  it('is sent through the mail provider with the invitation text, and logged in development without one', async () => {
+    const calls: Array<{ url: string; init: RequestInit }> = [];
+    process.env.RESEND_API_KEY = 're_test_key';
+    process.env.MAIL_FROM = 'Novera <no-reply@novera.example>';
+    try {
+      const instance = new ResetLinkNotifier();
+      instance.fetcher = async (url, init) => {
+        calls.push({ url, init });
+        return new Response('{"id":"1"}', { status: 200 });
+      };
+      await instance.send('mert@egelojistik.example', LINK, 'TR', INVITE);
+      expect(calls).toHaveLength(1);
+      const body = JSON.parse(calls[0]!.init.body as string);
+      expect(body).toMatchObject({ to: ['mert@egelojistik.example'], subject: 'Novera Mobility: kurumsal hesabın hazır' });
+      expect(body.text).toContain('Ege Lojistik A.Ş.');
+    } finally {
+      delete process.env.RESEND_API_KEY;
+      delete process.env.MAIL_FROM;
+    }
+  });
+});

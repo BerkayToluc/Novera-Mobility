@@ -17,7 +17,7 @@ import {
   newSessionToken,
 } from './session-token.js';
 import { failureWait, FREE_FAILED_ATTEMPTS, THROTTLE_MEMORY_MS } from './login-throttle.js';
-import type { UserRow } from './user-view.js';
+import { USER_WITH_COMPANY, type UserRow } from './user-view.js';
 import { DAY_MS, HOUR_MS } from '../common/time.js';
 
 // BACKLOG #34 (kayıt, giriş, çıkış) ve #36/#37 (/me): openapi.yaml auth ve me uçları.
@@ -77,7 +77,7 @@ export class AuthService {
       throw new RateLimitedException(Math.ceil((throttle.lockedUntil.getTime() - Date.now()) / 1000));
     }
 
-    const user = await this.prisma.user.findUnique({ where: { email } });
+    const user = await this.prisma.user.findUnique({ where: { email }, include: USER_WITH_COMPANY });
     if (!user) {
       await verifyAgainstDummy(password);
       await this.recordFailure(email);
@@ -151,7 +151,7 @@ export class AuthService {
   async authenticate(token: string, at: Date = new Date()): Promise<UserRow | null> {
     const session = await this.prisma.session.findUnique({
       where: { tokenHash: hashSessionToken(token) },
-      include: { user: true },
+      include: { user: { include: USER_WITH_COMPANY } },
     });
     if (!session) return null;
     const now = at.getTime();
@@ -194,7 +194,7 @@ export class AuthService {
     // E-posta tercihleri: { notifications: { reminders?: boolean, campaigns?: boolean } }, gönderilen alan güncellenir.
     if (body.notifications?.reminders !== undefined) data.notifyReminders = body.notifications.reminders;
     if (body.notifications?.campaigns !== undefined) data.notifyCampaigns = body.notifications.campaigns;
-    return this.prisma.user.update({ where: { id: userId }, data });
+    return this.prisma.user.update({ where: { id: userId }, data, include: USER_WITH_COMPANY });
   }
 
   // DELETE /me: hesap kalıcı silinir. Oturumlar ve puanlar birlikte gider (cascade). Rezervasyon kayıtları kalır,

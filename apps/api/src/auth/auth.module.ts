@@ -24,6 +24,6 @@ import { SessionGuard } from './session.guard.js';
     GoogleAuthService,
     { provide: GoogleTokenVerifier, useFactory: () => new JoseGoogleTokenVerifier() },
   ],
-  exports: [AuthService, SessionGuard],
+  exports: [AuthService, SessionGuard, ResetLinkNotifier],
 })
 export class AuthModule {}

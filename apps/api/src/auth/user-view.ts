@@ -9,19 +9,29 @@ export interface UserRow {
   accountType: 'INDIVIDUAL' | 'CORPORATE';
   // Panel yetkisi (V2-23); yalnızca `pnpm admin:create` değiştirir.
   role: 'CUSTOMER' | 'ADMIN';
-  companyName: string | null;
-  taxOffice: string | null;
-  companyCity: string | null;
-  companyPhone: string | null;
   contactTitle: string | null;
-  // Veritabanında JSON: { "name": "...", "email": "...", "phone": "..." } ya da boş
-  salesContact: unknown;
+  // Kurumsal hesabın şirketi (V2-33). `GET /me` cevabının firma alanları buradan doldurulur; bu yüzden bir kullanıcıyı `/me` için
+  // yükleyen her sorgu şirketi de getirir (`USER_WITH_COMPANY`). Yüklenmediyse (ya da şirket yoksa) firma alanları boştur.
+  companyId?: string | null;
+  company?: CompanyRow | null;
   locale: 'TR' | 'EN';
   theme: 'LIGHT' | 'DARK' | 'SYSTEM';
   currency: 'TRY' | 'EUR' | 'USD';
   notifyReminders: boolean;
   notifyCampaigns: boolean;
 }
+
+// Şirketin `GET /me` için gereken kısmı. Veritabanında `salesContact` JSON'dur: { "name": "...", "email": "...", "phone": "..." } ya da boş.
+export interface CompanyRow {
+  name: string;
+  taxOffice: string | null;
+  city: string | null;
+  phone: string | null;
+  salesContact: unknown;
+}
+
+// Kullanıcıyı şirketiyle birlikte yükleyen sorgu seçeneği (Prisma `include`).
+export const USER_WITH_COMPANY = { company: true } as const;
 
 export interface UserResponse {
   id: string;
@@ -63,12 +73,12 @@ export function toUserResponse(user: UserRow): UserResponse {
     lastName: user.lastName,
     accountType: user.accountType,
     role: user.role,
-    companyName: user.companyName,
-    taxOffice: user.taxOffice,
-    companyCity: user.companyCity,
-    companyPhone: user.companyPhone,
+    companyName: user.company?.name ?? null,
+    taxOffice: user.company?.taxOffice ?? null,
+    companyCity: user.company?.city ?? null,
+    companyPhone: user.company?.phone ?? null,
     contactTitle: user.contactTitle,
-    salesContact: readSalesContact(user.salesContact),
+    salesContact: readSalesContact(user.company?.salesContact),
     locale: user.locale === 'EN' ? 'en' : 'tr',
     theme: user.theme.toLowerCase() as UserResponse['theme'],
     currency: user.currency,

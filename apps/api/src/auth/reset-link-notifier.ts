@@ -2,7 +2,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import { mailFrom, resendApiKey } from '../config/env.js';
 import { isProduction } from '../config/runtime.js';
 
-// The one place that delivers a password reset link (BACKLOG #27, #49).
+// The one place that delivers a password link (BACKLOG #27, #49): a reset link, and since V2-33 the invitation of a person to a
+// corporate account, which is the same kind of link with another text and a longer life.
 //
 // With RESEND_API_KEY and MAIL_FROM set it sends a real e-mail through Resend (https://resend.com).
 // Without them: outside production the link goes to the server log, so development works with no mail
@@ -31,10 +32,43 @@ const TEXT = {
   },
 } as const;
 
+// The invitation of a person to their company's corporate account (V2-33, ADMIN.md §3.3): who opened it and for which company, the
+// link, and how long it lives. It is sent only by an administrator's action, never on a stranger's request.
+const INVITE_TEXT = {
+  TR: {
+    subject: 'Novera Mobility: kurumsal hesabın hazır',
+    intro: (name: string, company: string) =>
+      `Merhaba ${name}, ${company} için Novera Mobility kurumsal hesabın açıldı. Şifreni belirlemek için aşağıdaki bağlantıyı aç. Bağlantı 7 gün geçerli ve yalnızca bir kez kullanılır.`,
+    action: 'Şifremi belirle',
+    outro: 'Bu daveti beklemiyorsan bu e-postayı yok sayabilirsin; şifre belirlenmeden hesap kullanılamaz. Süre dolarsa Novera ekibinden yeni bir davet isteyebilirsin.',
+  },
+  EN: {
+    subject: 'Novera Mobility: your corporate account is ready',
+    intro: (name: string, company: string) =>
+      `Hello ${name}, a Novera Mobility corporate account was opened for you at ${company}. Open the link below to set your password. It is valid for 7 days and can be used once.`,
+    action: 'Set my password',
+    outro: 'If you were not expecting this invitation you can ignore this e-mail; the account cannot be used until a password is set. If the link runs out, ask the Novera team for a new invitation.',
+  },
+} as const;
+
+export type Invite = { company: string; name: string };
+
 const escapeHtml = (value: string): string =>
   value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
-export function resetEmail(link: string, locale: Locale): { subject: string; text: string; html: string } {
+export function resetEmail(link: string, locale: Locale, invite?: Invite): { subject: string; text: string; html: string } {
+  if (invite) {
+    const i = INVITE_TEXT[locale];
+    const intro = i.intro(invite.name, invite.company);
+    return {
+      subject: i.subject,
+      text: `${intro}\n\n${link}\n\n${i.outro}`,
+      html:
+        `<p>${escapeHtml(intro)}</p>` +
+        `<p><a href="${escapeHtml(link)}">${escapeHtml(i.action)}</a></p>` +
+        `<p style="color:#666">${escapeHtml(i.outro)}</p>`,
+    };
+  }
   const t = TEXT[locale];
   return {
     subject: t.subject,
@@ -53,34 +87,35 @@ export class ResetLinkNotifier {
   // Replaceable in tests.
   fetcher: Fetcher = (url, init) => fetch(url, init);
 
-  async send(email: string, link: string, locale: Locale = 'TR'): Promise<void> {
+  // With `invite` the e-mail is the invitation of a corporate account (V2-33); without it, a reset link.
+  async send(email: string, link: string, locale: Locale = 'TR', invite?: Invite): Promise<void> {
     const apiKey = resendApiKey();
     const from = mailFrom();
 
     if (apiKey && from) {
-      await this.deliver(apiKey, from, email, link, locale);
+      await this.deliver(apiKey, from, email, link, locale, invite);
       return;
     }
     // The link is a credential: it is written to the log only when the API is explicitly in development.
     if (isProduction()) {
-      this.logger.warn('A reset link was requested but no mail provider is configured (RESEND_API_KEY, MAIL_FROM)');
+      this.logger.warn(`${invite ? 'An invitation' : 'A reset link'} was due but no mail provider is configured (RESEND_API_KEY, MAIL_FROM)`);
       return;
     }
-    this.logger.log(`Reset link for ${email}: ${link}`);
+    this.logger.log(`${invite ? 'Invitation link' : 'Reset link'} for ${email}: ${link}`);
   }
 
-  private async deliver(apiKey: string, from: string, email: string, link: string, locale: Locale): Promise<void> {
+  private async deliver(apiKey: string, from: string, email: string, link: string, locale: Locale, invite?: Invite): Promise<void> {
     try {
       const response = await this.fetcher(RESEND_URL, {
         method: 'POST',
         headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ from, to: [email], ...resetEmail(link, locale) }),
+        body: JSON.stringify({ from, to: [email], ...resetEmail(link, locale, invite) }),
         signal: AbortSignal.timeout(SEND_TIMEOUT_MS),
       });
       // Only the status is logged: the answer can repeat the address, and the request holds the link.
-      if (!response.ok) this.logger.error(`The mail provider answered ${response.status}; no reset e-mail was sent`);
+      if (!response.ok) this.logger.error(`The mail provider answered ${response.status}; no ${invite ? 'invitation' : 'reset'} e-mail was sent`);
     } catch (error) {
-      this.logger.error(`The reset e-mail could not be sent: ${error instanceof Error ? error.name : 'unknown error'}`);
+      this.logger.error(`The ${invite ? 'invitation' : 'reset'} e-mail could not be sent: ${error instanceof Error ? error.name : 'unknown error'}`);
     }
   }
 }

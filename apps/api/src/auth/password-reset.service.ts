@@ -10,6 +10,8 @@ import { hashSessionToken, newSessionToken } from './session-token.js';
 
 // BACKLOG #27 (issue #36): POST /auth/forgot-password and POST /auth/reset-password.
 export const RESET_TOKEN_TTL_MS = 60 * 60 * 1000; // one hour
+// The link of a corporate invitation (V2-33) is valid for seven days.
+export const INVITE_TOKEN_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
 export function resetTokenInvalid(): HttpException {
   return new HttpException(

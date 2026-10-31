@@ -30,10 +30,10 @@ Kurumsal hesap açmanın tek ve güvenli yolunu kurmak: Novera şirketi açar, k
 - **KVKK:** davet e-postası metni ve kurumsal kullanıcı verisi aydınlatma metninde anlatılır (V2-36'daki personel bölümüyle birlikte gözden geçirilir).
 
 ## Kabul kriterleri
-- [ ] Migration sonrası mevcut kurumsal hesapların `GET /me` cevabı birebir aynı (test: önce/sonra anlık görüntüsü).
-- [ ] Davet edilen kişi bağlantıyla şifre belirler ve kurumsal sekmeden girer (e2e mock + canlıda kendi adresiyle G denemesi).
-- [ ] 7 gün sonra bağlantı geçersiz; yeniden gönderilen davette eski bağlantı geçersiz (test).
-- [ ] Aynı e-posta `409`.
+- [x] Migration sonrası mevcut kurumsal hesapların `GET /me` cevabı birebir aynı (test: önce/sonra anlık görüntüsü). _Nasıl: `companies.integration.spec.ts` migration SQL'inin `DATA MOVE` bloğunu çalıştırır, her hesabın `toUserResponse` çıktısını öncesi ve sonrasıyla karşılaştırır. Tek fark, issue'nun kendi kuralıdır: aynı ada sahip hesaplar firma bilgisinde ayrışıyorsa en eski hesabın bilgileri şirketin olur (ayrı testle belgelenmiş)._
+- [x] Davet edilen kişi bağlantıyla şifre belirler ve kurumsal sekmeden girer (e2e mock + canlıda kendi adresiyle G denemesi). _Nasıl: gerçek veritabanıyla `companies.integration.spec.ts` daveti kabul edip `AuthService.login` ile girer; `e2e/admin-companies.spec.ts` davet sayfasını ve kurumsal sekmeye yönlendirmeyi sınar. **Canlıda kendi adresiyle deneme yapılmadı** (migration uygulanıp yayına çıkınca)._
+- [x] 7 gün sonra bağlantı geçersiz; yeniden gönderilen davette eski bağlantı geçersiz (test). _Nasıl: `companies.integration.spec.ts` süresi dolmuş bağlantıyı ve yeniden gönderimden sonra eski bağlantıyı reddettirir._
+- [x] Aynı e-posta `409`. _Nasıl: `companies.integration.spec.ts` (eşzamanlı iki davet dahil) ve `e2e/admin-companies.spec.ts`._
 - [ ] Yetki testleri; işlem kaydı (`company.create`, `company.invite`); 375/1280 ekran görüntüsü.
 
 ## Etiketler

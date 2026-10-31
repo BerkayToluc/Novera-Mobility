@@ -762,6 +762,105 @@ describe('administration over HTTP', () => {
     });
   });
 
+  // The door and the input of the company endpoints (V2-33). What they do against a database is in
+  // companies/companies.integration.spec.ts; a request that is turned away is turned away before any database call.
+  describe('companies and invitations: the door and the input (V2-33)', () => {
+    const ID = '6f0a1f7e-8f5e-4b86-9f5c-2d2f6d9a0b11';
+    const USER_ID = '0b1c2d3e-8f5e-4b86-9f5c-2d2f6d9a0b22';
+    const routes: [string, string][] = [
+      ['GET', '/admin/companies'],
+      ['POST', '/admin/companies'],
+      ['GET', `/admin/companies/${ID}`],
+      ['PATCH', `/admin/companies/${ID}`],
+      ['POST', `/admin/companies/${ID}/users`],
+      ['POST', `/admin/companies/${ID}/users/${USER_ID}/resend`],
+    ];
+    const withBody = (method: string, path: string) => (method === 'POST' && !path.endsWith('/resend') ? { body: {} } : method === 'PATCH' ? { body: {} } : {});
+
+    it('no session is 401 UNAUTHENTICATED on every route', async () => {
+      for (const [method, path] of routes) {
+        const response = await call(method, path, withBody(method, path));
+        expect(response.status).toBe(401);
+        expect((await response.json()).code).toBe('UNAUTHENTICATED');
+      }
+    });
+
+    it('a customer is 403 FORBIDDEN on every route', async () => {
+      const { cookie } = await signedIn('CUSTOMER');
+      for (const [method, path] of routes) {
+        const response = await call(method, path, { cookie, ...withBody(method, path) });
+        expect(response.status).toBe(403);
+        expect((await response.json()).code).toBe('FORBIDDEN');
+      }
+    });
+
+    it('a new company with nothing in it asks for the name', async () => {
+      const { cookie } = await signedIn('ADMIN');
+      const response = await call('POST', '/admin/companies', { cookie, body: {} });
+      expect(response.status).toBe(422);
+      expect((await response.json()).fieldErrors).toEqual({ name: 'REQUIRED' });
+    });
+
+    it('wrong values are 422 with a code for each field', async () => {
+      const { cookie } = await signedIn('ADMIN');
+      const response = await call('POST', '/admin/companies', {
+        cookie,
+        body: { name: 'A', phone: 'abc', taxOffice: 12, salesContact: { name: 'Selin', email: 'degil', phone: '+90 212 555 01 99' } },
+      });
+      expect(response.status).toBe(422);
+      expect((await response.json()).fieldErrors).toEqual({ name: 'TOO_SHORT', phone: 'INVALID_FORMAT', taxOffice: 'INVALID_FORMAT', salesContact: 'INVALID_EMAIL' });
+    });
+
+    it('a change has to say which version it was made against', async () => {
+      const { cookie } = await signedIn('ADMIN');
+      const response = await call('PATCH', `/admin/companies/${ID}`, { cookie, body: { city: 'Ankara' } });
+      expect(response.status).toBe(422);
+      expect((await response.json()).fieldErrors).toEqual({ updatedAt: 'REQUIRED' });
+    });
+
+    it('an invitation needs an e-mail address and a name, and a language that is one', async () => {
+      const { cookie } = await signedIn('ADMIN');
+      const none = await call('POST', `/admin/companies/${ID}/users`, { cookie, body: {} });
+      expect(none.status).toBe(422);
+      expect(Object.keys((await none.json()).fieldErrors).sort()).toEqual(['email', 'firstName', 'lastName']);
+      const wrong = await call('POST', `/admin/companies/${ID}/users`, { cookie, body: { email: 'degil', firstName: 'A', lastName: 'B', locale: 'fr' } });
+      expect((await wrong.json()).fieldErrors).toEqual({ email: 'INVALID_EMAIL', locale: 'INVALID_FORMAT' });
+    });
+
+    it('a list asked for in a way that makes no sense is 422', async () => {
+      const { cookie } = await signedIn('ADMIN');
+      for (const [query, field] of [
+        ['pageSize=101', 'pageSize'],
+        ['sort=salesContact:asc', 'sort'],
+        ['q=' + 'x'.repeat(101), 'q'],
+      ] as const) {
+        const response = await call('GET', `/admin/companies?${query}`, { cookie });
+        expect(response.status).toBe(422);
+        expect(Object.keys((await response.json()).fieldErrors)).toEqual([field]);
+      }
+    });
+
+    it('an id that cannot be one is 404 without asking the database', async () => {
+      const { cookie } = await signedIn('ADMIN');
+      for (const [method, path] of [
+        ['GET', '/admin/companies/not-an-id'],
+        ['PATCH', '/admin/companies/not-an-id'],
+        ['POST', '/admin/companies/not-an-id/users'],
+        ['POST', `/admin/companies/${ID}/users/not-an-id/resend`],
+      ] as const) {
+        const response = await call(method, path, { cookie, body: method === 'POST' && path.endsWith('/users') ? { email: 'a@b.co', firstName: 'A', lastName: 'B' } : method === 'PATCH' ? { updatedAt: '2026-10-29T10:00:00.000Z' } : undefined });
+        expect(response.status).toBe(404);
+        expect((await response.json()).code).toBe('NOT_FOUND');
+      }
+    });
+
+    it('a body that is not JSON is 415', async () => {
+      const { cookie } = await signedIn('ADMIN');
+      const response = await call('POST', '/admin/companies', { cookie, body: 'name=x', type: 'text/plain' });
+      expect(response.status).toBe(415);
+    });
+  });
+
   describe('the audit log', () => {
     it('a change is logged with the names of its fields and none of the values', async () => {
       const { cookie, id } = await signedIn('ADMIN');

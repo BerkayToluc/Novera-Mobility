@@ -882,6 +882,100 @@
     "cityFilter": {
       "all": "Tüm şehirler",
       "apply": "Süz"
+    },
+    "companies": {
+      "title": "Şirketler",
+      "intro": "Kurumsal müşteri şirketleri ve şirketin kişileri. Kişiyi buradan davet edersiniz; şifresini kendisi belirler.",
+      "newButton": "Yeni şirket",
+      "newTitle": "Yeni şirket",
+      "newIntro": "Şirketi oluşturduktan sonra kişilerini davet edebilirsiniz.",
+      "detailTitle": "Şirket",
+      "detailIntro": "{count, plural, =0 {Henüz kişisi yok.} other {# kişi.}}",
+      "searchLabel": "Şirket ara",
+      "tableCaption": "Şirketler",
+      "retry": "Tekrar dene",
+      "columns": {
+        "name": "Şirket",
+        "users": "Kişi",
+        "pending": "Davet bekleyen"
+      },
+      "emptyTitle": "Henüz şirket yok",
+      "emptyText": "İlk şirketi ekleyin, sonra kişilerini davet edin.",
+      "emptyFilteredTitle": "Bu aramaya uyan şirket yok",
+      "emptyFilteredText": "Başka bir şey aramayı deneyin.",
+      "loadErrorTitle": "Şirketler yüklenemedi",
+      "loadErrorText": "Birkaç saniye sonra yeniden deneyin.",
+      "fields": {
+        "name": "Şirket adı",
+        "taxOffice": "Vergi dairesi",
+        "city": "Şehir",
+        "phone": "Telefon",
+        "salesName": "Temsilcinin adı",
+        "salesEmail": "Temsilcinin e-postası",
+        "salesPhone": "Temsilcinin telefonu"
+      },
+      "sales": {
+        "title": "Satış temsilcisi",
+        "hint": "Şirketin kendi Filom ekranında görünür. Üç alan birlikte doldurulur ya da üçü de boş bırakılır."
+      },
+      "form": {
+        "create": "Şirketi oluştur",
+        "save": "Değişiklikleri kaydet",
+        "saving": "Kaydediliyor",
+        "cancel": "Vazgeç"
+      },
+      "errors": {
+        "name": "2 ile 120 karakter arasında bir ad yazın.",
+        "nameTaken": "Bu adda bir şirket zaten var.",
+        "taxOffice": "En çok 80 karakter yazın.",
+        "city": "En çok 60 karakter yazın.",
+        "phone": "Geçerli bir telefon numarası yazın ya da boş bırakın.",
+        "salesName": "Temsilcinin adını yazın.",
+        "salesEmail": "Temsilcinin geçerli bir e-posta adresini yazın.",
+        "salesPhone": "Temsilcinin geçerli bir telefon numarasını yazın.",
+        "inviteEmail": "Geçerli bir e-posta adresi yazın.",
+        "firstName": "Adı yazın (en çok 60 karakter).",
+        "lastName": "Soyadı yazın (en çok 60 karakter).",
+        "title": "En çok 80 karakter yazın.",
+        "emailTaken": "Bu e-posta adresiyle zaten bir hesap var.",
+        "settled": "Bu kişi şifresini zaten belirlemiş; yeniden göndermeye gerek yok.",
+        "personNotFound": "Bu kişi artık yok. Sayfayı yenileyin.",
+        "generic": "Bu bilgi kabul edilmedi. Alanları gözden geçirip yeniden deneyin.",
+        "notFound": "Bu şirket artık yok. Listeye dönün.",
+        "unavailable": "Yapılamadı. Birkaç saniye sonra yeniden deneyin."
+      },
+      "toast": {
+        "created": "Şirket oluşturuldu",
+        "saved": "Değişiklikler kaydedildi",
+        "invited": "Davet gönderildi",
+        "resent": "Davet yeniden gönderildi"
+      },
+      "people": {
+        "title": "Kişiler",
+        "intro": "Şirket adına kiralama yapabilen kişiler. Davet edilen kişi e-postadaki bağlantıyla şifresini belirler; bağlantı 7 gün geçerlidir.",
+        "empty": "Bu şirkete henüz kimse davet edilmedi.",
+        "active": "Etkin",
+        "pending": "Davet bekliyor",
+        "expired": "Davetin süresi doldu",
+        "validUntil": "Bağlantı {date} tarihine kadar geçerli",
+        "expiredOn": "Bağlantının süresi {date} tarihinde doldu",
+        "resend": "Daveti yeniden gönder",
+        "resendFor": "Daveti yeniden gönder: {name}"
+      },
+      "invite": {
+        "title": "Kişi davet et",
+        "hint": "Kişiye şifre belirleme bağlantısı e-postayla gider. Şifreyi siz görmezsiniz.",
+        "email": "E-posta",
+        "firstName": "Ad",
+        "lastName": "Soyad",
+        "personTitle": "Görevi",
+        "locale": "E-postanın dili",
+        "localeHint": "Davet bu dilde yazılır.",
+        "localeTr": "Türkçe",
+        "localeEn": "İngilizce",
+        "submit": "Davet gönder",
+        "sending": "Gönderiliyor"
+      }
     }
   }
 }

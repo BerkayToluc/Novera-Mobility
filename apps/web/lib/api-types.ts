@@ -3889,6 +3889,471 @@ export interface paths {
         };
         trace?: never;
     };
+    "/admin/companies": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Şirketler (yönetim)
+         * @description Sayfalı liste (ADR-24). `q` şirket adında aranır (büyük/küçük harf: İngiliz alfabesindeki harfler için). Varsayılan sıra
+         *     ada göre. Her satırda şirketin kişi sayısı (`users`) ve henüz şifre belirlememiş davetli sayısı (`pendingUsers`) vardır.
+         *     Sınır: yönetici başına dakikada 120.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    page?: number;
+                    pageSize?: number;
+                    /** @description `alan` ya da `alan:asc|desc`. Varsayılan `name:asc`. */
+                    sort?: "name" | "createdAt" | "users";
+                    q?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Bir sayfa şirket */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AdminCompanyPage"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        put?: never;
+        /**
+         * Şirket oluştur
+         * @description Şirketin adı benzersizdir; büyük/küçük harf ve baştaki/sondaki boşluk fark etmez (`409 NAME_TAKEN`). Satış temsilcisi ya
+         *     üç alanıyla birlikte verilir ya da hiç verilmez. İşlem kaydına alan adları yazılır (`company.create`).
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["AdminCompanyCreate"];
+                };
+            };
+            responses: {
+                /** @description Oluşturulan şirket */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AdminCompanyDetail"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Bu adda bir şirket var (`NAME_TAKEN`) */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description JSON olmayan gövde (`BAD_REQUEST`) */
+                415: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/companies/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Şirketin kimliği. Kimlik olamayacak bir değer `404` döner. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * Bir şirket
+         * @description Şirketin bilgileri ve kişileri. Davet bekleyen kişide `invite` bağlantının ne zaman biteceğini söyler.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Şirketin kimliği. Kimlik olamayacak bir değer `404` döner. */
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Şirket */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AdminCompanyDetail"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Böyle bir şirket yok (`NOT_FOUND`) */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Şirketi güncelle
+         * @description Gönderilmeyen alan olduğu gibi kalır; `null` ya da boş metin isteğe bağlı bir alanı siler. Düzenlenen kaydın `updatedAt`
+         *     değeri geri gönderilir; şirket bu arada değiştiyse `409 STALE_WRITE`. İşlem kaydına alan adları yazılır (`company.update`).
+         */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Şirketin kimliği. Kimlik olamayacak bir değer `404` döner. */
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["AdminCompanyUpdate"];
+                };
+            };
+            responses: {
+                /** @description Güncel şirket */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AdminCompanyDetail"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Böyle bir şirket yok (`NOT_FOUND`) */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Kayıt değişmiş (`STALE_WRITE`) ya da bu adda başka bir şirket var (`NAME_TAKEN`) */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description JSON olmayan gövde (`BAD_REQUEST`) */
+                415: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        trace?: never;
+    };
+    "/admin/companies/{id}/users": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Şirketin kimliği. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Şirkete kişi davet et
+         * @description Şirkete bağlı, şifresiz bir **kurumsal** hesap açar ve e-postayla **7 gün geçerli** bir şifre belirleme bağlantısı yollar
+         *     (kişi şifresini kendisi belirler; yönetici şifre görmez). Kişi bağlantıyı kullanana kadar `PENDING` durumundadır. Bu
+         *     e-posta adresiyle bir hesap zaten varsa `409 EMAIL_TAKEN` döner ve hiçbir şey yazılmaz. E-posta gönderimi başarısız olsa da
+         *     davet kaydedilir; yönetici daveti yeniden yollayabilir. İşlem kaydına yalnızca alan adları yazılır, kişinin adı ve e-posta
+         *     adresi yazılmaz (`company.invite`).
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Şirketin kimliği. */
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["AdminCompanyInvite"];
+                };
+            };
+            responses: {
+                /** @description Davet edilen kişi */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AdminCompanyUser"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Böyle bir şirket yok (`NOT_FOUND`) */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Bu e-posta adresiyle bir hesap var (`EMAIL_TAKEN`) */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description JSON olmayan gövde (`BAD_REQUEST`) */
+                415: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/companies/{id}/users/{userId}/resend": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Şirketin kimliği. */
+                id: string;
+                /** @description Davet edilen kişinin kimliği. */
+                userId: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Daveti yeniden yolla
+         * @description Kişinin önceki bağlantıları **geçersiz olur** ve yeni bir 7 günlük bağlantı yollanır. Kişi şifresini zaten belirlemişse
+         *     (ya da Google ile bağlanmışsa) `409 INVALID_TRANSITION` döner. Gövde yoktur. İşlem kaydı: `company.invite-resend`.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Şirketin kimliği. */
+                    id: string;
+                    /** @description Davet edilen kişinin kimliği. */
+                    userId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Davet edilen kişi (yeni son kullanma zamanıyla) */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AdminCompanyUser"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Böyle bir şirket ya da kişi yok (`NOT_FOUND`) */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Kişi şifresini zaten belirlemiş (`INVALID_TRANSITION`) */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/ping": {
         parameters: {
             query?: never;
@@ -4019,7 +4484,7 @@ export interface components {
              * @description Sabit makine kodu.
              * @enum {string}
              */
-            code: "BAD_REQUEST" | "VALIDATION_FAILED" | "UNAUTHENTICATED" | "FORBIDDEN" | "INVALID_CREDENTIALS" | "EMAIL_TAKEN" | "NOT_FOUND" | "VEHICLE_UNAVAILABLE" | "INVALID_DATE_RANGE" | "RESERVATION_LIMIT" | "RESET_TOKEN_INVALID" | "SPAM_DETECTED" | "RATE_LIMITED" | "PAYLOAD_TOO_LARGE" | "IN_USE" | "STALE_WRITE" | "CODE_TAKEN" | "SLUG_TAKEN" | "PLATE_TAKEN" | "INVALID_TRANSITION" | "INTERNAL_ERROR";
+            code: "BAD_REQUEST" | "VALIDATION_FAILED" | "UNAUTHENTICATED" | "FORBIDDEN" | "INVALID_CREDENTIALS" | "EMAIL_TAKEN" | "NOT_FOUND" | "VEHICLE_UNAVAILABLE" | "INVALID_DATE_RANGE" | "RESERVATION_LIMIT" | "RESET_TOKEN_INVALID" | "SPAM_DETECTED" | "RATE_LIMITED" | "PAYLOAD_TOO_LARGE" | "IN_USE" | "STALE_WRITE" | "CODE_TAKEN" | "SLUG_TAKEN" | "PLATE_TAKEN" | "NAME_TAKEN" | "INVALID_TRANSITION" | "INTERNAL_ERROR";
             /** @description Geliştirici için İngilizce metin. Ekranda gösterilmez. */
             message: string;
             /** @description `IN_USE` için nedenlerin sayıları (bayi: reservations, holds, vehicles); ekran bunları listeler. */
@@ -4033,7 +4498,7 @@ export interface components {
              *     }
              */
             fieldErrors?: {
-                [key: string]: "REQUIRED" | "INVALID_EMAIL" | "INVALID_FORMAT" | "TOO_SHORT" | "PASSWORD_TOO_COMMON" | "INVALID_PASSWORD" | "EMAIL_MISMATCH" | "TOO_LONG" | "OUT_OF_RANGE" | "EMAIL_TAKEN" | "CONSENT_REQUIRED" | "INVALID_DATE_RANGE" | "NOT_IN_SLOT" | "IN_PAST" | "UNKNOWN_REFERENCE" | "UNKNOWN_CODE" | "CODE_EXHAUSTED" | "CODE_ALREADY_USED" | "CODE_TAKEN" | "BELOW_USAGE" | "NOT_ALLOWED" | "SLUG_TAKEN" | "PLATE_TAKEN";
+                [key: string]: "REQUIRED" | "INVALID_EMAIL" | "INVALID_FORMAT" | "TOO_SHORT" | "PASSWORD_TOO_COMMON" | "INVALID_PASSWORD" | "EMAIL_MISMATCH" | "TOO_LONG" | "OUT_OF_RANGE" | "EMAIL_TAKEN" | "CONSENT_REQUIRED" | "INVALID_DATE_RANGE" | "NOT_IN_SLOT" | "IN_PAST" | "UNKNOWN_REFERENCE" | "UNKNOWN_CODE" | "CODE_EXHAUSTED" | "CODE_ALREADY_USED" | "CODE_TAKEN" | "BELOW_USAGE" | "NOT_ALLOWED" | "SLUG_TAKEN" | "PLATE_TAKEN" | "NAME_TAKEN";
             };
         };
         LocalizedText: {
@@ -4992,6 +5457,108 @@ export interface components {
         AdminMessageHandle: {
             /** @description `true` ele alındı işareti koyar, `false` geri alır. */
             handled: boolean;
+        };
+        AdminSalesContact: {
+            name: string;
+            /** Format: email */
+            email: string;
+            phone: string;
+        };
+        AdminCompanyListItem: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            taxOffice: string | null;
+            city: string | null;
+            phone: string | null;
+            /** @description Şirketin kişi sayısı. */
+            users: number;
+            /** @description Henüz şifre belirlememiş davetli sayısı. */
+            pendingUsers: number;
+            /** Format: date-time */
+            createdAt: string;
+            /**
+             * Format: date-time
+             * @description Kaydın sürümü; düzenleme bunu geri gönderir.
+             */
+            updatedAt: string;
+        };
+        AdminCompanyPage: {
+            items: components["schemas"]["AdminCompanyListItem"][];
+            /** @description Süzgeçten geçen tüm şirketler */
+            total: number;
+            page: number;
+            pageSize: number;
+        };
+        AdminCompanyUser: {
+            /** Format: uuid */
+            id: string;
+            /** Format: email */
+            email: string;
+            firstName: string;
+            lastName: string;
+            title: string | null;
+            /**
+             * @description `PENDING`: davet edildi, şifre belirlenmedi. `ACTIVE`: şifresi ya da Google bağlantısı var.
+             * @enum {string}
+             */
+            status: "PENDING" | "ACTIVE";
+            /** @description Yalnızca `PENDING` kişide; son davetin bağlantısı. */
+            invite: {
+                /** Format: date-time */
+                expiresAt: string;
+                /** @description Bağlantının süresi doldu; yeniden yollamak gerekir. */
+                expired: boolean;
+            } | null;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        AdminCompanyDetail: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            taxOffice: string | null;
+            city: string | null;
+            phone: string | null;
+            salesContact: components["schemas"]["AdminSalesContact"] | null;
+            users: components["schemas"]["AdminCompanyUser"][];
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        AdminCompanyCreate: {
+            name: string;
+            taxOffice?: string;
+            city?: string;
+            phone?: string;
+            /** @description Üç alanıyla birlikte verilir ya da hiç verilmez. */
+            salesContact?: components["schemas"]["AdminSalesContact"];
+        };
+        AdminCompanyUpdate: {
+            /**
+             * Format: date-time
+             * @description Düzenlenen kaydın `updatedAt` değeri.
+             */
+            updatedAt: string;
+            name?: string;
+            taxOffice?: string | null;
+            city?: string | null;
+            phone?: string | null;
+            salesContact?: components["schemas"]["AdminSalesContact"] | null;
+        };
+        AdminCompanyInvite: {
+            /** Format: email */
+            email: string;
+            firstName: string;
+            lastName: string;
+            title?: string;
+            /**
+             * @description E-postanın dili.
+             * @default tr
+             * @enum {string}
+             */
+            locale: "tr" | "en";
         };
         /** @description Gönderilen alanlar güncellenir. */
         UserUpdate: {

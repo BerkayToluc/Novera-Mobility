@@ -16,7 +16,7 @@ import { rateLimitMessage } from "@/lib/rate-limit";
 
 // The token comes from the link in the e-mail. A link that is wrong, used or too old is told apart
 // from a failure of the service, because only the first needs a new link.
-export function ResetPasswordForm({ token }: { token: string }) {
+export function ResetPasswordForm({ token, invite = false }: { token: string; invite?: boolean }) {
   const t = useTranslations("Auth");
   const limitT = useTranslations("RateLimit");
   const messages = useAuthErrorMessages();
@@ -53,10 +53,10 @@ export function ResetPasswordForm({ token }: { token: string }) {
     return (
       <div className="flex flex-col gap-5">
         <p role="status" className="rounded-control bg-surface-muted p-4 text-body text-fg">
-          {t("reset.done")}
+          {t(invite ? "reset.inviteDone" : "reset.done")}
         </p>
         <Button asChild size="lg">
-          <Link href="/giris">{t("reset.toLogin")}</Link>
+          <Link href={invite ? { pathname: "/giris", query: { tip: "kurumsal" } } : "/giris"}>{t("reset.toLogin")}</Link>
         </Button>
       </div>
     );
@@ -66,11 +66,13 @@ export function ResetPasswordForm({ token }: { token: string }) {
     return (
       <div className="flex flex-col gap-5">
         <p role="alert" className="rounded-control border border-error p-3 text-small text-error">
-          {t("reset.invalidLink")}
+          {t(invite ? "reset.inviteInvalidLink" : "reset.invalidLink")}
         </p>
-        <Button asChild size="lg">
-          <Link href="/sifre-sifirla">{t("reset.requestNew")}</Link>
-        </Button>
+        {!invite && (
+          <Button asChild size="lg">
+            <Link href="/sifre-sifirla">{t("reset.requestNew")}</Link>
+          </Button>
+        )}
       </div>
     );
   }

@@ -209,6 +209,7 @@ describe('AuthService', () => {
 });
 
 describe('toUserResponse satış iletişimi', () => {
+  const firma = { name: 'Firma', taxOffice: null, city: null, phone: null };
   const base = {
     id: 'u1',
     email: 'a@b.co',
@@ -217,10 +218,6 @@ describe('toUserResponse satış iletişimi', () => {
     lastName: 'B',
     accountType: 'CORPORATE' as const,
     role: 'CUSTOMER' as const,
-    companyName: 'Firma',
-    taxOffice: null,
-    companyCity: null,
-    companyPhone: null,
     contactTitle: null,
     locale: 'TR' as const,
     theme: 'LIGHT' as const,
@@ -231,14 +228,13 @@ describe('toUserResponse satış iletişimi', () => {
   };
 
   it('JSON alanı tam ise satış iletişimini döner', () => {
-    const view = toUserResponse({ ...base, salesContact: { name: 'Selin', email: 's@n.co', phone: '+90 212' } });
+    const view = toUserResponse({ ...base, company: { ...firma, salesContact: { name: 'Selin', email: 's@n.co', phone: '+90 212' } } });
     expect(view.salesContact).toEqual({ name: 'Selin', email: 's@n.co', phone: '+90 212' });
   });
 
   it('boş, eksik ya da bozuk JSON alanında null döner', () => {
-    expect(toUserResponse({ ...base, salesContact: null }).salesContact).toBeNull();
-    expect(toUserResponse({ ...base, salesContact: { name: 'Selin' } }).salesContact).toBeNull();
-    expect(toUserResponse({ ...base, salesContact: 'metin' }).salesContact).toBeNull();
-    expect(toUserResponse({ ...base, salesContact: [1] }).salesContact).toBeNull();
+    for (const salesContact of [null, { name: 'Selin' }, 'metin', [1]]) {
+      expect(toUserResponse({ ...base, company: { ...firma, salesContact } }).salesContact).toBeNull();
+    }
   });
 });
