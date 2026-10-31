@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable, Optional } from '@nestjs/common';
 import { type Page } from '../admin-list.js';
 import { invalidTransition } from '../admin.errors.js';
 import { parseInput, validationFailed } from '../../common/zod-validation.js';
@@ -7,6 +7,7 @@ import { openWhere } from '../../fleet/fleet-requests.service.js';
 import { canMoveTo, type RequestStatus, type RequestType } from '../../fleet/requests/request-flow.js';
 import { listAdminRequestSchema, setRequestStatusSchema } from '../../fleet/requests/request.schemas.js';
 import { normalizeRequestNumber, requestDetail, requestView, REQUEST_DETAIL_INCLUDE, REQUEST_LIST_INCLUDE, type RequestDetail, type RequestView } from '../../fleet/requests/request.view.js';
+import { NotificationsService } from '../../notifications/notifications.service.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
 
 const notFound = (): HttpException => new HttpException({ code: 'NOT_FOUND', message: 'Request not found' }, HttpStatus.NOT_FOUND);
@@ -15,7 +16,11 @@ const notFound = (): HttpException => new HttpException({ code: 'NOT_FOUND', mes
 // along its steps, write down who is on it. Nothing is deleted. The rule for the steps is in fleet/requests/request-flow.ts.
 @Injectable()
 export class AdminRequestsService {
-  constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
+  constructor(
+    @Inject(PrismaService) private readonly prisma: PrismaService,
+    // Optional so the unit tests that build the service by hand need no mail; the module always provides it (V2-44).
+    @Optional() @Inject(NotificationsService) private readonly notifications?: NotificationsService,
+  ) {}
 
   async list(query: unknown): Promise<Page<RequestView>> {
     const input = parseInput(listAdminRequestSchema, query, 'Request list query is invalid');
@@ -64,7 +69,7 @@ export class AdminRequestsService {
     if (!number) throw notFound();
     const input = parseInput(setRequestStatusSchema, body, 'Request status validation failed');
 
-    return this.prisma.$transaction(async (tx) => {
+    const detail = await this.prisma.$transaction(async (tx) => {
       await tx.$queryRaw`SELECT "id" FROM "ServiceRequest" WHERE "number" = ${number} FOR UPDATE`;
       const current = await tx.serviceRequest.findUnique({ where: { number }, select: { id: true, type: true, status: true, assignee: true } });
       if (!current) throw notFound();
@@ -88,5 +93,8 @@ export class AdminRequestsService {
       });
       return requestDetail(row);
     });
+    // The person who opened it is told of the new step, by its words only, after the move is saved and without being waited for (V2-44).
+    this.notifications?.requestStatusChanged(number);
+    return detail;
   }
 }

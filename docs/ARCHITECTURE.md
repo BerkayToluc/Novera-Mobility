@@ -188,6 +188,17 @@ apps/api/src/
   media/                # (gerekirse) imageUrl doğrulaması
 ```
 
+### ADR-32 · E-posta bildirimleri ve saatlik görev
+
+- **Bağlam:** kullanıcı rezervasyonu, iptali, yaklaşan kiralamayı ve servis talebinin durumunu e-postayla öğrenmeli (SPEC §2.9, BACKLOG V2-44). Bugüne kadar yalnızca şifre bağlantısı ve davet gidiyordu.
+- **Karar:**
+  - **Tek gönderici:** `MailService` (`src/notifications/`), `ResetLinkNotifier` ile aynı Resend hizmeti ve aynı iki ayar (`RESEND_API_KEY`, `MAIL_FROM`). `send` hata fırlatmaz, adresi ya da anahtarı günlüğe yazmaz, 8 saniyede vazgeçer. Ayar yoksa hiçbir şey gönderilmez.
+  - **İstek yolunu bekletmez:** rezervasyon, iptal ve talep durumu servisleri işlemi kaydettikten sonra `NotificationsService`'e yalnızca kimliği söyler (`void`, beklenmez); e-posta hazırlanamasa ya da gitmese bile cevap aynıdır. Servisler `@Optional()` alır, böylece elle kurulan birim testleri e-postasız çalışır.
+  - **Şablonlar saf fonksiyondur** (`email-templates.ts`): kullanıcının `locale` değerine göre TR/EN, sade HTML + düz metin, marka rengi, en az kişisel veri (ad; telefon, adres, iptal nedeni ya da yöneticinin notu yok), her değer kaçışlıdır.
+  - **Hatırlatma (`RemindersService`):** başlangıcı 24 saat içinde olan, onaylı, hatırlatması açık kullanıcıya bir kez. "Bir kez", `Reservation.reminderSentAt` ile sağlanır: gönderimden ÖNCE tek bir koşullu güncellemeyle (`reminderSentAt IS NULL`) alınır; aynı anda çalışan iki görev ya da yeniden başlayan örnek aynı rezervasyona iki kez gönderemez. Gönderim başarısız olursa işaret geri alınır ve sonraki çalışma dener. E-posta servisi kapalıyken hiçbir rezervasyon işaretlenmez. 24 saatten kısa süre önce yapılan rezervasyona gönderilmez (onay az önce gitti).
+  - **Tetikleyici:** süreç içi saatlik zamanlayıcı (diğer arka plan görevleri gibi, başlangıçta bir kez ve örnek sıcakken saatte bir) ve **`POST /jobs/reminders`**. Cloud Run istek gelmeyince sıfıra iner ve CPU'yu kısar, bu yüzden zamanlayıcı tek başına saat değildir; güvenilir tetikleyici Cloud Scheduler'ın her saat çağırdığı uçtur (cevap beklenir, iş istek sürerken yapılır). Uç, canlıda API'nin geri kalanı gibi `x-novera-key` ister; ek bir sır yoktur. Girdi almaz, tekrar çağırmak zararsızdır.
+- **Sonuçları:** zamanlayıcı kurulmazsa hatırlatma yalnızca örnek sıcakken gider (onay, iptal ve talep e-postaları istek içinde tetiklendiği için etkilenmez). E-posta için ayrı bir kuyruk ya da yeniden deneme tablosu yoktur: başarısız onay/iptal/talep e-postası tekrar denenmez (yalnız hatırlatma tekrar denenir).
+
 ## 5. Sonraya: mobil uygulama
 
 G'nin kararıyla v2'de mobil uygulama yok (SPEC §4). İleride yapılırsa (öneri: Expo / React Native; dağıtım için mağaza gerekmez, Expo Go ve Android APK bağlantısı yeterli) API'de şunlar gerekir. 22 Ekim keşfinde bulundu:

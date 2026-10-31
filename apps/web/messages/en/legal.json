@@ -47,6 +47,14 @@
         ]
       },
       {
+        "heading": "E-mail notifications",
+        "paragraphs": [
+          "We send the e-mail address on your account these notifications about what you do on the site: the confirmation of a booking, the cancellation of a booking (by you or by Novera Mobility), a travel reminder 24 hours before a rental starts, and a change in the status of a service request you opened in Filom. The first two and the request status are sent because of what you did; they carry no marketing.",
+          "You can turn the travel reminder off at any time in the e-mail preferences of your account settings; when it is off it is not sent. Campaign e-mails are sent only with your explicit consent, through a preference that is off by default.",
+          "E-mails are delivered through our sending provider, Resend; your e-mail address and the content of the message are passed to the provider for that. The messages contain only your first name and the booking or request details; internal notes such as the reason for a cancellation are not sent. Your e-mail address is not written to our system logs."
+        ]
+      },
+      {
         "heading": "Purposes of processing",
         "list": [
           "Creating and managing your booking.",

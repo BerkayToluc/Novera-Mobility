@@ -1,7 +1,8 @@
-import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable, Optional } from '@nestjs/common';
 import { istanbulDateStart, istanbulDay } from '../../common/time.js';
 import { parseInput, validationFailed } from '../../common/zod-validation.js';
 import type { Prisma } from '../../generated/prisma/client.js';
+import { NotificationsService } from '../../notifications/notifications.service.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { claimCancellation } from '../../reservations/cancellation.js';
 import type { Page } from '../admin-list.js';
@@ -25,7 +26,11 @@ const notFound = (): HttpException =>
 // read however many bookings there are.
 @Injectable()
 export class AdminReservationsService {
-  constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
+  constructor(
+    @Inject(PrismaService) private readonly prisma: PrismaService,
+    // Optional so the unit tests that build the service by hand need no mail; the module always provides it (V2-44).
+    @Optional() @Inject(NotificationsService) private readonly notifications?: NotificationsService,
+  ) {}
 
   async list(query: unknown, now: Date = new Date()): Promise<Page<ReservationListItem>> {
     const input = parseInput(listReservationSchema, query, 'Reservation list query is invalid');
@@ -106,6 +111,8 @@ export class AdminReservationsService {
         latest.status === 'CANCELLED' ? 'The booking is already cancelled' : 'The rental has already started, it can no longer be cancelled',
       );
     }
+    // The person is told, without the reason (it is for the record), and only by the call that cancelled it (V2-44).
+    this.notifications?.reservationCancelled(current.id);
     return reservationDetail(await this.find(number), now);
   }
 

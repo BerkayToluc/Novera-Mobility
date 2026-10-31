@@ -1,8 +1,9 @@
-import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable, Optional } from '@nestjs/common';
 import type { UserRow } from '../auth/user-view.js';
 import { hasConflict } from '../common/availability.js';
 import { lockOpenBranches } from '../common/branch-lock.js';
 import { validationFailed } from '../common/zod-validation.js';
+import { NotificationsService } from '../notifications/notifications.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { claimCancellation } from './cancellation.js';
 import {
@@ -53,6 +54,8 @@ export class ReservationsService {
   constructor(
     @Inject(PrismaService) private readonly prisma: PrismaService,
     @Inject(PricingService) private readonly pricing: PricingService,
+    // Optional so the unit tests that build the service by hand need no mail; the module always provides it (V2-44).
+    @Optional() @Inject(NotificationsService) private readonly notifications?: NotificationsService,
   ) {}
 
   // POST /reservations: her şey TEK işlemde olur (araç kilidi, müsaitlik, fiyat, kayıt, puan, tutmanın silinmesi).
@@ -61,7 +64,7 @@ export class ReservationsService {
     const request = parseReservationRequest(input);
     await this.pricing.assertBranchesExist(request);
 
-    return this.prisma.$transaction(async (tx) => {
+    const view = await this.prisma.$transaction(async (tx) => {
       // Aracın satırını kilitle: aynı araç için gelen diğer istekler bu işlem bitene kadar bekler,
       // sonra çakışmayı görüp 409 alır (kilit yoksa iki kişi aynı aracı alabilir).
       await tx.$queryRaw`SELECT "id" FROM "Vehicle" WHERE "id" = ${request.vehicleId} FOR UPDATE`;
@@ -196,6 +199,9 @@ export class ReservationsService {
       });
       return toReservationView(row);
     });
+    // After the booking is saved (not in the transaction), and not waited for: a mail that cannot go changes nothing about the answer (V2-44).
+    this.notifications?.reservationConfirmed(view.id);
+    return view;
   }
 
   // GET /me/reservations: yeniden eskiye (kiralama başlangıcına göre).
@@ -226,6 +232,8 @@ export class ReservationsService {
   // GET /me/points iptal edilenleri saymaz.
   async cancel(userId: string, id: string, now: Date = new Date()) {
     const claimed = await claimCancellation(this.prisma, { id, userId }, now);
+    // Only the call that cancelled it tells the person; a repeated call (already cancelled) sends nothing (V2-44).
+    if (claimed) this.notifications?.reservationCancelled(id);
     const row = await this.prisma.reservation.findFirst({
       where: { id, userId },
       include: RESERVATION_INCLUDE,
