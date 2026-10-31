@@ -12,6 +12,7 @@
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r --if-present test",
     "audit:prod": "node scripts/audit-prod.mjs",
-    "test:scripts": "node --test \"scripts/**/*.test.mjs\""
+    "test:scripts": "node --test \"scripts/**/*.test.mjs\"",
+    "check:live": "node scripts/check-live.mjs"
   }
 }

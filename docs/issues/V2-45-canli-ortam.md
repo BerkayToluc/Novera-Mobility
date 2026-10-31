@@ -26,5 +26,22 @@ v1'den açık kalan ve v2'nin getirdiği canlı ortam ayarlarını tamamlamak; y
 - [ ] G yönetici olarak panele girdi.
 - [ ] DEPLOY.md ve SECURITY.md kontrol listeleri işaretli.
 
+## Hazırlık (kodla gelen, V2-45 PR'ı)
+Bu iş büyük ölçüde canlı ortamda elle yapılır (Vercel, Google Cloud, Neon); PR yalnız bunları kolaylaştırır ve kanıtı tutar. Maddeler **işaretlenmedi**: canlıda sınanıp aşağıdaki tablolar doldurulunca işaretlenir.
+- `pnpm check:live --web <site> --api <api>` (`scripts/check-live.mjs`, testi `scripts/live-checks.test.mjs`): sitemap, robots, canonical ve paylaşım adresi, güvenlik başlıkları, API sağlık, anahtarsız istek ve `/docs`. Yerelde gerçek bir `next start` ve üretim kipinde gerçek bir API'ye karşı denendi (anahtarsız `404`, doğru anahtarla `200`, yanlış anahtarla `404`).
+- `scripts/row-counts.sql` ve DEPLOY.md §9c: yedeği boş bir Neon projesine geri yükleme adımları ve satır sayısı karşılaştırması.
+- DEPLOY.md §9d: Maps anahtarı kısıtının nasıl denendiği.
+
+## Deneme kaydı (canlıda doldurulacak)
+| Ne | Sonuç |
+|---|---|
+| `pnpm check:live` çıktısı (site ve API) | |
+| Maps anahtarı başka adreste (`localhost`) denendi: ne oldu | |
+| Geri yükleme: tarih | |
+| Geri yükleme: `pg_dump` süresi / `pg_restore` süresi | |
+| Geri yükleme: tablo sayısı, satır sayıları aynı mı (fark varsa nedeni) | |
+| G yönetici olarak panele girdi (tarih) | |
+| Render servisi, Blueprint ve UptimeRobot izleyicisi silindi (tarih) | |
+
 ## Etiketler
 `faz-12` `guvenlik` `P1` `ci`

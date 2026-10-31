@@ -232,6 +232,8 @@ V2-22 turunda eklenen kabuller yukarıdaki "Faz 2 kapısı" bölümünde.
 
 ## Yayın (BACKLOG 40, issue #49) kontrol listesi
 
+V2-45: bu listenin dışarıdan sınanabilen maddeleri (anahtarsız istek `404`, `/docs` `404`, CSP ve HSTS, gerçek alan adı) `pnpm check:live` ile denetlenir (`docs/DEPLOY.md` §9d); yedek ve geri yükleme denemesi §9c'dedir. Maddeler **yalnız canlıda sınanıp tarih yazıldıktan sonra** işaretlenir.
+
 Adım adım uygulama: `docs/DEPLOY.md`. Burada yalnızca güvenlik açısından zorunlu olanlar.
 
 - [ ] `NODE_ENV=production` (aksi halde oturum çerezi `Secure` olmaz). Cloud Run'da servisin ortam değişkeni olarak girilir (DEPLOY.md §4).
