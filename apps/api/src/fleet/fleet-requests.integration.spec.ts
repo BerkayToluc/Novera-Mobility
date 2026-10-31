@@ -129,8 +129,8 @@ describeDb('the service requests against the database (V2-41)', () => {
 
     it('needs a kind that exists and is open to the company, and a car of the company that is in use', async () => {
       expect((await refused(requests.create(A.id, A.user, { type: 'WASH', fleetVehicleId: A.car.id, details: {} }, NOW))).body.fieldErrors).toEqual({ type: 'INVALID_FORMAT' });
-      // A transfer is V2-42's.
-      expect((await refused(requests.create(A.id, A.user, { type: 'TRANSFER', details: {} }, NOW))).body.fieldErrors).toEqual({ type: 'NOT_ALLOWED' });
+      // A transfer is for companies with a VIP Mobilite contract only (V2-42): company A has none here, so it is 403, not a field problem.
+      expect((await refused(requests.create(A.id, A.user, { type: 'TRANSFER', details: {} }, NOW))).status).toBe(403);
       expect((await refused(requests.create(A.id, A.user, { type: 'ROADSIDE', details: roadside }, NOW))).body.fieldErrors).toEqual({ fleetVehicleId: 'REQUIRED' });
       expect((await refused(requests.create(A.id, A.user, { type: 'ROADSIDE', fleetVehicleId: 'x', details: roadside }, NOW))).body.fieldErrors).toEqual({ fleetVehicleId: 'INVALID_FORMAT' });
       // Another company's car and one that is not there are the same answer.
@@ -307,6 +307,120 @@ describeDb('the service requests against the database (V2-41)', () => {
       expect(await mine({ company: A.id, open: 'true' })).toEqual([]);
       expect((await desk.get(swap.number)).company).toEqual({ id: B.id, name: `V41R B ${run}` });
       expect((await refused(desk.list({ type: 'WASH' }))).status).toBe(422);
+    });
+  });
+
+  describe('a VIP transfer (V2-42)', () => {
+    let vipProductId = '';
+    let madeVipProduct = false;
+    let vipContract = '';
+    const transfer = (at: Date = NOW) => ({
+      passengerName: 'Ada Kaya',
+      passengers: 3,
+      flightNumber: ' tk 1234',
+      meeting: { airport: 'ADB' },
+      meetingAt: new Date(at.getTime() + 5 * 3_600_000).toISOString(),
+      destination: 'Alsancak, İzmir',
+      note: 'Tabelayla karşılama',
+    });
+    const ask = (side: typeof A | typeof B, body: Record<string, unknown>) => requests.create(side.id, side.user, { type: 'TRANSFER', ...body }, NOW);
+
+    beforeAll(async () => {
+      const found = await prisma.product.findUnique({ where: { slug: 'vip-mobilite' } });
+      vipProductId = found?.id ?? (await prisma.product.create({ data: { slug: 'vip-mobilite' } })).id;
+      madeVipProduct = !found;
+      vipContract = (await admin.create(A.id, { productSlug: 'vip-mobilite', startAt: '2026-01-01', endAt: '2027-12-31', monthlyFee: 7_500_000, deliveryCity: 'İzmir' })).number;
+    });
+
+    afterAll(async () => {
+      // The contract goes with the rest of the clean-up at the end; the product only if this test made it.
+      await prisma.serviceRequestEvent.deleteMany({ where: { request: { companyId: { in: [A.id, B.id] } } } });
+      await prisma.serviceRequest.deleteMany({ where: { companyId: { in: [A.id, B.id] } } });
+      await prisma.fleetContract.deleteMany({ where: { number: vipContract } });
+      if (madeVipProduct) await prisma.product.deleteMany({ where: { id: vipProductId } });
+    });
+
+    it('opens for a company with a VIP contract: received, without a car, with the details as they are kept', async () => {
+      const made = await ask(A, { details: transfer() });
+      expect(made).toMatchObject({ status: 'RECEIVED', type: 'TRANSFER', vehicle: null, open: true, canCancel: true, similarOpen: [], assignee: null });
+      expect(made.details).toEqual({ ...transfer(), flightNumber: 'TK1234', meeting: { airport: 'ADB', address: null }, meetingAt: new Date(NOW.getTime() + 5 * 3_600_000).toISOString() });
+      expect(made.events.map((e) => [e.status, e.by])).toEqual([['RECEIVED', 'COMPANY']]);
+      expect((await prisma.serviceRequest.findUniqueOrThrow({ where: { number: made.number } })).fleetVehicleId).toBeNull();
+      // Two of them for the same passenger are no "similar" ones: there is no car to be the same.
+      expect((await ask(A, { details: transfer() })).similarOpen).toEqual([]);
+    });
+
+    it('is 403 FORBIDDEN for a company with no VIP contract, whatever it sends, and for one whose contract is over', async () => {
+      for (const body of [{ details: transfer() }, { details: {} }, {}, { fleetVehicleId: B.car.id, details: transfer() }]) {
+        const answer = await refused(ask(B, body));
+        expect([answer.status, answer.body.code]).toEqual([403, 'FORBIDDEN']);
+      }
+      await prisma.fleetContract.update({ where: { number: vipContract }, data: { status: 'ENDED' } });
+      try {
+        expect((await refused(ask(A, { details: transfer() }))).status).toBe(403);
+      } finally {
+        await prisma.fleetContract.update({ where: { number: vipContract }, data: { status: 'ACTIVE' } });
+      }
+      expect(await prisma.serviceRequest.count({ where: { companyId: B.id } })).toBe(0);
+    });
+
+    it('is not about a car, and the details are checked field by field (422)', async () => {
+      expect((await refused(ask(A, { fleetVehicleId: A.car.id, details: transfer() }))).body.fieldErrors).toEqual({ fleetVehicleId: 'NOT_ALLOWED' });
+      expect((await refused(ask(A, { details: {} }))).body.fieldErrors).toEqual({
+        'details.passengerName': 'REQUIRED',
+        'details.passengers': 'REQUIRED',
+        'details.meeting': 'REQUIRED',
+        'details.meetingAt': 'REQUIRED',
+        'details.destination': 'REQUIRED',
+      });
+      const soon = { ...transfer(), meetingAt: new Date(NOW.getTime() + 3_600_000).toISOString() };
+      expect((await refused(ask(A, { details: soon }))).body.fieldErrors).toEqual({ 'details.meetingAt': 'OUT_OF_RANGE' });
+      expect((await refused(ask(A, { details: { ...transfer(), passengers: 8, flightNumber: 'x' } }))).body.fieldErrors).toEqual({ 'details.passengers': 'OUT_OF_RANGE', 'details.flightNumber': 'INVALID_FORMAT' });
+      expect(await prisma.serviceRequest.count({ where: { companyId: A.id } })).toBe(0);
+    });
+
+    it('cannot be moved to the driver, the meeting or the end without a driver written down; cancelling needs none', async () => {
+      const made = await ask(A, { details: transfer() });
+      for (const status of ['DRIVER_ASSIGNED', 'MET', 'COMPLETED']) {
+        const answer = await refused(desk.setStatus(made.number, adminUser, { status, note: 'x' }, NOW));
+        expect([status, answer.status, answer.body.fieldErrors]).toEqual([status, 422, { assignee: 'REQUIRED' }]);
+        const blank = await refused(desk.setStatus(made.number, adminUser, { status, assignee: '   ' }, NOW));
+        expect([status, blank.status]).toEqual([status, 422]);
+      }
+      expect((await requests.get(A.id, made.number)).status).toBe('RECEIVED');
+      expect((await requests.get(A.id, made.number)).events).toHaveLength(1);
+
+      const assigned = await desk.setStatus(made.number, adminUser, { status: 'DRIVER_ASSIGNED', assignee: 'Mehmet Usta, 0532 000 00 02, 35 VIP 001 siyah Mercedes V-Class' }, new Date(NOW.getTime() + 60_000));
+      expect(assigned).toMatchObject({ status: 'DRIVER_ASSIGNED', assignee: 'Mehmet Usta, 0532 000 00 02, 35 VIP 001 siyah Mercedes V-Class', nextStatuses: ['MET', 'COMPLETED', 'CANCELLED'] });
+      // The driver stays for the steps after; taking him off at the meeting is refused.
+      expect((await desk.setStatus(made.number, adminUser, { status: 'MET' }, new Date(NOW.getTime() + 120_000))).assignee).toContain('Mehmet Usta');
+      expect((await refused(desk.setStatus(made.number, adminUser, { status: 'COMPLETED', assignee: '' }, NOW))).body.fieldErrors).toEqual({ assignee: 'REQUIRED' });
+      expect((await desk.setStatus(made.number, adminUser, { status: 'COMPLETED' }, new Date(NOW.getTime() + 180_000))).open).toBe(false);
+      expect((await requests.get(A.id, made.number)).events.map((e) => e.status)).toEqual(['RECEIVED', 'DRIVER_ASSIGNED', 'MET', 'COMPLETED']);
+
+      const other = await ask(A, { details: transfer() });
+      expect((await desk.setStatus(other.number, adminUser, { status: 'CANCELLED', note: 'Uçuş iptal' }, NOW)).status).toBe('CANCELLED');
+    });
+
+    it('is cancelled by the company while received; another company’s transfer is a 404 for it; the summary says who can ask', async () => {
+      const made = await ask(A, { details: transfer() });
+      expect((await requests.cancel(A.id, A.user, made.number, NOW)).status).toBe('CANCELLED');
+      const mine = await ask(A, { details: transfer() });
+      expect((await refused(requests.get(B.id, mine.number))).status).toBe(404);
+      expect((await refused(requests.cancel(B.id, B.user, mine.number))).status).toBe(404);
+      expect((await new FleetSummaryService(prisma).get(A.id, NOW)).hasVipContract).toBe(true);
+      expect((await new FleetSummaryService(prisma).get(B.id, NOW)).hasVipContract).toBe(false);
+      expect(await requests.hasVipContract(A.id)).toBe(true);
+      expect(await requests.hasVipContract(B.id)).toBe(false);
+      // Open ones are counted like the others, and listed under their kind.
+      expect((await requests.list(A.id, { type: 'TRANSFER', open: 'true' })).items.map((i) => i.number)).toEqual([mine.number]);
+      expect((await new FleetSummaryService(prisma).get(A.id, NOW)).requests.open).toBe(1);
+    });
+
+    it('the database keeps a transfer to the steps of a transfer', async () => {
+      const made = await ask(A, { details: transfer() });
+      await expect(prisma.serviceRequest.update({ where: { number: made.number }, data: { status: 'DELIVERED' } })).rejects.toThrow();
+      await expect(prisma.serviceRequest.update({ where: { number: made.number }, data: { status: 'DRIVER_ASSIGNED' } })).resolves.toBeTruthy();
     });
   });
 

@@ -8,7 +8,7 @@ import { StateMessage } from "@/components/ui/state-message";
 import { Link } from "@/i18n/navigation";
 import { currentTime } from "@/lib/clock";
 import type { FleetVehiclePage } from "@/lib/fleet-panel";
-import { getFleetVehicles } from "@/lib/fleet-server";
+import { getFleetSummary, getFleetVehicles } from "@/lib/fleet-server";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("FleetPanel.requestForm");
@@ -29,6 +29,8 @@ export default async function NewFleetRequestPage({ searchParams }: PageProps<"/
   } catch {
     vehicles = null;
   }
+  // Only a company with a VIP Mobilite contract is offered the transfer (V2-42). If the summary cannot be had, it is not offered.
+  const transferEnabled = await getFleetSummary().then((summary) => summary.hasVipContract).catch(() => false);
   const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Istanbul" }).format(new Date(currentTime()));
 
   return (
@@ -41,7 +43,7 @@ export default async function NewFleetRequestPage({ searchParams }: PageProps<"/
             <Link href="/filom/talepler/yeni">{listT("retry")}</Link>
           </Button>
         </StateMessage>
-      ) : vehicles.items.length === 0 ? (
+      ) : vehicles.items.length === 0 && !transferEnabled ? (
         <StateMessage title={t("noVehicles.title")} text={t("noVehicles.text")} />
       ) : (
         <RequestForm
@@ -49,6 +51,7 @@ export default async function NewFleetRequestPage({ searchParams }: PageProps<"/
           today={today}
           initialType={one("tur")}
           initialVehicle={one("arac")}
+          transferEnabled={transferEnabled}
         />
       )}
     </>

@@ -1504,8 +1504,10 @@
           "assignee": "The assignee can be at most 200 characters.",
           "notAllowed": "The request changed in the meantime and this move can no longer be made; the page was reloaded.",
           "notFound": "This request no longer exists.",
-          "unavailable": "The action could not be completed. Try again in a few seconds."
-        }
+          "unavailable": "The action could not be completed. Try again in a few seconds.",
+          "assigneeRequired": "Write the driver's name, phone and vehicle for this step."
+        },
+        "assigneeDriverHint": "On a transfer the steps \"Driver assigned\", \"Met\" and \"Completed\" need the driver's name, phone and vehicle written down."
       }
     }
   }

@@ -11,13 +11,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "@/i18n/navigation";
 import { rateLimitMessage } from "@/lib/rate-limit";
 import { moveRequest } from "@/lib/request-actions";
-import type { RequestStatus } from "@/lib/requests";
+import { DRIVER_STEPS, type RequestStatus, type RequestType } from "@/lib/requests";
 import { useToast } from "./toast";
 
 // Moving a request on (V2-41, docs/ADMIN.md §3.19): the steps it can go to (the page read them from the API), a note for the timeline and who
 // is on it. The note and the assignee are seen by the customer. A request that is over has nothing to choose, and says so. If someone else
 // moved it in the meantime the API refuses and the page is read again.
-export function RequestStatusForm({ number, next, assignee }: { number: string; next: readonly RequestStatus[]; assignee: string | null }) {
+export function RequestStatusForm({ number, type, next, assignee }: { number: string; type: RequestType; next: readonly RequestStatus[]; assignee: string | null }) {
   const t = useTranslations("Admin.requests");
   const limitT = useTranslations("RateLimit");
   const router = useRouter();
@@ -47,6 +47,8 @@ export function RequestStatusForm({ number, next, assignee }: { number: string; 
     if (!status) problems.status = t("move.errors.status");
     if (note.trim().length > 500) problems.note = t("move.errors.note");
     if (who.trim().length > 200) problems.assignee = t("move.errors.assignee");
+    // A transfer needs its driver written down for the steps that assign, meet and finish (V2-42).
+    if (type === "TRANSFER" && DRIVER_STEPS.includes(status as RequestStatus) && who.trim() === "") problems.assignee = t("move.errors.assigneeRequired");
     setErrors(problems);
     if (Object.keys(problems).length > 0) return;
 
@@ -61,7 +63,7 @@ export function RequestStatusForm({ number, next, assignee }: { number: string; 
       return;
     }
     if (result.status === "invalid") {
-      setErrors(Object.fromEntries(Object.keys(result.fields).map((name) => [name, t(`move.errors.${name === "assignee" ? "assignee" : name === "note" ? "note" : "status"}` as "move.errors.note")])));
+      setErrors(Object.fromEntries(Object.entries(result.fields).map(([name, code]) => [name, t(name === "assignee" ? (code === "REQUIRED" ? "move.errors.assigneeRequired" : "move.errors.assignee") : name === "note" ? "move.errors.note" : "move.errors.status")])));
       return;
     }
     if (result.status === "not_allowed") {
@@ -94,7 +96,7 @@ export function RequestStatusForm({ number, next, assignee }: { number: string; 
       <Field label={t("move.note")} hint={t("move.noteHint")} error={errors.note}>
         {(controlProps) => <Textarea rows={3} {...controlProps} value={note} onChange={(event) => setNote(event.target.value)} />}
       </Field>
-      <Field label={t("move.assignee")} hint={t("move.assigneeHint")} error={errors.assignee}>
+      <Field label={t("move.assignee")} hint={type === "TRANSFER" ? `${t("move.assigneeHint")} ${t("move.assigneeDriverHint")}` : t("move.assigneeHint")} error={errors.assignee}>
         {(controlProps) => <Input autoComplete="off" {...controlProps} value={who} onChange={(event) => setWho(event.target.value)} />}
       </Field>
       <Button type="submit" size="lg" className="self-start" disabled={pending} aria-busy={pending}>

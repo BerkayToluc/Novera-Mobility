@@ -2,7 +2,7 @@ import { normalizeSearch } from "@/lib/branch-detail";
 import { canCustomerCancel, isOpen, nextStatuses, REQUEST_FLOWS, requestApiFilters, type RequestFormValues, type RequestStatus, type RequestType, type ServiceRequest, type ServiceRequestCreated, type ServiceRequestDetail, type ServiceRequestPage } from "@/lib/requests";
 import { toRequestBody } from "@/lib/requests";
 import { getMockCompany } from "./admin-companies";
-import { listMockCompanyCars } from "./admin-contracts";
+import { listMockCompanyCars, listMockContracts } from "./admin-contracts";
 
 // The sample service requests (USE_MOCKS=1, local work and tests only, lib/mock-world.ts). They behave like the API's: a request is for one
 // company, each kind has its own steps, the customer can only withdraw one that is received, Novera moves it forward, and every step goes
@@ -112,10 +112,14 @@ export function getMockRequest(name: string, number: string, companyId: string |
   return row ? detail(name, row) : null;
 }
 
-export type CreateOutcome = { status: "ok"; value: ServiceRequestCreated } | { status: "invalid"; fields: Record<string, string> };
+// Whether the company has a VIP Mobilite contract in force: the only ones that can ask for a transfer (docs/FLEET.md §3.1).
+export const hasMockVipContract = (name: string, companyId: string): boolean => (listMockContracts(name, companyId) ?? []).some((contract) => contract.productSlug === "vip-mobilite" && contract.status === "ACTIVE");
+
+export type CreateOutcome = { status: "ok"; value: ServiceRequestCreated } | { status: "invalid"; fields: Record<string, string> } | { status: "forbidden" };
 
 export function createMockRequest(name: string, companyId: string, values: RequestFormValues): CreateOutcome {
   const w = world(name);
+  if (values.type === "TRANSFER") return createMockTransfer(name, companyId, values);
   const vehicle = listMockCompanyCars(name, companyId).find((entry) => entry.id === values.fleetVehicleId && entry.status === "ACTIVE");
   if (!vehicle) return { status: "invalid", fields: { fleetVehicleId: "UNKNOWN_REFERENCE" } };
   const body = toRequestBody(values);
@@ -137,6 +141,31 @@ export function createMockRequest(name: string, companyId: string, values: Reque
   };
   w.requests.push(row);
   return { status: "ok", value: { ...detail(name, row), similarOpen: similar } };
+}
+
+// A transfer: no car, a VIP Mobilite contract needed (403 without one), and the details as the API keeps them.
+function createMockTransfer(name: string, companyId: string, values: RequestFormValues): CreateOutcome {
+  if (!hasMockVipContract(name, companyId)) return { status: "forbidden" };
+  const w = world(name);
+  const body = toRequestBody(values);
+  const d = body.details as unknown as { passengerName: string; passengers: number; flightNumber?: string; meeting: { airport?: string; address?: string }; meetingAt: string; destination: string; note?: string };
+  const now = new Date().toISOString();
+  w.serial += 1;
+  const row: Stored = {
+    id: crypto.randomUUID(),
+    number: `TLP-${now.slice(0, 4)}-${String(w.serial).padStart(5, "0")}`,
+    type: "TRANSFER",
+    status: "RECEIVED",
+    vehicle: null,
+    details: { passengerName: d.passengerName, passengers: d.passengers, flightNumber: d.flightNumber ?? null, meeting: { airport: d.meeting.airport ?? null, address: d.meeting.address ?? null }, meetingAt: d.meetingAt, destination: d.destination, note: d.note ?? null } as unknown as Stored["details"],
+    assignee: null,
+    createdAt: now,
+    updatedAt: now,
+    events: [{ status: "RECEIVED", note: null, at: now, by: "COMPANY" }],
+    companyId,
+  };
+  w.requests.push(row);
+  return { status: "ok", value: { ...detail(name, row), similarOpen: [] } };
 }
 
 // The details as the API stores them: the position and the address always there, empty ones `null`.
@@ -162,12 +191,15 @@ export function cancelMockRequest(name: string, companyId: string, number: strin
   return { status: "ok" };
 }
 
-export type MoveOutcome = { status: "ok" } | { status: "not_found" | "not_allowed" };
+export type MoveOutcome = { status: "ok" } | { status: "not_found" | "not_allowed" } | { status: "invalid"; fields: Record<string, string> };
 
 export function moveMockRequest(name: string, number: string, status: RequestStatus, note: string | null, assignee: string | null | undefined): MoveOutcome {
   const row = world(name).requests.find((entry) => entry.number === normalize(number));
   if (!row) return { status: "not_found" };
   if (!nextStatuses(row.type, row.status).includes(status)) return { status: "not_allowed" };
+  // A transfer needs a driver written down to be assigned, met and finished (V2-42).
+  const driver = assignee !== undefined ? assignee : row.assignee;
+  if (row.type === "TRANSFER" && (status === "DRIVER_ASSIGNED" || status === "MET" || status === "COMPLETED") && !driver) return { status: "invalid", fields: { assignee: "REQUIRED" } };
   const now = new Date().toISOString();
   Object.assign(row, { status, updatedAt: now, ...(assignee !== undefined ? { assignee } : {}) });
   row.events.push({ status, note, at: now, by: "NOVERA" });

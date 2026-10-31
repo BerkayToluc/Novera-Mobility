@@ -16,7 +16,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Link, useRouter } from "@/i18n/navigation";
 import { rateLimitMessage } from "@/lib/rate-limit";
 import { createRequest } from "@/lib/request-actions";
-import { CUSTOMER_TYPES, EMPTY_REQUEST_FORM, INCIDENTS, MAINTENANCE_SERVICES, requestFormSchema, roundCoordinate, type RequestFormValues } from "@/lib/requests";
+import { AIRPORTS, CUSTOMER_TYPES, EMPTY_REQUEST_FORM, INCIDENTS, MAINTENANCE_SERVICES, requestFormSchema, roundCoordinate, type RequestFormValues } from "@/lib/requests";
 
 type Props = {
   vehicles: Array<{ id: string; label: string }>;
@@ -24,6 +24,8 @@ type Props = {
   today: string;
   initialType?: string;
   initialVehicle?: string;
+  // The company has a VIP Mobilite contract, so a transfer can be asked for (V2-42); without one the choice is not shown.
+  transferEnabled?: boolean;
 };
 
 type Position = "idle" | "asking" | "got" | "denied";
@@ -31,7 +33,7 @@ type Position = "idle" | "asking" | "got" | "denied";
 // The form that opens a service request (V2-41, docs/FLEET.md §3, SPEC §3.D): the kind first, then the fields of that kind. "Use my location"
 // is a button that asks the browser only when it is pressed, never by itself; if the position is refused or cannot be had, the address field
 // is all that is needed and the form works as before. The rules are checked here for comfort and again by the action and the API (ADR-26).
-export function RequestForm({ vehicles, today, initialType, initialVehicle }: Props) {
+export function RequestForm({ vehicles, today, initialType, initialVehicle, transferEnabled = false }: Props) {
   const t = useTranslations("FleetPanel.requestForm");
   const limitT = useTranslations("RateLimit");
   const router = useRouter();
@@ -42,7 +44,7 @@ export function RequestForm({ vehicles, today, initialType, initialVehicle }: Pr
 
   const initial: RequestFormValues = {
     ...EMPTY_REQUEST_FORM,
-    type: (CUSTOMER_TYPES as readonly string[]).includes(initialType ?? "") ? (initialType as string) : "",
+    type: [...CUSTOMER_TYPES, ...(transferEnabled ? ["TRANSFER"] : [])].includes(initialType ?? "") ? (initialType as string) : "",
     fleetVehicleId: vehicles.some((vehicle) => vehicle.id === initialVehicle) ? (initialVehicle as string) : "",
   };
   const messages = {
@@ -56,6 +58,13 @@ export function RequestForm({ vehicles, today, initialType, initialVehicle }: Pr
     durationDays: t("errors.durationDays"),
     service: t("errors.service"),
     preferredDate: t("errors.preferredDate"),
+    passengerName: t("errors.passengerName"),
+    passengers: t("errors.passengers"),
+    flightNumber: t("errors.flightNumber"),
+    meeting: t("errors.meeting"),
+    meetingAt: t("errors.meetingAt"),
+    destination: t("errors.destination"),
+    note: t("errors.note"),
   };
   const {
     register,
@@ -67,6 +76,7 @@ export function RequestForm({ vehicles, today, initialType, initialVehicle }: Pr
   } = useForm<RequestFormValues>({ resolver: zodResolver(requestFormSchema(messages, today)), defaultValues: initial });
   const type = useWatch({ control, name: "type" });
   const valet = useWatch({ control, name: "valet" });
+  const meetingKind = useWatch({ control, name: "meetingKind" });
   const latitude = useWatch({ control, name: "latitude" });
   const longitude = useWatch({ control, name: "longitude" });
 
@@ -106,15 +116,19 @@ export function RequestForm({ vehicles, today, initialType, initialVehicle }: Pr
         let shown = false;
         for (const field of Object.keys(result.fields)) {
           const name = field.startsWith("details.") ? field.slice("details.".length).split(".")[0]! : field;
-          const mapped = name === "location" ? "address" : name === "preferredDate" ? "preferredDate" : name;
+          // The position problem is shown at the address, the meeting place at the airport or the address, whichever is chosen.
+          const mapped = name === "location" ? "address" : name === "meeting" ? (values.meetingKind === "airport" ? "airport" : "address") : name;
           if (mapped in EMPTY_REQUEST_FORM) {
-            setError(mapped as keyof RequestFormValues, { message: messages[(name === "location" ? "location" : name) as keyof typeof messages] ?? t("errors.generic") });
+            setError(mapped as keyof RequestFormValues, { message: messages[name as keyof typeof messages] ?? t("errors.generic") });
             shown = true;
           }
         }
         setFormError(shown ? null : t("errors.generic"));
         return;
       }
+      case "forbidden":
+        setFormError(t("errors.forbidden"));
+        return;
       case "rate_limited":
         setFormError(rateLimitMessage(limitT, result.retryAfter));
         return;
@@ -132,8 +146,8 @@ export function RequestForm({ vehicles, today, initialType, initialVehicle }: Pr
 
       <fieldset className="flex flex-col gap-3">
         <legend className="text-label text-fg">{t("type.legend")}</legend>
-        <div className="grid gap-3 md:grid-cols-3">
-          {CUSTOMER_TYPES.map((kind) => (
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+          {[...CUSTOMER_TYPES, ...(transferEnabled ? (["TRANSFER"] as const) : [])].map((kind) => (
             <label key={kind} className={`flex min-h-11 cursor-pointer flex-col gap-1 rounded-card border p-4 ${type === kind ? "border-primary bg-selected" : "border-border-strong bg-surface"}`}>
               <span className="flex items-center gap-3">
                 <input type="radio" value={kind} className="size-5 shrink-0" {...register("type")} />
@@ -148,18 +162,20 @@ export function RequestForm({ vehicles, today, initialType, initialVehicle }: Pr
 
       {type && (
         <>
-          <Field label={t("fields.vehicle")} error={errors.fleetVehicleId?.message}>
-            {(controlProps) => (
-              <Select {...controlProps} {...register("fleetVehicleId")}>
-                <option value="">{t("fields.vehicleChoose")}</option>
-                {vehicles.map((vehicle) => (
-                  <option key={vehicle.id} value={vehicle.id}>
-                    {vehicle.label}
-                  </option>
-                ))}
-              </Select>
-            )}
-          </Field>
+          {type !== "TRANSFER" && (
+            <Field label={t("fields.vehicle")} error={errors.fleetVehicleId?.message}>
+              {(controlProps) => (
+                <Select {...controlProps} {...register("fleetVehicleId")}>
+                  <option value="">{t("fields.vehicleChoose")}</option>
+                  {vehicles.map((vehicle) => (
+                    <option key={vehicle.id} value={vehicle.id}>
+                      {vehicle.label}
+                    </option>
+                  ))}
+                </Select>
+              )}
+            </Field>
+          )}
 
           {type === "ROADSIDE" && (
             <>
@@ -222,6 +238,60 @@ export function RequestForm({ vehicles, today, initialType, initialVehicle }: Pr
                   {(controlProps) => <Input type="number" inputMode="numeric" min={1} max={90} {...controlProps} {...register("durationDays")} />}
                 </Field>
               </div>
+            </>
+          )}
+
+          {type === "TRANSFER" && (
+            <>
+              <div className="grid gap-5 md:grid-cols-2">
+                <Field label={t("fields.passengerName")} error={errors.passengerName?.message}>
+                  {(controlProps) => <Input autoComplete="off" {...controlProps} {...register("passengerName")} />}
+                </Field>
+                <Field label={t("fields.passengers")} hint={t("fields.passengersHint")} error={errors.passengers?.message}>
+                  {(controlProps) => <Input type="number" inputMode="numeric" min={1} max={7} {...controlProps} {...register("passengers")} />}
+                </Field>
+              </div>
+              <Field label={t("fields.flightNumber")} hint={t("fields.flightNumberHint")} error={errors.flightNumber?.message}>
+                {(controlProps) => <Input autoComplete="off" autoCapitalize="characters" {...controlProps} {...register("flightNumber")} />}
+              </Field>
+              <fieldset className="flex flex-col gap-3">
+                <legend className="text-label text-fg">{t("fields.meetingPlace")}</legend>
+                <div className="flex flex-wrap gap-x-6">
+                  {(["airport", "address"] as const).map((kind) => (
+                    <label key={kind} className="flex min-h-11 cursor-pointer items-center gap-3">
+                      <input type="radio" value={kind} className="size-5 shrink-0" {...register("meetingKind")} />
+                      <span className="text-body text-fg">{t(`fields.meetingKind.${kind}`)}</span>
+                    </label>
+                  ))}
+                </div>
+                {meetingKind === "airport" ? (
+                  <Field label={t("fields.airport")} error={errors.airport?.message}>
+                    {(controlProps) => (
+                      <Select {...controlProps} {...register("airport")}>
+                        <option value="">{t("fields.airportChoose")}</option>
+                        {AIRPORTS.map((code) => (
+                          <option key={code} value={code}>
+                            {t(`airports.${code}`)}
+                          </option>
+                        ))}
+                      </Select>
+                    )}
+                  </Field>
+                ) : (
+                  <Field label={t("fields.meetingAddress")} error={errors.address?.message}>
+                    {(controlProps) => <Input autoComplete="street-address" {...controlProps} {...register("address")} />}
+                  </Field>
+                )}
+              </fieldset>
+              <Field label={t("fields.meetingAt")} hint={t("fields.meetingAtHint")} error={errors.meetingAt?.message}>
+                {(controlProps) => <Input type="datetime-local" {...controlProps} {...register("meetingAt")} />}
+              </Field>
+              <Field label={t("fields.destination")} error={errors.destination?.message}>
+                {(controlProps) => <Input autoComplete="off" {...controlProps} {...register("destination")} />}
+              </Field>
+              <Field label={t("fields.note")} hint={t("fields.noteHint")} error={errors.note?.message}>
+                {(controlProps) => <Textarea rows={3} {...controlProps} {...register("note")} />}
+              </Field>
             </>
           )}
 

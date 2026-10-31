@@ -17,7 +17,27 @@ export type MaintenanceService = (typeof MAINTENANCE_SERVICES)[number];
 export type RoadsideDetails = { incident: Incident; location: { address: string | null; latitude: number | null; longitude: number | null }; description: string | null };
 export type ReplacementDetails = { address: string; date: string; durationDays: number };
 export type MaintenanceDetails = { service: MaintenanceService; preferredDate: string; valet: boolean; address: string | null };
-export type RequestDetails = RoadsideDetails | ReplacementDetails | MaintenanceDetails;
+export type TransferDetails = {
+  passengerName: string;
+  passengers: number;
+  flightNumber: string | null;
+  // Where the passenger is met: an airport of the list (its code), or an address; exactly one.
+  meeting: { airport: Airport | null; address: string | null };
+  // The moment, as an ISO instant.
+  meetingAt: string;
+  destination: string;
+  note: string | null;
+};
+export type RequestDetails = RoadsideDetails | ReplacementDetails | MaintenanceDetails | TransferDetails;
+
+// The airports a passenger can be met at (V2-42, SPEC §3.D): the codes; the names are the screens' words.
+export const AIRPORTS = ['IST', 'SAW', 'ESB', 'ADB', 'AYT', 'BJV', 'DLM', 'ADA', 'GZT', 'ASR', 'TZX', 'SZF'] as const;
+export type Airport = (typeof AIRPORTS)[number];
+export const MAX_PASSENGERS = 7;
+// A transfer is asked for at least this long ahead, so a driver can be found (docs/FLEET.md §3.1).
+export const MIN_LEAD_MS = 2 * 60 * 60 * 1000;
+// The airline's two characters (at least one a letter) and one to four digits: "TK1234".
+export const FLIGHT_NUMBER = /^(?=[A-Z0-9]*[A-Z])[A-Z0-9]{2}\d{1,4}$/;
 
 type Errors = Record<string, string>;
 type Parsed<T> = { value: T } | { errors: Errors };
@@ -116,8 +136,77 @@ function maintenance(raw: Record<string, unknown>, today: string): Parsed<Mainte
   return { value: { service: (service as { value: MaintenanceService }).value, preferredDate: (preferredDate as { value: string }).value, valet, address: valet ? (address as { value: string }).value : ((address as { value: string | null }).value ?? null) } };
 }
 
-// `details` of a request of this kind, or the fields that are wrong. A kind with no shape yet (a transfer, V2-42) has none to accept.
-export function parseDetails(type: RequestType, raw: unknown, today: string): Parsed<RequestDetails> {
+function transfer(raw: Record<string, unknown>, now: Date): Parsed<TransferDetails> {
+  const errors: Errors = {};
+  const passengerName = text(raw['passengerName'], 100, true);
+  if ('code' in passengerName) errors['details.passengerName'] = passengerName.code;
+
+  let passengers = 0;
+  const count = raw['passengers'];
+  if (count === undefined || count === null || count === '') errors['details.passengers'] = 'REQUIRED';
+  else if (typeof count !== 'number' || !Number.isInteger(count)) errors['details.passengers'] = 'INVALID_FORMAT';
+  else if (count < 1 || count > MAX_PASSENGERS) errors['details.passengers'] = 'OUT_OF_RANGE';
+  else passengers = count;
+
+  // The flight is optional; written any way, it is kept in capitals without spaces.
+  let flightNumber: string | null = null;
+  const flight = raw['flightNumber'];
+  if (flight !== undefined && flight !== null && flight !== '') {
+    const compact = typeof flight === 'string' ? flight.replace(/\s+/g, '').toUpperCase() : null;
+    if (compact === null) errors['details.flightNumber'] = 'INVALID_FORMAT';
+    else if (compact !== '') {
+      if (FLIGHT_NUMBER.test(compact)) flightNumber = compact;
+      else errors['details.flightNumber'] = 'INVALID_FORMAT';
+    }
+  }
+
+  // Where to meet: an airport of the list, or an address. One of them, not both and not neither.
+  const place = isObject(raw['meeting']) ? raw['meeting'] : undefined;
+  let meeting: TransferDetails['meeting'] = { airport: null, address: null };
+  if (!place) errors['details.meeting'] = raw['meeting'] === undefined || raw['meeting'] === null ? 'REQUIRED' : 'INVALID_FORMAT';
+  else {
+    const airport = place['airport'] === undefined || place['airport'] === null || place['airport'] === '' ? null : place['airport'];
+    const address = text(place['address'], MAX_ADDRESS, false);
+    if (airport !== null && !(typeof airport === 'string' && (AIRPORTS as readonly string[]).includes(airport))) errors['details.meeting.airport'] = 'INVALID_FORMAT';
+    if ('code' in address) errors['details.meeting.address'] = address.code;
+    if (!('details.meeting.airport' in errors) && !('details.meeting.address' in errors)) {
+      const addressValue = (address as { value: string | null }).value;
+      if ((airport === null) === (addressValue === null)) errors['details.meeting'] = airport === null ? 'REQUIRED' : 'INVALID_FORMAT';
+      else meeting = { airport: airport as Airport | null, address: addressValue };
+    }
+  }
+
+  // The moment is an instant (with its offset), at least two hours from now and at most a year.
+  let meetingAt = '';
+  const when = raw['meetingAt'];
+  if (when === undefined || when === null || when === '') errors['details.meetingAt'] = 'REQUIRED';
+  else if (typeof when !== 'string' || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(when) || Number.isNaN(Date.parse(when))) errors['details.meetingAt'] = 'INVALID_FORMAT';
+  else {
+    const at = Date.parse(when);
+    if (at < now.getTime() + MIN_LEAD_MS || at > now.getTime() + MAX_AHEAD_DAYS * 86_400_000) errors['details.meetingAt'] = 'OUT_OF_RANGE';
+    else meetingAt = new Date(at).toISOString();
+  }
+
+  const destination = text(raw['destination'], MAX_ADDRESS, true);
+  if ('code' in destination) errors['details.destination'] = destination.code;
+  const note = text(raw['note'], MAX_DESCRIPTION, false);
+  if ('code' in note) errors['details.note'] = note.code;
+  if (Object.keys(errors).length > 0) return failed(errors);
+  return {
+    value: {
+      passengerName: (passengerName as { value: string }).value,
+      passengers,
+      flightNumber,
+      meeting,
+      meetingAt,
+      destination: (destination as { value: string }).value,
+      note: (note as { value: string | null }).value,
+    },
+  };
+}
+
+// `details` of a request of this kind, or the fields that are wrong. `now` is for the kinds that ask for a moment (a transfer).
+export function parseDetails(type: RequestType, raw: unknown, today: string, now: Date = new Date()): Parsed<RequestDetails> {
   if (!isObject(raw)) return failed({ details: raw === undefined || raw === null ? 'REQUIRED' : 'INVALID_FORMAT' });
   switch (type) {
     case 'ROADSIDE':
@@ -126,7 +215,7 @@ export function parseDetails(type: RequestType, raw: unknown, today: string): Pa
       return replacement(raw, today);
     case 'MAINTENANCE':
       return maintenance(raw, today);
-    default:
-      return failed({ type: 'NOT_ALLOWED' });
+    case 'TRANSFER':
+      return transfer(raw, now);
   }
 }

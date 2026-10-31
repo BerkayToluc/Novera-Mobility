@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { type Page } from '../admin-list.js';
 import { invalidTransition } from '../admin.errors.js';
-import { parseInput } from '../../common/zod-validation.js';
+import { parseInput, validationFailed } from '../../common/zod-validation.js';
 import type { Prisma } from '../../generated/prisma/client.js';
 import { openWhere } from '../../fleet/fleet-requests.service.js';
 import { canMoveTo, type RequestStatus, type RequestType } from '../../fleet/requests/request-flow.js';
@@ -66,10 +66,16 @@ export class AdminRequestsService {
 
     return this.prisma.$transaction(async (tx) => {
       await tx.$queryRaw`SELECT "id" FROM "ServiceRequest" WHERE "number" = ${number} FOR UPDATE`;
-      const current = await tx.serviceRequest.findUnique({ where: { number }, select: { id: true, type: true, status: true } });
+      const current = await tx.serviceRequest.findUnique({ where: { number }, select: { id: true, type: true, status: true, assignee: true } });
       if (!current) throw notFound();
       if (!canMoveTo(current.type as RequestType, current.status as RequestStatus, input.status)) {
         throw invalidTransition(`A ${current.type} request that is ${current.status} cannot become ${input.status}`);
+      }
+      // A transfer needs a driver to be met and finished, so the step that assigns one (and every step after it) needs the driver written down,
+      // by this move or an earlier one (V2-42). Cancelling needs none.
+      const driver = input.assignee !== undefined ? input.assignee : current.assignee;
+      if (current.type === 'TRANSFER' && (input.status === 'DRIVER_ASSIGNED' || input.status === 'MET' || input.status === 'COMPLETED') && !driver) {
+        throw validationFailed({ assignee: 'REQUIRED' }, 'The driver has to be written down for this step');
       }
       const row = await tx.serviceRequest.update({
         where: { id: current.id },

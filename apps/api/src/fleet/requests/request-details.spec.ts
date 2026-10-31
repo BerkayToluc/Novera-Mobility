@@ -1,6 +1,7 @@
 import { parseDetails } from './request-details.js';
 
 const TODAY = '2026-10-31';
+const NOW = new Date('2026-10-31T10:00:00.000Z');
 const errorsOf = (result: ReturnType<typeof parseDetails>) => ('errors' in result ? result.errors : null);
 
 describe('the details of a roadside request (V2-41)', () => {
@@ -72,7 +73,55 @@ describe('what is not a set of details', () => {
     }
   });
 
-  it('a transfer has no shape yet (V2-42)', () => {
-    expect(errorsOf(parseDetails('TRANSFER', { passenger: 'Ada' }, TODAY))).toEqual({ type: 'NOT_ALLOWED' });
+  it('a transfer is read as a transfer, so a roadside request’s fields are not', () => {
+    expect(errorsOf(parseDetails('TRANSFER', { incident: 'TIRE' }, TODAY, NOW))).toMatchObject({ 'details.passengerName': 'REQUIRED' });
+  });
+});
+
+describe('the details of a transfer request (V2-42)', () => {
+  const good = { passengerName: 'Ada Kaya', passengers: 3, flightNumber: 'TK1234', meeting: { airport: 'ADB' }, meetingAt: '2026-11-03T09:30:00+03:00', destination: 'Alsancak, İzmir', note: 'Tabelayla karşılama' };
+
+  it('takes a passenger, a count, a flight, an airport or an address, a moment and a destination', () => {
+    expect(parseDetails('TRANSFER', good, TODAY, NOW)).toEqual({
+      value: { passengerName: 'Ada Kaya', passengers: 3, flightNumber: 'TK1234', meeting: { airport: 'ADB', address: null }, meetingAt: '2026-11-03T06:30:00.000Z', destination: 'Alsancak, İzmir', note: 'Tabelayla karşılama' },
+    });
+    // The flight and the note are optional; the flight is kept in capitals without spaces; the place may be an address.
+    const bare = parseDetails('TRANSFER', { passengerName: 'Ada Kaya', passengers: 1, flightNumber: ' tk 12 ', meeting: { address: 'Otel Lobisi' }, meetingAt: '2026-11-03T09:30:00+03:00', destination: 'Havalimanı' }, TODAY, NOW);
+    expect(bare).toMatchObject({ value: { flightNumber: 'TK12', meeting: { airport: null, address: 'Otel Lobisi' }, note: null } });
+    expect(parseDetails('TRANSFER', { ...good, flightNumber: '' }, TODAY, NOW)).toMatchObject({ value: { flightNumber: null } });
+  });
+
+  it('names the field that is wrong', () => {
+    expect(errorsOf(parseDetails('TRANSFER', {}, TODAY, NOW))).toEqual({
+      'details.passengerName': 'REQUIRED',
+      'details.passengers': 'REQUIRED',
+      'details.meeting': 'REQUIRED',
+      'details.meetingAt': 'REQUIRED',
+      'details.destination': 'REQUIRED',
+    });
+    for (const [passengers, code] of [[0, 'OUT_OF_RANGE'], [8, 'OUT_OF_RANGE'], [2.5, 'INVALID_FORMAT'], ['3', 'INVALID_FORMAT']] as const) {
+      expect(errorsOf(parseDetails('TRANSFER', { ...good, passengers }, TODAY, NOW))).toEqual({ 'details.passengers': code });
+    }
+    for (const flightNumber of ['TURKISH1', 'T', '1234', 'TK12345', 'TK-12']) expect(errorsOf(parseDetails('TRANSFER', { ...good, flightNumber }, TODAY, NOW))).toEqual({ 'details.flightNumber': 'INVALID_FORMAT' });
+    expect(errorsOf(parseDetails('TRANSFER', { ...good, passengerName: 'x'.repeat(101) }, TODAY, NOW))).toEqual({ 'details.passengerName': 'TOO_LONG' });
+    expect(errorsOf(parseDetails('TRANSFER', { ...good, destination: '' }, TODAY, NOW))).toEqual({ 'details.destination': 'REQUIRED' });
+    expect(errorsOf(parseDetails('TRANSFER', { ...good, note: 'n'.repeat(501) }, TODAY, NOW))).toEqual({ 'details.note': 'TOO_LONG' });
+  });
+
+  it('the place is an airport of the list or an address, one of them', () => {
+    expect(errorsOf(parseDetails('TRANSFER', { ...good, meeting: { airport: 'XXX' } }, TODAY, NOW))).toEqual({ 'details.meeting.airport': 'INVALID_FORMAT' });
+    expect(errorsOf(parseDetails('TRANSFER', { ...good, meeting: {} }, TODAY, NOW))).toEqual({ 'details.meeting': 'REQUIRED' });
+    expect(errorsOf(parseDetails('TRANSFER', { ...good, meeting: { airport: 'IST', address: 'Otel' } }, TODAY, NOW))).toEqual({ 'details.meeting': 'INVALID_FORMAT' });
+    expect(errorsOf(parseDetails('TRANSFER', { ...good, meeting: 'IST' }, TODAY, NOW))).toEqual({ 'details.meeting': 'INVALID_FORMAT' });
+  });
+
+  it('the moment is at least two hours from now and at most a year; the edge itself is allowed', () => {
+    const at = (offsetMs: number) => new Date(NOW.getTime() + offsetMs).toISOString();
+    expect('value' in parseDetails('TRANSFER', { ...good, meetingAt: at(2 * 3_600_000) }, TODAY, NOW)).toBe(true);
+    expect(errorsOf(parseDetails('TRANSFER', { ...good, meetingAt: at(2 * 3_600_000 - 1_000) }, TODAY, NOW))).toEqual({ 'details.meetingAt': 'OUT_OF_RANGE' });
+    expect(errorsOf(parseDetails('TRANSFER', { ...good, meetingAt: at(-3_600_000) }, TODAY, NOW))).toEqual({ 'details.meetingAt': 'OUT_OF_RANGE' });
+    expect(errorsOf(parseDetails('TRANSFER', { ...good, meetingAt: at(400 * 86_400_000) }, TODAY, NOW))).toEqual({ 'details.meetingAt': 'OUT_OF_RANGE' });
+    expect(errorsOf(parseDetails('TRANSFER', { ...good, meetingAt: 'yarın' }, TODAY, NOW))).toEqual({ 'details.meetingAt': 'INVALID_FORMAT' });
+    expect(errorsOf(parseDetails('TRANSFER', { ...good, meetingAt: '2026-11-03' }, TODAY, NOW))).toEqual({ 'details.meetingAt': 'INVALID_FORMAT' });
   });
 });

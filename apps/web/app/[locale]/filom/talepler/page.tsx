@@ -10,7 +10,7 @@ import { RequestHelp } from "@/components/fleet/request-help";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
 import { hrefQuery, parseAdminListParams, type Patch } from "@/lib/admin-query";
-import { getFleetRequests } from "@/lib/fleet-server";
+import { getFleetRequests, getFleetSummary } from "@/lib/fleet-server";
 import { OPEN_FILTER, REQUEST_LIST, REQUEST_STATUSES, REQUEST_TYPES, requestTone, type RequestFilter, type ServiceRequest, type ServiceRequestPage } from "@/lib/requests";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -31,6 +31,8 @@ export default async function FleetRequestsPage({ searchParams }: PageProps<"/[l
     data = null;
   }
 
+  // A transfer is only for companies with a VIP Mobilite contract, so only they get its chip (V2-42). If the summary cannot be had, no chip.
+  const vip = await getFleetSummary().then((summary) => summary.hasVipContract).catch(() => false);
   const address = (patch: Patch<RequestFilter>) => ({ pathname: "/filom/talepler" as const, query: hrefQuery(params, patch, REQUEST_LIST) });
   const moment = new Intl.DateTimeFormat(locale, { day: "2-digit", month: "2-digit", year: "2-digit", hour: "2-digit", minute: "2-digit", timeZone: "Europe/Istanbul" });
   const columns: Column<ServiceRequest>[] = [
@@ -56,7 +58,7 @@ export default async function FleetRequestsPage({ searchParams }: PageProps<"/[l
       />
       <RequestHelp />
       <div className="flex flex-col gap-3">
-        <FilterChips label={t("typeFilterLabel")} current={params.filters.tur ?? ""} options={[typeChip("", t("filterAll")), ...REQUEST_TYPES.filter((type) => type !== "TRANSFER").map((type) => typeChip(type, t(`type.${type}`)))]} />
+        <FilterChips label={t("typeFilterLabel")} current={params.filters.tur ?? ""} options={[typeChip("", t("filterAll")), ...REQUEST_TYPES.filter((type) => type !== "TRANSFER" || vip).map((type) => typeChip(type, t(`type.${type}`)))]} />
         <SelectFilter
           pathname="/filom/talepler"
           query={hrefQuery(params, {}, REQUEST_LIST)}

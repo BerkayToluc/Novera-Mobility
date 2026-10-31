@@ -3833,7 +3833,7 @@ paths:
       tags: [fleet]
       summary: Servis talebi aç
       description: |
-        Yol yardım (`ROADSIDE`), ikame araç (`REPLACEMENT_VEHICLE`) ya da bakım ve lastik (`MAINTENANCE`) talebi açar; talep `RECEIVED` olarak başlar ve zaman çizelgesinin ilk satırı yazılır. `details` türe göre doğrulanır ve hatalı alan **noktalı adla** söylenir (`422`, `fieldErrors: { "details.location": "REQUIRED" }`). `fleetVehicleId` şirketin kullanımdaki bir aracı olmalıdır; başka şirketin aracı, iade edilmiş araç ve olmayan araç aynı cevabı verir (`fleetVehicleId: UNKNOWN_REFERENCE`). `TRANSFER` türü bu sürümde açılamaz (`type: NOT_ALLOWED`; V2-42).
+        Yol yardım (`ROADSIDE`), ikame araç (`REPLACEMENT_VEHICLE`) ya da bakım ve lastik (`MAINTENANCE`) talebi açar; talep `RECEIVED` olarak başlar ve zaman çizelgesinin ilk satırı yazılır. `details` türe göre doğrulanır ve hatalı alan **noktalı adla** söylenir (`422`, `fieldErrors: { "details.location": "REQUIRED" }`). `fleetVehicleId` şirketin kullanımdaki bir aracı olmalıdır; başka şirketin aracı, iade edilmiş araç ve olmayan araç aynı cevabı verir (`fleetVehicleId: UNKNOWN_REFERENCE`). `TRANSFER` (VIP transfer) araçla ilgili değildir (`fleetVehicleId` gönderilirse `422 NOT_ALLOWED`) ve **yalnızca etkin `vip-mobilite` sözleşmesi olan şirkette** açılır; başka şirkette **`403 FORBIDDEN`** döner (gövdeye bakılmadan). Karşılama anı en az 2 saat sonrası, en çok bir yıl sonrasıdır.
         Aynı araçta aynı türde açık başka talep varsa **engel değildir**: cevaptaki `similarOpen` numaralarını söyler. **Şirket başına saatte en çok 20 talep** (`429`, şirketin hesapları tek sayacı paylaşır), üstüne hesap başına dakikada 120. İşlem kaydı: `fleet-request.create` (kayıt kimliği talep numarası, yalnız alan adları).
       security:
         - cookieAuth: []
@@ -4009,7 +4009,7 @@ paths:
       tags: [admin]
       summary: Talebi bir sonraki adıma taşı
       description: |
-        Talebi **türünün daha sonraki bir adımına** ya da `CANCELLED`'a taşır (bir adım atlanabilir); geri, aynı adıma, başka türün adımına ve bitmiş talepten çıkış `409 INVALID_TRANSITION`. Adımlar: yol yardım `RECEIVED → DISPATCHED → EN_ROUTE → COMPLETED`; ikame araç `RECEIVED → APPROVED → DELIVERED → RETURNED`; bakım `RECEIVED → SCHEDULED → IN_SERVICE → COMPLETED`. Satır kilitlenir; aynı anda gelen iki hamleden ikincisi birincinin bıraktığı duruma göre değerlendirilir. `note` zaman çizelgesine yazılır (müşteri görür); `assignee` serbest metindir (çekici, servis, şoför): gönderilmezse korunur, boş gönderilirse silinir. İşlem kaydı: `request.status` (şirket satırda, yalnız alan adları).
+        Talebi **türünün daha sonraki bir adımına** ya da `CANCELLED`'a taşır (bir adım atlanabilir); geri, aynı adıma, başka türün adımına ve bitmiş talepten çıkış `409 INVALID_TRANSITION`. Adımlar: yol yardım `RECEIVED → DISPATCHED → EN_ROUTE → COMPLETED`; ikame araç `RECEIVED → APPROVED → DELIVERED → RETURNED`; bakım `RECEIVED → SCHEDULED → IN_SERVICE → COMPLETED`. Satır kilitlenir; aynı anda gelen iki hamleden ikincisi birincinin bıraktığı duruma göre değerlendirilir. `note` zaman çizelgesine yazılır (müşteri görür); `assignee` serbest metindir (çekici, servis, şoför): gönderilmezse korunur, boş gönderilirse silinir. **Transferde** `DRIVER_ASSIGNED`, `MET` ve `COMPLETED` adımlarına geçmek için şoförün (ad, telefon, araç) yazılı olması gerekir: yoksa `422` `assignee: REQUIRED`; iptal için gerekmez. İşlem kaydı: `request.status` (şirket satırda, yalnız alan adları).
       security:
         - cookieAuth: []
       requestBody:
@@ -5440,7 +5440,7 @@ components:
 
     FleetSummary:
       type: object
-      required: [date, hasActiveContract, vehicles, contracts, maintenanceDue, invoices, expenses, greenVehicles, requests]
+      required: [date, hasActiveContract, vehicles, contracts, maintenanceDue, invoices, expenses, greenVehicles, requests, hasVipContract]
       properties:
         date: { type: string, format: date, description: Sayıların ait olduğu İstanbul günü. }
         hasActiveContract: { type: boolean, description: Etkin filo sözleşmesi olan şirkette Filom bağlantısı ve ekranları görünür. }
@@ -5478,6 +5478,7 @@ components:
                 count: { type: integer, minimum: 0, description: Ödenmemiş faturalar (gecikenler dahil). }
                 total: { type: integer, minimum: 0, description: Bunların toplamı, TRY kuruş. }
             overdue: { type: integer, minimum: 0, description: Vadesi geçmiş, ödenmemiş faturalar. }
+        hasVipContract: { type: boolean, description: Etkin bir VIP Mobilite sözleşmesi var; yalnızca bu şirketler transfer talebi açabilir (V2-42). }
         requests:
           type: object
           required: [open]
@@ -5811,6 +5812,23 @@ components:
         valet: { type: boolean, description: Vale ile alınsın mı. }
         address: { type: string, nullable: true, maxLength: 200, description: Vale gelecekse zorunlu. }
 
+    TransferDetails:
+      type: object
+      required: [passengerName, passengers, meeting, meetingAt, destination]
+      properties:
+        passengerName: { type: string, maxLength: 100 }
+        passengers: { type: integer, minimum: 1, maximum: 7 }
+        flightNumber: { type: string, nullable: true, example: TK1234, description: "İsteğe bağlı; havayolunun iki karakteri (en az biri harf) ve bir ile dört rakam. Boşluksuz ve büyük harfle saklanır. Gerçek bir uçuş servisine bağlanmaz; operasyon masası izler." }
+        meeting:
+          type: object
+          description: Karşılama yeri; havalimanı (liste) **ya da** adres, ikisinden tam biri.
+          properties:
+            airport: { type: string, nullable: true, enum: [IST, SAW, ESB, ADB, AYT, BJV, DLM, ADA, GZT, ASR, TZX, SZF] }
+            address: { type: string, nullable: true, maxLength: 200 }
+        meetingAt: { type: string, format: date-time, description: Karşılama anı; şu andan en az 2 saat sonra, en çok bir yıl. }
+        destination: { type: string, maxLength: 200, description: Varış adresi. }
+        note: { type: string, nullable: true, maxLength: 500 }
+
     ServiceRequest:
       type: object
       required: [id, number, company, type, status, open, vehicle, details, assignee, createdAt, updatedAt]
@@ -5840,6 +5858,7 @@ components:
             - { $ref: "#/components/schemas/RoadsideDetails" }
             - { $ref: "#/components/schemas/ReplacementVehicleDetails" }
             - { $ref: "#/components/schemas/MaintenanceDetails" }
+            - { $ref: "#/components/schemas/TransferDetails" }
         assignee: { type: string, nullable: true, maxLength: 200, description: Novera'nın yazdığı çekici, servis ya da şoför bilgisi. }
         createdAt: { type: string, format: date-time }
         updatedAt: { type: string, format: date-time }
@@ -5874,15 +5893,16 @@ components:
 
     ServiceRequestCreate:
       type: object
-      required: [type, fleetVehicleId, details]
+      required: [type, details]
       properties:
         type: { $ref: "#/components/schemas/ServiceRequestType" }
-        fleetVehicleId: { type: string, format: uuid }
+        fleetVehicleId: { type: string, format: uuid, description: "`TRANSFER` dışındaki her türde zorunlu; transferde gönderilemez." }
         details:
           oneOf:
             - { $ref: "#/components/schemas/RoadsideDetails" }
             - { $ref: "#/components/schemas/ReplacementVehicleDetails" }
             - { $ref: "#/components/schemas/MaintenanceDetails" }
+            - { $ref: "#/components/schemas/TransferDetails" }
 
     ServiceRequestCreated:
       allOf:

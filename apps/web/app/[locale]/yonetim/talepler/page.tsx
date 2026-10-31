@@ -48,7 +48,7 @@ export default async function AdminRequestsPage({ searchParams }: PageProps<"/[l
     <>
       <PageHeader title={t("title")} description={t("intro")} />
       <div className="flex flex-col gap-3">
-        <FilterChips label={t("typeFilterLabel")} current={params.filters.tur ?? ""} options={[typeChip("", t("filterAll")), ...REQUEST_TYPES.filter((type) => type !== "TRANSFER").map((type) => typeChip(type, t(`type.${type}`)))]} />
+        <FilterChips label={t("typeFilterLabel")} current={params.filters.tur ?? ""} options={[typeChip("", t("filterAll")), ...REQUEST_TYPES.map((type) => typeChip(type, t(`type.${type}`)))]} />
         <SelectFilter
           pathname="/yonetim/talepler"
           query={hrefQuery(params, {}, REQUEST_LIST)}

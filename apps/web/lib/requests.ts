@@ -16,8 +16,15 @@ export type RequestType = Schemas["ServiceRequestType"];
 export type RequestStatus = Schemas["ServiceRequestStatus"];
 export type RequestEvent = Schemas["ServiceRequestEvent"];
 
-// The kinds a customer can open today; a transfer is V2-42's.
+// The kinds about a car of the fleet, which every company can open; a transfer is for companies with a VIP Mobilite contract only (V2-42).
 export const CUSTOMER_TYPES = ["ROADSIDE", "REPLACEMENT_VEHICLE", "MAINTENANCE"] as const satisfies readonly RequestType[];
+export const FORM_TYPES = [...CUSTOMER_TYPES, "TRANSFER"] as const satisfies readonly RequestType[];
+export const AIRPORTS = ["IST", "SAW", "ESB", "ADB", "AYT", "BJV", "DLM", "ADA", "GZT", "ASR", "TZX", "SZF"] as const;
+export const MAX_PASSENGERS = 7;
+// A transfer is asked for at least this long ahead (docs/FLEET.md §3.1).
+export const MIN_LEAD_MS = 2 * 60 * 60 * 1000;
+// Two characters (at least one a letter) and one to four digits.
+export const FLIGHT_NUMBER = /^(?=[A-Z0-9]*[A-Z])[A-Z0-9]{2}\d{1,4}$/;
 export const REQUEST_TYPES = ["ROADSIDE", "REPLACEMENT_VEHICLE", "MAINTENANCE", "TRANSFER"] as const satisfies readonly RequestType[];
 export const REQUEST_STATUSES = ["RECEIVED", "DISPATCHED", "EN_ROUTE", "APPROVED", "DELIVERED", "RETURNED", "SCHEDULED", "IN_SERVICE", "DRIVER_ASSIGNED", "MET", "COMPLETED", "CANCELLED"] as const satisfies readonly RequestStatus[];
 
@@ -27,6 +34,9 @@ export const REQUEST_FLOWS: Record<RequestType, readonly RequestStatus[]> = {
   MAINTENANCE: ["RECEIVED", "SCHEDULED", "IN_SERVICE", "COMPLETED"],
   TRANSFER: ["RECEIVED", "DRIVER_ASSIGNED", "MET", "COMPLETED"],
 };
+
+// The steps of a transfer that need the driver written down (V2-42): assigning him, meeting the passenger, finishing.
+export const DRIVER_STEPS: readonly RequestStatus[] = ["DRIVER_ASSIGNED", "MET", "COMPLETED"];
 
 export function isFinished(type: RequestType, status: RequestStatus): boolean {
   const flow = REQUEST_FLOWS[type];
@@ -85,6 +95,15 @@ export type RequestFormValues = {
   service: string;
   preferredDate: string;
   valet: boolean;
+  // Transfer (V2-42): `address` is the meeting address when `meetingKind` is "address"; `meetingAt` is the date-time field's text, Istanbul time.
+  passengerName: string;
+  passengers: string;
+  flightNumber: string;
+  meetingKind: string;
+  airport: string;
+  meetingAt: string;
+  destination: string;
+  note: string;
 };
 export const EMPTY_REQUEST_FORM: RequestFormValues = {
   type: "",
@@ -99,14 +118,25 @@ export const EMPTY_REQUEST_FORM: RequestFormValues = {
   service: "",
   preferredDate: "",
   valet: false,
+  passengerName: "",
+  passengers: "",
+  flightNumber: "",
+  meetingKind: "airport",
+  airport: "",
+  meetingAt: "",
+  destination: "",
+  note: "",
 };
 
-export type RequestFormMessages = Record<"type" | "fleetVehicleId" | "incident" | "location" | "address" | "description" | "date" | "durationDays" | "service" | "preferredDate", string>;
+export type RequestFormMessages = Record<"type" | "fleetVehicleId" | "incident" | "location" | "address" | "description" | "date" | "durationDays" | "service" | "preferredDate" | "passengerName" | "passengers" | "flightNumber" | "meeting" | "meetingAt" | "destination" | "note", string>;
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const MAX_ADDRESS = 200;
 const MAX_DESCRIPTION = 500;
 const MAX_RENTAL_DAYS = 90;
+
+// A date-time as the browser's field writes it ("2026-11-03T09:30"), a real one.
+export const isMomentText = (value: string): boolean => /^\d{4}-\d{2}-\d{2}T([01]\d|2[0-3]):[0-5]\d$/.test(value.trim()) && isDay(value.trim().slice(0, 10));
 
 // A day from today to a year ahead, as the date field writes it. `today` is the Istanbul day, given by the caller (it has the clock).
 export function isDayInRange(value: string, today: string): boolean {
@@ -118,10 +148,11 @@ export function isDayInRange(value: string, today: string): boolean {
 
 // The same rules the API applies (apps/api/src/fleet/requests/request-details.ts), checked here for comfort and again by the server action
 // and the API (ADR-26). Only the fields of the chosen kind are looked at.
-export function requestFormErrors(values: RequestFormValues, today: string): Partial<Record<keyof RequestFormValues | "location", true>> {
-  const bad: Partial<Record<keyof RequestFormValues | "location", true>> = {};
-  if (!(CUSTOMER_TYPES as readonly string[]).includes(values.type)) bad.type = true;
-  if (!uuid.test(values.fleetVehicleId)) bad.fleetVehicleId = true;
+export function requestFormErrors(values: RequestFormValues, today: string, now: number = Date.now()): Partial<Record<keyof RequestFormValues | "location" | "meeting", true>> {
+  const bad: Partial<Record<keyof RequestFormValues | "location" | "meeting", true>> = {};
+  if (!(FORM_TYPES as readonly string[]).includes(values.type)) bad.type = true;
+  // A transfer is not about a car; every other kind is.
+  if (values.type !== "TRANSFER" && !uuid.test(values.fleetVehicleId)) bad.fleetVehicleId = true;
   const address = values.address.trim();
   if (address.length > MAX_ADDRESS) bad.address = true;
   if (values.type === "ROADSIDE") {
@@ -139,6 +170,23 @@ export function requestFormErrors(values: RequestFormValues, today: string): Par
     const days = Number(values.durationDays);
     if (values.durationDays.trim() === "" || !Number.isInteger(days) || days < 1 || days > MAX_RENTAL_DAYS) bad.durationDays = true;
   }
+  if (values.type === "TRANSFER") {
+    const name = values.passengerName.trim();
+    if (name === "" || name.length > 100) bad.passengerName = true;
+    const count = Number(values.passengers);
+    if (values.passengers.trim() === "" || !Number.isInteger(count) || count < 1 || count > MAX_PASSENGERS) bad.passengers = true;
+    const flight = values.flightNumber.replace(/\s+/g, "").toUpperCase();
+    if (flight !== "" && !FLIGHT_NUMBER.test(flight)) bad.flightNumber = true;
+    // The place is an airport of the list, or an address: whichever was chosen has to be filled in.
+    if (values.meetingKind === "airport" ? !(AIRPORTS as readonly string[]).includes(values.airport) : address === "") bad.meeting = true;
+    if (!isMomentText(values.meetingAt)) bad.meetingAt = true;
+    else {
+      const at = Date.parse(`${values.meetingAt.trim()}:00+03:00`);
+      if (at < now + MIN_LEAD_MS || at > now + 366 * 86_400_000) bad.meetingAt = true;
+    }
+    if (values.destination.trim() === "" || values.destination.trim().length > MAX_ADDRESS) bad.destination = true;
+    if (values.note.trim().length > MAX_DESCRIPTION) bad.note = true;
+  }
   if (values.type === "MAINTENANCE") {
     if (!(MAINTENANCE_SERVICES as readonly string[]).includes(values.service)) bad.service = true;
     if (!isDayInRange(values.preferredDate, today)) bad.preferredDate = true;
@@ -151,10 +199,10 @@ export function requestFormErrors(values: RequestFormValues, today: string): Par
 export const requestFormSchema = (m: RequestFormMessages, today: string) =>
   z.custom<RequestFormValues>().superRefine((values, context) => {
     const bad = requestFormErrors(values, today);
-    for (const key of Object.keys(bad) as Array<keyof typeof bad>) {
+      for (const key of Object.keys(bad) as Array<keyof typeof bad>) {
       const message = m[key as keyof RequestFormMessages] ?? key;
-      // The position problem belongs to the address field on screen.
-      context.addIssue({ code: "custom", message, path: [key === "location" ? "address" : key] });
+      // The position problem belongs to the address field on screen; the meeting place to the airport or the address, whichever was chosen.
+      context.addIssue({ code: "custom", message, path: [key === "location" ? "address" : key === "meeting" ? (values.meetingKind === "airport" ? "airport" : "address") : key] });
     }
   });
 
@@ -162,6 +210,21 @@ type CreateBody = Schemas["ServiceRequestCreate"];
 const text = (value: string): string | null => value.trim() || null;
 
 export function toRequestBody(values: RequestFormValues): CreateBody {
+  if (values.type === "TRANSFER") {
+    const flight = values.flightNumber.replace(/\s+/g, "").toUpperCase();
+    return {
+      type: "TRANSFER",
+      details: {
+        passengerName: values.passengerName.trim(),
+        passengers: Number(values.passengers),
+        ...(flight ? { flightNumber: flight } : {}),
+        meeting: values.meetingKind === "airport" ? { airport: values.airport as (typeof AIRPORTS)[number] } : { address: values.address.trim() },
+        meetingAt: new Date(`${values.meetingAt.trim()}:00+03:00`).toISOString(),
+        destination: values.destination.trim(),
+        ...(text(values.note) ? { note: values.note.trim() } : {}),
+      },
+    };
+  }
   const base = { type: values.type as RequestType, fleetVehicleId: values.fleetVehicleId };
   if (values.type === "ROADSIDE") {
     const location: { address?: string; latitude?: number; longitude?: number } = {};
@@ -180,6 +243,8 @@ export function toRequestBody(values: RequestFormValues): CreateBody {
 export type RequestCreateResult =
   | { status: "ok"; number: string; similarOpen: string[] }
   | { status: "invalid"; fields: Record<string, string> }
+  // A transfer from a company with no VIP Mobilite contract (403).
+  | { status: "forbidden" }
   | { status: "rate_limited"; retryAfter: number | null }
   | { status: "unavailable" };
 

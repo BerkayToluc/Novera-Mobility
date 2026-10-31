@@ -79,7 +79,7 @@ export default async function AdminRequestPage({ params }: PageProps<"/[locale]/
         <RequestTimeline type={request.type} events={request.events} />
       </section>
 
-      <RequestStatusForm number={request.number} next={request.nextStatuses} assignee={request.assignee} />
+      <RequestStatusForm number={request.number} type={request.type} next={request.nextStatuses} assignee={request.assignee} />
     </>
   );
 }

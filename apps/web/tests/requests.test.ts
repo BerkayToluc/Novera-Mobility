@@ -1,9 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { parseAdminListParams } from "@/lib/admin-query";
-import { canCustomerCancel, CUSTOMER_TYPES, EMPTY_REQUEST_FORM, isDayInRange, isOpen, nextStatuses, OPEN_FILTER, REQUEST_FLOWS, REQUEST_LIST, REQUEST_STATUSES, REQUEST_TYPES, requestApiFilters, requestFormErrors, requestTone, toRequestBody, type RequestFormValues } from "@/lib/requests";
+import { AIRPORTS, canCustomerCancel, CUSTOMER_TYPES, DRIVER_STEPS, EMPTY_REQUEST_FORM, FORM_TYPES, isDayInRange, isOpen, nextStatuses, OPEN_FILTER, REQUEST_FLOWS, REQUEST_LIST, REQUEST_STATUSES, REQUEST_TYPES, requestApiFilters, requestFormErrors, requestTone, toRequestBody, type RequestFormValues } from "@/lib/requests";
 import { MOCK_ADMIN_SUMMARY } from "@/mocks/admin";
 import { fleetSummary } from "@/mocks/fleet-panel";
-import { cancelMockRequest, createMockRequest, getMockRequest, listMockRequests, moveMockRequest, openRequestCount } from "@/mocks/requests";
+import { createMockContract } from "@/mocks/admin-contracts";
+import { cancelMockRequest, createMockRequest, getMockRequest, hasMockVipContract, listMockRequests, moveMockRequest, openRequestCount } from "@/mocks/requests";
 import { en, tr } from "../i18n/messages";
 import { routing } from "../i18n/routing";
 import { FLEET_SCREENS } from "../lib/fleet-screens";
@@ -24,6 +25,21 @@ const nextDay = (days: number) => new Date(Date.now() + days * 86_400_000).toISO
 const roadside = (extra: Partial<RequestFormValues> = {}): RequestFormValues => ({ ...EMPTY_REQUEST_FORM, type: "ROADSIDE", fleetVehicleId: CAR_101, incident: "TIRE", address: "Çiğli, İzmir", ...extra });
 const replacement = (extra: Partial<RequestFormValues> = {}): RequestFormValues => ({ ...EMPTY_REQUEST_FORM, type: "REPLACEMENT_VEHICLE", fleetVehicleId: CAR_101, address: "Alsancak, İzmir", date: nextDay(2), durationDays: "5", ...extra });
 const maintenance = (extra: Partial<RequestFormValues> = {}): RequestFormValues => ({ ...EMPTY_REQUEST_FORM, type: "MAINTENANCE", fleetVehicleId: CAR_102, service: "WINTER_TIRES", preferredDate: nextDay(7), valet: false, ...extra });
+
+const NOW = Date.parse("2026-10-31T10:00:00.000Z");
+const transfer = (extra: Partial<RequestFormValues> = {}): RequestFormValues => ({
+  ...EMPTY_REQUEST_FORM,
+  type: "TRANSFER",
+  passengerName: "Ada Kaya",
+  passengers: "3",
+  flightNumber: "tk 1234",
+  meetingKind: "airport",
+  airport: "ADB",
+  meetingAt: new Date(Date.now() + 3 * 86_400_000).toISOString().slice(0, 16),
+  destination: "Alsancak, İzmir",
+  ...extra,
+});
+const vipContract = { productSlug: "vip-mobilite", startAt: nextDay(-1), endAt: nextDay(300), monthlyFee: "75000", deliveryCity: "İzmir" };
 
 describe("the steps of each kind are the API's", () => {
   it("the table of the spec, in order", () => {
@@ -53,10 +69,10 @@ describe("the steps of each kind are the API's", () => {
 });
 
 describe("the customer's form", () => {
-  it("takes a good request of each of the three kinds, and a transfer is not among them yet", () => {
+  it("takes a good request of each of the three kinds about a car, and a kind that does not exist is refused", () => {
     for (const values of [roadside(), replacement(), maintenance()]) expect(requestFormErrors(values, TODAY)).toEqual({});
     expect(CUSTOMER_TYPES).toEqual(["ROADSIDE", "REPLACEMENT_VEHICLE", "MAINTENANCE"]);
-    expect(requestFormErrors({ ...roadside(), type: "TRANSFER" }, TODAY)).toEqual({ type: true });
+    expect(requestFormErrors({ ...roadside(), type: "WASH" }, TODAY)).toEqual({ type: true });
   });
 
   it("a roadside request needs the incident and where the car is: an address, or a position, or both", () => {
@@ -101,6 +117,79 @@ describe("the customer's form", () => {
     });
     expect(toRequestBody(replacement())).toEqual({ type: "REPLACEMENT_VEHICLE", fleetVehicleId: CAR_101, details: { address: "Alsancak, İzmir", date: nextDay(2), durationDays: 5 } });
     expect(toRequestBody(maintenance({ valet: true, address: "Bornova" })).details).toEqual({ service: "WINTER_TIRES", preferredDate: nextDay(7), valet: true, address: "Bornova" });
+  });
+});
+
+describe("a VIP transfer (V2-42)", () => {
+  it("is a fourth kind of the form, and the others are still the three about a car", () => {
+    expect(FORM_TYPES).toEqual(["ROADSIDE", "REPLACEMENT_VEHICLE", "MAINTENANCE", "TRANSFER"]);
+    expect(CUSTOMER_TYPES).not.toContain("TRANSFER");
+    expect(DRIVER_STEPS).toEqual(["DRIVER_ASSIGNED", "MET", "COMPLETED"]);
+    expect(AIRPORTS).toHaveLength(12);
+  });
+
+  it("takes a good transfer without a car, and names what is wrong", () => {
+    expect(requestFormErrors(transfer(), TODAY)).toEqual({});
+    expect(requestFormErrors(transfer({ meetingKind: "address", airport: "", address: "Otel Lobisi" }), TODAY)).toEqual({});
+    expect(requestFormErrors(transfer({ passengerName: " " }), TODAY)).toEqual({ passengerName: true });
+    for (const passengers of ["", "0", "8", "2.5"]) expect(requestFormErrors(transfer({ passengers }), TODAY)).toEqual({ passengers: true });
+    for (const flightNumber of ["TURKISH1", "1234", "TK12345", "T"]) expect(requestFormErrors(transfer({ flightNumber }), TODAY)).toEqual({ flightNumber: true });
+    expect(requestFormErrors(transfer({ flightNumber: "" }), TODAY)).toEqual({});
+    expect(requestFormErrors(transfer({ airport: "" }), TODAY)).toEqual({ meeting: true });
+    expect(requestFormErrors(transfer({ airport: "XXX" }), TODAY)).toEqual({ meeting: true });
+    expect(requestFormErrors(transfer({ meetingKind: "address", airport: "", address: " " }), TODAY)).toEqual({ meeting: true });
+    expect(requestFormErrors(transfer({ destination: "" }), TODAY)).toEqual({ destination: true });
+    expect(requestFormErrors(transfer({ note: "n".repeat(501) }), TODAY)).toEqual({ note: true });
+  });
+
+  it("the moment is at least two hours from now, at most a year, and the edge itself is allowed", () => {
+    const at = (offsetMs: number) => new Date(NOW + offsetMs + 3 * 3_600_000).toISOString().slice(0, 16);
+    // The field writes Istanbul time (+03:00), so the text above is shifted by the three hours back to the instant.
+    expect(requestFormErrors(transfer({ meetingAt: at(2 * 3_600_000) }), TODAY, NOW)).toEqual({});
+    expect(requestFormErrors(transfer({ meetingAt: at(2 * 3_600_000 - 60_000) }), TODAY, NOW)).toEqual({ meetingAt: true });
+    expect(requestFormErrors(transfer({ meetingAt: at(-3_600_000) }), TODAY, NOW)).toEqual({ meetingAt: true });
+    expect(requestFormErrors(transfer({ meetingAt: at(400 * 86_400_000) }), TODAY, NOW)).toEqual({ meetingAt: true });
+    for (const meetingAt of ["", "yarın", "2026-11-03", "2026-02-30T10:00", "2026-11-03T25:00"]) expect(requestFormErrors(transfer({ meetingAt }), TODAY, NOW)).toEqual({ meetingAt: true });
+  });
+
+  it("is sent to the API without a car, with the flight in capitals and the moment as an instant", () => {
+    const body = toRequestBody(transfer({ meetingAt: "2026-11-03T09:30", note: " Tabela " }));
+    expect(body).toEqual({
+      type: "TRANSFER",
+      details: { passengerName: "Ada Kaya", passengers: 3, flightNumber: "TK1234", meeting: { airport: "ADB" }, meetingAt: "2026-11-03T06:30:00.000Z", destination: "Alsancak, İzmir", note: "Tabela" },
+    });
+    expect("fleetVehicleId" in body).toBe(false);
+    expect(toRequestBody(transfer({ meetingKind: "address", address: " Otel ", flightNumber: "" })).details).toMatchObject({ meeting: { address: "Otel" } });
+  });
+
+  it("is forbidden for a company with no VIP Mobilite contract, and opens once the administrator has made one", () => {
+    const name = world();
+    expect(hasMockVipContract(name, EGE)).toBe(false);
+    expect(createMockRequest(name, EGE, transfer())).toEqual({ status: "forbidden" });
+    expect(listMockRequests(name, page, EGE).total).toBe(4);
+    expect(fleetSummary(name, EGE).hasVipContract).toBe(false);
+
+    expect(createMockContract(name, EGE, { ...vipContract, status: "ACTIVE" }).status).toBe("ok");
+    expect(hasMockVipContract(name, EGE)).toBe(true);
+    expect(fleetSummary(name, EGE).hasVipContract).toBe(true);
+    const made = createMockRequest(name, EGE, transfer());
+    expect(made).toMatchObject({ status: "ok", value: { type: "TRANSFER", status: "RECEIVED", vehicle: null, similarOpen: [], details: { flightNumber: "TK1234", meeting: { airport: "ADB", address: null } } } });
+  });
+
+  it("needs the driver written down to be assigned, met and finished; cancelling needs none", () => {
+    const name = world();
+    createMockContract(name, EGE, { ...vipContract, status: "ACTIVE" });
+    const made = createMockRequest(name, EGE, transfer());
+    if (made.status !== "ok") throw new Error("not made");
+    const { number } = made.value;
+    for (const status of DRIVER_STEPS) expect(moveMockRequest(name, number, status, null, undefined)).toEqual({ status: "invalid", fields: { assignee: "REQUIRED" } });
+    expect(moveMockRequest(name, number, "DRIVER_ASSIGNED", null, "")).toEqual({ status: "invalid", fields: { assignee: "REQUIRED" } });
+    expect(moveMockRequest(name, number, "DRIVER_ASSIGNED", null, "Mehmet Usta, 0532 000 00 02")).toEqual({ status: "ok" });
+    expect(moveMockRequest(name, number, "MET", null, undefined)).toEqual({ status: "ok" });
+    expect(moveMockRequest(name, number, "COMPLETED", null, undefined)).toEqual({ status: "ok" });
+    const other = createMockRequest(name, EGE, transfer());
+    if (other.status !== "ok") throw new Error("not made");
+    expect(moveMockRequest(name, other.value.number, "CANCELLED", "Uçuş iptal", undefined)).toEqual({ status: "ok" });
   });
 });
 

@@ -678,7 +678,15 @@
         "valetNo": "Hayır, araç servise getirilecek",
         "pickupAddress": "Alınacak adres",
         "position": "Konum: {latitude}, {longitude}",
-        "none": "—"
+        "none": "—",
+        "passenger": "Yolcu",
+        "passengerCount": "{count} yolcu",
+        "flight": "Uçuş",
+        "flightNote": "Uçuş durumu operasyon masası tarafından izlenir.",
+        "meetingPlace": "Karşılama yeri",
+        "meetingAt": "Karşılama zamanı",
+        "destination": "Varış adresi",
+        "note": "Not"
       },
       "incidents": {
         "BREAKDOWN": "Arıza",
@@ -719,6 +727,20 @@
         "empty": "Bu araç için henüz talep yok.",
         "new": "Bu araç için talep aç",
         "all": "Tüm talepler"
+      },
+      "airports": {
+        "IST": "İstanbul Havalimanı (IST)",
+        "SAW": "Sabiha Gökçen (SAW)",
+        "ESB": "Ankara Esenboğa (ESB)",
+        "ADB": "İzmir Adnan Menderes (ADB)",
+        "AYT": "Antalya (AYT)",
+        "BJV": "Milas-Bodrum (BJV)",
+        "DLM": "Dalaman (DLM)",
+        "ADA": "Adana Şakirpaşa (ADA)",
+        "GZT": "Gaziantep (GZT)",
+        "ASR": "Kayseri Erkilet (ASR)",
+        "TZX": "Trabzon (TZX)",
+        "SZF": "Samsun Çarşamba (SZF)"
       }
     },
     "requestForm": {
@@ -736,6 +758,10 @@
         "MAINTENANCE": {
           "title": "Bakım ve lastik",
           "text": "Periyodik bakım, yaz/kış lastiği ya da muayene randevusu."
+        },
+        "TRANSFER": {
+          "title": "VIP transfer",
+          "text": "Şoförlü transfer: havalimanında karşılama, uçuş takibi ve şoför koordinasyonu."
         }
       },
       "fields": {
@@ -757,7 +783,25 @@
         "valet": "Aracım vale ile alınsın",
         "pickupAddress": "Alınacak adres",
         "pickupAddressOptional": "Adres (isteğe bağlı)",
-        "pickupHint": "Vale istemiyorsanız boş bırakabilirsiniz."
+        "pickupHint": "Vale istemiyorsanız boş bırakabilirsiniz.",
+        "passengerName": "Yolcu adı",
+        "passengers": "Yolcu sayısı",
+        "passengersHint": "1 ile 7 arasında.",
+        "flightNumber": "Uçuş numarası (isteğe bağlı)",
+        "flightNumberHint": "Örneğin TK1234. Uçuşu operasyon masası izler; gerçek bir uçuş servisine bağlanmaz.",
+        "meetingPlace": "Karşılama yeri",
+        "meetingKind": {
+          "airport": "Havalimanı",
+          "address": "Adres"
+        },
+        "airport": "Havalimanı",
+        "airportChoose": "Havalimanı seçin",
+        "meetingAddress": "Karşılama adresi",
+        "meetingAt": "Karşılama tarihi ve saati",
+        "meetingAtHint": "İstanbul saatiyle; en az 2 saat sonrası.",
+        "destination": "Varış adresi",
+        "note": "Not (isteğe bağlı)",
+        "noteHint": "Örneğin tabela ile karşılama. En çok 500 karakter."
       },
       "incidents": {
         "BREAKDOWN": "Arıza",
@@ -790,7 +834,15 @@
         "service": "Bir işlem seçin.",
         "preferredDate": "Bugünden bir yıl sonrasına kadar geçerli bir gün seçin.",
         "generic": "Talep gönderilemedi. Alanları denetleyip yeniden deneyin.",
-        "unavailable": "İşlem yapılamadı. Birkaç saniye sonra yeniden deneyin."
+        "unavailable": "İşlem yapılamadı. Birkaç saniye sonra yeniden deneyin.",
+        "passengerName": "Yolcunun adını yazın (en çok 100 karakter).",
+        "passengers": "Yolcu sayısını 1 ile 7 arasında yazın.",
+        "flightNumber": "Uçuş numarası TK1234 gibi olmalı (iki karakter, bir ile dört rakam).",
+        "meeting": "Karşılama yerini seçin ya da yazın.",
+        "meetingAt": "Şu andan en az 2 saat sonrası, en çok bir yıl içinde geçerli bir zaman girin.",
+        "destination": "Varış adresini yazın (en çok 200 karakter).",
+        "note": "Not en çok 500 karakter olabilir.",
+        "forbidden": "VIP transfer yalnızca VIP Mobilite sözleşmesi olan şirketlerde açılabilir."
       },
       "toast": {
         "created": "Talebiniz alındı: {number}.",
@@ -802,6 +854,20 @@
       "noVehicles": {
         "title": "Aracınız yok",
         "text": "Talep açabilmek için kullanımda bir filo aracınız olmalı."
+      },
+      "airports": {
+        "IST": "İstanbul Havalimanı (IST)",
+        "SAW": "Sabiha Gökçen (SAW)",
+        "ESB": "Ankara Esenboğa (ESB)",
+        "ADB": "İzmir Adnan Menderes (ADB)",
+        "AYT": "Antalya (AYT)",
+        "BJV": "Milas-Bodrum (BJV)",
+        "DLM": "Dalaman (DLM)",
+        "ADA": "Adana Şakirpaşa (ADA)",
+        "GZT": "Gaziantep (GZT)",
+        "ASR": "Kayseri Erkilet (ASR)",
+        "TZX": "Trabzon (TZX)",
+        "SZF": "Samsun Çarşamba (SZF)"
       }
     }
   }

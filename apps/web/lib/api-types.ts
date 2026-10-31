@@ -7488,7 +7488,7 @@ export interface paths {
         put?: never;
         /**
          * Servis talebi aç
-         * @description Yol yardım (`ROADSIDE`), ikame araç (`REPLACEMENT_VEHICLE`) ya da bakım ve lastik (`MAINTENANCE`) talebi açar; talep `RECEIVED` olarak başlar ve zaman çizelgesinin ilk satırı yazılır. `details` türe göre doğrulanır ve hatalı alan **noktalı adla** söylenir (`422`, `fieldErrors: { "details.location": "REQUIRED" }`). `fleetVehicleId` şirketin kullanımdaki bir aracı olmalıdır; başka şirketin aracı, iade edilmiş araç ve olmayan araç aynı cevabı verir (`fleetVehicleId: UNKNOWN_REFERENCE`). `TRANSFER` türü bu sürümde açılamaz (`type: NOT_ALLOWED`; V2-42).
+         * @description Yol yardım (`ROADSIDE`), ikame araç (`REPLACEMENT_VEHICLE`) ya da bakım ve lastik (`MAINTENANCE`) talebi açar; talep `RECEIVED` olarak başlar ve zaman çizelgesinin ilk satırı yazılır. `details` türe göre doğrulanır ve hatalı alan **noktalı adla** söylenir (`422`, `fieldErrors: { "details.location": "REQUIRED" }`). `fleetVehicleId` şirketin kullanımdaki bir aracı olmalıdır; başka şirketin aracı, iade edilmiş araç ve olmayan araç aynı cevabı verir (`fleetVehicleId: UNKNOWN_REFERENCE`). `TRANSFER` (VIP transfer) araçla ilgili değildir (`fleetVehicleId` gönderilirse `422 NOT_ALLOWED`) ve **yalnızca etkin `vip-mobilite` sözleşmesi olan şirkette** açılır; başka şirkette **`403 FORBIDDEN`** döner (gövdeye bakılmadan). Karşılama anı en az 2 saat sonrası, en çok bir yıl sonrasıdır.
          *     Aynı araçta aynı türde açık başka talep varsa **engel değildir**: cevaptaki `similarOpen` numaralarını söyler. **Şirket başına saatte en çok 20 talep** (`429`, şirketin hesapları tek sayacı paylaşır), üstüne hesap başına dakikada 120. İşlem kaydı: `fleet-request.create` (kayıt kimliği talep numarası, yalnız alan adları).
          */
         post: {
@@ -7856,7 +7856,7 @@ export interface paths {
         put?: never;
         /**
          * Talebi bir sonraki adıma taşı
-         * @description Talebi **türünün daha sonraki bir adımına** ya da `CANCELLED`'a taşır (bir adım atlanabilir); geri, aynı adıma, başka türün adımına ve bitmiş talepten çıkış `409 INVALID_TRANSITION`. Adımlar: yol yardım `RECEIVED → DISPATCHED → EN_ROUTE → COMPLETED`; ikame araç `RECEIVED → APPROVED → DELIVERED → RETURNED`; bakım `RECEIVED → SCHEDULED → IN_SERVICE → COMPLETED`. Satır kilitlenir; aynı anda gelen iki hamleden ikincisi birincinin bıraktığı duruma göre değerlendirilir. `note` zaman çizelgesine yazılır (müşteri görür); `assignee` serbest metindir (çekici, servis, şoför): gönderilmezse korunur, boş gönderilirse silinir. İşlem kaydı: `request.status` (şirket satırda, yalnız alan adları).
+         * @description Talebi **türünün daha sonraki bir adımına** ya da `CANCELLED`'a taşır (bir adım atlanabilir); geri, aynı adıma, başka türün adımına ve bitmiş talepten çıkış `409 INVALID_TRANSITION`. Adımlar: yol yardım `RECEIVED → DISPATCHED → EN_ROUTE → COMPLETED`; ikame araç `RECEIVED → APPROVED → DELIVERED → RETURNED`; bakım `RECEIVED → SCHEDULED → IN_SERVICE → COMPLETED`. Satır kilitlenir; aynı anda gelen iki hamleden ikincisi birincinin bıraktığı duruma göre değerlendirilir. `note` zaman çizelgesine yazılır (müşteri görür); `assignee` serbest metindir (çekici, servis, şoför): gönderilmezse korunur, boş gönderilirse silinir. **Transferde** `DRIVER_ASSIGNED`, `MET` ve `COMPLETED` adımlarına geçmek için şoförün (ad, telefon, araç) yazılı olması gerekir: yoksa `422` `assignee: REQUIRED`; iptal için gerekmez. İşlem kaydı: `request.status` (şirket satırda, yalnız alan adları).
          */
         post: {
             parameters: {
@@ -9330,6 +9330,8 @@ export interface components {
                 /** @description Vadesi geçmiş */
                 overdue: number;
             };
+            /** @description Etkin bir VIP Mobilite sözleşmesi var; yalnızca bu şirketler transfer talebi açabilir (V2-42). */
+            hasVipContract: boolean;
             requests: {
                 /** @description Henüz bitmemiş servis talepleri. */
                 open: number;
@@ -9647,6 +9649,29 @@ export interface components {
             /** @description Vale gelecekse zorunlu. */
             address?: string | null;
         };
+        TransferDetails: {
+            passengerName: string;
+            passengers: number;
+            /**
+             * @description İsteğe bağlı; havayolunun iki karakteri (en az biri harf) ve bir ile dört rakam. Boşluksuz ve büyük harfle saklanır. Gerçek bir uçuş servisine bağlanmaz; operasyon masası izler.
+             * @example TK1234
+             */
+            flightNumber?: string | null;
+            /** @description Karşılama yeri; havalimanı (liste) **ya da** adres, ikisinden tam biri. */
+            meeting: {
+                /** @enum {string|null} */
+                airport?: "IST" | "SAW" | "ESB" | "ADB" | "AYT" | "BJV" | "DLM" | "ADA" | "GZT" | "ASR" | "TZX" | "SZF" | null;
+                address?: string | null;
+            };
+            /**
+             * Format: date-time
+             * @description Karşılama anı; şu andan en az 2 saat sonra
+             */
+            meetingAt: string;
+            /** @description Varış adresi. */
+            destination: string;
+            note?: string | null;
+        };
         ServiceRequest: {
             /** Format: uuid */
             id: string;
@@ -9668,7 +9693,7 @@ export interface components {
                 model: string;
             } | null;
             /** @description Türe göre ayrıntılar. */
-            details: components["schemas"]["RoadsideDetails"] | components["schemas"]["ReplacementVehicleDetails"] | components["schemas"]["MaintenanceDetails"];
+            details: components["schemas"]["RoadsideDetails"] | components["schemas"]["ReplacementVehicleDetails"] | components["schemas"]["MaintenanceDetails"] | components["schemas"]["TransferDetails"];
             /** @description Novera'nın yazdığı çekici */
             assignee: string | null;
             /** Format: date-time */
@@ -9703,9 +9728,12 @@ export interface components {
         };
         ServiceRequestCreate: {
             type: components["schemas"]["ServiceRequestType"];
-            /** Format: uuid */
-            fleetVehicleId: string;
-            details: components["schemas"]["RoadsideDetails"] | components["schemas"]["ReplacementVehicleDetails"] | components["schemas"]["MaintenanceDetails"];
+            /**
+             * Format: uuid
+             * @description `TRANSFER` dışındaki her türde zorunlu; transferde gönderilemez.
+             */
+            fleetVehicleId?: string;
+            details: components["schemas"]["RoadsideDetails"] | components["schemas"]["ReplacementVehicleDetails"] | components["schemas"]["MaintenanceDetails"] | components["schemas"]["TransferDetails"];
         };
         ServiceRequestCreated: components["schemas"]["ServiceRequestDetail"] & {
             /** @description Aynı araçta aynı türde */
