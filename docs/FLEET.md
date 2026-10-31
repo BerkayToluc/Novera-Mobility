@@ -64,7 +64,7 @@ Adres TR `/filom/...`, EN `/en/my-fleet/...`. Hepsi `noindex`, giriş gerektirir
   - Türe özel alanlar ve durum akışları SPEC §3.D'dedir.
   - `TRANSFER` türü yalnızca etkin `vip-mobilite` sözleşmesi olan şirkette seçilebilir: başka şirkette seçenek görünmez, API `403` döner. Transferde araç yerine yolcu, uçuş numarası ve karşılama bilgisi girilir.
 - **Canlı takip ve şarj** (ADR-30):
-  - Konumlar seed'deki şehir rotalarından deterministik üretilir. Araç, zimmetliyse personelin, değilse sözleşmenin teslim şehrinde hareket eder; 08:00–19:00 dışında ve hafta sonu kontak kapalıdır.
+  - Konumlar seed'deki şehir rotalarından deterministik üretilir. Araç, sözleşmesinin teslim şehrindeki bir rotada gidip gelir (V2-43'te zimmetli personelin şehri yerine sözleşmenin teslim şehri esas alındı: personelin şehri tutulmuyor); 08:00–19:00 dışında ve hafta sonu kontak kapalıdır. Ayrıntı ADMIN.md §3.20.
   - Şarj istasyonu müsaitliği 5 dakikalık dilimlerle değişir.
   - Cevaplardaki `simulated: true` ekranda rozet olarak görünür. Harita yüklenmezse aynı bilgi listede gösterilir.
 

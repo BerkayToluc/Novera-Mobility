@@ -5,6 +5,7 @@ import { TrackingView } from "@/components/fleet/tracking-view";
 import { Button } from "@/components/ui/button";
 import { StateMessage } from "@/components/ui/state-message";
 import { Link } from "@/i18n/navigation";
+import { currentTime } from "@/lib/clock";
 import { getFleetRoute, getFleetTracking } from "@/lib/fleet-server";
 import { istanbulDate } from "@/lib/simulation";
 import { pickDay, pickTracked, type RouteDay, type TrackingList } from "@/lib/tracking";
@@ -27,7 +28,7 @@ export default async function LiveTrackingPage({ searchParams }: PageProps<"/[lo
     tracking = null;
   }
   // Today is the day the answer is for (the API's own clock; the sample's, in sample mode), so the days offered are the days it will answer.
-  const today = istanbulDate(tracking ? Date.parse(tracking.updatedAt) : Date.now());
+  const today = istanbulDate(tracking ? Date.parse(tracking.updatedAt) : currentTime());
   const day = pickDay(one("gun"), today);
   const chosen = tracking ? pickTracked(tracking.items, one("arac")) : null;
   let route: RouteDay | null = null;
