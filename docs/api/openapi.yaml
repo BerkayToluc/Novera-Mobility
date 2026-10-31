@@ -2242,6 +2242,185 @@ paths:
               schema: { $ref: "#/components/schemas/Error" }
         "429": { $ref: "#/components/responses/TooManyRequests" }
 
+  /admin/users:
+    get:
+      tags: [admin]
+      summary: Hesaplar (yönetim)
+      description: |
+        Sayfalı liste (ADR-24). `q` e-posta adresinde ya da adda aranır; birden çok sözcük yazılırsa her sözcük e-postada ya da
+        adlardan birinde bulunmalıdır (büyük/küçük harf: İngiliz alfabesindeki harfler için). Varsayılan sıra en yeni hesap üstte.
+        `type`: `INDIVIDUAL` bireysel, `CORPORATE` kurumsal, `ADMIN` yönetici (yönetici hesabın türü bireysel olsa da bireysel
+        sayılmaz). `status`: `ACTIVE` ya da `DISABLED` (kapatılmış). Sınır: yönetici başına dakikada 120.
+      security:
+        - cookieAuth: []
+      parameters:
+        - { name: page, in: query, schema: { type: integer, minimum: 1, default: 1 } }
+        - { name: pageSize, in: query, schema: { type: integer, minimum: 1, maximum: 100, default: 20 } }
+        - name: sort
+          in: query
+          description: "`alan` ya da `alan:asc|desc`. Varsayılan `createdAt:desc`."
+          schema: { type: string, enum: [createdAt, email, lastName], example: "createdAt:desc" }
+        - { name: q, in: query, schema: { type: string, maxLength: 100 } }
+        - { name: type, in: query, schema: { $ref: "#/components/schemas/AdminUserType" } }
+        - { name: status, in: query, schema: { $ref: "#/components/schemas/AdminUserStatus" } }
+      responses:
+        "200":
+          description: Bir sayfa hesap
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminUserPage" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Yönetici değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
+  /admin/users/{id}:
+    parameters:
+      - { name: id, in: path, required: true, description: Hesabın kimliği. Kimlik olamayacak bir değer `404` döner., schema: { type: string, format: uuid } }
+    get:
+      tags: [admin]
+      summary: Bir hesap
+      description: Hesabın nasıl giriş yaptığı, şirketi, puanı, rezervasyon sayısı ve bunlardan kaçının henüz başlamadığı (kapatılınca kalan rezervasyonlar).
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Hesap
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminUserDetail" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Yönetici değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: Böyle bir hesap yok (`NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
+  /admin/users/{id}/disable:
+    parameters:
+      - { name: id, in: path, required: true, description: Hesabın kimliği., schema: { type: string, format: uuid } }
+    post:
+      tags: [admin]
+      summary: Hesabı kapat
+      description: |
+        Hesabın **tüm oturumları ve şifre sıfırlama bağlantıları silinir**; parola ve Google ile giriş `401 INVALID_CREDENTIALS` döner
+        (yanlış parolayla aynı cevap, hesabın kapalı olduğu sızmaz) ve hesaba şifre sıfırlama bağlantısı gitmez. Hesap ve rezervasyonları
+        kalır: **gelecek rezervasyonlar iptal edilmez**, sayısı `reservations.upcoming`'dedir. **Yönetici hesabı kapatılamaz**
+        (kendisi de, başka bir yönetici de): `403 FORBIDDEN`; yönetici `pnpm admin:create` ile geri alınır. Zaten kapalı hesabı
+        kapatmak hata değildir ve ilk tarihi korur. Gövde yoktur. İşlem kaydı: `user.disable`.
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Kapatılmış hesap
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminUserDetail" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Yönetici değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: Böyle bir hesap yok (`NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
+  /admin/users/{id}/enable:
+    parameters:
+      - { name: id, in: path, required: true, description: Hesabın kimliği., schema: { type: string, format: uuid } }
+    post:
+      tags: [admin]
+      summary: Hesabı yeniden aç
+      description: Hesap eskisi gibi giriş yapabilir (oturumları kapatılırken silindiği için yeniden giriş yapar). Açık hesabı açmak hata değildir. İşlem kaydı `user.enable`.
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Açılmış hesap
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminUserDetail" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Yönetici değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: Böyle bir hesap yok (`NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
+  /admin/audit-log:
+    get:
+      tags: [admin]
+      summary: İşlem kaydı (yönetim)
+      description: |
+        Panelde yapılan her değişikliğin kaydı. **Salt okunurdur**: değiştirme ya da silme ucu yoktur, veritabanı da güncellemeyi ve
+        silmeyi reddeder. Sayfalı liste (ADR-24), her zaman en yeni üstte. Satırda yalnızca alan **adları** vardır, değerler ve kişisel
+        veri yoktur; kişinin adı ve e-postası okunurken hesaptan alınır. `actor`: bir hesabın kimliği ya da `cli` (komut satırından
+        `pnpm admin:create`). `entity`: kaydın türü (`branch`, `reservation`, `user` ...). `from` ve `to`: günler, ikisi de dahil,
+        İstanbul takvimiyle.
+      security:
+        - cookieAuth: []
+      parameters:
+        - { name: page, in: query, schema: { type: integer, minimum: 1, default: 1 } }
+        - { name: pageSize, in: query, schema: { type: integer, minimum: 1, maximum: 100, default: 20 } }
+        - { name: actor, in: query, description: "Hesap kimliği ya da `cli`.", schema: { type: string } }
+        - { name: entity, in: query, schema: { type: string, maxLength: 60, pattern: "^[a-z][a-z0-9-]{0,59}$" } }
+        - { name: from, in: query, schema: { type: string, format: date, example: "2026-10-30" } }
+        - { name: to, in: query, schema: { type: string, format: date, example: "2026-10-31" } }
+      responses:
+        "200":
+          description: Bir sayfa kayıt
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminAuditPage" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Yönetici değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
   /admin/ping:
     get:
       tags: [admin]
@@ -3476,6 +3655,92 @@ components:
         lastName: { type: string, maxLength: 60 }
         title: { type: string, maxLength: 80 }
         locale: { type: string, enum: [tr, en], default: tr, description: E-postanın dili. }
+
+    AdminUserType:
+      type: string
+      enum: [INDIVIDUAL, CORPORATE, ADMIN]
+      description: Hesabın türü. Yönetici ayrı bir türdür.
+
+    AdminUserStatus:
+      type: string
+      enum: [ACTIVE, DISABLED]
+
+    AdminUserListItem:
+      type: object
+      required: [id, email, firstName, lastName, type, status, companyName, disabledAt, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        email: { type: string, format: email, description: Kişisel veri. }
+        firstName: { type: string }
+        lastName: { type: string }
+        type: { $ref: "#/components/schemas/AdminUserType" }
+        status: { $ref: "#/components/schemas/AdminUserStatus" }
+        companyName: { type: string, nullable: true, description: Kurumsal hesabın şirketi. }
+        disabledAt: { type: string, format: date-time, nullable: true }
+        createdAt: { type: string, format: date-time }
+
+    AdminUserDetail:
+      allOf:
+        - $ref: "#/components/schemas/AdminUserListItem"
+        - type: object
+          required: [title, locale, hasPassword, googleLinked, company, reservations, points]
+          properties:
+            title: { type: string, nullable: true }
+            locale: { type: string, enum: [TR, EN] }
+            hasPassword: { type: boolean, description: Parolayla giriş yapabilir. Davet edilip şifresini henüz belirlememiş kişide yanlıştır. }
+            googleLinked: { type: boolean }
+            company:
+              type: object
+              nullable: true
+              required: [id, name]
+              properties:
+                id: { type: string, format: uuid }
+                name: { type: string }
+            reservations:
+              type: object
+              required: [total, upcoming]
+              properties:
+                total: { type: integer, minimum: 0, description: Hesabın tüm rezervasyonları. }
+                upcoming: { type: integer, minimum: 0, description: Onaylı ve henüz başlamamış olanlar; hesap kapatılınca bunlar iptal edilmez. }
+            points: { type: integer, description: Hesabın şu anki puanı (kazanılan eksi harcanan). }
+
+    AdminUserPage:
+      type: object
+      required: [items, total, page, pageSize]
+      properties:
+        items: { type: array, items: { $ref: "#/components/schemas/AdminUserListItem" } }
+        total: { type: integer, minimum: 0, description: Süzgeçten geçen tüm hesaplar, yalnızca bu sayfa değil. }
+        page: { type: integer }
+        pageSize: { type: integer }
+
+    AdminAuditEntry:
+      type: object
+      required: [id, at, actor, action, entity, entityId, companyId, fields]
+      properties:
+        id: { type: string, format: uuid }
+        at: { type: string, format: date-time }
+        actor:
+          type: object
+          required: [id, name, email]
+          description: İşlemi yapan. `id` `cli` ise komut satırındaki kişidir; hesabı sonradan silinmişse ad ve e-posta boştur.
+          properties:
+            id: { type: string }
+            name: { type: string, nullable: true }
+            email: { type: string, nullable: true }
+        action: { type: string, example: branch.close }
+        entity: { type: string, example: branch }
+        entityId: { type: string, nullable: true }
+        companyId: { type: string, nullable: true }
+        fields: { type: array, items: { type: string }, description: Gönderilen alanların adları; değerler yazılmaz. }
+
+    AdminAuditPage:
+      type: object
+      required: [items, total, page, pageSize]
+      properties:
+        items: { type: array, items: { $ref: "#/components/schemas/AdminAuditEntry" } }
+        total: { type: integer, minimum: 0 }
+        page: { type: integer }
+        pageSize: { type: integer }
 
     UserUpdate:
       type: object

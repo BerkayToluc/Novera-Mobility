@@ -3898,7 +3898,7 @@ export interface paths {
         };
         /**
          * Şirketler (yönetim)
-         * @description Sayfalı liste (ADR-24). `q` şirket adında aranır (büyük/küçük harf: İngiliz alfabesindeki harfler için). Varsayılan sıra
+         * @description Sayfalı liste (ADR-24). `q` şirket adında, vergi dairesinde ya da şehirde aranır (büyük/küçük harf: İngiliz alfabesindeki harfler için). Varsayılan sıra
          *     ada göre. Her satırda şirketin kişi sayısı (`users`) ve henüz şifre belirlememiş davetli sayısı (`pendingUsers`) vardır.
          *     Sınır: yönetici başına dakikada 120.
          */
@@ -4348,6 +4348,370 @@ export interface paths {
                 429: components["responses"]["TooManyRequests"];
             };
         };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/users": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Hesaplar (yönetim)
+         * @description Sayfalı liste (ADR-24). `q` e-posta adresinde ya da adda aranır; birden çok sözcük yazılırsa her sözcük e-postada ya da
+         *     adlardan birinde bulunmalıdır (büyük/küçük harf: İngiliz alfabesindeki harfler için). Varsayılan sıra en yeni hesap üstte.
+         *     `type`: `INDIVIDUAL` bireysel, `CORPORATE` kurumsal, `ADMIN` yönetici (yönetici hesabın türü bireysel olsa da bireysel
+         *     sayılmaz). `status`: `ACTIVE` ya da `DISABLED` (kapatılmış). Sınır: yönetici başına dakikada 120.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    page?: number;
+                    pageSize?: number;
+                    /** @description `alan` ya da `alan:asc|desc`. Varsayılan `createdAt:desc`. */
+                    sort?: "createdAt" | "email" | "lastName";
+                    q?: string;
+                    type?: components["schemas"]["AdminUserType"];
+                    status?: components["schemas"]["AdminUserStatus"];
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Bir sayfa hesap */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AdminUserPage"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/users/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Hesabın kimliği. Kimlik olamayacak bir değer `404` döner. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * Bir hesap
+         * @description Hesabın nasıl giriş yaptığı, şirketi, puanı, rezervasyon sayısı ve bunlardan kaçının henüz başlamadığı (kapatılınca kalan rezervasyonlar).
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Hesabın kimliği. Kimlik olamayacak bir değer `404` döner. */
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Hesap */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AdminUserDetail"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Böyle bir hesap yok (`NOT_FOUND`) */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/users/{id}/disable": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Hesabın kimliği. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Hesabı kapat
+         * @description Hesabın **tüm oturumları ve şifre sıfırlama bağlantıları silinir**; parola ve Google ile giriş `401 INVALID_CREDENTIALS` döner
+         *     (yanlış parolayla aynı cevap, hesabın kapalı olduğu sızmaz) ve hesaba şifre sıfırlama bağlantısı gitmez. Hesap ve rezervasyonları
+         *     kalır: **gelecek rezervasyonlar iptal edilmez**, sayısı `reservations.upcoming`'dedir. **Yönetici hesabı kapatılamaz**
+         *     (kendisi de, başka bir yönetici de): `403 FORBIDDEN`; yönetici `pnpm admin:create` ile geri alınır. Zaten kapalı hesabı
+         *     kapatmak hata değildir ve ilk tarihi korur. Gövde yoktur. İşlem kaydı: `user.disable`.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Hesabın kimliği. */
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Kapatılmış hesap */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AdminUserDetail"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Böyle bir hesap yok (`NOT_FOUND`) */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/users/{id}/enable": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Hesabın kimliği. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Hesabı yeniden aç
+         * @description Hesap eskisi gibi giriş yapabilir (oturumları kapatılırken silindiği için yeniden giriş yapar). Açık hesabı açmak hata değildir. İşlem kaydı `user.enable`.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Hesabın kimliği. */
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Açılmış hesap */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AdminUserDetail"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Böyle bir hesap yok (`NOT_FOUND`) */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/audit-log": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * İşlem kaydı (yönetim)
+         * @description Panelde yapılan her değişikliğin kaydı. **Salt okunurdur**: değiştirme ya da silme ucu yoktur, veritabanı da güncellemeyi ve
+         *     silmeyi reddeder. Sayfalı liste (ADR-24), her zaman en yeni üstte. Satırda yalnızca alan **adları** vardır, değerler ve kişisel
+         *     veri yoktur; kişinin adı ve e-postası okunurken hesaptan alınır. `actor`: bir hesabın kimliği ya da `cli` (komut satırından
+         *     `pnpm admin:create`). `entity`: kaydın türü (`branch`, `reservation`, `user` ...). `from` ve `to`: günler, ikisi de dahil,
+         *     İstanbul takvimiyle.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    page?: number;
+                    pageSize?: number;
+                    /** @description Hesap kimliği ya da `cli`. */
+                    actor?: string;
+                    entity?: string;
+                    from?: string;
+                    to?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Bir sayfa kayıt */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AdminAuditPage"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -5559,6 +5923,86 @@ export interface components {
              * @enum {string}
              */
             locale: "tr" | "en";
+        };
+        /**
+         * @description Hesabın türü. Yönetici ayrı bir türdür.
+         * @enum {string}
+         */
+        AdminUserType: "INDIVIDUAL" | "CORPORATE" | "ADMIN";
+        /** @enum {string} */
+        AdminUserStatus: "ACTIVE" | "DISABLED";
+        AdminUserListItem: {
+            /** Format: uuid */
+            id: string;
+            /**
+             * Format: email
+             * @description Kişisel veri.
+             */
+            email: string;
+            firstName: string;
+            lastName: string;
+            type: components["schemas"]["AdminUserType"];
+            status: components["schemas"]["AdminUserStatus"];
+            /** @description Kurumsal hesabın şirketi. */
+            companyName: string | null;
+            /** Format: date-time */
+            disabledAt: string | null;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        AdminUserDetail: components["schemas"]["AdminUserListItem"] & {
+            title: string | null;
+            /** @enum {string} */
+            locale: "TR" | "EN";
+            /** @description Parolayla giriş yapabilir. Davet edilip şifresini henüz belirlememiş kişide yanlıştır. */
+            hasPassword: boolean;
+            googleLinked: boolean;
+            company: {
+                /** Format: uuid */
+                id: string;
+                name: string;
+            } | null;
+            reservations: {
+                /** @description Hesabın tüm rezervasyonları. */
+                total: number;
+                /** @description Onaylı ve henüz başlamamış olanlar; hesap kapatılınca bunlar iptal edilmez. */
+                upcoming: number;
+            };
+            /** @description Hesabın şu anki puanı (kazanılan eksi harcanan). */
+            points: number;
+        };
+        AdminUserPage: {
+            items: components["schemas"]["AdminUserListItem"][];
+            /** @description Süzgeçten geçen tüm hesaplar */
+            total: number;
+            page: number;
+            pageSize: number;
+        };
+        AdminAuditEntry: {
+            /** Format: uuid */
+            id: string;
+            /** Format: date-time */
+            at: string;
+            /** @description İşlemi yapan. `id` `cli` ise komut satırındaki kişidir; hesabı sonradan silinmişse ad ve e-posta boştur. */
+            actor: {
+                id: string;
+                name: string | null;
+                email: string | null;
+            };
+            /** @example branch.close */
+            action: string;
+            /** @example branch */
+            entity: string;
+            entityId: string | null;
+            companyId: string | null;
+            /** @description Gönderilen alanların adları; değerler yazılmaz. */
+            fields: string[];
+        };
+        AdminAuditPage: {
+            items: components["schemas"]["AdminAuditEntry"][];
+            total: number;
+            page: number;
+            pageSize: number;
         };
         /** @description Gönderilen alanlar güncellenir. */
         UserUpdate: {

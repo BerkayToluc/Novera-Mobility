@@ -157,3 +157,25 @@ export async function fetchAdminCompany(id: string): Promise<Schemas["AdminCompa
   if (result.status === "not_found") return null;
   throw new ApiUnavailableError();
 }
+
+// `GET /admin/users` (V2-34): one page of the list, closed accounts included.
+export async function fetchAdminUsers(query: URLSearchParams): Promise<Schemas["AdminUserPage"]> {
+  const result = await apiRequest<Schemas["AdminUserPage"]>("GET", "/admin/users?" + query.toString());
+  if (result.status !== "ok") throw new ApiUnavailableError();
+  return result.data;
+}
+
+// `GET /admin/users/{id}`: null when there is no such account (the page then does not exist), a failure to load otherwise.
+export async function fetchAdminUser(id: string): Promise<Schemas["AdminUserDetail"] | null> {
+  const result = await apiRequest<Schemas["AdminUserDetail"]>("GET", "/admin/users/" + encodeURIComponent(id));
+  if (result.status === "ok") return result.data;
+  if (result.status === "not_found") return null;
+  throw new ApiUnavailableError();
+}
+
+// `GET /admin/audit-log` (V2-34): one page of the log, newest first. Read only.
+export async function fetchAdminAudit(query: URLSearchParams): Promise<Schemas["AdminAuditPage"]> {
+  const result = await apiRequest<Schemas["AdminAuditPage"]>("GET", "/admin/audit-log?" + query.toString());
+  if (result.status !== "ok") throw new ApiUnavailableError();
+  return result.data;
+}

@@ -4,7 +4,7 @@ import { DAY_MS } from '../common/time.js';
 import { parseInput, validationFailed } from '../common/zod-validation.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { isAdmin } from './admin-rules.js';
-import { emailTaken, googleNotAllowed, googleTokenInvalid, googleUnavailable } from './auth.errors.js';
+import { emailTaken, googleNotAllowed, googleTokenInvalid, googleUnavailable, invalidCredentials } from './auth.errors.js';
 import { googleSchema } from './auth.schemas.js';
 import type { SessionStart } from './auth.service.js';
 import { cleanUserAgent } from './device.js';
@@ -61,6 +61,8 @@ export class GoogleAuthService {
     if (bySub) {
       // An administrator never signs in with Google (V2-23): the account is password-only, with a longer password.
       if (bySub.accountType !== 'INDIVIDUAL' || isAdmin(bySub)) throw googleNotAllowed();
+      // A closed account (V2-34) is refused like a wrong credential: the state does not show.
+      if (bySub.disabledAt) throw invalidCredentials();
       await this.prisma.$transaction([
         this.prisma.session.deleteMany({ where: { userId: bySub.id, expiresAt: { lt: new Date() } } }),
         this.prisma.session.create({ data: { ...newSession(), userId: bySub.id } }),
@@ -73,6 +75,8 @@ export class GoogleAuthService {
       // Same verified e-mail, but another Google account is already linked, or a corporate account.
       // An administrator's account is not linked either, which would also remove its password.
       if (byEmail.accountType !== 'INDIVIDUAL' || byEmail.googleSub !== null || isAdmin(byEmail)) throw googleNotAllowed();
+      // Linking would open a closed account.
+      if (byEmail.disabledAt) throw invalidCredentials();
       // Linking. Sign-up with a password never proved the e-mail belongs to the person, so whoever
       // registered it first could still hold the password or a session. Both go: the owner proved the
       // e-mail with Google now and can use Google or "forgot password" from here on.

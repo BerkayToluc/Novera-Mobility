@@ -976,6 +976,168 @@
         "submit": "Davet gönder",
         "sending": "Gönderiliyor"
       }
+    },
+    "users": {
+      "title": "Kullanıcılar",
+      "intro": "Siteye kayıtlı hesaplar. Kötüye kullanılan bir hesabı kapatabilirsiniz: kapatılan hesap giriş yapamaz, hesabın kendisi ve rezervasyonları silinmez.",
+      "detailTitle": "Kullanıcı",
+      "detailIntro": "Hesabın bilgileri. Kapatılan hesap giriş yapamaz.",
+      "searchLabel": "E-posta ya da ad ara",
+      "typeFilterLabel": "Türe göre",
+      "statusFilterLabel": "Duruma göre",
+      "tableCaption": "Kullanıcılar",
+      "retry": "Tekrar dene",
+      "columns": {
+        "name": "Ad",
+        "email": "E-posta",
+        "type": "Tür",
+        "created": "Kayıt",
+        "status": "Durum"
+      },
+      "type": {
+        "INDIVIDUAL": "Bireysel",
+        "CORPORATE": "Kurumsal",
+        "ADMIN": "Yönetici"
+      },
+      "status": {
+        "ACTIVE": "Açık",
+        "DISABLED": "Kapalı"
+      },
+      "emptyTitle": "Henüz kullanıcı yok",
+      "emptyText": "Hesaplar kayıt oldukça burada görünür.",
+      "emptyFilteredTitle": "Bu aramaya uyan kullanıcı yok",
+      "emptyFilteredText": "Süzgeçleri kaldırmayı ya da başka bir şey aramayı deneyin.",
+      "loadErrorTitle": "Kullanıcılar yüklenemedi",
+      "loadErrorText": "Birkaç saniye sonra yeniden deneyin.",
+      "facts": {
+        "title": "Görevi",
+        "email": "E-posta",
+        "type": "Tür",
+        "company": "Şirket",
+        "signIn": "Giriş yöntemi",
+        "withPassword": "Parola",
+        "withGoogle": "Google",
+        "noSignIn": "Henüz yok (davet bekliyor)",
+        "reservations": "Rezervasyonlar",
+        "reservationsValue": "{total} rezervasyon, {upcoming} tanesi henüz başlamadı",
+        "points": "Puan",
+        "created": "Kayıt tarihi",
+        "disabled": "Kapatıldığı tarih"
+      },
+      "actions": {
+        "title": "Hesabı kapat ya da yeniden aç",
+        "openText": "Kapatılan hesap hemen giriş yapamaz olur (parola ve Google), açık tüm oturumları kapanır. Hesabın kendisi ve rezervasyonları silinmez; henüz başlamamış rezervasyonlar iptal edilmez.",
+        "closedText": "Bu hesap kapalı: giriş yapamıyor ve açık oturumu yok. Yeniden açarsanız eskisi gibi giriş yapabilir.",
+        "adminText": "Yönetici hesabı buradan kapatılmaz. Yetkiyi kaldırmak için `pnpm admin:create` komutunun geri alma seçeneği kullanılır.",
+        "disable": "Hesabı kapat",
+        "enable": "Hesabı yeniden aç"
+      },
+      "disableDialog": {
+        "title": "{name} hesabı kapatılsın mı?",
+        "text": "Hesap hemen giriş yapamaz olur ve açık tüm oturumları kapanır. Hesap ve rezervasyonları silinmez; istediğiniz zaman yeniden açabilirsiniz.",
+        "upcoming": "{count, plural, =0 {Henüz başlamamış rezervasyonu yok.} other {Henüz başlamamış # rezervasyonu iptal edilmez, olduğu gibi kalır.}}",
+        "confirm": "Hesabı kapat",
+        "keep": "Vazgeç"
+      },
+      "toast": {
+        "disabled": "Hesap kapatıldı",
+        "enabled": "Hesap yeniden açıldı"
+      },
+      "errors": {
+        "forbidden": "Yönetici hesabı buradan kapatılamaz.",
+        "notFound": "Bu hesap artık yok. Listeye dönün.",
+        "unavailable": "Yapılamadı. Birkaç saniye sonra yeniden deneyin."
+      }
+    },
+    "audit": {
+      "title": "İşlem kaydı",
+      "intro": "Panelde yapılan her değişikliğin kaydı: kim, ne zaman, neyi değiştirdi. Yalnızca alan adları tutulur; değerler ve kişisel veriler tutulmaz. Kayıt düzenlenemez ve silinemez.",
+      "tableCaption": "İşlem kaydı",
+      "retry": "Tekrar dene",
+      "actorFilterLabel": "Kimin yaptığına göre",
+      "allActors": "Herkes",
+      "entityFilterLabel": "Kayıt türüne göre",
+      "allEntities": "Tüm türler",
+      "fromLabel": "İlk gün",
+      "toLabel": "Son gün",
+      "apply": "Süz",
+      "clearDates": "Günleri temizle",
+      "cli": "Komut satırı",
+      "deletedAccount": "Silinmiş hesap",
+      "columns": {
+        "when": "Zaman",
+        "who": "Kim",
+        "what": "İşlem",
+        "fields": "Alanlar"
+      },
+      "emptyTitle": "Henüz kayıt yok",
+      "emptyText": "Panelde bir değişiklik yapıldığında burada görünür.",
+      "emptyFilteredTitle": "Bu süzgece uyan kayıt yok",
+      "emptyFilteredText": "Süzgeçleri kaldırmayı ya da günleri genişletmeyi deneyin.",
+      "loadErrorTitle": "İşlem kaydı yüklenemedi",
+      "loadErrorText": "Birkaç saniye sonra yeniden deneyin.",
+      "entities": {
+        "branch": "Bayi",
+        "company": "Şirket",
+        "contact-message": "İletişim mesajı",
+        "extra": "Ek hizmet",
+        "promo-code": "Kampanya kodu",
+        "quote": "Teklif talebi",
+        "reservation": "Rezervasyon",
+        "user": "Kullanıcı",
+        "vehicle": "Araç",
+        "vehicle-model": "Araç modeli"
+      },
+      "actions": {
+        "admin": {
+          "grant": "Yönetici yetkisi verdi",
+          "revoke": "Yönetici yetkisini aldı",
+          "ping": "Yönetim bağlantısını denedi"
+        },
+        "branch": {
+          "create": "Bayi ekledi",
+          "update": "Bayiyi değiştirdi",
+          "close": "Bayiyi kapattı",
+          "reopen": "Bayiyi yeniden açtı"
+        },
+        "company": {
+          "create": "Şirket ekledi",
+          "update": "Şirketi değiştirdi",
+          "invite": "Kişi davet etti",
+          "invite-resend": "Daveti yeniden gönderdi"
+        },
+        "contact-message": {
+          "handle": "Mesajın ele alındı işaretini değiştirdi"
+        },
+        "extra": {
+          "update": "Ek hizmeti değiştirdi"
+        },
+        "promo-code": {
+          "create": "Kampanya kodu ekledi",
+          "update": "Kampanya kodunu değiştirdi",
+          "delete": "Kampanya kodunu sildi"
+        },
+        "quote": {
+          "update": "Teklif talebini güncelledi"
+        },
+        "reservation": {
+          "cancel": "Rezervasyonu iptal etti"
+        },
+        "user": {
+          "disable": "Hesabı kapattı",
+          "enable": "Hesabı yeniden açtı"
+        },
+        "vehicle-model": {
+          "create": "Model ekledi",
+          "update": "Modeli değiştirdi",
+          "retire": "Modeli kaldırdı",
+          "restore": "Modeli geri getirdi"
+        },
+        "vehicle": {
+          "create": "Araç ekledi",
+          "update": "Aracı değiştirdi"
+        }
+      }
     }
   }
 }

@@ -8,6 +8,7 @@ import { MOCK_GOOGLE_COOKIE, MOCK_SESSION_COOKIE, type AccountType } from "./ses
 import { SESSION_COOKIE, type SessionCookieChange } from "./session-cookie";
 import { setPreferenceCookies } from "./preference-cookies";
 import { isMockMode } from "./mode";
+import { mockWorld } from "./mock-world";
 import { loginSchema, registerSchema, type AuthErrorMessages } from "./auth-schemas";
 import { codeMessages } from "./validation";
 import { z } from "zod";
@@ -116,6 +117,9 @@ export async function signIn(kind: AccountType, email: string, password: string)
     if (result.status === "rate_limited") return { ok: false, reason: "rate_limited", retryAfter: result.retryAfter };
     return { ok: false, reason: "unavailable" };
   }
+
+  // Sample mode only: an account that was closed in the panel (V2-34) is refused like a wrong password, so the state does not show.
+  if ((await import("@/mocks/admin-users")).isMockUserDisabled(await mockWorld(), email)) return { ok: false, reason: "invalid" };
 
   const jar = await cookies();
   // Sample mode only (USE_MOCKS=1, which a real site cannot run, lib/mode.ts): an address that starts with "yonetici" signs in

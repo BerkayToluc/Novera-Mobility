@@ -23,11 +23,11 @@ Kötüye kullanılan bir hesabı kapatabilmek ve panelde kimin neyi değiştirdi
   - `/yonetim/kayit`: tablo; satırda kim, ne zaman, ne yaptı, hangi kayıt, hangi alanlar.
 
 ## Kabul kriterleri
-- [ ] Kapatılan hesap parola ve Google ile giremez; açık oturumu düşer (test).
-- [ ] Yönetici kendini kapatamaz.
-- [ ] Yeniden açılan hesap girebilir.
-- [ ] İşlem kaydı süzgeçleri çalışır; kayıt düzenlenemez (uç yok).
-- [ ] e2e: kullanıcı kapat → giriş reddi (mock); kayıtta görünür.
+- [x] Kapatılan hesap parola ve Google ile giremez; açık oturumu düşer (test). _Nasıl: `users.integration.spec.ts` (gerçek veritabanı): parola cevabı yanlış parolayla birebir aynı `401 INVALID_CREDENTIALS`, bağlı ve bağlanacak Google hesabı reddedilir (bağlanmaz), oturum silinir, sonradan eklenen oturum geçersiz sayılır, şifre sıfırlama bağlantısı gitmez ve işe yaramaz._
+- [x] Yönetici kendini kapatamaz. _Nasıl: `users.integration.spec.ts` yönetici hesabı için `403 FORBIDDEN`, hesap ve oturumu değişmez; HTTP testlerinde müşteri `403`._
+- [x] Yeniden açılan hesap girebilir. _Nasıl: `users.integration.spec.ts` (parola ve Google), `e2e/admin-users.spec.ts` (örnek giriş)._
+- [x] İşlem kaydı süzgeçleri çalışır; kayıt düzenlenemez (uç yok). _Nasıl: `audit-log.integration.spec.ts` yönetici, tür ve gün süzgeçlerini (İstanbul gün sınırı dahil), sayfalamayı ve veritabanının güncelleme/silmeyi reddettiğini; `admin.http.spec.ts` `POST/PUT/PATCH/DELETE /admin/audit-log` için `404`._
+- [x] e2e: kullanıcı kapat → giriş reddi (mock); kayıtta görünür. _Nasıl: `e2e/admin-users.spec.ts` (kapat → "E-posta veya şifre hatalı" → yeniden aç → girer; `user.disable` kayıtta)._
 - [ ] 375/1280 ekran görüntüsü; axe temiz.
 
 ## Etiketler

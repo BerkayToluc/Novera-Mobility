@@ -7,11 +7,11 @@ import { toPriceBreakdown, type ReservationRow } from '../../reservations/reserv
 export const RESERVATION_STATUSES = ['CONFIRMED', 'CANCELLED'] as const;
 export type ReservationStatusValue = (typeof RESERVATION_STATUSES)[number];
 
-type Person = { id: string; email: string; firstName: string; lastName: string; accountType: AccountType; companyName: string | null };
+type Person = { id: string; email: string; firstName: string; lastName: string; accountType: AccountType; company: { name: string } | null };
 
 // What the list query reads: enough for a row, and for the detail.
 export const ADMIN_RESERVATION_INCLUDE = {
-  user: { select: { id: true, email: true, firstName: true, lastName: true, accountType: true, companyName: true } },
+  user: { select: { id: true, email: true, firstName: true, lastName: true, accountType: true, company: { select: { name: true } } } },
   cancelledBy: { select: { id: true, email: true, firstName: true, lastName: true } },
   vehicle: { include: { vehicleModel: { include: { class: true } } } },
   pickupBranch: { select: { id: true, name: true, city: true } },
@@ -81,7 +81,7 @@ export function reservationDetail(row: AdminReservationRow, now: Date): Reservat
     ...reservationListItem(row),
     id: row.id,
     days: row.days,
-    customerAccount: row.user ? { type: row.user.accountType, companyName: row.user.companyName } : null,
+    customerAccount: row.user ? { type: row.user.accountType, companyName: row.user.company?.name ?? null } : null,
     price: toPriceBreakdown(row),
     // A cancelled booking earns no points.
     pointsEarned: row.status === 'CONFIRMED' ? (row.pointTransaction?.points ?? 0) : 0,

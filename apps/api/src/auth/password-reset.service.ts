@@ -34,7 +34,9 @@ export class PasswordResetService {
     const { email } = parseInput(forgotPasswordSchema, input, 'Reset request is invalid');
 
     const user = await this.prisma.user.findUnique({ where: { email } });
-    if (!user) return;
+    // A closed account (V2-34) gets no link, and the answer is the same as for an address that has no account.
+
+    if (!user || user.disabledAt) return;
 
     const token = newSessionToken();
     // One live link per account: asking again invalidates the previous one.
@@ -67,7 +69,8 @@ export class PasswordResetService {
 
     // An administrator's password needs 12 characters (V2-23). Checked before the link is claimed, so a short one does
     // not use the link up.
-    const owner = await this.prisma.user.findUnique({ where: { id: row.userId }, select: { role: true } });
+    const owner = await this.prisma.user.findUnique({ where: { id: row.userId }, select: { role: true, disabledAt: true } });
+    if (owner?.disabledAt) throw resetTokenInvalid();
     if (owner?.role === 'ADMIN' && password.length < ADMIN_PASSWORD_MIN) {
       throw validationFailed({ password: 'TOO_SHORT' }, `An administrator's password needs ${ADMIN_PASSWORD_MIN} characters`);
     }
