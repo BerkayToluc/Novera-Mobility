@@ -31,7 +31,7 @@ Gerçek GPS/telematik cihazı, gerçek uçuş takibi, gerçek çekici/servis ted
 
 - **Kurumsal hesap** (`accountType = CORPORATE`) bir şirkete bağlıdır (`User.companyId`). Bir şirketin birden çok kullanıcısı olabilir; hepsi aynı filoyu görür.
 - **Hesabı Novera açar** (ADMIN.md §3.3). Kişi davet e-postasındaki bağlantıyla şifresini belirler ve `/giris?tip=kurumsal` sayfasından girer.
-- **Filom bağlantısı** yalnızca etkin filo sözleşmesi olan şirkette görünür (hesap menüsü ve kurumsal profil). Sözleşmesi olmayan kurumsal hesapta `/filom` "Filonuz henüz yok, teklif alın" boş durumunu gösterir. Bireysel hesap `/filom`'a girince 404 görür.
+- **Filom bağlantısı** yalnızca etkin filo sözleşmesi olan şirkette görünür (kurumsal profilin menüsü; `GET /me` cevabındaki `hasFleet` alanı, V2-36). Sözleşmesi olmayan kurumsal hesapta `/filom` "Filonuz henüz yok, teklif alın" boş durumunu gösterir. Bireysel hesap `/filom`'a girince 404 görür.
 - **Veri ayrımı:** her `/fleet/*` ucu oturumdaki kullanıcının şirketiyle süzer. Başka şirketin kaydı **404** döner; bu her uç için zorunlu bir testtir.
 
 ## 3. Ekranlar
@@ -78,7 +78,7 @@ Adres TR `/filom/...`, EN `/en/my-fleet/...`. Hepsi `noindex`, giriş gerektirir
 |---|---|
 | `GET /fleet/summary` | Özet kartlarının sayıları |
 | `GET /fleet/vehicles`, `GET /fleet/vehicles/{plate}` | Araçlar ve detay |
-| `GET/POST /fleet/employees`, `PATCH /fleet/employees/{id}` | Personel; silme yok, `active: false` |
+| `GET/POST /fleet/employees`, `GET/PATCH /fleet/employees/{id}` | Personel; silme yok, `active: false` (V2-36: tek kişi `GET`'i düzenleme ekranı için eklendi) |
 | `GET/POST /fleet/assignments`, `POST /fleet/assignments/{id}/end` | Zimmet; açık zimmetli araca yenisi `409 VEHICLE_ASSIGNED` |
 | `GET /fleet/contracts`, `GET /fleet/contracts/{number}`, `POST /fleet/contracts/{number}/renewal-request` | Sözleşmeler ve yenileme talebi (bir `QuoteRequest` açar) |
 | `GET /fleet/invoices`, `GET /fleet/invoices/{number}` | Faturalar |

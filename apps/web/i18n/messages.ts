@@ -18,6 +18,7 @@ import trDriver from "../messages/tr/driver.json";
 import trErrors from "../messages/tr/errors.json";
 import trFaq from "../messages/tr/faq.json";
 import trFleet from "../messages/tr/fleet.json";
+import trFleetPanel from "../messages/tr/fleet-panel.json";
 import trGuides from "../messages/tr/guides.json";
 import trHelp from "../messages/tr/help.json";
 import trHome from "../messages/tr/home.json";
@@ -42,6 +43,7 @@ import enErrors from "../messages/en/errors.json";
 import enFaq from "../messages/en/faq.json";
 import enDriver from "../messages/en/driver.json";
 import enFleet from "../messages/en/fleet.json";
+import enFleetPanel from "../messages/en/fleet-panel.json";
 import enGuides from "../messages/en/guides.json";
 import enHelp from "../messages/en/help.json";
 import enHome from "../messages/en/home.json";
@@ -69,6 +71,7 @@ export const tr = {
   ...trErrors,
   ...trFaq,
   ...trFleet,
+  ...trFleetPanel,
   ...trGuides,
   ...trHelp,
   ...trHome,
@@ -96,6 +99,7 @@ export const en: typeof tr = {
   ...enErrors,
   ...enFaq,
   ...enFleet,
+  ...enFleetPanel,
   ...enGuides,
   ...enHelp,
   ...enHome,

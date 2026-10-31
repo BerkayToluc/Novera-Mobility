@@ -39,6 +39,14 @@
         ]
       },
       {
+        "heading": "Kurumsal müşterilerin personel bilgileri",
+        "paragraphs": [
+          "Filom'u kullanan kurumsal müşteriler, filo araçlarını verdikleri personelin ad, soyad, departman, sicil numarası, e-posta ve telefon bilgilerini girer. Bu bilgilerle ilgili veri sorumlusu kurumsal müşterinin kendisidir; Novera Mobility bu bilgileri yalnızca müşterinin talimatıyla, müşteri adına veri işleyen sıfatıyla saklar ve işler.",
+          "Ehliyet bilgisi istenmez ve saklanmaz. Personel bilgilerine yalnızca ilgili şirketin kullanıcıları ve Novera Mobility yönetimi erişir; başka şirketler göremez.",
+          "Personel kaydı silinmez: ayrılan kişi pasifleştirilir ve zimmet geçmişi şirketin kayıtlarında kalır. Düzeltme ya da silme taleplerinizi çalıştığınız şirkete iletebilir ya da kvkk@novera.example adresine yazabilirsiniz."
+        ]
+      },
+      {
         "heading": "İşleme amaçları",
         "list": [
           "Rezervasyonunuzu oluşturmak ve yönetmek.",

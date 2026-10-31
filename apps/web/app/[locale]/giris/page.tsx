@@ -25,6 +25,7 @@ export default async function LoginPage({ searchParams }: Props) {
   const booking = params.sonra === "odeme" ? parseBooking(params) : null;
   const next = booking ? toBookingQuery(booking) : undefined;
   const toAdmin = params.sonra === "yonetim";
+  const toFleet = params.sonra === "filom";
   // A booking is only ever paid for by an individual, so the corporate tab does not carry it.
   const corporate = params.tip === "kurumsal" && !booking && !toAdmin;
 
@@ -58,7 +59,7 @@ export default async function LoginPage({ searchParams }: Props) {
       }
     >
       <div className="flex flex-col gap-6">
-        <LoginForm key={corporate ? "corporate" : "individual"} kind={corporate ? "corporate" : "individual"} next={next} to={toAdmin ? "admin" : undefined} />
+        <LoginForm key={corporate ? "corporate" : "individual"} kind={corporate ? "corporate" : "individual"} next={next} to={toAdmin ? "admin" : toFleet ? "filom" : undefined} />
         {/* Corporate accounts are opened by Novera and cannot use Google; neither can an administrator. */}
         {!corporate && !toAdmin && <GoogleSignIn clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || null} sample={isMockMode()} nonce={nonce} next={next} />}
       </div>

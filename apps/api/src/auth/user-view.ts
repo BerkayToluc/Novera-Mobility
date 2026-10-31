@@ -28,10 +28,13 @@ export interface CompanyRow {
   city: string | null;
   phone: string | null;
   salesContact: unknown;
+  // Şirketin etkin filo sözleşmesi (en çok biri yüklenir): Filom bağlantısı yalnızca sözleşmeli şirkette görünür (V2-36).
+  fleetContracts?: Array<{ id: string }>;
 }
 
 // Kullanıcıyı şirketiyle birlikte yükleyen sorgu seçeneği (Prisma `include`).
-export const USER_WITH_COMPANY = { company: true } as const;
+// Şirketle birlikte etkin bir filo sözleşmesi olup olmadığı da gelir (`hasFleet`): tek satırlık küçük bir sorgu, yalnızca kurumsal hesapta.
+export const USER_WITH_COMPANY = { company: { include: { fleetContracts: { where: { status: 'ACTIVE' as const }, select: { id: true }, take: 1 } } } } as const;
 
 export interface UserResponse {
   id: string;
@@ -53,6 +56,8 @@ export interface UserResponse {
   // false: the account was opened with Google and has no password yet.
   hasPassword: boolean;
   googleLinked: boolean;
+  // Şirketin etkin filo sözleşmesi var: Filom'un giriş noktaları görünür (V2-36). Bireysel hesapta ve sözleşmesiz şirkette yanlıştır.
+  hasFleet: boolean;
 }
 
 // JSON alanının biçimi bozuksa (eksik/yanlış tür) satış iletişimi yokmuş gibi davranılır.
@@ -85,5 +90,6 @@ export function toUserResponse(user: UserRow): UserResponse {
     notifications: { reminders: user.notifyReminders, campaigns: user.notifyCampaigns },
     hasPassword: user.passwordHash !== null,
     googleLinked: user.googleSub !== null,
+    hasFleet: user.accountType === 'CORPORATE' && (user.company?.fleetContracts?.length ?? 0) > 0,
   };
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Building2, CalendarRange, Coins, FileText, Plus, Settings, ShieldCheck, UserRound } from "lucide-react";
+import { Building2, CalendarRange, Coins, FileText, Plus, Settings, ShieldCheck, Truck, UserRound } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Link, usePathname } from "@/i18n/navigation";
@@ -28,7 +28,7 @@ const TABS = {
 // new rental under it (v0.8); below xl it is a row of tabs that scrolls sideways on a narrow screen.
 // An administrator gets one more way at the end: into the panel (V2-23). It is only a way in; the panel and the API
 // check the role themselves.
-export function ProfileNav({ type, isAdmin = false }: { type: AccountType; isAdmin?: boolean }) {
+export function ProfileNav({ type, isAdmin = false, hasFleet = false }: { type: AccountType; isAdmin?: boolean; hasFleet?: boolean }) {
   const t = useTranslations("Profile.nav");
   const pathname = usePathname();
   const listRef = useRef<HTMLUListElement>(null);
@@ -49,10 +49,12 @@ export function ProfileNav({ type, isAdmin = false }: { type: AccountType; isAdm
     return () => window.removeEventListener("resize", measure);
   }, [pathname, measure]);
 
-  type NavKey = (typeof TABS)[AccountType][number]["labelKey"] | "admin";
+  type NavKey = (typeof TABS)[AccountType][number]["labelKey"] | "admin" | "fleet";
+  // Filom is for a corporate account whose company has a fleet contract (V2-36); the screens themselves check it again.
+  const withFleet = hasFleet && type === "corporate" ? [...TABS[type], { href: "/filom", labelKey: "fleet" as const, icon: Truck }] : TABS[type];
   const tabs: ReadonlyArray<{ href: string; labelKey: NavKey; icon: typeof UserRound }> = isAdmin
-    ? [...TABS[type], { href: "/yonetim", labelKey: "admin", icon: ShieldCheck }]
-    : TABS[type];
+    ? [...withFleet, { href: "/yonetim", labelKey: "admin", icon: ShieldCheck }]
+    : withFleet;
 
   return (
     <div className="flex flex-col gap-6 xl:sticky xl:top-8 xl:self-start">

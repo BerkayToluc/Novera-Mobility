@@ -14,6 +14,7 @@ export const CLIENT_NAMESPACES = {
   "araclar/layout": ["DateRangePicker", "RentalSearch", "ResultsPage", "Vehicle"],
   "bayilerimiz/layout": ["BranchesPage", "ContactLink", "RentalSearch"],
   "dev/layout": ["Admin", "Auth", "ContactLink", "DateRangePicker", "DevGallery", "Profile", "RateLimit", "ThemeSwitcher"],
+  "filom/layout": ["Admin", "FleetPanel", "RateLimit"],
   "giris/layout": ["Auth", "RateLimit"],
   "hakkimizda/layout": ["AboutPage"],
   "hizmetler/layout": ["ContactLink"],

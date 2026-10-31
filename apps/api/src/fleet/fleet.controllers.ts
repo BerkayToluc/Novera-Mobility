@@ -74,6 +74,11 @@ export class FleetEmployeesController {
     return this.employees.list(companyId, query);
   }
 
+  @Get(':id')
+  get(@CurrentCompany() companyId: string, @Param('id') id: string): Promise<EmployeeView> {
+    return this.employees.get(companyId, id);
+  }
+
   @Post()
   @Audited({ action: 'fleet-employee.create', entity: 'employee', entityId: resultId })
   create(@CurrentCompany() companyId: string, @Body() body: unknown): Promise<EmployeeView> {

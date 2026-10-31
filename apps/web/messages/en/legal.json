@@ -39,6 +39,14 @@
         ]
       },
       {
+        "heading": "Staff data of corporate customers",
+        "paragraphs": [
+          "Corporate customers who use My fleet (Filom) enter the first name, last name, department, staff number, e-mail address and phone number of the people they give fleet cars to. The corporate customer is the data controller for this information; Novera Mobility stores and processes it only on the customer's instructions, as a processor acting on the customer's behalf.",
+          "No driving licence data is asked for or kept. Staff data is available only to the users of the company concerned and to Novera Mobility's administration; other companies cannot see it.",
+          "A staff record is not deleted: a person who leaves is made inactive, and the assignment history stays in the company's records. You can send requests for correction or deletion to the company you work for, or write to kvkk@novera.example."
+        ]
+      },
+      {
         "heading": "Purposes of processing",
         "list": [
           "Creating and managing your booking.",
