@@ -74,7 +74,7 @@ Tam liste, seviye ve dosya:satır [QUALITY.md](QUALITY.md) §1.1'de.
 | G-06 | Yüksek | `USE_MOCKS` üretime sızarsa giriş koruması atlanır | V2-06 |
 | G-10 | Yüksek | Web server action'larında doğrulama yok | V2-08 |
 | G-07, G-08, G-09, G-11–G-15 | Orta | Fail-open `NODE_ENV`, `/api` yönlendirmesi, etkisiz `ValidationPipe`, sınırsız uçlar, parola özeti ve oturum süresi, hesap silmede doğrulama, giriş kilidi | V2-04, V2-06, V2-07, V2-09, V2-10 |
-| G-21 | Düşük | E-posta başına giriş bekleme sayacı atomik değil (dağıtık saldırıda geç devreye girer) | — (kapı dışı) |
+| G-21 | Düşük | E-posta başına giriş bekleme sayacı atomik değil (dağıtık saldırıda geç devreye girer) | Kabul edildi (V2-46; düzeltme v2.1) |
 
 ## Faz 2 kapısı: son güvenlik turu (V2-22, 29 Ekim 2026)
 
