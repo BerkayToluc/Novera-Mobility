@@ -104,13 +104,8 @@ model User {
   // Kişinin ünvanı (davette yazılır); şirketin değil kişinin bilgisidir.
   contactTitle String?
 
-  // ESKİ firma alanları: V2-33 bunları `Company`'ye taşıdı ve artık okunmaz. Bir yayın aralığında eski ve yeni kod birlikte
-  // çalışabilsin diye bu sürümde durur; V2-34 sütunları düşürür.
-  companyName  String?
-  taxOffice    String?
-  companyCity  String?
-  companyPhone String?
-  salesContact Json?
+  // Hesap kapatma (V2-34): doluysa hesap giremez (parola ve Google), oturumları silinmiştir. Hesap silinmez; yönetici yeniden açabilir.
+  disabledAt   DateTime?
 
   locale    Locale   @default(TR)
   theme     Theme    @default(LIGHT)

@@ -861,6 +861,90 @@ describe('administration over HTTP', () => {
     });
   });
 
+  // The door and the input of the user and audit log endpoints (V2-34). What they do against a database is in
+  // users/users.integration.spec.ts and audit-log/audit-log.integration.spec.ts; a request turned away is turned away before any
+  // database call.
+  describe('users and the audit log: the door and the input (V2-34)', () => {
+    const ID = '6f0a1f7e-8f5e-4b86-9f5c-2d2f6d9a0b11';
+    const routes: [string, string][] = [
+      ['GET', '/admin/users'],
+      ['GET', `/admin/users/${ID}`],
+      ['POST', `/admin/users/${ID}/disable`],
+      ['POST', `/admin/users/${ID}/enable`],
+      ['GET', '/admin/audit-log'],
+    ];
+
+    it('no session is 401 UNAUTHENTICATED on every route', async () => {
+      for (const [method, path] of routes) {
+        const response = await call(method, path);
+        expect(response.status).toBe(401);
+        expect((await response.json()).code).toBe('UNAUTHENTICATED');
+      }
+    });
+
+    it('a customer is 403 FORBIDDEN on every route, and cannot close an account', async () => {
+      const { cookie } = await signedIn('CUSTOMER');
+      for (const [method, path] of routes) {
+        const response = await call(method, path, { cookie });
+        expect(response.status).toBe(403);
+        expect((await response.json()).code).toBe('FORBIDDEN');
+      }
+    });
+
+    it('a user list asked for in a way that makes no sense is 422', async () => {
+      const { cookie } = await signedIn('ADMIN');
+      for (const [query, field] of [
+        ['pageSize=101', 'pageSize'],
+        ['sort=passwordHash:asc', 'sort'],
+        ['type=ROOT', 'type'],
+        ['status=GONE', 'status'],
+        ['q=' + 'x'.repeat(101), 'q'],
+      ] as const) {
+        const response = await call('GET', `/admin/users?${query}`, { cookie });
+        expect(response.status).toBe(422);
+        expect(Object.keys((await response.json()).fieldErrors)).toEqual([field]);
+      }
+    });
+
+    it('an id that cannot be one is 404 without asking the database', async () => {
+      const { cookie } = await signedIn('ADMIN');
+      for (const [method, path] of [
+        ['GET', '/admin/users/not-an-id'],
+        ['POST', '/admin/users/not-an-id/disable'],
+        ['POST', '/admin/users/not-an-id/enable'],
+      ] as const) {
+        const response = await call(method, path, { cookie });
+        expect(response.status).toBe(404);
+        expect((await response.json()).code).toBe('NOT_FOUND');
+      }
+    });
+
+    it('an audit log list asked for in a way that makes no sense is 422', async () => {
+      const { cookie } = await signedIn('ADMIN');
+      for (const [query, field] of [
+        ['actor=someone', 'actor'],
+        ['entity=Not%20A%20Kind', 'entity'],
+        ['from=2090-02-30', 'from'],
+        ['to=yesterday', 'to'],
+        ['pageSize=0', 'pageSize'],
+      ] as const) {
+        const response = await call('GET', `/admin/audit-log?${query}`, { cookie });
+        expect(response.status).toBe(422);
+        expect(Object.keys((await response.json()).fieldErrors)).toEqual([field]);
+      }
+    });
+
+    it('the audit log can be read and nothing else: there is no way in to change or remove a line', async () => {
+      const { cookie } = await signedIn('ADMIN');
+      for (const method of ['POST', 'PUT', 'PATCH', 'DELETE']) {
+        const response = await call(method, '/admin/audit-log', { cookie, ...(method === 'DELETE' ? {} : { body: {} }) });
+        expect(response.status).toBe(404);
+        const byId = await call(method, `/admin/audit-log/${ID}`, { cookie, ...(method === 'DELETE' ? {} : { body: {} }) });
+        expect(byId.status).toBe(404);
+      }
+    });
+  });
+
   describe('the audit log', () => {
     it('a change is logged with the names of its fields and none of the values', async () => {
       const { cookie, id } = await signedIn('ADMIN');

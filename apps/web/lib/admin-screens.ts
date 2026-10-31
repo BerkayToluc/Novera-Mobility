@@ -53,8 +53,8 @@ export const ADMIN_SCREENS: readonly AdminScreen[] = [
   { key: "invoices", href: "/yonetim/faturalar", icon: Receipt, ready: false },
   { key: "fleetExpenses", href: "/yonetim/filo-masraflari", icon: Wallet, ready: false },
   { key: "requests", href: "/yonetim/talepler", icon: LifeBuoy, ready: false },
-  { key: "users", href: "/yonetim/kullanicilar", icon: Users, ready: false },
-  { key: "auditLog", href: "/yonetim/kayit", icon: History, ready: false },
+  { key: "users", href: "/yonetim/kullanicilar", icon: Users, ready: true },
+  { key: "auditLog", href: "/yonetim/kayit", icon: History, ready: true },
 ];
 
 export const readyScreens = (): AdminScreen[] => ADMIN_SCREENS.filter((screen) => screen.ready);

@@ -83,8 +83,8 @@ export class AuthService {
       await this.recordFailure(email);
       throw invalidCredentials();
     }
-    if (user.passwordHash === null) {
-      // Google-only account: same work and same answer as a wrong password.
+    if (user.passwordHash === null || user.disabledAt) {
+      // Google-only account, or a closed one (V2-34): same work and same answer as a wrong password, so the state does not show.
       await verifyAgainstDummy(password);
       await this.recordFailure(email);
       throw invalidCredentials();
@@ -154,6 +154,11 @@ export class AuthService {
       include: { user: { include: USER_WITH_COMPANY } },
     });
     if (!session) return null;
+    // A closed account has no session (they go when it is closed); this catches one made in the same moment.
+    if (session.user.disabledAt) {
+      await this.prisma.session.deleteMany({ where: { userId: session.userId } });
+      return null;
+    }
     const now = at.getTime();
     const lastUsed = (session.lastUsedAt ?? session.createdAt).getTime();
     const admin = isAdmin(session.user);

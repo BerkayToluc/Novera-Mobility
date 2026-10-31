@@ -1,12 +1,10 @@
 import 'dotenv/config';
 import { randomUUID } from 'node:crypto';
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
 import { HttpException } from '@nestjs/common';
 import { AuthService } from '../../auth/auth.service.js';
 import { PasswordResetService } from '../../auth/password-reset.service.js';
 import type { ResetLinkNotifier } from '../../auth/reset-link-notifier.js';
-import { USER_WITH_COMPANY, toUserResponse, type UserRow } from '../../auth/user-view.js';
+import { toUserResponse } from '../../auth/user-view.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { CompaniesService } from './companies.service.js';
 
@@ -365,118 +363,5 @@ describeDb('company administration and invitation against the database (V2-33)',
       await prisma.user.update({ where: { id: person.id }, data: { passwordHash: 'x' } });
       expect((await refused(service.resend(made.id, person.id))).body).toMatchObject({ code: 'INVALID_TRANSITION' });
     });
-  });
-
-  // "The answer of GET /me does not change" (V2-33): the same corporate accounts, once from the columns they had on the user and
-  // once from the company the migration moved them to.
-  describe('the migration that moves the company fields', () => {
-    const legacy = (user: {
-      id: string;
-      email: string;
-      firstName: string;
-      lastName: string;
-      companyName: string | null;
-      taxOffice: string | null;
-      companyCity: string | null;
-      companyPhone: string | null;
-      contactTitle: string | null;
-      salesContact: unknown;
-    }) => ({
-      companyName: user.companyName,
-      taxOffice: user.taxOffice,
-      companyCity: user.companyCity,
-      companyPhone: user.companyPhone,
-      contactTitle: user.contactTitle,
-      salesContact: user.salesContact ?? null,
-    });
-
-    // The data part of the migration, as the file has it (comments cut away).
-    const dataMove = (): string[] => {
-      // The tests run from apps/api, where the migrations are.
-      const file = readFileSync(join(process.cwd(), 'prisma/migrations/20261030180000_company_and_invite/migration.sql'), 'utf8');
-      const part = file.slice(file.indexOf('-- DATA MOVE'), file.indexOf('-- END DATA MOVE'));
-      return part
-        .split('\n')
-        .filter((line) => !line.trim().startsWith('--'))
-        .join('\n')
-        .split(';')
-        .map((statement) => statement.trim())
-        .filter(Boolean);
-    };
-
-    const account = (word: string, data: Record<string, unknown>) =>
-      prisma.user.create({ data: { email: mailOf(word), passwordHash: 'x', firstName: 'Kişi', lastName: word, accountType: 'CORPORATE', ...data } });
-    const runMove = async () => {
-      for (const statement of dataMove()) await prisma.$executeRawUnsafe(statement);
-    };
-    const companyIds = async (ids: string[]) =>
-      new Map((await prisma.user.findMany({ where: { id: { in: ids } }, select: { id: true, companyId: true } })).map((row) => [row.id, row.companyId]));
-
-    it('leaves the answer of GET /me the same for every account, makes one company of the accounts of one company, and leaves the rest alone', async () => {
-      const sales = { name: 'Selin', email: 'satis@novera.example', phone: '+90 212 555 01 99' };
-      const details = { taxOffice: 'Bornova', companyCity: 'İzmir', companyPhone: '+90 232 555 01 00', salesContact: sales };
-      const firm = `V33 Gocmen ${run}`;
-      // Two people of one company, with the same company details (as the accounts of one company have), and each their own title.
-      const older = await account('eski-1', { companyName: firm, ...details, contactTitle: 'Müdür' });
-      const later = await account('eski-2', { companyName: firm, ...details, contactTitle: 'Uzman' });
-      const other = await account('eski-3', { companyName: `V33 Baska ${run}`, taxOffice: 'Çankaya' });
-      const nameless = await account('eski-4', { contactTitle: 'Yönetici' });
-      const individual = await prisma.user.create({ data: { email: mailOf('bireysel'), passwordHash: 'x', firstName: 'Bi', lastName: 'Reysel' } });
-      const all = [older, later, other, nameless, individual];
-      users.push(...all.map((user) => user.id));
-
-      const before = new Map(all.map((user) => [user.id, toUserResponse({ ...(user as unknown as UserRow), company: legacyCompany(user) })]));
-      await runMove();
-
-      for (const user of all) {
-        const loaded = await prisma.user.findUniqueOrThrow({ where: { id: user.id }, include: USER_WITH_COMPANY });
-        expect(toUserResponse(loaded as unknown as UserRow)).toEqual(before.get(user.id));
-      }
-
-      const companyOf = await companyIds(all.map((user) => user.id));
-      // Two accounts, one company; the other name its own; no name, or an individual account: no company.
-      expect(companyOf.get(older.id)).not.toBeNull();
-      expect(companyOf.get(later.id)).toBe(companyOf.get(older.id));
-      expect(companyOf.get(other.id)).not.toBe(companyOf.get(older.id));
-      expect(companyOf.get(nameless.id)).toBeNull();
-      expect(companyOf.get(individual.id)).toBeNull();
-      expect(await prisma.company.findUniqueOrThrow({ where: { id: companyOf.get(older.id)! } })).toMatchObject({
-        name: firm,
-        taxOffice: 'Bornova',
-        city: 'İzmir',
-        phone: '+90 232 555 01 00',
-        salesContact: sales,
-      });
-      expect(await prisma.company.count({ where: { name: { contains: `Gocmen ${run}`, mode: 'insensitive' } } })).toBe(1);
-
-      // Run again: nothing is made twice and nothing changes. The old columns are still there, untouched, for the release that overlaps.
-      await runMove();
-      expect(
-        await prisma.company.count({ where: { OR: [{ name: { contains: `Gocmen ${run}`, mode: 'insensitive' } }, { name: { contains: `Baska ${run}`, mode: 'insensitive' } }] } }),
-      ).toBe(2);
-      expect(legacy(await prisma.user.findUniqueOrThrow({ where: { id: older.id } }))).toMatchObject({ companyName: firm, taxOffice: 'Bornova' });
-    });
-
-    // The one place the answer can change, and it is the rule of the issue: "the same company name lands in one company". Where two
-    // accounts of one company name disagreed about the company's details, the oldest account's details are the company's, and the
-    // later account now reads them. The name written another way (case, spaces) is the same name.
-    it('where accounts of one company name disagreed, the oldest account’s details are the company’s', async () => {
-      const first = await account('uyusmaz-1', { companyName: `V33 Uyusmaz ${run}`, taxOffice: 'Bornova', companyCity: 'İzmir' });
-      const second = await account('uyusmaz-2', { companyName: `  v33 UYUSMAZ ${run} `, taxOffice: 'Çankaya', companyCity: 'Ankara' });
-      users.push(first.id, second.id);
-      await runMove();
-
-      const companyOf = await companyIds([first.id, second.id]);
-      expect(companyOf.get(second.id)).toBe(companyOf.get(first.id));
-      const loaded = await prisma.user.findUniqueOrThrow({ where: { id: second.id }, include: USER_WITH_COMPANY });
-      expect(toUserResponse(loaded as unknown as UserRow)).toMatchObject({ companyName: `V33 Uyusmaz ${run}`, taxOffice: 'Bornova', companyCity: 'İzmir' });
-    });
-
-    // What `GET /me` showed before: the company fields straight from the user's own columns.
-    function legacyCompany(user: { companyName: string | null; taxOffice: string | null; companyCity: string | null; companyPhone: string | null; salesContact: unknown }) {
-      return user.companyName === null
-        ? null
-        : { name: user.companyName.trim(), taxOffice: user.taxOffice, city: user.companyCity, phone: user.companyPhone, salesContact: user.salesContact };
-    }
   });
 });

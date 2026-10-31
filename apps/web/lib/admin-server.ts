@@ -10,7 +10,9 @@ import { MODEL_API_FILTERS, type AdminModelDetail, type AdminModelPage, type Mod
 import { BRANCH_API_FILTERS, type AdminBranchDetail, type AdminBranchPage } from "./admin-branches";
 import { PROMO_API_FILTERS, type PromoCode, type PromoCodePage } from "./admin-promo";
 import type { AdminCompanyDetail, AdminCompanyPage } from "./admin-companies";
-import { fetchAdminBranch, fetchAdminCompanies, fetchAdminCompany, fetchAdminBranches, fetchAdminExtra, fetchAdminExtras, fetchAdminModel, fetchAdminMessage, fetchAdminMessages, fetchAdminModels, fetchAdminQuote, fetchAdminQuotes, fetchAdminReservation, fetchAdminReservations, fetchAdminSummary, fetchAdminVehicle, fetchAdminVehicles, fetchModelClasses, fetchPromoCode, fetchPromoCodes, type AdminSummary } from "./api-admin";
+import { AUDIT_API_FILTERS, validActor, type AdminAuditPage, type AuditFilter } from "./admin-audit";
+import { USER_API_FILTERS, type AdminUserDetail, type AdminUserPage, type UserFilter } from "./admin-users";
+import { fetchAdminAudit, fetchAdminUser, fetchAdminUsers, fetchAdminBranch, fetchAdminCompanies, fetchAdminCompany, fetchAdminBranches, fetchAdminExtra, fetchAdminExtras, fetchAdminModel, fetchAdminMessage, fetchAdminMessages, fetchAdminModels, fetchAdminQuote, fetchAdminQuotes, fetchAdminReservation, fetchAdminReservations, fetchAdminSummary, fetchAdminVehicle, fetchAdminVehicles, fetchModelClasses, fetchPromoCode, fetchPromoCodes, type AdminSummary } from "./api-admin";
 import { isMockMode } from "./mode";
 import { mockWorld } from "./mock-world";
 import { normalizePromo } from "./promo-codes";
@@ -216,4 +218,47 @@ export async function getAdminCompanies(params: AdminListParams<never>): Promise
 export async function getAdminCompany(id: string): Promise<AdminCompanyDetail | null> {
   if (!isMockMode()) return fetchAdminCompany(id);
   return (await import("@/mocks/admin-companies")).getMockCompany(await mockWorld(), id);
+}
+
+export async function getAdminUsers(params: AdminListParams<UserFilter>): Promise<AdminUserPage> {
+  if (!isMockMode()) return fetchAdminUsers(toApiQuery(params, USER_API_FILTERS));
+  return (await import("@/mocks/admin-users")).listMockUsers(await mockWorld(), {
+    page: params.page,
+    pageSize: params.pageSize,
+    sort: params.sort,
+    q: params.q,
+    type: params.filters.tur ?? null,
+    status: params.filters.durum ?? null,
+  });
+}
+
+// `null` for an account that does not exist, or whose id cannot be one.
+export async function getAdminUser(id: string): Promise<AdminUserDetail | null> {
+  if (!isMockMode()) return fetchAdminUser(id);
+  return (await import("@/mocks/admin-users")).getMockUser(await mockWorld(), id);
+}
+
+// A day that is not a real one, or a "who" that cannot be one, is left out, so a made-up address shows the log.
+export async function getAdminAudit(params: AdminListParams<AuditFilter>): Promise<AdminAuditPage> {
+  const from = validDay(params.filters.bas);
+  const to = validDay(params.filters.bit);
+  const filters = { ...params.filters, yonetici: validActor(params.filters.yonetici), bas: from, bit: from && to && to < from ? undefined : to };
+  if (!isMockMode()) return fetchAdminAudit(toApiQuery({ ...params, filters }, AUDIT_API_FILTERS));
+  return (await import("@/mocks/admin-users")).listMockAudit(await mockWorld(), {
+    page: params.page,
+    pageSize: params.pageSize,
+    actor: filters.yonetici ?? null,
+    entity: filters.alan ?? null,
+    from: filters.bas ?? null,
+    to: filters.bit ?? null,
+  });
+}
+
+// The accounts that can be the "who" of a log line: the administrators, and the terminal.
+export async function getAuditActors(): Promise<Array<{ id: string; label: string }>> {
+  const page = isMockMode()
+    ? null
+    : await fetchAdminUsers(new URLSearchParams({ page: "1", pageSize: "100", type: "ADMIN", sort: "lastName:asc" }));
+  const admins = page ? page.items.map((user) => ({ id: user.id, label: `${user.firstName} ${user.lastName}` })) : (await import("@/mocks/admin-users")).mockAdministrators(await mockWorld());
+  return admins;
 }

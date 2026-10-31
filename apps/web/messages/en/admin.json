@@ -976,6 +976,168 @@
         "submit": "Send invitation",
         "sending": "Sending"
       }
+    },
+    "users": {
+      "title": "Users",
+      "intro": "The accounts registered on the site. You can close an account that is being misused: a closed account cannot sign in, and neither the account nor its bookings are deleted.",
+      "detailTitle": "User",
+      "detailIntro": "The account's details. A closed account cannot sign in.",
+      "searchLabel": "Search by e-mail or name",
+      "typeFilterLabel": "By type",
+      "statusFilterLabel": "By status",
+      "tableCaption": "Users",
+      "retry": "Try again",
+      "columns": {
+        "name": "Name",
+        "email": "E-mail",
+        "type": "Type",
+        "created": "Joined",
+        "status": "Status"
+      },
+      "type": {
+        "INDIVIDUAL": "Individual",
+        "CORPORATE": "Corporate",
+        "ADMIN": "Administrator"
+      },
+      "status": {
+        "ACTIVE": "Open",
+        "DISABLED": "Closed"
+      },
+      "emptyTitle": "No users yet",
+      "emptyText": "Accounts show up here as people register.",
+      "emptyFilteredTitle": "No user matches this search",
+      "emptyFilteredText": "Try removing the filters or searching for something else.",
+      "loadErrorTitle": "Users could not be loaded",
+      "loadErrorText": "Try again in a few seconds.",
+      "facts": {
+        "title": "Job title",
+        "email": "E-mail",
+        "type": "Type",
+        "company": "Company",
+        "signIn": "Signs in with",
+        "withPassword": "Password",
+        "withGoogle": "Google",
+        "noSignIn": "Nothing yet (invitation pending)",
+        "reservations": "Bookings",
+        "reservationsValue": "{total} bookings, {upcoming} not started yet",
+        "points": "Points",
+        "created": "Joined",
+        "disabled": "Closed on"
+      },
+      "actions": {
+        "title": "Close or reopen the account",
+        "openText": "A closed account cannot sign in at once (password or Google), and all its open sessions end. The account itself and its bookings are not deleted; bookings that have not started are not cancelled.",
+        "closedText": "This account is closed: it cannot sign in and has no open session. If you reopen it, it signs in as before.",
+        "adminText": "An administrator's account is not closed from here. To take the role away, use the revoke option of the `pnpm admin:create` command.",
+        "disable": "Close the account",
+        "enable": "Reopen the account"
+      },
+      "disableDialog": {
+        "title": "Close the account of {name}?",
+        "text": "The account cannot sign in at once and all its open sessions end. The account and its bookings are not deleted; you can reopen it at any time.",
+        "upcoming": "{count, plural, =0 {It has no booking that has not started.} one {# booking that has not started is not cancelled; it stays as it is.} other {# bookings that have not started are not cancelled; they stay as they are.}}",
+        "confirm": "Close the account",
+        "keep": "Keep it open"
+      },
+      "toast": {
+        "disabled": "Account closed",
+        "enabled": "Account reopened"
+      },
+      "errors": {
+        "forbidden": "An administrator's account cannot be closed from here.",
+        "notFound": "This account no longer exists. Go back to the list.",
+        "unavailable": "That did not work. Try again in a few seconds."
+      }
+    },
+    "audit": {
+      "title": "Audit log",
+      "intro": "A record of every change made in the panel: who, when, what. Only field names are kept; values and personal data are not. The record cannot be edited or deleted.",
+      "tableCaption": "Audit log",
+      "retry": "Try again",
+      "actorFilterLabel": "By who did it",
+      "allActors": "Everyone",
+      "entityFilterLabel": "By kind of record",
+      "allEntities": "All kinds",
+      "fromLabel": "First day",
+      "toLabel": "Last day",
+      "apply": "Filter",
+      "clearDates": "Clear the days",
+      "cli": "Command line",
+      "deletedAccount": "Deleted account",
+      "columns": {
+        "when": "When",
+        "who": "Who",
+        "what": "What",
+        "fields": "Fields"
+      },
+      "emptyTitle": "No records yet",
+      "emptyText": "A change made in the panel shows up here.",
+      "emptyFilteredTitle": "No record matches this filter",
+      "emptyFilteredText": "Try removing the filters or widening the days.",
+      "loadErrorTitle": "The audit log could not be loaded",
+      "loadErrorText": "Try again in a few seconds.",
+      "entities": {
+        "branch": "Branch",
+        "company": "Company",
+        "contact-message": "Contact message",
+        "extra": "Extra",
+        "promo-code": "Campaign code",
+        "quote": "Quote request",
+        "reservation": "Booking",
+        "user": "User",
+        "vehicle": "Vehicle",
+        "vehicle-model": "Vehicle model"
+      },
+      "actions": {
+        "admin": {
+          "grant": "Gave the administrator role",
+          "revoke": "Took the administrator role away",
+          "ping": "Tried the administration connection"
+        },
+        "branch": {
+          "create": "Added a branch",
+          "update": "Changed a branch",
+          "close": "Closed a branch",
+          "reopen": "Reopened a branch"
+        },
+        "company": {
+          "create": "Added a company",
+          "update": "Changed a company",
+          "invite": "Invited a person",
+          "invite-resend": "Sent an invitation again"
+        },
+        "contact-message": {
+          "handle": "Changed the handled mark of a message"
+        },
+        "extra": {
+          "update": "Changed an extra"
+        },
+        "promo-code": {
+          "create": "Added a campaign code",
+          "update": "Changed a campaign code",
+          "delete": "Deleted a campaign code"
+        },
+        "quote": {
+          "update": "Updated a quote request"
+        },
+        "reservation": {
+          "cancel": "Cancelled a booking"
+        },
+        "user": {
+          "disable": "Closed an account",
+          "enable": "Reopened an account"
+        },
+        "vehicle-model": {
+          "create": "Added a model",
+          "update": "Changed a model",
+          "retire": "Retired a model",
+          "restore": "Restored a model"
+        },
+        "vehicle": {
+          "create": "Added a vehicle",
+          "update": "Changed a vehicle"
+        }
+      }
     }
   }
 }

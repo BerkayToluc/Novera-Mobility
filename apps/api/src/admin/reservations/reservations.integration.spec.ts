@@ -255,6 +255,22 @@ describeDb('booking administration against the database (V2-31)', () => {
       expect(detail.price.lines.map((line) => line.type)).toEqual(['VEHICLE', 'DISCOUNT']);
     });
 
+    // The company name of a corporate customer comes from the company (V2-33); the old column on the account is gone (V2-34).
+    it('names the company of a corporate customer, from the company', async () => {
+      const company = await prisma.company.create({ data: { name: `V31 Firma ${run}` } });
+      const corporate = await prisma.user.create({
+        data: { email: `kurumsal-${run}@example.test`, passwordHash: 'x', firstName: 'Kurumsal', lastName: 'Kişi', accountType: 'CORPORATE', companyId: company.id },
+      });
+      try {
+        const row = await book({ userId: corporate.id });
+        expect((await service.get(row.number)).customerAccount).toEqual({ type: 'CORPORATE', companyName: `V31 Firma ${run}` });
+      } finally {
+        await prisma.reservation.deleteMany({ where: { userId: corporate.id } });
+        await prisma.user.delete({ where: { id: corporate.id } });
+        await prisma.company.delete({ where: { id: company.id } });
+      }
+    });
+
     it('cannot be cancelled once it has started, and says so', async () => {
       const running = await book({ startAt: days(-1), endAt: days(1) });
       expect((await service.get(running.number)).cancellable).toBe(false);
