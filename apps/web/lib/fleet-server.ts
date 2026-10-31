@@ -17,8 +17,9 @@ import {
   type FleetVehiclePage,
   type VehicleFilter,
 } from "./fleet-panel";
+import { FLEET_EXPENSE_API_FILTERS, type ExpenseStatus, type ExpenseType, type FleetExpenseFilter, type FleetExpensePage } from "./expenses";
 import type { Invoice, InvoiceFilter, InvoicePage } from "./invoices";
-import { fetchFleetAssignments, fetchFleetInvoice, fetchFleetInvoices, fetchFleetContract, fetchFleetContracts, fetchFleetEmployee, fetchFleetEmployees, fetchFleetSummary, fetchFleetVehicle, fetchFleetVehicles } from "./api-fleet";
+import { fetchFleetAssignments, fetchFleetExpenses, fetchFleetInvoice, fetchFleetInvoices, fetchFleetContract, fetchFleetContracts, fetchFleetEmployee, fetchFleetEmployees, fetchFleetSummary, fetchFleetVehicle, fetchFleetVehicles } from "./api-fleet";
 import { isMockMode } from "./mode";
 import { mockWorld } from "./mock-world";
 import { getSession } from "./session";
@@ -106,6 +107,32 @@ export async function getFleetInvoices(params: AdminListParams<InvoiceFilter>): 
 export async function getFleetInvoice(number: string): Promise<Invoice | null> {
   if (!isMockMode()) return fetchFleetInvoice(number);
   return (await import("@/mocks/invoices")).getMockInvoice(await mockWorld(), number, await sampleCompany());
+}
+
+// The person filter is a person's id, or `yok` (in the address) for the expenses of a moment nobody had the car: `none` for the API.
+export async function getFleetExpenses(params: AdminListParams<FleetExpenseFilter>): Promise<FleetExpensePage> {
+  const f = params.filters;
+  if (!isMockMode()) {
+    const query = new URLSearchParams({ page: String(params.page), pageSize: String(params.pageSize) });
+    if (params.sort) query.set("sort", `${params.sort.key}:${params.sort.dir}`);
+    for (const [name, value] of Object.entries(f) as Array<[FleetExpenseFilter, string]>) query.set(FLEET_EXPENSE_API_FILTERS[name], name === "personel" && value === "yok" ? "none" : value);
+    return fetchFleetExpenses(query);
+  }
+  return (await import("@/mocks/expenses")).listMockExpenses(
+    await mockWorld(),
+    {
+      page: params.page,
+      pageSize: params.pageSize,
+      sort: params.sort,
+      type: (f.tur as ExpenseType | undefined) ?? null,
+      status: (f.durum as ExpenseStatus | undefined) ?? null,
+      employee: f.personel === "yok" ? "none" : (f.personel ?? null),
+      vehicle: f.arac ?? null,
+      from: f.bas ?? null,
+      to: f.bit ?? null,
+    },
+    await sampleCompany(),
+  );
 }
 
 // The people a car can be given to: the active ones, by surname, for the form's choice (a company has a few dozen at most).

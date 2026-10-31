@@ -13,6 +13,8 @@ import { UsersController } from './users/users.controller.js';
 import { UsersService } from './users/users.service.js';
 import { InvoicesController } from './invoices/invoices.controller.js';
 import { InvoicesService } from './invoices/invoices.service.js';
+import { AdminFleetExpensesController } from './fleet-expenses/fleet-expenses.controller.js';
+import { AdminFleetExpensesService } from './fleet-expenses/fleet-expenses.service.js';
 import { AdminContractsController } from './contracts/contracts.controller.js';
 import { AdminContractsService } from './contracts/contracts.service.js';
 import { CompaniesController } from './companies/companies.controller.js';
@@ -37,7 +39,7 @@ import { AuditService } from './audit.service.js';
 // rate limit module, so a request is counted before it is turned away.
 @Module({
   imports: [AuthModule],
-  controllers: [AdminController, PromoCodesController, BranchesController, VehicleModelsController, VehicleClassesController, VehiclesController, ExtrasController, AdminReservationsController, AdminQuotesController, AdminMessagesController, CompaniesController, UsersController, AuditLogController, AdminContractsController, InvoicesController],
+  controllers: [AdminController, PromoCodesController, BranchesController, VehicleModelsController, VehicleClassesController, VehiclesController, ExtrasController, AdminReservationsController, AdminQuotesController, AdminMessagesController, CompaniesController, UsersController, AuditLogController, AdminContractsController, InvoicesController, AdminFleetExpensesController],
   providers: [
     AuditService,
     AdminSummaryService,
@@ -53,6 +55,7 @@ import { AuditService } from './audit.service.js';
     UsersService,
     AdminContractsService,
     InvoicesService,
+    AdminFleetExpensesService,
     AuditLogService,
     { provide: APP_GUARD, useClass: AdminGuard },
     { provide: APP_INTERCEPTOR, useClass: AuditInterceptor },

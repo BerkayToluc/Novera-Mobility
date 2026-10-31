@@ -24,6 +24,8 @@ export type FleetSummary = {
     unpaid: { count: number; total: number };
     overdue: number;
   };
+  // The costs (V2-38): those still open, which the customer has to look at.
+  expenses: { open: { count: number; total: number } };
 };
 
 // The numbers on the summary of the fleet panel (V2-35). The cards of invoices, expenses and requests are added by the issues that
@@ -35,7 +37,7 @@ export class FleetSummaryService {
   async get(companyId: string, now: Date = new Date()): Promise<FleetSummary> {
     const day = istanbulDay(now);
     const today = parseDay(day.date)!;
-    const [activeContracts, endingSoon, total, assigned, maintenanceDue, thisMonth, unpaid, overdue] = await Promise.all([
+    const [activeContracts, endingSoon, total, assigned, maintenanceDue, thisMonth, unpaid, overdue, openExpenses] = await Promise.all([
       this.prisma.fleetContract.count({ where: { companyId, status: 'ACTIVE' } }),
       this.prisma.fleetContract.count({ where: { companyId, status: 'ACTIVE', endAt: { lte: addDays(today, CONTRACT_ENDING_DAYS) } } }),
       this.prisma.fleetVehicle.count({ where: { companyId, status: 'ACTIVE' } }),
@@ -50,6 +52,7 @@ export class FleetSummaryService {
       this.prisma.fleetInvoice.findFirst({ where: { companyId, period: day.date.slice(0, 7) } }),
       this.prisma.fleetInvoice.aggregate({ where: { companyId, paidAt: null }, _count: true, _sum: { total: true } }),
       this.prisma.fleetInvoice.count({ where: { companyId, paidAt: null, dueAt: { lt: today } } }),
+      this.prisma.fleetExpense.aggregate({ where: { companyId, status: 'OPEN' }, _count: true, _sum: { amount: true } }),
     ]);
     return {
       date: day.date,
@@ -62,6 +65,7 @@ export class FleetSummaryService {
         unpaid: { count: unpaid._count, total: unpaid._sum.total ?? 0 },
         overdue,
       },
+      expenses: { open: { count: openExpenses._count, total: openExpenses._sum.amount ?? 0 } },
     };
   }
 }

@@ -5,10 +5,11 @@
 // the companies are made and the users are not.
 import type { PrismaClient } from "../src/generated/prisma/client.js";
 import { hashPassword } from "../src/auth/password.js";
+import { assigneeAt, type ExpenseType } from "../src/fleet/expense-calc.js";
 import { addDays, parseDay } from "../src/fleet/fleet-dates.js";
 import { dueDayOf, lineOf, periodRange, totalsOf, type InvoiceLine } from "../src/fleet/invoice-calc.js";
 
-type Db = Pick<PrismaClient, "company" | "user" | "product" | "vehicleModel" | "vehicle" | "fleetContract" | "fleetVehicle" | "companyEmployee" | "vehicleAssignment" | "vehicleReading" | "fleetInvoice" | "$queryRaw">;
+type Db = Pick<PrismaClient, "company" | "user" | "product" | "vehicleModel" | "vehicle" | "fleetContract" | "fleetVehicle" | "companyEmployee" | "vehicleAssignment" | "vehicleReading" | "fleetInvoice" | "fleetExpense" | "$queryRaw">;
 
 type CarSeed = { plate: string; modelSlug: string; year: number; startKm: number; maintenanceInDays: number; inspectionInDays: number };
 type PersonSeed = { firstName: string; lastName: string; department: string; employeeNo: string; email: string; phone: string };
@@ -123,12 +124,12 @@ const HYBRID = new Set(["toyota-corolla-hybrid", "nissan-qashqai", "toyota-rav4-
 const day = (date: string): Date => new Date(`${date}T00:00:00.000Z`);
 const dayOf = (now: Date, offsetDays: number): Date => new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + offsetDays));
 
-export type FleetSeedResult = { companies: number; users: number; contracts: number; cars: number; people: number; assignments: number; readings: number; invoices: number };
+export type FleetSeedResult = { companies: number; users: number; contracts: number; cars: number; people: number; assignments: number; readings: number; invoices: number; expenses: number };
 
 // Adds what is missing and says how much it added. `password` is the one for the sample users; empty means no user is made.
 export async function seedFleet(db: Db, options: { password?: string | null; now?: Date; seeds?: CompanySeed[] } = {}): Promise<FleetSeedResult> {
   const now = options.now ?? new Date();
-  const result: FleetSeedResult = { companies: 0, users: 0, contracts: 0, cars: 0, people: 0, assignments: 0, readings: 0, invoices: 0 };
+  const result: FleetSeedResult = { companies: 0, users: 0, contracts: 0, cars: 0, people: 0, assignments: 0, readings: 0, invoices: 0, expenses: 0 };
   const passwordHash = options.password ? await hashPassword(options.password) : null;
 
   for (const [seedIndex, seed] of (options.seeds ?? FLEET_SEEDS).entries()) {
@@ -225,6 +226,35 @@ export async function seedFleet(db: Db, options: { password?: string | null; now
             result.readings += 1;
           }
         }
+      }
+    }
+
+    // About twenty costs per company over the last eighty days (V2-38): mostly HGS passes, a few penalties and one maintenance bill in
+    // every ten. Most are open; some are disputed, and a few are reflected to the person who had the car at the time (only where
+    // somebody did: an expense is never reflected to nobody). A company that has any expense is left as it is.
+    if ((await db.fleetExpense.count({ where: { companyId: company.id } })) === 0) {
+      const cars = await db.fleetVehicle.findMany({ where: { companyId: company.id }, orderBy: { plate: "asc" }, select: { id: true, plate: true } });
+      const spans = await db.vehicleAssignment.findMany({ where: { companyId: company.id }, select: { fleetVehicleId: true, employeeId: true, startedAt: true, endedAt: true } });
+      const places = ["Osmangazi Köprüsü", "Avrasya Tüneli", "15 Temmuz Şehitler Köprüsü", "İzmir-Çeşme Otoyolu"];
+      const kinds: ExpenseType[] = ["HGS", "HGS", "HGS", "PENALTY", "HGS", "MAINTENANCE", "HGS", "HGS", "PENALTY", "HGS"];
+      for (let i = 0; i < 20 && cars.length > 0; i += 1) {
+        const vehicle = cars[i % cars.length]!;
+        const type = kinds[i % kinds.length]!;
+        const occurredAt = new Date(now.getTime() - (1 + ((i * 4) % 80)) * DAY - ((i * 3) % 24) * 3_600_000);
+        const hasPerson = assigneeAt(spans.filter((span) => span.fleetVehicleId === vehicle.id), occurredAt) !== null;
+        await db.fleetExpense.create({
+          data: {
+            companyId: company.id,
+            fleetVehicleId: vehicle.id,
+            type,
+            occurredAt,
+            amount: type === "HGS" ? 4_500 + ((i * 1_350) % 21_000) : type === "PENALTY" ? 119_000 + ((i * 7_300) % 90_000) : 185_000 + ((i * 11_000) % 120_000),
+            description: type === "HGS" ? "HGS geçişi" : type === "PENALTY" ? "Hız sınırı ihlali" : "Periyodik bakım",
+            place: type === "HGS" ? places[i % places.length]! : null,
+            status: i % 7 === 3 ? "DISPUTED" : i % 5 === 2 && hasPerson ? "REFLECTED" : "OPEN",
+          },
+        });
+        result.expenses += 1;
       }
     }
 

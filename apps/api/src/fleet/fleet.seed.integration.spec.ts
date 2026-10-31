@@ -2,6 +2,7 @@ import 'dotenv/config';
 import { randomUUID } from 'node:crypto';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { FLEET_SEEDS, seedFleet } from '../../prisma/seed-fleet.js';
+import { assigneeAt } from './expense-calc.js';
 
 // The sample fleet customers of the seed (V2-35, docs/FLEET.md §5) against a real PostgreSQL (TEST_DATABASE_URL); skipped without one.
 // The seed runs on a live database too, so it must make no copy when it runs again and must not put the sample back over what a
@@ -29,6 +30,7 @@ describeDb('the fleet seed against the database (V2-35)', () => {
     await prisma.vehicleReading.deleteMany({ where: { fleetVehicleId: { in: cars.map((row) => row.id) } } });
     await prisma.vehicleAssignment.deleteMany({ where: { companyId: { in: companyIds } } });
     await prisma.fleetInvoice.deleteMany({ where: { companyId: { in: companyIds } } });
+    await prisma.fleetExpense.deleteMany({ where: { companyId: { in: companyIds } } });
     await prisma.fleetVehicle.deleteMany({ where: { companyId: { in: companyIds } } });
     await prisma.fleetContract.deleteMany({ where: { companyId: { in: companyIds } } });
     await prisma.companyEmployee.deleteMany({ where: { companyId: { in: companyIds } } });
@@ -79,13 +81,14 @@ describeDb('the fleet seed against the database (V2-35)', () => {
     assignments: await prisma.vehicleAssignment.count({ where: { companyId: { in: companyIds } } }),
     readings: await prisma.vehicleReading.count({ where: { vehicle: { plate: { in: plates } } } }),
     invoices: await prisma.fleetInvoice.count({ where: { companyId: { in: companyIds } } }),
+    expenses: await prisma.fleetExpense.count({ where: { companyId: { in: companyIds } } }),
     };
   };
 
   it('makes two companies with their contracts, twelve cars, fifteen people, some assignments and three readings a car', async () => {
     const added = await seedFleet(prisma, { password: 'ornek-seed-parolasi-1', now: NOW });
-    expect(added).toMatchObject({ companies: 2, users: 2, contracts: 3, cars: 12, people: 15, assignments: 8, readings: 36, invoices: 6 });
-    expect(await counts()).toEqual({ companies: 2, users: 2, contracts: 3, cars: 12, people: 15, assignments: 8, readings: 36, invoices: 6 });
+    expect(added).toMatchObject({ companies: 2, users: 2, contracts: 3, cars: 12, people: 15, assignments: 8, readings: 36, invoices: 6, expenses: 40 });
+    expect(await counts()).toEqual({ companies: 2, users: 2, contracts: 3, cars: 12, people: 15, assignments: 8, readings: 36, invoices: 6, expenses: 40 });
 
     // The user belongs to the company and has no password in the clear; the contracts carry the sample's products.
     const user = await prisma.user.findUniqueOrThrow({ where: { email: emails[0]! }, include: { company: true } });
@@ -100,7 +103,7 @@ describeDb('the fleet seed against the database (V2-35)', () => {
   it('run again, it makes no copy and adds nothing', async () => {
     const before = await counts();
     const again = await seedFleet(prisma, { password: 'ornek-seed-parolasi-1', now: NOW });
-    expect(again).toEqual({ companies: 0, users: 0, contracts: 0, cars: 0, people: 0, assignments: 0, readings: 0, invoices: 0 });
+    expect(again).toEqual({ companies: 0, users: 0, contracts: 0, cars: 0, people: 0, assignments: 0, readings: 0, invoices: 0, expenses: 0 });
     expect(await counts()).toEqual(before);
   });
 
@@ -141,6 +144,25 @@ describeDb('the fleet seed against the database (V2-35)', () => {
       expect(row.total).toBe(row.subtotal + row.vat);
     }
     expect(new Set([...first, ...second].map((row) => row.number)).size).toBe(6);
+  });
+
+  it('makes about forty expenses: HGS, penalties and maintenance, none reflected to nobody, and none made twice', async () => {
+    await clean();
+    await seedFleet(prisma, { password: '', now: NOW });
+    const companyIds = (await prisma.company.findMany({ where: { name: { in: names } }, select: { id: true } })).map((row) => row.id);
+    const rows = await prisma.fleetExpense.findMany({ where: { companyId: { in: companyIds } } });
+    expect(rows).toHaveLength(40);
+    expect(new Set(rows.map((row) => row.type))).toEqual(new Set(['HGS', 'PENALTY', 'MAINTENANCE']));
+    expect(rows.filter((row) => row.status === 'OPEN').length).toBeGreaterThan(20);
+    expect(rows.some((row) => row.status === 'DISPUTED')).toBe(true);
+    // An expense that is reflected had a person: that is the rule the screens keep, and the sample does not break it.
+    const reflected = rows.filter((row) => row.status === 'REFLECTED');
+    expect(reflected.length).toBeGreaterThan(0);
+    for (const row of reflected) {
+      const spans = await prisma.vehicleAssignment.findMany({ where: { fleetVehicleId: row.fleetVehicleId } });
+      expect(assigneeAt(spans, row.occurredAt)).not.toBeNull();
+    }
+    expect((await seedFleet(prisma, { password: '', now: NOW })).expenses).toBe(0);
   });
 
   it('without a password the companies are made and the users are not', async () => {

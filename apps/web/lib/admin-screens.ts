@@ -51,7 +51,7 @@ export const ADMIN_SCREENS: readonly AdminScreen[] = [
   { key: "messages", href: "/yonetim/mesajlar", icon: MessageSquare, ready: true },
   { key: "companies", href: "/yonetim/sirketler", icon: Briefcase, ready: true },
   { key: "invoices", href: "/yonetim/faturalar", icon: Receipt, ready: true },
-  { key: "fleetExpenses", href: "/yonetim/filo-masraflari", icon: Wallet, ready: false },
+  { key: "fleetExpenses", href: "/yonetim/filo-masraflari", icon: Wallet, ready: true },
   { key: "requests", href: "/yonetim/talepler", icon: LifeBuoy, ready: false },
   { key: "users", href: "/yonetim/kullanicilar", icon: Users, ready: true },
   { key: "auditLog", href: "/yonetim/kayit", icon: History, ready: true },

@@ -12,6 +12,7 @@ import { PrismaService } from '../prisma/prisma.service.js';
 import { FleetAssignmentsService } from './fleet-assignments.service.js';
 import { FleetContractsService } from './fleet-contracts.service.js';
 import { FleetEmployeesService } from './fleet-employees.service.js';
+import { FleetExpensesService } from './fleet-expenses.service.js';
 import { FleetInvoicesService } from './fleet-invoices.service.js';
 import { FleetSummaryService } from './fleet-summary.service.js';
 import { FleetVehiclesService } from './fleet-vehicles.service.js';
@@ -48,6 +49,11 @@ const ROUTES: Array<[string, string, unknown?]> = [
   ['GET', '/fleet/assignments'],
   ['POST', '/fleet/assignments', { fleetVehicleId: ID, employeeId: ID, note: 'Not' }],
   ['POST', `/fleet/assignments/${ID}/end`, {}],
+  ['POST', '/fleet/contracts/SZL-2026-00001/renewal-request', { notes: 'Lütfen arayın' }],
+  ['GET', '/fleet/expenses'],
+  ['GET', `/fleet/expenses/${ID}`],
+  ['PATCH', `/fleet/expenses/${ID}`, { updatedAt: '2026-10-31T10:00:00.000Z', status: 'DISPUTED' }],
+  ['POST', '/fleet/expenses/reflect', { ids: [ID] }],
 ];
 
 describe('the fleet panel over HTTP (V2-35)', () => {
@@ -61,7 +67,9 @@ describe('the fleet panel over HTTP (V2-35)', () => {
       .overrideProvider(FleetVehiclesService)
       .useValue(stub(['list', 'get']))
       .overrideProvider(FleetContractsService)
-      .useValue(stub(['list', 'get']))
+      .useValue(stub(['list', 'get', 'requestRenewal']))
+      .overrideProvider(FleetExpensesService)
+      .useValue(stub(['list', 'get', 'setStatus', 'reflect']))
       .overrideProvider(FleetEmployeesService)
       .useValue(stub(['list', 'get', 'create', 'update']))
       .overrideProvider(FleetInvoicesService)
@@ -144,7 +152,7 @@ describe('the fleet panel over HTTP (V2-35)', () => {
     const { cookie } = await signedIn('corporate');
     for (const [method, path, body] of ROUTES) {
       const response = await call(method, path, { cookie, body });
-      expect([method, path, response.status]).toEqual([method, path, method === 'POST' && !path.endsWith('/end') ? 201 : 200]);
+      expect([method, path, response.status]).toEqual([method, path, method === 'POST' && !path.endsWith('/end') && !path.endsWith('/reflect') ? 201 : 200]);
     }
   });
 
@@ -152,13 +160,16 @@ describe('the fleet panel over HTTP (V2-35)', () => {
     const { cookie, id } = await signedIn('corporate');
     for (const [method, path, body] of ROUTES) await call(method, path, { cookie, body });
 
-    expect(fake.auditLogs).toHaveLength(4);
+    expect(fake.auditLogs).toHaveLength(7);
     expect(fake.auditLogs[0]).toMatchObject({ actorId: id, companyId: COMPANY, action: 'fleet-employee.create', entity: 'employee', entityId: ID, fields: ['firstName', 'lastName', 'email'] });
     expect(fake.auditLogs[1]).toMatchObject({ actorId: id, companyId: COMPANY, action: 'fleet-employee.update', entityId: ID, fields: ['updatedAt', 'department'] });
     expect(fake.auditLogs[2]).toMatchObject({ actorId: id, companyId: COMPANY, action: 'fleet-assignment.create', entity: 'assignment', entityId: ID, fields: ['fleetVehicleId', 'employeeId', 'note'] });
     expect(fake.auditLogs[3]).toMatchObject({ actorId: id, companyId: COMPANY, action: 'fleet-assignment.end', entityId: ID, fields: [] });
+    expect(fake.auditLogs[4]).toMatchObject({ actorId: id, companyId: COMPANY, action: 'fleet-contract.renewal-request', entity: 'contract', entityId: 'SZL-2026-00001', fields: ['notes'] });
+    expect(fake.auditLogs[5]).toMatchObject({ actorId: id, companyId: COMPANY, action: 'fleet-expense.update', entity: 'expense', entityId: ID, fields: ['updatedAt', 'status'] });
+    expect(fake.auditLogs[6]).toMatchObject({ actorId: id, companyId: COMPANY, action: 'fleet-expense.reflect', entity: 'expense', entityId: null, fields: ['ids'] });
     const written = JSON.stringify(fake.auditLogs);
-    for (const secret of ['ada@example.test', 'Ada', 'Kaya', 'Satış']) expect(written).not.toContain(secret);
+    for (const secret of ['ada@example.test', 'Ada', 'Kaya', 'Satış', 'Lütfen arayın']) expect(written).not.toContain(secret);
   });
 
   it('counts the account, not the address, and refuses the 121st request in a minute with 429', async () => {

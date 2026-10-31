@@ -9,7 +9,8 @@
       "employees": "People",
       "assignments": "Assignments",
       "contracts": "Contracts",
-      "invoices": "Invoices"
+      "invoices": "Invoices",
+      "expenses": "Expenses"
     },
     "empty": {
       "title": "My fleet",
@@ -43,6 +44,12 @@
         "unpaidCount": "{count, plural, one {# unpaid invoice} other {# unpaid invoices}}, {overdue} overdue",
         "openInvoice": "Open the invoice",
         "openList": "Open the invoices"
+      },
+      "expenses": {
+        "title": "Expenses",
+        "open": "Open expenses",
+        "openTotal": "Total {total}",
+        "openList": "Open expenses"
       }
     },
     "vehicles": {
@@ -333,6 +340,21 @@
         "empty": "No car has been added to this contract yet.",
         "idle": "Idle",
         "returned": "Given back"
+      },
+      "renewal": {
+        "title": "Renew the contract",
+        "text": "Send the sales team a renewal request. It is opened with your contract's product and number of vehicles, and our team will get in touch.",
+        "notesLabel": "A note to the sales team (optional)",
+        "notesHint": "At most 500 characters.",
+        "button": "Send renewal request",
+        "sending": "Sending…",
+        "sent": "Your renewal request was received. Your reference number: {number}",
+        "errors": {
+          "already": "A renewal request for this contract is already being handled; our team will get in touch.",
+          "notes": "The note can be at most 500 characters.",
+          "notFound": "This contract no longer exists.",
+          "unavailable": "The request could not be sent. Try again in a few seconds."
+        }
       }
     },
     "invoices": {
@@ -363,6 +385,80 @@
       "loadErrorTitle": "The invoice could not be loaded",
       "loadErrorText": "Try again in a few seconds.",
       "retry": "Try again"
+    },
+    "expenses": {
+      "title": "Expenses",
+      "intro": "HGS tolls, penalties and maintenance costs. For each expense you see who had the vehicle at that moment. You can reflect open expenses to the employee or dispute them.",
+      "statusFilterLabel": "By status",
+      "typeFilterLabel": "By type",
+      "tableCaption": "Expenses",
+      "retry": "Try again",
+      "currencyNote": "Amounts are shown in TRY.",
+      "columns": {
+        "select": "Select",
+        "occurredAt": "Time",
+        "vehicle": "Vehicle",
+        "type": "Type",
+        "amount": "Amount",
+        "employee": "Employee",
+        "status": "Status",
+        "actions": "Action"
+      },
+      "type": {
+        "HGS": "HGS toll",
+        "PENALTY": "Penalty",
+        "MAINTENANCE": "Maintenance",
+        "OTHER": "Other"
+      },
+      "status": {
+        "OPEN": "Open",
+        "REFLECTED": "Reflected to employee",
+        "DISPUTED": "Disputed"
+      },
+      "unassigned": "Unassigned",
+      "emptyTitle": "No expenses yet",
+      "emptyText": "HGS tolls, penalties and maintenance costs appear here once Novera enters them.",
+      "emptyFilteredTitle": "No expense matches this filter",
+      "emptyFilteredText": "Try removing the filters.",
+      "loadErrorTitle": "Expenses could not be loaded",
+      "loadErrorText": "Try again in a few seconds.",
+      "selectRow": "Select the expense of {plate}",
+      "selectAll": "Select every expense on this page that can be reflected",
+      "reflect": {
+        "button": "Reflect to employee",
+        "buttonCount": "Reflect to employee ({count})",
+        "hint": "Only open expenses that have an employee can be reflected. {count} selected.",
+        "none": "Select open expenses that have an employee to reflect them.",
+        "dialogTitle": "Reflect {count} expenses to the employees?",
+        "dialogText": "Each expense is reflected to the employee who had the vehicle at that moment. A reflected expense cannot be undone.",
+        "confirm": "Reflect",
+        "keep": "Cancel"
+      },
+      "dispute": "Dispute",
+      "undispute": "Withdraw dispute",
+      "rowActionsFor": "Expense of {plate}",
+      "toast": {
+        "reflected": "{count} expenses reflected to the employees.",
+        "reflectedSkipped": "{count} expenses reflected; {skipped} were left as they are because they did not qualify.",
+        "disputed": "The expense is disputed.",
+        "reopened": "The dispute was withdrawn."
+      },
+      "errors": {
+        "stale": "The expense changed in the meantime; the list was reloaded, try again.",
+        "notAllowed": "This cannot be done to this expense.",
+        "notFound": "This expense no longer exists.",
+        "unavailable": "The action could not be completed. Try again in a few seconds."
+      },
+      "filters": {
+        "vehicleLabel": "By vehicle",
+        "vehicleAll": "All vehicles",
+        "employeeLabel": "By employee",
+        "employeeAll": "All employees",
+        "from": "First day",
+        "to": "Last day",
+        "apply": "Apply",
+        "clear": "Clear days"
+      }
     }
   }
 }

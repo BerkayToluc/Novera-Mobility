@@ -1,6 +1,7 @@
 import type { AssignFormValues, EmployeeFormValues, FleetAssignment, FleetAssignmentPage, FleetContract, FleetContractDetail, FleetContractPage, FleetEmployee, FleetEmployeePage, FleetSummary, FleetVehiclePage, FleetVehicleDetail } from "@/lib/fleet-panel";
 import { normalizePlate } from "@/lib/admin-vehicles";
 import { normalizeSearch } from "@/lib/branch-detail";
+import { expenseSummary } from "./expenses";
 import { invoiceSummary } from "./invoices";
 import { getMockCarReadings, getMockContract, listMockCompanyCars, listMockContracts, setMockCarAssignee } from "./admin-contracts";
 
@@ -96,6 +97,17 @@ function assignmentView(world_: string, w: World, g: Given): FleetAssignment {
   return { id: g.id, vehicle: { id: g.vehicleId, plate: car?.plate ?? "—" }, employee: { id: p.id, name: fullName(p), department: p.department }, startedAt: g.startedAt, endedAt: g.endedAt, note: g.note };
 }
 
+// The assignments of a company's cars, with the person's name, for the expenses: who had a car at a moment is worked out from these (V2-38).
+export function assignmentSpans(world_: string, companyId: string): Array<{ vehicleId: string; employeeId: string; startedAt: string; endedAt: string | null; name: string; department: string | null }> {
+  const w = world(world_);
+  return w.given
+    .filter((g) => g.companyId === companyId)
+    .map((g) => {
+      const p = w.people.find((entry) => entry.id === g.employeeId)!;
+      return { vehicleId: g.vehicleId, employeeId: g.employeeId, startedAt: g.startedAt, endedAt: g.endedAt, name: fullName(p), department: p.department };
+    });
+}
+
 // ---------- Summary, cars, contracts ----------
 export function fleetSummary(world_: string, companyId: string): FleetSummary {
   const cars = listMockCompanyCars(world_, companyId).filter((c) => c.status === "ACTIVE");
@@ -110,6 +122,7 @@ export function fleetSummary(world_: string, companyId: string): FleetSummary {
     contracts: { active: contracts.length, endingSoon: contracts.filter((c) => within(c.endAt, 60)).length },
     maintenanceDue: cars.filter((c) => within(c.nextMaintenanceOn, 30) || within(c.inspectionDueOn, 30)).length,
     invoices: invoiceSummary(world_, companyId),
+    expenses: expenseSummary(world_, companyId),
   };
 }
 

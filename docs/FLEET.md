@@ -55,7 +55,7 @@ Adres TR `/filom/...`, EN `/en/my-fleet/...`. Hepsi `noindex`, giriş gerektirir
 ### 3.1 Davranış kuralları
 
 - **Para ve zaman:** tutarlar TRY'dir ve kullanıcının para birimi tercihinden bağımsız ₺ gösterilir ("Tutarlar TL" notu). Tarihler İstanbul saatiyledir (ADR-16).
-- **Masrafın personeli:** masrafın `occurredAt` anında aracın açık zimmeti kimdeyse odur. Zimmet geriye dönük değişirse eşleme yeniden hesaplanır (yalnızca durumu Açık olanlarda; ADR-25: saklanmaz, hesaplanır).
+- **Masrafın personeli:** masrafın `occurredAt` anında aracın açık zimmeti kimdeyse odur. Zimmet geriye dönük değişirse eşleme yeniden hesaplanır; masrafın durumu ne olursa olsun (ADR-25: saklanmaz, hesaplanır; ayrıntı ve devir anı kuralı ADMIN.md §3.16).
 - **Rapor doğruluğu:** rapor sayıları kuruşu kuruşuna faturalar ve masraflarla tutar (test).
 - **Karbon tasarrufu (örnek hesap, ekranda yazar):** km × (benzinli eşdeğer emisyon − aracın emisyonu). Katsayılar tek yerde (`fleet-report.ts`) ve burada: benzinli eşdeğer 0,170 kg CO₂/km, hibrit 0,105, elektrikli 0,045 (şebeke payı).
 - **Talepler:**

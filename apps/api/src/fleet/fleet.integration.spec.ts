@@ -6,6 +6,7 @@ import { AuthService } from '../auth/auth.service.js';
 import { hashSessionToken, newSessionToken } from '../auth/session-token.js';
 import { toUserResponse } from '../auth/user-view.js';
 import { testPlate } from '../common/plate.testing.js';
+import { QuotesService } from '../forms/quotes.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { FleetAssignmentsService } from './fleet-assignments.service.js';
 import { FleetContractsService } from './fleet-contracts.service.js';
@@ -64,7 +65,7 @@ describeDb('the fleet panel against the database (V2-35)', () => {
     await prisma.$connect();
     admin = new AdminContractsService(prisma);
     vehicles = new FleetVehiclesService(prisma);
-    contracts = new FleetContractsService(prisma);
+    contracts = new FleetContractsService(prisma, new QuotesService(prisma));
     employees = new FleetEmployeesService(prisma);
     assignments = new FleetAssignmentsService(prisma);
     summary = new FleetSummaryService(prisma);

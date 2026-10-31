@@ -22,3 +22,12 @@ export function employeeNoTaken(): HttpException {
     HttpStatus.CONFLICT,
   );
 }
+
+// A renewal of this contract is waiting already: asking again would only fill the quote list of the administration with copies. Nothing was
+// written.
+export function renewalAlreadyRequested(): HttpException {
+  return new HttpException(
+    { code: 'ALREADY_REQUESTED', message: 'A renewal request for this contract is being handled already' },
+    HttpStatus.CONFLICT,
+  );
+}

@@ -3,10 +3,15 @@ import { ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
 import type { Page } from '../admin/admin-list.js';
 import { Audited } from '../admin/audit.interceptor.js';
+import type { UserRow } from '../auth/user-view.js';
+import { CurrentUser } from '../auth/session.guard.js';
+import type { QuoteReceived } from '../forms/quotes.service.js';
 import { CurrentCompany } from './company.guard.js';
 import { FleetAssignmentsService } from './fleet-assignments.service.js';
 import { FleetContractsService } from './fleet-contracts.service.js';
 import { FleetEmployeesService } from './fleet-employees.service.js';
+import { FleetExpensesService, type ReflectResult } from './fleet-expenses.service.js';
+import type { ExpenseView } from './expense.view.js';
 import { FleetInvoicesService } from './fleet-invoices.service.js';
 import type { InvoiceView } from './invoice.view.js';
 import { FleetSummaryService, type FleetSummary } from './fleet-summary.service.js';
@@ -20,6 +25,10 @@ import type { AssignmentView, ContractDetail, ContractView, EmployeeView, FleetV
 const idParam = (request: Request): string | null => {
   const raw = request.params['id'];
   return typeof raw === 'string' ? raw : null;
+};
+const numberParam = (request: Request): string | null => {
+  const raw = request.params['number'];
+  return typeof raw === 'string' ? raw.toUpperCase() : null;
 };
 const resultId = (_request: Request, result: unknown): string | null => (result as { id?: string } | null)?.id ?? null;
 
@@ -63,6 +72,13 @@ export class FleetContractsController {
   @Get(':number')
   get(@CurrentCompany() companyId: string, @Param('number') number: string): Promise<ContractDetail> {
     return this.contracts.get(companyId, number);
+  }
+
+  // Asks the sales team to renew the contract (V2-38): a quote request, marked as a renewal. 201 with its reference number.
+  @Post(':number/renewal-request')
+  @Audited({ action: 'fleet-contract.renewal-request', entity: 'contract', entityId: numberParam })
+  renew(@CurrentUser() user: UserRow, @CurrentCompany() companyId: string, @Param('number') number: string, @Body() body: unknown): Promise<QuoteReceived> {
+    return this.contracts.requestRenewal(user, companyId, number, body);
   }
 }
 
@@ -131,5 +147,35 @@ export class FleetAssignmentsController {
   @Audited({ action: 'fleet-assignment.end', entity: 'assignment', entityId: idParam })
   end(@CurrentCompany() companyId: string, @Param('id') id: string, @Body() body: unknown): Promise<AssignmentView> {
     return this.assignments.end(companyId, id, body);
+  }
+}
+
+@ApiTags('fleet')
+@Controller('fleet/expenses')
+export class FleetExpensesController {
+  constructor(private readonly expenses: FleetExpensesService) {}
+
+  @Get()
+  list(@CurrentCompany() companyId: string, @Query() query: unknown): Promise<Page<ExpenseView>> {
+    return this.expenses.list(companyId, query);
+  }
+
+  // Many at once; declared before `:id` so `reflect` is never read as an id.
+  @Post('reflect')
+  @HttpCode(200)
+  @Audited({ action: 'fleet-expense.reflect', entity: 'expense', entityId: () => null })
+  reflect(@CurrentCompany() companyId: string, @Body() body: unknown): Promise<ReflectResult> {
+    return this.expenses.reflect(companyId, body);
+  }
+
+  @Get(':id')
+  get(@CurrentCompany() companyId: string, @Param('id') id: string): Promise<ExpenseView> {
+    return this.expenses.get(companyId, id);
+  }
+
+  @Patch(':id')
+  @Audited({ action: 'fleet-expense.update', entity: 'expense', entityId: idParam })
+  update(@CurrentCompany() companyId: string, @Param('id') id: string, @Body() body: unknown): Promise<ExpenseView> {
+    return this.expenses.setStatus(companyId, id, body);
   }
 }

@@ -80,6 +80,24 @@ export class QuotesService {
     return { received: true, referenceNumber };
   }
 
+  // A renewal asked from the fleet panel (V2-38): the form is replaced by what the contract already knows, so the request is made here
+  // from values that were checked by the caller. It lands in the administration's quote list like any other, marked `FLEET_RENEWAL`.
+  async createFleetRenewal(data: {
+    companyName: string;
+    contactName: string;
+    phone: string | null;
+    email: string;
+    vehicleCount: number;
+    durationMonths: number;
+    vehicleType: string;
+    notes: string;
+    productId: string;
+    userId: string;
+  }): Promise<QuoteReceived> {
+    const referenceNumber = await this.createWithNumber({ ...data, deliveryCities: null, kvkkConsentAt: new Date(), source: 'FLEET_RENEWAL' });
+    return { received: true, referenceNumber };
+  }
+
   // GET /me/quotes: the signed-in account's own requests, newest first.
   async listMine(userId: string): Promise<QuoteSummaryView[]> {
     const rows = await this.prisma.quoteRequest.findMany({
@@ -121,6 +139,7 @@ export class QuotesService {
     productId: string | null;
     userId: string | null;
     kvkkConsentAt: Date;
+    source?: 'WEB' | 'FLEET_RENEWAL';
   }): Promise<string> {
     const prefix = `TKL-${istanbulYear(new Date())}-`;
     for (let attempt = 0; attempt < NUMBER_ATTEMPTS; attempt += 1) {
