@@ -260,7 +260,7 @@ Müşteri tarafının `/fleet/*` uçları `CompanyGuard` arkasındadır (FLEET.m
 - **Zimmet:** araç başına tek açık zimmet: servis önce bakar (`409 VEHICLE_ASSIGNED`), aynı anda gelen iki istekte araç satırı kilitlenir ve veritabanındaki kısmi benzersiz indeks son sözü söyler. Pasif personele zimmet verilmez, iade edilmiş araç verilmez, başlangıç gelecekte ve aracın önceki zimmetinin bitişinden önce olamaz. Zimmeti biten araç yeniden boştadır; geçmiş silinmez.
 - **Personel:** kimse silinmez, `active: false` olur ve **açık zimmeti aynı anda kapanır**. Aynı şirkette aynı sicil no iki kişide olmaz (`409 EMPLOYEE_NO_TAKEN`; başka şirketin aynı numarası engel değil). Ehliyet bilgisi saklanmaz. Personel kişisel veridir: yalnızca o şirketin kullanıcıları ve yönetici görür.
 - **İşlem kaydı:** `fleet-employee.create`, `fleet-employee.update`, `fleet-assignment.create`, `fleet-assignment.end`; **aktör müşteri hesabı, satırda `companyId` dolu**, yalnızca alan adları (Yönetim > İşlem kaydı'nda görünür).
-- **Özet:** `hasActiveContract`, araç sayıları (kullanımda / zimmetli / boşta), 60 gün içinde biten etkin sözleşmeler, bakımı ya da muayenesi 30 gün içinde (ya da geçmiş) olan araçlar. Faturalar, masraflar ve talepler kartları V2-37, V2-38 ve V2-41'de eklenir.
+- **Özet:** `hasActiveContract`, araç sayıları (kullanımda / zimmetli / boşta), 60 gün içinde biten etkin sözleşmeler, bakımı ya da muayenesi 30 gün içinde (ya da geçmiş) olan araçlar. Fatura kartları V2-37'de eklendi (§3.15); masraflar ve talepler kartları V2-38 ve V2-41'de eklenir.
 
 ### 3.14 Filom ekranları: Özet, Araçlar, Personel, Zimmet, Sözleşmeler (V2-36)
 
@@ -268,7 +268,7 @@ Adresler (TR / EN): `/filom` / `/en/my-fleet`, `/filom/araclar` ve `/{plaka}` (`
 
 - **Kapı** (`app/[locale]/filom/layout.tsx`, sunucuda): oturum yoksa kurumsal girişe (`/giris?tip=kurumsal&sonra=filom`, giriş sonrası `/filom`'a döner; `sonra` sabit bir sözcüktür, adres değildir); **bireysel hesap ve yönetici hesabı `404`** (Filom'un var olduğu bile doğrulanmaz); sözleşmesi olmayan kurumsal hesap ekranlar yerine **boş durum ve "Kurumsal teklif al" (`/kurumsal-teklif`)** görür, bu `/filom` altındaki her adres için aynıdır. Hepsi `noindex`. Gerçek koruma API'dedir; sayfaların verisi API'den gelir ve API reddeder.
 - **Giriş noktası:** kurumsal profilin menüsünde, yalnızca `hasFleet` olan hesapta "Filom" (`GET /me`'deki `hasFleet`: şirketin etkin bir sözleşmesi var; kurumsal hesap oturumuyla birlikte tek küçük sorguyla gelir). Bireysel hesapta ve sözleşmesiz şirkette yoktur.
-- **Özet:** kullanımdaki / zimmetli / boşta araç, etkin sözleşme, 60 gün içinde biten sözleşme, bakımı ya da muayenesi 30 gün içinde olan araç. Kullanımdaki, zimmetli, boşta ve etkin sözleşme kartlarının sayısı, açtıkları listenin toplamıyla aynıdır (aynı süzgeç); "60 gün içinde biten" ve "bakımı yaklaşan" kartları ilgili listeyi (etkin sözleşmeler, kullanımdaki araçlar) açar ve sayıları onun bir alt kümesidir. Fatura, masraf ve talep kartları V2-37, V2-38, V2-41'de eklenir.
+- **Özet:** kullanımdaki / zimmetli / boşta araç, etkin sözleşme, 60 gün içinde biten sözleşme, bakımı ya da muayenesi 30 gün içinde olan araç. Kullanımdaki, zimmetli, boşta ve etkin sözleşme kartlarının sayısı, açtıkları listenin toplamıyla aynıdır (aynı süzgeç); "60 gün içinde biten" ve "bakımı yaklaşan" kartları ilgili listeyi (etkin sözleşmeler, kullanımdaki araçlar) açar ve sayıları onun bir alt kümesidir. Fatura kartları V2-37'de eklendi (§3.15, "Bu ayın faturası" ve "Ödenmemiş fatura toplamı"); masraf ve talep kartları V2-38, V2-41'de eklenir.
 - **Araçlar:** liste (plaka, model, kimde, son km, durum; süzgeç `durum` ve `zimmet`, arama plaka ve modelde, plaka nasıl yazılırsa yazılsın). Detay `/{plaka}` (boşluksuz da olur): bilgiler (bakım ve muayene için kalan gün), **zimmet** (boştaysa "Aracı ver" formu, kimdeyse "Aracı geri al" ve onay penceresi; zimmetli araca ikinci kişi verilemez, form yoktur), zimmet geçmişi, son 10 okuma. İade edilmiş araç kimseye verilemez.
 - **Personel:** liste, ekleme (`/yeni`), kişinin sayfası (düzenleme ve **Pasifleştir**). Pasifleştirme onay ister ve kişinin elindeki araç varsa onu söyler: **araç hemen geri gelir** (API zimmeti aynı adımda kapatır). Pasif kişiye araç verilmez; yeniden etkinleştirmek tek basıştır. Ehliyet bilgisi istenmez. Formun altında bilgilerin kime görüneceği ve verinin Novera tarafından şirket adına işlendiği yazar.
 - **Zimmet** (`/filom/zimmet`): tüm zimmetlerin kaydı, en yeni başlayan üstte, süzgeç `durum` (açık / kapanmış); satır aracın sayfasına gider. Vermek ve geri almak aracın sayfasındadır.
@@ -276,6 +276,30 @@ Adresler (TR / EN): `/filom` / `/en/my-fleet`, `/filom/araclar` ve `/{plaka}` (`
 - **Dar ekran:** tablolar kendi kutusunda yatay kayar (admin paneliyle aynı DataTable), yönetim paneliyle aynı çerçeve ve menü; 375 px'te sayfa yana kaymaz. Her ekran yükleniyor, boş ve hata durumunu gösterir.
 - **KVKK:** aydınlatma metnine "Kurumsal müşterilerin personel bilgileri" bölümü eklendi (`legal.json`, TR/EN): veri sorumlusu kurumsal müşteridir, Novera veri işleyendir, ehliyet bilgisi alınmaz, yalnızca o şirketin kullanıcıları ve yönetim görür. Metni Berkay onaylar.
 - **Örnek veri (USE_MOCKS=1):** `mocks/fleet-panel.ts` (kişiler ve zimmetler; sözleşme ve araçlar `mocks/admin-contracts.ts`'ten, yani yönetim ekranıyla aynı veri). Örnek kurumsal hesap Ege Lojistik A.Ş.'dir (iki araç, beş kişi; biri pasif); `novera-mock-session=corporate-nofleet` sözleşmesiz Anadolu İnşaat'ın hesabıdır (boş durum).
+
+### 3.15 Faturalar (V2-37)
+
+Adresler (TR / EN): Yönetim'de `/yonetim/faturalar` ve `/{numara}` (`/admin/invoices`); Filom'da `/filom/faturalar` ve `/{numara}` (`/my-fleet/invoices`). Metinler `messages/*/admin.json` (`Admin.invoices`) ve `fleet-panel.json` (`FleetPanel.invoices`, `.invoice`, `.summary.invoices`).
+
+**Hesaplama kuralı** (`apps/api/src/fleet/invoice-calc.ts`, saf fonksiyonlar; seed ve testler de bunu kullanır):
+
+- Bir fatura **bir şirketin bir ayı** içindir (dönem `2026-10`). Veritabanında `(companyId, period)` benzersizdir.
+- Bir sözleşme, ayda kapsadığı günler kadar faturalanır: sözleşmenin başlangıç gününün ve ayın 1'inin **geç olanından**, bitiş gününün ve ayın son gününün **erken olanına** kadar, **iki uç gün dahil**. Aya hiç değmeyen sözleşmenin satırı yoktur. Sözleşmenin durumuna değil tarihlerine bakılır (erken bitirmek, bitiş gününü faturalanacak son güne çekmektir).
+- Satır tutarı = aylık bedel × kapsanan gün ÷ ayın gün sayısı, **kuruşa yarım yukarı** yuvarlanır (yalnız tamsayıyla). Tam ay, aylık bedelin kendisidir. Şubat ve artık yıl ayın gün sayısından gelir.
+- Ara toplam = satırların toplamı, yani **satırlar faturayla kuruşu kuruşuna tutar**. KDV = ara toplamın %20'si, yarım yukarı kuruşa. Toplam = ara toplam + KDV (veritabanı bunu `CHECK` ile de ister).
+- Düzenlenme günü faturayı kestiğiniz gündür (İstanbul takvimi), **son ödeme 30 gün sonradır**. Para TRY kuruş.
+- **Durum saklanmaz.** `PAID` ödenme zamanı varsa; `OVERDUE` ("Gecikti") ödenmemiş ve son ödeme günü bugünden önceyse (son ödeme günü kendisi gecikmiş sayılmaz); yoksa `PENDING` ("Bekliyor"). Okunurken hesaplanır.
+
+**Oluşturma** (`POST /admin/invoices/generate?period=YYYY-MM`, gövdesiz): o ayda sözleşmesi olan her şirkete bir fatura, hepsi **tek işlemde ve ay kilitli** (`pg_advisory_xact_lock`) kesilir. Ay zaten kesilmişse **`409 ALREADY_GENERATED`** ve hiçbir şey değişmez (iki istek aynı anda gelirse biri kazanır). Başlamamış ay `422` `period: OUT_OF_RANGE`, ay olmayan değer `INVALID_FORMAT`. Kesilecek sözleşme yoksa hiçbir şey oluşmaz (`created: 0`). Numara `FTR-<yıl>-<5 hane>`, bir sequence'ten (`FleetInvoiceNumber_seq`) gelir. Faturalar buradan silinmez ve tutarları değişmez; değişen tek şey ödendi işaretidir.
+
+**Ödendi işareti** (`PATCH /admin/invoices/{numara}`, `{ updatedAt, paid }`): satır kilitlenir, sürüm uyuşmazsa `409 STALE_WRITE`. `paid: true` ödenme zamanını yazar, `false` siler; zaten o durumdaysa bir şey değişmez ve hata da vermez.
+
+- **İşlem kaydı:** `invoice.generate` (kayıt kimliği = ay, alan yok) ve `invoice.update` (kayıt kimliği = fatura numarası, `companyId` dolu, yalnız alan adları). Okumalar kaydedilmez.
+- **Yönetim ekranı** (`/yonetim/faturalar`): üstte **dönem seçimi** (bu ay ve önceki on bir) ve "Faturaları oluştur"; onay penceresi ayı söyler ("Ekim 2026 faturaları oluşturulsun mu?"), sonuç "N fatura oluşturuldu" ya da "zaten oluşturulmuş" uyarısıdır. Altında liste (numara, şirket, dönem, düzenlenme, son ödeme, toplam, durum; süzgeç `durum`, arama numara ve şirket adında, sıralama düzenlenme / son ödeme / numara / toplam). Detayda fatura belgesi ve **Ödendi olarak işaretle / Ödeme işaretini kaldır**; eski ekrandan yapılan işaret başkasının değişikliğinin üstüne yazmaz (`STALE_WRITE` bildirimi, sayfa yenilenir).
+- **Filom ekranı** (`/filom/faturalar`): şirketin faturaları (en yeni dönem üstte; süzgeç `durum`, sıralama dönem / son ödeme / toplam). Detayda aynı belge: şirket, numara, dönem, tarihler, durum, **sözleşme bazında satırlar** (gün / ayın günü), ara toplam, **KDV (%20)**, toplam ve **"Bu bir örnek faturadır, yasal belge (e-fatura) değildir."** notu. Müşteri faturayı işaretleyemez. **Başka şirketin faturası `404`** (API her sorguyu şirkete göre süzer, ADR-25).
+- **Filom Özet:** "Bu ayın faturası" (tutar, numara, durum; kesilmediyse "Henüz kesilmedi") ve "Ödenmemiş fatura toplamı" (kaç tane, kaçı gecikmiş) kartları, `GET /fleet/summary`'deki `invoices` bloğundan gelir.
+- **Yazdırma:** detayda "Yazdır" düğmesi `window.print()` çağırır. `@media print` kuralları (`app/globals.css`) site başlığını, altbilgiyi, atlama bağlantısını, Filom/Yönetim menüsünü ve düğmeleri gizler; fatura A4'te siyah beyaz, kenarlıksız, **tek sayfa** olur (tema koyu olsa da). e2e'de `emulateMedia("print")` ile öğeler ve Chromium'da PDF'in sayfa sayısı (1) denetlenir.
+- **Örnek veri:** seed her sözleşmeli şirkete **önceki üç ayın faturasını** ekler (en eskisi ödendi; ilk şirketin ortadaki faturası gecikmiş, geri kalanlar bekliyor); yeniden çalıştırınca kopya yapmaz. Sample mod (`USE_MOCKS=1`) `mocks/invoices.ts`: Ege Lojistik'in üç faturası (ödendi, gecikmiş, bekliyor), tarihler bugüne göre kayar; bir ay bir kez kesilir, durum aynı kuralla hesaplanır.
 
 ## 4. API
 
@@ -288,6 +312,7 @@ Tüm uçlar `/admin` önekli, `AdminGuard` arkasında, ADR-24 kurallarıyla (say
 | Bayiler | `GET/POST /admin/branches`, `GET/PATCH /admin/branches/{id}`, `POST /admin/branches/{id}/close`, `POST /admin/branches/{id}/reopen` |
 | Araç modelleri | `GET/POST /admin/vehicle-models`, `GET/PATCH /admin/vehicle-models/{slug}`, `POST /admin/vehicle-models/{slug}/retire`, `POST /admin/vehicle-models/{slug}/restore` |
 | Araçlar | `GET/POST /admin/vehicles`, `PATCH /admin/vehicles/{id}` (bayi, `active`) |
+| Faturalar | `POST /admin/invoices/generate?period=YYYY-MM` (aynı ay ikinci kez `409 ALREADY_GENERATED`), `GET /admin/invoices`, `GET/PATCH /admin/invoices/{numara}` (ödendi işareti) |
 | Ek hizmetler | `GET /admin/extras`, `PATCH /admin/extras/{slug}` |
 | Rezervasyonlar | `GET /admin/reservations`, `GET /admin/reservations/{number}`, `POST /admin/reservations/{number}/cancel` |
 | Teklifler | `GET /admin/quotes`, `GET/PATCH /admin/quotes/{number}` |

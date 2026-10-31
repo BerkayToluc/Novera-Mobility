@@ -23,11 +23,11 @@ Akıllı Kurumsal Filo'daki "faturaları tek tıkla takip edin" vaadini çalış
 - **Seed:** son 3 ayın faturaları.
 
 ## Kabul kriterleri
-- [ ] Aynı dönem ikinci kez üretilemez (test).
-- [ ] Kısmi ay ve KDV hesabı testli; satır toplamı faturayla kuruşu kuruşuna tutar.
-- [ ] Başka şirketin faturası 404.
-- [ ] Yazdırma önizlemesinde navbar ve footer yok, fatura tek sayfaya sığar (ekran görüntüsü).
-- [ ] e2e: panelde oluştur → Filom'da görünür → ödendi işaretle → durum güncel.
+- [x] Aynı dönem ikinci kez üretilemez (test). _`invoices.integration.spec.ts` (409 `ALREADY_GENERATED`, iki eşzamanlı istekten biri kazanır), `admin.http.spec.ts`, e2e "bir ay bir kez kesilir"._
+- [x] Kısmi ay ve KDV hesabı testli; satır toplamı faturayla kuruşu kuruşuna tutar. _`invoice-calc.spec.ts` (13 test: uç günler, şubat/artık yıl, yarım yukarı yuvarlama), entegrasyon testinde tutarlar ve `CHECK`._
+- [x] Başka şirketin faturası 404. _`invoices.integration.spec.ts` (müşteri servisi), `fleet.http.spec.ts` (kapı), e2e "yetkisiz hesaplar"._
+- [x] Yazdırma önizlemesinde navbar ve footer yok, fatura tek sayfaya sığar. _e2e `emulateMedia("print")` ile başlık, altbilgi, menü ve düğmelerin gizli olduğunu ve PDF'in tek sayfa olduğunu denetler (ekran görüntüsü artık istenmiyor)._
+- [x] e2e: panelde oluştur → Filom'da görünür → ödendi işaretle → durum güncel. _`e2e/invoices.spec.ts`._
 
 ## Etiketler
 `faz-8` `ozellik` `P2` `api` `web` `veritabani`

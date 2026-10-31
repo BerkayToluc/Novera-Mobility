@@ -17,7 +17,8 @@ import {
   type FleetVehiclePage,
   type VehicleFilter,
 } from "./fleet-panel";
-import { fetchFleetAssignments, fetchFleetContract, fetchFleetContracts, fetchFleetEmployee, fetchFleetEmployees, fetchFleetSummary, fetchFleetVehicle, fetchFleetVehicles } from "./api-fleet";
+import type { Invoice, InvoiceFilter, InvoicePage } from "./invoices";
+import { fetchFleetAssignments, fetchFleetInvoice, fetchFleetInvoices, fetchFleetContract, fetchFleetContracts, fetchFleetEmployee, fetchFleetEmployees, fetchFleetSummary, fetchFleetVehicle, fetchFleetVehicles } from "./api-fleet";
 import { isMockMode } from "./mode";
 import { mockWorld } from "./mock-world";
 import { getSession } from "./session";
@@ -90,6 +91,21 @@ export async function getFleetEmployee(id: string): Promise<FleetEmployee | null
 export async function getFleetAssignments(params: AdminListParams<AssignmentFilter>): Promise<FleetAssignmentPage> {
   if (!isMockMode()) return fetchFleetAssignments(apiQuery(params, ASSIGNMENT_API_VALUES));
   return (await import("@/mocks/fleet-panel")).listFleetAssignments(await mockWorld(), await sampleCompany(), { page: params.page, pageSize: params.pageSize, vehicle: null, employee: null, open: flag(params.filters.durum, "acik") });
+}
+
+export async function getFleetInvoices(params: AdminListParams<InvoiceFilter>): Promise<InvoicePage> {
+  if (!isMockMode()) return fetchFleetInvoices(apiQuery(params, { durum: { name: "status", values: { PAID: "PAID", PENDING: "PENDING", OVERDUE: "OVERDUE" } } }));
+  return (await import("@/mocks/invoices")).listMockInvoices(
+    await mockWorld(),
+    { page: params.page, pageSize: params.pageSize, sort: params.sort, q: "", status: (params.filters.durum as Invoice["status"] | undefined) ?? null },
+    await sampleCompany(),
+  );
+}
+
+// `null` for an invoice that does not exist, is another company's, or whose number cannot be one.
+export async function getFleetInvoice(number: string): Promise<Invoice | null> {
+  if (!isMockMode()) return fetchFleetInvoice(number);
+  return (await import("@/mocks/invoices")).getMockInvoice(await mockWorld(), number, await sampleCompany());
 }
 
 // The people a car can be given to: the active ones, by surname, for the form's choice (a company has a few dozen at most).

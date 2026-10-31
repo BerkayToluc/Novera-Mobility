@@ -8,7 +8,8 @@
       "vehicles": "Araçlar",
       "employees": "Personel",
       "assignments": "Zimmet",
-      "contracts": "Sözleşmeler"
+      "contracts": "Sözleşmeler",
+      "invoices": "Faturalar"
     },
     "empty": {
       "title": "Filom",
@@ -33,6 +34,15 @@
         "contracts": "Etkin sözleşme",
         "endingSoon": "60 gün içinde biten sözleşme",
         "maintenanceDue": "Bakımı ya da muayenesi 30 gün içinde olan araç"
+      },
+      "invoices": {
+        "title": "Faturalar",
+        "thisMonth": "Bu ayın faturası",
+        "notYet": "Henüz kesilmedi",
+        "unpaid": "Ödenmemiş fatura toplamı",
+        "unpaidCount": "{count} ödenmemiş fatura, {overdue} tanesi gecikmiş",
+        "openInvoice": "Faturayı aç",
+        "openList": "Faturaları aç"
       }
     },
     "vehicles": {
@@ -324,6 +334,35 @@
         "idle": "Boşta",
         "returned": "İade edildi"
       }
+    },
+    "invoices": {
+      "title": "Faturalar",
+      "intro": "Şirketinize kesilen aylık faturalar. Bir faturaya tıklayınca satırlarını ve KDV'sini görür, yazdırabilirsiniz.",
+      "statusFilterLabel": "Duruma göre",
+      "tableCaption": "Faturalar",
+      "retry": "Tekrar dene",
+      "currencyNote": "Tutarlar TL olarak gösterilir.",
+      "columns": {
+        "number": "Numara",
+        "period": "Dönem",
+        "due": "Son ödeme",
+        "total": "Toplam",
+        "status": "Durum"
+      },
+      "emptyTitle": "Henüz fatura yok",
+      "emptyText": "Aylık faturalarınız kesildiğinde burada görünür.",
+      "emptyFilteredTitle": "Bu süzgece uyan fatura yok",
+      "emptyFilteredText": "Süzgeçleri kaldırmayı deneyin.",
+      "loadErrorTitle": "Faturalar yüklenemedi",
+      "loadErrorText": "Birkaç saniye sonra yeniden deneyin."
+    },
+    "invoice": {
+      "metaTitle": "Fatura",
+      "intro": "Faturanın satırları, KDV'si ve toplamı. Yazdır düğmesi faturayı tek sayfa olarak yazdırır.",
+      "back": "Faturalara dön",
+      "loadErrorTitle": "Fatura yüklenemedi",
+      "loadErrorText": "Birkaç saniye sonra yeniden deneyin.",
+      "retry": "Tekrar dene"
     }
   }
 }

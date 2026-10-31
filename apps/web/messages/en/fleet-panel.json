@@ -8,7 +8,8 @@
       "vehicles": "Cars",
       "employees": "People",
       "assignments": "Assignments",
-      "contracts": "Contracts"
+      "contracts": "Contracts",
+      "invoices": "Invoices"
     },
     "empty": {
       "title": "My fleet",
@@ -33,6 +34,15 @@
         "contracts": "Active contracts",
         "endingSoon": "Contracts ending within 60 days",
         "maintenanceDue": "Cars due for maintenance or inspection within 30 days"
+      },
+      "invoices": {
+        "title": "Invoices",
+        "thisMonth": "This month's invoice",
+        "notYet": "Not made yet",
+        "unpaid": "Unpaid invoices in total",
+        "unpaidCount": "{count, plural, one {# unpaid invoice} other {# unpaid invoices}}, {overdue} overdue",
+        "openInvoice": "Open the invoice",
+        "openList": "Open the invoices"
       }
     },
     "vehicles": {
@@ -324,6 +334,35 @@
         "idle": "Idle",
         "returned": "Given back"
       }
+    },
+    "invoices": {
+      "title": "Invoices",
+      "intro": "The monthly invoices made out to your company. Open one to see its lines and VAT, and to print it.",
+      "statusFilterLabel": "By status",
+      "tableCaption": "Invoices",
+      "retry": "Try again",
+      "currencyNote": "Amounts are shown in TRY.",
+      "columns": {
+        "number": "Number",
+        "period": "Period",
+        "due": "Due",
+        "total": "Total",
+        "status": "Status"
+      },
+      "emptyTitle": "No invoices yet",
+      "emptyText": "Your monthly invoices appear here once they are made.",
+      "emptyFilteredTitle": "No invoice matches this filter",
+      "emptyFilteredText": "Try removing the filters.",
+      "loadErrorTitle": "The invoices could not be loaded",
+      "loadErrorText": "Try again in a few seconds."
+    },
+    "invoice": {
+      "metaTitle": "Invoice",
+      "intro": "The lines, the VAT and the total of the invoice. The print button prints it as a single page.",
+      "back": "Back to invoices",
+      "loadErrorTitle": "The invoice could not be loaded",
+      "loadErrorText": "Try again in a few seconds.",
+      "retry": "Try again"
     }
   }
 }

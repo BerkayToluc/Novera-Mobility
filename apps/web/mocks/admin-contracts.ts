@@ -298,3 +298,9 @@ export function setMockCarAssignee(name: string, carId: string, assignee: FleetV
   const found = findCar(world(name), carId);
   if (found) found.car.assignee = assignee;
 }
+
+// ---------- What the invoices read from the same store (mocks/invoices.ts, V2-37) ----------
+// Every contract of the world with what a line of an invoice needs. The state of a contract does not matter for billing, its dates do.
+export function listMockBillingContracts(name: string): Array<{ number: string; companyId: string; productSlug: string; monthlyFee: number; startAt: string; endAt: string }> {
+  return world(name).contracts.map((c) => ({ number: c.number, companyId: c.companyId, productSlug: c.productSlug, monthlyFee: c.monthlyFee, startAt: c.startAt, endAt: c.endAt }));
+}

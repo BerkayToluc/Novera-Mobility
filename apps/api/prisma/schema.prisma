@@ -146,6 +146,7 @@ model Company {
   users          User[]
   employees      CompanyEmployee[]
   fleetContracts FleetContract[]
+  fleetInvoices  FleetInvoice[]
 }
 
 // ---------- Filom: filo verisi (V2-35, ADR-25, docs/FLEET.md §5) ----------
@@ -275,6 +276,34 @@ model VehicleReading {
   createdAt            DateTime      @default(now())
 
   @@index([fleetVehicleId, at])
+}
+
+// Aylık filo faturası (V2-37, docs/FLEET.md §5, docs/ADMIN.md §3.15): bir şirketin bir dönemi için tek fatura. Numara
+// `FTR-<yıl>-<5 hane>`, `FleetInvoiceNumber_seq` sequence'inden gelir. Satırlar sözleşme başınadır (JSON: sözleşme numarası, ürün,
+// gün sayısı, ayın gün sayısı, tutar); ara toplam satırların toplamıdır, KDV ara toplamın %20'si, toplam ikisinin toplamıdır (CHECK ile de
+// korunur). Tutarlar TRY kuruş. "Gecikti" saklanmaz: ödenmemiş ve son ödeme günü geçmiş fatura sorgu anında gecikmiş sayılır.
+model FleetInvoice {
+  id        String   @id @default(uuid())
+  number    String   @unique
+  companyId String
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  // "2026-10": faturanın ait olduğu ay.
+  period    String
+  issuedAt  DateTime @db.Date
+  dueAt     DateTime @db.Date
+  lines     Json
+  subtotal  Int
+  vat       Int
+  total     Int
+  // Boşsa ödenmemiş.
+  paidAt    DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Bir şirketin bir dönemi için tek fatura: aynı dönemi iki kez üretmeye çalışan ikinci istek veritabanında da durur.
+  @@unique([companyId, period])
+  @@index([period])
+  @@index([companyId, issuedAt])
 }
 
 // Yönetimde değiştiren her işlemin kaydı (V2-23, ADR-24). Yalnızca eklenir: servis güncelleme ya da silme sunmaz ve

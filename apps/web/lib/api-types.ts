@@ -6129,6 +6129,429 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/admin/invoices/generate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Ayın faturalarını oluştur
+         * @description Verilen ay (`period=2026-10`) için etkin sözleşmesi olan her şirkete **bir fatura** keser. Bir sözleşmenin satırı, aylık bedelin ayda kapsadığı gün sayısına oranıdır (iki uç gün dahil, yarım yukarı kuruşa yuvarlanır); ara toplam satırların toplamı, KDV %20 (yarım yukarı), toplam ikisinin toplamıdır. Düzenlenme günü bugün (İstanbul), vade 30 gün sonradır. Numara `FTR-<yıl>-<5 hane>` bir sequence'ten gelir.
+         *     **Bir şirkete bir ayın tek faturası kesilir** (veritabanında benzersiz; ay, `pg_advisory_xact_lock` ile kilitlenir). Ay zaten kesilmişse `409 ALREADY_GENERATED`; gelecekteki ay `422 OUT_OF_RANGE`. Kesilecek bir şey yoksa hiçbir şey oluşmaz (`created: 0`). İşlem kaydı: `invoice.generate` (kayıt kimliği ay).
+         */
+        post: {
+            parameters: {
+                query: {
+                    /** @description Ay, `YYYY-MM`. */
+                    period: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Kesilen faturalar */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["InvoiceGenerateResult"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Ayın faturaları zaten kesilmiş (`ALREADY_GENERATED`) */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/invoices": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Faturalar
+         * @description Sayfalı liste, varsayılan olarak en yeni düzenlenen üstte (`sort=issuedAt|dueAt|number|total:asc|desc`). `q` numarada ve şirket adında arar. Durum **okunurken** hesaplanır: ödenmemiş ve vadesi geçmiş fatura `OVERDUE`'dur, hiçbir yerde saklanmaz.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    page?: number;
+                    pageSize?: number;
+                    sort?: string;
+                    q?: string;
+                    period?: string;
+                    company?: string;
+                    status?: "PAID" | "PENDING" | "OVERDUE";
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Bir sayfa fatura */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["InvoicePage"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/invoices/{number}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Fatura numarası (`FTR-2026-00001`); büyük/küçük harf fark etmez. */
+                number: string;
+            };
+            cookie?: never;
+        };
+        /** Bir fatura */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Fatura numarası (`FTR-2026-00001`); büyük/küçük harf fark etmez. */
+                    number: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Fatura */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Invoice"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Böyle bir fatura yok (`NOT_FOUND`) */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Faturayı ödendi / ödenmedi işaretle
+         * @description Bir faturada değişen tek şey ödendi bilgisidir; tutarlar ve satırlar kesildikten sonra değişmez. Düzenlenen kaydın `updatedAt` değeri geri gönderilir; fatura bu arada değiştiyse `409 STALE_WRITE`. `paid: true` ödeme zamanını yazar, `false` siler. İşlem kaydı: `invoice.update` (şirket satırda).
+         */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Fatura numarası (`FTR-2026-00001`); büyük/küçük harf fark etmez. */
+                    number: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["InvoiceUpdate"];
+                };
+            };
+            responses: {
+                /** @description Güncel fatura */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Invoice"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Böyle bir fatura yok (`NOT_FOUND`) */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Kayıt değişmiş (`STALE_WRITE`) */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description JSON olmayan gövde (`BAD_REQUEST`) */
+                415: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        trace?: never;
+    };
+    "/fleet/invoices": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Faturalar
+         * @description Sayfalı liste, varsayılan olarak en yeni ay üstte (`sort=period|dueAt|total:asc|desc`); `period` ve `status` süzer.
+         *     Yalnızca **kurumsal hesabın kendi şirketinin** kayıtları görünür; başka şirketin kaydı `404` döner (ADR-25). Sınır: hesap başına dakikada 120.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    page?: number;
+                    pageSize?: number;
+                    sort?: string;
+                    period?: string;
+                    status?: "PAID" | "PENDING" | "OVERDUE";
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Bir sayfa fatura */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["InvoicePage"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Kurumsal hesap değil ya da bir şirkete bağlı değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/fleet/invoices/{number}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Fatura numarası. */
+                number: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * Bir fatura
+         * @description Yalnızca **kurumsal hesabın kendi şirketinin** kayıtları görünür; başka şirketin faturası `404` döner (ADR-25). Sınır: hesap başına dakikada 120.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Fatura numarası. */
+                    number: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Fatura */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Invoice"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Kurumsal hesap değil ya da bir şirkete bağlı değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Böyle bir fatura yok ya da başka şirketin (`NOT_FOUND`) */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/ping": {
         parameters: {
             query?: never;
@@ -7507,6 +7930,23 @@ export interface components {
             };
             /** @description Bakımı ya da muayenesi 30 gün içinde olan (ya da geçmiş) araçlar. */
             maintenanceDue: number;
+            invoices: {
+                /** @description Bu ayın faturası; henüz kesilmediyse null. */
+                thisMonth: {
+                    number: string;
+                    total: number;
+                    /** @enum {string} */
+                    status: "PAID" | "PENDING" | "OVERDUE";
+                } | null;
+                unpaid: {
+                    /** @description Ödenmemiş faturalar (gecikenler dahil). */
+                    count: number;
+                    /** @description Bunların toplamı */
+                    total: number;
+                };
+                /** @description Vadesi geçmiş */
+                overdue: number;
+            };
         };
         FleetContract: {
             /** Format: uuid */
@@ -7546,6 +7986,80 @@ export interface components {
             total: number;
             page: number;
             pageSize: number;
+        };
+        InvoiceLine: {
+            /** @example SZL-2026-00001 */
+            contractNumber: string;
+            /** @example akilli-kurumsal-filo */
+            productSlug: string;
+            /** @description Sözleşmenin ayda kapsadığı gün (iki uç gün dahil). */
+            days: number;
+            daysInMonth: number;
+            /** @description Satır tutarı */
+            amount: number;
+        };
+        Invoice: {
+            /** Format: uuid */
+            id: string;
+            /** @example FTR-2026-00001 */
+            number: string;
+            company: {
+                /** Format: uuid */
+                id: string;
+                name: string;
+            };
+            /**
+             * @description Faturanın ait olduğu ay.
+             * @example 2026-10
+             */
+            period: string;
+            /** Format: date */
+            issuedAt: string;
+            /**
+             * Format: date
+             * @description Düzenlenmeden 30 gün sonra.
+             */
+            dueAt: string;
+            lines: components["schemas"]["InvoiceLine"][];
+            /** @description Satırların toplamı */
+            subtotal: number;
+            /** @example 20 */
+            vatPercent: number;
+            vat: number;
+            /** @description Ara toplam + KDV. */
+            total: number;
+            /** Format: date-time */
+            paidAt: string | null;
+            /**
+             * @description Okunurken hesaplanır: ödenmemiş ve vadesi geçmiş fatura OVERDUE.
+             * @enum {string}
+             */
+            status: "PAID" | "PENDING" | "OVERDUE";
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        InvoicePage: {
+            items: components["schemas"]["Invoice"][];
+            total: number;
+            page: number;
+            pageSize: number;
+        };
+        InvoiceGenerateResult: {
+            /** @example 2026-10 */
+            period: string;
+            /** @description Kesilen fatura sayısı. */
+            created: number;
+            invoices: components["schemas"]["Invoice"][];
+        };
+        InvoiceUpdate: {
+            /**
+             * Format: date-time
+             * @description Düzenlenen kaydın sürümü.
+             */
+            updatedAt: string;
+            paid: boolean;
         };
         /** @description Kişisel veri. Yalnızca o şirketin kullanıcıları ve yönetici görür. */
         FleetEmployee: {

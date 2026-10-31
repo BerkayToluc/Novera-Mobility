@@ -1276,6 +1276,89 @@
         "save": "Okumayı kaydet",
         "saving": "Kaydediliyor"
       }
+    },
+    "invoices": {
+      "title": "Faturalar",
+      "intro": "Şirketlere kesilen aylık faturalar. Bir ayın faturaları bir kez kesilir; ödeme geldiğinde faturayı ödendi olarak işaretleyin, müşterinin ekranında durum hemen güncellenir.",
+      "detailTitle": "Fatura",
+      "detailErrorTitle": "Fatura yüklenemedi",
+      "detailIntro": "{company} şirketine kesilen fatura.",
+      "back": "Faturalara dön",
+      "print": "Yazdır",
+      "searchLabel": "Fatura numarası ya da şirket ara",
+      "statusFilterLabel": "Duruma göre",
+      "tableCaption": "Faturalar",
+      "retry": "Tekrar dene",
+      "currencyNote": "Tutarlar TL olarak gösterilir.",
+      "columns": {
+        "number": "Numara",
+        "company": "Şirket",
+        "period": "Dönem",
+        "issued": "Düzenlenme",
+        "due": "Son ödeme",
+        "total": "Toplam",
+        "status": "Durum"
+      },
+      "status": {
+        "PAID": "Ödendi",
+        "PENDING": "Bekliyor",
+        "OVERDUE": "Gecikti"
+      },
+      "emptyTitle": "Henüz fatura yok",
+      "emptyText": "Yukarıdan bir ay seçip faturaları oluşturduğunuzda burada görünür.",
+      "emptyFilteredTitle": "Bu aramaya uyan fatura yok",
+      "emptyFilteredText": "Süzgeçleri kaldırmayı ya da başka bir şey aramayı deneyin.",
+      "loadErrorTitle": "Faturalar yüklenemedi",
+      "loadErrorText": "Birkaç saniye sonra yeniden deneyin.",
+      "generate": {
+        "title": "Faturaları oluştur",
+        "text": "Seçilen ayda sözleşmesi olan her şirkete tek fatura kesilir. Kısmi aylar gün oranıyla hesaplanır, KDV %20'dir, son ödeme 30 gün sonradır. Bir ayın faturaları yalnızca bir kez oluşturulur.",
+        "period": "Dönem",
+        "button": "Faturaları oluştur",
+        "dialogTitle": "{period} faturaları oluşturulsun mu?",
+        "dialogText": "Bu ay için her şirkete bir fatura kesilir ve müşterinin Filom ekranında görünür. Oluşturulan fatura buradan silinemez.",
+        "confirm": "Faturaları oluştur",
+        "keep": "Vazgeç"
+      },
+      "toast": {
+        "created": "{period} için {count} fatura oluşturuldu.",
+        "none": "{period} için faturalanacak sözleşme yok, fatura oluşturulmadı.",
+        "paid": "{number} ödendi olarak işaretlendi.",
+        "unpaid": "{number} için ödeme işareti kaldırıldı."
+      },
+      "errors": {
+        "already": "{period} faturaları zaten oluşturulmuş.",
+        "future": "Henüz başlamamış bir ay için fatura kesilemez.",
+        "stale": "Fatura bu arada değişmiş; sayfa yenilendi, tekrar deneyin.",
+        "notFound": "Bu fatura artık yok.",
+        "unavailable": "İşlem yapılamadı. Birkaç saniye sonra yeniden deneyin."
+      },
+      "actions": {
+        "title": "Ödeme durumu",
+        "unpaidText": "Ödeme geldiyse faturayı ödendi olarak işaretleyin. Müşteri bunu Filom ekranında görür.",
+        "paidText": "Fatura ödendi olarak işaretli. Yanlışlıkla işaretlendiyse işareti kaldırabilirsiniz.",
+        "markPaid": "Ödendi olarak işaretle",
+        "markUnpaid": "Ödeme işaretini kaldır"
+      },
+      "sheet": {
+        "title": "Fatura",
+        "issuer": "Novera Mobility · Kurumsal filo kiralama",
+        "billTo": "Fatura edilen",
+        "number": "Fatura numarası",
+        "period": "Dönem",
+        "issued": "Düzenlenme tarihi",
+        "due": "Son ödeme tarihi",
+        "paidOn": "Ödeme tarihi",
+        "linesCaption": "Fatura satırları",
+        "contract": "Sözleşme",
+        "days": "Gün",
+        "daysValue": "{days} / {total}",
+        "amount": "Tutar",
+        "subtotal": "Ara toplam",
+        "vat": "KDV (%{percent})",
+        "total": "Genel toplam",
+        "note": "Bu bir örnek faturadır, yasal belge (e-fatura) değildir."
+      }
     }
   }
 }

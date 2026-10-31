@@ -1024,6 +1024,78 @@ describe('administration over HTTP', () => {
     });
   });
 
+  // The door and the input of the invoice endpoints (V2-37). What they do against a database is in
+  // invoices/invoices.integration.spec.ts; a request turned away is turned away before any database call.
+  describe('invoices: the door and the input (V2-37)', () => {
+    const NUMBER = 'FTR-2026-00001';
+    const routes: Array<[string, string]> = [
+      ['POST', '/admin/invoices/generate?period=2026-10'],
+      ['GET', '/admin/invoices'],
+      ['GET', `/admin/invoices/${NUMBER}`],
+      ['PATCH', `/admin/invoices/${NUMBER}`],
+    ];
+    const withBody = (method: string) => (method === 'PATCH' ? { body: {} } : {});
+
+    it('no session is 401 UNAUTHENTICATED on every route', async () => {
+      for (const [method, path] of routes) {
+        const response = await call(method, path, withBody(method));
+        expect(response.status).toBe(401);
+        expect((await response.json()).code).toBe('UNAUTHENTICATED');
+      }
+    });
+
+    it('a customer, a corporate one included, is 403 FORBIDDEN on every route, and cannot make the invoices', async () => {
+      const { cookie } = await signedIn('CUSTOMER');
+      for (const [method, path] of routes) {
+        const response = await call(method, path, { cookie, ...withBody(method) });
+        expect(response.status).toBe(403);
+        expect((await response.json()).code).toBe('FORBIDDEN');
+      }
+    });
+
+    it('making the invoices needs a month, and one that is a month', async () => {
+      const { cookie } = await signedIn('ADMIN');
+      const missing = await call('POST', '/admin/invoices/generate', { cookie });
+      expect(missing.status).toBe(422);
+      expect((await missing.json()).fieldErrors).toEqual({ period: 'REQUIRED' });
+      for (const period of ['2026-13', '2026-1', 'bu-ay', '2026-10-01']) {
+        const response = await call('POST', `/admin/invoices/generate?period=${period}`, { cookie });
+        expect(response.status).toBe(422);
+        expect((await response.json()).fieldErrors).toEqual({ period: 'INVALID_FORMAT' });
+      }
+    });
+
+    it('a list asked for in a way that makes no sense is 422', async () => {
+      const { cookie } = await signedIn('ADMIN');
+      for (const [query, field] of [
+        ['pageSize=101', 'pageSize'],
+        ['sort=lines:asc', 'sort'],
+        ['status=LATE', 'status'],
+        ['period=2026-13', 'period'],
+        ['company=x', 'company'],
+        ['q=' + 'x'.repeat(101), 'q'],
+      ] as const) {
+        const response = await call('GET', `/admin/invoices?${query}`, { cookie });
+        expect(response.status).toBe(422);
+        expect(Object.keys((await response.json()).fieldErrors)).toEqual([field]);
+      }
+    });
+
+    it('a change needs the version and a paid mark that is true or false; a number that cannot be one is 404', async () => {
+      const { cookie } = await signedIn('ADMIN');
+      const empty = await call('PATCH', `/admin/invoices/${NUMBER}`, { cookie, body: {} });
+      expect(empty.status).toBe(422);
+      expect(Object.keys((await empty.json()).fieldErrors).sort()).toEqual(['paid', 'updatedAt']);
+      const wrong = await call('PATCH', `/admin/invoices/${NUMBER}`, { cookie, body: { updatedAt: '2026-10-31T10:00:00.000Z', paid: 'yes' } });
+      expect((await wrong.json()).fieldErrors).toEqual({ paid: 'INVALID_FORMAT' });
+      for (const [method, path] of [['GET', '/admin/invoices/nope'], ['PATCH', '/admin/invoices/nope']] as const) {
+        const response = await call(method, path, { cookie, ...withBody(method) });
+        expect(response.status).toBe(404);
+        expect((await response.json()).code).toBe('NOT_FOUND');
+      }
+    });
+  });
+
   describe('the audit log', () => {
     it('a change is logged with the names of its fields and none of the values', async () => {
       const { cookie, id } = await signedIn('ADMIN');

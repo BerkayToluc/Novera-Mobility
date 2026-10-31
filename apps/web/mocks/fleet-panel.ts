@@ -1,6 +1,7 @@
 import type { AssignFormValues, EmployeeFormValues, FleetAssignment, FleetAssignmentPage, FleetContract, FleetContractDetail, FleetContractPage, FleetEmployee, FleetEmployeePage, FleetSummary, FleetVehiclePage, FleetVehicleDetail } from "@/lib/fleet-panel";
 import { normalizePlate } from "@/lib/admin-vehicles";
 import { normalizeSearch } from "@/lib/branch-detail";
+import { invoiceSummary } from "./invoices";
 import { getMockCarReadings, getMockContract, listMockCompanyCars, listMockContracts, setMockCarAssignee } from "./admin-contracts";
 
 // The sample fleet of the customer (USE_MOCKS=1, local work and tests only, lib/mode.ts). The company of the sample corporate account is
@@ -108,6 +109,7 @@ export function fleetSummary(world_: string, companyId: string): FleetSummary {
     vehicles: { total: cars.length, assigned, idle: cars.length - assigned },
     contracts: { active: contracts.length, endingSoon: contracts.filter((c) => within(c.endAt, 60)).length },
     maintenanceDue: cars.filter((c) => within(c.nextMaintenanceOn, 30) || within(c.inspectionDueOn, 30)).length,
+    invoices: invoiceSummary(world_, companyId),
   };
 }
 

@@ -501,6 +501,38 @@ body:has(dialog[open]) {
  * closed dialog animate from display:none; where they are missing it simply appears. Off with
  * reduced motion.
  */
+/*
+ * The invoice on paper (V2-37). Only the invoice goes to the page: the site's header and footer, the skip link, the menus and the buttons
+ * (marked `print:hidden` where they are) stay out, and the sheet is black on white whatever theme the screen has, so a dark theme does not
+ * print as light text on a white page. A4 with a margin that fits a one-page invoice.
+ */
+@media print {
+  @page {
+    size: A4;
+    margin: 14mm;
+  }
+
+  body > a,
+  body > header,
+  body > footer {
+    display: none !important;
+  }
+
+  .invoice-sheet {
+    max-width: none;
+    border: 0;
+    padding: 0;
+    break-inside: avoid;
+  }
+
+  .invoice-sheet,
+  .invoice-sheet * {
+    background: #fff !important;
+    color: #000 !important;
+    border-color: #000 !important;
+  }
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .fleet-dialog {
     opacity: 0;

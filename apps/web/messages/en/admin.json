@@ -1276,6 +1276,89 @@
         "save": "Save the reading",
         "saving": "Saving"
       }
+    },
+    "invoices": {
+      "title": "Invoices",
+      "intro": "The monthly invoices made out to companies. A month's invoices are made once; when a payment arrives, mark the invoice paid and the customer's screen shows it at once.",
+      "detailTitle": "Invoice",
+      "detailErrorTitle": "The invoice could not be loaded",
+      "detailIntro": "The invoice made out to {company}.",
+      "back": "Back to invoices",
+      "print": "Print",
+      "searchLabel": "Search by invoice number or company",
+      "statusFilterLabel": "By status",
+      "tableCaption": "Invoices",
+      "retry": "Try again",
+      "currencyNote": "Amounts are shown in TRY.",
+      "columns": {
+        "number": "Number",
+        "company": "Company",
+        "period": "Period",
+        "issued": "Issued",
+        "due": "Due",
+        "total": "Total",
+        "status": "Status"
+      },
+      "status": {
+        "PAID": "Paid",
+        "PENDING": "Pending",
+        "OVERDUE": "Overdue"
+      },
+      "emptyTitle": "No invoices yet",
+      "emptyText": "Choose a month above and make the invoices; they appear here.",
+      "emptyFilteredTitle": "No invoice matches this search",
+      "emptyFilteredText": "Try removing the filters or searching for something else.",
+      "loadErrorTitle": "The invoices could not be loaded",
+      "loadErrorText": "Try again in a few seconds.",
+      "generate": {
+        "title": "Make the invoices",
+        "text": "Every company with a contract in the chosen month gets one invoice. Part months are worked out by the days, VAT is 20 %, and payment is due 30 days later. A month's invoices are made only once.",
+        "period": "Period",
+        "button": "Make the invoices",
+        "dialogTitle": "Make the invoices for {period}?",
+        "dialogText": "Every company gets one invoice for this month, and it shows on the customer's Filom screen. An invoice that is made cannot be deleted from here.",
+        "confirm": "Make the invoices",
+        "keep": "Cancel"
+      },
+      "toast": {
+        "created": "{count, plural, one {# invoice} other {# invoices}} made for {period}.",
+        "none": "No contract to bill in {period}; no invoice was made.",
+        "paid": "{number} was marked paid.",
+        "unpaid": "The paid mark on {number} was removed."
+      },
+      "errors": {
+        "already": "The invoices for {period} have already been made.",
+        "future": "A month that has not started cannot be billed.",
+        "stale": "The invoice changed in the meantime; the page was refreshed, try again.",
+        "notFound": "This invoice no longer exists.",
+        "unavailable": "That could not be done. Try again in a few seconds."
+      },
+      "actions": {
+        "title": "Payment status",
+        "unpaidText": "When the payment has arrived, mark the invoice paid. The customer sees it on their Filom screen.",
+        "paidText": "The invoice is marked paid. If that was a mistake, you can remove the mark.",
+        "markPaid": "Mark as paid",
+        "markUnpaid": "Remove the paid mark"
+      },
+      "sheet": {
+        "title": "Invoice",
+        "issuer": "Novera Mobility · Corporate fleet rental",
+        "billTo": "Billed to",
+        "number": "Invoice number",
+        "period": "Period",
+        "issued": "Issue date",
+        "due": "Due date",
+        "paidOn": "Paid on",
+        "linesCaption": "Invoice lines",
+        "contract": "Contract",
+        "days": "Days",
+        "daysValue": "{days} / {total}",
+        "amount": "Amount",
+        "subtotal": "Subtotal",
+        "vat": "VAT ({percent} %)",
+        "total": "Total",
+        "note": "This is a sample invoice, not a legal document (e-invoice)."
+      }
     }
   }
 }
