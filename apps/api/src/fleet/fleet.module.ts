@@ -5,12 +5,14 @@ import { CompanyGuard } from './company.guard.js';
 import { FleetAssignmentsService } from './fleet-assignments.service.js';
 import { FleetContractsService } from './fleet-contracts.service.js';
 import { FleetEmployeesService } from './fleet-employees.service.js';
+import { FleetInvoicesService } from './fleet-invoices.service.js';
 import { FleetSummaryService } from './fleet-summary.service.js';
 import { FleetVehiclesService } from './fleet-vehicles.service.js';
 import {
   FleetAssignmentsController,
   FleetContractsController,
   FleetEmployeesController,
+  FleetInvoicesController,
   FleetSummaryController,
   FleetVehiclesController,
 } from './fleet.controllers.js';
@@ -20,13 +22,14 @@ import {
 // written by the administration's interceptor, which covers `/fleet/*` writes as well.
 @Module({
   imports: [AuthModule],
-  controllers: [FleetSummaryController, FleetVehiclesController, FleetContractsController, FleetEmployeesController, FleetAssignmentsController],
+  controllers: [FleetSummaryController, FleetVehiclesController, FleetContractsController, FleetEmployeesController, FleetAssignmentsController, FleetInvoicesController],
   providers: [
     FleetSummaryService,
     FleetVehiclesService,
     FleetContractsService,
     FleetEmployeesService,
     FleetAssignmentsService,
+    FleetInvoicesService,
     { provide: APP_GUARD, useClass: CompanyGuard },
   ],
 })

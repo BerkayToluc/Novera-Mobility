@@ -5,8 +5,10 @@
 // the companies are made and the users are not.
 import type { PrismaClient } from "../src/generated/prisma/client.js";
 import { hashPassword } from "../src/auth/password.js";
+import { addDays, parseDay } from "../src/fleet/fleet-dates.js";
+import { dueDayOf, lineOf, periodRange, totalsOf, type InvoiceLine } from "../src/fleet/invoice-calc.js";
 
-type Db = Pick<PrismaClient, "company" | "user" | "product" | "vehicleModel" | "vehicle" | "fleetContract" | "fleetVehicle" | "companyEmployee" | "vehicleAssignment" | "vehicleReading" | "$queryRaw">;
+type Db = Pick<PrismaClient, "company" | "user" | "product" | "vehicleModel" | "vehicle" | "fleetContract" | "fleetVehicle" | "companyEmployee" | "vehicleAssignment" | "vehicleReading" | "fleetInvoice" | "$queryRaw">;
 
 type CarSeed = { plate: string; modelSlug: string; year: number; startKm: number; maintenanceInDays: number; inspectionInDays: number };
 type PersonSeed = { firstName: string; lastName: string; department: string; employeeNo: string; email: string; phone: string };
@@ -121,15 +123,15 @@ const HYBRID = new Set(["toyota-corolla-hybrid", "nissan-qashqai", "toyota-rav4-
 const day = (date: string): Date => new Date(`${date}T00:00:00.000Z`);
 const dayOf = (now: Date, offsetDays: number): Date => new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + offsetDays));
 
-export type FleetSeedResult = { companies: number; users: number; contracts: number; cars: number; people: number; assignments: number; readings: number };
+export type FleetSeedResult = { companies: number; users: number; contracts: number; cars: number; people: number; assignments: number; readings: number; invoices: number };
 
 // Adds what is missing and says how much it added. `password` is the one for the sample users; empty means no user is made.
 export async function seedFleet(db: Db, options: { password?: string | null; now?: Date; seeds?: CompanySeed[] } = {}): Promise<FleetSeedResult> {
   const now = options.now ?? new Date();
-  const result: FleetSeedResult = { companies: 0, users: 0, contracts: 0, cars: 0, people: 0, assignments: 0, readings: 0 };
+  const result: FleetSeedResult = { companies: 0, users: 0, contracts: 0, cars: 0, people: 0, assignments: 0, readings: 0, invoices: 0 };
   const passwordHash = options.password ? await hashPassword(options.password) : null;
 
-  for (const seed of options.seeds ?? FLEET_SEEDS) {
+  for (const [seedIndex, seed] of (options.seeds ?? FLEET_SEEDS).entries()) {
     // The name is unique: a company that has it is left exactly as it is.
     let company = await db.company.findUnique({ where: { name: seed.name } });
     if (!company) {
@@ -224,6 +226,38 @@ export async function seedFleet(db: Db, options: { password?: string | null; now
           }
         }
       }
+    }
+
+    // The invoices of the three months before this one, made the way the administration makes them (docs/ADMIN.md §3.15): the oldest
+    // is paid, the middle one is paid at every company but the first, whose is late, and the last is waiting. A month that has an
+    // invoice for the company is left as it is.
+    const contracts = await db.fleetContract.findMany({ where: { companyId: company.id }, include: { product: { select: { slug: true } } } });
+    for (const monthsAgo of [3, 2, 1]) {
+      const period = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - monthsAgo, 1)).toISOString().slice(0, 7);
+      if (await db.fleetInvoice.findFirst({ where: { companyId: company.id, period }, select: { id: true } })) continue;
+      const range = periodRange(period)!;
+      const lines = contracts.flatMap((c): InvoiceLine[] => {
+        const line = lineOf({ number: c.number, productSlug: c.product.slug, monthlyFee: c.monthlyFee, startAt: c.startAt, endAt: c.endAt }, range);
+        return line ? [line] : [];
+      });
+      if (lines.length === 0) continue;
+      const issuedAt = addDays(range.end, 1);
+      const dueAt = parseDay(dueDayOf(issuedAt))!;
+      const paid = monthsAgo === 3 || (monthsAgo === 2 && seedIndex !== 0);
+      const [{ serial }] = await db.$queryRaw<{ serial: bigint }[]>`SELECT nextval('"FleetInvoiceNumber_seq"') AS serial`;
+      await db.fleetInvoice.create({
+        data: {
+          number: `FTR-${issuedAt.getUTCFullYear()}-${String(serial).padStart(5, "0")}`,
+          companyId: company.id,
+          period,
+          issuedAt,
+          dueAt,
+          lines,
+          ...totalsOf(lines),
+          paidAt: paid ? addDays(dueAt, -5) : null,
+        },
+      });
+      result.invoices += 1;
     }
   }
   return result;

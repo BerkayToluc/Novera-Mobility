@@ -173,6 +173,21 @@ export async function fetchAdminUser(id: string): Promise<Schemas["AdminUserDeta
   throw new ApiUnavailableError();
 }
 
+// `GET /admin/invoices` (V2-37): one page of invoices.
+export async function fetchAdminInvoices(query: URLSearchParams): Promise<Schemas["InvoicePage"]> {
+  const result = await apiRequest<Schemas["InvoicePage"]>("GET", "/admin/invoices?" + query.toString());
+  if (result.status !== "ok") throw new ApiUnavailableError();
+  return result.data;
+}
+
+// `GET /admin/invoices/{number}`: null when there is no such invoice (the page then does not exist), a failure to load otherwise.
+export async function fetchAdminInvoice(number: string): Promise<Schemas["Invoice"] | null> {
+  const result = await apiRequest<Schemas["Invoice"]>("GET", "/admin/invoices/" + encodeURIComponent(number));
+  if (result.status === "ok") return result.data;
+  if (result.status === "not_found") return null;
+  throw new ApiUnavailableError();
+}
+
 // `GET /admin/audit-log` (V2-34): one page of the log, newest first. Read only.
 export async function fetchAdminAudit(query: URLSearchParams): Promise<Schemas["AdminAuditPage"]> {
   const result = await apiRequest<Schemas["AdminAuditPage"]>("GET", "/admin/audit-log?" + query.toString());

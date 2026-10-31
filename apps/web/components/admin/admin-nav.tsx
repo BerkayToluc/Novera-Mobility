@@ -47,7 +47,7 @@ export function AdminNav() {
           buttonRef.current?.focus();
         }
       }}
-      className="flex flex-col gap-2 xl:sticky xl:top-8 xl:self-start"
+      className="flex flex-col gap-2 print:hidden xl:sticky xl:top-8 xl:self-start"
     >
       <button
         ref={buttonRef}

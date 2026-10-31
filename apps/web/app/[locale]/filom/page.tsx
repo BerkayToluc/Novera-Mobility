@@ -35,6 +35,10 @@ export default async function FleetSummaryPage() {
       ] as const)
     : [];
 
+  const money = new Intl.NumberFormat(locale, { style: "currency", currency: "TRY" });
+  const statusT = await getTranslations("Admin.invoices.status");
+  const invoices = summary?.invoices;
+
   return (
     <>
       <PageHeader title={t("title")} description={asOf ? t("asOf", { date: asOf }) : undefined} />
@@ -50,13 +54,49 @@ export default async function FleetSummaryPage() {
             <div key={card.key} className="flex flex-col gap-2 rounded-card border border-border bg-surface p-5">
               <dt className="text-label text-fg-muted">{t(`cards.${card.key}`)}</dt>
               <dd className="text-display text-fg">{card.value}</dd>
-              <Link href={card.href} className="inline-flex min-h-11 items-center self-start text-link underline underline-offset-4">
-                {t("openList")}
-                <span className="sr-only">{`: ${t(`cards.${card.key}`)}`}</span>
-              </Link>
+              <dd>
+                <Link href={card.href} className="inline-flex min-h-11 items-center text-link underline underline-offset-4">
+                  {t("openList")}
+                  <span className="sr-only">{`: ${t(`cards.${card.key}`)}`}</span>
+                </Link>
+              </dd>
             </div>
           ))}
         </dl>
+      )}
+      {invoices && (
+        <section aria-labelledby="summary-invoices" className="flex flex-col gap-4">
+          <h2 id="summary-invoices" className="text-h3 text-fg">
+            {t("invoices.title")}
+          </h2>
+          <dl className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            <div className="flex flex-col gap-2 rounded-card border border-border bg-surface p-5">
+              <dt className="text-label text-fg-muted">{t("invoices.thisMonth")}</dt>
+              <dd className="text-display text-fg">{invoices.thisMonth ? money.format(invoices.thisMonth.total / 100) : t("invoices.notYet")}</dd>
+              {invoices.thisMonth && <dd className="text-small text-fg-muted">{`${invoices.thisMonth.number} · ${statusT(invoices.thisMonth.status)}`}</dd>}
+              <dd>
+                <Link
+                  href={invoices.thisMonth ? { pathname: "/filom/faturalar/[number]", params: { number: invoices.thisMonth.number } } : "/filom/faturalar"}
+                  className="inline-flex min-h-11 items-center text-link underline underline-offset-4"
+                >
+                  {invoices.thisMonth ? t("invoices.openInvoice") : t("invoices.openList")}
+                  <span className="sr-only">{`: ${t("invoices.thisMonth")}`}</span>
+                </Link>
+              </dd>
+            </div>
+            <div className="flex flex-col gap-2 rounded-card border border-border bg-surface p-5">
+              <dt className="text-label text-fg-muted">{t("invoices.unpaid")}</dt>
+              <dd className="text-display text-fg">{money.format(invoices.unpaid.total / 100)}</dd>
+              <dd className="text-small text-fg-muted">{t("invoices.unpaidCount", { count: invoices.unpaid.count, overdue: invoices.overdue })}</dd>
+              <dd>
+                <Link href={{ pathname: "/filom/faturalar", query: { durum: invoices.overdue > 0 ? "OVERDUE" : "PENDING" } }} className="inline-flex min-h-11 items-center text-link underline underline-offset-4">
+                  {t("invoices.openList")}
+                  <span className="sr-only">{`: ${t("invoices.unpaid")}`}</span>
+                </Link>
+              </dd>
+            </div>
+          </dl>
+        </section>
       )}
     </>
   );

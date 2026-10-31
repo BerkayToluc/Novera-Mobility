@@ -15,6 +15,8 @@ const describeDb = databaseUrl ? describe : describe.skip;
 describeDb('the fleet seed against the database (V2-35)', () => {
   let prisma: PrismaService;
   const run = randomUUID().slice(0, 8);
+  // The invoices are of the three months before this one, so the day is fixed or the numbers would move with the calendar.
+  const NOW = new Date('2026-10-31T10:00:00.000Z');
   const created = { products: [] as string[], models: [] as string[], classes: [] as string[] };
   const names = FLEET_SEEDS.map((seed) => seed.name);
   const emails = FLEET_SEEDS.map((seed) => seed.user.email);
@@ -26,6 +28,7 @@ describeDb('the fleet seed against the database (V2-35)', () => {
     const cars = await prisma.fleetVehicle.findMany({ where: { companyId: { in: companyIds } }, select: { id: true } });
     await prisma.vehicleReading.deleteMany({ where: { fleetVehicleId: { in: cars.map((row) => row.id) } } });
     await prisma.vehicleAssignment.deleteMany({ where: { companyId: { in: companyIds } } });
+    await prisma.fleetInvoice.deleteMany({ where: { companyId: { in: companyIds } } });
     await prisma.fleetVehicle.deleteMany({ where: { companyId: { in: companyIds } } });
     await prisma.fleetContract.deleteMany({ where: { companyId: { in: companyIds } } });
     await prisma.companyEmployee.deleteMany({ where: { companyId: { in: companyIds } } });
@@ -75,13 +78,14 @@ describeDb('the fleet seed against the database (V2-35)', () => {
     people: await prisma.companyEmployee.count({ where: { company: { name: { in: names } } } }),
     assignments: await prisma.vehicleAssignment.count({ where: { companyId: { in: companyIds } } }),
     readings: await prisma.vehicleReading.count({ where: { vehicle: { plate: { in: plates } } } }),
+    invoices: await prisma.fleetInvoice.count({ where: { companyId: { in: companyIds } } }),
     };
   };
 
   it('makes two companies with their contracts, twelve cars, fifteen people, some assignments and three readings a car', async () => {
-    const added = await seedFleet(prisma, { password: 'ornek-seed-parolasi-1' });
-    expect(added).toMatchObject({ companies: 2, users: 2, contracts: 3, cars: 12, people: 15, assignments: 8, readings: 36 });
-    expect(await counts()).toEqual({ companies: 2, users: 2, contracts: 3, cars: 12, people: 15, assignments: 8, readings: 36 });
+    const added = await seedFleet(prisma, { password: 'ornek-seed-parolasi-1', now: NOW });
+    expect(added).toMatchObject({ companies: 2, users: 2, contracts: 3, cars: 12, people: 15, assignments: 8, readings: 36, invoices: 6 });
+    expect(await counts()).toEqual({ companies: 2, users: 2, contracts: 3, cars: 12, people: 15, assignments: 8, readings: 36, invoices: 6 });
 
     // The user belongs to the company and has no password in the clear; the contracts carry the sample's products.
     const user = await prisma.user.findUniqueOrThrow({ where: { email: emails[0]! }, include: { company: true } });
@@ -95,8 +99,8 @@ describeDb('the fleet seed against the database (V2-35)', () => {
 
   it('run again, it makes no copy and adds nothing', async () => {
     const before = await counts();
-    const again = await seedFleet(prisma, { password: 'ornek-seed-parolasi-1' });
-    expect(again).toEqual({ companies: 0, users: 0, contracts: 0, cars: 0, people: 0, assignments: 0, readings: 0 });
+    const again = await seedFleet(prisma, { password: 'ornek-seed-parolasi-1', now: NOW });
+    expect(again).toEqual({ companies: 0, users: 0, contracts: 0, cars: 0, people: 0, assignments: 0, readings: 0, invoices: 0 });
     expect(await counts()).toEqual(before);
   });
 
@@ -108,7 +112,7 @@ describeDb('the fleet seed against the database (V2-35)', () => {
     // The person gave the car back: the assignment is closed, and the seed does not open it again.
     await prisma.vehicleAssignment.updateMany({ where: { fleetVehicleId: car.id }, data: { endedAt: new Date() } });
 
-    await seedFleet(prisma, { password: 'baska-bir-parola-2' });
+    await seedFleet(prisma, { password: 'baska-bir-parola-2', now: NOW });
     expect((await prisma.company.findUniqueOrThrow({ where: { id: company.id } })).phone).toBe('+90 000 000 00 00');
     expect((await prisma.fleetVehicle.findUniqueOrThrow({ where: { id: car.id } })).nextMaintenanceOn?.toISOString().slice(0, 10)).toBe('2031-01-01');
     expect(await prisma.vehicleAssignment.count({ where: { fleetVehicleId: car.id, endedAt: null } })).toBe(0);
@@ -118,9 +122,30 @@ describeDb('the fleet seed against the database (V2-35)', () => {
     expect(await verifyPassword('ornek-seed-parolasi-1', user.passwordHash!)).toBe(true);
   });
 
+  it('makes the invoices of the three months before this one: paid, late for the first company, waiting; each adds up and none is made twice', async () => {
+    await clean();
+    await seedFleet(prisma, { password: '', now: NOW });
+    const first = await prisma.fleetInvoice.findMany({ where: { company: { name: names[0]! } }, orderBy: { period: 'asc' } });
+    expect(first.map((row) => [row.period, row.paidAt !== null, row.dueAt.toISOString().slice(0, 10)])).toEqual([
+      ['2026-07', true, '2026-08-31'],
+      ['2026-08', false, '2026-10-01'],
+      ['2026-09', false, '2026-10-31'],
+    ]);
+    const second = await prisma.fleetInvoice.findMany({ where: { company: { name: names[1]! } }, orderBy: { period: 'asc' } });
+    expect(second.map((row) => row.paidAt !== null)).toEqual([true, true, false]);
+    // The second company has two contracts from June: July's invoice has both lines, and the totals are the lines and the VAT exactly.
+    expect(second[0]!.lines).toHaveLength(2);
+    for (const row of [...first, ...second]) {
+      const lines = row.lines as Array<{ amount: number }>;
+      expect(row.subtotal).toBe(lines.reduce((sum, line) => sum + line.amount, 0));
+      expect(row.total).toBe(row.subtotal + row.vat);
+    }
+    expect(new Set([...first, ...second].map((row) => row.number)).size).toBe(6);
+  });
+
   it('without a password the companies are made and the users are not', async () => {
     await clean();
-    const added = await seedFleet(prisma, { password: '' });
+    const added = await seedFleet(prisma, { password: '', now: NOW });
     expect(added.companies).toBe(2);
     expect(added.users).toBe(0);
     expect(await prisma.user.count({ where: { email: { in: emails } } })).toBe(0);
@@ -137,7 +162,7 @@ describeDb('the fleet seed against the database (V2-35)', () => {
     });
     const rented = await prisma.vehicle.create({ data: { plate: '35 FLM 101', year: 2030, vehicleModelId: model.id, branchId: branch.id } });
     try {
-      const added = await seedFleet(prisma, { password: '' });
+      const added = await seedFleet(prisma, { password: '', now: NOW });
       expect(added.cars).toBe(11);
       expect(await prisma.fleetVehicle.count({ where: { plate: '35 FLM 101' } })).toBe(0);
     } finally {

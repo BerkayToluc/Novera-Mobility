@@ -1,5 +1,6 @@
 import "server-only";
 import { apiRequest } from "./api-request";
+import type { Invoice, InvoicePage } from "./invoices";
 import type { FleetAssignmentPage, FleetContractDetail, FleetContractPage, FleetEmployee, FleetEmployeePage, FleetSummary, FleetVehicleDetail, FleetVehiclePage } from "./fleet-panel";
 import { ApiUnavailableError } from "./fleet-client";
 
@@ -27,4 +28,6 @@ export const fetchFleetContracts = (query: URLSearchParams) => read<FleetContrac
 export const fetchFleetContract = (number: string) => readOrNull<FleetContractDetail>("/fleet/contracts/" + encodeURIComponent(number));
 export const fetchFleetEmployees = (query: URLSearchParams) => read<FleetEmployeePage>("/fleet/employees?" + query.toString());
 export const fetchFleetEmployee = (id: string) => readOrNull<FleetEmployee>("/fleet/employees/" + encodeURIComponent(id));
+export const fetchFleetInvoices = (query: URLSearchParams) => read<InvoicePage>("/fleet/invoices?" + query.toString());
+export const fetchFleetInvoice = (number: string) => readOrNull<Invoice>("/fleet/invoices/" + encodeURIComponent(number));
 export const fetchFleetAssignments = (query: URLSearchParams) => read<FleetAssignmentPage>("/fleet/assignments?" + query.toString());

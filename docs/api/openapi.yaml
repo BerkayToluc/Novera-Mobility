@@ -3148,6 +3148,215 @@ paths:
         "422": { $ref: "#/components/responses/ValidationFailed" }
         "429": { $ref: "#/components/responses/TooManyRequests" }
 
+  /admin/invoices/generate:
+    post:
+      tags: [admin]
+      summary: Ayın faturalarını oluştur
+      description: |
+        Verilen ay (`period=2026-10`) için etkin sözleşmesi olan her şirkete **bir fatura** keser. Bir sözleşmenin satırı, aylık bedelin ayda kapsadığı gün sayısına oranıdır (iki uç gün dahil, yarım yukarı kuruşa yuvarlanır); ara toplam satırların toplamı, KDV %20 (yarım yukarı), toplam ikisinin toplamıdır. Düzenlenme günü bugün (İstanbul), vade 30 gün sonradır. Numara `FTR-<yıl>-<5 hane>` bir sequence'ten gelir.
+        **Bir şirkete bir ayın tek faturası kesilir** (veritabanında benzersiz; ay, `pg_advisory_xact_lock` ile kilitlenir). Ay zaten kesilmişse `409 ALREADY_GENERATED`; gelecekteki ay `422 OUT_OF_RANGE`. Kesilecek bir şey yoksa hiçbir şey oluşmaz (`created: 0`). İşlem kaydı: `invoice.generate` (kayıt kimliği ay).
+      security:
+        - cookieAuth: []
+      parameters:
+        - { name: period, in: query, required: true, description: "Ay, `YYYY-MM`.", schema: { type: string, pattern: "^[0-9]{4}-(0[1-9]|1[0-2])$", example: "2026-10" } }
+      responses:
+        "200":
+          description: Kesilen faturalar
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/InvoiceGenerateResult" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Yönetici değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "409":
+          description: Ayın faturaları zaten kesilmiş (`ALREADY_GENERATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
+  /admin/invoices:
+    get:
+      tags: [admin]
+      summary: Faturalar
+      description: |
+        Sayfalı liste, varsayılan olarak en yeni düzenlenen üstte (`sort=issuedAt|dueAt|number|total:asc|desc`). `q` numarada ve şirket adında arar. Durum **okunurken** hesaplanır: ödenmemiş ve vadesi geçmiş fatura `OVERDUE`'dur, hiçbir yerde saklanmaz.
+      security:
+        - cookieAuth: []
+      parameters:
+        - { name: page, in: query, schema: { type: integer, minimum: 1, default: 1 } }
+        - { name: pageSize, in: query, schema: { type: integer, minimum: 1, maximum: 100, default: 20 } }
+        - { name: sort, in: query, schema: { type: string, example: "issuedAt:desc" } }
+        - { name: q, in: query, schema: { type: string, maxLength: 100 } }
+        - { name: period, in: query, schema: { type: string, example: "2026-10" } }
+        - { name: company, in: query, schema: { type: string, format: uuid } }
+        - { name: status, in: query, schema: { type: string, enum: [PAID, PENDING, OVERDUE] } }
+      responses:
+        "200":
+          description: Bir sayfa fatura
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/InvoicePage" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Yönetici değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
+  /admin/invoices/{number}:
+    parameters:
+      - { name: number, in: path, required: true, description: "Fatura numarası (`FTR-2026-00001`); büyük/küçük harf fark etmez.", schema: { type: string, example: FTR-2026-00001 } }
+    get:
+      tags: [admin]
+      summary: Bir fatura
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Fatura
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Invoice" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Yönetici değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: Böyle bir fatura yok (`NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+    patch:
+      tags: [admin]
+      summary: Faturayı ödendi / ödenmedi işaretle
+      description: |
+        Bir faturada değişen tek şey ödendi bilgisidir; tutarlar ve satırlar kesildikten sonra değişmez. Düzenlenen kaydın `updatedAt` değeri geri gönderilir; fatura bu arada değiştiyse `409 STALE_WRITE`. `paid: true` ödeme zamanını yazar, `false` siler. İşlem kaydı: `invoice.update` (şirket satırda).
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/InvoiceUpdate" }
+      responses:
+        "200":
+          description: Güncel fatura
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Invoice" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Yönetici değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: Böyle bir fatura yok (`NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "409":
+          description: Kayıt değişmiş (`STALE_WRITE`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "415": { description: JSON olmayan gövde (`BAD_REQUEST`) }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
+  /fleet/invoices:
+    get:
+      tags: [fleet]
+      summary: Faturalar
+      description: |
+        Sayfalı liste, varsayılan olarak en yeni ay üstte (`sort=period|dueAt|total:asc|desc`); `period` ve `status` süzer.
+        Yalnızca **kurumsal hesabın kendi şirketinin** kayıtları görünür; başka şirketin kaydı `404` döner (ADR-25). Sınır: hesap başına dakikada 120.
+      security:
+        - cookieAuth: []
+      parameters:
+        - { name: page, in: query, schema: { type: integer, minimum: 1, default: 1 } }
+        - { name: pageSize, in: query, schema: { type: integer, minimum: 1, maximum: 100, default: 20 } }
+        - { name: sort, in: query, schema: { type: string, example: "period:desc" } }
+        - { name: period, in: query, schema: { type: string, example: "2026-10" } }
+        - { name: status, in: query, schema: { type: string, enum: [PAID, PENDING, OVERDUE] } }
+      responses:
+        "200":
+          description: Bir sayfa fatura
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/InvoicePage" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Kurumsal hesap değil ya da bir şirkete bağlı değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
+  /fleet/invoices/{number}:
+    parameters:
+      - { name: number, in: path, required: true, description: "Fatura numarası.", schema: { type: string, example: FTR-2026-00001 } }
+    get:
+      tags: [fleet]
+      summary: Bir fatura
+      description: |
+        Yalnızca **kurumsal hesabın kendi şirketinin** kayıtları görünür; başka şirketin faturası `404` döner (ADR-25). Sınır: hesap başına dakikada 120.
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Fatura
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Invoice" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Kurumsal hesap değil ya da bir şirkete bağlı değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: Böyle bir fatura yok ya da başka şirketin (`NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
   /admin/ping:
 
     get:
@@ -4541,7 +4750,7 @@ components:
 
     FleetSummary:
       type: object
-      required: [date, hasActiveContract, vehicles, contracts, maintenanceDue]
+      required: [date, hasActiveContract, vehicles, contracts, maintenanceDue, invoices]
       properties:
         date: { type: string, format: date, description: Sayıların ait olduğu İstanbul günü. }
         hasActiveContract: { type: boolean, description: Etkin filo sözleşmesi olan şirkette Filom bağlantısı ve ekranları görünür. }
@@ -4559,6 +4768,26 @@ components:
             active: { type: integer, minimum: 0 }
             endingSoon: { type: integer, minimum: 0, description: 60 gün içinde biten etkin sözleşmeler. }
         maintenanceDue: { type: integer, minimum: 0, description: Bakımı ya da muayenesi 30 gün içinde olan (ya da geçmiş) araçlar. }
+        invoices:
+          type: object
+          required: [thisMonth, unpaid, overdue]
+          properties:
+            thisMonth:
+              type: object
+              nullable: true
+              description: Bu ayın faturası; henüz kesilmediyse null.
+              required: [number, total, status]
+              properties:
+                number: { type: string }
+                total: { type: integer, minimum: 0 }
+                status: { type: string, enum: [PAID, PENDING, OVERDUE] }
+            unpaid:
+              type: object
+              required: [count, total]
+              properties:
+                count: { type: integer, minimum: 0, description: Ödenmemiş faturalar (gecikenler dahil). }
+                total: { type: integer, minimum: 0, description: Bunların toplamı, TRY kuruş. }
+            overdue: { type: integer, minimum: 0, description: Vadesi geçmiş, ödenmemiş faturalar. }
 
     FleetContract:
       type: object
@@ -4597,6 +4826,63 @@ components:
         total: { type: integer, minimum: 0 }
         page: { type: integer }
         pageSize: { type: integer }
+
+    InvoiceLine:
+      type: object
+      required: [contractNumber, productSlug, days, daysInMonth, amount]
+      properties:
+        contractNumber: { type: string, example: SZL-2026-00001 }
+        productSlug: { type: string, example: akilli-kurumsal-filo }
+        days: { type: integer, minimum: 1, description: Sözleşmenin ayda kapsadığı gün (iki uç gün dahil). }
+        daysInMonth: { type: integer, minimum: 28, maximum: 31 }
+        amount: { type: integer, minimum: 0, description: Satır tutarı, TRY kuruş (KDV hariç). }
+
+    Invoice:
+      type: object
+      required: [id, number, company, period, issuedAt, dueAt, lines, subtotal, vatPercent, vat, total, paidAt, status, createdAt, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        number: { type: string, example: FTR-2026-00001 }
+        company:
+          type: object
+          required: [id, name]
+          properties: { id: { type: string, format: uuid }, name: { type: string } }
+        period: { type: string, example: "2026-10", description: Faturanın ait olduğu ay. }
+        issuedAt: { type: string, format: date }
+        dueAt: { type: string, format: date, description: Düzenlenmeden 30 gün sonra. }
+        lines: { type: array, items: { $ref: "#/components/schemas/InvoiceLine" } }
+        subtotal: { type: integer, minimum: 0, description: Satırların toplamı, TRY kuruş. }
+        vatPercent: { type: integer, example: 20 }
+        vat: { type: integer, minimum: 0 }
+        total: { type: integer, minimum: 0, description: Ara toplam + KDV. }
+        paidAt: { type: string, format: date-time, nullable: true }
+        status: { type: string, enum: [PAID, PENDING, OVERDUE], description: "Okunurken hesaplanır: ödenmemiş ve vadesi geçmiş fatura OVERDUE." }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+
+    InvoicePage:
+      type: object
+      required: [items, total, page, pageSize]
+      properties:
+        items: { type: array, items: { $ref: "#/components/schemas/Invoice" } }
+        total: { type: integer, minimum: 0 }
+        page: { type: integer }
+        pageSize: { type: integer }
+
+    InvoiceGenerateResult:
+      type: object
+      required: [period, created, invoices]
+      properties:
+        period: { type: string, example: "2026-10" }
+        created: { type: integer, minimum: 0, description: Kesilen fatura sayısı. }
+        invoices: { type: array, items: { $ref: "#/components/schemas/Invoice" } }
+
+    InvoiceUpdate:
+      type: object
+      required: [updatedAt, paid]
+      properties:
+        updatedAt: { type: string, format: date-time, description: Düzenlenen kaydın sürümü. }
+        paid: { type: boolean }
 
     FleetEmployee:
       type: object

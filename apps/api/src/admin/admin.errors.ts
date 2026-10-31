@@ -24,3 +24,11 @@ export function staleWrite(): HttpException {
 export function invalidTransition(message: string): HttpException {
   return new HttpException({ code: 'INVALID_TRANSITION', message }, HttpStatus.CONFLICT);
 }
+
+// The invoices of that month have been made already (ADMIN.md §3.15). Nothing was written; the ones that exist stay as they are.
+export function alreadyGenerated(period: string): HttpException {
+  return new HttpException(
+    { code: 'ALREADY_GENERATED', message: `The invoices of ${period} have been made already`, details: {} },
+    HttpStatus.CONFLICT,
+  );
+}

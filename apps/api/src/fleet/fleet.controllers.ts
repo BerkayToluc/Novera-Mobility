@@ -7,6 +7,8 @@ import { CurrentCompany } from './company.guard.js';
 import { FleetAssignmentsService } from './fleet-assignments.service.js';
 import { FleetContractsService } from './fleet-contracts.service.js';
 import { FleetEmployeesService } from './fleet-employees.service.js';
+import { FleetInvoicesService } from './fleet-invoices.service.js';
+import type { InvoiceView } from './invoice.view.js';
 import { FleetSummaryService, type FleetSummary } from './fleet-summary.service.js';
 import { FleetVehiclesService, type FleetVehicleDetail } from './fleet-vehicles.service.js';
 import type { AssignmentView, ContractDetail, ContractView, EmployeeView, FleetVehicleView } from './fleet.view.js';
@@ -89,6 +91,22 @@ export class FleetEmployeesController {
   @Audited({ action: 'fleet-employee.update', entity: 'employee', entityId: idParam })
   update(@CurrentCompany() companyId: string, @Param('id') id: string, @Body() body: unknown): Promise<EmployeeView> {
     return this.employees.update(companyId, id, body);
+  }
+}
+
+@ApiTags('fleet')
+@Controller('fleet/invoices')
+export class FleetInvoicesController {
+  constructor(private readonly invoices: FleetInvoicesService) {}
+
+  @Get()
+  list(@CurrentCompany() companyId: string, @Query() query: unknown): Promise<Page<InvoiceView>> {
+    return this.invoices.list(companyId, query);
+  }
+
+  @Get(':number')
+  get(@CurrentCompany() companyId: string, @Param('number') number: string): Promise<InvoiceView> {
+    return this.invoices.get(companyId, number);
   }
 }
 

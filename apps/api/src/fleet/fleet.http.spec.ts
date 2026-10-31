@@ -12,6 +12,7 @@ import { PrismaService } from '../prisma/prisma.service.js';
 import { FleetAssignmentsService } from './fleet-assignments.service.js';
 import { FleetContractsService } from './fleet-contracts.service.js';
 import { FleetEmployeesService } from './fleet-employees.service.js';
+import { FleetInvoicesService } from './fleet-invoices.service.js';
 import { FleetSummaryService } from './fleet-summary.service.js';
 import { FleetVehiclesService } from './fleet-vehicles.service.js';
 import { FleetModule } from './fleet.module.js';
@@ -42,6 +43,8 @@ const ROUTES: Array<[string, string, unknown?]> = [
   ['GET', `/fleet/employees/${ID}`],
   ['POST', '/fleet/employees', { firstName: 'Ada', lastName: 'Kaya', email: 'ada@example.test' }],
   ['PATCH', `/fleet/employees/${ID}`, { updatedAt: '2026-10-31T10:00:00.000Z', department: 'Satış' }],
+  ['GET', '/fleet/invoices'],
+  ['GET', '/fleet/invoices/FTR-2026-00001'],
   ['GET', '/fleet/assignments'],
   ['POST', '/fleet/assignments', { fleetVehicleId: ID, employeeId: ID, note: 'Not' }],
   ['POST', `/fleet/assignments/${ID}/end`, {}],
@@ -61,6 +64,8 @@ describe('the fleet panel over HTTP (V2-35)', () => {
       .useValue(stub(['list', 'get']))
       .overrideProvider(FleetEmployeesService)
       .useValue(stub(['list', 'get', 'create', 'update']))
+      .overrideProvider(FleetInvoicesService)
+      .useValue(stub(['list', 'get']))
       .overrideProvider(FleetAssignmentsService)
       .useValue(stub(['list', 'create', 'end']))
       .overrideProvider(RateLimitStore)
