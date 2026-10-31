@@ -170,7 +170,7 @@ export class CompaniesService {
       throw error;
     }
 
-    this.send({ id: user.id, email: user.email, locale: user.locale, firstName: user.firstName }, company.name, token);
+    await this.send({ id: user.id, email: user.email, locale: user.locale, firstName: user.firstName }, company.name, token);
     return companyUser(user, expiresAt, now);
   }
 
@@ -192,15 +192,17 @@ export class CompaniesService {
       return { user: found, companyName: found.company.name };
     });
 
-    this.send({ id: user.id, email: user.email, locale: user.locale, firstName: user.firstName }, companyName, token);
+    await this.send({ id: user.id, email: user.email, locale: user.locale, firstName: user.firstName }, companyName, token);
     return companyUser(user, expiresAt, now);
   }
 
-  // The e-mail goes after the account and the link are stored. It is not awaited: sending can take seconds, and the notifier never
-  // throws (a failed delivery is logged), so the administrator can send the invitation again from the screen.
-  private send(person: Pending, company: string, token: string): void {
+  // The e-mail goes after the account and the link are stored, and it is awaited: on Cloud Run the CPU is throttled once the answer
+  // is sent, so a send left running in the background can stall and never reach the mail provider. Only an administrator waits
+  // (a few seconds at most, the notifier has a timeout); nobody can learn who has an account from it. The notifier never throws (a
+  // failed delivery is logged), so the invitation is kept and can be sent again from the screen.
+  private async send(person: Pending, company: string, token: string): Promise<void> {
     const link = `${webBaseUrl()}/${person.locale.toLowerCase()}/sifre-sifirla/yeni?token=${encodeURIComponent(token)}&tur=davet`;
-    void this.notifier.send(person.email, link, person.locale, { company, name: person.firstName }).catch(() => undefined);
+    await this.notifier.send(person.email, link, person.locale, { company, name: person.firstName }).catch(() => undefined);
   }
 
   private async requireFreeName(db: Pick<PrismaService, 'company'>, name: string): Promise<void> {
