@@ -21,7 +21,7 @@
 
 Her uçta bir sınır vardır (ADR-27). Sayaçlar Postgres'te (`RateLimitHit`) tutulur; API yeniden başlayınca ya da ikinci bir örnek açılınca kaybolmaz. Pencere sabittir: sayaç pencerenin başında sıfırlanır, bu yüzden pencere sınırında en çok iki katı istek geçebilir. Sınırı aşan istek `429 RATE_LIMITED` ve saniye cinsinden `Retry-After` alır. Sınır doğrulamadan önce sayılır: geçersiz istek de sayılır. Eski pencereler her gün silinir.
 
-**Anahtar:** *adres* istemci adresinin özetidir (`ip:<özet>`, adresin kendisi saklanmaz); *hesap* girişli istekte `user:<id>`, girişsiz istekte adrestir; *yönetici* `admin:<id>`, oturumsuz istekte adrestir; *e-posta* gövdedeki adrestir (`email:<adres>`, küçük harfe çevrilir). Yönetici sınırı (`admin:<id>`, dakikada 120) V2-23'te gelir.
+**Anahtar:** *adres* istemci adresinin özetidir (`ip:<özet>`, adresin kendisi saklanmaz); *hesap* girişli istekte `user:<id>`, girişsiz istekte adrestir; *yönetici* `admin:<id>`, oturumsuz istekte adrestir; *Filom hesabı* `fleet:<id>` (kurumsal hesap, V2-35), oturumsuz istekte adrestir; *e-posta* gövdedeki adrestir (`email:<adres>`, küçük harfe çevrilir). Yönetici sınırı (`admin:<id>`, dakikada 120) V2-23'te gelir.
 
 | Uç | Sınır | Anahtar | Kova |
 |---|---|---|---|
@@ -39,6 +39,7 @@ Her uçta bir sınır vardır (ADR-27). Sayaçlar Postgres'te (`RateLimitHit`) t
 | `POST /reservations/price` (gövdede `promoCode` varsa, yukarıdakine ek olarak) | 10 istek/10 dk | hesap | `promo` |
 | `POST /reservations` | 10 istek/saat (ayrıca bir hesapta en çok 3 gelecek rezervasyon; bu kural serviste) | hesap | `reserve` |
 | `/admin/*` (her uç; ADR-24) | 120 istek/dk | yönetici (`admin:<id>`); oturumsuz istekte adres | `admin` |
+| `/fleet/*` (her uç; ADR-25) | 120 istek/dk | hesap (`fleet:<id>`); oturumsuz istekte adres | `fleet` |
 | `GET /health` | sınır yok (barındırıcının sağlık denetimi) | — | — |
 | Yukarıda olmayan her uç: katalog okumaları, `/rates`, `GET /me*`, `DELETE /holds/{id}`, `GET /me/quotes` | 300 istek/5 dk | hesap | `default` |
 

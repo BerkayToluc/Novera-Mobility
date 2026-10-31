@@ -4,6 +4,7 @@ import type { Request } from 'express';
 import { AuthService } from '../auth/auth.service.js';
 import { userOfRequest, type AuthedRequest } from '../auth/session.guard.js';
 import { isAdminRoute } from '../admin/admin-route.js';
+import { isFleetRoute } from '../fleet/fleet-route.js';
 import { clientKeyOf } from './client-key.js';
 import { DEFAULT_RATE_LIMIT, NO_RATE_LIMIT_METADATA, RATE_LIMIT_METADATA, type RateLimitSpec } from './rate-limit.js';
 import { RateLimitService } from './rate-limit.service.js';
@@ -27,7 +28,7 @@ export class RateLimitGuard implements CanActivate {
     const own = this.reflector.getAllAndOverride<RateLimitSpec[] | undefined>(RATE_LIMIT_METADATA, targets);
     const request = context.switchToHttp().getRequest<AuthedRequest>();
     // Everything under /admin shares one limit unless the handler names its own (ADR-24).
-    const fallback = isAdminRoute(context, request) ? LIMITS.admin : DEFAULT_RATE_LIMIT;
+    const fallback = isAdminRoute(context, request) ? LIMITS.admin : isFleetRoute(context, request) ? LIMITS.fleet : DEFAULT_RATE_LIMIT;
     const specs = own && own.length > 0 ? own : [fallback];
 
     // Who is asking: read once here and kept on the request, so the session guard does not look it up again.

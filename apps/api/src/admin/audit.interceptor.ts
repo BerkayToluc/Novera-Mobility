@@ -10,6 +10,7 @@ import { Reflector } from '@nestjs/core';
 import type { Request } from 'express';
 import { mergeMap, type Observable } from 'rxjs';
 import type { AuthedRequest } from '../auth/session.guard.js';
+import { isFleetRoute } from '../fleet/fleet-route.js';
 import { isAdminRoute } from './admin-route.js';
 import { AuditService, fieldNamesOf } from './audit.service.js';
 
@@ -20,6 +21,9 @@ export interface AuditedOptions {
   entity: string;
   // The id of what was changed, from the request (`:id`) or the answer; null when there is none.
   entityId?: (request: Request, result: unknown) => string | null;
+  // The company the change was for, on an administration route (a company's contract, a company's car). A fleet route has the company
+  // of the signed-in account on its line without this.
+  companyId?: (request: Request, result: unknown) => string | null;
 }
 const AUDITED_METADATA = 'novera:audited';
 export const Audited = (options: AuditedOptions) => SetMetadata(AUDITED_METADATA, options);
@@ -39,7 +43,9 @@ export class AuditInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     if (context.getType() !== 'http') return next.handle();
     const request = context.switchToHttp().getRequest<AuthedRequest>();
-    if (READ_ONLY.has(request.method) || !isAdminRoute(context, request) || !request.user) return next.handle();
+    // The fleet panel (V2-35) is written to the same log: the actor is the customer's account, and the line carries its company.
+    const fleet = isFleetRoute(context, request);
+    if (READ_ONLY.has(request.method) || !(isAdminRoute(context, request) || fleet) || !request.user) return next.handle();
 
     const options = this.reflector.getAllAndOverride<AuditedOptions | undefined>(AUDITED_METADATA, [
       context.getHandler(),
@@ -52,6 +58,7 @@ export class AuditInterceptor implements NestInterceptor {
         const param = request.params['id'];
         await this.audit.record({
           actorId,
+          companyId: fleet ? (request.user?.companyId ?? null) : (options?.companyId ? options.companyId(request, result) : null),
           action: options?.action ?? `${request.method} ${route}`,
           entity: options?.entity ?? route.split('/').filter(Boolean)[1] ?? 'admin',
           entityId: options?.entityId ? options.entityId(request, result) : (typeof param === 'string' ? param : null),

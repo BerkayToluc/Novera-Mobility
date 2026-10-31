@@ -179,3 +179,19 @@ export async function fetchAdminAudit(query: URLSearchParams): Promise<Schemas["
   if (result.status !== "ok") throw new ApiUnavailableError();
   return result.data;
 }
+
+// `GET /admin/companies/{id}/contracts` (V2-35): the contracts of one company; null when there is no such company.
+export async function fetchCompanyContracts(companyId: string): Promise<Schemas["FleetContract"][] | null> {
+  const result = await apiRequest<{ items: Schemas["FleetContract"][] }>("GET", "/admin/companies/" + encodeURIComponent(companyId) + "/contracts");
+  if (result.status === "ok") return result.data.items;
+  if (result.status === "not_found") return null;
+  throw new ApiUnavailableError();
+}
+
+// `GET /admin/contracts/{number}`: null when there is no such contract (the page then does not exist), a failure to load otherwise.
+export async function fetchAdminContract(number: string): Promise<Schemas["FleetContractDetail"] | null> {
+  const result = await apiRequest<Schemas["FleetContractDetail"]>("GET", "/admin/contracts/" + encodeURIComponent(number));
+  if (result.status === "ok") return result.data;
+  if (result.status === "not_found") return null;
+  throw new ApiUnavailableError();
+}

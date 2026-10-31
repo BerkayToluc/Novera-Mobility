@@ -16,6 +16,7 @@ import {
   rates,
   retiredModelSlugs,
 } from "./seed-data";
+import { seedFleet } from "./seed-fleet";
 import { seedDemoPromoCodes, seedExchangeRates } from "./seed-reference";
 
 const connectionString = process.env.DATABASE_URL;
@@ -106,10 +107,16 @@ async function main() {
     await prisma.product.upsert({ where: { slug: p.slug }, update: {}, create: { slug: p.slug } });
   }
 
+  // The sample fleet customers (V2-35). Their users get FLEET_SEED_PASSWORD, which is never in the repository; without it only the
+  // companies are made. Run again, it adds nothing that is there already.
+  const fleet = await seedFleet(prisma, { password: process.env.FLEET_SEED_PASSWORD });
+  if (!process.env.FLEET_SEED_PASSWORD) console.log("  Örnek Filom kullanıcıları atlandı (FLEET_SEED_PASSWORD ile gelir).");
+
   console.log("Seed tamam:");
   console.log(`  ${classes.length} sınıf, ${branches.length} bayi, ${models.length} model, ${vehicles.length} araç`);
   console.log(`  ${extras.length} ek hizmet, ${rates.length} kur`);
   console.log(`  ${products.length} ürün, ${demoCodes} örnek kampanya kodu`);
+  console.log(`  Filom: ${fleet.companies} şirket, ${fleet.users} kullanıcı, ${fleet.contracts} sözleşme, ${fleet.cars} araç, ${fleet.people} personel, ${fleet.assignments} zimmet, ${fleet.readings} okuma eklendi`);
 }
 
 main()

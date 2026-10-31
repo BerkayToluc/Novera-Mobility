@@ -26,6 +26,9 @@ const promoKey = (request: Request, user: { id: string } | null): string | null 
 const adminKey = (request: Request, user: { id: string } | null): string =>
   user ? `admin:${user.id}` : `ip:${clientKeyOf(request)}`;
 
+// Everything under /fleet (ADR-25): one counter for the signed-in account, 120 a minute. Before sign-in it counts by address.
+const fleetKey = (request: Request, user: { id: string } | null): string => (user ? `fleet:${user.id}` : `ip:${clientKeyOf(request)}`);
+
 export const LIMITS = {
   register: { bucket: 'register', limit: 10, windowSec: HOUR, key: 'client' },
   login: { bucket: 'login', limit: 10, windowSec: 15 * MINUTE, key: 'client' },
@@ -42,4 +45,5 @@ export const LIMITS = {
   reserve: { bucket: 'reserve', limit: 10, windowSec: HOUR },
   accountWrite: { bucket: 'account-write', limit: 20, windowSec: 15 * MINUTE },
   admin: { bucket: 'admin', limit: 120, windowSec: MINUTE, key: adminKey },
+  fleet: { bucket: 'fleet', limit: 120, windowSec: MINUTE, key: fleetKey },
 } satisfies Record<string, RateLimitSpec>;

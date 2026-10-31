@@ -30,11 +30,11 @@ Filom'un veri temelini kurmak ve Novera'nın bu veriyi panelden girmesini sağla
 - Sözleşme numarası sequence ile üretilir (V2-11 deseni).
 
 ## Kabul kriterleri
-- [ ] Her `/fleet/*` ucunda "başka şirketin kaydı 404" ve "bireysel hesap 403" testleri.
-- [ ] Açık zimmetli araca yeni zimmet `409 VEHICLE_ASSIGNED` (veritabanı kısıtı + servis).
-- [ ] Panelden sözleşmeye araç eklendi, okuma girildi (e2e mock).
-- [ ] Seed iki kez çalışınca kopya yok (test).
-- [ ] İşlem kaydı; yetki testleri; 375/1280 ekran görüntüsü (panel ekranları 768'de de).
+- [x] Her `/fleet/*` ucunda "başka şirketin kaydı 404" ve "bireysel hesap 403" testleri. _Nasıl: `fleet.http.spec.ts` on bir uçta oturumsuz `401`, bireysel hesap / yönetici / şirketsiz kurumsal hesap `403` (yolun büyük/küçük harfi fark etmez); `fleet.integration.spec.ts` iki şirketle: araç, sözleşme, personel ve zimmet için başka şirketin kaydı `404`, gövdedeki başka şirket kaydı olmayanla aynı `422`._
+- [x] Açık zimmetli araca yeni zimmet `409 VEHICLE_ASSIGNED` (veritabanı kısıtı + servis). _Nasıl: `fleet.integration.spec.ts` servis `409`'u, aynı anda dört istekte tek kazanan ve doğrudan `prisma` ile ikinci açık zimmet / şirketler arası bağın veritabanınca reddi._
+- [x] Panelden sözleşmeye araç eklendi, okuma girildi (e2e mock). _Nasıl: `e2e/admin-contracts.spec.ts` (araç ekle, aynı plaka reddi, okuma, kilometre geri gitmez, iade, sözleşme bitirme); gerçek veritabanıyla `contracts.integration.spec.ts`._
+- [x] Seed iki kez çalışınca kopya yok (test). _Nasıl: `fleet.seed.integration.spec.ts`: ikinci çalışma hiçbir şey eklemez, kişinin değiştirdiği kayıt ve kapatılan zimmet geri gelmez, var olan kullanıcının parolası değişmez._
+- [x] İşlem kaydı; yetki testleri; ~~375/1280 ekran görüntüsü~~. _Nasıl: `contracts.audit.spec.ts` ve `fleet.http.spec.ts` (şirket satırda, yalnızca alan adları); yönetim uçları için `admin.http.spec.ts` 401/403. Ekran görüntüsü artık istenmiyor (Berkay, 31 Ekim)._
 
 ## Etiketler
 `faz-7` `ozellik` `P2` `api` `web` `veritabani`

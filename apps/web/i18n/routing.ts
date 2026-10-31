@@ -61,6 +61,7 @@ export const routing = defineRouting({
     "/yonetim/sirketler": { tr: "/yonetim/sirketler", en: "/admin/companies" },
     "/yonetim/sirketler/yeni": { tr: "/yonetim/sirketler/yeni", en: "/admin/companies/new" },
     "/yonetim/sirketler/[id]": { tr: "/yonetim/sirketler/[id]", en: "/admin/companies/[id]" },
+    "/yonetim/sirketler/[id]/sozlesmeler/[number]": { tr: "/yonetim/sirketler/[id]/sozlesmeler/[number]", en: "/admin/companies/[id]/contracts/[number]" },
     "/yonetim/kullanicilar": { tr: "/yonetim/kullanicilar", en: "/admin/users" },
     "/yonetim/kullanicilar/[id]": { tr: "/yonetim/kullanicilar/[id]", en: "/admin/users/[id]" },
     "/yonetim/kayit": { tr: "/yonetim/kayit", en: "/admin/audit-log" },

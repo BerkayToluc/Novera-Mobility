@@ -945,6 +945,85 @@ describe('administration over HTTP', () => {
     });
   });
 
+  // The door and the input of the contract, fleet car and reading endpoints (V2-35). What they do against a database is in
+  // contracts/contracts.integration.spec.ts; a request turned away is turned away before any database call.
+  describe('contracts and fleet cars: the door and the input (V2-35)', () => {
+    const ID = '6f0a1f7e-8f5e-4b86-9f5c-2d2f6d9a0b11';
+    const NUMBER = 'SZL-2026-00001';
+    const routes: Array<[string, string]> = [
+      ['GET', `/admin/companies/${ID}/contracts`],
+      ['POST', `/admin/companies/${ID}/contracts`],
+      ['GET', `/admin/contracts/${NUMBER}`],
+      ['PATCH', `/admin/contracts/${NUMBER}`],
+      ['POST', `/admin/contracts/${NUMBER}/vehicles`],
+      ['PATCH', `/admin/fleet-vehicles/${ID}`],
+      ['POST', `/admin/fleet-vehicles/${ID}/readings`],
+    ];
+    const withBody = (method: string) => (method === 'GET' ? {} : { body: {} });
+
+    it('no session is 401 UNAUTHENTICATED on every route', async () => {
+      for (const [method, path] of routes) {
+        const response = await call(method, path, withBody(method));
+        expect(response.status).toBe(401);
+        expect((await response.json()).code).toBe('UNAUTHENTICATED');
+      }
+    });
+
+    it('a customer, a corporate one included, is 403 FORBIDDEN on every route', async () => {
+      const { cookie } = await signedIn('CUSTOMER');
+      for (const [method, path] of routes) {
+        const response = await call(method, path, { cookie, ...withBody(method) });
+        expect(response.status).toBe(403);
+        expect((await response.json()).code).toBe('FORBIDDEN');
+      }
+    });
+
+    it('a contract with nothing in it, a change with no version, a car with nothing and a reading with no kilometre each say what is missing', async () => {
+      const { cookie } = await signedIn('ADMIN');
+      const missing = async (method: string, path: string) => {
+        const response = await call(method, path, { cookie, body: {} });
+        expect(response.status).toBe(422);
+        return Object.keys((await response.json()).fieldErrors).sort();
+      };
+      expect(await missing('POST', `/admin/companies/${ID}/contracts`)).toEqual(['deliveryCity', 'endAt', 'monthlyFee', 'productSlug', 'startAt']);
+      expect(await missing('PATCH', `/admin/contracts/${NUMBER}`)).toEqual(['updatedAt']);
+      expect(await missing('POST', `/admin/contracts/${NUMBER}/vehicles`)).toEqual(['modelSlug', 'plate', 'startKm', 'year']);
+      expect(await missing('PATCH', `/admin/fleet-vehicles/${ID}`)).toEqual(['updatedAt']);
+      expect(await missing('POST', `/admin/fleet-vehicles/${ID}/readings`)).toEqual(['km']);
+    });
+
+    it('wrong values are 422 with a code for each field', async () => {
+      const { cookie } = await signedIn('ADMIN');
+      const response = await call('POST', `/admin/companies/${ID}/contracts`, {
+        cookie,
+        body: { productSlug: 'Not A Slug', startAt: '2026-02-30', endAt: 'soon', monthlyFee: 12.5, deliveryCity: 'Atlantis' },
+      });
+      expect(response.status).toBe(422);
+      expect((await response.json()).fieldErrors).toEqual({ productSlug: 'INVALID_FORMAT', startAt: 'INVALID_FORMAT', endAt: 'INVALID_FORMAT', monthlyFee: 'INVALID_FORMAT', deliveryCity: 'INVALID_FORMAT' });
+
+      const reading = await call('POST', `/admin/fleet-vehicles/${ID}/readings`, { cookie, body: { km: -5, fuelPercent: 120, chargePercent: 'full' } });
+      expect(reading.status).toBe(422);
+      expect((await reading.json()).fieldErrors).toEqual({ km: 'OUT_OF_RANGE', fuelPercent: 'OUT_OF_RANGE', chargePercent: 'INVALID_FORMAT' });
+    });
+
+    it('an id or a number that cannot be one is 404 without asking the database', async () => {
+      const { cookie } = await signedIn('ADMIN');
+      for (const [method, path] of [
+        ['GET', '/admin/companies/not-an-id/contracts'],
+        ['POST', '/admin/companies/not-an-id/contracts'],
+        ['GET', '/admin/contracts/nope'],
+        ['PATCH', '/admin/contracts/nope'],
+        ['POST', '/admin/contracts/nope/vehicles'],
+        ['PATCH', '/admin/fleet-vehicles/not-an-id'],
+        ['POST', '/admin/fleet-vehicles/not-an-id/readings'],
+      ] as const) {
+        const response = await call(method, path, { cookie, ...withBody(method) });
+        expect(response.status).toBe(404);
+        expect((await response.json()).code).toBe('NOT_FOUND');
+      }
+    });
+  });
+
   describe('the audit log', () => {
     it('a change is logged with the names of its fields and none of the values', async () => {
       const { cookie, id } = await signedIn('ADMIN');
