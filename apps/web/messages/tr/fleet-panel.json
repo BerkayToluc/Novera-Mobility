@@ -10,7 +10,8 @@
       "assignments": "Zimmet",
       "contracts": "Sözleşmeler",
       "invoices": "Faturalar",
-      "expenses": "Masraflar"
+      "expenses": "Masraflar",
+      "reports": "Raporlar"
     },
     "empty": {
       "title": "Filom",
@@ -459,6 +460,68 @@
         "apply": "Uygula",
         "clear": "Günleri temizle"
       }
+    },
+    "reports": {
+      "title": "Raporlar",
+      "intro": "Filonuzun ne kadar harcadığı ve kaç kilometre yaptığı: ay, araç ve departman bazında. Her grafiğin altında aynı verinin tablosu vardır.",
+      "periodLabel": "Dönem",
+      "periods": {
+        "bu-ay": "Bu ay",
+        "son-3-ay": "Son 3 ay",
+        "bu-yil": "Bu yıl",
+        "ozel": "Özel dönem"
+      },
+      "from": "İlk ay",
+      "to": "Son ay",
+      "apply": "Raporu göster",
+      "showing": "{period} gösteriliyor.",
+      "showingRange": "{from} – {to} gösteriliyor.",
+      "retry": "Tekrar dene",
+      "loadErrorTitle": "Rapor yüklenemedi",
+      "loadErrorText": "Birkaç saniye sonra yeniden deneyin.",
+      "emptyTitle": "Bu dönemde veri yok",
+      "emptyText": "Seçtiğiniz aylarda fatura, masraf ya da kilometre kaydı yok. Daha geniş bir dönem seçmeyi deneyin.",
+      "emptyAction": "Bu yılı göster",
+      "totals": {
+        "total": "Toplam maliyet",
+        "invoice": "Fatura payı",
+        "expenses": "Masraflar",
+        "km": "Kilometre"
+      },
+      "basis": "Tutarlar TL'dir. Fatura payı KDV hariçtir: bir faturanın her satırı, o sözleşmedeki tüm araçlar arasında eşit bölünür; araç, masrafın ya da faturanın kendi ayının sonunda kimdeyse departman onunkidir.",
+      "series": {
+        "invoice": "Fatura payı",
+        "expenses": "Masraflar",
+        "km": "Kilometre"
+      },
+      "km": {
+        "title": "Aylara göre kilometre"
+      },
+      "tableBelow": "Aynı veri aşağıdaki tabloda.",
+      "topNote": "En yüksek {count} satır çizilir; tablo hepsini içerir.",
+      "noDepartment": "Atanmamış / departmansız",
+      "unallocated": "Araçlara dağıtılamayan (aracı olmayan sözleşme)",
+      "scrollable": "{table} (yatay kaydırılabilir)",
+      "months": {
+        "title": "Aylara göre maliyet"
+      },
+      "vehicles": {
+        "title": "Araçlara göre maliyet"
+      },
+      "departments": {
+        "title": "Departmanlara göre maliyet"
+      },
+      "columns": {
+        "month": "Ay",
+        "invoice": "Fatura payı",
+        "expenses": "Masraflar",
+        "total": "Toplam",
+        "km": "Kilometre",
+        "vehicle": "Araç",
+        "department": "Departman",
+        "sum": "Toplam"
+      },
+      "kmUnit": "{value} km"
     }
   }
 }

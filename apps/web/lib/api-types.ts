@@ -7213,6 +7213,73 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/fleet/reports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Dönem raporu
+         * @description Şirketin bir ay aralığındaki (`from` ve `to`, `YYYY-MM`, ikisi dahil; ikisi de yoksa bu ay, biri yoksa tek ay) **maliyeti ve kilometresi**: ay, araç ve departman bazında. En çok 24 ay; henüz başlamamış ay ve ters sıra `422` `OUT_OF_RANGE`.
+         *     **Maliyet = fatura payı + masraflar.** Faturalar KDV'siz, satırlarının toplamıyla (ara toplam) alınır: bir faturanın bir satırı, sözleşmenin **tüm araçları** arasında eşit bölünür (plaka sırasıyla; bölünmeyen kuruşlar ilk araçlara gider), böylece toplam faturalarla kuruşu kuruşuna tutar. Aracı olmayan sözleşmenin satırı hiçbir araca düşmez, `unallocated`'dadır ve toplamdadır. Fatura, ait olduğu **dönemin** ayına; masraf, gerçekleştiği **İstanbul ayına** yazılır.
+         *     **Departman:** faturada o ayın son anında, masrafta masrafın anında aracı kimin kullandığına göre kişinin departmanıdır; kimse kullanmıyorsa ya da kişinin departmanı yoksa `null`. **Kilometre:** ayın sonundaki ile başındaki okumanın farkı (okuma yoksa aracın başlangıç km'si); ay toplamları dönem toplamına eşittir.
+         *     Aynı toplam üç kesitte de tutar: aylar, departmanlar ve (`unallocated` ile birlikte) araçlar. Yalnızca **kurumsal hesabın kendi şirketinin** verisi gelir. Sınır: hesap başına dakikada 120.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description İlk ay, `YYYY-MM`. */
+                    from?: string;
+                    /** @description Son ay, `YYYY-MM`. */
+                    to?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Rapor */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["FleetReport"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Kurumsal hesap değil ya da bir şirkete bağlı değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/ping": {
         parameters: {
             query?: never;
@@ -8740,6 +8807,46 @@ export interface components {
             durationMonths?: number | null;
             /** @description Satış ekibine not. */
             notes?: string | null;
+        };
+        FleetReportMoney: {
+            /** @description Fatura payı */
+            invoice: number;
+            /** @description Masraflar */
+            expenses: number;
+            /** @description İkisinin toplamı. */
+            total: number;
+        };
+        FleetReport: {
+            /** @example 2026-08 */
+            from: string;
+            /** @example 2026-10 */
+            to: string;
+            /** @description Aralıktaki her ay (boş olanlar da), eskiden yeniye. */
+            months: (components["schemas"]["FleetReportMoney"] & {
+                /** @example 2026-10 */
+                period: string;
+                km: number;
+            })[];
+            /** @description Maliyeti ya da kilometresi olan araçlar, maliyete göre çoktan aza. */
+            vehicles: (components["schemas"]["FleetReportMoney"] & {
+                /** Format: uuid */
+                id: string;
+                plate: string;
+                model: string;
+                km: number;
+            })[];
+            /** @description Departman bazında; `department: null` kimsenin kullanmadığı ya da departmanı olmayan kişinin payıdır. */
+            departments: (components["schemas"]["FleetReportMoney"] & {
+                department: string | null;
+                km: number;
+            })[];
+            unallocated: {
+                /** @description Aracı olmayan sözleşmelerin fatura satırları; toplamdadır */
+                invoice: number;
+            };
+            totals: components["schemas"]["FleetReportMoney"] & {
+                km: number;
+            };
         };
         FleetContract: {
             /** Format: uuid */

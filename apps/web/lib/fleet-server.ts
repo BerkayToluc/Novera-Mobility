@@ -19,7 +19,8 @@ import {
 } from "./fleet-panel";
 import { FLEET_EXPENSE_API_FILTERS, type ExpenseStatus, type ExpenseType, type FleetExpenseFilter, type FleetExpensePage } from "./expenses";
 import type { Invoice, InvoiceFilter, InvoicePage } from "./invoices";
-import { fetchFleetAssignments, fetchFleetExpenses, fetchFleetInvoice, fetchFleetInvoices, fetchFleetContract, fetchFleetContracts, fetchFleetEmployee, fetchFleetEmployees, fetchFleetSummary, fetchFleetVehicle, fetchFleetVehicles } from "./api-fleet";
+import { fetchFleetReport, fetchFleetAssignments, fetchFleetExpenses, fetchFleetInvoice, fetchFleetInvoices, fetchFleetContract, fetchFleetContracts, fetchFleetEmployee, fetchFleetEmployees, fetchFleetSummary, fetchFleetVehicle, fetchFleetVehicles } from "./api-fleet";
+import type { FleetReport } from "./report-calc";
 import { isMockMode } from "./mode";
 import { mockWorld } from "./mock-world";
 import { getSession } from "./session";
@@ -133,6 +134,12 @@ export async function getFleetExpenses(params: AdminListParams<FleetExpenseFilte
     },
     await sampleCompany(),
   );
+}
+
+// The report of the company for the months from `from` to `to` ("2026-08"), both included.
+export async function getFleetReport(from: string, to: string): Promise<FleetReport> {
+  if (!isMockMode()) return fetchFleetReport(from, to);
+  return (await import("@/mocks/reports")).sampleReport(await mockWorld(), await sampleCompany(), from, to);
 }
 
 // The people a car can be given to: the active ones, by surname, for the form's choice (a company has a few dozen at most).
