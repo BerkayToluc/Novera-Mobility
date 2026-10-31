@@ -15,3 +15,13 @@ export async function mockWorld(): Promise<string> {
   const value = (await cookies()).get(MOCK_WORLD_COOKIE)?.value ?? DEFAULT_WORLD;
   return NAME.test(value) ? value : DEFAULT_WORLD;
 }
+
+// The time of the sample live tracking (V2-43). The positions move with the clock, so a test that wants to see them move, or to see the
+// ignition off at night, says what time it is with this cookie (epoch milliseconds); without it the real clock is used. Sample mode only.
+export const MOCK_NOW_COOKIE = "novera-mock-now";
+
+export async function mockNow(): Promise<number> {
+  const value = (await cookies()).get(MOCK_NOW_COOKIE)?.value;
+  const time = value && /^\d{10,14}$/.test(value) ? Number(value) : NaN;
+  return Number.isFinite(time) ? time : Date.now();
+}

@@ -15,6 +15,7 @@ import { FleetEmployeesService } from './fleet-employees.service.js';
 import { FleetExpensesService } from './fleet-expenses.service.js';
 import { FleetInvoicesService } from './fleet-invoices.service.js';
 import { FleetGreenService } from './fleet-green.service.js';
+import { FleetTrackingService } from './fleet-tracking.service.js';
 import { FleetReportsService } from './fleet-reports.service.js';
 import { FleetRequestsService } from './fleet-requests.service.js';
 import { FleetSummaryService } from './fleet-summary.service.js';
@@ -56,6 +57,8 @@ const ROUTES: Array<[string, string, unknown?]> = [
   ['GET', '/fleet/reports?from=2026-09&to=2026-10'],
   ['GET', '/fleet/green?from=2026-08&to=2026-10'],
   ['GET', '/fleet/vehicles/34-ABC-123/charging-stations?limit=5'],
+  ['GET', '/fleet/tracking'],
+  ['GET', '/fleet/vehicles/34-ABC-123/route?date=2026-10-30'],
   ['GET', '/fleet/requests'],
   ['GET', '/fleet/requests/TLP-2026-00001'],
   ['POST', '/fleet/requests', { type: 'ROADSIDE', fleetVehicleId: ID, details: { incident: 'TIRE', location: { address: 'Gizli Sokak 7' } } }],
@@ -82,6 +85,8 @@ describe('the fleet panel over HTTP (V2-35)', () => {
       .useValue({ ...stub(['list', 'get', 'cancel']), create: async () => ({ number: 'TLP-2026-00001' }) })
       .overrideProvider(FleetGreenService)
       .useValue(stub(['green', 'stations']))
+      .overrideProvider(FleetTrackingService)
+      .useValue(stub(['tracking', 'route']))
       .overrideProvider(FleetReportsService)
       .useValue(stub(['get']))
       .overrideProvider(FleetExpensesService)

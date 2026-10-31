@@ -3765,7 +3765,7 @@ paths:
       tags: [fleet]
       summary: Aracın en yakın şarj istasyonları
       description: |
-        Aracın konumuna en yakın istasyonlar, yakından uzağa. **Cevap bir simülasyondur** (ADR-30): `simulated: true`. Araç henüz canlı konum üretmediği için (V2-43) **sözleşmesinin teslim şehrinin merkezinde** sayılır; o şehrin merkezi bilinmiyorsa istasyonlar uzaklıksız (`distanceKm: null`) ve aracın kendi şehrindekiler önce gelir. İstasyonun durumu (`AVAILABLE`, `BUSY`, `OUT_OF_ORDER`) saklanmaz: istasyon kimliği ve **5 dakikalık dilimden** deterministik üretilir, yani aynı araç ve aynı dilim için her istek aynı cevabı verir (`updatedAt` dilimin başlangıcıdır).
+        Aracın konumuna en yakın istasyonlar, yakından uzağa. **Cevap bir simülasyondur** (ADR-30): `simulated: true`. Bu uç aracın canlı takip konumunu (`/fleet/tracking`) kullanmaz; araç **sözleşmesinin teslim şehrinin merkezinde** sayılır; o şehrin merkezi bilinmiyorsa istasyonlar uzaklıksız (`distanceKm: null`) ve aracın kendi şehrindekiler önce gelir. İstasyonun durumu (`AVAILABLE`, `BUSY`, `OUT_OF_ORDER`) saklanmaz: istasyon kimliği ve **5 dakikalık dilimden** deterministik üretilir, yani aynı araç ve aynı dilim için her istek aynı cevabı verir (`updatedAt` dilimin başlangıcıdır).
         Elektrikli ya da hibrit olmayan araç, başka şirketin aracı ve plaka olamayacak değer aynı `404`'tür. Sınır: hesap başına dakikada 120.
       security:
         - cookieAuth: []
@@ -3789,6 +3789,68 @@ paths:
               schema: { $ref: "#/components/schemas/Error" }
         "404":
           description: Böyle bir elektrikli ya da hibrit araç yok ya da başka şirketin (`NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
+  /fleet/tracking:
+    get:
+      tags: [fleet]
+      summary: Canlı takip, tüm araçların son konumu
+      description: |
+        Şirketin kullanımdaki (iade edilmemiş) tüm araçları, plakaya göre: konum, kontak, hız ve kim kullanıyor. **Cevap bir simülasyondur** (ADR-30): `simulated: true`; ekranda "Simülasyon" rozeti gösterilir. Konum saklanmaz; aracın teslim şehrindeki `TrackingRoute` rotalarından biri (aynı araç hep aynısı) ve **5 dakikalık dilimden** deterministik üretilir, yani aynı araç ve aynı dilim için her istek aynı cevabı verir (`updatedAt` dilimin başlangıcıdır). Hafta içi 08:00–19:00 (İstanbul) dışında ve hafta sonu kontak kapalıdır, hız 0'dır ve araç son çalıştığı noktada durur. Şehrinde rota olmayan araç listede `position: null` ile gelir. Sözleşmesi ya da aracı olmayan şirkette liste boştur. Sınır: hesap başına dakikada 120 (ekran 30 saniyede bir yeniler).
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Araçların son konumu
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/TrackingList" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Kurumsal hesap değil ya da bir şirkete bağlı değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
+  /fleet/vehicles/{plate}/route:
+    parameters:
+      - { name: plate, in: path, required: true, description: "Plaka; boşluksuz ya da küçük harfle de olur.", schema: { type: string, example: 06 FLM 201 } }
+    get:
+      tags: [fleet]
+      summary: Aracın bir günkü rotası
+      description: |
+        O günün 5 dakikalık noktaları, gece yarısından (İstanbul) bugünse şimdiye, geçmiş günse günün sonuna kadar (en çok 288 nokta). **Cevap bir simülasyondur** (ADR-30); aynı noktalar `/fleet/tracking`'in o dilimde verdiği konumla birebir aynıdır. En çok son 7 gün (bugün ve önceki altı gün) sorulabilir; ondan eski ya da gelecekteki gün `422 date: OUT_OF_RANGE`, gün olmayan değer `INVALID_FORMAT`. Şehrinde rota olmayan araçta `points` boştur. İade edilmiş araç, başka şirketin aracı ve plaka olamayacak değer aynı `404`'tür. Sınır: hesap başına dakikada 120.
+      security:
+        - cookieAuth: []
+      parameters:
+        - { name: date, in: query, description: "İstanbul günü, YYYY-MM-DD; varsayılan bugün.", schema: { type: string, format: date, example: "2026-10-30" } }
+      responses:
+        "200":
+          description: Günün noktaları
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RouteDay" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Kurumsal hesap değil ya da bir şirkete bağlı değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: Böyle bir araç yok, iade edilmiş ya da başka şirketin (`NOT_FOUND`)
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Error" }
@@ -5770,6 +5832,66 @@ components:
                 longitude: { type: number }
         updatedAt: { type: string, format: date-time, description: Durumların ait olduğu 5 dakikalık dilimin başlangıcı. }
         items: { type: array, items: { $ref: "#/components/schemas/ChargingStation" } }
+
+    TrackedVehicle:
+      type: object
+      required: [plate, model, city, employee, ignition, speedKmh, position]
+      properties:
+        plate: { type: string }
+        model: { type: string, example: Fiat Egea }
+        city: { type: string, description: Sözleşmenin teslim şehri; araç bu şehrin rotalarında hareket eder. }
+        employee:
+          type: object
+          nullable: true
+          description: Aracı şu an kullanan kişi (zimmet); yoksa null.
+          required: [id, name]
+          properties:
+            id: { type: string, format: uuid }
+            name: { type: string }
+        ignition: { type: boolean, description: Kontak açık mı; hafta içi 08:00–19:00 (İstanbul) dışında ve hafta sonu kapalı. }
+        speedKmh: { type: integer, minimum: 0, description: Hız, km/saat; kontak kapalıyken 0. }
+        position:
+          type: object
+          nullable: true
+          description: Aracın sayılan konumu; şehrinde rota yoksa null.
+          required: [latitude, longitude]
+          properties:
+            latitude: { type: number }
+            longitude: { type: number }
+
+    TrackingList:
+      type: object
+      required: [simulated, updatedAt, items]
+      properties:
+        simulated: { type: boolean, enum: [true], description: Konumlar üretilmiştir (ADR-30); ekranda "Simülasyon" rozeti gösterilir. }
+        updatedAt: { type: string, format: date-time, description: Konumların ait olduğu 5 dakikalık dilimin başlangıcı. }
+        items: { type: array, items: { $ref: "#/components/schemas/TrackedVehicle" } }
+
+    RouteDay:
+      type: object
+      required: [simulated, vehicle, date, points]
+      properties:
+        simulated: { type: boolean, enum: [true] }
+        vehicle:
+          type: object
+          required: [plate, city, route]
+          properties:
+            plate: { type: string }
+            city: { type: string }
+            route: { type: string, nullable: true, description: Aracın bu günkü rotasının adı; şehrinde rota yoksa null. }
+        date: { type: string, format: date, description: İstanbul günü. }
+        points:
+          type: array
+          description: Her 5 dakikada bir nokta, eskiden yeniye.
+          items:
+            type: object
+            required: [at, latitude, longitude, speedKmh, ignition]
+            properties:
+              at: { type: string, format: date-time, description: Dilimin başlangıcı. }
+              latitude: { type: number }
+              longitude: { type: number }
+              speedKmh: { type: integer, minimum: 0 }
+              ignition: { type: boolean }
 
     ServiceRequestType:
       type: string

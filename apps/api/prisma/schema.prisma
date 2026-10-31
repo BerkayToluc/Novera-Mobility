@@ -363,6 +363,20 @@ model ChargingStation {
   @@index([city])
 }
 
+// Canlı takip simülasyonunun rotaları (V2-43, ADR-30): şehir başına 2–3 elle hazırlanmış çoklu çizgi. Araç, sözleşmesinin teslim şehrindeki
+// rotalardan birinde gidip gelir (src/fleet/simulation/tracking.ts); konumlar saklanmaz, rota ve 5 dakikalık dilimden hesaplanır.
+model TrackingRoute {
+  id        String   @id @default(uuid())
+  city      String
+  name      String
+  // [{ "latitude": 38.42, "longitude": 27.14 }, ...] en az iki nokta (migration'daki CHECK).
+  points    Json
+  createdAt DateTime @default(now())
+
+  @@unique([city, name])
+  @@index([city])
+}
+
 // ---------- Servis talepleri (V2-41, ADR-31, docs/FLEET.md §3, SPEC §3.D) ----------
 // Tek tablo, türe göre ayrıntı: `details` her tür için ayrı bir zod şemasıyla doğrulanır (src/fleet/requests/request-details.ts), durum geçişleri tür
 // başına bir tabloda tanımlıdır (request-flow.ts). Tek durum listesi tüm türlerin adımlarını taşır; hangi türün hangi adımları kullanabildiği
