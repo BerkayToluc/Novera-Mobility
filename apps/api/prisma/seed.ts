@@ -116,7 +116,7 @@ async function main() {
   console.log(`  ${classes.length} sınıf, ${branches.length} bayi, ${models.length} model, ${vehicles.length} araç`);
   console.log(`  ${extras.length} ek hizmet, ${rates.length} kur`);
   console.log(`  ${products.length} ürün, ${demoCodes} örnek kampanya kodu`);
-  console.log(`  Filom: ${fleet.companies} şirket, ${fleet.users} kullanıcı, ${fleet.contracts} sözleşme, ${fleet.cars} araç, ${fleet.people} personel, ${fleet.assignments} zimmet, ${fleet.readings} okuma, ${fleet.invoices} fatura eklendi`);
+  console.log(`  Filom: ${fleet.companies} şirket, ${fleet.users} kullanıcı, ${fleet.contracts} sözleşme, ${fleet.cars} araç, ${fleet.people} personel, ${fleet.assignments} zimmet, ${fleet.readings} okuma, ${fleet.invoices} fatura, ${fleet.expenses} masraf eklendi`);
 }
 
 main()

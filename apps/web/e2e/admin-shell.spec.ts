@@ -54,8 +54,8 @@ test("desktop: the menu is a column on the left with the summary marked", async 
   await expect(nav.getByRole("link", { name: "Özet" })).toHaveAttribute("aria-current", "page");
   // The button that opens the list is for the narrow layouts only.
   await expect(nav.getByRole("button")).toBeHidden();
-  // Screens that do not exist yet are not in the menu: the summary, the campaign codes (V2-26), the branches (V2-27) the models (V2-29), the cars and the extra services (V2-30) the bookings (V2-31), the quote requests and the messages (V2-32), the invoices (V2-37) are.
-  await expect(nav.getByRole("link")).toHaveCount(13);
+  // Screens that do not exist yet are not in the menu: the summary, the campaign codes (V2-26), the branches (V2-27) the models (V2-29), the cars and the extra services (V2-30) the bookings (V2-31), the quote requests and the messages (V2-32), the invoices (V2-37), the fleet expenses (V2-38) are.
+  await expect(nav.getByRole("link")).toHaveCount(14);
   await expect(nav.getByRole("link", { name: "Kampanya kodları" })).toBeVisible();
 });
 

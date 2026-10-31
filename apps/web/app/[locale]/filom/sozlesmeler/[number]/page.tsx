@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import { PageHeader } from "@/components/admin/page-header";
+import { RenewalRequest } from "@/components/fleet/renewal-request";
 import { StatusChip } from "@/components/admin/status-chip";
 import { Button } from "@/components/ui/button";
 import { StateMessage } from "@/components/ui/state-message";
@@ -81,6 +82,8 @@ export default async function FleetContractPage({ params }: PageProps<"/[locale]
         </dl>
         <p className="text-small text-fg-muted">{productsT("currencyNote")}</p>
       </section>
+
+      {contract.status === "ACTIVE" && <RenewalRequest number={contract.number} />}
 
       <section aria-labelledby="contract-vehicles" className="flex max-w-2xl flex-col gap-3 border-t border-border pt-6">
         <h2 id="contract-vehicles" className="text-h3 text-fg">

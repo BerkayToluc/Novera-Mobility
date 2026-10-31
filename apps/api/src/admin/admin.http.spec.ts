@@ -1096,6 +1096,83 @@ describe('administration over HTTP', () => {
     });
   });
 
+  // The door and the input of the expense endpoints (V2-38). What they do against a database is in
+  // ../fleet/fleet-expenses.integration.spec.ts; a request turned away is turned away before any database call.
+  describe('fleet expenses: the door and the input (V2-38)', () => {
+    const ID = '6f0a1f7e-8f5e-4b86-9f5c-2d2f6d9a0b11';
+    const routes: Array<[string, string]> = [
+      ['GET', '/admin/fleet-expenses'],
+      ['GET', `/admin/fleet-expenses/${ID}`],
+      ['POST', '/admin/fleet-expenses'],
+      ['PATCH', `/admin/fleet-expenses/${ID}`],
+    ];
+    const withBody = (method: string) => (method === 'POST' || method === 'PATCH' ? { body: {} } : {});
+
+    it('no session is 401 UNAUTHENTICATED on every route', async () => {
+      for (const [method, path] of routes) {
+        const response = await call(method, path, withBody(method));
+        expect([method, path, response.status]).toEqual([method, path, 401]);
+        expect((await response.json()).code).toBe('UNAUTHENTICATED');
+      }
+    });
+
+    it('a customer, a corporate one included, is 403 FORBIDDEN on every route', async () => {
+      const { cookie } = await signedIn('CUSTOMER');
+      for (const [method, path] of routes) {
+        const response = await call(method, path, { cookie, ...withBody(method) });
+        expect([method, path, response.status]).toEqual([method, path, 403]);
+        expect((await response.json()).code).toBe('FORBIDDEN');
+      }
+    });
+
+    it('a new expense needs the plate, the type, the moment and the amount; each is checked', async () => {
+      const { cookie } = await signedIn('ADMIN');
+      const empty = await call('POST', '/admin/fleet-expenses', { cookie, body: {} });
+      expect(empty.status).toBe(422);
+      expect(Object.keys((await empty.json()).fieldErrors).sort()).toEqual(['amount', 'occurredAt', 'plate', 'type']);
+      const wrong = await call('POST', '/admin/fleet-expenses', {
+        cookie,
+        body: { plate: 'abc', type: 'TAX', occurredAt: 'dün', amount: 12.5, description: 'x'.repeat(201), place: 'y'.repeat(101) },
+      });
+      expect((await wrong.json()).fieldErrors).toEqual({ plate: 'INVALID_FORMAT', type: 'INVALID_FORMAT', occurredAt: 'INVALID_FORMAT', amount: 'INVALID_FORMAT', description: 'TOO_LONG', place: 'TOO_LONG' });
+      for (const amount of [0, -5, 1_000_000_001]) {
+        const response = await call('POST', '/admin/fleet-expenses', { cookie, body: { plate: '34 ABC 123', type: 'HGS', occurredAt: '2026-10-01', amount } });
+        expect((await response.json()).fieldErrors).toEqual({ amount: 'OUT_OF_RANGE' });
+      }
+    });
+
+    it('a list asked for in a way that makes no sense is 422', async () => {
+      const { cookie } = await signedIn('ADMIN');
+      for (const [query, field] of [
+        ['pageSize=101', 'pageSize'],
+        ['sort=place:asc', 'sort'],
+        ['type=TAX', 'type'],
+        ['status=PAID', 'status'],
+        ['company=x', 'company'],
+        ['vehicle=x', 'vehicle'],
+        ['from=2026-02-30', 'from'],
+        ['to=bugun', 'to'],
+        ['q=' + 'x'.repeat(101), 'q'],
+      ] as const) {
+        const response = await call('GET', `/admin/fleet-expenses?${query}`, { cookie });
+        expect([query, response.status]).toEqual([query, 422]);
+        expect(Object.keys((await response.json()).fieldErrors)).toEqual([field]);
+      }
+    });
+
+    it('a correction needs the version; an id that cannot be one is 404', async () => {
+      const { cookie } = await signedIn('ADMIN');
+      const empty = await call('PATCH', `/admin/fleet-expenses/${ID}`, { cookie, body: {} });
+      expect(empty.status).toBe(422);
+      expect(Object.keys((await empty.json()).fieldErrors)).toEqual(['updatedAt']);
+      for (const [method, path] of [['GET', '/admin/fleet-expenses/nope'], ['PATCH', '/admin/fleet-expenses/nope']] as const) {
+        const response = await call(method, path, { cookie, ...withBody(method) });
+        expect(response.status).toBe(404);
+        expect((await response.json()).code).toBe('NOT_FOUND');
+      }
+    });
+  });
+
   describe('the audit log', () => {
     it('a change is logged with the names of its fields and none of the values', async () => {
       const { cookie, id } = await signedIn('ADMIN');

@@ -168,6 +168,20 @@ enum ReadingSource {
   SEED
 }
 
+enum FleetExpenseType {
+  HGS
+  PENALTY
+  MAINTENANCE
+  OTHER
+}
+
+// OPEN → REFLECTED (charged to the employee) or DISPUTED (the customer objects); DISPUTED → OPEN again. REFLECTED is final.
+enum FleetExpenseStatus {
+  OPEN
+  REFLECTED
+  DISPUTED
+}
+
 // Şirketin personeli (zimmet alan kişiler). Silinmez, `active: false` olur. Ehliyet bilgisi saklanmaz (KVKK, FLEET.md §6).
 model CompanyEmployee {
   id         String   @id @default(uuid())
@@ -235,6 +249,7 @@ model FleetVehicle {
 
   assignments VehicleAssignment[]
   readings    VehicleReading[]
+  expenses    FleetExpense[]
 
   @@unique([id, companyId])
   @@index([contractId])
@@ -304,6 +319,28 @@ model FleetInvoice {
   @@unique([companyId, period])
   @@index([period])
   @@index([companyId, issuedAt])
+}
+
+// Filo masrafı (V2-38, docs/FLEET.md §5): HGS geçişi, ceza, bakım ya da başka bir gider; Novera plakayla girer. Tutar TRY kuruş (CHECK > 0).
+// Masrafın personeli SAKLANMAZ: `occurredAt` anında aracın açık zimmeti kimdeyse odur, sorgu anında hesaplanır (ADR-25). Araç ve şirket
+// bileşik yabancı anahtarla bağlıdır: bir şirketin masrafı başka şirketin aracına yazılamaz.
+model FleetExpense {
+  id             String             @id @default(uuid())
+  companyId      String
+  fleetVehicleId String
+  vehicle        FleetVehicle       @relation(fields: [fleetVehicleId, companyId], references: [id, companyId], onDelete: Restrict)
+  type           FleetExpenseType
+  occurredAt     DateTime
+  amount         Int
+  description    String?
+  place          String?
+  status         FleetExpenseStatus @default(OPEN)
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  @@index([companyId, occurredAt])
+  @@index([companyId, status])
+  @@index([fleetVehicleId, occurredAt])
 }
 
 // Yönetimde değiştiren her işlemin kaydı (V2-23, ADR-24). Yalnızca eklenir: servis güncelleme ya da silme sunmaz ve

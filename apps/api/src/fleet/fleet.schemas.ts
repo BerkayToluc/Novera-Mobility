@@ -135,3 +135,19 @@ export const listAssignmentSchema = z.object({
   employee: uuidQuery,
   open: flagQuery,
 });
+
+// ---------- Contract renewal (V2-38) ----------
+export const MAX_RENEWAL_NOTE = 500;
+const count = (max: number): Check<number | null> => (raw) => {
+  if (raw === undefined || raw === null || raw === '') return { value: null };
+  if (typeof raw !== 'number' || !Number.isInteger(raw)) return { code: 'INVALID_FORMAT' };
+  return raw < 1 || raw > max ? { code: 'OUT_OF_RANGE' } : { value: raw };
+};
+
+// What a renewal request can say beyond what the contract knows: a different number of cars or months, and a word to the sales team. All of
+// it may be left out: the request then asks for the same as the contract has.
+export const renewalRequestSchema = z.object({
+  vehicleCount: field(count(10000)),
+  durationMonths: field(count(120)),
+  notes: field(optional(text(MAX_RENEWAL_NOTE))),
+});

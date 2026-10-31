@@ -11,10 +11,11 @@ import { BRANCH_API_FILTERS, type AdminBranchDetail, type AdminBranchPage } from
 import { PROMO_API_FILTERS, type PromoCode, type PromoCodePage } from "./admin-promo";
 import type { AdminCompanyDetail, AdminCompanyPage } from "./admin-companies";
 import { AUDIT_API_FILTERS, validActor, type AdminAuditPage, type AuditFilter } from "./admin-audit";
+import { EXPENSE_API_FILTERS, type ExpenseFilter, type ExpenseStatus, type ExpenseType, type FleetExpensePage } from "./expenses";
 import { INVOICE_API_FILTERS, type Invoice, type InvoiceFilter, type InvoicePage } from "./invoices";
 import { USER_API_FILTERS, type AdminUserDetail, type AdminUserPage, type UserFilter } from "./admin-users";
 import type { FleetContract, FleetContractDetail } from "./admin-contracts";
-import { fetchAdminContract, fetchAdminInvoice, fetchAdminInvoices, fetchCompanyContracts, fetchAdminAudit, fetchAdminUser, fetchAdminUsers, fetchAdminBranch, fetchAdminCompanies, fetchAdminCompany, fetchAdminBranches, fetchAdminExtra, fetchAdminExtras, fetchAdminModel, fetchAdminMessage, fetchAdminMessages, fetchAdminModels, fetchAdminQuote, fetchAdminQuotes, fetchAdminReservation, fetchAdminReservations, fetchAdminSummary, fetchAdminVehicle, fetchAdminVehicles, fetchModelClasses, fetchPromoCode, fetchPromoCodes, type AdminSummary } from "./api-admin";
+import { fetchAdminContract, fetchAdminExpenses, fetchAdminInvoice, fetchAdminInvoices, fetchCompanyContracts, fetchAdminAudit, fetchAdminUser, fetchAdminUsers, fetchAdminBranch, fetchAdminCompanies, fetchAdminCompany, fetchAdminBranches, fetchAdminExtra, fetchAdminExtras, fetchAdminModel, fetchAdminMessage, fetchAdminMessages, fetchAdminModels, fetchAdminQuote, fetchAdminQuotes, fetchAdminReservation, fetchAdminReservations, fetchAdminSummary, fetchAdminVehicle, fetchAdminVehicles, fetchModelClasses, fetchPromoCode, fetchPromoCodes, type AdminSummary } from "./api-admin";
 import { isMockMode } from "./mode";
 import { mockWorld } from "./mock-world";
 import { normalizePromo } from "./promo-codes";
@@ -255,6 +256,18 @@ export async function getAdminInvoices(params: AdminListParams<InvoiceFilter>): 
 export async function getAdminInvoice(number: string): Promise<Invoice | null> {
   if (!isMockMode()) return fetchAdminInvoice(number);
   return (await import("@/mocks/invoices")).getMockInvoice(await mockWorld(), number);
+}
+
+export async function getAdminExpenses(params: AdminListParams<ExpenseFilter>): Promise<FleetExpensePage> {
+  if (!isMockMode()) return fetchAdminExpenses(toApiQuery(params, EXPENSE_API_FILTERS));
+  return (await import("@/mocks/expenses")).listMockExpenses(await mockWorld(), {
+    page: params.page,
+    pageSize: params.pageSize,
+    sort: params.sort,
+    q: params.q,
+    type: (params.filters.tur as ExpenseType | undefined) ?? null,
+    status: (params.filters.durum as ExpenseStatus | undefined) ?? null,
+  });
 }
 
 // A day that is not a real one, or a "who" that cannot be one, is left out, so a made-up address shows the log.

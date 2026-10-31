@@ -1359,6 +1359,76 @@
         "total": "Genel toplam",
         "note": "Bu bir örnek faturadır, yasal belge (e-fatura) değildir."
       }
+    },
+    "fleetExpenses": {
+      "title": "Filo masrafları",
+      "intro": "Filo müşterilerinin HGS geçişleri, cezaları ve bakım masrafları. Masrafı araç plakasıyla girersiniz; şirket aracın şirketidir. Müşteri Filom'da masrafı o anda aracı kimin kullandığıyla birlikte görür, personele yansıtır ya da itiraz eder.",
+      "tableCaption": "Filo masrafları",
+      "statusFilterLabel": "Duruma göre",
+      "typeFilterLabel": "Türe göre",
+      "searchLabel": "Plaka ara",
+      "retry": "Tekrar dene",
+      "currencyNote": "Tutarlar TL olarak gösterilir.",
+      "columns": {
+        "occurredAt": "Zaman",
+        "plate": "Plaka",
+        "company": "Şirket",
+        "type": "Tür",
+        "amount": "Tutar",
+        "employee": "Personel",
+        "status": "Durum"
+      },
+      "type": {
+        "HGS": "HGS",
+        "PENALTY": "Ceza",
+        "MAINTENANCE": "Bakım",
+        "OTHER": "Diğer"
+      },
+      "status": {
+        "OPEN": "Açık",
+        "REFLECTED": "Personele yansıtıldı",
+        "DISPUTED": "İtiraz edildi"
+      },
+      "unassigned": "Atanmamış",
+      "emptyTitle": "Henüz masraf girilmedi",
+      "emptyText": "Yukarıdaki formdan plakayla ilk masrafı girin.",
+      "emptyFilteredTitle": "Bu aramaya uyan masraf yok",
+      "emptyFilteredText": "Süzgeçleri kaldırmayı ya da başka bir plaka aramayı deneyin.",
+      "loadErrorTitle": "Masraflar yüklenemedi",
+      "loadErrorText": "Birkaç saniye sonra yeniden deneyin.",
+      "form": {
+        "title": "Masraf gir",
+        "label": "Masraf girişi",
+        "save": "Masrafı kaydet",
+        "saving": "Kaydediliyor…",
+        "text": "Masraf açık olarak kaydedilir ve müşterinin ekranında hemen görünür. Gelecekteki bir zaman girilemez."
+      },
+      "fields": {
+        "plate": "Araç plakası",
+        "plateHint": "Filo aracının plakası, örneğin 35 FLM 101.",
+        "type": "Tür",
+        "occurredAt": "Ne zaman oldu",
+        "occurredAtHint": "İstanbul saatiyle.",
+        "amount": "Tutar (TL)",
+        "amountHint": "Virgül ya da nokta: 85,50.",
+        "description": "Açıklama",
+        "place": "Yer"
+      },
+      "errors": {
+        "plate": "Geçerli bir plaka yazın.",
+        "plateUnknown": "Bu plakada bir filo aracı yok.",
+        "type": "Bir tür seçin.",
+        "occurredAt": "Geçerli bir zaman girin.",
+        "occurredAtFuture": "Gelecekteki bir zaman girilemez.",
+        "amount": "Tutarı 0,01 ile 10.000.000 TL arasında yazın.",
+        "description": "Açıklama en çok 200 karakter olabilir.",
+        "place": "Yer en çok 100 karakter olabilir.",
+        "generic": "Masraf kaydedilemedi. Alanları denetleyip yeniden deneyin.",
+        "unavailable": "İşlem yapılamadı. Birkaç saniye sonra yeniden deneyin."
+      },
+      "toast": {
+        "created": "Masraf kaydedildi."
+      }
     }
   }
 }

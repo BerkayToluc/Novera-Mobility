@@ -9,7 +9,8 @@
       "employees": "Personel",
       "assignments": "Zimmet",
       "contracts": "Sözleşmeler",
-      "invoices": "Faturalar"
+      "invoices": "Faturalar",
+      "expenses": "Masraflar"
     },
     "empty": {
       "title": "Filom",
@@ -43,6 +44,12 @@
         "unpaidCount": "{count} ödenmemiş fatura, {overdue} tanesi gecikmiş",
         "openInvoice": "Faturayı aç",
         "openList": "Faturaları aç"
+      },
+      "expenses": {
+        "title": "Masraflar",
+        "open": "Açık masraf",
+        "openTotal": "Toplam {total}",
+        "openList": "Masrafları aç"
       }
     },
     "vehicles": {
@@ -333,6 +340,21 @@
         "empty": "Bu sözleşmeye henüz araç eklenmedi.",
         "idle": "Boşta",
         "returned": "İade edildi"
+      },
+      "renewal": {
+        "title": "Sözleşmeyi yenile",
+        "text": "Yenileme için satış ekibine talep gönderin. Talep, sözleşmenizin ürünü ve araç sayısıyla açılır; ekibimiz sizinle iletişime geçer.",
+        "notesLabel": "Satış ekibine not (isteğe bağlı)",
+        "notesHint": "En çok 500 karakter.",
+        "button": "Yenileme talebi gönder",
+        "sending": "Gönderiliyor…",
+        "sent": "Yenileme talebiniz alındı. Başvuru numaranız: {number}",
+        "errors": {
+          "already": "Bu sözleşme için işlemde bir yenileme talebiniz var; ekibimiz sizinle iletişime geçecek.",
+          "notes": "Not en çok 500 karakter olabilir.",
+          "notFound": "Bu sözleşme artık yok.",
+          "unavailable": "Talep gönderilemedi. Birkaç saniye sonra yeniden deneyin."
+        }
       }
     },
     "invoices": {
@@ -363,6 +385,80 @@
       "loadErrorTitle": "Fatura yüklenemedi",
       "loadErrorText": "Birkaç saniye sonra yeniden deneyin.",
       "retry": "Tekrar dene"
+    },
+    "expenses": {
+      "title": "Masraflar",
+      "intro": "HGS geçişleri, cezalar ve bakım masrafları. Her masrafta, masraf olduğu anda aracı kimin kullandığını görürsünüz. Açık masrafları personele yansıtabilir ya da itiraz edebilirsiniz.",
+      "statusFilterLabel": "Duruma göre",
+      "typeFilterLabel": "Türe göre",
+      "tableCaption": "Masraflar",
+      "retry": "Tekrar dene",
+      "currencyNote": "Tutarlar TL olarak gösterilir.",
+      "columns": {
+        "select": "Seç",
+        "occurredAt": "Zaman",
+        "vehicle": "Araç",
+        "type": "Tür",
+        "amount": "Tutar",
+        "employee": "Personel",
+        "status": "Durum",
+        "actions": "İşlem"
+      },
+      "type": {
+        "HGS": "HGS",
+        "PENALTY": "Ceza",
+        "MAINTENANCE": "Bakım",
+        "OTHER": "Diğer"
+      },
+      "status": {
+        "OPEN": "Açık",
+        "REFLECTED": "Personele yansıtıldı",
+        "DISPUTED": "İtiraz edildi"
+      },
+      "unassigned": "Atanmamış",
+      "emptyTitle": "Henüz masraf yok",
+      "emptyText": "HGS geçişleri, cezalar ve bakım masrafları Novera tarafından girildiğinde burada görünür.",
+      "emptyFilteredTitle": "Bu süzgece uyan masraf yok",
+      "emptyFilteredText": "Süzgeçleri kaldırmayı deneyin.",
+      "loadErrorTitle": "Masraflar yüklenemedi",
+      "loadErrorText": "Birkaç saniye sonra yeniden deneyin.",
+      "selectRow": "{plate} masrafını seç",
+      "selectAll": "Bu sayfadaki yansıtılabilir masrafların tümünü seç",
+      "reflect": {
+        "button": "Personele yansıt",
+        "buttonCount": "Personele yansıt ({count})",
+        "hint": "Yalnızca açık ve bir personeli olan masraflar yansıtılabilir. {count} masraf seçili.",
+        "none": "Yansıtmak için açık ve personeli olan masraflar seçin.",
+        "dialogTitle": "{count} masraf personele yansıtılsın mı?",
+        "dialogText": "Masraflar, masraf olduğu anda aracı kullanan personele yansıtılır. Yansıtılan masraf geri alınamaz.",
+        "confirm": "Yansıt",
+        "keep": "Vazgeç"
+      },
+      "dispute": "İtiraz et",
+      "undispute": "İtirazı geri al",
+      "rowActionsFor": "{plate} masrafı",
+      "toast": {
+        "reflected": "{count} masraf personele yansıtıldı.",
+        "reflectedSkipped": "{count} masraf yansıtıldı, {skipped} tanesi uygun olmadığı için olduğu gibi kaldı.",
+        "disputed": "Masrafa itiraz edildi.",
+        "reopened": "İtiraz geri alındı."
+      },
+      "errors": {
+        "stale": "Masraf bu arada değişmiş; liste yenilendi, tekrar deneyin.",
+        "notAllowed": "Bu masraf için bu işlem yapılamaz.",
+        "notFound": "Bu masraf artık yok.",
+        "unavailable": "İşlem yapılamadı. Birkaç saniye sonra yeniden deneyin."
+      },
+      "filters": {
+        "vehicleLabel": "Araca göre",
+        "vehicleAll": "Tüm araçlar",
+        "employeeLabel": "Personele göre",
+        "employeeAll": "Tüm personel",
+        "from": "İlk gün",
+        "to": "Son gün",
+        "apply": "Uygula",
+        "clear": "Günleri temizle"
+      }
     }
   }
 }

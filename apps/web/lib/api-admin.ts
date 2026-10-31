@@ -188,6 +188,13 @@ export async function fetchAdminInvoice(number: string): Promise<Schemas["Invoic
   throw new ApiUnavailableError();
 }
 
+// `GET /admin/fleet-expenses` (V2-38): one page of the expenses of the fleets.
+export async function fetchAdminExpenses(query: URLSearchParams): Promise<Schemas["FleetExpensePage"]> {
+  const result = await apiRequest<Schemas["FleetExpensePage"]>("GET", "/admin/fleet-expenses?" + query.toString());
+  if (result.status !== "ok") throw new ApiUnavailableError();
+  return result.data;
+}
+
 // `GET /admin/audit-log` (V2-34): one page of the log, newest first. Read only.
 export async function fetchAdminAudit(query: URLSearchParams): Promise<Schemas["AdminAuditPage"]> {
   const result = await apiRequest<Schemas["AdminAuditPage"]>("GET", "/admin/audit-log?" + query.toString());

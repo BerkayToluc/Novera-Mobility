@@ -6552,6 +6552,667 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/admin/fleet-expenses": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Filo masrafları
+         * @description Sayfalı liste, varsayılan olarak en yeni masraf üstte. `q` plakanın bir parçasında arar (büyük/küçük harf fark etmez); `company` şirkete göre süzer. Masrafın **personeli** her okunuşta o anki zimmetlerden hesaplanır (`employee`), hiçbir yerde saklanmaz (ADR-25).
+         */
+        get: {
+            parameters: {
+                query?: {
+                    page?: number;
+                    pageSize?: number;
+                    /** @description `occurredAt` ya da `amount`; `:asc|desc`. Varsayılan en yeni masraf üstte. */
+                    sort?: string;
+                    type?: components["schemas"]["FleetExpenseType"];
+                    status?: components["schemas"]["FleetExpenseStatus"];
+                    vehicle?: string;
+                    /** @description İlk gün (İstanbul günü, dahil). */
+                    from?: string;
+                    /** @description Son gün (İstanbul günü, dahil). */
+                    to?: string;
+                    company?: string;
+                    q?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Bir sayfa masraf */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["FleetExpensePage"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        put?: never;
+        /**
+         * Masraf gir
+         * @description HGS, ceza, bakım ya da başka bir masrafı **plakayla** girer; plaka bir filo aracına çözülür ve masrafın şirketi aracın şirketidir (seçilemez). Plaka hiçbir filo aracına ait değilse `422` `plate: UNKNOWN_REFERENCE`; gelecekteki an `422` `occurredAt: OUT_OF_RANGE`; tutar 1 kuruştan az ya da 10.000.000 TL'den çok ise `amount: OUT_OF_RANGE`. Yeni masraf `OPEN`'dır. İşlem kaydı: `fleet-expense.create` (şirket satırda, yalnız alan adları).
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["FleetExpenseCreate"];
+                };
+            };
+            responses: {
+                /** @description Girilen masraf */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["FleetExpense"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description JSON olmayan gövde (`BAD_REQUEST`) */
+                415: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/fleet-expenses/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        /** Bir filo masrafı */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Masraf */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["FleetExpense"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Böyle bir masraf yok (`NOT_FOUND`) */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Masrafı düzelt
+         * @description Tür, an, tutar, açıklama ve yer düzeltilebilir (araç değişmez; yanlış araca girilen masraf yeniden girilir). Düzenlenen kaydın `updatedAt` değeri geri gönderilir; masraf bu arada değiştiyse `409 STALE_WRITE`. **Yansıtılmış masraf kesindir**: `409 INVALID_TRANSITION`. Açık ve itiraz edilmiş masraf düzeltilebilir. İşlem kaydı: `fleet-expense.update` (şirket satırda).
+         */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["FleetExpenseUpdate"];
+                };
+            };
+            responses: {
+                /** @description Güncel masraf */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["FleetExpense"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Yönetici değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Böyle bir masraf yok (`NOT_FOUND`) */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Kayıt değişmiş (`STALE_WRITE`) ya da yansıtılmış masraf (`INVALID_TRANSITION`) */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description JSON olmayan gövde (`BAD_REQUEST`) */
+                415: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        trace?: never;
+    };
+    "/fleet/expenses": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Masraflar
+         * @description Sayfalı liste, varsayılan olarak en yeni masraf üstte. `employee` bir personelin kimliği ya da `none` ("Atanmamış": o anda aracı kimse kullanmıyordu) olabilir. Her masrafta `employee`, masrafın **gerçekleştiği anda** aracın açık zimmeti kimdeyse odur; sorgu anında hesaplanır, saklanmaz (ADR-25).
+         *     Yalnızca **kurumsal hesabın kendi şirketinin** kayıtları görünür; başka şirketin kaydı `404` döner. Sınır: hesap başına dakikada 120.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    page?: number;
+                    pageSize?: number;
+                    /** @description `occurredAt` ya da `amount`; `:asc|desc`. Varsayılan en yeni masraf üstte. */
+                    sort?: string;
+                    type?: components["schemas"]["FleetExpenseType"];
+                    status?: components["schemas"]["FleetExpenseStatus"];
+                    vehicle?: string;
+                    /** @description İlk gün (İstanbul günü, dahil). */
+                    from?: string;
+                    /** @description Son gün (İstanbul günü, dahil). */
+                    to?: string;
+                    /** @description Personel kimliği ya da `none`. */
+                    employee?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Bir sayfa masraf */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["FleetExpensePage"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Kurumsal hesap değil ya da bir şirkete bağlı değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/fleet/expenses/reflect": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Masrafları toplu yansıt
+         * @description Verilen masrafları (en çok 100, yinelenen kimlik bir sayılır) personele yansıtır. **Kimliklerden biri şirketin değilse ya da yoksa tümü `404` ile reddedilir ve hiçbir şey değişmez** (ikisi ayırt edilemez). Şirketin kendi masraflarından yalnızca **Açık olup o anda bir personeli olanlar** `REFLECTED` olur; diğerleri olduğu gibi kalır ve `skipped` içinde nedenle sayılır (`NOT_OPEN`, `NO_ASSIGNEE`). İşlem kaydı: `fleet-expense.reflect` (kayıt kimliği yok, alan adı `ids`).
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["FleetExpenseReflect"];
+                };
+            };
+            responses: {
+                /** @description Sonuç */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["FleetExpenseReflectResult"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Kurumsal hesap değil ya da bir şirkete bağlı değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Kimliklerden biri şirketin değil ya da yok (`NOT_FOUND`) */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description JSON olmayan gövde (`BAD_REQUEST`) */
+                415: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/fleet/expenses/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * Bir masraf
+         * @description Yalnızca **kurumsal hesabın kendi şirketinin** kayıtları görünür; başka şirketin masrafı `404` döner (ADR-25).
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Masraf */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["FleetExpense"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Kurumsal hesap değil ya da bir şirkete bağlı değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Böyle bir masraf yok ya da başka şirketin (`NOT_FOUND`) */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Masrafın durumunu değiştir
+         * @description Açık ↔ İtiraz edildi ve Açık → Yansıtıldı. **Yansıtılmış masraf kesindir**; itiraz edilmiş masraf önce Açık'a alınmadan yansıtılamaz (`409 INVALID_TRANSITION`). O anda aracı kimse kullanmıyorsa masraf yansıtılamaz (`409 INVALID_TRANSITION`). Düzenlenen kaydın `updatedAt` değeri geri gönderilir; masraf arada değiştiyse `409 STALE_WRITE`. Zaten o durumda olan masrafa aynı durum istenirse bir şey değişmez ve hata da verilmez. İşlem kaydı: `fleet-expense.update`.
+         */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["FleetExpenseStatusChange"];
+                };
+            };
+            responses: {
+                /** @description Güncel masraf */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["FleetExpense"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Kurumsal hesap değil ya da bir şirkete bağlı değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Böyle bir masraf yok ya da başka şirketin (`NOT_FOUND`) */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Kayıt değişmiş (`STALE_WRITE`) ya da bu geçiş yapılamaz (`INVALID_TRANSITION`) */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description JSON olmayan gövde (`BAD_REQUEST`) */
+                415: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        trace?: never;
+    };
+    "/fleet/contracts/{number}/renewal-request": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Sözleşme numarası (`SZL-2026-00001`); büyük/küçük harf fark etmez. */
+                number: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Sözleşme yenileme talebi gönder
+         * @description Sözleşme için bir teklif talebi (`QuoteRequest`, `source = FLEET_RENEWAL`) açar: ürün sözleşmenin ürünüdür, araç sayısı sözleşmedeki kullanımdaki araçlardır, süre sözleşmenin süresidir (gövdede başka sayı verilebilir; gövde boş olabilir). Talep yönetim panelinde **Teklifler**'de görünür. Aynı sözleşme için işlemdeki (kapatılmamış) bir yenileme talebi varsa `409 ALREADY_REQUESTED`. Başka şirketin sözleşmesi `404`. İşlem kaydı: `fleet-contract.renewal-request` (kayıt kimliği sözleşme numarası, yalnız alan adları). Sınır: hesap başına dakikada 120.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Sözleşme numarası (`SZL-2026-00001`); büyük/küçük harf fark etmez. */
+                    number: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["RenewalRequest"];
+                };
+            };
+            responses: {
+                /** @description Talep alındı; başvuru numarası döner */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["RenewalReceived"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Kurumsal hesap değil ya da bir şirkete bağlı değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Böyle bir sözleşme yok ya da başka şirketin (`NOT_FOUND`) */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Bu sözleşme için işlemdeki bir yenileme talebi var (`ALREADY_REQUESTED`) */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description JSON olmayan gövde (`BAD_REQUEST`) */
+                415: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/ping": {
         parameters: {
             query?: never;
@@ -7947,6 +8608,138 @@ export interface components {
                 /** @description Vadesi geçmiş */
                 overdue: number;
             };
+            expenses: {
+                open: {
+                    /** @description Açık (yansıtılmamış */
+                    count: number;
+                    /** @description Bunların toplamı */
+                    total: number;
+                };
+            };
+        };
+        /**
+         * @description HGS geçişi, ceza, bakım, diğer.
+         * @enum {string}
+         */
+        FleetExpenseType: "HGS" | "PENALTY" | "MAINTENANCE" | "OTHER";
+        /**
+         * @description Açık, personele yansıtıldı (kesin), itiraz edildi.
+         * @enum {string}
+         */
+        FleetExpenseStatus: "OPEN" | "REFLECTED" | "DISPUTED";
+        FleetExpense: {
+            /** Format: uuid */
+            id: string;
+            company: {
+                /** Format: uuid */
+                id: string;
+                name: string;
+            };
+            vehicle: {
+                /** Format: uuid */
+                id: string;
+                /** @example 35 FLM 101 */
+                plate: string;
+                /** @example Fiat Egea */
+                model: string;
+                /** @example SZL-2026-00001 */
+                contractNumber: string;
+            };
+            type: components["schemas"]["FleetExpenseType"];
+            /** Format: date-time */
+            occurredAt: string;
+            /** @description TRY kuruş. */
+            amount: number;
+            description: string | null;
+            place: string | null;
+            status: components["schemas"]["FleetExpenseStatus"];
+            /** @description Masrafın gerçekleştiği anda aracın açık zimmeti kimdeyse o (saklanmaz, her okunuşta hesaplanır); kimse kullanmıyorsa null ("Atanmamış"). */
+            employee: {
+                /** Format: uuid */
+                id: string;
+                name: string;
+                department: string | null;
+            } | null;
+            /** Format: date-time */
+            createdAt: string;
+            /**
+             * Format: date-time
+             * @description Düzenleme sürümü.
+             */
+            updatedAt: string;
+        };
+        FleetExpensePage: {
+            items: components["schemas"]["FleetExpense"][];
+            total: number;
+            page: number;
+            pageSize: number;
+        };
+        FleetExpenseCreate: {
+            /**
+             * @description Filo aracının plakası; boşluksuz ya da küçük harfle de yazılabilir.
+             * @example 35 FLM 101
+             */
+            plate: string;
+            type: components["schemas"]["FleetExpenseType"];
+            /** @description Tam an (`2026-10-31T09:30:00Z`) ya da gün (`2026-10-31`, İstanbul 00:00'dan). Gelecekte olamaz. */
+            occurredAt: string;
+            /** @description TRY kuruş. */
+            amount: number;
+            description?: string | null;
+            place?: string | null;
+        };
+        FleetExpenseUpdate: {
+            /**
+             * Format: date-time
+             * @description Düzenlenen kaydın sürümü.
+             */
+            updatedAt: string;
+            type?: components["schemas"]["FleetExpenseType"];
+            occurredAt?: string;
+            amount?: number;
+            /** @description Boş gönderilirse silinir. */
+            description?: string | null;
+            /** @description Boş gönderilirse silinir. */
+            place?: string | null;
+        };
+        FleetExpenseStatusChange: {
+            /** Format: date-time */
+            updatedAt: string;
+            status: components["schemas"]["FleetExpenseStatus"];
+        };
+        FleetExpenseReflect: {
+            ids: string[];
+        };
+        FleetExpenseReflectResult: {
+            /** @description Yansıtılan masraf sayısı. */
+            reflected: number;
+            /** @description Şirketin olup değişmeyenler ve nedeni. */
+            skipped: {
+                /** Format: uuid */
+                id: string;
+                /**
+                 * @description `NOT_OPEN`: zaten yansıtılmış ya da itiraz edilmiş. `NO_ASSIGNEE`: o anda aracı kimse kullanmıyordu.
+                 * @enum {string}
+                 */
+                reason: "NOT_OPEN" | "NO_ASSIGNEE";
+            }[];
+        };
+        RenewalReceived: {
+            /** @example true */
+            received: boolean;
+            /**
+             * @description Teklif talebinin numarası; yönetim panelinde Teklifler'de bu numarayla görünür.
+             * @example TKL-2026-00042
+             */
+            referenceNumber: string;
+        };
+        RenewalRequest: {
+            /** @description Boşsa sözleşmedeki kullanımdaki araç sayısı. */
+            vehicleCount?: number | null;
+            /** @description Boşsa sözleşmenin süresi. */
+            durationMonths?: number | null;
+            /** @description Satış ekibine not. */
+            notes?: string | null;
         };
         FleetContract: {
             /** Format: uuid */

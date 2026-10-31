@@ -98,6 +98,26 @@ export default async function FleetSummaryPage() {
           </dl>
         </section>
       )}
+      {summary && (
+        <section aria-labelledby="summary-expenses" className="flex flex-col gap-4">
+          <h2 id="summary-expenses" className="text-h3 text-fg">
+            {t("expenses.title")}
+          </h2>
+          <dl className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            <div className="flex flex-col gap-2 rounded-card border border-border bg-surface p-5">
+              <dt className="text-label text-fg-muted">{t("expenses.open")}</dt>
+              <dd className="text-display text-fg">{summary.expenses.open.count}</dd>
+              <dd className="text-small text-fg-muted">{t("expenses.openTotal", { total: money.format(summary.expenses.open.total / 100) })}</dd>
+              <dd>
+                <Link href={{ pathname: "/filom/masraflar", query: { durum: "OPEN" } }} className="inline-flex min-h-11 items-center text-link underline underline-offset-4">
+                  {t("expenses.openList")}
+                  <span className="sr-only">{`: ${t("expenses.open")}`}</span>
+                </Link>
+              </dd>
+            </div>
+          </dl>
+        </section>
+      )}
     </>
   );
 }
