@@ -14,6 +14,7 @@ import { FleetContractsService } from './fleet-contracts.service.js';
 import { FleetEmployeesService } from './fleet-employees.service.js';
 import { FleetExpensesService } from './fleet-expenses.service.js';
 import { FleetInvoicesService } from './fleet-invoices.service.js';
+import { FleetGreenService } from './fleet-green.service.js';
 import { FleetReportsService } from './fleet-reports.service.js';
 import { FleetSummaryService } from './fleet-summary.service.js';
 import { FleetVehiclesService } from './fleet-vehicles.service.js';
@@ -52,6 +53,8 @@ const ROUTES: Array<[string, string, unknown?]> = [
   ['POST', `/fleet/assignments/${ID}/end`, {}],
   ['POST', '/fleet/contracts/SZL-2026-00001/renewal-request', { notes: 'Lütfen arayın' }],
   ['GET', '/fleet/reports?from=2026-09&to=2026-10'],
+  ['GET', '/fleet/green?from=2026-08&to=2026-10'],
+  ['GET', '/fleet/vehicles/34-ABC-123/charging-stations?limit=5'],
   ['GET', '/fleet/expenses'],
   ['GET', `/fleet/expenses/${ID}`],
   ['PATCH', `/fleet/expenses/${ID}`, { updatedAt: '2026-10-31T10:00:00.000Z', status: 'DISPUTED' }],
@@ -70,6 +73,8 @@ describe('the fleet panel over HTTP (V2-35)', () => {
       .useValue(stub(['list', 'get']))
       .overrideProvider(FleetContractsService)
       .useValue(stub(['list', 'get', 'requestRenewal']))
+      .overrideProvider(FleetGreenService)
+      .useValue(stub(['green', 'stations']))
       .overrideProvider(FleetReportsService)
       .useValue(stub(['get']))
       .overrideProvider(FleetExpensesService)

@@ -10,7 +10,7 @@ import { FLEET_SCREENS, isCurrentFleetScreen } from "@/lib/fleet-screens";
 // The menu of Filom (DESIGN.md §8), the same as the administration's: from xl a column on the left with an icon for each screen, below
 // that one button on top that opens the list. The open list closes by itself on a new page, on Escape (focus returns to the button) and
 // on a click anywhere else.
-export function FleetNav() {
+export function FleetNav({ green = false }: { green?: boolean }) {
   const t = useTranslations("FleetPanel.nav");
   const pathname = usePathname();
   const listId = useId();
@@ -31,7 +31,9 @@ export function FleetNav() {
     return () => document.removeEventListener("pointerdown", outside);
   }, [open]);
 
-  const current = FLEET_SCREENS.find((screen) => isCurrentFleetScreen(pathname, screen.href)) ?? FLEET_SCREENS[0]!;
+  // The Green Fleet is in the menu only for a company with an electric or hybrid car in use.
+  const screens = FLEET_SCREENS.filter((screen) => screen.key !== "green" || green);
+  const current = screens.find((screen) => isCurrentFleetScreen(pathname, screen.href)) ?? screens[0]!;
   const CurrentIcon = current.icon;
 
   return (
@@ -62,7 +64,7 @@ export function FleetNav() {
         <ChevronDown aria-hidden="true" className={cn("size-4 shrink-0 transition-transform", open && "rotate-180")} />
       </button>
       <ul id={listId} className={cn("flex-col gap-1", open ? "flex" : "hidden", "xl:flex")}>
-        {FLEET_SCREENS.map(({ key, href, icon: Icon }) => {
+        {screens.map(({ key, href, icon: Icon }) => {
           const isCurrent = isCurrentFleetScreen(pathname, href);
           return (
             <li key={key}>

@@ -11,7 +11,8 @@
       "contracts": "Contracts",
       "invoices": "Invoices",
       "expenses": "Expenses",
-      "reports": "Reports"
+      "reports": "Reports",
+      "green": "Green Fleet"
     },
     "empty": {
       "title": "My fleet",
@@ -521,6 +522,76 @@
         "vehicle": "Vehicle",
         "department": "Department",
         "sum": "Total"
+      }
+    },
+    "green": {
+      "title": "Green Fleet",
+      "intro": "The charge, battery health and carbon saving of your electric and hybrid vehicles, and the charging stations nearby.",
+      "simulation": "Simulation",
+      "retry": "Try again",
+      "scrollable": "{table} (scrolls sideways)",
+      "percent": "{value}%",
+      "km": "{value} km",
+      "distance": "{value} km",
+      "tableBelow": "The same data is in the table below.",
+      "loadErrorTitle": "The Green Fleet could not be loaded",
+      "loadErrorText": "Try again in a few seconds.",
+      "emptyTitle": "No vehicles in the Green Fleet",
+      "emptyText": "Your company has no electric or hybrid vehicle in use. Once one is added to your contract, its carbon saving, battery and charge show here.",
+      "emptyAction": "See your vehicles",
+      "fuel": {
+        "ELECTRIC": "Electric",
+        "HYBRID": "Hybrid"
+      },
+      "carbon": {
+        "title": "Carbon saving",
+        "example": "Example calculation",
+        "saved": "CO₂ saved",
+        "km": "Kilometres",
+        "cars": "Electric and hybrid vehicles",
+        "kg": "{value} kg",
+        "how": "This is an example calculation: kilometres × (petrol equivalent − the vehicle's emissions). The petrol equivalent is {petrol} g CO₂/km, hybrid {hybrid} g, electric {electric} g (grid share). It is not a measurement."
+      },
+      "charge": {
+        "title": "Charge level",
+        "text": "The latest reading Novera wrote down. A vehicle that has none (a hybrid that is not charged from the grid, for one) has no figure.",
+        "none": "No reading"
+      },
+      "battery": {
+        "title": "Battery health",
+        "chart": "Battery health over the last 6 months",
+        "firstFour": "The lines of the first four vehicles are drawn; the table has every vehicle."
+      },
+      "stations": {
+        "title": "Charging stations nearby",
+        "vehicleLabel": "Vehicle",
+        "fromCity": "The vehicle {plate} is taken to be in the centre of {city} for now; distances are from there.",
+        "noPosition": "The position of {city}, the city of vehicle {plate}, is not known; stations are listed without distances, those of its own city first.",
+        "updated": "States as of {time} (they change every 5 minutes).",
+        "note": "The stations and their states are examples; they are not connected to a real charging network.",
+        "emptyTitle": "No station found",
+        "emptyText": "There is no charging station to show for this vehicle.",
+        "errorTitle": "The stations could not be loaded",
+        "errorText": "Try again in a few seconds."
+      },
+      "stationStatus": {
+        "AVAILABLE": "Available",
+        "BUSY": "In use",
+        "OUT_OF_ORDER": "Out of order"
+      },
+      "columns": {
+        "vehicle": "Vehicle",
+        "fuel": "Type",
+        "km": "Kilometres",
+        "saved": "Saved",
+        "sum": "Total",
+        "charge": "Charge level",
+        "date": "Date",
+        "health": "Battery health",
+        "station": "Station",
+        "distance": "Distance",
+        "sockets": "Sockets",
+        "status": "Status"
       }
     }
   }

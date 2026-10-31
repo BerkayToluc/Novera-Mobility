@@ -344,6 +344,30 @@ Adres (TR / EN): `/filom/raporlar` (`/my-fleet/reports`). Metinler `messages/*/f
 
 **Örnek veri (USE_MOCKS=1):** `mocks/reports.ts` örnek şirketin faturalarından, masraflarından, araçlarından, okumalarından ve zimmetlerinden kurar; yani rapor o ekranlarla kuruşu kuruşuna tutar.
 
+### 3.18 Yeşil Filo (V2-40)
+
+Adres (TR / EN): `/filom/yesil-filo` (`/my-fleet/green-fleet`). Metinler `messages/*/fleet-panel.json` (`FleetPanel.green`). Uçlar: `GET /fleet/green?from=YYYY-MM&to=YYYY-MM` (dönem raporla aynı kurallarla; ikisi de yoksa son 3 ay) ve `GET /fleet/vehicles/{plaka}/charging-stations?limit=5` (1–20). Veri: `ChargingStation` (ad, şehir, enlem, boylam, soketler; `(şehir, ad)` benzersiz, konum ve soket sayısı `CHECK`), seed'de 30 kurgusal istasyon (`prisma/seed-stations.ts`; İzmir, Ankara, İstanbul 5'er, Bursa, Antalya 3'er, Eskişehir, Adana, Konya 2'şer, Gaziantep, Kayseri, Mersin 1'er; yeniden çalışınca kopya yapmaz).
+
+**Hangi araçlar:** şirketin kullanımdaki (iade edilmemiş) **elektrikli ve hibrit** araçları (`VehicleModel.fuelType`). Benzinli, dizel, iade edilmiş ya da başka şirketin aracı hiçbir cevapta yoktur.
+
+**Karbon tasarrufu (örnek hesap, ekranda yazar):** dönemin kilometresi (rapordaki gibi: dönem sonu ve başındaki okumanın farkı) × (benzinli eşdeğer − aracın emisyonu). Katsayılar **g CO₂/km olarak** tek yerde, `apps/api/src/fleet/fleet-report.ts`'te: benzinli 170, hibrit 105, elektrikli 45 (FLEET.md §3.1'deki 0,170 / 0,105 / 0,045 kg/km; tam sayı kalsın diye gram). Cevap tasarrufu **gram** (tam sayı) verir, ekran kg'a çevirir; katsayılar cevapta `coefficients` olarak gelir ve ekranda yazar.
+
+**Şarj seviyesi ve batarya sağlığı:** Novera'nın girdiği okumalardır (simülasyon değil). Şarj seviyesi yazılmış **son** değerdir; hiç yoksa (şebekeden şarj edilmeyen bir hibrit gibi) `null` ve ekranda "Okuma yok". Batarya sağlığının eğilimi **son 6 ayın** okumalarıdır, eskiden yeniye.
+
+**Şarj istasyonları (simülasyon, ADR-30):**
+- Sıralama: aracın konumuna kuş uçuşu uzaklık (haversine, bir ondalık), yakından uzağa. Araç henüz canlı konum üretmediği için (V2-43) **sözleşmenin teslim şehrinin merkezinde** sayılır (`src/fleet/simulation/stations.ts` içindeki şehir merkezleri). Merkezi bilinmeyen şehirde uzaklık `null` olur ve aracın kendi şehrindeki istasyonlar önce gelir.
+- Durum `AVAILABLE` (~%60), `BUSY` (~%30), `OUT_OF_ORDER` (~%10): **saklanmaz**, istasyon kimliği ve **5 dakikalık dilimden** deterministik üretilir (`seeded`: FNV-1a + mulberry32). Aynı araç ve aynı dilim için her istek aynı cevabı verir; cevaptaki `updatedAt` dilimin başlangıcıdır.
+- Cevapta `simulated: true`. Ekranda her yerde **"Simülasyon" rozeti** ve "gerçek bir istasyon ağına bağlı değildir" notu vardır. Elektrikli ya da hibrit olmayan, iade edilmiş ya da başka şirketin aracı `404` (olmayan araçla aynı cevap).
+- Sample mod aynı aritmetiği `lib/simulation.ts`'te taşır; web testi API'nin verdiği sayıları sabitleyerek ikisinin aynı olduğunu gösterir.
+
+**Harita (SPEC §7 kararı):** karar Google Maps'tir ama anahtar bu ortamda yoktur ve issue "harita yoksa liste yeterli" der; bu yüzden **harita eklenmedi**, istasyonlar yalnız listede (uzaklık, soketler, durum). V2-43 canlı takip haritayı getirdiğinde istasyonlar da oraya eklenebilir; uçların biçimi (enlem, boylam) buna hazırdır.
+
+**Görünürlük:** `GET /fleet/summary` `greenVehicles` verir (kullanımdaki elektrikli ve hibrit sayısı). Filom menüsünde "Yeşil Filo" yalnız `greenVehicles > 0` ise vardır (düzen sunucuda özeti bir kez okur; okunamazsa öğe şimdilik gizlenir). Aracı olmayan şirkette adres boş durum gösterir ("Yeşil Filo'da araç yok", "Araçlarınızı görün").
+
+**Ekran:** dönem seçimi raporlardaki gibi (`donem`, `bas`, `bit`); üç toplam kartı (tasarruf edilen CO₂, kilometre, araç sayısı) ve "Örnek hesap" rozeti, araç tablosu; **şarj seviyesi** tablosu (yüzde, küçük çubuk, okuma tarihi); **batarya sağlığı** çizgi grafiği (ilk dört araç, her çizginin kendi desenli çizgisi var, renk tek başına değil; son değer açıklamada) ve altında bütün okumaların tablosu; **yakındaki istasyonlar** (araç seçimi `arac`, varsayılan ilk elektrikli araç). Resim ekran okuyucudan gizlenir, tablolar okunur.
+
+**Örnek veri (USE_MOCKS=1):** `mocks/green.ts`: Ege Lojistik'in Togg T10X'i (35 FLM 102; benzinli Egea yok) ve İzmir'de 5 kurgusal istasyon (+ Ankara, İstanbul'dan birer tane); admin sözleşme sayfasından araç iade edilirse menüden kaybolur. Issue'daki Yeşil Enerji Ltd. seed şirketidir (sample modda yoktur); onun durumu API entegrasyon testlerinde sınanır.
+
 ## 4. API
 
 Tüm uçlar `/admin` önekli, `AdminGuard` arkasında, ADR-24 kurallarıyla (sayfalama, `STALE_WRITE`, yeni hata kodları). Değiştiren her istek işlem kaydına yazılır, `Content-Type: application/json` dışındakiler `415` döner, sınır dakikada 120/yönetici.
