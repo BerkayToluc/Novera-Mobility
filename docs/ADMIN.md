@@ -355,12 +355,12 @@ Adres (TR / EN): `/filom/yesil-filo` (`/my-fleet/green-fleet`). Metinler `messag
 **Şarj seviyesi ve batarya sağlığı:** Novera'nın girdiği okumalardır (simülasyon değil). Şarj seviyesi yazılmış **son** değerdir; hiç yoksa (şebekeden şarj edilmeyen bir hibrit gibi) `null` ve ekranda "Okuma yok". Batarya sağlığının eğilimi **son 6 ayın** okumalarıdır, eskiden yeniye.
 
 **Şarj istasyonları (simülasyon, ADR-30):**
-- Sıralama: aracın konumuna kuş uçuşu uzaklık (haversine, bir ondalık), yakından uzağa. Araç henüz canlı konum üretmediği için (V2-43) **sözleşmenin teslim şehrinin merkezinde** sayılır (`src/fleet/simulation/stations.ts` içindeki şehir merkezleri). Merkezi bilinmeyen şehirde uzaklık `null` olur ve aracın kendi şehrindeki istasyonlar önce gelir.
+- Sıralama: aracın konumuna kuş uçuşu uzaklık (haversine, bir ondalık), yakından uzağa. Araç, canlı takipteki (§3.20) konumuna değil **sözleşmenin teslim şehrinin merkezine** göre sayılır (`src/fleet/simulation/stations.ts` içindeki şehir merkezleri); ikisini birleştirmek ayrı bir iştir. Merkezi bilinmeyen şehirde uzaklık `null` olur ve aracın kendi şehrindeki istasyonlar önce gelir.
 - Durum `AVAILABLE` (~%60), `BUSY` (~%30), `OUT_OF_ORDER` (~%10): **saklanmaz**, istasyon kimliği ve **5 dakikalık dilimden** deterministik üretilir (`seeded`: FNV-1a + mulberry32). Aynı araç ve aynı dilim için her istek aynı cevabı verir; cevaptaki `updatedAt` dilimin başlangıcıdır.
 - Cevapta `simulated: true`. Ekranda her yerde **"Simülasyon" rozeti** ve "gerçek bir istasyon ağına bağlı değildir" notu vardır. Elektrikli ya da hibrit olmayan, iade edilmiş ya da başka şirketin aracı `404` (olmayan araçla aynı cevap).
 - Sample mod aynı aritmetiği `lib/simulation.ts`'te taşır; web testi API'nin verdiği sayıları sabitleyerek ikisinin aynı olduğunu gösterir.
 
-**Harita (SPEC §7 kararı):** karar Google Maps'tir ama anahtar bu ortamda yoktur ve issue "harita yoksa liste yeterli" der; bu yüzden **harita eklenmedi**, istasyonlar yalnız listede (uzaklık, soketler, durum). V2-43 canlı takip haritayı getirdiğinde istasyonlar da oraya eklenebilir; uçların biçimi (enlem, boylam) buna hazırdır.
+**Harita (SPEC §7 kararı):** karar Google Maps'tir ama anahtar bu ortamda yoktur ve issue "harita yoksa liste yeterli" der; bu yüzden **harita eklenmedi**, istasyonlar yalnız listede (uzaklık, soketler, durum). Canlı takip haritası (§3.20) geldi ama istasyonları göstermez; uçların biçimi (enlem, boylam) buna hazırdır.
 
 **Görünürlük:** `GET /fleet/summary` `greenVehicles` verir (kullanımdaki elektrikli ve hibrit sayısı). Filom menüsünde "Yeşil Filo" yalnız `greenVehicles > 0` ise vardır (düzen sunucuda özeti bir kez okur; okunamazsa öğe şimdilik gizlenir). Aracı olmayan şirkette adres boş durum gösterir ("Yeşil Filo'da araç yok", "Araçlarınızı görün").
 
@@ -404,6 +404,32 @@ Adresler (TR / EN): Filom'da `/filom/talepler`, `/yeni` ve `/{numara}` (`/my-fle
 **E-posta:** durum değişikliği e-postası V2-44'tedir; burada olay kaydı yeterli.
 
 **Örnek veri (USE_MOCKS=1):** `mocks/requests.ts`: Ege Lojistik'in dört talebi (yolda olan bir yol yardım, randevusu verilmiş bir bakım, iade alınmış bir ikame araç, yeni alınmış bir yol yardım) ve Anadolu İnşaat'ın bir talebi (Ege hiçbir yerde göremez, `404`). Açık olanlar: Ege 3, hepsi 4.
+
+### 3.20 Canlı takip (V2-43)
+
+Adres (TR / EN): `/filom/canli-takip` (`/my-fleet/live-tracking`); menüde "Canlı Takip". Metinler `messages/*/fleet-panel.json` (`FleetPanel.tracking`). Uçlar: `GET /fleet/tracking` (şirketin kullanımdaki tüm araçları, plakaya göre) ve `GET /fleet/vehicles/{plaka}/route?date=YYYY-MM-DD` (o günün 5 dakikalık noktaları). Veri: `TrackingRoute` (şehir, ad, `points` = en az iki noktalı JSON dizisi; `(şehir, ad)` benzersiz, nokta sayısı `CHECK`), seed'de her şehir merkezi için 2 rota (`prisma/seed-routes.ts`, `src/fleet/simulation/route-data.ts`; yeniden çalışınca kopya yapmaz).
+
+**Rotalar:** elle hazırlanmış iki çoklu çizgi (bir "Merkez – Sanayi hattı", bir "Çevre yolu hattı"), her şehrin merkezine göre yerleştirilmiş; dış servis kullanılmaz. Şehir başına iki rota olduğundan kapsam "2–3" aralığının altındadır: üçüncüsü eklemek yalnız `ROUTE_SHAPES`'e bir satırdır.
+
+**Simülasyon (ADR-30, `src/fleet/simulation/tracking.ts`, saf ve tohumlu):** araç, sözleşmesinin **teslim şehrindeki** rotalardan birini kullanır (araç kimliğinden seçilir, hep aynısı) ve onda **gidip gelir**.
+- **Mesai:** hafta içi 08:00–19:00 (İstanbul). Bu saatlerde kontak açıktır; yaklaşık her on dilimden birinde (trafik ışığı, teslimat) araç durur (hız 0, kontak açık). Mesai dışında ve hafta sonu **kontak kapalı, hız 0, araç son çalıştığı noktada** durur (gece, o günün sonunda ya da bir önceki iş gününün sonunda bulunduğu nokta).
+- **Hareket:** her mesai dilimi için adım, `seeded(araç, dilim)` ile ortalama 35 km/sa'yi veren bir pay olarak üretilir ve toplanır; hız o adımın rota üzerindeki uzunluğundan hesaplanır (bu yüzden hız ile konum birbirini tutar). Her iş günü rotanın başka bir yerinden başlar (araç oraya götürülmüştür), böylece günler birbirini tekrar etmez. Konumlar beş ondalığa yuvarlanır.
+- **Saklanmaz:** aynı araç ve aynı 5 dakikalık dilim için her istek aynı cevabı verir; `/fleet/tracking`'in o dilimde verdiği konum ile `/route`'un o dilimdeki noktası **birebir aynıdır**. Cevaplarda `simulated: true`.
+- **Rotası olmayan şehir** (sözleşme tablosunda tanıdık olmayan şehir ya da rotası silinmiş): araç listede kalır, `position: null`; `/route` boş `points` verir.
+
+**`GET /fleet/tracking`:** her araç için plaka, model, şehir, **kullanan kişi** (açık zimmet, ad soyad; yoksa `null`), kontak, hız (km/sa, tam sayı), konum, ve cevapta `updatedAt` (dilimin başlangıcı). İade edilmiş araç yoktur. **`/route`:** gece yarısından bugünse şimdiye, geçmiş günse gün sonuna kadar en çok 288 nokta; en çok son 7 gün (bugün ve altı gün önce), dışı `422 date: OUT_OF_RANGE`, gün olmayan değer `INVALID_FORMAT`. İade edilmiş, başka şirketin ya da olmayan araç ve plaka olamayacak değer aynı `404`. İkisi de `/fleet/*` hız sınırının (hesap başına dakikada 120) altındadır; ekran 30 saniyede bir yenilediği için kullanımı çok altındadır. Salt okunur uçlar işlem kaydına yazılmaz.
+
+**Ekran:**
+- Üstte "Simülasyon" rozeti, son güncelleme saati ve "30 saniyede bir yenilenir" notu.
+- **Araçlar listesi** (tablo): numara, plaka · model (araç seçme bağlantısı, `?arac=`), kullanan, şehir, kontak ("Kontak açık / kapalı": renk tek başına değil), hız. Haritadaki iğnenin numarası listedeki numarayla aynıdır; harita tek bilgi kaynağı değildir, liste her şeyi söyler.
+- **Harita:** Google Maps (SPEC §7 kararı; mevcut CSP izinli, `@vis.gl/react-google-maps`, `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`); kodu **yalnızca bu rotada** ve ancak anahtar varsa dinamik olarak yüklenir. Anahtar yoksa, Google anahtarı reddederse ya da gösterilecek konum yoksa harita yerine bir not görünür ve ekran liste olarak çalışır. İğneye basmak aracı seçer.
+- **Seçili aracın rotası** (`?arac=35FLM101&gun=YYYY-MM-DD`): harita çizgisi (rengi sitenin `--novera-primary` simgesinden okunur, sayfada ham renk yoktur), gün seçimi (bugün ve önceki altı gün; geçersiz `gun` bugündür), rotanın adı ve nokta sayısı ve **saat başı tablosu** (saat, kontak, hız, konum): çizginin söylediği, haritayı görmeyen biri için.
+- **Yenileme:** istemci her **30 saniyede** bir `refreshTracking` eylemini çağırır (eylem arayanı sorar, sonra aynı okuyucuları kullanır); **sekme gizliyken yenilemez**, görünür olunca cevap 30 saniyeden eskiyse hemen yeniler. Yenileme başarısız olursa son cevap kalır ve "Bilgi yenilenemedi" notu çıkar.
+- Boş durum (kullanımda araç yok), yükleme hatası ("Tekrar dene") ve yükleniyor durumu (Filom iskeleti) vardır. Uydurma adres (`arac`, `gun`) hata değil listeyi gösterir.
+
+**Örnek veri (USE_MOCKS=1):** `mocks/tracking.ts`: Ege Lojistik'in iki aracı İzmir'in iki rotasında (aynı aritmetik, `lib/simulation.ts`; web testi API'nin verdiği sayıları sabitleyerek ikisinin aynı olduğunu gösterir). Konumlar saatle değiştiği için örnek modda saati **`novera-mock-now` çerezi** (epoch ms; yalnız sample mod, `lib/mock-world.ts`) söyleyebilir: e2e bununla "mesai içi", "gece", "hafta sonu" ve "30 saniye sonra" durumlarını görür. Çerez yoksa gerçek saat kullanılır.
+
+**Doğrulanamayan:** harita, bu ortamda Google anahtarı olmadığı için tarayıcıda **gerçek harita ile denenmedi** (kod, `BranchMap` ile aynı kütüphane ve kalıpla yazıldı); e2e haritasız yolu (anahtarsız sayfa) sınar.
 
 ## 4. API
 

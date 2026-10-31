@@ -14,6 +14,7 @@ import { FleetExpensesService, type ReflectResult } from './fleet-expenses.servi
 import type { ExpenseView } from './expense.view.js';
 import { FleetInvoicesService } from './fleet-invoices.service.js';
 import type { InvoiceView } from './invoice.view.js';
+import { FleetTrackingService, type RouteDay, type TrackingList } from './fleet-tracking.service.js';
 import { FleetGreenService, type GreenReport, type StationList } from './fleet-green.service.js';
 import { FleetReportsService } from './fleet-reports.service.js';
 import { FleetRequestsService, type CreatedRequest } from './fleet-requests.service.js';
@@ -91,6 +92,23 @@ export class FleetGreenController {
   @Get('vehicles/:plate/charging-stations')
   stations(@CurrentCompany() companyId: string, @Param('plate') plate: string, @Query() query: unknown): Promise<StationList> {
     return this.green.stations(companyId, plate, query);
+  }
+}
+
+@ApiTags('fleet')
+@Controller('fleet')
+export class FleetTrackingController {
+  constructor(private readonly tracking: FleetTrackingService) {}
+
+  // Where the cars are, in the five minutes it is now (a simulation, ADR-30).
+  @Get('tracking')
+  list(@CurrentCompany() companyId: string): Promise<TrackingList> {
+    return this.tracking.tracking(companyId);
+  }
+
+  @Get('vehicles/:plate/route')
+  route(@CurrentCompany() companyId: string, @Param('plate') plate: string, @Query() query: unknown): Promise<RouteDay> {
+    return this.tracking.route(companyId, plate, query);
   }
 }
 

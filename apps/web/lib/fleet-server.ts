@@ -19,12 +19,13 @@ import {
 } from "./fleet-panel";
 import { FLEET_EXPENSE_API_FILTERS, type ExpenseStatus, type ExpenseType, type FleetExpenseFilter, type FleetExpensePage } from "./expenses";
 import type { Invoice, InvoiceFilter, InvoicePage } from "./invoices";
-import { fetchFleetRequest, fetchFleetRequests, fetchFleetGreen, fetchFleetReport, fetchFleetStations, fetchFleetAssignments, fetchFleetExpenses, fetchFleetInvoice, fetchFleetInvoices, fetchFleetContract, fetchFleetContracts, fetchFleetEmployee, fetchFleetEmployees, fetchFleetSummary, fetchFleetVehicle, fetchFleetVehicles } from "./api-fleet";
+import { fetchFleetRoute, fetchFleetTracking, fetchFleetRequest, fetchFleetRequests, fetchFleetGreen, fetchFleetReport, fetchFleetStations, fetchFleetAssignments, fetchFleetExpenses, fetchFleetInvoice, fetchFleetInvoices, fetchFleetContract, fetchFleetContracts, fetchFleetEmployee, fetchFleetEmployees, fetchFleetSummary, fetchFleetVehicle, fetchFleetVehicles } from "./api-fleet";
 import type { FleetReport } from "./report-calc";
 import type { GreenReport, StationList } from "./green";
+import type { RouteDay, TrackingList } from "./tracking";
 import { requestApiFilters, type RequestFilter, type ServiceRequestDetail, type ServiceRequestPage } from "./requests";
 import { isMockMode } from "./mode";
-import { mockWorld } from "./mock-world";
+import { mockNow, mockWorld } from "./mock-world";
 import { getSession } from "./session";
 
 // What the Filom screens read (V2-36). With USE_MOCKS=1 (local work and tests only, lib/mode.ts) the sample fleet is shown; otherwise
@@ -172,6 +173,20 @@ export async function getFleetGreen(from: string, to: string): Promise<GreenRepo
 export async function getFleetStations(plate: string, limit: number): Promise<StationList | null> {
   if (!isMockMode()) return fetchFleetStations(plate, limit);
   return (await import("@/mocks/green")).sampleStations(await mockWorld(), await sampleCompany(), plate, limit);
+}
+
+// Where the cars are now (a simulation, ADR-30).
+export async function getFleetTracking(): Promise<TrackingList> {
+  if (!isMockMode()) return fetchFleetTracking();
+  return (await import("@/mocks/tracking")).sampleTracking(await mockWorld(), await sampleCompany(), await mockNow());
+}
+
+// The route of a car on a day (a simulation); `null` for a car that does not exist, is another company's or was given back. `date` must be one the
+// route can be asked for (lib/tracking.ts `pickDay`).
+export async function getFleetRoute(plate: string, date: string): Promise<RouteDay | null> {
+  if (!isMockMode()) return fetchFleetRoute(plate, date);
+  const route = (await import("@/mocks/tracking")).sampleRoute(await mockWorld(), await sampleCompany(), plate, date, await mockNow());
+  return route === "out_of_range" ? null : route;
 }
 
 // The people a car can be given to: the active ones, by surname, for the form's choice (a company has a few dozen at most).

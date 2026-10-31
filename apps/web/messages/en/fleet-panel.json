@@ -13,7 +13,8 @@
       "expenses": "Expenses",
       "reports": "Reports",
       "green": "Green Fleet",
-      "requests": "Requests"
+      "requests": "Requests",
+      "tracking": "Live tracking"
     },
     "empty": {
       "title": "My fleet",
@@ -868,6 +869,57 @@
         "ASR": "Kayseri Erkilet (ASR)",
         "TZX": "Trabzon (TZX)",
         "SZF": "Samsun Çarşamba (SZF)"
+      }
+    },
+    "tracking": {
+      "title": "Live tracking",
+      "intro": "Where your cars are now, whether the ignition is on and how fast they go; the route of the one you choose through the day.",
+      "retry": "Try again",
+      "scrollable": "{table} (scrolls sideways)",
+      "speed": "{value} km/h",
+      "updated": "Last updated: {time}",
+      "refreshNote": "The information renews itself every 30 seconds, and not while the tab is hidden.",
+      "refreshFailed": "The information could not be renewed; the last answer is shown. It will be tried again in a few seconds.",
+      "loadErrorTitle": "Live tracking could not be loaded",
+      "loadErrorText": "Try again in a few seconds.",
+      "emptyTitle": "No cars to track",
+      "emptyText": "You have no car in use, so there is no position to show.",
+      "emptyAction": "See your cars",
+      "noPerson": "Not assigned",
+      "noPosition": "{city} (no position)",
+      "ignition": {
+        "on": "Ignition on",
+        "off": "Ignition off"
+      },
+      "columns": {
+        "pin": "No.",
+        "vehicle": "Car",
+        "person": "Driver",
+        "city": "City",
+        "ignition": "Ignition",
+        "speed": "Speed"
+      },
+      "list": {
+        "title": "Cars",
+        "hint": "A number on the map is the number in this list. Press a plate to choose a car."
+      },
+      "map": {
+        "title": "Map",
+        "noKey": "There is no map in this environment; every car is in the list.",
+        "failed": "The map could not be loaded; the same information is in the list.",
+        "noPins": "There is no position to show on the map; the cars are in the list."
+      },
+      "route": {
+        "title": "Route of {plate}",
+        "dayLabel": "Day of the route",
+        "today": "Today",
+        "none": "There is no route defined in the city of this car ({city}).",
+        "summary": "{name}: {count} points through the day (every 5 minutes).",
+        "hourlyNote": "The line of the map, hour by hour; while the ignition is off the car stays where it last stopped.",
+        "columns": {
+          "time": "Time",
+          "place": "Position (latitude, longitude)"
+        }
       }
     }
   }

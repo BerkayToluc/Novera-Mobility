@@ -7417,7 +7417,7 @@ export interface paths {
         };
         /**
          * Aracın en yakın şarj istasyonları
-         * @description Aracın konumuna en yakın istasyonlar, yakından uzağa. **Cevap bir simülasyondur** (ADR-30): `simulated: true`. Araç henüz canlı konum üretmediği için (V2-43) **sözleşmesinin teslim şehrinin merkezinde** sayılır; o şehrin merkezi bilinmiyorsa istasyonlar uzaklıksız (`distanceKm: null`) ve aracın kendi şehrindekiler önce gelir. İstasyonun durumu (`AVAILABLE`, `BUSY`, `OUT_OF_ORDER`) saklanmaz: istasyon kimliği ve **5 dakikalık dilimden** deterministik üretilir, yani aynı araç ve aynı dilim için her istek aynı cevabı verir (`updatedAt` dilimin başlangıcıdır).
+         * @description Aracın konumuna en yakın istasyonlar, yakından uzağa. **Cevap bir simülasyondur** (ADR-30): `simulated: true`. Bu uç aracın canlı takip konumunu (`/fleet/tracking`) kullanmaz; araç **sözleşmesinin teslim şehrinin merkezinde** sayılır; o şehrin merkezi bilinmiyorsa istasyonlar uzaklıksız (`distanceKm: null`) ve aracın kendi şehrindekiler önce gelir. İstasyonun durumu (`AVAILABLE`, `BUSY`, `OUT_OF_ORDER`) saklanmaz: istasyon kimliği ve **5 dakikalık dilimden** deterministik üretilir, yani aynı araç ve aynı dilim için her istek aynı cevabı verir (`updatedAt` dilimin başlangıcıdır).
          *     Elektrikli ya da hibrit olmayan araç, başka şirketin aracı ve plaka olamayacak değer aynı `404`'tür. Sınır: hesap başına dakikada 120.
          */
         get: {
@@ -7463,6 +7463,141 @@ export interface paths {
                     };
                 };
                 /** @description Böyle bir elektrikli ya da hibrit araç yok ya da başka şirketin (`NOT_FOUND`) */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                422: components["responses"]["ValidationFailed"];
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/fleet/tracking": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Canlı takip, tüm araçların son konumu
+         * @description Şirketin kullanımdaki (iade edilmemiş) tüm araçları, plakaya göre: konum, kontak, hız ve kim kullanıyor. **Cevap bir simülasyondur** (ADR-30): `simulated: true`; ekranda "Simülasyon" rozeti gösterilir. Konum saklanmaz; aracın teslim şehrindeki `TrackingRoute` rotalarından biri (aynı araç hep aynısı) ve **5 dakikalık dilimden** deterministik üretilir, yani aynı araç ve aynı dilim için her istek aynı cevabı verir (`updatedAt` dilimin başlangıcıdır). Hafta içi 08:00–19:00 (İstanbul) dışında ve hafta sonu kontak kapalıdır, hız 0'dır ve araç son çalıştığı noktada durur. Şehrinde rota olmayan araç listede `position: null` ile gelir. Sözleşmesi ya da aracı olmayan şirkette liste boştur. Sınır: hesap başına dakikada 120 (ekran 30 saniyede bir yeniler).
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Araçların son konumu */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["TrackingList"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Kurumsal hesap değil ya da bir şirkete bağlı değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/fleet/vehicles/{plate}/route": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Plaka; boşluksuz ya da küçük harfle de olur. */
+                plate: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * Aracın bir günkü rotası
+         * @description O günün 5 dakikalık noktaları, gece yarısından (İstanbul) bugünse şimdiye, geçmiş günse günün sonuna kadar (en çok 288 nokta). **Cevap bir simülasyondur** (ADR-30); aynı noktalar `/fleet/tracking`'in o dilimde verdiği konumla birebir aynıdır. En çok son 7 gün (bugün ve önceki altı gün) sorulabilir; ondan eski ya da gelecekteki gün `422 date: OUT_OF_RANGE`, gün olmayan değer `INVALID_FORMAT`. Şehrinde rota olmayan araçta `points` boştur. İade edilmiş araç, başka şirketin aracı ve plaka olamayacak değer aynı `404`'tür. Sınır: hesap başına dakikada 120.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description İstanbul günü, YYYY-MM-DD; varsayılan bugün. */
+                    date?: string;
+                };
+                header?: never;
+                path: {
+                    /** @description Plaka; boşluksuz ya da küçük harfle de olur. */
+                    plate: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Günün noktaları */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["RouteDay"];
+                    };
+                };
+                /** @description Oturum yok (`UNAUTHENTICATED`) */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Kurumsal hesap değil ya da bir şirkete bağlı değil (`FORBIDDEN`) */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Böyle bir araç yok, iade edilmiş ya da başka şirketin (`NOT_FOUND`) */
                 404: {
                     headers: {
                         [name: string]: unknown;
@@ -9659,6 +9794,68 @@ export interface components {
              */
             updatedAt: string;
             items: components["schemas"]["ChargingStation"][];
+        };
+        TrackedVehicle: {
+            plate: string;
+            /** @example Fiat Egea */
+            model: string;
+            /** @description Sözleşmenin teslim şehri; araç bu şehrin rotalarında hareket eder. */
+            city: string;
+            /** @description Aracı şu an kullanan kişi (zimmet); yoksa null. */
+            employee: {
+                /** Format: uuid */
+                id: string;
+                name: string;
+            } | null;
+            /** @description Kontak açık mı; hafta içi 08:00–19:00 (İstanbul) dışında ve hafta sonu kapalı. */
+            ignition: boolean;
+            /** @description Hız */
+            speedKmh: number;
+            /** @description Aracın sayılan konumu; şehrinde rota yoksa null. */
+            position: {
+                latitude: number;
+                longitude: number;
+            } | null;
+        };
+        TrackingList: {
+            /**
+             * @description Konumlar üretilmiştir (ADR-30); ekranda "Simülasyon" rozeti gösterilir.
+             * @enum {boolean}
+             */
+            simulated: true;
+            /**
+             * Format: date-time
+             * @description Konumların ait olduğu 5 dakikalık dilimin başlangıcı.
+             */
+            updatedAt: string;
+            items: components["schemas"]["TrackedVehicle"][];
+        };
+        RouteDay: {
+            /** @enum {boolean} */
+            simulated: true;
+            vehicle: {
+                plate: string;
+                city: string;
+                /** @description Aracın bu günkü rotasının adı; şehrinde rota yoksa null. */
+                route: string | null;
+            };
+            /**
+             * Format: date
+             * @description İstanbul günü.
+             */
+            date: string;
+            /** @description Her 5 dakikada bir nokta, eskiden yeniye. */
+            points: {
+                /**
+                 * Format: date-time
+                 * @description Dilimin başlangıcı.
+                 */
+                at: string;
+                latitude: number;
+                longitude: number;
+                speedKmh: number;
+                ignition: boolean;
+            }[];
         };
         /**
          * @description Yol yardım, ikame araç, bakım ve lastik, VIP transfer (transfer V2-42'de açılır).

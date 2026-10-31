@@ -187,7 +187,7 @@ Bunlar ilgili iş birleşince bu rehbere adım olarak yazılır; burada yalnızc
 |---|---|---|
 | Fotoğraf deposu: Vercel Blob (`BLOB_READ_WRITE_TOKEN`, `BLOB_PUBLIC_HOST`); adımlar §5a, koşullar 29 Ekim 2026 tarihli | V2-28 | Vercel ve Cloud Run |
 | İlk yönetici hesabı (`pnpm admin:create`) | V2-23, V2-45 | Neon (Berkay'ın bilgisayarından) |
-| Örnek şirket, şarj istasyonu ve rota seed'i | V2-35, V2-40, V2-43 | Neon |
+| Şarj istasyonu ve rota seed'i: `pnpm --filter @novera/api db:seed:simulation` (yalnız eksikleri ekler; tam `db:seed` canlıda bayi, model ve araç düzenlemelerini geri yazar, bunun için kullanılmaz). Örnek şirket seed'i ayrı (`FLEET_SEED_PASSWORD`) | V2-35, V2-40, V2-43 | Neon |
 | Kullanıcı parolası için seed ortam değişkeni (repoya yazılmaz) | V2-35 | Berkay'ın bilgisayarı |
 | `NODE_ENV=production` artık zorunlu güvenlik ayarı; `API_ACCESS_KEY` olmadan API açılmaz | V2-04 | Cloud Run |
 | Seyahat hatırlatması için Cloud Scheduler işi (`POST /jobs/reminders`, saatlik), §9b; migration `20261101110000_reservation_reminder` | V2-44 | Google Cloud, Neon |
