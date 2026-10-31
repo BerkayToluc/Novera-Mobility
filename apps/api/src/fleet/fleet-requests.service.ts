@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import type { Page } from '../admin/admin-list.js';
-import { invalidTransition } from '../admin/admin.errors.js';
+import { forbidden, invalidTransition } from '../admin/admin.errors.js';
 import { istanbulDay } from '../common/time.js';
 import { isUuid } from '../common/uuid.js';
 import { parseInput, validationFailed } from '../common/zod-validation.js';
@@ -32,6 +32,11 @@ export function openWhere(open: boolean): Prisma.ServiceRequestWhereInput {
 @Injectable()
 export class FleetRequestsService {
   constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
+
+  // Whether the company has a VIP Mobilite contract in force (docs/FLEET.md §3.1): the only companies that can ask for a transfer.
+  async hasVipContract(companyId: string): Promise<boolean> {
+    return (await this.prisma.fleetContract.count({ where: { companyId, status: 'ACTIVE', product: { slug: 'vip-mobilite' } } })) > 0;
+  }
 
   async list(companyId: string, query: unknown): Promise<Page<RequestView>> {
     const input = parseInput(listFleetRequestSchema, query, 'Request list query is invalid');
@@ -71,20 +76,28 @@ export class FleetRequestsService {
   // `UNKNOWN_REFERENCE`, so the answer says nothing about other companies' cars). A transfer is V2-42's.
   async create(companyId: string, userId: string, body: unknown, now: Date = new Date()): Promise<CreatedRequest> {
     const input = parseInput(createRequestSchema, body, 'Request validation failed');
-    if (input.type === 'TRANSFER') throw validationFailed({ type: 'NOT_ALLOWED' }, 'This kind of request cannot be made yet');
-    if (!input.fleetVehicleId) throw validationFailed({ fleetVehicleId: 'REQUIRED' }, 'The vehicle is required');
-    const parsed = parseDetails(input.type, input.details, istanbulDay(now).date);
+    // A transfer is not about a car of the fleet and is for companies with a VIP Mobilite contract only (V2-42): anyone else is turned away
+    // before anything is looked at, with 403, so the answer does not depend on what was sent.
+    if (input.type === 'TRANSFER') {
+      if (!(await this.hasVipContract(companyId))) throw forbidden();
+      if (input.fleetVehicleId) throw validationFailed({ fleetVehicleId: 'NOT_ALLOWED' }, 'A transfer is not about a vehicle');
+    } else if (!input.fleetVehicleId) {
+      throw validationFailed({ fleetVehicleId: 'REQUIRED' }, 'The vehicle is required');
+    }
+    const parsed = parseDetails(input.type, input.details, istanbulDay(now).date, now);
     if ('errors' in parsed) throw validationFailed(parsed.errors, 'Request details are invalid');
-    const vehicle = await this.prisma.fleetVehicle.findFirst({ where: { id: input.fleetVehicleId, companyId, status: 'ACTIVE' }, select: { id: true } });
-    if (!vehicle) throw validationFailed({ fleetVehicleId: 'UNKNOWN_REFERENCE' }, 'No vehicle of the company is in use with this id');
+    const vehicle = input.fleetVehicleId ? await this.prisma.fleetVehicle.findFirst({ where: { id: input.fleetVehicleId, companyId, status: 'ACTIVE' }, select: { id: true } }) : null;
+    if (input.fleetVehicleId && !vehicle) throw validationFailed({ fleetVehicleId: 'UNKNOWN_REFERENCE' }, 'No vehicle of the company is in use with this id');
 
     return this.prisma.$transaction(async (tx) => {
       const [{ serial }] = await tx.$queryRaw<{ serial: bigint }[]>`SELECT nextval('"ServiceRequestNumber_seq"') AS serial`;
-      const similar = await tx.serviceRequest.findMany({
-        where: { companyId, fleetVehicleId: vehicle.id, type: input.type, status: { notIn: finishedStatuses(input.type) } },
-        select: { number: true },
-        orderBy: { createdAt: 'desc' },
-      });
+      const similar = vehicle
+        ? await tx.serviceRequest.findMany({
+            where: { companyId, fleetVehicleId: vehicle.id, type: input.type, status: { notIn: finishedStatuses(input.type) } },
+            select: { number: true },
+            orderBy: { createdAt: 'desc' },
+          })
+        : [];
       const row = await tx.serviceRequest.create({
         data: {
           number: `TLP-${istanbulDay(now).date.slice(0, 4)}-${String(serial).padStart(5, '0')}`,
@@ -92,7 +105,7 @@ export class FleetRequestsService {
           createdById: userId,
           createdAt: now,
           type: input.type,
-          fleetVehicleId: vehicle.id,
+          fleetVehicleId: vehicle?.id ?? null,
           details: parsed.value as unknown as Prisma.InputJsonValue,
           events: { create: { status: 'RECEIVED', actor: 'COMPANY', actorId: userId, at: now } },
         },

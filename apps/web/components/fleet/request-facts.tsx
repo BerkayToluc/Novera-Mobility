@@ -23,6 +23,14 @@ export async function RequestFacts({ request, className }: { request: Pick<Servi
     rows.push([t("facts.deliveryAddress"), str(details.address)]);
     rows.push([t("facts.deliveryDate"), day(details.date)]);
     rows.push([t("facts.duration"), t("facts.durationValue", { count: Number(details.durationDays) })]);
+  } else if (request.type === "TRANSFER") {
+    const meeting = (details.meeting ?? {}) as { airport?: string | null; address?: string | null };
+    rows.push([t("facts.passenger"), `${str(details.passengerName)} · ${t("facts.passengerCount", { count: Number(details.passengers) })}`]);
+    rows.push([t("facts.flight"), details.flightNumber ? `${String(details.flightNumber)} · ${t("facts.flightNote")}` : t("facts.none")]);
+    rows.push([t("facts.meetingPlace"), meeting.airport ? t(`airports.${meeting.airport as "IST"}`) : str(meeting.address)]);
+    rows.push([t("facts.meetingAt"), typeof details.meetingAt === "string" ? format.dateTime(new Date(details.meetingAt), { dateStyle: "long", timeStyle: "short", timeZone: "Europe/Istanbul" }) : t("facts.none")]);
+    rows.push([t("facts.destination"), str(details.destination)]);
+    if (details.note) rows.push([t("facts.note"), str(details.note)]);
   } else if (request.type === "MAINTENANCE") {
     rows.push([t("facts.service"), t(`services.${details.service as "PERIODIC"}`)]);
     rows.push([t("facts.preferredDate"), day(details.preferredDate)]);

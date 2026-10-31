@@ -1504,8 +1504,10 @@
           "assignee": "Atanan bilgi en çok 200 karakter olabilir.",
           "notAllowed": "Talep bu arada değişti ve bu geçiş artık yapılamıyor; sayfa yenilendi.",
           "notFound": "Bu talep artık yok.",
-          "unavailable": "İşlem yapılamadı. Birkaç saniye sonra yeniden deneyin."
-        }
+          "unavailable": "İşlem yapılamadı. Birkaç saniye sonra yeniden deneyin.",
+          "assigneeRequired": "Bu adım için şoförün adını, telefonunu ve aracını yazın."
+        },
+        "assigneeDriverHint": "Transferde şoför adı, telefonu ve aracı yazılmadan \"Şoför atandı\", \"Karşılandı\" ve \"Tamamlandı\" adımlarına geçilemez."
       }
     }
   }

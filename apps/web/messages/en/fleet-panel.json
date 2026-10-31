@@ -678,7 +678,15 @@
         "valetNo": "No, the vehicle will be brought in",
         "pickupAddress": "Address to collect from",
         "position": "Position: {latitude}, {longitude}",
-        "none": "—"
+        "none": "—",
+        "passenger": "Yolcu",
+        "passengerCount": "{count} passengers",
+        "flight": "Uçuş",
+        "flightNote": "The flight status is followed by the operations desk.",
+        "meetingPlace": "Meeting place",
+        "meetingAt": "Meeting time",
+        "destination": "Destination",
+        "note": "Note"
       },
       "incidents": {
         "BREAKDOWN": "Breakdown",
@@ -719,6 +727,20 @@
         "empty": "There are no requests for this vehicle yet.",
         "new": "Open a request for this vehicle",
         "all": "All requests"
+      },
+      "airports": {
+        "IST": "Istanbul Airport (IST)",
+        "SAW": "Sabiha Gökçen (SAW)",
+        "ESB": "Ankara Esenboğa (ESB)",
+        "ADB": "İzmir Adnan Menderes (ADB)",
+        "AYT": "Antalya (AYT)",
+        "BJV": "Milas-Bodrum (BJV)",
+        "DLM": "Dalaman (DLM)",
+        "ADA": "Adana Şakirpaşa (ADA)",
+        "GZT": "Gaziantep (GZT)",
+        "ASR": "Kayseri Erkilet (ASR)",
+        "TZX": "Trabzon (TZX)",
+        "SZF": "Samsun Çarşamba (SZF)"
       }
     },
     "requestForm": {
@@ -736,6 +758,10 @@
         "MAINTENANCE": {
           "title": "Maintenance and tyres",
           "text": "Periodic maintenance, summer/winter tyres or an inspection appointment."
+        },
+        "TRANSFER": {
+          "title": "VIP transfer",
+          "text": "A chauffeured transfer: a meeting at the airport, flight following and driver coordination."
         }
       },
       "fields": {
@@ -757,7 +783,25 @@
         "valet": "Collect my vehicle with a valet",
         "pickupAddress": "Address to collect from",
         "pickupAddressOptional": "Address (optional)",
-        "pickupHint": "You can leave it empty if you do not want a valet."
+        "pickupHint": "You can leave it empty if you do not want a valet.",
+        "passengerName": "Passenger name",
+        "passengers": "Number of passengers",
+        "passengersHint": "Between 1 and 7.",
+        "flightNumber": "Flight number (optional)",
+        "flightNumberHint": "For example TK1234. The operations desk follows the flight; it is not linked to a real flight service.",
+        "meetingPlace": "Meeting place",
+        "meetingKind": {
+          "airport": "Airport",
+          "address": "Address"
+        },
+        "airport": "Airport",
+        "airportChoose": "Choose an airport",
+        "meetingAddress": "Meeting address",
+        "meetingAt": "Meeting date and time",
+        "meetingAtHint": "In Istanbul time; at least 2 hours from now.",
+        "destination": "Destination address",
+        "note": "Note (optional)",
+        "noteHint": "For example, meeting with a name sign. At most 500 characters."
       },
       "incidents": {
         "BREAKDOWN": "Breakdown",
@@ -790,7 +834,15 @@
         "service": "Choose a service.",
         "preferredDate": "Choose a valid day from today to a year ahead.",
         "generic": "The request could not be sent. Check the fields and try again.",
-        "unavailable": "The action could not be completed. Try again in a few seconds."
+        "unavailable": "The action could not be completed. Try again in a few seconds.",
+        "passengerName": "Write the passenger's name (at most 100 characters).",
+        "passengers": "Write a number of passengers between 1 and 7.",
+        "flightNumber": "The flight number should look like TK1234 (two characters, one to four digits).",
+        "meeting": "Choose or write the meeting place.",
+        "meetingAt": "Enter a valid time from at least 2 hours from now to a year ahead.",
+        "destination": "Write the destination address (at most 200 characters).",
+        "note": "The note can be at most 500 characters.",
+        "forbidden": "A VIP transfer can only be opened by companies with a VIP Mobilite contract."
       },
       "toast": {
         "created": "Your request was received: {number}.",
@@ -802,6 +854,20 @@
       "noVehicles": {
         "title": "No vehicles",
         "text": "You need a fleet vehicle in use to open a request."
+      },
+      "airports": {
+        "IST": "Istanbul Airport (IST)",
+        "SAW": "Sabiha Gökçen (SAW)",
+        "ESB": "Ankara Esenboğa (ESB)",
+        "ADB": "İzmir Adnan Menderes (ADB)",
+        "AYT": "Antalya (AYT)",
+        "BJV": "Milas-Bodrum (BJV)",
+        "DLM": "Dalaman (DLM)",
+        "ADA": "Adana Şakirpaşa (ADA)",
+        "GZT": "Gaziantep (GZT)",
+        "ASR": "Kayseri Erkilet (ASR)",
+        "TZX": "Trabzon (TZX)",
+        "SZF": "Samsun Çarşamba (SZF)"
       }
     }
   }

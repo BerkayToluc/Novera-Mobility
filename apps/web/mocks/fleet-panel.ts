@@ -3,7 +3,7 @@ import { normalizePlate } from "@/lib/admin-vehicles";
 import { normalizeSearch } from "@/lib/branch-detail";
 import { expenseSummary } from "./expenses";
 import { MODELS } from "./fleet";
-import { openRequestCount } from "./requests";
+import { hasMockVipContract, openRequestCount } from "./requests";
 import { invoiceSummary } from "./invoices";
 import { getMockCarReadings, getMockContract, listMockCompanyCars, listMockContracts, setMockCarAssignee } from "./admin-contracts";
 
@@ -128,6 +128,7 @@ export function fleetSummary(world_: string, companyId: string): FleetSummary {
     invoices: invoiceSummary(world_, companyId),
     expenses: expenseSummary(world_, companyId),
     requests: { open: openRequestCount(world_, companyId) },
+    hasVipContract: hasMockVipContract(world_, companyId),
     greenVehicles: cars.filter((c) => GREEN.has(c.model.slug)).length,
   };
 }

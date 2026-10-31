@@ -43,6 +43,8 @@ export async function createRequest(values: RequestFormValues): Promise<RequestC
       return refresh({ status: "ok", number: answer.data.number, similarOpen: answer.data.similarOpen });
     case "invalid":
       return { status: "invalid", fields: answer.fieldErrors };
+    case "forbidden":
+      return { status: "forbidden" };
     case "rate_limited":
       return { status: "rate_limited", retryAfter: answer.retryAfter };
     default:

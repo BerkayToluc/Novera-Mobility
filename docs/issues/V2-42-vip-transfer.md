@@ -16,10 +16,10 @@ VIP Mobilite'deki "Hızlı Transfer ve Şoför Koordinasyonu" ve "uçuş takibi"
 - **Ekranlar:** Filom talep formu ve detayı; panelde talepler listesinde tür süzgeci.
 
 ## Kabul kriterleri
-- [ ] VIP sözleşmesi olmayan şirkette `TRANSFER` 403 ve seçenek yok (test + e2e).
-- [ ] "Şoför atandı" adımına `assignee` olmadan geçilemez (test).
-- [ ] e2e: Yeşil Enerji Ltd. (VIP sözleşmeli) ile transfer talebi → panelde şoför ata → Filom'da görünür.
-- [ ] 375/1280 ekran görüntüsü; axe temiz.
+- [x] VIP sözleşmesi olmayan şirkette `TRANSFER` 403 ve seçenek yok (test + e2e). _`fleet-requests.integration.spec.ts`: sözleşmesi olmayan şirket hangi gövdeyi gönderirse göndersin 403 `FORBIDDEN`, bitmiş VIP sözleşmesi de saymaz, hiçbir şey yazılmaz. e2e: sözleşmesiz örnek şirkette formda yalnız üç seçenek ve listede "VIP transfer" zinciri yok; yönetici VIP sözleşmesi açınca belirir._
+- [x] "Şoför atandı" adımına `assignee` olmadan geçilemez (test). _Entegrasyon testi: `DRIVER_ASSIGNED`, `MET`, `COMPLETED` şoförsüz `422 assignee: REQUIRED` (boşluk da sayılmaz), hiçbir olay yazılmaz; şoför bir kez yazılınca sonraki adımlar onu korur, `MET`'te silmeye çalışmak reddedilir, iptal şoförsüz geçer. e2e: panelde şoförsüz kayıt hata verir._
+- [x] e2e: Yeşil Enerji Ltd. (VIP sözleşmeli) ile transfer talebi → panelde şoför ata → Filom'da görünür. _Yeşil Enerji Ltd. seed şirketidir, sample modda yoktur; e2e aynı akışı sample şirketle koşar: yönetici VIP Mobilite sözleşmesi açar → Filom'da transfer açılır (uçuş notu dahil) → panelde şoför atanır → Filom'da şoför ve adım görünür. Seed şirketiyle gerçek API'ye karşı tarayıcıda denenmedi._
+- [x] 375/1280 ekran görüntüsü; axe temiz. _Ekran görüntüsü artık istenmiyor; e2e mobil 375 ve masaüstü 1280'de koşar, her test axe ile biter._
 
 ## Etiketler
 `faz-10` `ozellik` `P2` `api` `web`

@@ -275,3 +275,91 @@ test("the screens are not there for who they are not for, and another company's 
   await expect(page.getByRole("heading", { level: 1, name: "Filom" })).toBeVisible();
   await expect(page.getByRole("table", { name: "Servis talepleri" })).toHaveCount(0);
 });
+
+// ---------- A VIP transfer (V2-42) ----------
+// The sample company has no VIP Mobilite contract until the administrator makes one, so the option is not there, and then it is. (The company in
+// the issue, Yeşil Enerji Ltd., is the seed's, which the sample mode does not have; its case is fleet-requests.integration.spec.ts.)
+const inDays = (days: number) => new Date(Date.now() + days * 86_400_000).toISOString().slice(0, 10);
+
+test("a company with no VIP Mobilite contract is not offered a transfer: no choice in the form and no chip in the list", async ({ page, context }) => {
+  await signInSample(context, "corporate");
+  await page.goto("/filom/talepler/yeni");
+  const form = page.getByRole("form", { name: "Yeni servis talebi" });
+  await expect(form.getByRole("radio")).toHaveCount(3);
+  await expect(form.getByRole("radio", { name: /VIP transfer/ })).toHaveCount(0);
+  await page.goto("/filom/talepler");
+  await expect(page.getByRole("navigation", { name: "Türe göre" }).getByRole("link", { name: "VIP transfer" })).toHaveCount(0);
+  // The panel's list has the kind for everybody.
+  await signInSample(context, "admin");
+  await page.goto("/yonetim/talepler");
+  await expect(page.getByRole("navigation", { name: "Türe göre" }).getByRole("link", { name: "VIP transfer" })).toBeVisible();
+});
+
+test("a transfer is asked for once the company has a VIP contract, a driver is assigned in the panel and the customer sees it", async ({ page, context }, testInfo) => {
+  test.slow();
+  await ownWorld(context, testInfo, "transfer");
+
+  // The administrator makes the VIP Mobilite contract for the sample company.
+  await signInSample(context, "admin");
+  await page.goto("/yonetim/sirketler/5d0c1c0e-6f3a-4a52-9c1e-0a1b2c3d4e01");
+  const contract = page.getByRole("form", { name: "Yeni sözleşme" });
+  await (await hydrated(contract.getByRole("button", { name: "Sözleşmeyi oluştur" }))).click();
+  await contract.getByLabel("Ürün").selectOption("vip-mobilite");
+  await contract.getByLabel("Teslim şehri").selectOption("İzmir");
+  await contract.getByLabel("Başlangıç günü").fill(inDays(-1));
+  await contract.getByLabel("Bitiş günü").fill(inDays(300));
+  await contract.getByLabel("Aylık bedel (₺)").fill("75000");
+  await contract.getByRole("button", { name: "Sözleşmeyi oluştur" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: /^SZL-\d{4}-\d{5}$/ })).toBeVisible();
+
+  // The customer is offered the transfer, with no car to choose.
+  await signInSample(context, "corporate");
+  await page.goto("/filom/talepler/yeni");
+  const form = page.getByRole("form", { name: "Yeni servis talebi" });
+  await (await hydrated(form.getByRole("radio", { name: /VIP transfer/ }))).check();
+  await expect(form.getByLabel("Araç", { exact: true })).toHaveCount(0);
+  await form.getByRole("button", { name: "Talebi gönder" }).click();
+  await expect(form.getByText("Yolcunun adını yazın (en çok 100 karakter).")).toBeVisible();
+  await expect(form.getByText("Yolcu sayısını 1 ile 7 arasında yazın.")).toBeVisible();
+  await expect(form.getByText("Karşılama yerini seçin ya da yazın.")).toBeVisible();
+  await expect(form.getByText("Varış adresini yazın (en çok 200 karakter).")).toBeVisible();
+
+  await form.getByLabel("Yolcu adı").fill("Ada Kaya");
+  await form.getByLabel("Yolcu sayısı").fill("3");
+  await form.getByLabel("Uçuş numarası (isteğe bağlı)").fill("tk 1234");
+  await form.getByRole("combobox", { name: "Havalimanı" }).selectOption("ADB");
+  await form.getByLabel("Karşılama tarihi ve saati").fill(`${inDays(3)}T09:30`);
+  await form.getByLabel("Varış adresi").fill("Alsancak, İzmir");
+  await form.getByRole("button", { name: "Talebi gönder" }).click();
+  const heading = page.getByRole("heading", { level: 1, name: /^TLP-\d{4}-\d{5}$/ });
+  await expect(heading).toBeVisible();
+  const number = (await heading.textContent())!.trim();
+  const facts = page.getByRole("region", { name: "Talep bilgileri" });
+  await expect(facts).toContainText("Ada Kaya · 3 yolcu");
+  await expect(facts).toContainText("TK1234 · Uçuş durumu operasyon masası tarafından izlenir.");
+  await expect(facts).toContainText("İzmir Adnan Menderes (ADB)");
+  await expect(facts).toContainText("Alsancak, İzmir");
+  await expect(facts).not.toContainText("Araç");
+
+  // In the panel: the driver is needed to move on; written down, the step is taken.
+  await signInSample(context, "admin");
+  await page.goto(`/yonetim/talepler/${number}`);
+  const move = page.getByRole("form", { name: "Talebi ilerlet" });
+  await (await hydrated(move.getByRole("button", { name: "Durumu kaydet" }))).click();
+  await move.getByLabel("Yeni durum").selectOption("DRIVER_ASSIGNED");
+  await move.getByRole("button", { name: "Durumu kaydet" }).click();
+  await expect(move.getByText("Bu adım için şoförün adını, telefonunu ve aracını yazın.")).toBeVisible();
+  await move.getByLabel("Atanan (çekici, servis, şoför)").fill("Mehmet Usta, 0532 000 00 02, 35 VIP 001 siyah Mercedes V-Class");
+  await move.getByRole("button", { name: "Durumu kaydet" }).click();
+  await expect(page.getByText(`${number} için durum "Şoför atandı" yapıldı.`)).toBeVisible();
+  await expect(move.getByLabel("Yeni durum").locator("option")).toHaveText(["Durum seçin", "Karşılandı", "Tamamlandı", "İptal edildi"]);
+
+  // The customer sees the driver and the step.
+  await signInSample(context, "corporate");
+  await page.goto(`/filom/talepler/${number}`);
+  await expect(page.getByRole("region", { name: "Talep bilgileri" })).toContainText("Mehmet Usta");
+  await expect(page.getByRole("list", { name: "Talebin adımları" }).getByRole("listitem").last()).toContainText("Şoför atandı");
+  await page.goto("/filom/talepler");
+  await expect(page.getByRole("navigation", { name: "Türe göre" }).getByRole("link", { name: "VIP transfer" })).toBeVisible();
+  await expect(page.getByRole("table", { name: "Servis talepleri" }).getByRole("row").filter({ hasText: "VIP transfer" })).toHaveCount(1);
+});
