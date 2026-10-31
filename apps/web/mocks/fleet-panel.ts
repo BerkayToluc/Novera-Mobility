@@ -3,6 +3,7 @@ import { normalizePlate } from "@/lib/admin-vehicles";
 import { normalizeSearch } from "@/lib/branch-detail";
 import { expenseSummary } from "./expenses";
 import { MODELS } from "./fleet";
+import { openRequestCount } from "./requests";
 import { invoiceSummary } from "./invoices";
 import { getMockCarReadings, getMockContract, listMockCompanyCars, listMockContracts, setMockCarAssignee } from "./admin-contracts";
 
@@ -126,6 +127,7 @@ export function fleetSummary(world_: string, companyId: string): FleetSummary {
     maintenanceDue: cars.filter((c) => within(c.nextMaintenanceOn, 30) || within(c.inspectionDueOn, 30)).length,
     invoices: invoiceSummary(world_, companyId),
     expenses: expenseSummary(world_, companyId),
+    requests: { open: openRequestCount(world_, companyId) },
     greenVehicles: cars.filter((c) => GREEN.has(c.model.slug)).length,
   };
 }

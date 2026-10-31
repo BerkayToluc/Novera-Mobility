@@ -12,7 +12,8 @@
       "invoices": "Invoices",
       "expenses": "Expenses",
       "reports": "Reports",
-      "green": "Green Fleet"
+      "green": "Green Fleet",
+      "requests": "Requests"
     },
     "empty": {
       "title": "My fleet",
@@ -52,6 +53,11 @@
         "open": "Open expenses",
         "openTotal": "Total {total}",
         "openList": "Open expenses"
+      },
+      "requests": {
+        "title": "Requests",
+        "open": "Open requests",
+        "openList": "Open requests"
       }
     },
     "vehicles": {
@@ -592,6 +598,210 @@
         "distance": "Distance",
         "sockets": "Sockets",
         "status": "Status"
+      }
+    },
+    "requests": {
+      "title": "Requests",
+      "intro": "Open roadside assistance, replacement vehicle and maintenance or tyre requests here, and follow them step by step.",
+      "newButton": "New request",
+      "tableCaption": "Service requests",
+      "retry": "Try again",
+      "typeFilterLabel": "By type",
+      "statusFilterLabel": "By status",
+      "filterAll": "All",
+      "filterOpen": "Open requests",
+      "apply": "Apply",
+      "columns": {
+        "number": "Number",
+        "type": "Type",
+        "vehicle": "Vehicle",
+        "status": "Status",
+        "updated": "Last update"
+      },
+      "type": {
+        "ROADSIDE": "Roadside assistance",
+        "REPLACEMENT_VEHICLE": "Replacement vehicle",
+        "MAINTENANCE": "Maintenance and tyres",
+        "TRANSFER": "VIP transfer"
+      },
+      "status": {
+        "RECEIVED": "Received",
+        "DISPATCHED": "Dispatched",
+        "EN_ROUTE": "On the way",
+        "APPROVED": "Approved",
+        "DELIVERED": "Delivered",
+        "RETURNED": "Returned",
+        "SCHEDULED": "Appointment made",
+        "IN_SERVICE": "In service",
+        "DRIVER_ASSIGNED": "Driver assigned",
+        "MET": "Met",
+        "COMPLETED": "Completed",
+        "CANCELLED": "Cancelled"
+      },
+      "emptyTitle": "You have no requests yet",
+      "emptyText": "You can open a new request for roadside assistance, a replacement vehicle or maintenance.",
+      "emptyFilteredTitle": "No request matches this filter",
+      "emptyFilteredText": "Try removing the filters.",
+      "loadErrorTitle": "Requests could not be loaded",
+      "loadErrorText": "Try again in a few seconds.",
+      "help": {
+        "title": "Need help?",
+        "desk": "24/7 Operations Desk:",
+        "emergency": "If anyone's safety is at risk, do not fill in a form: call 112 at once."
+      },
+      "detail": {
+        "metaTitle": "Request",
+        "intro": "{type} request",
+        "back": "Back to requests",
+        "retry": "Try again",
+        "loadErrorTitle": "The request could not be loaded",
+        "loadErrorText": "Try again in a few seconds.",
+        "factsTitle": "Request details",
+        "timelineTitle": "Timeline",
+        "assignee": "Assigned",
+        "noAssignee": "Nobody has been assigned yet",
+        "opened": "Opened",
+        "vehicle": "Vehicle"
+      },
+      "facts": {
+        "incident": "Incident",
+        "location": "Location",
+        "description": "Description",
+        "deliveryAddress": "Delivery address",
+        "deliveryDate": "Delivery day",
+        "duration": "Estimated duration",
+        "durationValue": "{count} days",
+        "service": "Service",
+        "preferredDate": "Preferred day",
+        "valet": "Valet",
+        "valetYes": "Yes, collect it with a valet",
+        "valetNo": "No, the vehicle will be brought in",
+        "pickupAddress": "Address to collect from",
+        "position": "Position: {latitude}, {longitude}",
+        "none": "—"
+      },
+      "incidents": {
+        "BREAKDOWN": "Breakdown",
+        "ACCIDENT": "Accident",
+        "TIRE": "Tyre",
+        "FUEL_OR_CHARGE": "Fuel or charge"
+      },
+      "services": {
+        "PERIODIC": "Periodic maintenance",
+        "SUMMER_TIRES": "Summer tyres",
+        "WINTER_TIRES": "Winter tyres",
+        "INSPECTION": "Vehicle inspection"
+      },
+      "timeline": {
+        "label": "Steps of the request",
+        "company": "Your company",
+        "novera": "Novera"
+      },
+      "cancel": {
+        "title": "Cancel the request",
+        "text": "You can cancel the request because nobody has taken it up yet. Once it is taken up, call the operations desk to cancel.",
+        "button": "Cancel the request",
+        "toast": "Request {number} was cancelled.",
+        "dialog": {
+          "title": "Cancel {number}?",
+          "text": "A cancelled request cannot be reopened; open a new one if you need to.",
+          "confirm": "Cancel the request",
+          "keep": "Keep it"
+        },
+        "errors": {
+          "notAllowed": "The request has been taken up in the meantime and can no longer be cancelled. Call the operations desk.",
+          "notFound": "This request no longer exists.",
+          "unavailable": "The action could not be completed. Try again in a few seconds."
+        }
+      },
+      "vehicleSection": {
+        "title": "Requests for this vehicle",
+        "empty": "There are no requests for this vehicle yet.",
+        "new": "Open a request for this vehicle",
+        "all": "All requests"
+      }
+    },
+    "requestForm": {
+      "label": "New service request",
+      "type": {
+        "legend": "Type of request",
+        "ROADSIDE": {
+          "title": "Roadside assistance",
+          "text": "Breakdown, accident, tyre or fuel/charge: a tow and help are sent."
+        },
+        "REPLACEMENT_VEHICLE": {
+          "title": "Replacement vehicle",
+          "text": "A spare vehicle while yours is in service or cannot be used."
+        },
+        "MAINTENANCE": {
+          "title": "Maintenance and tyres",
+          "text": "Periodic maintenance, summer/winter tyres or an inspection appointment."
+        }
+      },
+      "fields": {
+        "vehicle": "Vehicle",
+        "vehicleChoose": "Choose a vehicle",
+        "incident": "Type of incident",
+        "incidentChoose": "Choose the incident",
+        "address": "Address",
+        "roadsideAddressHint": "The address or place where the vehicle is. You can leave it empty if you use your location.",
+        "description": "Description (optional)",
+        "descriptionHint": "Say briefly what happened. At most 500 characters.",
+        "deliveryAddress": "Delivery address",
+        "deliveryDate": "Delivery day",
+        "durationDays": "Estimated duration (days)",
+        "durationDaysHint": "Between 1 and 90.",
+        "service": "Service",
+        "serviceChoose": "Choose the service",
+        "preferredDate": "Preferred day",
+        "valet": "Collect my vehicle with a valet",
+        "pickupAddress": "Address to collect from",
+        "pickupAddressOptional": "Address (optional)",
+        "pickupHint": "You can leave it empty if you do not want a valet."
+      },
+      "incidents": {
+        "BREAKDOWN": "Breakdown",
+        "ACCIDENT": "Accident",
+        "TIRE": "Tyre",
+        "FUEL_OR_CHARGE": "Fuel or charge"
+      },
+      "services": {
+        "PERIODIC": "Periodic maintenance",
+        "SUMMER_TIRES": "Summer tyres",
+        "WINTER_TIRES": "Winter tyres",
+        "INSPECTION": "Vehicle inspection"
+      },
+      "location": {
+        "button": "Use my location",
+        "asking": "Asking for your location…",
+        "got": "Location found: {latitude}, {longitude}",
+        "forget": "Remove location",
+        "denied": "The location could not be had or was not allowed; that is fine, just fill in the address field above."
+      },
+      "errors": {
+        "type": "Choose a type of request.",
+        "fleetVehicleId": "Choose a vehicle.",
+        "incident": "Choose the incident.",
+        "location": "Say where the vehicle is, or use your location.",
+        "address": "Write a valid address (at most 200 characters).",
+        "description": "The description can be at most 500 characters.",
+        "date": "Choose a valid day from today to a year ahead.",
+        "durationDays": "Write a duration between 1 and 90 days.",
+        "service": "Choose a service.",
+        "preferredDate": "Choose a valid day from today to a year ahead.",
+        "generic": "The request could not be sent. Check the fields and try again.",
+        "unavailable": "The action could not be completed. Try again in a few seconds."
+      },
+      "toast": {
+        "created": "Your request was received: {number}.",
+        "createdWithOpen": "Your request was received: {number}. There is another open request of this kind for this vehicle: {others}."
+      },
+      "send": "Send the request",
+      "sending": "Sending…",
+      "back": "Cancel",
+      "noVehicles": {
+        "title": "No vehicles",
+        "text": "You need a fleet vehicle in use to open a request."
       }
     }
   }

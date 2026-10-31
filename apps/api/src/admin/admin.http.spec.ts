@@ -1173,6 +1173,67 @@ describe('administration over HTTP', () => {
     });
   });
 
+  // The door and the input of the service request endpoints (V2-41). What they do against a database is in
+  // ../fleet/fleet-requests.integration.spec.ts; a request turned away is turned away before any database call.
+  describe('service requests: the door and the input (V2-41)', () => {
+    const NUMBER = 'TLP-2026-00001';
+    const routes: Array<[string, string]> = [
+      ['GET', '/admin/requests'],
+      ['GET', `/admin/requests/${NUMBER}`],
+      ['POST', `/admin/requests/${NUMBER}/status`],
+    ];
+    const withBody = (method: string) => (method === 'POST' ? { body: {} } : {});
+
+    it('no session is 401 UNAUTHENTICATED on every route', async () => {
+      for (const [method, path] of routes) {
+        const response = await call(method, path, withBody(method));
+        expect([method, path, response.status]).toEqual([method, path, 401]);
+        expect((await response.json()).code).toBe('UNAUTHENTICATED');
+      }
+    });
+
+    it('a customer, a corporate one included, is 403 FORBIDDEN on every route', async () => {
+      const { cookie } = await signedIn('CUSTOMER');
+      for (const [method, path] of routes) {
+        const response = await call(method, path, { cookie, ...withBody(method) });
+        expect([method, path, response.status]).toEqual([method, path, 403]);
+        expect((await response.json()).code).toBe('FORBIDDEN');
+      }
+    });
+
+    it('a move needs a step that exists, and a note and an assignee that are short enough', async () => {
+      const { cookie } = await signedIn('ADMIN');
+      const empty = await call('POST', `/admin/requests/${NUMBER}/status`, { cookie, body: {} });
+      expect(empty.status).toBe(422);
+      expect((await empty.json()).fieldErrors).toEqual({ status: 'REQUIRED' });
+      const wrong = await call('POST', `/admin/requests/${NUMBER}/status`, { cookie, body: { status: 'LOST', note: 'n'.repeat(501), assignee: 'a'.repeat(201) } });
+      expect((await wrong.json()).fieldErrors).toEqual({ status: 'INVALID_FORMAT', note: 'TOO_LONG', assignee: 'TOO_LONG' });
+    });
+
+    it('a list asked for in a way that makes no sense is 422; a number that cannot be one is 404', async () => {
+      const { cookie } = await signedIn('ADMIN');
+      for (const [query, field] of [
+        ['pageSize=101', 'pageSize'],
+        ['sort=type:asc', 'sort'],
+        ['type=WASH', 'type'],
+        ['status=LATE', 'status'],
+        ['open=maybe', 'open'],
+        ['company=x', 'company'],
+        ['vehicle=x', 'vehicle'],
+        ['q=' + 'x'.repeat(101), 'q'],
+      ] as const) {
+        const response = await call('GET', `/admin/requests?${query}`, { cookie });
+        expect([query, response.status]).toEqual([query, 422]);
+        expect(Object.keys((await response.json()).fieldErrors)).toEqual([field]);
+      }
+      for (const [method, path] of [['GET', '/admin/requests/nope'], ['POST', '/admin/requests/nope/status']] as const) {
+        const response = await call(method, path, { cookie, body: method === 'POST' ? { status: 'DISPATCHED' } : undefined });
+        expect([method, response.status]).toEqual([method, 404]);
+        expect((await response.json()).code).toBe('NOT_FOUND');
+      }
+    });
+  });
+
   describe('the audit log', () => {
     it('a change is logged with the names of its fields and none of the values', async () => {
       const { cookie, id } = await signedIn('ADMIN');

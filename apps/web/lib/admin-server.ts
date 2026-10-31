@@ -11,11 +11,12 @@ import { BRANCH_API_FILTERS, type AdminBranchDetail, type AdminBranchPage } from
 import { PROMO_API_FILTERS, type PromoCode, type PromoCodePage } from "./admin-promo";
 import type { AdminCompanyDetail, AdminCompanyPage } from "./admin-companies";
 import { AUDIT_API_FILTERS, validActor, type AdminAuditPage, type AuditFilter } from "./admin-audit";
+import { requestApiFilters, type RequestFilter, type ServiceRequestDetail, type ServiceRequestPage } from "./requests";
 import { EXPENSE_API_FILTERS, type ExpenseFilter, type ExpenseStatus, type ExpenseType, type FleetExpensePage } from "./expenses";
 import { INVOICE_API_FILTERS, type Invoice, type InvoiceFilter, type InvoicePage } from "./invoices";
 import { USER_API_FILTERS, type AdminUserDetail, type AdminUserPage, type UserFilter } from "./admin-users";
 import type { FleetContract, FleetContractDetail } from "./admin-contracts";
-import { fetchAdminContract, fetchAdminExpenses, fetchAdminInvoice, fetchAdminInvoices, fetchCompanyContracts, fetchAdminAudit, fetchAdminUser, fetchAdminUsers, fetchAdminBranch, fetchAdminCompanies, fetchAdminCompany, fetchAdminBranches, fetchAdminExtra, fetchAdminExtras, fetchAdminModel, fetchAdminMessage, fetchAdminMessages, fetchAdminModels, fetchAdminQuote, fetchAdminQuotes, fetchAdminReservation, fetchAdminReservations, fetchAdminSummary, fetchAdminVehicle, fetchAdminVehicles, fetchModelClasses, fetchPromoCode, fetchPromoCodes, type AdminSummary } from "./api-admin";
+import { fetchAdminContract, fetchAdminExpenses, fetchAdminRequest, fetchAdminRequests, fetchAdminInvoice, fetchAdminInvoices, fetchCompanyContracts, fetchAdminAudit, fetchAdminUser, fetchAdminUsers, fetchAdminBranch, fetchAdminCompanies, fetchAdminCompany, fetchAdminBranches, fetchAdminExtra, fetchAdminExtras, fetchAdminModel, fetchAdminMessage, fetchAdminMessages, fetchAdminModels, fetchAdminQuote, fetchAdminQuotes, fetchAdminReservation, fetchAdminReservations, fetchAdminSummary, fetchAdminVehicle, fetchAdminVehicles, fetchModelClasses, fetchPromoCode, fetchPromoCodes, type AdminSummary } from "./api-admin";
 import { isMockMode } from "./mode";
 import { mockWorld } from "./mock-world";
 import { normalizePromo } from "./promo-codes";
@@ -268,6 +269,21 @@ export async function getAdminExpenses(params: AdminListParams<ExpenseFilter>): 
     type: (params.filters.tur as ExpenseType | undefined) ?? null,
     status: (params.filters.durum as ExpenseStatus | undefined) ?? null,
   });
+}
+
+export async function getAdminRequests(params: AdminListParams<RequestFilter>): Promise<ServiceRequestPage> {
+  if (!isMockMode()) {
+    const query = toApiQuery({ ...params, filters: {} });
+    for (const [name, value] of Object.entries(requestApiFilters(params.filters))) query.set(name, String(value));
+    return fetchAdminRequests(query);
+  }
+  return (await import("@/mocks/requests")).listMockRequests(await mockWorld(), { page: params.page, pageSize: params.pageSize, sort: params.sort, filters: params.filters, q: params.q });
+}
+
+// `null` for a request that does not exist, or whose number cannot be one.
+export async function getAdminRequest(number: string): Promise<ServiceRequestDetail | null> {
+  if (!isMockMode()) return fetchAdminRequest(number);
+  return (await import("@/mocks/requests")).getMockRequest(await mockWorld(), number);
 }
 
 // A day that is not a real one, or a "who" that cannot be one, is left out, so a made-up address shows the log.

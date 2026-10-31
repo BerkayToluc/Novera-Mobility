@@ -9,7 +9,8 @@ import { StateMessage } from "@/components/ui/state-message";
 import { Link } from "@/i18n/navigation";
 import { currentTime } from "@/lib/clock";
 import { daysUntil, type FleetEmployee, type FleetVehicleDetail } from "@/lib/fleet-panel";
-import { getAssignableEmployees, getFleetVehicle } from "@/lib/fleet-server";
+import { getAssignableEmployees, getFleetRequests, getFleetVehicle } from "@/lib/fleet-server";
+import { requestTone, type ServiceRequestPage } from "@/lib/requests";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("FleetPanel.vehicle");
@@ -77,6 +78,10 @@ export default async function FleetVehiclePage({ params }: PageProps<"/[locale]/
     [t("facts.inspection"), due(vehicle.inspectionDueOn)],
     ...(vehicle.returnedAt ? ([[t("facts.returnedAt"), dateTime.format(new Date(vehicle.returnedAt))]] as Array<[string, string]>) : []),
   ];
+
+  // The latest requests for this car (V2-41). They are a convenience: if they cannot be loaded the rest of the page still shows.
+  const requestsT = await getTranslations("FleetPanel.requests");
+  const requests: ServiceRequestPage | null = await getFleetRequests({ page: 1, pageSize: 5, sort: { key: "createdAt", dir: "desc" }, q: "", filters: {} }, vehicle.id).catch(() => null);
 
   return (
     <>
@@ -160,6 +165,41 @@ export default async function FleetVehiclePage({ params }: PageProps<"/[locale]/
           </ul>
         )}
       </section>
+
+      {requests && (
+        <section aria-labelledby="vehicle-requests" className="flex max-w-2xl flex-col gap-3 border-t border-border pt-6">
+          <h2 id="vehicle-requests" className="text-h3 text-fg">
+            {requestsT("vehicleSection.title")}
+          </h2>
+          {requests.items.length === 0 ? (
+            <p className="rounded-card border border-border p-4 text-body text-fg-muted">{requestsT("vehicleSection.empty")}</p>
+          ) : (
+            <ul className="flex flex-col gap-2">
+              {requests.items.map((entry) => (
+                <li key={entry.id} className="flex flex-wrap items-center justify-between gap-2 rounded-card border border-border p-3">
+                  <div className="flex flex-col">
+                    <Link href={{ pathname: "/filom/talepler/[number]", params: { number: entry.number } }} className="inline-flex min-h-11 items-center text-label text-link underline underline-offset-4">
+                      {entry.number}
+                    </Link>
+                    <span className="text-small text-fg-muted">{requestsT(`type.${entry.type}`)}</span>
+                  </div>
+                  <StatusChip tone={requestTone(entry.type, entry.status)}>{requestsT(`status.${entry.status}`)}</StatusChip>
+                </li>
+              ))}
+            </ul>
+          )}
+          <div className="flex flex-wrap gap-3">
+            <Button asChild variant="outline">
+              <Link href={{ pathname: "/filom/talepler/yeni", query: { arac: vehicle.id } }}>{requestsT("vehicleSection.new")}</Link>
+            </Button>
+            {requests.total > requests.items.length && (
+              <Button asChild variant="ghost">
+                <Link href="/filom/talepler">{requestsT("vehicleSection.all")}</Link>
+              </Button>
+            )}
+          </div>
+        </section>
+      )}
     </>
   );
 }

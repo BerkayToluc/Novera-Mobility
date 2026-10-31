@@ -16,6 +16,7 @@ import { FleetExpensesService } from './fleet-expenses.service.js';
 import { FleetInvoicesService } from './fleet-invoices.service.js';
 import { FleetGreenService } from './fleet-green.service.js';
 import { FleetReportsService } from './fleet-reports.service.js';
+import { FleetRequestsService } from './fleet-requests.service.js';
 import { FleetSummaryService } from './fleet-summary.service.js';
 import { FleetVehiclesService } from './fleet-vehicles.service.js';
 import { FleetModule } from './fleet.module.js';
@@ -55,6 +56,10 @@ const ROUTES: Array<[string, string, unknown?]> = [
   ['GET', '/fleet/reports?from=2026-09&to=2026-10'],
   ['GET', '/fleet/green?from=2026-08&to=2026-10'],
   ['GET', '/fleet/vehicles/34-ABC-123/charging-stations?limit=5'],
+  ['GET', '/fleet/requests'],
+  ['GET', '/fleet/requests/TLP-2026-00001'],
+  ['POST', '/fleet/requests', { type: 'ROADSIDE', fleetVehicleId: ID, details: { incident: 'TIRE', location: { address: 'Gizli Sokak 7' } } }],
+  ['POST', '/fleet/requests/TLP-2026-00001/cancel', {}],
   ['GET', '/fleet/expenses'],
   ['GET', `/fleet/expenses/${ID}`],
   ['PATCH', `/fleet/expenses/${ID}`, { updatedAt: '2026-10-31T10:00:00.000Z', status: 'DISPUTED' }],
@@ -73,6 +78,8 @@ describe('the fleet panel over HTTP (V2-35)', () => {
       .useValue(stub(['list', 'get']))
       .overrideProvider(FleetContractsService)
       .useValue(stub(['list', 'get', 'requestRenewal']))
+      .overrideProvider(FleetRequestsService)
+      .useValue({ ...stub(['list', 'get', 'cancel']), create: async () => ({ number: 'TLP-2026-00001' }) })
       .overrideProvider(FleetGreenService)
       .useValue(stub(['green', 'stations']))
       .overrideProvider(FleetReportsService)
@@ -161,7 +168,7 @@ describe('the fleet panel over HTTP (V2-35)', () => {
     const { cookie } = await signedIn('corporate');
     for (const [method, path, body] of ROUTES) {
       const response = await call(method, path, { cookie, body });
-      expect([method, path, response.status]).toEqual([method, path, method === 'POST' && !path.endsWith('/end') && !path.endsWith('/reflect') ? 201 : 200]);
+      expect([method, path, response.status]).toEqual([method, path, method === 'POST' && !path.endsWith('/end') && !path.endsWith('/reflect') && !path.endsWith('/cancel') ? 201 : 200]);
     }
   });
 
@@ -169,16 +176,35 @@ describe('the fleet panel over HTTP (V2-35)', () => {
     const { cookie, id } = await signedIn('corporate');
     for (const [method, path, body] of ROUTES) await call(method, path, { cookie, body });
 
-    expect(fake.auditLogs).toHaveLength(7);
+    expect(fake.auditLogs).toHaveLength(9);
     expect(fake.auditLogs[0]).toMatchObject({ actorId: id, companyId: COMPANY, action: 'fleet-employee.create', entity: 'employee', entityId: ID, fields: ['firstName', 'lastName', 'email'] });
     expect(fake.auditLogs[1]).toMatchObject({ actorId: id, companyId: COMPANY, action: 'fleet-employee.update', entityId: ID, fields: ['updatedAt', 'department'] });
     expect(fake.auditLogs[2]).toMatchObject({ actorId: id, companyId: COMPANY, action: 'fleet-assignment.create', entity: 'assignment', entityId: ID, fields: ['fleetVehicleId', 'employeeId', 'note'] });
     expect(fake.auditLogs[3]).toMatchObject({ actorId: id, companyId: COMPANY, action: 'fleet-assignment.end', entityId: ID, fields: [] });
     expect(fake.auditLogs[4]).toMatchObject({ actorId: id, companyId: COMPANY, action: 'fleet-contract.renewal-request', entity: 'contract', entityId: 'SZL-2026-00001', fields: ['notes'] });
-    expect(fake.auditLogs[5]).toMatchObject({ actorId: id, companyId: COMPANY, action: 'fleet-expense.update', entity: 'expense', entityId: ID, fields: ['updatedAt', 'status'] });
-    expect(fake.auditLogs[6]).toMatchObject({ actorId: id, companyId: COMPANY, action: 'fleet-expense.reflect', entity: 'expense', entityId: null, fields: ['ids'] });
+    expect(fake.auditLogs[5]).toMatchObject({ actorId: id, companyId: COMPANY, action: 'fleet-request.create', entity: 'request', entityId: 'TLP-2026-00001', fields: ['type', 'fleetVehicleId', 'details'] });
+    expect(fake.auditLogs[6]).toMatchObject({ actorId: id, companyId: COMPANY, action: 'fleet-request.cancel', entity: 'request', entityId: 'TLP-2026-00001', fields: [] });
+    expect(fake.auditLogs[7]).toMatchObject({ actorId: id, companyId: COMPANY, action: 'fleet-expense.update', entity: 'expense', entityId: ID, fields: ['updatedAt', 'status'] });
+    expect(fake.auditLogs[8]).toMatchObject({ actorId: id, companyId: COMPANY, action: 'fleet-expense.reflect', entity: 'expense', entityId: null, fields: ['ids'] });
     const written = JSON.stringify(fake.auditLogs);
-    for (const secret of ['ada@example.test', 'Ada', 'Kaya', 'Satış', 'Lütfen arayın']) expect(written).not.toContain(secret);
+    for (const secret of ['ada@example.test', 'Ada', 'Kaya', 'Satış', 'Lütfen arayın', 'Gizli Sokak']) expect(written).not.toContain(secret);
+  });
+
+  it('a company may make 20 service requests an hour, whichever of its accounts makes them; the 21st is 429', async () => {
+    const first = await signedIn('corporate');
+    const second = await signedIn('corporate');
+    // Their own company, so what the other tests in this file have already made does not count against it.
+    const SHARED = '5d0c1c0e-6f3a-4a52-9c1e-0a1b2c3d4e99';
+    for (const account of [first, second]) fake.users.find((user) => user.id === account.id)!.companyId = SHARED;
+    const make = (cookie: string) => call('POST', '/fleet/requests', { cookie, body: { type: 'ROADSIDE', fleetVehicleId: ID, details: {} } });
+    for (let index = 0; index < 12; index += 1) expect((await make(first.cookie)).status).toBe(201);
+    for (let index = 0; index < 8; index += 1) expect((await make(second.cookie)).status).toBe(201);
+    const refused = await make(first.cookie);
+    expect(refused.status).toBe(429);
+    expect((await refused.json()).code).toBe('RATE_LIMITED');
+    expect(refused.headers.get('retry-after')).toBeTruthy();
+    // Only making them is limited: looking at them is not.
+    expect((await call('GET', '/fleet/requests', { cookie: first.cookie })).status).toBe(200);
   });
 
   it('counts the account, not the address, and refuses the 121st request in a minute with 429', async () => {

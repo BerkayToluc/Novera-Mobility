@@ -3795,6 +3795,258 @@ paths:
         "422": { $ref: "#/components/responses/ValidationFailed" }
         "429": { $ref: "#/components/responses/TooManyRequests" }
 
+  /fleet/requests:
+    get:
+      tags: [fleet]
+      summary: Servis talepleri
+      description: |
+        Sayfalı liste, varsayılan olarak en yeni talep üstte. Yalnızca **kurumsal hesabın kendi şirketinin** talepleri görünür; başka şirketin talebi `404` döner (ADR-25). Sınır: hesap başına dakikada 120.
+      security:
+        - cookieAuth: []
+      parameters:
+        - { name: page, in: query, schema: { type: integer, minimum: 1, default: 1 } }
+        - { name: pageSize, in: query, schema: { type: integer, minimum: 1, maximum: 100, default: 20 } }
+        - { name: sort, in: query, schema: { type: string, example: "createdAt:desc" }, description: "`createdAt` ya da `updatedAt`; `:asc|desc`. Varsayılan en yeni talep üstte." }
+        - { name: type, in: query, schema: { $ref: "#/components/schemas/ServiceRequestType" } }
+        - { name: status, in: query, schema: { $ref: "#/components/schemas/ServiceRequestStatus" } }
+        - { name: open, in: query, description: "`true`: henüz bitmemiş (türünün son adımına ulaşmamış ve iptal edilmemiş), `false`: bitmiş.", schema: { type: boolean } }
+        - { name: vehicle, in: query, schema: { type: string, format: uuid } }
+      responses:
+        "200":
+          description: Bir sayfa talep
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ServiceRequestPage" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Kurumsal hesap değil ya da bir şirkete bağlı değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+    post:
+      tags: [fleet]
+      summary: Servis talebi aç
+      description: |
+        Yol yardım (`ROADSIDE`), ikame araç (`REPLACEMENT_VEHICLE`) ya da bakım ve lastik (`MAINTENANCE`) talebi açar; talep `RECEIVED` olarak başlar ve zaman çizelgesinin ilk satırı yazılır. `details` türe göre doğrulanır ve hatalı alan **noktalı adla** söylenir (`422`, `fieldErrors: { "details.location": "REQUIRED" }`). `fleetVehicleId` şirketin kullanımdaki bir aracı olmalıdır; başka şirketin aracı, iade edilmiş araç ve olmayan araç aynı cevabı verir (`fleetVehicleId: UNKNOWN_REFERENCE`). `TRANSFER` türü bu sürümde açılamaz (`type: NOT_ALLOWED`; V2-42).
+        Aynı araçta aynı türde açık başka talep varsa **engel değildir**: cevaptaki `similarOpen` numaralarını söyler. **Şirket başına saatte en çok 20 talep** (`429`, şirketin hesapları tek sayacı paylaşır), üstüne hesap başına dakikada 120. İşlem kaydı: `fleet-request.create` (kayıt kimliği talep numarası, yalnız alan adları).
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ServiceRequestCreate" }
+      responses:
+        "201":
+          description: Açılan talep
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ServiceRequestCreated" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Kurumsal hesap değil ya da bir şirkete bağlı değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "415": { description: JSON olmayan gövde (`BAD_REQUEST`) }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
+  /fleet/requests/{number}:
+    parameters:
+      - { name: number, in: path, required: true, description: "Talep numarası (`TLP-2026-00001`); büyük/küçük harf fark etmez.", schema: { type: string, example: TLP-2026-00001 } }
+    get:
+      tags: [fleet]
+      summary: Bir servis talebi
+      description: |
+        Ayrıntılar, zaman çizelgesi (`events`: adım, not, an ve işlemi şirketin mi Novera'nın mı yaptığı; kimsenin adı yok), atanan kişi bilgisi. `canCancel` yalnızca `RECEIVED` durumundaki talepte doğrudur. Başka şirketin talebi `404`.
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Talep
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ServiceRequestDetail" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Kurumsal hesap değil ya da bir şirkete bağlı değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: Böyle bir talep yok ya da başka şirketin (`NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
+  /fleet/requests/{number}/cancel:
+    parameters:
+      - { name: number, in: path, required: true, schema: { type: string, example: TLP-2026-00001 } }
+    post:
+      tags: [fleet]
+      summary: Talebi iptal et
+      description: |
+        Müşteri yalnızca henüz kimsenin ele almadığı (`RECEIVED`) talebi iptal edebilir; başka durumda `409 INVALID_TRANSITION` ve hiçbir şey yazılmaz. Satır kilitlenir: iptal ile Novera'nın ilk hamlesi sıraya girer, ikincisi reddedilir. İşlem kaydı: `fleet-request.cancel`.
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: İptal edilen talep
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ServiceRequestDetail" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Kurumsal hesap değil ya da bir şirkete bağlı değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: Böyle bir talep yok ya da başka şirketin (`NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "409":
+          description: Talep artık iptal edilemez (`INVALID_TRANSITION`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
+  /admin/requests:
+    get:
+      tags: [admin]
+      summary: Servis talepleri
+      description: |
+        Bütün şirketlerin talepleri, sayfalı, varsayılan olarak en yeni üstte. `q` talep numarasında, plakada ve şirket adında arar (büyük/küçük harf fark etmez); `company` şirkete göre süzer. `open=true` Özet'teki "açık servis talebi" kartının saydığı kuraldır.
+      security:
+        - cookieAuth: []
+      parameters:
+        - { name: page, in: query, schema: { type: integer, minimum: 1, default: 1 } }
+        - { name: pageSize, in: query, schema: { type: integer, minimum: 1, maximum: 100, default: 20 } }
+        - { name: sort, in: query, schema: { type: string, example: "createdAt:desc" }, description: "`createdAt` ya da `updatedAt`; `:asc|desc`. Varsayılan en yeni talep üstte." }
+        - { name: type, in: query, schema: { $ref: "#/components/schemas/ServiceRequestType" } }
+        - { name: status, in: query, schema: { $ref: "#/components/schemas/ServiceRequestStatus" } }
+        - { name: open, in: query, description: "`true`: henüz bitmemiş (türünün son adımına ulaşmamış ve iptal edilmemiş), `false`: bitmiş.", schema: { type: boolean } }
+        - { name: vehicle, in: query, schema: { type: string, format: uuid } }
+        - { name: company, in: query, schema: { type: string, format: uuid } }
+        - { name: q, in: query, schema: { type: string, maxLength: 100 } }
+      responses:
+        "200":
+          description: Bir sayfa talep
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ServiceRequestPage" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Yönetici değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
+  /admin/requests/{number}:
+    parameters:
+      - { name: number, in: path, required: true, schema: { type: string, example: TLP-2026-00001 } }
+    get:
+      tags: [admin]
+      summary: Bir servis talebi
+      description: Ayrıntılar, zaman çizelgesi ve Novera'nın talebi hangi adımlara taşıyabildiği (`nextStatuses`).
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Talep
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ServiceRequestDetail" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Yönetici değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: Böyle bir talep yok (`NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
+  /admin/requests/{number}/status:
+    parameters:
+      - { name: number, in: path, required: true, schema: { type: string, example: TLP-2026-00001 } }
+    post:
+      tags: [admin]
+      summary: Talebi bir sonraki adıma taşı
+      description: |
+        Talebi **türünün daha sonraki bir adımına** ya da `CANCELLED`'a taşır (bir adım atlanabilir); geri, aynı adıma, başka türün adımına ve bitmiş talepten çıkış `409 INVALID_TRANSITION`. Adımlar: yol yardım `RECEIVED → DISPATCHED → EN_ROUTE → COMPLETED`; ikame araç `RECEIVED → APPROVED → DELIVERED → RETURNED`; bakım `RECEIVED → SCHEDULED → IN_SERVICE → COMPLETED`. Satır kilitlenir; aynı anda gelen iki hamleden ikincisi birincinin bıraktığı duruma göre değerlendirilir. `note` zaman çizelgesine yazılır (müşteri görür); `assignee` serbest metindir (çekici, servis, şoför): gönderilmezse korunur, boş gönderilirse silinir. İşlem kaydı: `request.status` (şirket satırda, yalnız alan adları).
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ServiceRequestStatusChange" }
+      responses:
+        "200":
+          description: Güncel talep
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ServiceRequestDetail" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Yönetici değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: Böyle bir talep yok (`NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "409":
+          description: Bu geçiş yapılamaz (`INVALID_TRANSITION`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "415": { description: JSON olmayan gövde (`BAD_REQUEST`) }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
   /admin/ping:
 
     get:
@@ -4404,9 +4656,9 @@ components:
           description: "Ele alınmamış iletişim mesajı (V2-32). Kişisel alanları saklama süresi dolduğu için silinmiş mesaj sayılmaz: yanıtlanacak bir şey kalmamıştır. `GET /admin/contact-messages?handled=false` aynı kuralla sayar."
         serviceRequests:
           type: integer
-          nullable: true
           minimum: 0
-          description: Açık servis talebi. Talepler gelene kadar (V2-41) `null`; ekran kartı gizler.
+          description: "Açık (türünün son adımına ulaşmamış, iptal edilmemiş) servis talebi (V2-41). `GET /admin/requests?open=true` aynı kuralla sayar."
+
 
     PromoCodeStatus:
       type: string
@@ -5188,7 +5440,7 @@ components:
 
     FleetSummary:
       type: object
-      required: [date, hasActiveContract, vehicles, contracts, maintenanceDue, invoices, expenses, greenVehicles]
+      required: [date, hasActiveContract, vehicles, contracts, maintenanceDue, invoices, expenses, greenVehicles, requests]
       properties:
         date: { type: string, format: date, description: Sayıların ait olduğu İstanbul günü. }
         hasActiveContract: { type: boolean, description: Etkin filo sözleşmesi olan şirkette Filom bağlantısı ve ekranları görünür. }
@@ -5226,6 +5478,11 @@ components:
                 count: { type: integer, minimum: 0, description: Ödenmemiş faturalar (gecikenler dahil). }
                 total: { type: integer, minimum: 0, description: Bunların toplamı, TRY kuruş. }
             overdue: { type: integer, minimum: 0, description: Vadesi geçmiş, ödenmemiş faturalar. }
+        requests:
+          type: object
+          required: [open]
+          properties:
+            open: { type: integer, minimum: 0, description: Henüz bitmemiş servis talepleri. }
         greenVehicles: { type: integer, minimum: 0, description: Kullanımdaki elektrikli ve hibrit araçlar; 0 ise Yeşil Filo menüde görünmez. }
         expenses:
           type: object
@@ -5512,6 +5769,136 @@ components:
                 longitude: { type: number }
         updatedAt: { type: string, format: date-time, description: Durumların ait olduğu 5 dakikalık dilimin başlangıcı. }
         items: { type: array, items: { $ref: "#/components/schemas/ChargingStation" } }
+
+    ServiceRequestType:
+      type: string
+      enum: [ROADSIDE, REPLACEMENT_VEHICLE, MAINTENANCE, TRANSFER]
+      description: Yol yardım, ikame araç, bakım ve lastik, VIP transfer (transfer V2-42'de açılır).
+
+    ServiceRequestStatus:
+      type: string
+      enum: [RECEIVED, DISPATCHED, EN_ROUTE, APPROVED, DELIVERED, RETURNED, SCHEDULED, IN_SERVICE, DRIVER_ASSIGNED, MET, COMPLETED, CANCELLED]
+      description: "Her türün kendi adımları vardır: yol yardım RECEIVED, DISPATCHED, EN_ROUTE, COMPLETED; ikame araç RECEIVED, APPROVED, DELIVERED, RETURNED; bakım RECEIVED, SCHEDULED, IN_SERVICE, COMPLETED; transfer RECEIVED, DRIVER_ASSIGNED, MET, COMPLETED. CANCELLED hepsinde var. Veritabanı da bunu CHECK ile ister."
+
+    RoadsideDetails:
+      type: object
+      required: [incident, location]
+      properties:
+        incident: { type: string, enum: [BREAKDOWN, ACCIDENT, TIRE, FUEL_OR_CHARGE], description: "Arıza, kaza, lastik, yakıt/şarj." }
+        location:
+          type: object
+          description: Adres, ya da telefondan alınan konum (enlem ve boylam birlikte), ya da ikisi; en az biri gerekir.
+          properties:
+            address: { type: string, nullable: true, maxLength: 200 }
+            latitude: { type: number, nullable: true, minimum: -90, maximum: 90 }
+            longitude: { type: number, nullable: true, minimum: -180, maximum: 180 }
+        description: { type: string, nullable: true, maxLength: 500 }
+
+    ReplacementVehicleDetails:
+      type: object
+      required: [address, date, durationDays]
+      properties:
+        address: { type: string, maxLength: 200, description: Teslim adresi. }
+        date: { type: string, format: date, description: "Teslim günü; bugünden (İstanbul) bir yıl sonrasına kadar." }
+        durationDays: { type: integer, minimum: 1, maximum: 90, description: Tahmini süre. }
+
+    MaintenanceDetails:
+      type: object
+      required: [service, preferredDate, valet]
+      properties:
+        service: { type: string, enum: [PERIODIC, SUMMER_TIRES, WINTER_TIRES, INSPECTION], description: "Periyodik bakım, yaz lastiği, kış lastiği, muayene." }
+        preferredDate: { type: string, format: date }
+        valet: { type: boolean, description: Vale ile alınsın mı. }
+        address: { type: string, nullable: true, maxLength: 200, description: Vale gelecekse zorunlu. }
+
+    ServiceRequest:
+      type: object
+      required: [id, number, company, type, status, open, vehicle, details, assignee, createdAt, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        number: { type: string, example: TLP-2026-00001 }
+        company:
+          type: object
+          required: [id, name]
+          properties:
+            id: { type: string, format: uuid }
+            name: { type: string }
+        type: { $ref: "#/components/schemas/ServiceRequestType" }
+        status: { $ref: "#/components/schemas/ServiceRequestStatus" }
+        open: { type: boolean, description: Henüz bitmemiş; türünden ve adımından hesaplanır, saklanmaz. }
+        vehicle:
+          type: object
+          nullable: true
+          required: [id, plate, model]
+          properties:
+            id: { type: string, format: uuid }
+            plate: { type: string }
+            model: { type: string }
+        details:
+          description: Türe göre ayrıntılar.
+          oneOf:
+            - { $ref: "#/components/schemas/RoadsideDetails" }
+            - { $ref: "#/components/schemas/ReplacementVehicleDetails" }
+            - { $ref: "#/components/schemas/MaintenanceDetails" }
+        assignee: { type: string, nullable: true, maxLength: 200, description: Novera'nın yazdığı çekici, servis ya da şoför bilgisi. }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+
+    ServiceRequestEvent:
+      type: object
+      required: [status, note, at, by]
+      properties:
+        status: { $ref: "#/components/schemas/ServiceRequestStatus" }
+        note: { type: string, nullable: true, maxLength: 500 }
+        at: { type: string, format: date-time }
+        by: { type: string, enum: [COMPANY, NOVERA], description: İşlemi şirketin kendi hesabı mı Novera mı yaptı. Kimsenin adı yoktur. }
+
+    ServiceRequestDetail:
+      allOf:
+        - { $ref: "#/components/schemas/ServiceRequest" }
+        - type: object
+          required: [events, canCancel, nextStatuses]
+          properties:
+            events: { type: array, items: { $ref: "#/components/schemas/ServiceRequestEvent" }, description: Zaman çizelgesi, eskiden yeniye. }
+            canCancel: { type: boolean, description: Müşteri talebi iptal edebilir (yalnız RECEIVED). }
+            nextStatuses: { type: array, items: { $ref: "#/components/schemas/ServiceRequestStatus" }, description: Novera'nın talebi taşıyabileceği adımlar; bitmiş talepte boş. }
+
+    ServiceRequestPage:
+      type: object
+      required: [items, total, page, pageSize]
+      properties:
+        items: { type: array, items: { $ref: "#/components/schemas/ServiceRequest" } }
+        total: { type: integer, minimum: 0 }
+        page: { type: integer }
+        pageSize: { type: integer }
+
+    ServiceRequestCreate:
+      type: object
+      required: [type, fleetVehicleId, details]
+      properties:
+        type: { $ref: "#/components/schemas/ServiceRequestType" }
+        fleetVehicleId: { type: string, format: uuid }
+        details:
+          oneOf:
+            - { $ref: "#/components/schemas/RoadsideDetails" }
+            - { $ref: "#/components/schemas/ReplacementVehicleDetails" }
+            - { $ref: "#/components/schemas/MaintenanceDetails" }
+
+    ServiceRequestCreated:
+      allOf:
+        - { $ref: "#/components/schemas/ServiceRequestDetail" }
+        - type: object
+          required: [similarOpen]
+          properties:
+            similarOpen: { type: array, items: { type: string, example: TLP-2026-00001 }, description: Aynı araçta aynı türde, hâlâ açık diğer taleplerin numaraları (uyarı, engel değil). }
+
+    ServiceRequestStatusChange:
+      type: object
+      required: [status]
+      properties:
+        status: { $ref: "#/components/schemas/ServiceRequestStatus" }
+        note: { type: string, nullable: true, maxLength: 500 }
+        assignee: { type: string, nullable: true, maxLength: 200, description: "Gönderilmezse korunur, boş gönderilirse silinir." }
 
     FleetContract:
       type: object

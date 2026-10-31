@@ -12,7 +12,8 @@
       "invoices": "Faturalar",
       "expenses": "Masraflar",
       "reports": "Raporlar",
-      "green": "Yeşil Filo"
+      "green": "Yeşil Filo",
+      "requests": "Talepler"
     },
     "empty": {
       "title": "Filom",
@@ -52,6 +53,11 @@
         "open": "Açık masraf",
         "openTotal": "Toplam {total}",
         "openList": "Masrafları aç"
+      },
+      "requests": {
+        "title": "Talepler",
+        "open": "Açık talep",
+        "openList": "Talepleri aç"
       }
     },
     "vehicles": {
@@ -592,6 +598,210 @@
         "distance": "Uzaklık",
         "sockets": "Soketler",
         "status": "Durum"
+      }
+    },
+    "requests": {
+      "title": "Talepler",
+      "intro": "Yol yardım, ikame araç ve bakım ya da lastik taleplerinizi buradan açar, adım adım izlersiniz.",
+      "newButton": "Yeni talep",
+      "tableCaption": "Servis talepleri",
+      "retry": "Tekrar dene",
+      "typeFilterLabel": "Türe göre",
+      "statusFilterLabel": "Duruma göre",
+      "filterAll": "Tümü",
+      "filterOpen": "Açık talepler",
+      "apply": "Uygula",
+      "columns": {
+        "number": "Numara",
+        "type": "Tür",
+        "vehicle": "Araç",
+        "status": "Durum",
+        "updated": "Son güncelleme"
+      },
+      "type": {
+        "ROADSIDE": "Yol yardım",
+        "REPLACEMENT_VEHICLE": "İkame araç",
+        "MAINTENANCE": "Bakım ve lastik",
+        "TRANSFER": "VIP transfer"
+      },
+      "status": {
+        "RECEIVED": "Alındı",
+        "DISPATCHED": "Yönlendirildi",
+        "EN_ROUTE": "Yolda",
+        "APPROVED": "Onaylandı",
+        "DELIVERED": "Teslim edildi",
+        "RETURNED": "İade alındı",
+        "SCHEDULED": "Randevu verildi",
+        "IN_SERVICE": "Serviste",
+        "DRIVER_ASSIGNED": "Şoför atandı",
+        "MET": "Karşılandı",
+        "COMPLETED": "Tamamlandı",
+        "CANCELLED": "İptal edildi"
+      },
+      "emptyTitle": "Henüz talebiniz yok",
+      "emptyText": "Yol yardım, ikame araç ya da bakım için yeni bir talep açabilirsiniz.",
+      "emptyFilteredTitle": "Bu süzgece uyan talep yok",
+      "emptyFilteredText": "Süzgeçleri kaldırmayı deneyin.",
+      "loadErrorTitle": "Talepler yüklenemedi",
+      "loadErrorText": "Birkaç saniye sonra yeniden deneyin.",
+      "help": {
+        "title": "Yardıma mı ihtiyacınız var?",
+        "desk": "7/24 Operasyon Masası:",
+        "emergency": "Can güvenliği söz konusuysa form doldurmayın, hemen 112'yi arayın."
+      },
+      "detail": {
+        "metaTitle": "Talep",
+        "intro": "{type} talebi",
+        "back": "Taleplere dön",
+        "retry": "Tekrar dene",
+        "loadErrorTitle": "Talep yüklenemedi",
+        "loadErrorText": "Birkaç saniye sonra yeniden deneyin.",
+        "factsTitle": "Talep bilgileri",
+        "timelineTitle": "Zaman çizelgesi",
+        "assignee": "Atanan",
+        "noAssignee": "Henüz atama yapılmadı",
+        "opened": "Açıldı",
+        "vehicle": "Araç"
+      },
+      "facts": {
+        "incident": "Olay",
+        "location": "Konum",
+        "description": "Açıklama",
+        "deliveryAddress": "Teslim adresi",
+        "deliveryDate": "Teslim günü",
+        "duration": "Tahmini süre",
+        "durationValue": "{count} gün",
+        "service": "İşlem",
+        "preferredDate": "Tercih edilen gün",
+        "valet": "Vale",
+        "valetYes": "Evet, vale ile alınsın",
+        "valetNo": "Hayır, araç servise getirilecek",
+        "pickupAddress": "Alınacak adres",
+        "position": "Konum: {latitude}, {longitude}",
+        "none": "—"
+      },
+      "incidents": {
+        "BREAKDOWN": "Arıza",
+        "ACCIDENT": "Kaza",
+        "TIRE": "Lastik",
+        "FUEL_OR_CHARGE": "Yakıt ya da şarj"
+      },
+      "services": {
+        "PERIODIC": "Periyodik bakım",
+        "SUMMER_TIRES": "Yaz lastiği",
+        "WINTER_TIRES": "Kış lastiği",
+        "INSPECTION": "Muayene"
+      },
+      "timeline": {
+        "label": "Talebin adımları",
+        "company": "Şirketiniz",
+        "novera": "Novera"
+      },
+      "cancel": {
+        "title": "Talebi iptal et",
+        "text": "Talebi henüz kimse ele almadığı için iptal edebilirsiniz. Ele alındıktan sonra iptal için operasyon masasını arayın.",
+        "button": "Talebi iptal et",
+        "toast": "{number} numaralı talep iptal edildi.",
+        "dialog": {
+          "title": "{number} iptal edilsin mi?",
+          "text": "İptal edilen talep yeniden açılamaz; gerekirse yeni bir talep açarsınız.",
+          "confirm": "Talebi iptal et",
+          "keep": "Vazgeç"
+        },
+        "errors": {
+          "notAllowed": "Talep bu arada ele alındı; artık iptal edilemez. Operasyon masasını arayın.",
+          "notFound": "Bu talep artık yok.",
+          "unavailable": "İşlem yapılamadı. Birkaç saniye sonra yeniden deneyin."
+        }
+      },
+      "vehicleSection": {
+        "title": "Bu aracın talepleri",
+        "empty": "Bu araç için henüz talep yok.",
+        "new": "Bu araç için talep aç",
+        "all": "Tüm talepler"
+      }
+    },
+    "requestForm": {
+      "label": "Yeni servis talebi",
+      "type": {
+        "legend": "Talep türü",
+        "ROADSIDE": {
+          "title": "Yol yardım",
+          "text": "Arıza, kaza, lastik ya da yakıt/şarj: çekici ve yardım yönlendirilir."
+        },
+        "REPLACEMENT_VEHICLE": {
+          "title": "İkame araç",
+          "text": "Aracınız servisteyken ya da kullanılamazken yedek araç."
+        },
+        "MAINTENANCE": {
+          "title": "Bakım ve lastik",
+          "text": "Periyodik bakım, yaz/kış lastiği ya da muayene randevusu."
+        }
+      },
+      "fields": {
+        "vehicle": "Araç",
+        "vehicleChoose": "Araç seçin",
+        "incident": "Olay türü",
+        "incidentChoose": "Olay türünü seçin",
+        "address": "Adres",
+        "roadsideAddressHint": "Aracın bulunduğu adres ya da yer. Konumunuzu kullanırsanız boş bırakabilirsiniz.",
+        "description": "Açıklama (isteğe bağlı)",
+        "descriptionHint": "Ne olduğunu kısaca yazın. En çok 500 karakter.",
+        "deliveryAddress": "Teslim adresi",
+        "deliveryDate": "Teslim günü",
+        "durationDays": "Tahmini süre (gün)",
+        "durationDaysHint": "1 ile 90 arasında.",
+        "service": "İşlem",
+        "serviceChoose": "İşlemi seçin",
+        "preferredDate": "Tercih edilen gün",
+        "valet": "Aracım vale ile alınsın",
+        "pickupAddress": "Alınacak adres",
+        "pickupAddressOptional": "Adres (isteğe bağlı)",
+        "pickupHint": "Vale istemiyorsanız boş bırakabilirsiniz."
+      },
+      "incidents": {
+        "BREAKDOWN": "Arıza",
+        "ACCIDENT": "Kaza",
+        "TIRE": "Lastik",
+        "FUEL_OR_CHARGE": "Yakıt ya da şarj"
+      },
+      "services": {
+        "PERIODIC": "Periyodik bakım",
+        "SUMMER_TIRES": "Yaz lastiği",
+        "WINTER_TIRES": "Kış lastiği",
+        "INSPECTION": "Muayene"
+      },
+      "location": {
+        "button": "Konumumu kullan",
+        "asking": "Konum isteniyor…",
+        "got": "Konum alındı: {latitude}, {longitude}",
+        "forget": "Konumu kaldır",
+        "denied": "Konum alınamadı ya da izin verilmedi; sorun değil, yukarıdaki adres alanını doldurmanız yeterli."
+      },
+      "errors": {
+        "type": "Bir talep türü seçin.",
+        "fleetVehicleId": "Bir araç seçin.",
+        "incident": "Olay türünü seçin.",
+        "location": "Aracın nerede olduğunu yazın ya da konumunuzu kullanın.",
+        "address": "Geçerli bir adres yazın (en çok 200 karakter).",
+        "description": "Açıklama en çok 500 karakter olabilir.",
+        "date": "Bugünden bir yıl sonrasına kadar geçerli bir gün seçin.",
+        "durationDays": "Süreyi 1 ile 90 gün arasında yazın.",
+        "service": "Bir işlem seçin.",
+        "preferredDate": "Bugünden bir yıl sonrasına kadar geçerli bir gün seçin.",
+        "generic": "Talep gönderilemedi. Alanları denetleyip yeniden deneyin.",
+        "unavailable": "İşlem yapılamadı. Birkaç saniye sonra yeniden deneyin."
+      },
+      "toast": {
+        "created": "Talebiniz alındı: {number}.",
+        "createdWithOpen": "Talebiniz alındı: {number}. Bu araç için aynı türde açık başka talep de var: {others}."
+      },
+      "send": "Talebi gönder",
+      "sending": "Gönderiliyor…",
+      "back": "Vazgeç",
+      "noVehicles": {
+        "title": "Aracınız yok",
+        "text": "Talep açabilmek için kullanımda bir filo aracınız olmalı."
       }
     }
   }

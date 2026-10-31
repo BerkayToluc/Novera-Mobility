@@ -19,9 +19,10 @@ import {
 } from "./fleet-panel";
 import { FLEET_EXPENSE_API_FILTERS, type ExpenseStatus, type ExpenseType, type FleetExpenseFilter, type FleetExpensePage } from "./expenses";
 import type { Invoice, InvoiceFilter, InvoicePage } from "./invoices";
-import { fetchFleetGreen, fetchFleetReport, fetchFleetStations, fetchFleetAssignments, fetchFleetExpenses, fetchFleetInvoice, fetchFleetInvoices, fetchFleetContract, fetchFleetContracts, fetchFleetEmployee, fetchFleetEmployees, fetchFleetSummary, fetchFleetVehicle, fetchFleetVehicles } from "./api-fleet";
+import { fetchFleetRequest, fetchFleetRequests, fetchFleetGreen, fetchFleetReport, fetchFleetStations, fetchFleetAssignments, fetchFleetExpenses, fetchFleetInvoice, fetchFleetInvoices, fetchFleetContract, fetchFleetContracts, fetchFleetEmployee, fetchFleetEmployees, fetchFleetSummary, fetchFleetVehicle, fetchFleetVehicles } from "./api-fleet";
 import type { FleetReport } from "./report-calc";
 import type { GreenReport, StationList } from "./green";
+import { requestApiFilters, type RequestFilter, type ServiceRequestDetail, type ServiceRequestPage } from "./requests";
 import { isMockMode } from "./mode";
 import { mockWorld } from "./mock-world";
 import { getSession } from "./session";
@@ -141,6 +142,24 @@ export async function getFleetExpenses(params: AdminListParams<FleetExpenseFilte
 export async function getFleetReport(from: string, to: string): Promise<FleetReport> {
   if (!isMockMode()) return fetchFleetReport(from, to);
   return (await import("@/mocks/reports")).sampleReport(await mockWorld(), await sampleCompany(), from, to);
+}
+
+// The service requests of the company; `vehicle` narrows to one car's.
+export async function getFleetRequests(params: AdminListParams<RequestFilter>, vehicle: string | null = null): Promise<ServiceRequestPage> {
+  if (!isMockMode()) {
+    const query = new URLSearchParams({ page: String(params.page), pageSize: String(params.pageSize) });
+    if (params.sort) query.set("sort", `${params.sort.key}:${params.sort.dir}`);
+    for (const [name, value] of Object.entries(requestApiFilters(params.filters))) query.set(name, String(value));
+    if (vehicle) query.set("vehicle", vehicle);
+    return fetchFleetRequests(query);
+  }
+  return (await import("@/mocks/requests")).listMockRequests(await mockWorld(), { page: params.page, pageSize: params.pageSize, sort: params.sort, filters: params.filters, vehicle }, await sampleCompany());
+}
+
+// `null` for a request that does not exist, is another company's, or whose number cannot be one.
+export async function getFleetRequest(number: string): Promise<ServiceRequestDetail | null> {
+  if (!isMockMode()) return fetchFleetRequest(number);
+  return (await import("@/mocks/requests")).getMockRequest(await mockWorld(), number, await sampleCompany());
 }
 
 // The electric and hybrid cars of the company for the months from `from` to `to`, with the carbon they saved.

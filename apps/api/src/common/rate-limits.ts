@@ -29,6 +29,9 @@ const adminKey = (request: Request, user: { id: string } | null): string =>
 // Everything under /fleet (ADR-25): one counter for the signed-in account, 120 a minute. Before sign-in it counts by address.
 const fleetKey = (request: Request, user: { id: string } | null): string => (user ? `fleet:${user.id}` : `ip:${clientKeyOf(request)}`);
 
+// Making a service request (V2-41): at most 20 an hour for a company, whoever of its accounts makes them (ADR-25). It stacks with `fleet`.
+const companyKey = (_request: Request, user: { id: string; companyId?: string | null } | null): string | null => (user?.companyId ? `company:${user.companyId}` : null);
+
 export const LIMITS = {
   register: { bucket: 'register', limit: 10, windowSec: HOUR, key: 'client' },
   login: { bucket: 'login', limit: 10, windowSec: 15 * MINUTE, key: 'client' },
@@ -46,4 +49,5 @@ export const LIMITS = {
   accountWrite: { bucket: 'account-write', limit: 20, windowSec: 15 * MINUTE },
   admin: { bucket: 'admin', limit: 120, windowSec: MINUTE, key: adminKey },
   fleet: { bucket: 'fleet', limit: 120, windowSec: MINUTE, key: fleetKey },
+  fleetRequests: { bucket: 'fleet-requests', limit: 20, windowSec: HOUR, key: companyKey },
 } satisfies Record<string, RateLimitSpec>;

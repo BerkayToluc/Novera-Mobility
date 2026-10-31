@@ -99,6 +99,25 @@ export default async function FleetSummaryPage() {
         </section>
       )}
       {summary && (
+        <section aria-labelledby="summary-requests" className="flex flex-col gap-4">
+          <h2 id="summary-requests" className="text-h3 text-fg">
+            {t("requests.title")}
+          </h2>
+          <dl className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            <div className="flex flex-col gap-2 rounded-card border border-border bg-surface p-5">
+              <dt className="text-label text-fg-muted">{t("requests.open")}</dt>
+              <dd className="text-display text-fg">{summary.requests.open}</dd>
+              <dd>
+                <Link href={{ pathname: "/filom/talepler", query: { durum: "acik" } }} className="inline-flex min-h-11 items-center text-link underline underline-offset-4">
+                  {t("requests.openList")}
+                  <span className="sr-only">{`: ${t("requests.open")}`}</span>
+                </Link>
+              </dd>
+            </div>
+          </dl>
+        </section>
+      )}
+      {summary && (
         <section aria-labelledby="summary-expenses" className="flex flex-col gap-4">
           <h2 id="summary-expenses" className="text-h3 text-fg">
             {t("expenses.title")}

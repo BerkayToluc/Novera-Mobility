@@ -1429,6 +1429,84 @@
       "toast": {
         "created": "Masraf kaydedildi."
       }
+    },
+    "requests": {
+      "title": "Servis talepleri",
+      "intro": "Filo müşterilerinin yol yardım, ikame araç ve bakım talepleri. Bir talebi adım adım ilerletir, atanan çekici, servis ya da şoför bilgisini yazarsınız; müşteri zaman çizelgesinde bunu hemen görür.",
+      "searchLabel": "Numara, plaka ya da şirket ara",
+      "tableCaption": "Servis talepleri",
+      "retry": "Tekrar dene",
+      "typeFilterLabel": "Türe göre",
+      "statusFilterLabel": "Duruma göre",
+      "statusAll": "Tüm durumlar",
+      "statusOpen": "Açık talepler",
+      "filterAll": "Tümü",
+      "apply": "Uygula",
+      "columns": {
+        "number": "Numara",
+        "company": "Şirket",
+        "type": "Tür",
+        "vehicle": "Araç",
+        "status": "Durum",
+        "updated": "Son güncelleme"
+      },
+      "type": {
+        "ROADSIDE": "Yol yardım",
+        "REPLACEMENT_VEHICLE": "İkame araç",
+        "MAINTENANCE": "Bakım ve lastik",
+        "TRANSFER": "VIP transfer"
+      },
+      "status": {
+        "RECEIVED": "Alındı",
+        "DISPATCHED": "Yönlendirildi",
+        "EN_ROUTE": "Yolda",
+        "APPROVED": "Onaylandı",
+        "DELIVERED": "Teslim edildi",
+        "RETURNED": "İade alındı",
+        "SCHEDULED": "Randevu verildi",
+        "IN_SERVICE": "Serviste",
+        "DRIVER_ASSIGNED": "Şoför atandı",
+        "MET": "Karşılandı",
+        "COMPLETED": "Tamamlandı",
+        "CANCELLED": "İptal edildi"
+      },
+      "emptyTitle": "Henüz talep yok",
+      "emptyText": "Filo müşterileri Filom'dan talep açtığında burada görünür.",
+      "emptyFilteredTitle": "Bu aramaya uyan talep yok",
+      "emptyFilteredText": "Süzgeçleri kaldırmayı ya da başka bir şey aramayı deneyin.",
+      "loadErrorTitle": "Talepler yüklenemedi",
+      "loadErrorText": "Birkaç saniye sonra yeniden deneyin.",
+      "detail": {
+        "back": "Taleplere dön",
+        "retry": "Tekrar dene",
+        "loadErrorTitle": "Talep yüklenemedi",
+        "intro": "{company} şirketinin {type} talebi.",
+        "company": "Şirket",
+        "assignee": "Atanan",
+        "noAssignee": "Henüz atama yapılmadı"
+      },
+      "move": {
+        "title": "Talebi ilerlet",
+        "text": "Talep yalnızca türünün daha sonraki bir adımına ya da iptale taşınabilir; geri alınamaz. Not ve atanan bilgi müşterinin zaman çizelgesinde görünür.",
+        "status": "Yeni durum",
+        "choose": "Durum seçin",
+        "note": "Not (isteğe bağlı)",
+        "noteHint": "Zaman çizelgesine yazılır, müşteri görür. En çok 500 karakter.",
+        "assignee": "Atanan (çekici, servis, şoför)",
+        "assigneeHint": "Serbest metin. Boş bırakırsanız mevcut bilgi silinir. En çok 200 karakter.",
+        "button": "Durumu kaydet",
+        "sending": "Kaydediliyor…",
+        "finished": "Bu talep bitti; artık taşınamaz.",
+        "toast": "{number} için durum \"{status}\" yapıldı.",
+        "errors": {
+          "status": "Bir durum seçin.",
+          "note": "Not en çok 500 karakter olabilir.",
+          "assignee": "Atanan bilgi en çok 200 karakter olabilir.",
+          "notAllowed": "Talep bu arada değişti ve bu geçiş artık yapılamıyor; sayfa yenilendi.",
+          "notFound": "Bu talep artık yok.",
+          "unavailable": "İşlem yapılamadı. Birkaç saniye sonra yeniden deneyin."
+        }
+      }
     }
   }
 }

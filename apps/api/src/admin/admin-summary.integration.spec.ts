@@ -150,7 +150,7 @@ describeDb('admin summary against the database (V2-25)', () => {
     await quote('q4', 'OFFERED');
     // Counted over this run's rows only: the table is shared with suites that run at the same time and add and remove quote
     // requests of their own, so a count of all of them would change under the test. The rule itself (RECEIVED only) is the service's.
-    const mine = { reservation: prisma.reservation, contactMessage: prisma.contactMessage, quoteRequest: { count: (args: { where?: object }) => prisma.quoteRequest.count({ where: { ...args.where, number: { startsWith: `SUM-${run}` } } }) } };
+    const mine = { reservation: prisma.reservation, serviceRequest: prisma.serviceRequest, contactMessage: prisma.contactMessage, quoteRequest: { count: (args: { where?: object }) => prisma.quoteRequest.count({ where: { ...args.where, number: { startsWith: `SUM-${run}` } } }) } };
     expect((await new AdminSummaryService(mine as unknown as PrismaService).get(NOW)).quotesAwaiting).toBe(2);
   });
 
@@ -167,13 +167,30 @@ describeDb('admin summary against the database (V2-25)', () => {
     // The rule itself (not handled, not erased) is the service's.
     const mine = {
       reservation: prisma.reservation,
+      serviceRequest: prisma.serviceRequest,
       quoteRequest: prisma.quoteRequest,
       contactMessage: { count: (args: { where?: object }) => prisma.contactMessage.count({ where: { ...args.where, subject: { startsWith: `SUM-${run}` } } }) },
     };
     expect((await new AdminSummaryService(mine as unknown as PrismaService).get(NOW)).unhandledMessages).toBe(2);
   });
 
-  it('leaves the number that has no source yet as null, not zero', async () => {
-    expect((await service.get(NOW)).serviceRequests).toBeNull();
+  // V2-41: the card counts the service requests that are not over, whatever their kind (the steps that end a request differ by kind).
+  it('counts the service requests that are not over, and not the finished or the cancelled ones', async () => {
+    const before = (await service.get(NOW)).serviceRequests!;
+    expect(typeof before).toBe('number');
+    const company = await prisma.company.create({ data: { name: `SUM Servis ${run}` } });
+    try {
+      // A transfer needs no car, which the database requires of every other kind; it has steps of its own, and the last ends it.
+      const transfer = (n: number, status: 'RECEIVED' | 'MET' | 'COMPLETED' | 'CANCELLED') =>
+        prisma.serviceRequest.create({ data: { number: `TLP-2026-7${run.replace(/\D/g, '0').slice(0, 3)}${n}`, companyId: company.id, type: 'TRANSFER', status, details: {} } });
+      await transfer(1, 'RECEIVED');
+      await transfer(2, 'MET');
+      await transfer(3, 'COMPLETED');
+      await transfer(4, 'CANCELLED');
+      expect((await service.get(NOW)).serviceRequests).toBe(before + 2);
+    } finally {
+      await prisma.serviceRequest.deleteMany({ where: { companyId: company.id } });
+      await prisma.company.delete({ where: { id: company.id } });
+    }
   });
 });

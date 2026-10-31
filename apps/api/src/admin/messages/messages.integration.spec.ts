@@ -123,6 +123,7 @@ describeDb('contact message administration against the database (V2-32)', () => 
       expect(list.items.length).toBe(card);
       const summaryOnOwn = {
         reservation: prisma.reservation,
+        serviceRequest: prisma.serviceRequest,
         quoteRequest: prisma.quoteRequest,
         contactMessage: { count: (args: { where?: object }) => prisma.contactMessage.count({ where: { ...args.where, ...own } }) },
       };

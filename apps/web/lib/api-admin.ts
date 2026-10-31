@@ -195,6 +195,21 @@ export async function fetchAdminExpenses(query: URLSearchParams): Promise<Schema
   return result.data;
 }
 
+// `GET /admin/requests` (V2-41): one page of the service requests of all the companies.
+export async function fetchAdminRequests(query: URLSearchParams): Promise<Schemas["ServiceRequestPage"]> {
+  const result = await apiRequest<Schemas["ServiceRequestPage"]>("GET", "/admin/requests?" + query.toString());
+  if (result.status !== "ok") throw new ApiUnavailableError();
+  return result.data;
+}
+
+// `GET /admin/requests/{number}`: null when there is no such request (the page then does not exist), a failure to load otherwise.
+export async function fetchAdminRequest(number: string): Promise<Schemas["ServiceRequestDetail"] | null> {
+  const result = await apiRequest<Schemas["ServiceRequestDetail"]>("GET", "/admin/requests/" + encodeURIComponent(number));
+  if (result.status === "ok") return result.data;
+  if (result.status === "not_found") return null;
+  throw new ApiUnavailableError();
+}
+
 // `GET /admin/audit-log` (V2-34): one page of the log, newest first. Read only.
 export async function fetchAdminAudit(query: URLSearchParams): Promise<Schemas["AdminAuditPage"]> {
   const result = await apiRequest<Schemas["AdminAuditPage"]>("GET", "/admin/audit-log?" + query.toString());
