@@ -13,7 +13,8 @@
       "expenses": "Masraflar",
       "reports": "Raporlar",
       "green": "Yeşil Filo",
-      "requests": "Talepler"
+      "requests": "Talepler",
+      "tracking": "Canlı Takip"
     },
     "empty": {
       "title": "Filom",
@@ -868,6 +869,57 @@
         "ASR": "Kayseri Erkilet (ASR)",
         "TZX": "Trabzon (TZX)",
         "SZF": "Samsun Çarşamba (SZF)"
+      }
+    },
+    "tracking": {
+      "title": "Canlı Takip",
+      "intro": "Araçlarınızın şu anki yeri, kontak durumu ve hızı; seçtiğiniz aracın gün içindeki rotası.",
+      "retry": "Tekrar dene",
+      "scrollable": "{table} (yatay kaydırılabilir)",
+      "speed": "{value} km/sa",
+      "updated": "Son güncelleme: {time}",
+      "refreshNote": "Bilgi 30 saniyede bir kendiliğinden yenilenir; sekme görünmezken yenilenmez.",
+      "refreshFailed": "Bilgi yenilenemedi, son alınan gösteriliyor. Birkaç saniye sonra yeniden denenecek.",
+      "loadErrorTitle": "Canlı takip yüklenemedi",
+      "loadErrorText": "Birkaç saniye sonra yeniden deneyin.",
+      "emptyTitle": "Takip edilecek araç yok",
+      "emptyText": "Kullanımda aracınız olmadığı için gösterilecek bir konum yok.",
+      "emptyAction": "Araçlarınızı görün",
+      "noPerson": "Zimmetli değil",
+      "noPosition": "{city} (konum yok)",
+      "ignition": {
+        "on": "Kontak açık",
+        "off": "Kontak kapalı"
+      },
+      "columns": {
+        "pin": "No",
+        "vehicle": "Araç",
+        "person": "Kullanan",
+        "city": "Şehir",
+        "ignition": "Kontak",
+        "speed": "Hız"
+      },
+      "list": {
+        "title": "Araçlar",
+        "hint": "Haritadaki numara, bu listedeki numarayla aynıdır. Bir aracı seçmek için plakasına basın."
+      },
+      "map": {
+        "title": "Harita",
+        "noKey": "Harita bu ortamda yok; araçların hepsi soldaki listede.",
+        "failed": "Harita yüklenemedi; aynı bilgi listede.",
+        "noPins": "Haritada gösterilecek konum yok; araçlar listede."
+      },
+      "route": {
+        "title": "{plate} rotası",
+        "dayLabel": "Rota günü",
+        "today": "Bugün",
+        "none": "Bu aracın şehrinde ({city}) rota tanımlı değil.",
+        "summary": "{name}: gün boyunca {count} nokta (5 dakikada bir).",
+        "hourlyNote": "Harita çizgisinin saat başı değerleri; kontak kapalıyken araç son durduğu yerde kalır.",
+        "columns": {
+          "time": "Saat",
+          "place": "Konum (enlem, boylam)"
+        }
       }
     }
   }

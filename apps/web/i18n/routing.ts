@@ -52,6 +52,7 @@ export const routing = defineRouting({
     "/filom/talepler": { tr: "/filom/talepler", en: "/my-fleet/requests" },
     "/filom/talepler/yeni": { tr: "/filom/talepler/yeni", en: "/my-fleet/requests/new" },
     "/filom/talepler/[number]": { tr: "/filom/talepler/[number]", en: "/my-fleet/requests/[number]" },
+    "/filom/canli-takip": { tr: "/filom/canli-takip", en: "/my-fleet/live-tracking" },
     "/filom/raporlar": { tr: "/filom/raporlar", en: "/my-fleet/reports" },
     "/filom/yesil-filo": { tr: "/filom/yesil-filo", en: "/my-fleet/green-fleet" },
     "/yonetim": { tr: "/yonetim", en: "/admin" },

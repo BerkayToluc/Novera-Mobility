@@ -10,11 +10,16 @@ export function stationStatus(stationId: string, slice: number): StationStatus {
   return r < 0.6 ? 'AVAILABLE' : r < 0.9 ? 'BUSY' : 'OUT_OF_ORDER';
 }
 
-// Great-circle distance in kilometres (haversine), to one decimal. Enough for "the nearest stations"; a road is longer.
-export function distanceKm(from: { latitude: number; longitude: number }, to: { latitude: number; longitude: number }): number {
+// Great-circle distance in kilometres (haversine), as it comes out; the route of a car (tracking.ts) adds many short ones up.
+export function greatCircleKm(from: { latitude: number; longitude: number }, to: { latitude: number; longitude: number }): number {
   const rad = (degrees: number) => (degrees * Math.PI) / 180;
   const a = Math.sin(rad(to.latitude - from.latitude) / 2) ** 2 + Math.cos(rad(from.latitude)) * Math.cos(rad(to.latitude)) * Math.sin(rad(to.longitude - from.longitude) / 2) ** 2;
-  return Math.round(2 * 6371 * Math.asin(Math.sqrt(a)) * 10) / 10;
+  return 2 * 6371 * Math.asin(Math.sqrt(a));
+}
+
+// The same to one decimal. Enough for "the nearest stations"; a road is longer.
+export function distanceKm(from: { latitude: number; longitude: number }, to: { latitude: number; longitude: number }): number {
+  return Math.round(greatCircleKm(from, to) * 10) / 10;
 }
 
 // The centre of the cities the fleets are delivered to, where a car is taken to be while there is no live position (V2-43 will give one).
