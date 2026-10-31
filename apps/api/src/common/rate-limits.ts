@@ -49,5 +49,7 @@ export const LIMITS = {
   accountWrite: { bucket: 'account-write', limit: 20, windowSec: 15 * MINUTE },
   admin: { bucket: 'admin', limit: 120, windowSec: MINUTE, key: adminKey },
   fleet: { bucket: 'fleet', limit: 120, windowSec: MINUTE, key: fleetKey },
+  // The hourly reminder trigger (V2-44): Cloud Scheduler calls it once an hour; a few more is room for a retry and a manual run.
+  jobs: { bucket: 'jobs', limit: 10, windowSec: HOUR, key: 'client' },
   fleetRequests: { bucket: 'fleet-requests', limit: 20, windowSec: HOUR, key: companyKey },
 } satisfies Record<string, RateLimitSpec>;

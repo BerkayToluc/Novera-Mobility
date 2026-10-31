@@ -47,6 +47,14 @@
         ]
       },
       {
+        "heading": "E-posta bildirimleri",
+        "paragraphs": [
+          "Hesabınızdaki e-posta adresine, yaptığınız işlemle ilgili şu bildirimler gönderilir: rezervasyon onayı, rezervasyon iptali (sizin ya da Novera Mobility tarafından), kiralama başlangıcından 24 saat önce seyahat hatırlatması ve Filom'dan açtığınız servis talebinin durumunun değişmesi. İlk ikisi ve talep durumu, yaptığınız işlemin gereği olarak gönderilir; pazarlama içeriği taşımaz.",
+          "Seyahat hatırlatmasını hesap ayarlarınızdaki e-posta tercihlerinden istediğiniz zaman kapatabilirsiniz; kapalıysa gönderilmez. Kampanya e-postaları yalnızca açık rızanızla ve varsayılan olarak kapalı olan tercihinizle gönderilir.",
+          "E-postalar, gönderim hizmeti sağlayıcımız Resend üzerinden iletilir; bu sırada e-posta adresiniz ve mesaj içeriği sağlayıcıya aktarılır. Mesajlarda yalnızca adınız, rezervasyon ya da talep bilgileri yer alır; iptal gerekçesi gibi iç notlar gönderilmez. Sistem kayıtlarına e-posta adresiniz yazılmaz."
+        ]
+      },
+      {
         "heading": "İşleme amaçları",
         "list": [
           "Rezervasyonunuzu oluşturmak ve yönetmek.",

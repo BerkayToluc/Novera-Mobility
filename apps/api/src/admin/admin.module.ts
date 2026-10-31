@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { AuthModule } from '../auth/auth.module.js';
+import { NotificationsModule } from '../notifications/notifications.module.js';
 import { AdminController } from './admin.controller.js';
 import { AdminSummaryService } from './admin-summary.service.js';
 import { BranchesController } from './branches/branches.controller.js';
@@ -40,7 +41,7 @@ import { AuditService } from './audit.service.js';
 // The administration (ADR-24): the role guard and the audit log for everything under `/admin`. Imported after the
 // rate limit module, so a request is counted before it is turned away.
 @Module({
-  imports: [AuthModule],
+  imports: [AuthModule, NotificationsModule],
   controllers: [AdminController, PromoCodesController, BranchesController, VehicleModelsController, VehicleClassesController, VehiclesController, ExtrasController, AdminReservationsController, AdminQuotesController, AdminMessagesController, CompaniesController, UsersController, AuditLogController, AdminContractsController, InvoicesController, AdminFleetExpensesController, AdminRequestsController],
   providers: [
     AuditService,

@@ -10,7 +10,7 @@ Gizli değerleri (veritabanı adresi, API anahtarları) **hiçbir yere yapışt�
 | Web (Next.js) | **Vercel** (Hobby) | ADR-12'deki öneri; Next.js'i kendisi yapıyor. Hobby plan yalnızca kişisel, ticari olmayan kullanım içindir: bu proje kurgusal bir demo olduğu için uygundur. Gerçek müşteriyle çalışılacaksa Pro plana geçilir. |
 | API (NestJS) | **Google Cloud Run** (europe-west1, Belçika; Tier 1), Docker kapsayıcısı | 27 Ekim'de karar: Render'ın aylık 750 saatlik havuzu başka bir projeyle paylaşılıyordu ve ücretsiz plan uyuyordu. Cloud Run istek gelmezse sıfır örneğe iner (boştayken ücret yok), aylık ücretsiz kotası küçük bir site için yeterli. Bölge Tier 1 olduğu için ücretsiz kota daha uzun yeter ve birim fiyat düşüktür; Neon Frankfurt'ta, yani her veritabanı sorgusu biraz daha uzun sürer (trafik küçük, ölçülen bir sorun yok). **Bütçe uyarısı ve harcama sınırı şart** (aşağıda). E-posta için SMTP portları kapalı olabileceğinden HTTPS ile çalışan Resend kullanılıyor. |
 | Veritabanı | **Neon** (Free, Frankfurt) | Render'ın ücretsiz PostgreSQL'i 30 günde siliniyor, bu yüzden kullanılmıyor. Neon Free: 1 GB, kullanılmayınca uyur (ilk istek biraz yavaş), son 6 saate geri dönüş (restore) var. |
-| E-posta | **Resend** (Free) | Parola sıfırlama bağlantısı için. Kendi alan adın olmadan yalnızca kendi e-posta adresine gönderebilir. |
+| E-posta | **Resend** (Free) | Parola sıfırlama, davet, rezervasyon onayı ve iptali, seyahat hatırlatması ve talep durumu için (V2-44). Kendi alan adın olmadan yalnızca kendi e-posta adresine gönderebilir. |
 | Uyandırma | ~~UptimeRobot~~ gerekmiyor | Cloud Run sıfıra iner ve ilk istekte birkaç saniyede açılır (soğuk başlangıç); Vercel'in 10 saniyelik sınırının içinde kalır. Uyandırma izlemesi boşuna istek ve ücret demek olur. |
 
 Güncel koşullara 17 Ekim 2026'da bakıldı (Render ve Neon'un kendi sayfaları); Cloud Run'ın ücretsiz kotası ve fiyatları Ekim 2026'da konsoldaki fiyat tablosundan okundu. Koşullar değişebilir: bu yüzden aşağıdaki bütçe uyarısı zorunlu. Vercel Hobby sınırlarını Vercel'in kendi sayfasından değil bir üçüncü taraf yazısından aldım; Vercel'de proje açarken plan sayfasını bir kez kontrol et. Üç servis de koşullarını sık değiştiriyor.
@@ -190,7 +190,21 @@ Bunlar ilgili iş birleşince bu rehbere adım olarak yazılır; burada yalnızc
 | Şarj istasyonu ve rota seed'i: `pnpm --filter @novera/api db:seed:simulation` (yalnız eksikleri ekler; tam `db:seed` canlıda bayi, model ve araç düzenlemelerini geri yazar, bunun için kullanılmaz). Örnek şirket seed'i ayrı (`FLEET_SEED_PASSWORD`) | V2-35, V2-40, V2-43 | Neon |
 | Kullanıcı parolası için seed ortam değişkeni (repoya yazılmaz) | V2-35 | Berkay'ın bilgisayarı |
 | `NODE_ENV=production` artık zorunlu güvenlik ayarı; `API_ACCESS_KEY` olmadan API açılmaz | V2-04 | Cloud Run |
+| Seyahat hatırlatması için Cloud Scheduler işi (`POST /jobs/reminders`, saatlik), §9b; migration `20261101110000_reservation_reminder` | V2-44 | Google Cloud, Neon |
 | Her migration öncesi yedek | V2-11 ve sonrası | Neon |
+
+## 9b. Seyahat hatırlatması için Cloud Scheduler (V2-44)
+
+Rezervasyon onayı, iptal ve talep durumu e-postaları istek sırasında gider, ek bir kurulum gerekmez (Resend ayarı yeter, 3. adım). **Seyahat hatırlatması** ise saatlik bir iş ister; Cloud Run boştayken uyuduğu için bunu Cloud Scheduler tetikler (ADR-32). Ücretsiz kotası (ayda 3 iş) yeter.
+
+1. Google Cloud → **Cloud Scheduler** → **Create job**. Ad: `novera-reminders`, bölge: Cloud Run ile aynı (`europe-west1`).
+2. **Frequency:** `0 * * * *` (her saat başı), saat dilimi İstanbul.
+3. **Target type:** HTTP. **URL:** `https://<Cloud Run adresin>/jobs/reminders`, **HTTP method:** POST.
+4. **HTTP headers:** `x-novera-key` = Cloud Run'daki `API_ACCESS_KEY` değeri (web sunucusunun kullandığı anahtarın aynısı). Bu anahtar iş ayarında görünür; yalnız projeye erişimi olanlar görür.
+5. **Create**, sonra işin satırında **Force run** ile bir kez dene: durum "Success" olmalı. Cevap `{"due":0,"sent":0,"failed":0,"skipped":0}` gibi görünür (Cloud Run günlüğünde "Reminders: …" satırı, e-posta adresi yazılmaz).
+6. Anahtar sonradan değişirse işin başlığını da güncelle; yanlış anahtar `404` verir.
+
+E-posta ayarı (`RESEND_API_KEY`, `MAIL_FROM`) yoksa iş hata vermez, hiçbir şey göndermez ve hiçbir rezervasyonu işaretlemez; ayar eklendiği gün yaklaşan kiralamalar hatırlatılır.
 
 ## 10. Kendi alan adın olunca
 

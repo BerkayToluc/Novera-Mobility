@@ -708,6 +708,9 @@ model Reservation {
   // Panelden iptalde zorunlu neden (5-500 karakter, CHECK ile de korunur) ve iptal eden yönetici (V2-31). Müşterinin kendi iptalinde boş kalır;
   // yönetici hesabı silinirse bağlantı boşalır, neden kalır.
   cancelReason  String?
+  // Seyahat hatırlatma e-postasının gönderildiği an (V2-44): dolu ise bir daha gönderilmez. Gönderimden ÖNCE tek bir koşullu güncellemeyle
+  // alınır (`reminderSentAt IS NULL`), bu yüzden iki görev ya da yeniden başlayan bir örnek aynı rezervasyona iki kez yollayamaz.
+  reminderSentAt DateTime?
   cancelledById String?
   cancelledBy   User?     @relation("ReservationCanceller", fields: [cancelledById], references: [id], onDelete: SetNull)
 
@@ -725,6 +728,8 @@ model Reservation {
   pointTransaction PointTransaction?
 
   @@index([vehicleId, startAt, endAt])
+  // Hatırlatma görevi: başlangıcı yakın, onaylı ve henüz hatırlatılmamış rezervasyonları arar (V2-44).
+  @@index([status, startAt])
   // Rezervasyonlarım: bir hesabın rezervasyonları başlangıca göre sıralı okunur.
   // `(userId, startAt)` aynı zamanda yalnızca `userId` ile aramayı da karşılar; ayrı bir `userId` indeksi gerekmez.
   @@index([userId, startAt])

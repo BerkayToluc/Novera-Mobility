@@ -5289,6 +5289,65 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/jobs/reminders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Seyahat hatırlatma e-postalarını gönder (Cloud Scheduler, saatlik)
+         * @description Başlangıcı **24 saat içinde** olan, onaylı rezervasyonların sahiplerine seyahat hatırlatma e-postasını gönderir (V2-44, ADR-32). Hatırlatmayı kapatmış (`notifyReminders: false`) ya da kapatılmış hesaba gitmez; 24 saatten kısa süre önce yapılmış rezervasyona gitmez (onay e-postası az önce gitmiştir). **Bir rezervasyona bir kez** gider: `reminderSentAt`, e-posta gönderilmeden önce tek bir koşullu güncellemeyle alınır; aynı anda çalışan iki çağrı ya da yeniden başlayan bir örnek tekrar göndermez. Gönderim başarısız olursa işaret geri alınır ve bir sonraki çağrı yeniden dener. E-posta servisi (`RESEND_API_KEY`, `MAIL_FROM`) kurulu değilse hiçbir şey gönderilmez ve hiçbir rezervasyon işaretlenmez.
+         *     Girdi almaz; tekrar çağırmak zararsızdır. Cloud Run uyuyan bir örnekte zamanlayıcı çalıştırmadığı için bu uç Cloud Scheduler tarafından saatte bir çağrılır (docs/DEPLOY.md); canlıda API yalnız web sunucusunun anahtarıyla (`x-novera-key`) erişilebilir, zamanlayıcı da onu gönderir. Sınır: istemci adresi başına saatte 10.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Çalışmanın özeti */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description Bu çalışmada hatırlatılması gereken rezervasyon sayısı. */
+                            due: number;
+                            /** @description Gönderilen. */
+                            sent: number;
+                            /** @description Gönderilemeyen (sonraki çalışma yeniden dener). */
+                            failed: number;
+                            /** @description 24 saatten kısa süre önce yapıldığı için atlanan. */
+                            skipped: number;
+                        };
+                    };
+                };
+                /** @description Anahtar yok ya da yanlış (canlıda API'nin geri kalanı gibi, olmayan adres gibi cevaplanır) */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                429: components["responses"]["TooManyRequests"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/fleet/summary": {
         parameters: {
             query?: never;

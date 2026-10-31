@@ -9,6 +9,7 @@ import { ReservationsModule } from './reservations/reservations.module.js';
 import { RateLimitModule } from './common/rate-limit.module.js';
 import { AdminModule } from './admin/admin.module.js';
 import { FleetModule } from './fleet/fleet.module.js';
+import { NotificationsModule } from './notifications/notifications.module.js';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { FleetModule } from './fleet/fleet.module.js';
     // After the rate limit: its guard runs first, so a request to /admin is counted before it is turned away.
     AdminModule,
     FleetModule,
+    NotificationsModule,
   ],
 })
 export class AppModule {}
