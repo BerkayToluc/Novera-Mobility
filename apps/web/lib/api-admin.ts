@@ -142,3 +142,18 @@ export async function fetchAdminMessage(id: string): Promise<Schemas["AdminMessa
   if (result.status === "not_found") return null;
   throw new ApiUnavailableError();
 }
+
+// `GET /admin/companies` (V2-33): one page of the list.
+export async function fetchAdminCompanies(query: URLSearchParams): Promise<Schemas["AdminCompanyPage"]> {
+  const result = await apiRequest<Schemas["AdminCompanyPage"]>("GET", "/admin/companies?" + query.toString());
+  if (result.status !== "ok") throw new ApiUnavailableError();
+  return result.data;
+}
+
+// `GET /admin/companies/{id}`: null when there is no such company (the page then does not exist), a failure to load otherwise.
+export async function fetchAdminCompany(id: string): Promise<Schemas["AdminCompanyDetail"] | null> {
+  const result = await apiRequest<Schemas["AdminCompanyDetail"]>("GET", "/admin/companies/" + encodeURIComponent(id));
+  if (result.status === "ok") return result.data;
+  if (result.status === "not_found") return null;
+  throw new ApiUnavailableError();
+}

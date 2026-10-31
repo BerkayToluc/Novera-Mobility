@@ -210,6 +210,21 @@ Bir kart, bağlı olduğu liste ekranı yapılınca (`lib/admin-screens.ts` `rea
 - **Veritabanı:** `QuoteStatus`'a `CLOSED`, yeni `QuoteSource` enum'u, `QuoteRequest.source` ve `internalNote` (+ uzunluk CHECK, `NOT VALID`), `ContactMessage.handledAt`, `handledById` (yabancı anahtar, `ON DELETE SET NULL`) ve `handledAt` üzerinde indeks; migration `20261030170000_quotes_and_messages_admin`.
 - **Örnek veri (USE_MOCKS=1):** `mocks/admin-quotes.ts` ve `mocks/admin-messages.ts`, örnek filonun dünyasında (`mocks/fleet-world.ts`) tutulur: dokuz talep (üçü bekliyor, üçü kurumsal örnek hesabın), altı mesaj (dördü bekliyor), özet kartı bunlarla aynı sayıyı gösterir. Kurumsal örnek hesabın "Teklif taleplerim" ekranı durumu aynı dünyadan okur.
 
+### 3.10 Şirketler ekranı ve kurumsal davet (V2-33)
+
+`/yonetim/sirketler`, `/yeni` ve `/{id}` (EN `/en/admin/companies`); uçlar `GET/POST /admin/companies`, `GET/PATCH /admin/companies/{id}`, `POST /admin/companies/{id}/users` ve `POST /admin/companies/{id}/users/{userId}/resend`.
+
+- **Şirket** (`Company`): ad (2–120, **benzersiz**; büyük/küçük harf ve baştaki/sondaki boşluk fark etmez, `409 NAME_TAKEN`), vergi dairesi, şehir, telefon, satış temsilcisi (`{ name, email, phone }`: üçü birlikte ya da hiçbiri). Boşaltılan alan `null` gider ve siler. Değişiklik `updatedAt` sürümüne karşıdır (`STALE_WRITE`).
+- **Davet:** `POST .../users` şirkete bağlı, şifresiz bir `CORPORATE` hesap açar ve **7 gün geçerli** bağlantıyı e-postayla yollar (`PasswordResetToken.kind = INVITE`, aynı tablo, ayrı metin ve süre). Bağlantı `/{dil}/sifre-sifirla/yeni?token=…&tur=davet` sayfasını açar: sayfa kişiyi karşılar, şifre belirlenince kurumsal giriş sekmesine (`/giris?tip=kurumsal`) götürür. Yönetici şifreyi hiçbir yerde görmez. Aynı e-posta (bireysel hesap dahil) `409 EMAIL_TAKEN`, hiçbir şey yazılmaz. E-posta gönderimi başarısız olsa da hesap ve bağlantı kaydedilir; yönetici daveti yeniden yollayabilir.
+- **Yeniden gönder:** kişinin **tüm önceki bağlantıları geçersiz olur**, yenisi 7 gün yaşar. Şifresini belirlemiş (ya da Google ile bağlanmış) kişi için `409 INVALID_TRANSITION`.
+- **Durum:** `PENDING` (şifre ve Google bağlantısı yok) ya da `ACTIVE`. Bekleyen kişide son davetin bitiş zamanı ve `expired` gelir; ekran "Davet bekliyor" / "Davetin süresi doldu" der.
+- **Liste:** veritabanı sorgusu; arama ad, vergi dairesi ve şehirde; sıralama `name` (varsayılan), `users`, `createdAt`. Satırda kişi sayısı ve davet bekleyen sayısı.
+- **Migration** `20261030180000_company_and_invite` yeni tabloyu açar ve **mevcut kurumsal hesapları taşır**: aynı firma adı (büyük/küçük harf ve boşluk fark etmez) tek `Company` olur; adı olmayan hesap şirketsiz kalır. Taşıma tekrarlanabilir (`DATA MOVE` bloğu) ve testle sabitlenmiştir: her hesap için `GET /me` cevabı öncesi ve sonrası birebir aynıdır. **Tek istisna issue'nun kuralıdır:** aynı ada sahip hesaplar firma bilgisinde ayrışıyorsa **en eski hesabın bilgileri** şirketin bilgileri olur, sonraki hesaplar onu okur.
+- **Eski `User` firma alanları bu sürümde silinmez** (`companyName`, `taxOffice`, `companyCity`, `companyPhone`, `salesContact`): kod artık bunları okumaz ama yeni kod yayına çıkarken eski kodun çalıştığı kısa süre için kolonlar kalır (genişlet / daralt). Silme V2-34'tedir. `GET /me` biçimi değişmedi; alanlar şirketten doldurulur.
+- **İşlem kaydı:** `company.create`, `company.update`, `company.invite`, `company.invite-resend` (varlık şirket kimliği, yalnızca alan adları). Kişinin adı ve e-posta adresi, şirketin bilgileri işlem kaydına yazılmaz.
+- **Örnek veri (USE_MOCKS=1):** `mocks/admin-companies.ts`, dünya başına: Ege Lojistik A.Ş. (biri etkin, biri davet bekleyen iki kişi), Marmara Turizm Ltd. Şti. (bir kişi), Anadolu İnşaat A.Ş. (kişisiz).
+- **KVKK:** davet e-postası ve kurumsal kullanıcı verisinin aydınlatma metnindeki yeri, V2-36'daki personel bölümüyle birlikte gözden geçirilecek.
+
 ## 4. API
 
 Tüm uçlar `/admin` önekli, `AdminGuard` arkasında, ADR-24 kurallarıyla (sayfalama, `STALE_WRITE`, yeni hata kodları). Değiştiren her istek işlem kaydına yazılır, `Content-Type: application/json` dışındakiler `415` döner, sınır dakikada 120/yönetici.

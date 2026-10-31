@@ -10,12 +10,7 @@ const row = (over: Partial<UserRow> = {}): UserRow => ({
   lastName: 'Yıldız',
   accountType: 'INDIVIDUAL',
   role: 'CUSTOMER',
-  companyName: null,
-  taxOffice: null,
-  companyCity: null,
-  companyPhone: null,
   contactTitle: null,
-  salesContact: null,
   locale: 'TR',
   theme: 'LIGHT',
   currency: 'TRY',
@@ -68,7 +63,7 @@ describe('toUserResponse', () => {
   it('reads the sales contact of a corporate account', () => {
     const salesContact = { name: 'Selin', email: 'satis@novera.example', phone: '+90 212 555 01 99' };
     expect(
-      toUserResponse(row({ accountType: 'CORPORATE', companyName: 'Ege Lojistik', salesContact })).salesContact,
+      toUserResponse(row({ accountType: 'CORPORATE', company: { name: 'Ege Lojistik', taxOffice: null, city: null, phone: null, salesContact } })).salesContact,
     ).toEqual(salesContact);
   });
 
@@ -81,6 +76,6 @@ describe('toUserResponse', () => {
     [{ name: 'Selin' }],
     [{ name: 'Selin', email: 'a@b.c', phone: 5 }],
   ])('treats a sales contact of the wrong shape (%j) as none', (salesContact) => {
-    expect(toUserResponse(row({ salesContact })).salesContact).toBeNull();
+    expect(toUserResponse(row({ company: { name: 'Firma', taxOffice: null, city: null, phone: null, salesContact } })).salesContact).toBeNull();
   });
 });

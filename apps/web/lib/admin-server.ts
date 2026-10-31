@@ -9,7 +9,8 @@ import { VEHICLE_API_FILTERS, type AdminVehicleDetail, type AdminVehiclePage, ty
 import { MODEL_API_FILTERS, type AdminModelDetail, type AdminModelPage, type ModelClass } from "./admin-models";
 import { BRANCH_API_FILTERS, type AdminBranchDetail, type AdminBranchPage } from "./admin-branches";
 import { PROMO_API_FILTERS, type PromoCode, type PromoCodePage } from "./admin-promo";
-import { fetchAdminBranch, fetchAdminBranches, fetchAdminExtra, fetchAdminExtras, fetchAdminModel, fetchAdminMessage, fetchAdminMessages, fetchAdminModels, fetchAdminQuote, fetchAdminQuotes, fetchAdminReservation, fetchAdminReservations, fetchAdminSummary, fetchAdminVehicle, fetchAdminVehicles, fetchModelClasses, fetchPromoCode, fetchPromoCodes, type AdminSummary } from "./api-admin";
+import type { AdminCompanyDetail, AdminCompanyPage } from "./admin-companies";
+import { fetchAdminBranch, fetchAdminCompanies, fetchAdminCompany, fetchAdminBranches, fetchAdminExtra, fetchAdminExtras, fetchAdminModel, fetchAdminMessage, fetchAdminMessages, fetchAdminModels, fetchAdminQuote, fetchAdminQuotes, fetchAdminReservation, fetchAdminReservations, fetchAdminSummary, fetchAdminVehicle, fetchAdminVehicles, fetchModelClasses, fetchPromoCode, fetchPromoCodes, type AdminSummary } from "./api-admin";
 import { isMockMode } from "./mode";
 import { mockWorld } from "./mock-world";
 import { normalizePromo } from "./promo-codes";
@@ -204,4 +205,15 @@ export async function getAdminMessages(params: AdminListParams<"durum">): Promis
 export async function getAdminMessage(id: string): Promise<AdminMessageDetail | null> {
   if (!isMockMode()) return fetchAdminMessage(id);
   return (await import("@/mocks/admin-messages")).getMockMessage(await mockWorld(), id);
+}
+
+export async function getAdminCompanies(params: AdminListParams<never>): Promise<AdminCompanyPage> {
+  if (!isMockMode()) return fetchAdminCompanies(toApiQuery(params));
+  return (await import("@/mocks/admin-companies")).listMockCompanies(await mockWorld(), { page: params.page, pageSize: params.pageSize, sort: params.sort, q: params.q });
+}
+
+// `null` for a company that does not exist, or whose id cannot be one.
+export async function getAdminCompany(id: string): Promise<AdminCompanyDetail | null> {
+  if (!isMockMode()) return fetchAdminCompany(id);
+  return (await import("@/mocks/admin-companies")).getMockCompany(await mockWorld(), id);
 }

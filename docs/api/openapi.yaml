@@ -2005,6 +2005,243 @@ paths:
         "422": { $ref: "#/components/responses/ValidationFailed" }
         "429": { $ref: "#/components/responses/TooManyRequests" }
 
+  /admin/companies:
+    get:
+      tags: [admin]
+      summary: Şirketler (yönetim)
+      description: |
+        Sayfalı liste (ADR-24). `q` şirket adında, vergi dairesinde ya da şehirde aranır (büyük/küçük harf: İngiliz alfabesindeki harfler için). Varsayılan sıra
+        ada göre. Her satırda şirketin kişi sayısı (`users`) ve henüz şifre belirlememiş davetli sayısı (`pendingUsers`) vardır.
+        Sınır: yönetici başına dakikada 120.
+      security:
+        - cookieAuth: []
+      parameters:
+        - { name: page, in: query, schema: { type: integer, minimum: 1, default: 1 } }
+        - { name: pageSize, in: query, schema: { type: integer, minimum: 1, maximum: 100, default: 20 } }
+        - name: sort
+          in: query
+          description: "`alan` ya da `alan:asc|desc`. Varsayılan `name:asc`."
+          schema: { type: string, enum: [name, createdAt, users], example: "name:asc" }
+        - { name: q, in: query, schema: { type: string, maxLength: 100 } }
+      responses:
+        "200":
+          description: Bir sayfa şirket
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminCompanyPage" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Yönetici değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+    post:
+      tags: [admin]
+      summary: Şirket oluştur
+      description: |
+        Şirketin adı benzersizdir; büyük/küçük harf ve baştaki/sondaki boşluk fark etmez (`409 NAME_TAKEN`). Satış temsilcisi ya
+        üç alanıyla birlikte verilir ya da hiç verilmez. İşlem kaydına alan adları yazılır (`company.create`).
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminCompanyCreate" }
+      responses:
+        "201":
+          description: Oluşturulan şirket
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminCompanyDetail" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Yönetici değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "409":
+          description: Bu adda bir şirket var (`NAME_TAKEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "415": { description: JSON olmayan gövde (`BAD_REQUEST`) }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
+  /admin/companies/{id}:
+    parameters:
+      - { name: id, in: path, required: true, description: Şirketin kimliği. Kimlik olamayacak bir değer `404` döner., schema: { type: string, format: uuid } }
+    get:
+      tags: [admin]
+      summary: Bir şirket
+      description: Şirketin bilgileri ve kişileri. Davet bekleyen kişide `invite` bağlantının ne zaman biteceğini söyler.
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Şirket
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminCompanyDetail" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Yönetici değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: Böyle bir şirket yok (`NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+    patch:
+      tags: [admin]
+      summary: Şirketi güncelle
+      description: |
+        Gönderilmeyen alan olduğu gibi kalır; `null` ya da boş metin isteğe bağlı bir alanı siler. Düzenlenen kaydın `updatedAt`
+        değeri geri gönderilir; şirket bu arada değiştiyse `409 STALE_WRITE`. İşlem kaydına alan adları yazılır (`company.update`).
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminCompanyUpdate" }
+      responses:
+        "200":
+          description: Güncel şirket
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminCompanyDetail" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Yönetici değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: Böyle bir şirket yok (`NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "409":
+          description: Kayıt değişmiş (`STALE_WRITE`) ya da bu adda başka bir şirket var (`NAME_TAKEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "415": { description: JSON olmayan gövde (`BAD_REQUEST`) }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
+  /admin/companies/{id}/users:
+    parameters:
+      - { name: id, in: path, required: true, description: Şirketin kimliği., schema: { type: string, format: uuid } }
+    post:
+      tags: [admin]
+      summary: Şirkete kişi davet et
+      description: |
+        Şirkete bağlı, şifresiz bir **kurumsal** hesap açar ve e-postayla **7 gün geçerli** bir şifre belirleme bağlantısı yollar
+        (kişi şifresini kendisi belirler; yönetici şifre görmez). Kişi bağlantıyı kullanana kadar `PENDING` durumundadır. Bu
+        e-posta adresiyle bir hesap zaten varsa `409 EMAIL_TAKEN` döner ve hiçbir şey yazılmaz. E-posta gönderimi başarısız olsa da
+        davet kaydedilir; yönetici daveti yeniden yollayabilir. İşlem kaydına yalnızca alan adları yazılır, kişinin adı ve e-posta
+        adresi yazılmaz (`company.invite`).
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminCompanyInvite" }
+      responses:
+        "201":
+          description: Davet edilen kişi
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminCompanyUser" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Yönetici değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: Böyle bir şirket yok (`NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "409":
+          description: Bu e-posta adresiyle bir hesap var (`EMAIL_TAKEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "415": { description: JSON olmayan gövde (`BAD_REQUEST`) }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
+  /admin/companies/{id}/users/{userId}/resend:
+    parameters:
+      - { name: id, in: path, required: true, description: Şirketin kimliği., schema: { type: string, format: uuid } }
+      - { name: userId, in: path, required: true, description: Davet edilen kişinin kimliği., schema: { type: string, format: uuid } }
+    post:
+      tags: [admin]
+      summary: Daveti yeniden yolla
+      description: |
+        Kişinin önceki bağlantıları **geçersiz olur** ve yeni bir 7 günlük bağlantı yollanır. Kişi şifresini zaten belirlemişse
+        (ya da Google ile bağlanmışsa) `409 INVALID_TRANSITION` döner. Gövde yoktur. İşlem kaydı: `company.invite-resend`.
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Davet edilen kişi (yeni son kullanma zamanıyla)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminCompanyUser" }
+        "401":
+          description: Oturum yok (`UNAUTHENTICATED`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Yönetici değil (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: Böyle bir şirket ya da kişi yok (`NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "409":
+          description: Kişi şifresini zaten belirlemiş (`INVALID_TRANSITION`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "429": { $ref: "#/components/responses/TooManyRequests" }
+
   /admin/ping:
     get:
       tags: [admin]
@@ -2155,6 +2392,7 @@ components:
             - CODE_TAKEN
             - SLUG_TAKEN
             - PLATE_TAKEN
+            - NAME_TAKEN
             - INVALID_TRANSITION
             - INTERNAL_ERROR
         message:
@@ -2193,6 +2431,7 @@ components:
               - NOT_ALLOWED
               - SLUG_TAKEN
               - PLATE_TAKEN
+              - NAME_TAKEN
           example: { email: EMAIL_TAKEN }
 
     LocalizedText:
@@ -3128,6 +3367,115 @@ components:
       required: [handled]
       properties:
         handled: { type: boolean, description: "`true` ele alındı işareti koyar, `false` geri alır." }
+
+    AdminSalesContact:
+      type: object
+      required: [name, email, phone]
+      properties:
+        name: { type: string, maxLength: 80 }
+        email: { type: string, format: email }
+        phone: { type: string }
+
+    AdminCompanyListItem:
+      type: object
+      required: [id, name, taxOffice, city, phone, users, pendingUsers, createdAt, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        taxOffice: { type: string, nullable: true }
+        city: { type: string, nullable: true }
+        phone: { type: string, nullable: true }
+        users: { type: integer, minimum: 0, description: Şirketin kişi sayısı. }
+        pendingUsers: { type: integer, minimum: 0, description: Henüz şifre belirlememiş davetli sayısı. }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time, description: Kaydın sürümü; düzenleme bunu geri gönderir. }
+
+    AdminCompanyPage:
+      type: object
+      required: [items, total, page, pageSize]
+      properties:
+        items: { type: array, items: { $ref: "#/components/schemas/AdminCompanyListItem" } }
+        total: { type: integer, minimum: 0, description: Süzgeçten geçen tüm şirketler, yalnızca bu sayfa değil. }
+        page: { type: integer }
+        pageSize: { type: integer }
+
+    AdminCompanyUser:
+      type: object
+      required: [id, email, firstName, lastName, title, status, invite, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        email: { type: string, format: email }
+        firstName: { type: string }
+        lastName: { type: string }
+        title: { type: string, nullable: true }
+        status:
+          type: string
+          enum: [PENDING, ACTIVE]
+          description: "`PENDING`: davet edildi, şifre belirlenmedi. `ACTIVE`: şifresi ya da Google bağlantısı var."
+        invite:
+          type: object
+          nullable: true
+          description: Yalnızca `PENDING` kişide; son davetin bağlantısı.
+          required: [expiresAt, expired]
+          properties:
+            expiresAt: { type: string, format: date-time }
+            expired: { type: boolean, description: Bağlantının süresi doldu; yeniden yollamak gerekir. }
+        createdAt: { type: string, format: date-time }
+
+    AdminCompanyDetail:
+      allOf:
+        - type: object
+          required: [id, name, taxOffice, city, phone, salesContact, users, createdAt, updatedAt]
+          properties:
+            id: { type: string, format: uuid }
+            name: { type: string }
+            taxOffice: { type: string, nullable: true }
+            city: { type: string, nullable: true }
+            phone: { type: string, nullable: true }
+            salesContact:
+              nullable: true
+              allOf:
+                - $ref: "#/components/schemas/AdminSalesContact"
+            users: { type: array, items: { $ref: "#/components/schemas/AdminCompanyUser" } }
+            createdAt: { type: string, format: date-time }
+            updatedAt: { type: string, format: date-time }
+
+    AdminCompanyCreate:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string, minLength: 2, maxLength: 120 }
+        taxOffice: { type: string, maxLength: 80 }
+        city: { type: string, maxLength: 60 }
+        phone: { type: string }
+        salesContact:
+          description: Üç alanıyla birlikte verilir ya da hiç verilmez.
+          allOf:
+            - $ref: "#/components/schemas/AdminSalesContact"
+
+    AdminCompanyUpdate:
+      type: object
+      required: [updatedAt]
+      properties:
+        updatedAt: { type: string, format: date-time, description: Düzenlenen kaydın `updatedAt` değeri. }
+        name: { type: string, minLength: 2, maxLength: 120 }
+        taxOffice: { type: string, nullable: true, maxLength: 80 }
+        city: { type: string, nullable: true, maxLength: 60 }
+        phone: { type: string, nullable: true }
+        salesContact:
+          nullable: true
+          allOf:
+            - $ref: "#/components/schemas/AdminSalesContact"
+
+    AdminCompanyInvite:
+      type: object
+      required: [email, firstName, lastName]
+      properties:
+        email: { type: string, format: email }
+        firstName: { type: string, maxLength: 60 }
+        lastName: { type: string, maxLength: 60 }
+        title: { type: string, maxLength: 80 }
+        locale: { type: string, enum: [tr, en], default: tr, description: E-postanın dili. }
 
     UserUpdate:
       type: object

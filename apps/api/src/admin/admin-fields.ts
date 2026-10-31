@@ -29,3 +29,19 @@ export const versionField = () =>
     const date = typeof raw === 'string' ? new Date(raw) : null;
     return date && !Number.isNaN(date.getTime()) ? { value: date } : { code: 'INVALID_FORMAT' };
   });
+
+const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// An e-mail address, trimmed and lower case; `INVALID_EMAIL` when it is not one.
+export const email: Check<string> = (raw) => {
+  const result = text(120)(raw);
+  if ('code' in result) return result;
+  return EMAIL.test(result.value) ? { value: result.value.toLowerCase() } : { code: 'INVALID_EMAIL' };
+};
+
+const PHONE = /^[0-9+()\-.\s]+$/;
+// A phone number: digits and the usual signs, at least seven digits.
+export const phone: Check<string> = (raw) => {
+  const result = text(30)(raw);
+  if ('code' in result) return result;
+  return PHONE.test(result.value) && result.value.replace(/\D/g, '').length >= 7 ? { value: result.value } : { code: 'INVALID_FORMAT' };
+};

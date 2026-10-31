@@ -80,6 +80,12 @@ enum QuoteSource {
 
 // ---------- Hesap ----------
 
+// Şifre belirleme bağlantısının ne için olduğu: unutulan şifre (1 saat) ya da kurumsal davet (7 gün, V2-33).
+enum ResetTokenKind {
+  RESET
+  INVITE
+}
+
 model User {
   id           String      @id @default(uuid())
   email        String      @unique
@@ -92,13 +98,19 @@ model User {
   accountType  AccountType @default(INDIVIDUAL)
   role         Role        @default(CUSTOMER)
 
-  // Kurumsal hesap bilgileri (yalnızca CORPORATE hesapta dolu gelir, hesabı Novera açar)
+  // Kurumsal hesap bir şirkete bağlıdır (V2-33). Şirket bilgisi `Company`'dedir; `GET /me` cevabı onu oradan doldurur.
+  companyId    String?
+  company      Company? @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  // Kişinin ünvanı (davette yazılır); şirketin değil kişinin bilgisidir.
+  contactTitle String?
+
+  // ESKİ firma alanları: V2-33 bunları `Company`'ye taşıdı ve artık okunmaz. Bir yayın aralığında eski ve yeni kod birlikte
+  // çalışabilsin diye bu sürümde durur; V2-34 sütunları düşürür.
   companyName  String?
   taxOffice    String?
   companyCity  String?
   companyPhone String?
-  contactTitle String?
-  salesContact Json? // { "name": "...", "email": "...", "phone": "..." }
+  salesContact Json?
 
   locale    Locale   @default(TR)
   theme     Theme    @default(LIGHT)
@@ -118,6 +130,25 @@ model User {
   pointTransactions PointTransaction[]
   sessions          Session[]
   passwordResetTokens   PasswordResetToken[]
+
+  // Bir şirketin kullanıcıları (V2-33).
+  @@index([companyId])
+}
+
+// Şirket (V2-33, ADR-25): kurumsal müşteri. Kurumsal hesaplar `User.companyId` ile buna bağlanır; bir şirketin birden çok
+// kullanıcısı olabilir. Şirketi ve kullanıcılarını Novera açar (davet): müşteri kendi başına hesap açamaz.
+model Company {
+  id           String   @id @default(uuid())
+  name         String   @unique
+  taxOffice    String?
+  city         String?
+  phone        String?
+  // { "name": "...", "email": "...", "phone": "..." } ya da boş
+  salesContact Json?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  users User[]
 }
 
 // Yönetimde değiştiren her işlemin kaydı (V2-23, ADR-24). Yalnızca eklenir: servis güncelleme ya da silme sunmaz ve
@@ -170,6 +201,8 @@ model LoginThrottle {
 model PasswordResetToken {
   id        String    @id @default(uuid())
   tokenHash String    @unique
+  // Unutulan şifre mi, kurumsal davet mi (V2-33): süre ve e-posta metni buna göre değişir.
+  kind      ResetTokenKind @default(RESET)
   expiresAt DateTime
   usedAt    DateTime?
   createdAt DateTime  @default(now())

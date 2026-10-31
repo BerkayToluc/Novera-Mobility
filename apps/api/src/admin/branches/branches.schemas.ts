@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { field } from '../../common/zod-fields.js';
 import { isProvince } from '../../common/provinces.js';
-import { required, sent, text, versionField, type Check } from '../admin-fields.js';
+import { email, phone, required, sent, text, versionField, type Check } from '../admin-fields.js';
 import { pageFields, sortField } from '../admin-list.js';
 import { BRANCH_KINDS, BRANCH_STATUSES, isValidDay, type OpeningHours } from './branches.view.js';
 
@@ -12,20 +12,6 @@ import { BRANCH_KINDS, BRANCH_STATUSES, isValidDay, type OpeningHours } from './
 // decimal point), not a point in the sea.
 export const LATITUDE = { min: 35.5, max: 42.5 } as const;
 export const LONGITUDE = { min: 25.5, max: 45.0 } as const;
-
-const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const email: Check<string> = (raw) => {
-  const result = text(120)(raw);
-  if ('code' in result) return result;
-  return EMAIL.test(result.value) ? { value: result.value.toLowerCase() } : { code: 'INVALID_EMAIL' };
-};
-
-const PHONE = /^[0-9+()\-.\s]+$/;
-const phone: Check<string> = (raw) => {
-  const result = text(30)(raw);
-  if ('code' in result) return result;
-  return PHONE.test(result.value) && result.value.replace(/\D/g, '').length >= 7 ? { value: result.value } : { code: 'INVALID_FORMAT' };
-};
 
 const province: Check<string> = (raw) => {
   if (raw === undefined || raw === null || raw === '') return { code: 'REQUIRED' };

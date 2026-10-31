@@ -882,6 +882,100 @@
     "cityFilter": {
       "all": "All cities",
       "apply": "Filter"
+    },
+    "companies": {
+      "title": "Companies",
+      "intro": "Corporate customer companies and their people. You invite a person here; they set their own password.",
+      "newButton": "New company",
+      "newTitle": "New company",
+      "newIntro": "Once the company is created you can invite its people.",
+      "detailTitle": "Company",
+      "detailIntro": "{count, plural, =0 {No people yet.} one {# person.} other {# people.}}",
+      "searchLabel": "Search companies",
+      "tableCaption": "Companies",
+      "retry": "Try again",
+      "columns": {
+        "name": "Company",
+        "users": "People",
+        "pending": "Awaiting invite"
+      },
+      "emptyTitle": "No companies yet",
+      "emptyText": "Add the first company, then invite its people.",
+      "emptyFilteredTitle": "No company matches this search",
+      "emptyFilteredText": "Try searching for something else.",
+      "loadErrorTitle": "Companies could not be loaded",
+      "loadErrorText": "Try again in a few seconds.",
+      "fields": {
+        "name": "Company name",
+        "taxOffice": "Tax office",
+        "city": "City",
+        "phone": "Phone",
+        "salesName": "Representative's name",
+        "salesEmail": "Representative's e-mail",
+        "salesPhone": "Representative's phone"
+      },
+      "sales": {
+        "title": "Sales representative",
+        "hint": "Shown on the company's own fleet screen. Fill in all three fields, or leave all three empty."
+      },
+      "form": {
+        "create": "Create company",
+        "save": "Save changes",
+        "saving": "Saving",
+        "cancel": "Cancel"
+      },
+      "errors": {
+        "name": "Enter a name between 2 and 120 characters.",
+        "nameTaken": "A company with this name already exists.",
+        "taxOffice": "Enter 80 characters at most.",
+        "city": "Enter 60 characters at most.",
+        "phone": "Enter a valid phone number, or leave it empty.",
+        "salesName": "Enter the representative's name.",
+        "salesEmail": "Enter a valid e-mail address for the representative.",
+        "salesPhone": "Enter a valid phone number for the representative.",
+        "inviteEmail": "Enter a valid e-mail address.",
+        "firstName": "Enter the first name (60 characters at most).",
+        "lastName": "Enter the last name (60 characters at most).",
+        "title": "Enter 80 characters at most.",
+        "emailTaken": "An account with this e-mail address already exists.",
+        "settled": "This person has already set a password; there is nothing to send again.",
+        "personNotFound": "This person no longer exists. Reload the page.",
+        "generic": "This information was not accepted. Check the fields and try again.",
+        "notFound": "This company no longer exists. Go back to the list.",
+        "unavailable": "That did not work. Try again in a few seconds."
+      },
+      "toast": {
+        "created": "Company created",
+        "saved": "Changes saved",
+        "invited": "Invitation sent",
+        "resent": "Invitation sent again"
+      },
+      "people": {
+        "title": "People",
+        "intro": "People who can rent on the company's behalf. An invited person sets their password with the link in the e-mail; the link is valid for 7 days.",
+        "empty": "Nobody has been invited to this company yet.",
+        "active": "Active",
+        "pending": "Awaiting invite",
+        "expired": "Invitation expired",
+        "validUntil": "Link valid until {date}",
+        "expiredOn": "The link expired on {date}",
+        "resend": "Send invitation again",
+        "resendFor": "Send invitation again: {name}"
+      },
+      "invite": {
+        "title": "Invite a person",
+        "hint": "The person gets a link to set a password by e-mail. You never see the password.",
+        "email": "E-mail",
+        "firstName": "First name",
+        "lastName": "Last name",
+        "personTitle": "Job title",
+        "locale": "Language of the e-mail",
+        "localeHint": "The invitation is written in this language.",
+        "localeTr": "Turkish",
+        "localeEn": "English",
+        "submit": "Send invitation",
+        "sending": "Sending"
+      }
     }
   }
 }
