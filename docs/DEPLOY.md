@@ -177,7 +177,89 @@ docker exec novera-db rm /tmp/novera.dump
 ```
 
 Yedek dosyaları kişisel veri içerir: **Git'e koyma**, herkese açık bir yere yükleme.
-- Geri yükleme denemesi yapılmamış yedek, yedek sayılmaz: bir kez boş bir Neon projesine `pg_restore` ile yüklemeyi dene.
+- Geri yükleme denemesi yapılmamış yedek, yedek sayılmaz: bir kez boş bir Neon projesine `pg_restore` ile yüklemeyi dene (adımlar §9c).
+
+## 9c. Geri yükleme denemesi (V2-45)
+
+Geri yüklenmemiş yedek, yedek sayılmaz. Bu deneme bir kez yapılır ve sonucu `docs/issues/V2-45-canli-ortam.md` içindeki "Deneme kaydı" tablosuna yazılır (tarih, süre, tablo sayısı, satır sayıları aynı mı). Deneme **canlı veritabanına yazmaz**: yedeği ayrı, boş bir Neon projesine yükler. Bilgisayarında Docker açık ve `novera-db` kapsayıcısı çalışıyor olmalı (§2). Bağlantı adreslerini hiçbir yere yazma; her seferinde `Read-Host` ile gir.
+
+1. **Boş bir Neon projesi aç:** Neon → **New project** (örn. `novera-restore-test`), Postgres sürümü canlı projeyle aynı. **Connect** penceresinde havuzlamayı (*Connection pooling*) kapat ve adresi kopyala. (Deneme bitince projeyi sil, adım 7.)
+2. **Yedeği al** (§9'daki komut; süreyi ölçmek için `Measure-Command` içinde):
+
+```powershell
+$env:LIVE_URL = Read-Host "Canli Neon baglanti dizesi"
+```
+
+```powershell
+Measure-Command { docker exec novera-db pg_dump $env:LIVE_URL -Fc -f /tmp/novera.dump }
+```
+
+3. **Boş projeye yükle** (adresi yine sor; çıkan süre "süre" satırına yazılır):
+
+```powershell
+$env:TEST_URL = Read-Host "Bos test projesinin baglanti dizesi"
+```
+
+```powershell
+Measure-Command { docker exec novera-db pg_restore --no-owner --no-acl -d $env:TEST_URL /tmp/novera.dump }
+```
+
+`pg_restore` "already exists" gibi uyarılar verirse proje boş değildir; yeni bir proje aç. Sürüm uyuşmazlığı ("unsupported version") çıkarsa `docker exec novera-db pg_dump --version` ile Neon'daki sürümü karşılaştır.
+4. **Satır sayılarını karşılaştır:** aynı sorgu iki veritabanında çalışır (yalnız tablo adı ve sayı yazar, kişisel veri yazmaz):
+
+```powershell
+docker cp scripts/row-counts.sql novera-db:/tmp/row-counts.sql
+```
+
+```powershell
+docker exec novera-db psql $env:LIVE_URL -f /tmp/row-counts.sql
+```
+
+```powershell
+docker exec novera-db psql $env:TEST_URL -f /tmp/row-counts.sql
+```
+
+İki liste **satır satırına aynı** olmalı (canlıya o arada yazılan bir kayıt 1–2 satır fark yaratabilir; fark varsa nedenini yaz). `_prisma_migrations` sayısı = migration klasörü sayısı.
+5. **Uygulama açılıyor mu (isteğe bağlı ama önerilir):** API'yi yerelde `DATABASE_URL` = test projesi ile açıp `GET /branches` dene; satırlar canlıdakilerle aynı gelmeli.
+6. **Temizlik:** dökümü ve ortam değişkenlerini sil:
+
+```powershell
+docker exec novera-db rm /tmp/novera.dump /tmp/row-counts.sql
+```
+
+```powershell
+Remove-Item Env:LIVE_URL, Env:TEST_URL
+```
+
+7. Neon'da `novera-restore-test` projesini sil. Yedek dosyası kişisel veri içerir: Git'e koyma.
+
+## 9d. Canlıyı dışarıdan denetle (V2-45)
+
+`pnpm check:live` canlı siteye dışarıdan bakar ve neyin eksik kaldığını söyler; yalnız okur. Sitenin ve API'nin adresiyle çalıştır:
+
+```powershell
+pnpm check:live --web https://SITE-ADRESIN --api https://API-ADRESIN
+```
+
+Şunları denetler: `sitemap.xml` ve `robots.txt` gerçek alan adını gösteriyor mu (`NEXT_PUBLIC_SITE_URL` doğru mu), ana sayfanın canonical ve paylaşım adresi gerçek alan adı mı, CSP (nonce'lu), `nosniff`, `X-Frame-Options` ve HSTS var mı, API `/health` cevap veriyor mu, **anahtarsız API isteği `404`** mu, **`/docs` kapalı** mı. API anahtarının doğru olduğunu da görmek için **yalnız bu komut için** anahtarı ortam değişkenine koy (yazdırılmaz, günlüğe girmez):
+
+```powershell
+$env:NOVERA_API_KEY = Read-Host "API_ACCESS_KEY"
+```
+
+```powershell
+pnpm check:live --api https://API-ADRESIN
+```
+
+```powershell
+Remove-Item Env:NOVERA_API_KEY
+```
+
+Çıktının son satırı "N of N checks passed" olmalı. Betik (`scripts/check-live.mjs`) bu dosyadaki ve SECURITY.md'deki yayın listesinin dışarıdan sınanabilen maddelerini kapsar; Maps kısıtı, yönetici girişi ve yedek elle sınanır (aşağıda).
+
+### Google Maps anahtarının kısıtını denemek
+
+Kısıt çalışıyorsa anahtar **başka bir alan adında** çalışmaz. Denemek için anahtarı kendi bilgisayarında, listede olmayan bir adreste kullan: `apps/web/.env.local` içine anahtarı yaz, `pnpm dev` ile `http://localhost:3000/bayilerimiz` aç. Anahtar yalnız site adresine kısıtlıysa harita açılmaz ve tarayıcı konsolunda `RefererNotAllowedMapError` görünür (sayfa listeyle çalışır). Harita açılıyorsa kısıt yok ya da `localhost` listede demektir: Google Cloud → APIs & Services → Credentials → anahtar → **Websites** listesini düzelt. Denemeden sonra `.env.local` dosyasını sil. Sonucu (tarih ve "açılmadı / RefererNotAllowedMapError") V2-45 issue'sundaki deneme notuna yaz. Kota için aynı sayfada "Quotas" bölümünden günlük bir üst sınır koy.
 
 ## 9a. v2 ile gelecek ayarlar
 
