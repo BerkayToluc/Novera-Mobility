@@ -6,13 +6,13 @@ import { listMockInvoices } from "./invoices";
 
 // The sample report (USE_MOCKS=1, local work and tests only, lib/mode.ts): built from the sample company's own invoices, expenses, cars
 // and assignments by the same rules as the API's, so what the report says adds up to those screens to the kuruş.
-export function sampleReport(world: string, companyId: string, from: string, to: string): FleetReport {
+export function sampleReport(world: string, companyId: string, from: string, to: string, now = Date.now()): FleetReport {
   const spans = assignmentSpans(world, companyId);
   const everything = { page: 1, pageSize: 1000, sort: null, type: null, status: null } as const;
   return buildReport({
     from,
     to,
-    now: Date.now(),
+    now,
     vehicles: listMockCompanyCars(world, companyId).map((car) => ({
       id: car.id,
       plate: car.plate,

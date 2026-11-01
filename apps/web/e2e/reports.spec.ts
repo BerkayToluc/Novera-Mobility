@@ -40,6 +40,9 @@ test("the chart is a picture hidden from screen readers; the table is what is re
 
 test("the period is chosen from the four choices, and a custom run goes in the address", async ({ page, context }) => {
   await signInSample(context, "corporate");
+  // The sample's invoices and expenses are of August to October 2026, so "this month" is October 2026 whatever day the test runs on: it is
+  // said what time it is (sample mode, lib/mock-world.ts). It broke on 1 November 2026, when the real "this month" had nothing in it.
+  await context.addCookies([{ name: "novera-mock-now", value: String(Date.parse("2026-10-31T09:00:00.000Z")), url: "http://localhost:3200" }]);
   await page.goto("/filom/raporlar");
   const nav = page.getByRole("navigation", { name: "Dönem" });
   await expect(nav.getByRole("link", { name: "Son 3 ay" })).toHaveAttribute("aria-current", "page");
@@ -51,7 +54,7 @@ test("the period is chosen from the four choices, and a custom run goes in the a
   await nav.getByRole("link", { name: "Bu yıl" }).click();
   await expect(page).toHaveURL(/donem=bu-yil/);
 
-  const year = new Date().getUTCFullYear();
+  const year = 2026;
   await page.goto(`/filom/raporlar?donem=ozel&bas=${year}-01&bit=${year}-02`);
   await expect(page.getByLabel("İlk ay")).toHaveValue(`${year}-01`);
   await expect(page.getByLabel("Son ay")).toHaveValue(`${year}-02`);

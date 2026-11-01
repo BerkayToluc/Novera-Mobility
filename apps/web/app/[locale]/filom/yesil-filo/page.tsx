@@ -10,8 +10,7 @@ import { SimulationBadge } from "@/components/fleet/simulation-badge";
 import { Button } from "@/components/ui/button";
 import { StateMessage } from "@/components/ui/state-message";
 import { Link } from "@/i18n/navigation";
-import { currentTime } from "@/lib/clock";
-import { getFleetGreen, getFleetStations } from "@/lib/fleet-server";
+import { fleetNow, getFleetGreen, getFleetStations } from "@/lib/fleet-server";
 import { kilograms, pickVehicle, STATIONS_SHOWN, stationTone, type GreenReport, type StationList } from "@/lib/green";
 import { monthLabel, PERIOD_CHOICES, parseReportRange } from "@/lib/reports";
 
@@ -26,7 +25,7 @@ export default async function GreenFleetPage({ searchParams }: PageProps<"/[loca
   const locale = await getLocale();
   const raw = await searchParams;
   const one = (name: string) => (Array.isArray(raw[name]) ? raw[name][0] : raw[name]);
-  const thisMonth = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Istanbul", year: "numeric", month: "2-digit" }).format(new Date(currentTime())).slice(0, 7);
+  const thisMonth = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Istanbul", year: "numeric", month: "2-digit" }).format(new Date(await fleetNow())).slice(0, 7);
   const range = parseReportRange({ donem: one("donem"), bas: one("bas"), bit: one("bit") }, thisMonth);
 
   // Only the fetches sit in the try: a failure to load is an expected state with its own UI.

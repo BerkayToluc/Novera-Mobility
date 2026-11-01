@@ -26,6 +26,7 @@ import type { RouteDay, TrackingList } from "./tracking";
 import { requestApiFilters, type RequestFilter, type ServiceRequestDetail, type ServiceRequestPage } from "./requests";
 import { isMockMode } from "./mode";
 import { mockNow, mockWorld } from "./mock-world";
+import { currentTime } from "./clock";
 import { getSession } from "./session";
 
 // What the Filom screens read (V2-36). With USE_MOCKS=1 (local work and tests only, lib/mode.ts) the sample fleet is shown; otherwise
@@ -139,10 +140,17 @@ export async function getFleetExpenses(params: AdminListParams<FleetExpenseFilte
   );
 }
 
+// "Now" for the screens that talk about this month (reports, Green Fleet). The clock; in the sample mode the time a test says (the `novera-mock-now`
+// cookie, lib/mock-world.ts), so the sample's months (August to October 2026) stay "this month" and a test does not break when the real month
+// turns over.
+export async function fleetNow(): Promise<number> {
+  return isMockMode() ? mockNow() : currentTime();
+}
+
 // The report of the company for the months from `from` to `to` ("2026-08"), both included.
 export async function getFleetReport(from: string, to: string): Promise<FleetReport> {
   if (!isMockMode()) return fetchFleetReport(from, to);
-  return (await import("@/mocks/reports")).sampleReport(await mockWorld(), await sampleCompany(), from, to);
+  return (await import("@/mocks/reports")).sampleReport(await mockWorld(), await sampleCompany(), from, to, await mockNow());
 }
 
 // The service requests of the company; `vehicle` narrows to one car's.
@@ -166,7 +174,7 @@ export async function getFleetRequest(number: string): Promise<ServiceRequestDet
 // The electric and hybrid cars of the company for the months from `from` to `to`, with the carbon they saved.
 export async function getFleetGreen(from: string, to: string): Promise<GreenReport> {
   if (!isMockMode()) return fetchFleetGreen(from, to);
-  return (await import("@/mocks/green")).sampleGreen(await mockWorld(), await sampleCompany(), from, to);
+  return (await import("@/mocks/green")).sampleGreen(await mockWorld(), await sampleCompany(), from, to, await mockNow());
 }
 
 // The charging stations nearest to a car (a simulation); `null` for a car that does not exist, is another company's or is not electric or hybrid.
