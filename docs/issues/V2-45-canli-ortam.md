@@ -32,16 +32,25 @@ Bu iş büyük ölçüde canlı ortamda elle yapılır (Vercel, Google Cloud, Ne
 - `scripts/row-counts.sql` ve DEPLOY.md §9c: yedeği boş bir Neon projesine geri yükleme adımları ve satır sayısı karşılaştırması.
 - DEPLOY.md §9d: Maps anahtarı kısıtının nasıl denendiği.
 
-## Deneme kaydı (canlıda doldurulacak)
+## Deneme kaydı (1 Kasım 2026)
 | Ne | Sonuç |
 |---|---|
-| `pnpm check:live` çıktısı (site ve API) | |
-| Maps anahtarı başka adreste (`localhost`) denendi: ne oldu | |
-| Geri yükleme: tarih | |
-| Geri yükleme: `pg_dump` süresi / `pg_restore` süresi | |
-| Geri yükleme: tablo sayısı, satır sayıları aynı mı (fark varsa nedeni) | |
-| G yönetici olarak panele girdi (tarih) | |
-| Render servisi, Blueprint ve UptimeRobot izleyicisi silindi (tarih) | |
+| `pnpm check:live` çıktısı (site ve API) | **7 / 7 geçti** (site: `https://novera-mobility.vercel.app`): sitemap (48 adres) ve robots gerçek adreste, canonical ve paylaşım adresi gerçek adres, CSP (nonce'lu) + `nosniff` + `X-Frame-Options` + HSTS; API: `/health` ok, anahtarsız istek 404, `/docs` 404. API anahtarının kendisi komutla denenmedi (girilen değer yanlıştı, `404`); anahtarın uyuştuğu canlı sitenin API'den veri okumasıyla görüldü |
+| Maps anahtarı başka adreste (`localhost`) denendi: ne oldu | **Denenmedi.** Berkay anahtarın siteye kısıtlı olduğunu Google Cloud'da kontrol etti; `localhost`'ta `RefererNotAllowedMapError` denemesi bildirilmedi. Kota (günlük üst sınır) ayrıca bildirilmedi |
+| Geri yükleme: tarih | **Yapılmadı** (Berkay kararı, 1 Kasım 2026). Yedek yalnız Neon'un son 6 saatlik dönüşüdür; kod GitHub'da, veri yalnız Neon'da. Adımlar DEPLOY.md §9c'de hazır |
+| Geri yükleme: `pg_dump` süresi / `pg_restore` süresi | Yapılmadı |
+| Geri yükleme: tablo sayısı, satır sayıları aynı mı | Yapılmadı |
+| G yönetici olarak panele girdi (tarih) | Yönetici hesapları `pnpm admin:create` ile açıldı (1 Kasım 2026); **G'nin ilk girişi bildirilmedi**, doğrulanmadı |
+| Render servisi, Blueprint ve UptimeRobot izleyicisi silindi (tarih) | **Silindi** (1 Kasım 2026, Berkay bildirdi) |
+
+## Kabul kriterleri: durum
+- [x] Canlıda sitemap ve canonical adresleri gerçek alan adını gösteriyor (`pnpm check:live`; adres şimdilik `novera-mobility.vercel.app`, kendi alan adı gelince yeniden bakılır).
+- [ ] Başka bir alan adından Maps anahtarı çalışmıyor: denenmedi (yukarıda).
+- [ ] Geri yükleme denemesi yapıldı: yapılmadı (yukarıda).
+- [ ] G yönetici olarak panele girdi: bildirilmedi.
+- [ ] DEPLOY.md ve SECURITY.md kontrol listeleri işaretli: SECURITY.md'deki 10 maddenin 8'i işaretlendi; yedek ve geri yükleme ile Resend (`RESEND_API_KEY` ve doğrulanmış alan adı) açık.
+
+Bu yüzden issue #335 **açık kalır**; kalanlar tamamlanınca ya da PM kararıyla v2.1'e bırakılınca kapatılır.
 
 ## Etiketler
 `faz-12` `guvenlik` `P1` `ci`
