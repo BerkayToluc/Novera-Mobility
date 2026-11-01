@@ -240,3 +240,4 @@ v2 "bitti" sayılmadan önce canlıda, önce 375 px mobil tarayıcıda, sonra 12
 ## Sürüm notları
 
 - **v2.0 (22 Ekim 2026, G):** belge sıfırdan yazıldı. Roller değişti (G PM, Berkay full stack). Kapsam: temel sağlamlaştırma, Yönetim paneli (bayi/model/araç ekleme dahil, fotoğraf yükleme), Filom, servis ve transfer talepleri, canlı takip ve şarj simülasyonu. İçerik modülü ve mobil uygulama kapsam dışı. Berkay'ın 20 Ekim önerisi (v0.11, ADMIN/FLEET/ROADMAP) temel alındı ve arşivlendi.
+- **v2.0 kod tamam (31 Ekim 2026, Berkay):** V2-01 – V2-44 `main`'de. Ekran görüntüsü ve G onayı artık PR şartı değildir (Berkay kararı); ekran okuyucu turu proje kapsamı dışındadır (U-05). Canlıda doğrulanacak olanlar V2-45 (ortam) ve V2-46 (§6 kabul akışları, QUALITY kapanışı, `v2.0.0` etiketi). v2.1'e kalanlar [ROADMAP.md](ROADMAP.md) §7'dedir.

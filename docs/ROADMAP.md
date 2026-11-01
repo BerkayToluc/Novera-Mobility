@@ -3,21 +3,15 @@
 > Durum: **v2.0** · 22 Ekim 2026 · Sahip: G (PM). İşlerin tam listesi [BACKLOG.md](BACKLOG.md), kapsam [SPEC.md](SPEC.md), süreç [WORKFLOW.md](WORKFLOW.md).
 > Bu belge sıra, gerekçe ve faz kapılarıdır. Çelişki olursa SPEC ve BACKLOG kazanır. v1'in yol haritası ve durum belgesi [archive/v1/](archive/v1/) içinde.
 
-## 1. Neredeyiz (22 Ekim 2026)
+## 1. Neredeyiz (31 Ekim 2026)
 
-**Canlıda çalışan (v1):** Vercel + Render + Neon üzerinde:
-- kiralama akışı uçtan uca: arama, 15 dakika tutma, özet, kampanya kodu, puanla ödeme, sürücü bilgileri, sahte ödeme, onay;
-- hesap: kayıt, giriş, Google ile giriş, şifre sıfırlama e-postası, ayarlar, oturumlar, Rezervasyonlarım, Puanlarım, iptal;
-- kurumsal teklif ve iletişim formları;
-- SSS, Yardım, Rehberler, Bayilerimiz;
-- çerez onayı, CSP ve güvenlik başlıkları.
-- CI: lint, tip, test (gerçek Postgres), build, link kontrolü, e2e.
+**Kod tarafı bitti:** V2-01 – V2-44 birleşti (V2-44: PR #397). Faz 1–11'in hepsi `main`'dedir: güvenlik ve temel, yönetim paneli (kampanya kodu, bayi, model ve araç, rezervasyon, teklif ve mesaj, şirket ve kullanıcı daveti), Filom (araç, personel, zimmet, sözleşme, fatura, masraf, rapor, Yeşil Filo), servis ve VIP transfer talepleri, canlı takip simülasyonu ve e-postalar. Her iş kendi PR'ında lint, tip, test (gerçek Postgres), build ve e2e ile geçti.
 
-**Eksik ya da zayıf olan:**
-- **Güvenlik ve temel:** 22 Ekim keşfi bir kritik, beş yüksek bulgu çıkardı ([QUALITY.md](QUALITY.md)).
-- **Yönetim yolu yok:** kampanya kodu, bayi ve araç ancak veritabanından elle yönetiliyor; kurumsal hesap açmanın yolu yok.
-- **Satılan ama çalışmayan özellikler:** ürün ve hizmet sayfalarındaki filo paneli, takip ve talepler yalnızca metin.
-- **v1'den açık kalanlar:** production Lighthouse, ekran okuyucu turu, 4 modelin fotoğrafı, analytics kararı, `NEXT_PUBLIC_SITE_URL`.
+**Canlıda yapılacak (kod değil):**
+- **V2-45 (hazırlık PR'ı #398):** canlı ortam ayarları ve yedeğin geri yüklenebildiğinin kanıtı. `pnpm check:live` ve geri yükleme adımları hazır; ayar ve denemeler Berkay'ın, sonuç [issue dosyasındaki](issues/V2-45-canli-ortam.md) "Deneme kaydı" tablosuna yazılır.
+- **V2-46:** SPEC §6'nın 11 kabul akışı canlıda (G yürütür, [issue dosyasında](issues/V2-46-son-kabul.md) adım adım listelendi), QUALITY kapanışı, `v2.0.0` etiketi.
+
+**Bilinen açıklar:** gerçek müşterilere e-posta gitmesi için kendi alan adı ve Resend doğrulaması (şimdilik deneme göndericisi), Google Maps haritasının gerçek tarayıcıda ilk denemesi, ekran okuyucu turu (proje kapsamı dışında, QUALITY U-05). Hepsi §7'de.
 
 **Ekip:** G Product/Project Manager, Berkay full stack. Önceki FE/BE ayrımı ve 20 Ekim'deki iş dağılımı (Y79–Y108) geçersizdir; arşivde referans olarak durur.
 
@@ -89,3 +83,23 @@ Her fazın sonunda G canlıda (ya da son PR'ın önizlemesinde) bir **faz turu**
 | Ücretsiz katman koşullarının değişmesi (Vercel, Blob, Resend) | Hizmet kesilir | Her karar gününde koşullar resmi sayfadan doğrulanır, DEPLOY.md'ye tarihle yazılır |
 | Büyük refactor'ların (V2-07, V2-13, V2-14) davranışı bozması | Gerileme | Önce test (V2-19'un API kısmı gerekiyorsa öne alınır); PR'da önce/sonra e2e |
 | Kapsam büyümesi | v2 hiç bitmez | Yeni istek önce SPEC'e PR olarak girer, G onaylar, BACKLOG'a yeni satır olur (WORKFLOW.md §5) |
+
+## 7. v2.1'e kalanlar (V2-46'da listelendi)
+
+Bunlar v2.0'ı engellemez; yapılırsa v2.1'dir. Kapsam dışı olanlar (mobil uygulama, içerik modülü) SPEC §4'tedir.
+
+| Ne | Nereden | Not |
+|---|---|---|
+| E-posta için kendi alan adı ve Resend doğrulaması | V2-44, V2-45 | `onboarding@resend.dev` yalnız Resend hesabının adresine gönderir; müşterilere gitmesi için alan adı gerekir (DEPLOY.md §10) |
+| Başarısız onay, iptal ve talep e-postalarının yeniden denenmesi | V2-44 | Yalnız hatırlatma yeniden denenir; ayrı kuyruk ya da deneme tablosu yok (ADR-32) |
+| E-posta için gerçek gönderim ve Cloud Scheduler denemesi | V2-44 | Kod ve testler tamam; Resend'e gerçek gönderim ve zamanlayıcı canlıda denenmedi |
+| Canlı konumun şarj istasyonu uzaklığında kullanılması; istasyonların takip haritasında gösterilmesi | V2-40, V2-43 | İstasyon uçları şimdi şehir merkezinden hesaplar |
+| Şehir başına üçüncü rota; rotaların gerçek yol verisiyle çizilmesi | V2-43 | İki şablon rota var (issue 2–3 diyordu) |
+| Takip haritasının gerçek Google anahtarıyla ilk denemesi | V2-43 | e2e anahtarsız yolu sınar |
+| Yönetim panelinde masraf düzeltme ekranı | V2-38 | `PATCH /admin/fleet-expenses/{id}` API'de var ve testli |
+| Yönetim panelinden müşteri adına talep ve transfer açma | V2-41, V2-42 | Talepleri yalnız müşteri açar |
+| İstasyonlar ve rotalar için yönetim ekranı | V2-40, V2-43 | Seed sabit, issue istemiyordu |
+| Fatura payının kullanım ya da gün oranına göre bölüşümü | V2-39 | Şimdi eşit bölüşüm (issue böyle istedi) |
+| Giriş bekleme sayacının atomik yapılması | QUALITY G-21 | Düşük; tek SQL `INSERT … ON CONFLICT DO UPDATE` |
+| Ekran okuyucu (NVDA) turu ve sayfa sayfa tasarım eleştirisi | QUALITY U-05 | Proje kapsamı dışı kararı (29 Ekim) |
+| `/bayilerimiz` giriş betiğinin +1 KB'ının nedeni; `green.spec.ts` tam koşuda bir kez hydration zaman aşımı | V2-43, V2-40 | İncelenmedi; tek başına geçiyor |

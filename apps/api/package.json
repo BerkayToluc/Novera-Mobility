@@ -20,6 +20,7 @@
     "test:debug": "node --inspect-brk --experimental-vm-modules -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "db:seed": "tsx prisma/seed.ts",
     "db:seed:simulation": "tsx prisma/seed-simulation.ts",
+    "db:seed:fleet": "tsx prisma/seed-fleet-only.ts",
     "admin:create": "tsx src/admin/admin-create.ts"
   },
   "dependencies": {
