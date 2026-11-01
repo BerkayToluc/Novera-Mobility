@@ -8,8 +8,7 @@ import { ReportTable } from "@/components/fleet/report-table";
 import { Button } from "@/components/ui/button";
 import { StateMessage } from "@/components/ui/state-message";
 import { Link } from "@/i18n/navigation";
-import { currentTime } from "@/lib/clock";
-import { getFleetReport } from "@/lib/fleet-server";
+import { fleetNow, getFleetReport } from "@/lib/fleet-server";
 import { monthLabel, PERIOD_CHOICES, parseReportRange, type FleetReport } from "@/lib/reports";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -26,7 +25,7 @@ export default async function FleetReportsPage({ searchParams }: PageProps<"/[lo
   const raw = await searchParams;
   const one = (name: string) => (Array.isArray(raw[name]) ? raw[name][0] : raw[name]);
   // The month of today in Istanbul, so "this month" is the same for everyone whatever their clock says.
-  const thisMonth = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Istanbul", year: "numeric", month: "2-digit" }).format(new Date(currentTime())).slice(0, 7);
+  const thisMonth = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Istanbul", year: "numeric", month: "2-digit" }).format(new Date(await fleetNow())).slice(0, 7);
   const range = parseReportRange({ donem: one("donem"), bas: one("bas"), bit: one("bit") }, thisMonth);
 
   // Only the fetch sits in the try: a failure to load is an expected state with its own UI.
