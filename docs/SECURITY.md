@@ -237,16 +237,16 @@ V2-45: bu listenin dışarıdan sınanabilen maddeleri (anahtarsız istek `404`,
 
 Adım adım uygulama: `docs/DEPLOY.md`. Burada yalnızca güvenlik açısından zorunlu olanlar.
 
-- [ ] `NODE_ENV=production` (aksi halde oturum çerezi `Secure` olmaz). Cloud Run'da servisin ortam değişkeni olarak girilir (DEPLOY.md §4).
-- [ ] `API_ACCESS_KEY` hem API'de hem web'de **aynı** değerde (en az 32 karakter). Web'in bu anahtarı ve ziyaretçi adresini göndermesi `apps/web/lib/api-headers.ts` ile yapılır. Anahtar olmadan canlı API açılmaz; yanlışsa her çağrı `404` olur.
-- [ ] `TRUST_PROXY_HOPS`: API'den önce kaç proxy var. Cloud Run'da `1` (Google'ın yük dengeleyicisi); 28 Ekim'de iki cihazdan denendi, `RateLimitHit`'te farklı `ip:` anahtarları göründü. Ziyaretçi adresi anahtarla gelen `X-Novera-Client-IP` başlığından alınır; canlıda her istek anahtarla geldiği için bu ayar pratikte yalnızca `/health` için geçerlidir, yine de doğru tutulur.
-- [ ] `WEB_URL=https://...` ve `DATABASE_URL` tanımlı (yoksa API açılmaz).
-- [ ] `/docs` kapalı kalmalı (`ENABLE_DOCS` boş).
-- [ ] `RESEND_API_KEY` ve `MAIL_FROM` (alan adı Resend'de doğrulanmış) ya da bilinçli olarak boş: boşsa canlıda parola sıfırlama e-postası gitmez.
-- [ ] Veritabanı yedeği alınıyor ve geri yükleme **denendi** (`DEPLOY.md` 9. adım). Veritabanı parolası geliştirme değerinden (`novera_dev`) farklı.
-- [ ] Google Maps anahtarı siteye (HTTP referrer) kısıtlı.
-- [ ] Canlıda `curl`/`Invoke-WebRequest` ile anahtarsız istek `404`, `/docs` `404` (`DEPLOY.md` 8. adım).
-- [ ] Web tarafı (G): CSP ve HSTS zaten var (`next.config.ts`, `proxy.ts`); canlı alan adında doğrulanmalı.
+- [x] `NODE_ENV=production` (aksi halde oturum çerezi `Secure` olmaz). Cloud Run'da servisin ortam değişkeni olarak girilir (DEPLOY.md §4). _1 Kasım 2026: Cloud Run ortam değişkeninde `production` görüldü (Berkay)._
+- [x] `API_ACCESS_KEY` hem API'de hem web'de **aynı** değerde (en az 32 karakter). Web'in bu anahtarı ve ziyaretçi adresini göndermesi `apps/web/lib/api-headers.ts` ile yapılır. Anahtar olmadan canlı API açılmaz; yanlışsa her çağrı `404` olur. _1 Kasım 2026: site API'den veri okuyor (anahtarlar aynı) ve API production kipinde 32 karakterden kısa anahtarla açılmaz (`config/runtime.ts`). `pnpm check:live` ile anahtarın kendisi denenmedi (komuta yanlış değer girildi); eski anahtardan farklı olduğu Berkay'ın beyanıdır, doğrulanmadı._
+- [x] `TRUST_PROXY_HOPS`: API'den önce kaç proxy var. Cloud Run'da `1` (Google'ın yük dengeleyicisi); 28 Ekim'de iki cihazdan denendi, `RateLimitHit`'te farklı `ip:` anahtarları göründü. Ziyaretçi adresi anahtarla gelen `X-Novera-Client-IP` başlığından alınır; canlıda her istek anahtarla geldiği için bu ayar pratikte yalnızca `/health` için geçerlidir, yine de doğru tutulur. _1 Kasım 2026: Cloud Run'da `1` görüldü._
+- [x] `WEB_URL=https://...` ve `DATABASE_URL` tanımlı (yoksa API açılmaz). _1 Kasım 2026: `WEB_URL=https://novera-mobility.vercel.app` görüldü, `DATABASE_URL` tanımlı (API açılıyor ve veri okuyor)._
+- [x] `/docs` kapalı kalmalı (`ENABLE_DOCS` boş). _1 Kasım 2026: `pnpm check:live` → `/docs` 404._
+- [ ] `RESEND_API_KEY` ve `MAIL_FROM` (alan adı Resend'de doğrulanmış) ya da bilinçli olarak boş: boşsa canlıda parola sıfırlama e-postası gitmez. _Açık: `MAIL_FROM` Resend'in deneme göndericisi (`onboarding@resend.dev`), yalnız Resend hesabının adresine gider; `RESEND_API_KEY`'in varlığı doğrulanmadı. Alan adı doğrulanınca işaretlenir (ROADMAP §7)._
+- [ ] Veritabanı yedeği alınıyor ve geri yükleme **denendi** (`DEPLOY.md` 9. adım). Veritabanı parolası geliştirme değerinden (`novera_dev`) farklı. _Açık: geri yükleme denemesi yapılmadı (1 Kasım 2026, Berkay kararı)._
+- [x] Google Maps anahtarı siteye (HTTP referrer) kısıtlı. _1 Kasım 2026: Berkay kısıtı Google Cloud'da kontrol etti (siteye kısıtlı). Başka adreste (`localhost`) ayrıca denendiği bildirilmedi._
+- [x] Canlıda `curl`/`Invoke-WebRequest` ile anahtarsız istek `404`, `/docs` `404` (`DEPLOY.md` 8. adım). _1 Kasım 2026: `pnpm check:live` → anahtarsız istek 404, `/docs` 404._
+- [x] Web tarafı (G): CSP ve HSTS zaten var (`next.config.ts`, `proxy.ts`); canlı alan adında doğrulanmalı. _1 Kasım 2026: `pnpm check:live` → CSP (nonce'lu), `nosniff`, `X-Frame-Options` ve HSTS canlı adreste var._
 
 ## Bilinen sınırlar (canlıda)
 
