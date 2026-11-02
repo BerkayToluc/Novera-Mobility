@@ -43,7 +43,7 @@
     "@types/node": "^24.19.2",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "eslint": "^9",
+    "eslint": "^10",
     "eslint-config-next": "16.4.3",
     "openapi-typescript": "^7.13.0",
     "sharp": "0.35.5",
